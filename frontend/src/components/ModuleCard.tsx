@@ -76,6 +76,16 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
   const menteesWithAvatars = mentees.filter((m) => m?.avatarUrl)
 
   const hasContributors = mentorsWithAvatars.length > 0 || menteesWithAvatars.length > 0
+  const isAdminView = pathname?.startsWith('/my/mentorship')
+  const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
+  const moduleKey = module.key || module.id
+
+  const getMenteeUrl = (login: string) => {
+    if (isAdminView) {
+      return `/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${login}`
+    }
+    return `/members/${login}`
+  }
 
   const getAvatarUrlWithSize = (avatarUrl: string): string => {
     try {
@@ -113,15 +123,20 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
               </span>
               <div className="flex flex-wrap gap-1">
                 {mentorsWithAvatars.slice(0, 4).map((contributor) => (
-                  <Image
+                  <Link
                     key={contributor.login}
-                    alt={contributor.name || contributor.login}
-                    className="rounded-full border-1 border-gray-200 dark:border-gray-700"
-                    height={24}
-                    src={getAvatarUrlWithSize(contributor.avatarUrl)}
-                    title={contributor.name || contributor.login}
-                    width={24}
-                  />
+                    href={`/members/${contributor.login}`}
+                    className="hover:opacity-80 transition-opacity"
+                  >
+                    <Image
+                      alt={contributor.name || contributor.login}
+                      className="rounded-full border-1 border-gray-200 dark:border-gray-700"
+                      height={24}
+                      src={getAvatarUrlWithSize(contributor.avatarUrl)}
+                      title={contributor.name || contributor.login}
+                      width={24}
+                    />
+                  </Link>
                 ))}
                 {mentorsWithAvatars.length > 4 && (
                   <span className="self-center text-xs font-medium text-gray-400">
@@ -140,15 +155,20 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
               </span>
               <div className="flex flex-wrap gap-1">
                 {menteesWithAvatars.slice(0, 4).map((contributor) => (
-                  <Image
+                  <Link
                     key={contributor.login}
-                    alt={contributor.name || contributor.login}
-                    className="rounded-full border-1 border-gray-200 dark:border-gray-700"
-                    height={24}
-                    src={getAvatarUrlWithSize(contributor.avatarUrl)}
-                    title={contributor.name || contributor.login}
-                    width={24}
-                  />
+                    href={getMenteeUrl(contributor.login)}
+                    className="hover:opacity-80 transition-opacity"
+                  >
+                    <Image
+                      alt={contributor.name || contributor.login}
+                      className="rounded-full border-1 border-gray-200 dark:border-gray-700"
+                      height={24}
+                      src={getAvatarUrlWithSize(contributor.avatarUrl)}
+                      title={contributor.name || contributor.login}
+                      width={24}
+                    />
+                  </Link>
                 ))}
                 {menteesWithAvatars.length > 4 && (
                   <span className="self-center text-xs font-medium text-gray-400">
