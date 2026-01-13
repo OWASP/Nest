@@ -4,7 +4,6 @@ import type { IconType } from 'react-icons'
 import type { CardProps } from 'types/card'
 import Card from 'components/Card'
 
-// Mock icon component for testing
 const MockIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg data-testid="mock-icon" {...props} />
 )
@@ -309,7 +308,6 @@ describe('Card', () => {
 
   it('does not render social section when not provided', () => {
     render(<Card {...baseProps} />)
-    // No social icons should be present (check for common social icon test IDs)
     expect(screen.queryByTestId('github-icon')).not.toBeInTheDocument()
     expect(screen.queryByTestId('x-twitter-icon')).not.toBeInTheDocument()
     expect(screen.queryByTestId('slack-icon')).not.toBeInTheDocument()
@@ -337,7 +335,6 @@ describe('Card', () => {
     render(<Card {...propsWithProjectNameOnly} />)
 
     expect(screen.getByText('Test Organization')).toBeInTheDocument()
-    // Title link + ActionButton link (projectName with empty href doesn't count as a link)
     expect(screen.getAllByRole('link')).toHaveLength(2)
   })
 
