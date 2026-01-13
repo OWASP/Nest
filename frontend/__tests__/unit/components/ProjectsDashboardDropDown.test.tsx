@@ -161,7 +161,6 @@ describe('ProjectsDashboardDropDown Component', () => {
       ) {
         return
       }
-      return
     })
   })
 
@@ -303,7 +302,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       expect(activeItem).toBeDefined()
 
-      fireEvent.click(activeItem!)
+      fireEvent.click(activeItem)
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
@@ -317,7 +316,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       expect(activeItem).toBeDefined()
 
-      fireEvent.keyDown(activeItem!, { key: 'Enter' })
+      fireEvent.keyDown(activeItem, { key: 'Enter' })
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
@@ -333,8 +332,8 @@ describe('ProjectsDashboardDropDown Component', () => {
       expect(activeItem).toBeDefined()
       expect(inactiveItem).toBeDefined()
 
-      fireEvent.click(activeItem!)
-      fireEvent.click(inactiveItem!)
+      fireEvent.click(activeItem)
+      fireEvent.click(inactiveItem)
 
       expect(mockOnAction).toHaveBeenCalledTimes(2)
       expect(mockOnAction).toHaveBeenCalledWith('Active')

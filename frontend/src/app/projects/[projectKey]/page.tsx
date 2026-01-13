@@ -3,43 +3,51 @@ import { useQuery } from '@apollo/client/react'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa'
 import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
-import { formatDate } from 'utils/dateFormatter'
+import { getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [project, setProject] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const { data, error: graphQLRequestError } = useQuery(GetProjectDocument, {
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
+
+  const project = data?.project
+  const topContributors = data?.topContributors || []
+
   useEffect(() => {
-    if (data) {
-      setProject(data.project)
-      setTopContributors(data.topContributors)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [data, graphQLRequestError, projectKey])
+  }, [graphQLRequestError])
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  if (!project)
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading project"
+        message="An error occurred while loading the project data"
+      />
+    )
+  }
+
+  if (!data || !project) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -47,6 +55,7 @@ const ProjectDetailsPage = () => {
         message="Sorry, the project you're looking for doesn't exist"
       />
     )
+  }
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     { label: 'Leaders', value: project.leaders.join(', ') },
@@ -85,9 +94,19 @@ const ProjectDetailsPage = () => {
     },
   ]
 
+  const { startDate, endDate } = getDateRange({ years: 1 })
+
+  const contributionStats = getContributionStats(
+    project.contributionStats,
+    project.contributionData
+  )
+
   return (
     <DetailsCard
+      contributionData={project.contributionData}
+      contributionStats={contributionStats}
       details={projectDetails}
+      endDate={endDate}
       entityKey={project.key}
       entityLeaders={project.entityLeaders}
       healthMetricsData={project.healthMetricsList}
@@ -98,6 +117,7 @@ const ProjectDetailsPage = () => {
       recentMilestones={project.recentMilestones}
       recentReleases={project.recentReleases}
       repositories={project.repositories}
+      startDate={startDate}
       stats={projectStats}
       summary={project.summary}
       title={project.name}

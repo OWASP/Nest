@@ -16,6 +16,8 @@ import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ContributionHeatmap from 'components/ContributionHeatmap'
+import ContributionStats from 'components/ContributionStats'
 import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
@@ -36,10 +38,33 @@ import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
 import TopContributorsList from 'components/TopContributorsList'
 
+export type CardType =
+  | 'chapter'
+  | 'committee'
+  | 'module'
+  | 'organization'
+  | 'program'
+  | 'project'
+  | 'repository'
+  | 'user'
+
+const showStatistics = (type: CardType): boolean =>
+  ['committee', 'organization', 'project', 'repository', 'user'].includes(type)
+
+const showIssuesAndMilestones = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
+
+const showPullRequestsAndReleases = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
+
 const DetailsCard = ({
   description,
   details,
   accessLevel,
+  contributionData,
+  contributionStats,
+  endDate,
+  startDate,
   status,
   setStatus,
   canUpdateStatus,
@@ -74,7 +99,7 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const { data } = useSession()
+  const { data: session } = useSession() as { data: ExtendedSession | null }
 
   // compute styles based on type prop
   const typeStylesMap = {
@@ -82,6 +107,11 @@ const DetailsCard = ({
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
   }
+
+  const hasContributions =
+    (contributionStats && contributionStats.total > 0) ||
+    (contributionData && Object.keys(contributionData).length > 0)
+
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
   return (
@@ -101,9 +131,9 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some(
-                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
+                admins?.some((admin) => admin.login === session?.user?.login) && (
+                  <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
+                )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
@@ -134,7 +164,7 @@ const DetailsCard = ({
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
+                  <LeadersList leaders={detail?.value == null ? 'Unknown' : String(detail.value)} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
@@ -146,11 +176,7 @@ const DetailsCard = ({
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
-          {(type === 'project' ||
-            type === 'repository' ||
-            type === 'committee' ||
-            type === 'user' ||
-            type === 'organization') && (
+          {showStatistics(type) && (
             <SecondaryCard
               icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
@@ -239,6 +265,33 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
+        {(type === 'project' || type === 'chapter') && hasContributions && (
+          <div className="mb-8">
+            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
+              {contributionStats && (
+                <ContributionStats
+                  title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
+                  stats={contributionStats}
+                />
+              )}
+              {contributionData &&
+                Object.keys(contributionData).length > 0 &&
+                startDate &&
+                endDate && (
+                  <div className="flex w-full items-center justify-center">
+                    <div className="w-full">
+                      <ContributionHeatmap
+                        contributionData={contributionData}
+                        startDate={startDate}
+                        endDate={endDate}
+                        unit="contribution"
+                      />
+                    </div>
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
         {topContributors && (
           <TopContributorsList
             contributors={topContributors}
@@ -272,30 +325,13 @@ const DetailsCard = ({
             moduleKey={entityKey || ''}
           />
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'user' ||
-          type === 'organization') && (
+        {showIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ||
-            type === 'organization' ||
-            type === 'repository' ||
-            type === 'project' ? (
-              <Milestones data={recentMilestones} showAvatar={showAvatar} />
-            ) : (
-              <RecentReleases
-                data={recentReleases}
-                showAvatar={showAvatar}
-                showSingleColumn={true}
-              />
-            )}
+            <Milestones data={recentMilestones} showAvatar={showAvatar} />
           </div>
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'organization' ||
-          type === 'user') && (
+        {showPullRequestsAndReleases(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
