@@ -78,7 +78,7 @@ const MapViewUpdater = ({
     const container = map.getContainer()
     const width = container.clientWidth
     const height = container.clientHeight
-    const aspectRatio = width / height
+    const aspectRatio = height > 0 ? width / height : 1
 
     const dynamicMinZoom = aspectRatio > 2 ? 1 : 2
     map.setMinZoom(dynamicMinZoom)
@@ -195,8 +195,8 @@ const ChapterMap = ({
         maxZoom={18}
         worldCopyJump={true}
         maxBounds={[
-          [-85, -Infinity],
-          [85, Infinity],
+          [-85, -180],
+          [85, 180],
         ]}
         maxBoundsViscosity={0.5}
       >
@@ -255,7 +255,7 @@ const ChapterMap = ({
           <button
             type="button"
             tabIndex={0}
-            className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
+            className="pointer-events-auto flex cursor-pointer items-center justify-center rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
             onClick={() => {
               setIsMapActive(true)
             }}
@@ -267,10 +267,8 @@ const ChapterMap = ({
             }}
             aria-label="Unlock map"
           >
-            <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
-              <FaUnlock aria-hidden="true" />
-              Unlock map
-            </p>
+            <FaUnlock aria-hidden="true" className="mr-2" />
+            Unlock map
           </button>
         </div>
       )}
