@@ -54,6 +54,10 @@ run:
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 
+scan-images: \
+	scan-backend-image \
+	scan-frontend-image
+
 test: \
 	test-nest-app
 

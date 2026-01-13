@@ -1,5 +1,12 @@
 SHELL := /bin/bash
 
+build-frontend-local-image:
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+		--no-cache \
+		-f docker/frontend/Dockerfile \
+		-t nest-frontend-local \
+		frontend
+
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code \
@@ -48,6 +55,14 @@ generate-graphql-types:
 	&& (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
 	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run graphql-codegen))
+
+scan-frontend-image: build-frontend-local-image
+	@trivy image \
+		--config trivy.yaml \
+		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
+		--exit-code 1 \
+		--severity CRITICAL,HIGH \
+		nest-frontend-local
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it

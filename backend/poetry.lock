@@ -917,14 +917,14 @@ django = ">=4.2"
 
 [[package]]
 name = "django-ninja"
-version = "1.5.2"
+version = "1.5.3"
 description = "Django Ninja - Fast Django REST framework"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "django_ninja-1.5.2-py3-none-any.whl", hash = "sha256:5faf09cf6e64298e822305c3f4b933608b4fce30643e36cc58f67660f20f4cac"},
-    {file = "django_ninja-1.5.2.tar.gz", hash = "sha256:1554bebc28e9bbc8412f49bae4698937781b54d828c84af30c40dfced407b8cb"},
+    {file = "django_ninja-1.5.3-py3-none-any.whl", hash = "sha256:0a6ead5b4e57ec1050b584eb6f36f105f256b8f4ac70d12e774d8b6dd91e2198"},
+    {file = "django_ninja-1.5.3.tar.gz", hash = "sha256:974803944965ad0566071633ffd4999a956f2ad1ecbed815c0de37c1c969592b"},
 ]
 
 [package.dependencies]
@@ -4349,18 +4349,18 @@ doc = ["sphinx"]
 
 [[package]]
 name = "strawberry-graphql"
-version = "0.288.3"
+version = "0.288.4"
 description = "A library for creating GraphQL APIs"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "strawberry_graphql-0.288.3-py3-none-any.whl", hash = "sha256:4cccc871d5545360bfea65a0b21ff823e4c66ab962da6eec812fb9e3a586316e"},
-    {file = "strawberry_graphql-0.288.3.tar.gz", hash = "sha256:985af4c33ea98343409892207d15b7d4a8491b1ba65ae3bb8ddcd674525069a6"},
+    {file = "strawberry_graphql-0.288.4-py3-none-any.whl", hash = "sha256:166045032e0240b9bb422b2d6819582ab9429a6ec908157862bb188dd5ecc727"},
+    {file = "strawberry_graphql-0.288.4.tar.gz", hash = "sha256:781b3be4b203f1f33ef93c427bf20c6d29dfe9949c96edb3ee18ee9da2d93313"},
 ]
 
 [package.dependencies]
-asgiref = {version = ">=3.2,<4.0", optional = true, markers = "extra == \"django\""}
+asgiref = {version = ">=3.2", optional = true, markers = "extra == \"django\""}
 cross-web = ">=0.4.0"
 Django = {version = ">=3.2", optional = true, markers = "extra == \"django\""}
 graphql-core = ">=3.2.0,<3.4.0"
@@ -4371,12 +4371,12 @@ typing-extensions = ">=4.5.0"
 [package.extras]
 aiohttp = ["aiohttp (>=3.7.4.post0,<4)"]
 asgi = ["python-multipart (>=0.0.7)", "starlette (>=0.18.0)"]
-chalice = ["chalice (>=1.22,<2.0)"]
-channels = ["asgiref (>=3.2,<4.0)", "channels (>=3.0.5)"]
-cli = ["libcst", "pygments (>=2.3,<3.0)", "python-multipart (>=0.0.7)", "rich (>=12.0.0)", "starlette (>=0.18.0)", "typer (>=0.12.4)", "uvicorn (>=0.11.6)", "websockets (>=15.0.1,<16)"]
+chalice = ["chalice (>=1.22)"]
+channels = ["asgiref (>=3.2)", "channels (>=3.0.5)"]
+cli = ["libcst", "pygments (>=2.3)", "python-multipart (>=0.0.7)", "rich (>=12.0.0)", "starlette (>=0.18.0)", "typer (>=0.12.4)", "uvicorn (>=0.11.6)", "websockets (>=15.0.1,<16)"]
 debug = ["libcst", "rich (>=12.0.0)"]
 debug-server = ["libcst", "pygments (>=2.3)", "python-multipart (>=0.0.7)", "rich (>=12.0.0)", "starlette (>=0.18.0)", "typer (>=0.12.4)", "uvicorn (>=0.11.6)", "websockets (>=15.0.1,<16)"]
-django = ["Django (>=3.2)", "asgiref (>=3.2,<4.0)"]
+django = ["Django (>=3.2)", "asgiref (>=3.2)"]
 fastapi = ["fastapi (>=0.65.2)", "python-multipart (>=0.0.7)"]
 flask = ["flask (>=1.1)"]
 litestar = ["litestar (>=2) ; python_version ~= \"3.10\""]
