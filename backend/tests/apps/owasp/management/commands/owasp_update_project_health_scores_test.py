@@ -80,7 +80,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
                 "score",
             ],
         )
-        assert mock_metric.score == EXPECTED_SCORE
+        assert mock_metric.score == pytest.approx(EXPECTED_SCORE)
         assert "Updated project health scores successfully." in self.stdout.getvalue()
         assert "Updating score for project: Test Project" in self.stdout.getvalue()
 
@@ -127,5 +127,5 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         with patch("sys.stdout", new=self.stdout):
             call_command("owasp_update_project_health_scores")
 
-        assert mock_metric.score == EXPECTED_SCORE - 10.0
+        assert mock_metric.score == pytest.approx(EXPECTED_SCORE - 10.0)
         self.mock_bulk_save.assert_called_once()
