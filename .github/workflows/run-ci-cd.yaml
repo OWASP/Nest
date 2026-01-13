@@ -428,7 +428,6 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:backend-staging
           scan-type: image
-          severity: CRITICAL,HIGH
           skip-setup-trivy: true
           trivy-config: trivy.yaml
 
@@ -799,7 +798,6 @@ jobs:
           exit-code: 1
           image-ref: owasp/nest:frontend-production
           scan-type: image
-          severity: CRITICAL,HIGH
           skip-setup-trivy: true
           trivy-config: trivy.yaml
 
