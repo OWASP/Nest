@@ -1,5 +1,5 @@
+import { mockUserDetailsData } from '@mockData/mockUserDetails'
 import { test, expect } from '@playwright/test'
-import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 
 test.describe('User Details Page', () => {
   test.beforeEach(async ({ page }) => {
