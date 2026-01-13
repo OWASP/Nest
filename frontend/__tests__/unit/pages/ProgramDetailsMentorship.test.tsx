@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client/react'
+import mockProgramDetailsData from '@mockData/mockProgramData'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
-import mockProgramDetailsData from '@unit/data/mockProgramData'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import ProgramDetailsPage from 'app/my/mentorship/programs/[programKey]/page'
