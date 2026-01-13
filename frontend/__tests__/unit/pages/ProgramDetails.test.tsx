@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
+import mockProgramDetailsData from '@mockData/mockProgramData'
 import { screen, waitFor } from '@testing-library/react'
-import mockProgramDetailsData from '@unit/data/mockProgramData'
 import { render } from 'wrappers/testUtil'
 import ProgramDetailsPage from 'app/mentorship/programs/[programKey]/page'
 import '@testing-library/jest-dom'

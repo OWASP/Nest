@@ -27,6 +27,12 @@ export const mockChapterData = {
         lat: 35.1815,
         lng: 136.9066,
       },
+      suggestedLocation: 'Nagoya, Japan',
+      geoLocation: {
+        lat: 35.1815,
+        lng: 136.9066,
+      },
+      region: 'Japan',
     },
   ],
 }

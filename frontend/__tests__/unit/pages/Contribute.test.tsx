@@ -1,5 +1,5 @@
+import { mockContributeData } from '@mockData/mockContributeData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockContributeData } from '@unit/data/mockContributeData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ContributePage from 'app/contribute/page'
@@ -8,10 +8,6 @@ import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
-
-jest.mock('next/link', () => {
-  return ({ children }) => <div>{children}</div>
-})
 
 jest.mock('components/Pagination', () =>
   jest.fn(({ currentPage, onPageChange, totalPages }) =>

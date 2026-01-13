@@ -1,5 +1,5 @@
+import { mockPrograms } from '@mockData/mockProgramData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockPrograms } from '@unit/data/mockProgramData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ProgramsPage from 'app/mentorship/programs/page'

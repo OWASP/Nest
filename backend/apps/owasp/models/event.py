@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 from apps.core.models.prompt import Prompt
 
 if TYPE_CHECKING:  # pragma: no cover
     from datetime import date
+
+from datetime import datetime
 
 from dateutil import parser
 from django.db import models
@@ -68,7 +71,7 @@ class Event(BulkSaveModel, TimestampedModel):
     def upcoming_events():
         """Get upcoming events.
 
-        Returns
+        Returns:
             QuerySet: A queryset of upcoming Event instances ordered by start date.
 
         """
@@ -103,7 +106,7 @@ class Event(BulkSaveModel, TimestampedModel):
 
     # TODO(arkid15r): refactor this when there is a chance.
     @staticmethod
-    def parse_dates(dates: str, start_date: date) -> date | None:
+    def parse_dates(dates: str, start_date: date) -> date | None:  # noqa: PLR0911
         """Parse event dates.
 
         Args:
@@ -117,41 +120,41 @@ class Event(BulkSaveModel, TimestampedModel):
         if not dates:
             return None
 
-        # Handle single-day events (e.g., "March 14, 2025")
-        if "," in dates and "-" not in dates:
+        max_day_length = 2
+
+        # Normalize dashes (hyphen, en-dash, em-dash).
+        clean_dates = re.sub(r"[\-\–\—]", "-", dates)  # noqa: RUF001
+
+        # Guard against ISO-like single dates (e.g. "2025-05-26").
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", clean_dates.strip()):
             try:
-                return parser.parse(dates).date()
-            except ValueError:
+                return parser.parse(clean_dates.strip()).date()
+            except (TypeError, ValueError):
                 return None
 
-        # Handle date ranges (e.g., "May 26-30, 2025" or "November 2-6, 2026")
-        if "-" in dates and "," in dates:
-            try:
-                # Split the date range into parts
-                date_part, year_part = dates.rsplit(", ", 1)
-                parts = date_part.split()
+        try:
+            if "-" in clean_dates:
+                parts = clean_dates.split("-")
+                end_str = parts[-1].strip()
 
-                # Extract month and day range
-                month = parts[0]
-                day_range = "".join(parts[1:])
+                day_match = re.match(r"^(\d{1,2})", end_str)
+                if day_match:
+                    day_value = day_match.group(1)
+                    if len(end_str) <= max_day_length or "," in end_str:
+                        return start_date.replace(day=int(day_value))
 
-                # Extract end day from the range
-                end_day = int(day_range.split("-")[-1])
+                end_date = parser.parse(
+                    end_str, default=datetime.combine(start_date, datetime.min.time())
+                ).date()
+                # Handle year crossover: if end_date is before start_date, assume next year.
+                if end_date < start_date:
+                    end_date = end_date.replace(year=end_date.year + 1)
+                return end_date
 
-                # Parse the year
-                year = int(year_part.strip())
+            return parser.parse(clean_dates.strip()).date()
 
-                # Use the start_date to determine the month if provided
-                if start_date:
-                    start_date_parsed = start_date
-                    month = start_date_parsed.strftime("%B")  # Full month name (e.g., "May")
-
-                # Parse the full end date string
-                return parser.parse(f"{month} {end_day}, {year}").date()
-            except (ValueError, IndexError, AttributeError):
-                return None
-
-        return None
+        except (IndexError, OverflowError, TypeError, ValueError):
+            return None
 
     @staticmethod
     def update_data(category, data, *, save: bool = True) -> Event | None:
@@ -174,7 +177,7 @@ class Event(BulkSaveModel, TimestampedModel):
 
         try:
             event.from_dict(category, data)
-        except KeyError:  # No start date.
+        except KeyError:
             return None
 
         if save:

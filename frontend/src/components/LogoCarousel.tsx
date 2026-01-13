@@ -45,7 +45,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
                       style={{ objectFit: 'contain' }}
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center"></div>
+                    <span className="sr-only">{sponsor.name}</span>
                   )}
                 </div>
               </Link>

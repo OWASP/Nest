@@ -1,0 +1,7 @@
+{% extends "base.jinja" %}
+{% block content %}
+    <div class="flex h-full flex-col items-center justify-center p-12 text-center">
+        <h1 class="text-6xl font-bold">{{ name }} OWASP Community Snapshot</h1>
+        <p class="mt-8 text-4xl">{{ formatted_start }} - {{ formatted_end }}</p>
+    </div>
+{% endblock %}

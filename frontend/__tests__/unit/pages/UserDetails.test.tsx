@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockUserDetailsData } from '@mockData/mockUserDetails'
 import { screen, waitFor } from '@testing-library/react'
-import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
 import UserDetailsPage from 'app/members/[memberKey]/page'

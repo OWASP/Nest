@@ -1,6 +1,6 @@
+import { mockChapterData } from '@mockData/mockChapterData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
-import { mockChapterData } from '@unit/data/mockChapterData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ChaptersPage from 'app/chapters/page'

@@ -20,18 +20,6 @@ jest.mock('next/image', () => ({
   },
 }))
 
-// Mock next/link
-jest.mock('next/link', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function MockLink({ href, children, onClick, className, ...props }: any) {
-    return (
-      <a href={href} onClick={onClick} className={className} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
-
 jest.mock('react-icons/fa', () => ({
   FaBars: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-bars" {...props} />,
   FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-xmark" {...props} />,

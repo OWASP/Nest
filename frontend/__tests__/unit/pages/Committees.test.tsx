@@ -1,5 +1,5 @@
+import { mockCommitteeData } from '@mockData/mockCommitteeData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockCommitteeData } from '@unit/data/mockCommitteeData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import CommitteesPage from 'app/committees/page'

@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockSnapshotDetailsData } from '@unit/data/mockSnapshotData'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
 

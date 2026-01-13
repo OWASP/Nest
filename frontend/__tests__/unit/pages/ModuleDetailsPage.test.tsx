@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
+import { mockModuleData } from '@mockData/mockModuleData'
 import { screen, waitFor } from '@testing-library/react'
-import { mockModuleData } from '@unit/data/mockModuleData'
 import { useParams } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'

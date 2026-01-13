@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
+import { mockChapterDetailsData } from '@mockData/mockChapterDetailsData'
 import { screen, waitFor } from '@testing-library/react'
-import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { render } from 'wrappers/testUtil'
 import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
 

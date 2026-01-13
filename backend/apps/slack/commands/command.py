@@ -7,11 +7,11 @@ from django.conf import settings
 from jinja2 import Template
 
 from apps.common.constants import NL
+from apps.common.template_loader import slack_env as env
 from apps.common.utils import convert_to_snake_case
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import DIVIDER, SECTION_BREAK, markdown
 from apps.slack.constants import FEEDBACK_SHARING_INVITE, NEST_BOT_NAME
-from apps.slack.template_loader import env
 from apps.slack.utils import get_text
 
 logger = logging.getLogger(__name__)

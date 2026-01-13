@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
+import { mockHealthMetricsData } from '@mockData/mockProjectsHealthMetricsData'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import { mockHealthMetricsData } from '@unit/data/mockProjectsHealthMetricsData'
 import MetricsPage from 'app/projects/dashboard/metrics/page'
 
 jest.mock('@apollo/client/react', () => ({

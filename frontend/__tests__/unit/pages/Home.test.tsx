@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockAlgoliaData, mockGraphQLData } from '@mockData/mockHomeData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
@@ -55,10 +55,6 @@ jest.mock('components/Modal', () => {
     )
   })
   return ModalMock
-})
-
-jest.mock('next/link', () => {
-  return ({ children }) => children
 })
 
 describe('Home', () => {

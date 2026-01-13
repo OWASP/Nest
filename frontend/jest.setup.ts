@@ -39,10 +39,65 @@ jest.mock('next/navigation', () => {
   return {
     ...actual,
     useParams: jest.fn(() => ({})),
+    usePathname: jest.fn(() => '/'),
     useRouter: jest.fn(() => mockRouter),
     useSearchParams: jest.fn(() => new URLSearchParams()),
   }
 })
+
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: function MockedLink({
+    children,
+    href,
+    className,
+    onClick,
+    ...props
+  }: {
+    children: React.ReactNode
+    href?: string
+    className?: string
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
+    [key: string]: unknown
+  }) {
+    return React.createElement(
+      'a',
+      {
+        href,
+        className,
+        ...props,
+        onClick: (e) => {
+          e.preventDefault()
+          onClick?.(e as React.MouseEvent<HTMLAnchorElement>)
+        },
+      },
+      children
+    )
+  },
+}))
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({
+    src,
+    alt,
+    fill,
+    objectFit,
+    ...props
+  }: {
+    src: string
+    alt: string
+    fill?: boolean
+    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
+    [key: string]: unknown
+  }) =>
+    React.createElement('img', {
+      src,
+      alt,
+      style: fill ? { objectFit: objectFit as React.CSSProperties['objectFit'] } : undefined,
+      ...props,
+    }),
+}))
 
 beforeAll(() => {
   if (globalThis !== undefined) {

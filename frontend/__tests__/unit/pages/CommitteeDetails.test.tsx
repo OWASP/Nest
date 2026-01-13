@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 
+import { mockCommitteeDetailsData } from '@mockData/mockCommitteeDetailsData'
 import { screen, waitFor } from '@testing-library/react'
-import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { render } from 'wrappers/testUtil'
 import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
 

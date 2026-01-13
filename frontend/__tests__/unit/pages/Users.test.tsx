@@ -1,5 +1,5 @@
+import { mockUserData } from '@mockData/mockUserData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockUserData } from '@unit/data/mockUserData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import UsersPage from 'app/members/page'
