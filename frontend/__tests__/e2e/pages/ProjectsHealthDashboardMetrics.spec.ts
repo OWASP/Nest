@@ -6,7 +6,7 @@ test.describe('Projects Health Dashboard Metrics', () => {
     await mockDashboardCookies(page, mockHealthMetricsData, false)
     await page.goto('/projects/dashboard/metrics')
     await expect(page.getByText('404')).toBeVisible()
-    await expect(page.getByText('This page could not be found.')).toBeVisible()
+    await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
   })
 
   test('renders page headers', async ({ page }) => {
