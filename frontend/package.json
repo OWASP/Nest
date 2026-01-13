@@ -13,11 +13,12 @@
     "lint": "eslint . --config eslint.config.mjs --fix --max-warnings=0",
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start",
+    "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/a11y/components --coverage=false",
     "test:e2e": "npx playwright test",
     "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.11",
+    "@apollo/client": "^4.0.12",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@heroui/button": "^2.2.29",
     "@heroui/modal": "^2.2.26",
@@ -31,7 +32,7 @@
     "@next/eslint-plugin-next": "^16.1.1",
     "@next/third-parties": "^16.1.1",
     "@react-leaflet/core": "^3.0.0",
-    "@sentry/nextjs": "^10.32.1",
+    "@sentry/nextjs": "^10.33.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.23",
     "apexcharts": "^5.3.6",
@@ -42,7 +43,7 @@
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
     "eslint-plugin-import": "^2.32.0",
-    "framer-motion": "^12.25.0",
+    "framer-motion": "^12.26.1",
     "graphql": "^16.12.0",
     "ics": "^3.8.1",
     "leaflet": "^1.9.4",
@@ -118,6 +119,13 @@
   "engines": {
     "node": "^24.0.0"
   },
+  "packageManager": "pnpm@10.24.0",
+  "pnpm": {
+    "overrides": {
+      "glob": "^11.1.0",
+      "test-exclude": "^7.0.1"
+    }
+  },
   "prettier": {
     "arrowParens": "always",
     "endOfLine": "lf",
@@ -129,6 +137,5 @@
     "singleQuote": true,
     "tabWidth": 2,
     "trailingComma": "es5"
-  },
-  "packageManager": "pnpm@10.24.0"
+  }
 }
