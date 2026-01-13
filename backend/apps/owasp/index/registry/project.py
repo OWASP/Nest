@@ -13,6 +13,7 @@ class ProjectIndex(IndexBase):
     fields = (
         "idx_companies",
         "idx_contributors_count",
+        "idx_created_at",
         "idx_custom_tags",
         "idx_description",
         "idx_forks_count",
@@ -53,6 +54,7 @@ class ProjectIndex(IndexBase):
             "desc(idx_stars_count)",
             "desc(idx_contributors_count)",
             "desc(idx_forks_count)",
+            "desc(idx_created_at)",
             "desc(idx_updated_at)",
         ],
         "ranking": [
@@ -84,6 +86,8 @@ class ProjectIndex(IndexBase):
         replicas = {
             "contributors_count_asc": ["asc(idx_contributors_count)"],
             "contributors_count_desc": ["desc(idx_contributors_count)"],
+            "created_at_asc": ["asc(idx_created_at)"],
+            "created_at_desc": ["desc(idx_created_at)"],
             "forks_count_asc": ["asc(idx_forks_count)"],
             "forks_count_desc": ["desc(idx_forks_count)"],
             "level_raw_asc": ["asc(idx_level_raw)"],

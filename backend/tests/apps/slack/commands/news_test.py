@@ -4,6 +4,7 @@ import pytest
 from django.conf import settings
 
 from apps.common.constants import OWASP_NEWS_URL
+from apps.owasp.utils.news import get_news_data
 from apps.slack.commands.news import News
 
 
@@ -29,6 +30,9 @@ class TestNewsCommand:
         self, mock_client, mock_command, commands_enabled, expected_calls
     ):
         settings.SLACK_COMMANDS_ENABLED = commands_enabled
+        # Clear cache before test
+        get_news_data.cache_clear()
+        # Patch where it's imported and used
         with patch("apps.slack.commands.news.get_news_data") as mock_get_news_data:
             mock_get_news_data.return_value = (
                 [
@@ -79,6 +83,8 @@ class TestNewsCommand:
     @patch("apps.slack.commands.news.get_news_data")
     def test_news_handler_no_items(self, mock_get_news_data, mock_client, mock_command):
         settings.SLACK_COMMANDS_ENABLED = True
+        # Clear cache before test
+        get_news_data.cache_clear()
         mock_get_news_data.return_value = []
         ack = MagicMock()
         News().handler(ack=ack, command=mock_command, client=mock_client)

@@ -5,7 +5,7 @@
   • Run `/contribute --start` to get more information on how to contribute to OWASP.
 {{ SECTION_BREAK }}
 {% elif MODE == "YEAR" %}
-*GSoC {{ YEAR }} projects:*{{ NL }}{{ NL }}{% for project in PROJECTS %}  • <{{ project.idx_url }}|{{ project.idx_name }}>{{ NL }}{% endfor %}
+*GSoC {{ YEAR }} projects:*{{ NL }}{{ NL }}{% for project in PROJECTS %}  • <{{ project.url }}|{{ project.name }}>{{ NL }}{% endfor %}
 {{ SECTION_BREAK }}
 Additional information:{{ NL }}{% if HAS_ANNOUNCEMENT %}  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{{ YEAR }}|GSoC {{ YEAR }} announcement>{{ NL }}{% endif %}  • <https://owasp.org/www-community/initiatives/gsoc/gsoc{{ YEAR }}ideas|GSoC {{ YEAR }} ideas>
 {% elif MODE == "UNSUPPORTED_YEAR" %}

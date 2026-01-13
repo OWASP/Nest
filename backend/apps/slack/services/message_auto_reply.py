@@ -41,13 +41,36 @@ def generate_ai_reply_if_unanswered(message_id: int):
     except SlackApiError:
         logger.exception("Error checking for replies for message")
 
-    ai_response_text = process_ai_query(query=message.text)
+    channel_id = message.conversation.slack_channel_id
+    ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)
     if not ai_response_text:
+        # Add shrugging reaction when no answer can be generated
+        try:
+            result = client.reactions_add(
+                channel=channel_id,
+                timestamp=message.slack_message_id,
+                name="man-shrugging",
+            )
+            if result.get("ok"):
+                logger.info("Successfully added 🤷 reaction to message")
+            else:
+                error = result.get("error")
+                if error != "already_reacted":
+                    logger.warning(
+                        "Failed to add reaction: %s",
+                        error,
+                        extra={
+                            "channel_id": channel_id,
+                            "message_id": message.slack_message_id,
+                        },
+                    )
+        except SlackApiError:
+            logger.exception("Error adding reaction to message")
         return
 
     client.chat_postMessage(
-        channel=message.conversation.slack_channel_id,
-        blocks=get_blocks(ai_response_text),
+        channel=channel_id,
+        blocks=get_blocks(ai_response_text, channel_id=channel_id),
         text=ai_response_text,
         thread_ts=message.slack_message_id,
     )

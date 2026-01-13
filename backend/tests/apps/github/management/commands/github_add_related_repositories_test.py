@@ -117,7 +117,7 @@ def test_handle_unknown_object_exception(
     mock_gh_client = mock.Mock()
     mock_get_github_client.return_value = mock_gh_client
 
-    def raise_404(*a, **k):  # noqa: ARG001
+    def raise_404(*a, **k):
         raise UnknownObjectException(
             status=404,
             data={"message": "Not Found", "status": "404"},

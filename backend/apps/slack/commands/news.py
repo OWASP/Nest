@@ -1,8 +1,8 @@
 """Slack bot news command."""
 
 from apps.common.constants import OWASP_NEWS_URL
+from apps.owasp.utils.news import get_news_data
 from apps.slack.commands.command import CommandBase
-from apps.slack.utils import get_news_data
 
 
 class News(CommandBase):

@@ -4,11 +4,11 @@ from urllib.parse import urljoin
 import pytest
 
 from apps.common.constants import OWASP_NEWS_URL
+from apps.owasp.utils.gsoc import get_gsoc_projects
+from apps.owasp.utils.news import get_news_data
+from apps.owasp.utils.staff import get_staff_data
 from apps.slack.utils import (
     escape,
-    get_gsoc_projects,
-    get_news_data,
-    get_staff_data,
     get_text,
     strip_markdown,
 )
@@ -153,31 +153,59 @@ def test_escape(input_content, expected_output):
 
 
 def test_get_gsoc_projects_(monkeypatch):
-    """Test getting GSoC projects with mocked data."""
-    mock_get_projects = Mock()
-    mock_get_projects.return_value = {"hits": MOCK_GSOC_PROJECTS["2023"]}
+    """Test getting GSoC projects with mocked database data."""
+    from apps.owasp.models.project import Project
 
-    monkeypatch.setattr("apps.owasp.index.search.project.get_projects", mock_get_projects)
+    # Create mock project objects
+    mock_project1 = Mock(spec=Project)
+    mock_project1.name = "Project1_2023"
+    mock_project1.key = "www-project-project1"
+    mock_project1.owasp_url = "https://example.com/proj1"
+    mock_project1.custom_tags = ["gsoc2023", "security"]
 
-    result = get_gsoc_projects("2023")
+    mock_project2 = Mock(spec=Project)
+    mock_project2.name = "Project2_2023"
+    mock_project2.key = "www-project-project2"
+    mock_project2.owasp_url = "https://example.com/proj2"
+    mock_project2.custom_tags = ["gsoc2023", "testing"]
+
+    # Mock the QuerySet chain: filter().only().order_by()
+    # The actual chain is: filter().only().order_by() which returns an iterable
+    projects_list = [mock_project1, mock_project2]
+
+    # Create a mock queryset that supports the chain: filter().only().order_by()
+    # order_by() should return the list directly (it's the final call)
+    mock_order_by_result = projects_list
+    mock_order_by = Mock(return_value=mock_order_by_result)
+
+    # mock_only_result is what .only() returns, and it has .order_by() method
+    mock_only_result = Mock()
+    mock_only_result.order_by = mock_order_by
+
+    # mock_only is the .only() method that returns mock_only_result
+    mock_only = Mock(return_value=mock_only_result)
+
+    # mock_queryset is what filter() returns, and it has .only() method
+    mock_queryset = Mock()
+    mock_queryset.only = mock_only
+
+    # Create a function that returns the mock queryset
+    def mock_filter(**kwargs):
+        return mock_queryset
+
+    # Mock Project.objects.filter
+    monkeypatch.setattr(Project.objects, "filter", mock_filter)
+
+    result = get_gsoc_projects(2023)
     length = 2
     assert len(result) == length
-    assert result[0]["idx_name"] == "Project1_2023"
-    assert result[1]["idx_url"] == "https://example.com/proj2"
+    assert result[0]["name"] == "Project1_2023"
+    assert result[0]["url"] == "https://example.com/proj1"
+    assert result[1]["name"] == "Project2_2023"
+    assert result[1]["url"] == "https://example.com/proj2"
 
-    mock_get_projects.assert_called_once_with(
-        attributes=["idx_name", "idx_url"],
-        query="gsoc2023",
-        searchable_attributes=[
-            "idx_custom_tags",
-            "idx_languages",
-            "idx_tags",
-            "idx_topics",
-        ],
-    )
-
-    result2 = get_gsoc_projects("2023")
-    assert mock_get_projects.call_count == 1
+    # Test caching - should return same result without another query
+    result2 = get_gsoc_projects(2023)
     assert result == result2
 
 

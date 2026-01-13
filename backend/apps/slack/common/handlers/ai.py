@@ -4,48 +4,57 @@ from __future__ import annotations
 
 import logging
 
-from apps.ai.agent.agent import AgenticRAGAgent
+from apps.ai.flows import process_query
 from apps.slack.blocks import markdown
-from apps.slack.common.question_detector import QuestionDetector
+from apps.slack.utils import format_ai_response_for_slack
 
 logger = logging.getLogger(__name__)
 
 
-def get_blocks(query: str) -> list[dict]:
+def get_blocks(
+    query: str, channel_id: str | None = None, *, is_app_mention: bool = False
+) -> list[dict]:
     """Get AI response blocks.
 
     Args:
         query (str): The user's question.
-        presentation (EntityPresentation | None): Configuration for entity presentation.
+        channel_id (str | None): The Slack channel ID where the query originated.
+        is_app_mention (bool): Whether this is an explicit app mention.
 
     Returns:
         list: A list of Slack blocks representing the AI response.
 
     """
-    ai_response = process_ai_query(query.strip())
+    ai_response = process_ai_query(
+        query.strip(), channel_id=channel_id, is_app_mention=is_app_mention
+    )
 
     if ai_response:
-        return [markdown(ai_response)]
+        # Format the AI response for Slack (remove code blocks, fix markdown)
+        formatted_response = format_ai_response_for_slack(ai_response)
+        return [markdown(formatted_response)]
     return get_error_blocks()
 
 
-def process_ai_query(query: str) -> str | None:
-    """Process the AI query using the agentic RAG agent.
+def process_ai_query(
+    query: str, channel_id: str | None = None, *, is_app_mention: bool = False
+) -> str | None:
+    """Process the AI query using CrewAI flow.
 
     Args:
         query (str): The user's question.
+        channel_id (str | None): The Slack channel ID where the query originated.
+        is_app_mention (bool): Whether this is an explicit app mention.
 
     Returns:
-        str | None: The AI response or None if error occurred.
+        str | None: The AI response, None if error occurred or should be skipped.
 
     """
-    question_detector = QuestionDetector()
-    if not question_detector.is_owasp_question(text=query):
-        return get_default_response()
-
-    agent = AgenticRAGAgent()
-    result = agent.run(query=query)
-    return result["answer"]
+    try:
+        return process_query(query, channel_id=channel_id, is_app_mention=is_app_mention)
+    except Exception:
+        logger.exception("Failed to process AI query")
+        return None
 
 
 def get_error_blocks() -> list[dict]:

@@ -7,11 +7,10 @@ import os
 
 import openai
 from django.core.exceptions import ObjectDoesNotExist
+from pgvector.django.functions import CosineDistance
 
-from apps.ai.agent.tools.rag.retriever import Retriever
-from apps.ai.common.constants import (
-    DEFAULT_SIMILARITY_THRESHOLD,
-)
+from apps.ai.embeddings.factory import get_embedder
+from apps.ai.models.chunk import Chunk
 from apps.core.models.prompt import Prompt
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class QuestionDetector:
             raise ValueError(error_msg)
 
         self.openai_client = openai.OpenAI(api_key=openai_api_key)
-        self.retriever = Retriever()
+        self.embedder = get_embedder()
 
     def is_owasp_question(self, text: str) -> bool:
         """Check if the input text is an OWASP-related question.
@@ -52,10 +51,9 @@ class QuestionDetector:
         if not text or not text.strip():
             return False
 
-        context_chunks = self.retriever.retrieve(
+        context_chunks = self._retrieve_chunks(
             query=text,
             limit=self.CHUNKS_RETRIEVAL_LIMIT,
-            similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD,
         )
 
         openai_result = self.is_owasp_question_with_openai(text, context_chunks)
@@ -153,3 +151,29 @@ class QuestionDetector:
             formatted_context.append(context_block)
 
         return "\n\n---\n\n".join(formatted_context)
+
+    def _retrieve_chunks(self, query: str, limit: int) -> list[dict]:
+        """Retrieve context chunks using semantic search.
+
+        Args:
+            query: The search query
+            limit: Maximum number of results to return
+
+        Returns:
+            List of dictionaries with chunk information
+
+        """
+        query_embedding = self.embedder.embed_query(query)
+
+        chunks = Chunk.objects.annotate(
+            distance=CosineDistance("embedding", query_embedding)
+        ).order_by("distance")[:limit]
+
+        return [
+            {
+                "text": chunk.text,
+                "source_name": str(chunk.context) if chunk.context else "Unknown",
+                "additional_context": {},
+            }
+            for chunk in chunks
+        ]

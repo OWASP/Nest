@@ -33,6 +33,7 @@ def get_projects(
         "attributesToRetrieve": attributes
         or [
             "idx_contributors_count",
+            "idx_created_at",
             "idx_forks_count",
             "idx_leaders",
             "idx_level",

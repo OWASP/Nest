@@ -122,6 +122,15 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         return self.type
 
     @property
+    def idx_created_at(self) -> float:
+        """Return created at for indexing."""
+        if self.created_at:
+            return self.created_at.timestamp()
+        if self.owasp_repository and self.owasp_repository.created_at:
+            return self.owasp_repository.created_at.timestamp()
+        return 0.0
+
+    @property
     def idx_updated_at(self) -> str | float:
         """Return updated at for indexing."""
         return self.updated_at.timestamp() if self.updated_at else ""

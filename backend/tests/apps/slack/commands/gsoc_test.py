@@ -70,14 +70,14 @@ class TestGsocCommand:
     def test_handler_with_projects(self, mock_slack_client):
         mock_projects = [
             {
-                "idx_name": "Test Project",
-                "idx_url": "https://owasp.org/www-project-bug-logging-tool/",
+                "name": "Test Project",
+                "url": "https://owasp.org/www-project-bug-logging-tool/",
             }
         ]
         command = {"text": "2024", "user_id": "U123456"}
         settings.SLACK_COMMANDS_ENABLED = True
         with patch(
-            "apps.slack.commands.gsoc.get_gsoc_projects",
+            "apps.owasp.utils.gsoc.get_gsoc_projects",
             return_value=mock_projects,
         ):
             ack = MagicMock()
