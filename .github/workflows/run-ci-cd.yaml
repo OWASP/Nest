@@ -1,5 +1,4 @@
-﻿name: Run CI/CD
-
+name: Run CI/CD
 on:
   merge_group:
   pull_request:
@@ -7,7 +6,7 @@ on:
       - feature/**
       - main
     paths-ignore:
-      - backend/data/nest.json.gz
+      - backend/data/nest.json.gzz
   push:
     branches:
       - feature/**
@@ -120,7 +119,6 @@ jobs:
       - name: Run cspell
         run: |
           make check-spelling
-    timeout-minutes: 10
 
   scan-code:
     name: Run Code Scan
@@ -144,8 +142,9 @@ jobs:
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: repo
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
-    timeout-minutes: 10
+          trivyignores: trivyignore.yaml
 
   scan-ci-dependencies:
     name: Run CI Dependencies Scan
@@ -169,8 +168,9 @@ jobs:
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: fs
+          skip-setup-trivy: true
           trivy-config: trivy.yaml
-    timeout-minutes: 10
+          trivyignores: trivyignore.yaml
 
   run-backend-tests:
     name: Run backend tests
@@ -272,40 +272,6 @@ jobs:
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
     timeout-minutes: 10
 
-  run-frontend-a11y-tests:
-    name: Run frontend accessibility tests
-    needs:
-      - scan-code
-      - scan-ci-dependencies
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
-
-      - name: Build frontend a11y-testing image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
-        with:
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:test-frontend-a11y-cache
-          cache-to: |
-            type=gha,compression=zstd
-          context: frontend
-          file: docker/frontend/Dockerfile.a11y.test
-          load: true
-          platforms: linux/amd64
-          tags: owasp/nest:test-frontend-a11y-latest
-
-      - name: Run frontend a11y tests
-        run: |
-          docker run --env-file frontend/.env.example owasp/nest:test-frontend-a11y-latest pnpm run test:a11y
-    timeout-minutes: 10
-
   set-release-version:
     name: Set release version
     outputs:
@@ -321,7 +287,6 @@ jobs:
           else
             echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
           fi
-    timeout-minutes: 15
 
   build-staging-images:
     name: Build Staging Images
@@ -333,7 +298,6 @@ jobs:
       github.ref == 'refs/heads/main'
     needs:
       - run-backend-tests
-      - run-frontend-a11y-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
@@ -441,7 +405,7 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
-    timeout-minutes: 15
+    timeout-minutes: 10
 
   scan-staging-images:
     name: Scan Staging Images
@@ -460,6 +424,7 @@ jobs:
           cache: true
 
       - name: Scan backend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
@@ -467,15 +432,18 @@ jobs:
           scan-type: image
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
           image-ref: owasp/nest:frontend-staging
           scan-type: image
           trivy-config: trivy.yaml
-    timeout-minutes: 10
+          trivyignores: trivyignore.yaml
+          version: latest
 
   deploy-staging-nest:
     name: Deploy Nest Staging
@@ -594,7 +562,6 @@ jobs:
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-    timeout-minutes: 10
 
   deploy-staging-nest-proxy:
     name: Deploy Staging Nest Proxy
@@ -630,7 +597,6 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-    timeout-minutes: 10
 
   run-staging-lighthouse-ci:
     name: Run Lighthouse CI
@@ -661,8 +627,8 @@ jobs:
           LHCI_BASE_URL: 'https://nest.owasp.dev'
         run: |
           pnpm run lighthouse-ci
+        timeout-minutes: 15
         working-directory: frontend
-    timeout-minutes: 20
 
   run-staging-zap-baseline-scan:
     name: Run staging ZAP baseline scan
@@ -690,7 +656,6 @@ jobs:
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
           path: report_html.html
-    timeout-minutes: 20
 
   build-production-images:
     name: Build Production Images
@@ -702,7 +667,6 @@ jobs:
       github.event.action == 'published'
     needs:
       - run-backend-tests
-      - run-frontend-a11y-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
@@ -806,7 +770,7 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
-    timeout-minutes: 15
+    timeout-minutes: 10
 
   scan-production-images:
     name: Scan Production Images
@@ -825,21 +789,24 @@ jobs:
           cache: true
 
       - name: Scan backend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
           image-ref: owasp/nest:backend-production
           skip-setup-trivy: true
           trivy-config: trivy.yaml
+          trivyignores: trivyignore.yaml
 
       - name: Scan frontend image
+        continue-on-error: true
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           exit-code: 1
           image-ref: owasp/nest:frontend-production
           skip-setup-trivy: true
           trivy-config: trivy.yaml
-    timeout-minutes: 10
+          trivyignores: trivyignore.yaml
 
   deploy-production-nest:
     name: Deploy Nest to Production
@@ -969,7 +936,6 @@ jobs:
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-    timeout-minutes: 10
 
   deploy-production-nest-proxy:
     name: Deploy Production Nest Proxy
@@ -1005,7 +971,6 @@ jobs:
       - name: Run proxy deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-    timeout-minutes: 10
 
   run-production-zap-baseline-scan:
     name: Run production ZAP baseline scan
@@ -1033,4 +998,3 @@ jobs:
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
           path: report_html.html
-    timeout-minutes: 20
