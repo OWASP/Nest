@@ -96,7 +96,6 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        data-testid={`${type}-actions-button`}
         type="button"
         onClick={handleToggle}
         className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"

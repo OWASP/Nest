@@ -29,7 +29,7 @@ const OrganizationDetailsPage = () => {
 
   if (isLoading) {
     return (
-      <div data-testid="org-loading-skeleton">
+      <div role="status">
         <OrganizationDetailsPageSkeleton />
       </div>
     )

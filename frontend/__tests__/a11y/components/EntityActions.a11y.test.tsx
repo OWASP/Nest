@@ -34,7 +34,7 @@ describe('EntityActions a11y', () => {
       />
     )
 
-    const toggleButton = screen.getByTestId('program-actions-button')
+    const toggleButton = screen.getByRole('button', { name: /Program actions menu/ })
     fireEvent.click(toggleButton)
 
     const results = await axe(container)
