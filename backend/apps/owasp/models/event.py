@@ -122,14 +122,14 @@ class Event(BulkSaveModel, TimestampedModel):
 
         max_day_length = 2
 
-        # Normalize dashes (hyphen, en-dash, em-dash)
+        # Normalize dashes (hyphen, en-dash, em-dash).
         clean_dates = re.sub(r"[\-\–\—]", "-", dates)  # noqa: RUF001
 
-        # Guard against ISO-like single dates (e.g. "2025-05-26")
+        # Guard against ISO-like single dates (e.g. "2025-05-26").
         if re.match(r"^\d{4}-\d{2}-\d{2}$", clean_dates.strip()):
             try:
                 return parser.parse(clean_dates.strip()).date()
-            except (ValueError, TypeError):
+            except (TypeError, ValueError):
                 return None
 
         try:
@@ -139,20 +139,21 @@ class Event(BulkSaveModel, TimestampedModel):
 
                 day_match = re.match(r"^(\d{1,2})", end_str)
                 if day_match:
-                    day_val = day_match.group(1)
+                    day_value = day_match.group(1)
                     if len(end_str) <= max_day_length or "," in end_str:
-                        return start_date.replace(day=int(day_val))
+                        return start_date.replace(day=int(day_value))
 
-                default_dt = datetime.combine(start_date, datetime.min.time())
-                end_date = parser.parse(end_str, default=default_dt).date()
-                # Handle year crossover: if end_date is before start_date, assume next year
+                end_date = parser.parse(
+                    end_str, default=datetime.combine(start_date, datetime.min.time())
+                ).date()
+                # Handle year crossover: if end_date is before start_date, assume next year.
                 if end_date < start_date:
                     end_date = end_date.replace(year=end_date.year + 1)
                 return end_date
 
             return parser.parse(clean_dates.strip()).date()
 
-        except (ValueError, TypeError, OverflowError, IndexError):
+        except (IndexError, OverflowError, TypeError, ValueError):
             return None
 
     @staticmethod

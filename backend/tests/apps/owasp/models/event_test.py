@@ -58,14 +58,14 @@ class TestEventModel:
     @pytest.mark.parametrize(
         ("dates", "start_date", "expected_result"),
         [
-            ("June 5, 2025", date(2025, 6, 5), date(2025, 6, 5)),
             ("2025-05-26", date(2025, 5, 26), date(2025, 5, 26)),
-            ("May 26-30", date(2025, 5, 26), date(2025, 5, 30)),
+            ("Dec 30, 2025 - Jan 2, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("June 5, 2025", date(2025, 6, 5), date(2025, 6, 5)),
             ("May 26-30, 2025", date(2025, 5, 26), date(2025, 5, 30)),
-            ("May 30 - June 2, 2025", date(2025, 5, 30), date(2025, 6, 2)),
+            ("May 26-30", date(2025, 5, 26), date(2025, 5, 30)),
             ("May 26–30, 2025", date(2025, 5, 26), date(2025, 5, 30)),  # noqa: RUF001
             ("May 26—30, 2025", date(2025, 5, 26), date(2025, 5, 30)),
-            ("Dec 30, 2025 - Jan 2, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("May 30 - June 2, 2025", date(2025, 5, 30), date(2025, 6, 2)),
         ],
     )
     def test_parse_dates_integration(self, dates, start_date, expected_result):
@@ -140,7 +140,11 @@ class TestEventModel:
     def test_category_mapping(self, category_str, expected_category):
         """Test that category strings are correctly mapped to enum values."""
         event = Event(key="test-event")
-        data = {"name": "Example Event", "start-date": date(2025, 1, 1), "dates": ""}
+        data = {
+            "dates": "",
+            "name": "Example Event",
+            "start-date": date(2025, 1, 1),
+        }
         with (
             patch("apps.owasp.models.event.Event.parse_dates") as mock_parse_dates,
             patch("apps.owasp.models.event.normalize_url") as mock_normalize_url,
