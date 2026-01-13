@@ -90,7 +90,7 @@ class Command(BaseCommand):
         if updated_metrics:
             ProjectHealthMetrics.bulk_save(
                 updated_metrics,
-                update_fields=["level_non_compliant"],
+                fields=["level_non_compliant"],
             )
 
         self.stdout.write(f"Project level compliance updated for {len(updated_metrics)} metrics.")
