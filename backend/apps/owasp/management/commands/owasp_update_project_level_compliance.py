@@ -48,9 +48,15 @@ class Command(BaseCommand):
         official OWASP data and marks the project as
         level non-compliant when a mismatch is detected.
         """
-        response = requests.get(LEVELS_URL, timeout=15)
-        response.raise_for_status()
-        official_data = response.json()
+        try:
+             response = requests.get(LEVELS_URL, timeout=15)
+             response.raise_for_status()
+             official_data = response.json()
+         except requests.RequestException as exc:
+             self.stdout.write(
+                 self.style.ERROR(f"Failed to fetch official project levels: {exc}")
+             )
+             return
 
         by_repo: dict[str, Decimal] = {}
         by_name: dict[str, Decimal] = {}
@@ -68,7 +74,7 @@ class Command(BaseCommand):
             if name := item.get("name"):
                 by_name[normalize_name(name)] = level
 
-        metrics = ProjectHealthMetrics.objects.select_related("project")
+        metrics = ProjectHealthMetrics.get_latest_health_metrics().select_related("project")
         updated_metrics = []
 
         for metric in metrics:
