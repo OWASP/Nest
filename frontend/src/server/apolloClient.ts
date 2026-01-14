@@ -1,28 +1,34 @@
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+import { ApolloClient, InMemoryCache, HttpLink, NormalizedCacheObject } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 
+declare global {
+  var __APOLLO_STATE__: NormalizedCacheObject | undefined
+}
+
 async function createApolloClient() {
-  const authLink = setContext(async (_, { headers }) => {
-    let csrfToken = null
-    const cookieValue = await getCsrfTokenOnServer()
-    csrfToken = cookieValue
-    return {
-      headers: {
-        ...headers,
-        'X-CSRFToken': csrfToken ?? '',
-        Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
-      },
+  const authLink = setContext(
+    async (_: unknown, { headers }: { headers?: Record<string, string> }) => {
+      let csrfToken = null
+      const cookieValue = await getCsrfTokenOnServer()
+      csrfToken = cookieValue
+      return {
+        headers: {
+          ...headers,
+          'X-CSRFToken': csrfToken ?? '',
+          Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
+        },
+      }
     }
-  })
+  )
   const httpLink = new HttpLink({
     credentials: 'same-origin',
     uri: process.env.NEXT_SERVER_GRAPHQL_URL,
   })
 
   return new ApolloClient({
-    cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ ?? {}),
+    cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ || {}),
     link: authLink.concat(httpLink),
     ssrMode: true,
   })
@@ -30,8 +36,8 @@ async function createApolloClient() {
 
 // This is a no-op Apollo client for end-to-end tests.
 const noopApolloClient = {
-  mutate: async () => ({ data: null }),
-  query: async () => ({ data: null }),
+  mutate: async (): Promise<{ data: unknown }> => ({ data: null }),
+  query: async (): Promise<{ data: unknown }> => ({ data: null }),
 }
 export const apolloClient =
   process.env.NEXT_SERVER_DISABLE_SSR === 'true' ? noopApolloClient : await createApolloClient()

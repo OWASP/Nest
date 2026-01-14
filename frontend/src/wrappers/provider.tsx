@@ -12,7 +12,7 @@ import apolloClient from 'utils/helpers/apolloClient'
 // AppInitializer is mounted once. Its job is to call useDjangoSession(),
 // which syncs the GitHub access token (stored in the NextAuth session) with the Django session.
 
-function AppInitializer() {
+function AppInitializer(): React.ReactElement | null {
   useDjangoSession()
   return null
 }

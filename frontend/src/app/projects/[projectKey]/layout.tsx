@@ -1,21 +1,33 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetProjectMetadataDocument } from 'types/__generated__/projectQueries.generated'
+import {
+  GetProjectMetadataDocument,
+  GetProjectMetadataQuery,
+} from 'types/__generated__/projectQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
-const getProjectMetadata = cache(async (projectKey: string) => {
-  try {
-    const { data } = await apolloClient.query({
-      query: GetProjectMetadataDocument,
-      variables: { key: projectKey },
-    })
-    return data
-  } catch {
-    return null
+const getProjectMetadata = cache(
+  async (projectKey: string): Promise<GetProjectMetadataQuery | null> => {
+    try {
+      const result = await apolloClient.query<GetProjectMetadataQuery>({
+        query: GetProjectMetadataDocument,
+        variables: { key: projectKey },
+        errorPolicy: 'all',
+      })
+      const data = result.data as GetProjectMetadataQuery | undefined
+
+      if (!data || !data.project) {
+        return null
+      }
+
+      return data
+    } catch {
+      return null
+    }
   }
-})
+)
 
 export async function generateMetadata({
   params,
@@ -28,14 +40,14 @@ export async function generateMetadata({
   const data = await getProjectMetadata(projectKey)
   const project = data?.project
 
-  return project
-    ? generateSeoMetadata({
-        canonicalPath: `/projects/${projectKey}`,
-        description: project.summary ?? `${project.name} project details`,
-        keywords: ['owasp', 'project', projectKey, project.name],
-        title: project.name,
-      })
-    : null
+  if (!project) return {}
+
+  return generateSeoMetadata({
+    canonicalPath: `/projects/${projectKey}`,
+    description: project.summary ?? `${project.name} project details`,
+    keywords: ['owasp', 'project', projectKey, project.name],
+    title: project.name,
+  })
 }
 
 export default async function ProjectDetailsLayout({
@@ -49,7 +61,7 @@ export default async function ProjectDetailsLayout({
   const data = await getProjectMetadata(projectKey)
 
   if (!data?.project) {
-    return children
+    return <>{children}</>
   }
 
   return <PageLayout title={data.project.name}>{children}</PageLayout>
