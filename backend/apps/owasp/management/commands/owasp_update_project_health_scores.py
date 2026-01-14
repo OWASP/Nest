@@ -1,4 +1,12 @@
-"""A command to update OWASP project health metrics scores."""
+"""
+Update OWASP project health scores.
+
+This command calculates health scores for OWASP projects
+based on defined metrics and requirement thresholds.
+Projects marked as level non-compliant receive an
+additional score penalty to reflect misalignment with
+official OWASP project classification.
+"""
 
 from django.core.management.base import BaseCommand
 
@@ -9,14 +17,25 @@ LEVEL_NON_COMPLIANCE_PENALTY = 10.0
 
 
 class Command(BaseCommand):
-    """Update OWASP project health scores."""
+    """
+    Compute and update project health scores.
+
+    Health scores are derived from project metrics and
+    requirement definitions. Projects that fail level
+    compliance checks are penalized to ensure score
+    accuracy reflects governance alignment.
+    """
 
     help = "Update OWASP project health scores."
 
     def handle(self, *args, **options):
-        """Recalculate and update project health scores.
+        """
+        Calculate and persist project health scores.
 
-        Applies a fixed penalty when a project is marked as level non-compliant.
+        This method iterates over project health metrics,
+        evaluates each metric against defined requirements,
+        applies penalties for non-compliant project levels,
+        and stores the final computed score.
         """
         forward_fields = {
             "age_days": 6.0,

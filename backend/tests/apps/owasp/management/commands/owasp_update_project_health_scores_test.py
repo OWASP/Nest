@@ -63,6 +63,7 @@ class TestUpdateProjectHealthMetricsScoreCommand:
         mock_metric.project.name = "Test Project"
         mock_metric.is_funding_requirements_compliant = True
         mock_metric.is_leader_requirements_compliant = True
+        mock_metric.level_non_compliant = False
         self.mock_metrics.return_value.select_related.return_value = [mock_metric]
         self.mock_requirements.return_value = [mock_requirements]
         mock_requirements.level = "test_level"

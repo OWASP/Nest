@@ -1,4 +1,15 @@
-"""Detect OWASP project level non-compliance using official source of truth."""
+"""
+Update OWASP project level compliance status.
+
+This command compares locally stored project levels against
+official OWASP project classification data and determines
+whether each project is level-compliant.
+
+Projects whose locally assigned level does not match the
+official OWASP classification are flagged as non-compliant.
+This compliance flag is later used during health score
+calculation to apply penalties where appropriate.
+"""
 
 import re
 from decimal import Decimal, InvalidOperation
@@ -20,11 +31,26 @@ def normalize_name(name: str) -> str:
 
 
 class Command(BaseCommand):
-    """Update project level non-compliance flag."""
+    """
+    Detect and persist OWASP project level compliance.
+
+    This command fetches official OWASP project level data,
+    maps it to the internal ProjectLevel enum, and updates
+    project health metrics to indicate whether a project’s
+    stored level matches the official classification.
+    """
 
     help = "Detect and flag OWASP project level non-compliance."
 
     def handle(self, *args, **options) -> None:
+        """
+        Execute project level compliance detection.
+
+        For each project health metric entry, this method
+        determines the expected project level based on
+        official OWASP data and marks the project as
+        level non-compliant when a mismatch is detected.
+        """
         response = requests.get(LEVELS_URL, timeout=15)
         response.raise_for_status()
         official_data = response.json()
