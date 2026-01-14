@@ -70,6 +70,11 @@ jest.mock('utils/aboutData', () => ({
   projectTimeline: [
     { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
     { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
+    { title: 'Timeline Event 3', description: 'Timeline description 3', year: '2025' },
+    { title: 'Timeline Event 4', description: 'Timeline description 4', year: '2026' },
+    { title: 'Timeline Event 5', description: 'Timeline description 5', year: '2027' },
+    { title: 'Timeline Event 6', description: 'Timeline description 6', year: '2028' },
+    { title: 'Timeline Event 7', description: 'Timeline description 7', year: '2029' },
   ],
   technologies: [
     {
@@ -275,15 +280,33 @@ describe('About Component', () => {
       render(<About />)
     })
 
-    const projectHistorySection = screen.getByText('Our Story').closest('div')
-    expect(projectHistorySection).toBeInTheDocument()
-
-    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Project Timeline')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
-    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
-    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
-    expect(screen.getByText('2023')).toBeInTheDocument()
+    expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
+    expect(screen.getByText('2029')).toBeInTheDocument()
+    expect(screen.queryByText('2023')).not.toBeInTheDocument()
     expect(screen.getByText('2024')).toBeInTheDocument()
+
+    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
+    expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
+
+    const timelineSection = screen.getByText('Project Timeline').closest('h2')?.parentElement
+    if (!timelineSection) throw new Error('Could not find Timeline section')
+
+    const showMoreButton = within(timelineSection).getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    })
+
+    const showLessButton = within(timelineSection).getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButton)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
+    })
   })
 
   test('renders leaders section with three leaders', async () => {
@@ -327,7 +350,10 @@ describe('About Component', () => {
       expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
 
-    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    const wallOfFameSection = screen.getByText('Wall of Fame').closest('h2')?.parentElement
+    if (!wallOfFameSection) throw new Error('Could not find Wall of Fame section')
+
+    const showMoreButton = within(wallOfFameSection).getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
@@ -336,7 +362,7 @@ describe('About Component', () => {
       expect(screen.getByText('Contributor 15')).toBeInTheDocument()
     })
 
-    const showLessButton = screen.getByRole('button', { name: /Show less/i })
+    const showLessButton = within(wallOfFameSection).getByRole('button', { name: /Show less/i })
     fireEvent.click(showLessButton)
 
     await waitFor(() => {
@@ -387,17 +413,28 @@ describe('About Component', () => {
 
     const roadmapSection = screen.getByRole('heading', { name: /Roadmap/ }).closest('div')
     expect(roadmapSection).toBeInTheDocument()
-    const roadmapData = mockAboutData.project.recentMilestones
-    const links = within(roadmapSection)
-      .getAllByRole('link')
-      .filter((link) => link.getAttribute('href') !== '#roadmap')
+    const roadmapData = [...mockAboutData.project.recentMilestones].sort((a, b) =>
+      a.title > b.title ? 1 : -1
+    )
 
-    for (let i = 0; i < roadmapData.length; i++) {
-      const milestone = [...roadmapData].sort((a, b) => (a.title > b.title ? 1 : -1))[i]
-      expect(screen.getByText(milestone.title)).toBeInTheDocument()
-      expect(screen.getByText(milestone.body)).toBeInTheDocument()
-      expect(links[i].getAttribute('href')).toBe(milestone.url)
-    }
+    expect(screen.getByText(roadmapData[0].title)).toBeInTheDocument()
+    expect(screen.getByText(roadmapData[1].title)).toBeInTheDocument()
+    expect(screen.getByText(roadmapData[2].title)).toBeInTheDocument()
+    expect(screen.queryByText(roadmapData[3].title)).not.toBeInTheDocument()
+
+    const showMoreButtonRef = within(roadmapSection).getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButtonRef)
+
+    await waitFor(() => {
+      expect(screen.getByText(roadmapData[3].title)).toBeInTheDocument()
+    })
+
+    const showLessButtonRef = within(roadmapSection).getByRole('button', { name: /Show less/i })
+    fireEvent.click(showLessButtonRef)
+
+    await waitFor(() => {
+      expect(screen.queryByText(roadmapData[3].title)).not.toBeInTheDocument()
+    })
   })
 
   test('renders project stats cards correctly', async () => {
@@ -643,10 +680,10 @@ describe('About Component', () => {
       render(<About />)
     })
     expect(screen.getByText('Project Timeline')).toBeInTheDocument()
-    expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+    expect(screen.getByText('Project Timeline')).toBeInTheDocument()
+    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
-    expect(screen.getByText('Timeline description 1')).toBeInTheDocument()
-    expect(screen.getByText('Timeline description 2')).toBeInTheDocument()
+    expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
   })
 
   test('triggers toaster error when GraphQL request fails for a leader', async () => {

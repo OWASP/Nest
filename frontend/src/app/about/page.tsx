@@ -5,7 +5,7 @@ import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
@@ -28,6 +28,7 @@ import AnchorTitle from 'components/AnchorTitle'
 import Leaders from 'components/Leaders'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -86,6 +87,9 @@ const About = () => {
   // Derive data directly from response to prevent race conditions.
   const projectMetadata = projectMetadataResponse?.project
   const topContributors = topContributorsResponse?.topContributors
+
+  const [showAllRoadmap, setShowAllRoadmap] = useState(false)
+  const [showAllTimeline, setShowAllTimeline] = useState(false)
 
   useEffect(() => {
     if (projectMetadataRequestError) {
@@ -202,6 +206,7 @@ const About = () => {
               {[...projectMetadata.recentMilestones]
                 .filter((milestone) => milestone.state !== 'closed')
                 .sort((a, b) => (a.title > b.title ? 1 : -1))
+                .slice(0, showAllRoadmap ? projectMetadata.recentMilestones.length : 3)
                 .map((milestone, index) => (
                   <div
                     key={milestone.url || milestone.title || index}
@@ -237,6 +242,9 @@ const About = () => {
                   </div>
                 ))}
             </div>
+            {projectMetadata.recentMilestones.length > 3 && (
+              <ShowMoreButton onToggle={() => setShowAllRoadmap(!showAllRoadmap)} />
+            )}
           </SecondaryCard>
         )}
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
@@ -250,23 +258,29 @@ const About = () => {
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
-            {[...projectTimeline].reverse().map((milestone, index) => (
-              <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                {index !== projectTimeline.length - 1 && (
-                  <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                )}
-                <div
-                  aria-hidden="true"
-                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                ></div>
-                <div>
-                  <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                  <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                  <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+            {[...projectTimeline]
+              .reverse()
+              .slice(0, showAllTimeline ? projectTimeline.length : 6)
+              .map((milestone, index) => (
+                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
+                  {index !== projectTimeline.length - 1 && (
+                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
+                  )}
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
+                  ></div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
+                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
+          {projectTimeline.length > 6 && (
+            <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
+          )}
         </SecondaryCard>
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
