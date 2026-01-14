@@ -174,7 +174,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @property
     def recent_milestones(self):
         """Repository recent milestones."""
-        return self.milestones.order_by("-created_at")
+        return self.milestones.order_by("-created_at") if self.pk else []
 
     @property
     def top_languages(self) -> list[str]:
