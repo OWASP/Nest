@@ -3,22 +3,13 @@
 import { usePathname, useSearchParams } from 'next/navigation'
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider, usePostHog } from 'posthog-js/react'
-import React, { Suspense, useEffect } from 'react'
+import React, { Suspense, useEffect, useRef } from 'react'
 import { ENVIRONMENT, POSTHOG_HOST, POSTHOG_KEY } from 'utils/env.client'
 
 const isPostHogEnabled =
-  (ENVIRONMENT === 'staging' || ENVIRONMENT === 'production') && POSTHOG_KEY && POSTHOG_HOST
-
-if (typeof globalThis.window !== 'undefined' && isPostHogEnabled) {
-  posthog.init(POSTHOG_KEY, {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    api_host: POSTHOG_HOST,
-    capture_pageview: false, // We capture pageviews manually
-    capture_pageleave: true,
-    person_profiles: 'identified_only',
-    /* eslint-enable @typescript-eslint/naming-convention */
-  })
-}
+  (ENVIRONMENT === 'staging' || ENVIRONMENT === 'production') &&
+  POSTHOG_KEY &&
+  POSTHOG_HOST
 
 function PostHogPageView() {
   const pathname = usePathname()
@@ -26,12 +17,11 @@ function PostHogPageView() {
   const posthogClient = usePostHog()
 
   useEffect(() => {
-    if (pathname && posthogClient) {
-      let url = globalThis.window.origin + pathname
+    if (pathname && posthogClient && globalThis.window !== undefined) {
+      let url = globalThis.window.location.origin + pathname
       if (searchParams.toString()) {
-        url = url + '?' + searchParams.toString()
+        url += `?${searchParams.toString()}`
       }
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       posthogClient.capture('$pageview', { $current_url: url })
     }
   }, [pathname, searchParams, posthogClient])
@@ -39,9 +29,23 @@ function PostHogPageView() {
   return null
 }
 
-export function PostHogProvider({ children }: Readonly<{ children: React.ReactNode }>) {
+export function PostHogProvider({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  const initialized = useRef(false)
+
   if (!isPostHogEnabled) {
     return <>{children}</>
+  }
+
+  if (!initialized.current && globalThis.window !== undefined) {
+    posthog.init(POSTHOG_KEY, {
+      api_host: POSTHOG_HOST,
+      capture_pageview: false,
+      capture_pageleave: true,
+      person_profiles: 'identified_only',
+    })
+    initialized.current = true
   }
 
   return (
