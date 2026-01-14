@@ -12,7 +12,7 @@ export default function ContributionStats({ title, stats }: Readonly<Contributio
   }
 
   return (
-    <section aria-labelledby="contribution-stats-title" className="">
+    <section aria-labelledby="contribution-stats-title">
       <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800 sm:text-xl md:text-2xl dark:text-gray-200">
         <FaChartLine className="h-5 w-5 text-gray-600 sm:h-6 sm:w-6 dark:text-gray-400" />
         {title}
