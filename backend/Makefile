@@ -26,7 +26,9 @@ clean-backend-docker:
 	@docker container rm -f nest-cache >/dev/null 2>&1 || true
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
 	@docker container rm -f nest-worker >/dev/null 2>&1 || true
+	@docker image rm -f nest-backend:base >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
+	@docker image rm -f nest-snapshot-video >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
@@ -119,7 +121,6 @@ scan-backend-image: build-backend-local-image
 		--config trivy.yaml \
 		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
 		--exit-code 1 \
-		--ignorefile trivyignore.yaml \
 		--severity CRITICAL,HIGH \
 		nest-backend-local
 

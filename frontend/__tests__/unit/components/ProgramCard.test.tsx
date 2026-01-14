@@ -55,12 +55,6 @@ jest.mock('@heroui/tooltip', () => ({
 
 jest.mock('components/EntityActions', () => jest.requireActual('components/EntityActions'))
 
-jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => {
-    return <a href={href}>{children}</a>
-  }
-})
-
 describe('ProgramCard', () => {
   const mockPush = jest.fn()
 
@@ -153,7 +147,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      const actionsButton = screen.getByTestId('program-actions-button')
+      const actionsButton = screen.getByRole('button', { name: /Program actions menu/ })
 
       await act(async () => {
         fireEvent.click(actionsButton)
@@ -422,7 +416,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(screen.getByTestId('program-actions-button')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Program actions menu/ })).toBeInTheDocument()
     })
   })
 
@@ -437,7 +431,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(screen.getByTestId('program-actions-button')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Program actions menu/ })).toBeInTheDocument()
     })
 
     it('handles program with minimal data', () => {

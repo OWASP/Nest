@@ -61,7 +61,6 @@ scan-frontend-image: build-frontend-local-image
 		--config trivy.yaml \
 		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
 		--exit-code 1 \
-		--ignorefile trivyignore.yaml \
 		--severity CRITICAL,HIGH \
 		nest-frontend-local
 
@@ -70,7 +69,15 @@ shell-frontend:
 
 test-frontend: \
 	test-frontend-unit \
+	test-frontend-a11y \
 	test-frontend-e2e
+
+test-frontend-a11y:
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+		--cache-from nest-test-frontend-a11y \
+		-f docker/frontend/Dockerfile.a11y.test frontend \
+		-t nest-test-frontend-a11y
+	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
 test-frontend-e2e:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
