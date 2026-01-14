@@ -1,5 +1,5 @@
 declare module 'markdown-it-task-lists' {
-  import { PluginSimple } from 'markdown-it'
-  const taskLists: PluginSimple
+  import { PluginWithOptions } from 'markdown-it'
+  const taskLists: PluginWithOptions
   export default taskLists
 }

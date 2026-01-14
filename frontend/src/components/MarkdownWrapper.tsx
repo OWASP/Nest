@@ -6,10 +6,10 @@ import React from 'react'
 export default function Markdown({
   content,
   className,
-}: {
+}: Readonly<{
   content: string
   className?: string
-}): React.ReactElement {
+}>): React.ReactElement {
   // prettier-ignore
   const md = markdownit({  // NOSONAR - Safe to use markdown-it as we use DOMPurify to sanitize the content.
     breaks: true,

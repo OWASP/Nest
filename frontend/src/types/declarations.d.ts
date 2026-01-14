@@ -10,9 +10,3 @@ declare module 'react-leaflet' {
   export const Popup: React.FC<SafeProps>
   export function useMap(): L.Map
 }
-
-declare module 'react-leaflet-cluster' {
-  import * as React from 'react'
-  const MarkerClusterGroup: React.FC<React.PropsWithChildren<Record<string, unknown>>>
-  export default MarkerClusterGroup
-}

@@ -23,20 +23,14 @@ interface BaseItem {
   }
 }
 
-type RenderItem = {
+type RenderItem = BaseItem & {
   createdAt?: string
   commentsCount?: number
   organizationName?: string
   publishedAt?: string
-  repositoryName?: string
   tagName?: string
   openIssuesCount?: number
   closedIssuesCount?: number
-  author?: {
-    avatarUrl: string
-    login: string
-    name?: string
-  }
 }
 
 const ItemCardList = ({
@@ -71,7 +65,7 @@ const ItemCardList = ({
             >
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
-                  {showAvatar && (
+                  {showAvatar && cardItem?.author?.avatarUrl && (
                     <Tooltip
                       content={cardItem?.author?.name || cardItem?.author?.login}
                       id={`avatar-tooltip-${index}`}
@@ -81,7 +75,7 @@ const ItemCardList = ({
                         <Image
                           height={24}
                           width={24}
-                          src={cardItem?.author?.avatarUrl || ''}
+                          src={cardItem?.author?.avatarUrl || '/images/default-avatar.png'}
                           alt="avatar"
                           className="mr-2 rounded-full"
                         />
@@ -89,9 +83,13 @@ const ItemCardList = ({
                     </Tooltip>
                   )}
                   <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
-                    <Link href={cardItem?.url || ''} target="_blank">
-                      <TruncatedText text={cardItem.title || cardItem.name || ''} />
-                    </Link>
+                    {cardItem?.url ? (
+                     <Link href={cardItem.url} target="_blank">
+                        <TruncatedText text={cardItem.title || cardItem.name || ''} />
+                     </Link>
+                        ) : (
+                           <TruncatedText text={cardItem.title || cardItem.name || ''} />
+                    )}
                   </h3>
                 </div>
                 <div className="ml-0.5 w-full">{renderDetails(cardItem)}</div>
