@@ -307,6 +307,7 @@ class TestRepositoryProperties:
         with patch.object(Repository, "milestones", new_callable=PropertyMock) as mock_prop:
             mock_manager = mock_prop.return_value
             mock_manager.order_by.return_value = "recent_milestones"
+            repository.pk = 123
             assert repository.recent_milestones == "recent_milestones"
             mock_manager.order_by.assert_called_with("-created_at")
 
