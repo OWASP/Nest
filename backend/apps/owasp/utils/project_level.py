@@ -1,6 +1,4 @@
-"""
-Utilities for mapping OWASP official numeric project levels
-to internal ProjectLevel enum values.
+"""Utilities for mapping OWASP official numeric project levels.
 
 This module acts as a translation layer between the OWASP
 project level definitions published upstream and the
@@ -11,7 +9,6 @@ from decimal import Decimal, InvalidOperation
 from typing import cast
 
 from apps.owasp.models.enums.project import ProjectLevel
-
 
 _LEVEL_MAP = {
     Decimal(4): ProjectLevel.FLAGSHIP,
@@ -32,6 +29,7 @@ def map_level(level: Decimal) -> ProjectLevel | None:
     Returns:
         ProjectLevel | None: The mapped ProjectLevel value if valid,
         otherwise None for unsupported or invalid levels.
+
     """
     try:
         parsed_level = Decimal(str(level))
@@ -41,4 +39,4 @@ def map_level(level: Decimal) -> ProjectLevel | None:
     if parsed_level < 0:
         return None
 
-    return cast(ProjectLevel | None, _LEVEL_MAP.get(parsed_level))
+    return cast("ProjectLevel | None", _LEVEL_MAP.get(parsed_level))

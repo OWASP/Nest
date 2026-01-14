@@ -1,5 +1,4 @@
-"""
-Tests for mapping OWASP official numeric project levels to internal ProjectLevel enums.
+"""Tests for mapping OWASP official numeric project levels to internal ProjectLevel enums.
 
 These tests ensure that the utility correctly translates official OWASP project
 classification values into the corresponding Nest ProjectLevel values and

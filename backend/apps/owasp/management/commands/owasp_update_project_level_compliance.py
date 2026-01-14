@@ -1,5 +1,4 @@
-"""
-Update OWASP project level compliance status.
+"""Update OWASP project level compliance status.
 
 This command compares locally stored project levels against
 official OWASP project classification data and determines
@@ -31,20 +30,18 @@ def normalize_name(name: str) -> str:
 
 
 class Command(BaseCommand):
-    """
-    Detect and persist OWASP project level compliance.
+    """Detect and persist OWASP project level compliance.
 
     This command fetches official OWASP project level data,
     maps it to the internal ProjectLevel enum, and updates
-    project health metrics to indicate whether a project’s
+    project health metrics to indicate whether a project's
     stored level matches the official classification.
     """
 
     help = "Detect and flag OWASP project level non-compliance."
 
     def handle(self, *args, **options) -> None:
-        """
-        Execute project level compliance detection.
+        """Execute project level compliance detection.
 
         For each project health metric entry, this method
         determines the expected project level based on

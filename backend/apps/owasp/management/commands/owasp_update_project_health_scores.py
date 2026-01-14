@@ -1,5 +1,4 @@
-"""
-Update OWASP project health scores.
+"""Update OWASP project health scores.
 
 This command calculates health scores for OWASP projects
 based on defined metrics and requirement thresholds.
@@ -17,8 +16,7 @@ LEVEL_NON_COMPLIANCE_PENALTY = 10.0
 
 
 class Command(BaseCommand):
-    """
-    Compute and update project health scores.
+    """Compute and update project health scores.
 
     Health scores are derived from project metrics and
     requirement definitions. Projects that fail level
@@ -29,8 +27,7 @@ class Command(BaseCommand):
     help = "Update OWASP project health scores."
 
     def handle(self, *args, **options):
-        """
-        Calculate and persist project health scores.
+        """Calculate and persist project health scores.
 
         This method iterates over project health metrics,
         evaluates each metric against defined requirements,

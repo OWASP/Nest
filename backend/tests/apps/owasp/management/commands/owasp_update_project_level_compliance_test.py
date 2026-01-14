@@ -15,9 +15,7 @@ class TestProjectLevelCompliance(SimpleTestCase):
         "apps.owasp.management.commands.owasp_update_project_level_compliance."
         "ProjectHealthMetrics.objects"
     )
-    @patch(
-        "apps.owasp.management.commands.owasp_update_project_level_compliance.requests.get"
-    )
+    @patch("apps.owasp.management.commands.owasp_update_project_level_compliance.requests.get")
     def test_marks_project_as_non_compliant_when_levels_differ(
         self, mock_get, mock_objects, mock_bulk_save
     ):
@@ -46,9 +44,7 @@ class TestProjectLevelCompliance(SimpleTestCase):
         "apps.owasp.management.commands.owasp_update_project_level_compliance."
         "ProjectHealthMetrics.objects"
     )
-    @patch(
-        "apps.owasp.management.commands.owasp_update_project_level_compliance.requests.get"
-    )
+    @patch("apps.owasp.management.commands.owasp_update_project_level_compliance.requests.get")
     def test_project_remains_compliant_when_levels_match(
         self, mock_get, mock_objects, mock_bulk_save
     ):
