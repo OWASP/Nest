@@ -6,7 +6,6 @@ from base64 import b64decode
 
 import yaml
 from django.db import models
-from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
 from apps.github.constants import OWASP_LOGIN
@@ -250,6 +249,8 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             organization is not None and organization.login.lower() == OWASP_LOGIN
         )
         self.is_owasp_site_repository = check_owasp_site_repository(self.key)
+
+        from github.GithubException import GithubException
 
         # Commits.
         if commits is not None:

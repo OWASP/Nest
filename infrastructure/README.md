@@ -118,7 +118,7 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
   - Steps for Linux:
 
     ```bash
-    poetry install && eval $(poetry env activate)
+    poetry sync --without dev --without test && eval $(poetry env activate)
     ```
 
 3. **Create Zappa Settings File**:

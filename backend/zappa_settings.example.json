@@ -20,6 +20,7 @@
       }
     ],
     "manage_roles": true,
+    "memory_size": 3008,
     "project_name": "nest-backend",
     "runtime": "python3.13",
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
