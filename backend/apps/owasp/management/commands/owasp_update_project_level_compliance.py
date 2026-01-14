@@ -9,7 +9,6 @@ from django.core.management.base import BaseCommand
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.utils.project_level import map_level
 
-
 LEVELS_URL = (
     "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_data/project_levels.json"
 )
@@ -77,7 +76,5 @@ class Command(BaseCommand):
             )
 
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Updated level compliance for {len(updated_metrics)} projects."
-            )
+            self.style.SUCCESS(f"Updated level compliance for {len(updated_metrics)} projects.")
         )
