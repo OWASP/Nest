@@ -1,0 +1,61 @@
+/* Custom Admin Navbar Styles */
+
+/* Increase navbar height */
+#header {
+    height: 60px !important;
+    line-height: 60px !important;
+    padding: 0 20px !important;
+}
+
+/* Increase branding text size */
+#branding h1 {
+    font-size: 28px !important;
+    line-height: 60px !important;
+    margin: 0 !important;
+}
+
+#branding h1 a {
+    font-size: 28px !important;
+}
+
+/* Increase user tools text size */
+#user-tools {
+    font-size: 16px !important;
+    line-height: 60px !important;
+}
+
+#user-tools a {
+    font-size: 16px !important;
+}
+
+/* Adjust welcome message */
+#user-tools strong {
+    font-size: 16px !important;
+}
+
+/* Increase navigation menu text size */
+.module h2, .module caption {
+    font-size: 18px !important;
+}
+
+/* Increase breadcrumbs text size */
+.breadcrumbs {
+    font-size: 15px !important;
+    padding: 12px 20px !important;
+}
+
+/* Increase button text size */
+.button, input[type=submit], input[type=button], .submit-row input {
+    font-size: 15px !important;
+    padding: 12px 18px !important;
+}
+
+/* Increase form labels */
+label {
+    font-size: 15px !important;
+}
+
+/* Increase table text */
+#result_list th, #result_list td {
+    font-size: 14px !important;
+}
