@@ -16,7 +16,7 @@ describe('Footer a11y', () => {
   it('should not have any accessibility violations when section is opened', async () => {
     const { container } = render(<Footer />)
 
-    const button = screen.getByTestId('footer-section-button-Resources')
+    const button = screen.getByRole('button', { name: /Resources/ })
     fireEvent.click(button)
 
     const results = await axe(container)

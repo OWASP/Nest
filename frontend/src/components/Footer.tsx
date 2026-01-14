@@ -31,7 +31,6 @@ export default function Footer() {
                 className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:ring-slate-400 focus:outline-hidden lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
-                data-testid={`footer-section-button-${section.title}`}
               >
                 <h3>{section.title}</h3>
                 <div className="transition-transform duration-200 lg:hidden">

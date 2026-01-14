@@ -372,10 +372,10 @@ describe('SearchBar Component', () => {
       )
     })
 
-    it('has the correct class names for search icon', () => {
-      render(<SearchBar {...defaultProps} isLoaded={true} />)
-      const searchIcon = screen.getByTestId('search-icon')
-      expect(searchIcon).toBeInTheDocument()
+    it('renders the search input', () => {
+      render(<SearchBar {...defaultProps} isLoaded />)
+
+      expect(screen.getByRole('textbox')).toBeInTheDocument()
     })
 
     it('maintains proper DOM structure with all elements', () => {

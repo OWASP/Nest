@@ -20,7 +20,7 @@ describe('EntityActions', () => {
   describe('Program Actions - Create Module', () => {
     it('navigates to create module page when Add Module is clicked', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const addModuleButton = screen.getByText('Add Module')
@@ -31,7 +31,7 @@ describe('EntityActions', () => {
 
     it('closes dropdown after clicking Add Module', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -45,7 +45,7 @@ describe('EntityActions', () => {
   describe('Module Actions - Edit Module', () => {
     it('navigates to edit module page when Edit is clicked with moduleKey', () => {
       render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const editButton = screen.getByText('Edit')
@@ -58,7 +58,7 @@ describe('EntityActions', () => {
 
     it('does not navigate when moduleKey is missing for edit action', () => {
       render(<EntityActions type="module" programKey="test-program" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const editButton = screen.getByText('Edit')
@@ -69,7 +69,7 @@ describe('EntityActions', () => {
 
     it('closes dropdown after clicking Edit', () => {
       render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -83,7 +83,7 @@ describe('EntityActions', () => {
   describe('Module Actions - View Issues', () => {
     it('navigates to view issues page when View Issues is clicked with moduleKey', () => {
       render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const viewIssuesButton = screen.getByText('View Issues')
@@ -96,7 +96,7 @@ describe('EntityActions', () => {
 
     it('does not navigate when moduleKey is missing for view issues action', () => {
       render(<EntityActions type="module" programKey="test-program" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const viewIssuesButton = screen.getByText('View Issues')
@@ -107,7 +107,7 @@ describe('EntityActions', () => {
 
     it('closes dropdown after clicking View Issues', () => {
       render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -129,7 +129,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const publishButton = screen.getByText('Publish')
@@ -142,7 +142,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Publish')).toBeInTheDocument()
@@ -156,7 +156,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Publish')).not.toBeInTheDocument()
@@ -172,7 +172,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -194,7 +194,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const unpublishButton = screen.getByText('Unpublish')
@@ -213,7 +213,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const unpublishButton = screen.getByText('Unpublish')
@@ -230,7 +230,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Unpublish')).toBeInTheDocument()
@@ -244,7 +244,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Completed}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Unpublish')).toBeInTheDocument()
@@ -254,7 +254,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Unpublish')).not.toBeInTheDocument()
@@ -270,7 +270,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -292,7 +292,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const completedButton = screen.getByText('Mark as Completed')
@@ -309,7 +309,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Mark as Completed')).toBeInTheDocument()
@@ -319,7 +319,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Mark as Completed')).not.toBeInTheDocument()
@@ -333,7 +333,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Completed}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Mark as Completed')).not.toBeInTheDocument()
@@ -349,7 +349,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -363,7 +363,7 @@ describe('EntityActions', () => {
   describe('Click Outside Behavior', () => {
     it('closes dropdown when clicking outside', async () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -376,7 +376,7 @@ describe('EntityActions', () => {
 
     it('does not close dropdown when clicking inside', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -403,7 +403,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const publishButton = screen.getByText('Publish')
@@ -419,7 +419,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const unpublishButton = screen.getByText('Unpublish')
@@ -434,7 +434,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const completedButton = screen.getByText('Mark as Completed')
@@ -443,7 +443,7 @@ describe('EntityActions', () => {
 
     it('handles undefined status gracefully', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       // Should still show Edit and Add Module
@@ -461,7 +461,7 @@ describe('EntityActions', () => {
           <EntityActions type="program" programKey="test-program" />
         </div>
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(mockParentClick).not.toHaveBeenCalled()
@@ -475,7 +475,7 @@ describe('EntityActions', () => {
           <EntityActions type="program" programKey="test-program" />
         </div>
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const editButton = screen.getByText('Edit')

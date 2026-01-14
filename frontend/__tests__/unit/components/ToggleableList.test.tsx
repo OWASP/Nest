@@ -77,7 +77,7 @@ describe('ToggleableList', () => {
   it('shows Show More button when items exceed limit', () => {
     render(<ToggleableList items={mockItems} label="test-label" limit={5} />)
 
-    expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
   })
 
   it('expands to show all items when ShowMoreButton is clicked', () => {
@@ -88,7 +88,7 @@ describe('ToggleableList', () => {
     expect(screen.queryByText('Item 15')).not.toBeInTheDocument()
 
     // Click Show More
-    fireEvent.click(screen.getByTestId('show-more-button'))
+    fireEvent.click(screen.getByRole('button', { name: /show more/i }))
 
     // All items should now be visible
     expect(screen.getByText('Item 6')).toBeInTheDocument()
@@ -99,11 +99,11 @@ describe('ToggleableList', () => {
     render(<ToggleableList items={mockItems} label="Collapsible Items" limit={5} />)
 
     // Expand
-    fireEvent.click(screen.getByTestId('show-more-button'))
+    fireEvent.click(screen.getByRole('button', { name: /show more/i }))
     expect(screen.getByText('Item 10')).toBeInTheDocument()
 
     // Collapse
-    fireEvent.click(screen.getByTestId('show-more-button'))
+    fireEvent.click(screen.getByRole('button', { name: /show more/i }))
     expect(screen.queryByText('Item 6')).not.toBeInTheDocument()
     expect(screen.getByText('Item 5')).toBeInTheDocument()
   })
@@ -140,7 +140,7 @@ describe('ToggleableList', () => {
   it('handles limit of 0', () => {
     render(<ToggleableList items={mockItems} label="test-label" limit={0} />)
     // Should show ShowMoreButton since limit is exceeded
-    expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
     for (const item of mockItems) {
       expect(screen.queryByText(item)).not.toBeInTheDocument()
     }

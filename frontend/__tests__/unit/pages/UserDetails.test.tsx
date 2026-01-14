@@ -104,9 +104,9 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
 
-    // Use semantic role query instead of CSS selectors for better stability
+    // Check that the loading state is rendered using semantic role
     await waitFor(() => {
-      expect(screen.getByTestId('user-loading-skeleton')).toBeInTheDocument()
+      expect(screen.getByRole('status')).toBeInTheDocument()
     })
   })
 

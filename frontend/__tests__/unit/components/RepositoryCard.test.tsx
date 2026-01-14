@@ -75,7 +75,7 @@ describe('RepositoryCard', () => {
 
   it('renders without crashing with empty repositories', () => {
     render(<RepositoryCard repositories={[]} />)
-    expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Show/ })).not.toBeInTheDocument()
   })
 
   it('shows first 4 repositories initially when there are more than 4', () => {
@@ -104,7 +104,7 @@ describe('RepositoryCard', () => {
 
     render(<RepositoryCard repositories={repositories} />)
 
-    expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Show/ })).toBeInTheDocument()
   })
 
   it('does not display ShowMoreButton when there are 4 or fewer repositories', () => {
@@ -112,7 +112,7 @@ describe('RepositoryCard', () => {
 
     render(<RepositoryCard repositories={repositories} />)
 
-    expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Show/ })).not.toBeInTheDocument()
   })
 
   it('toggles between showing 4 and all repositories when clicked', () => {
@@ -125,14 +125,14 @@ describe('RepositoryCard', () => {
     expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
 
     // Click show more
-    fireEvent.click(screen.getByTestId('show-more-button'))
+    fireEvent.click(screen.getByRole('button', { name: /Show/ }))
 
     // Now shows all repositories
     expect(screen.getByText('Repository 4')).toBeInTheDocument()
     expect(screen.getByText('Repository 5')).toBeInTheDocument()
 
     // Click show less
-    fireEvent.click(screen.getByTestId('show-more-button'))
+    fireEvent.click(screen.getByRole('button', { name: /Show/ }))
 
     // Back to showing first 4
     expect(screen.queryByText('Repository 4')).not.toBeInTheDocument()
@@ -316,11 +316,11 @@ describe('RepositoryCard', () => {
 
       expect(screen.getAllByText('Archived')).toHaveLength(2)
 
-      fireEvent.click(screen.getByTestId('show-more-button'))
+      fireEvent.click(screen.getByRole('button', { name: /Show/ }))
 
       expect(screen.getAllByText('Archived')).toHaveLength(3)
 
-      fireEvent.click(screen.getByTestId('show-more-button'))
+      fireEvent.click(screen.getByRole('button', { name: /Show/ }))
 
       expect(screen.getAllByText('Archived')).toHaveLength(2)
     })
