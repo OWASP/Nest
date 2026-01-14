@@ -680,7 +680,6 @@ describe('About Component', () => {
       render(<About />)
     })
     expect(screen.getByText('Project Timeline')).toBeInTheDocument()
-    expect(screen.getByText('Project Timeline')).toBeInTheDocument()
     expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
     expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()

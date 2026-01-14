@@ -258,12 +258,13 @@ const About = () => {
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
-            {[...projectTimeline]
-              .reverse()
-              .slice(0, showAllTimeline ? projectTimeline.length : 6)
-              .map((milestone, index) => (
+            {(() => {
+              const visibleTimeline = [...projectTimeline]
+                .reverse()
+                .slice(0, showAllTimeline ? projectTimeline.length : 6)
+              return visibleTimeline.map((milestone, index) => (
                 <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                  {index !== projectTimeline.length - 1 && (
+                  {index !== visibleTimeline.length - 1 && (
                     <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
                   )}
                   <div
@@ -276,7 +277,8 @@ const About = () => {
                     <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
                   </div>
                 </div>
-              ))}
+              ))
+            })()}
           </div>
           {projectTimeline.length > 6 && (
             <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
