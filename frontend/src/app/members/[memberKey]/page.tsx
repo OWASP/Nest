@@ -84,9 +84,9 @@ const UserDetailsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div data-testid="user-loading-skeleton">
+      <output>
         <MemberDetailsPageSkeleton />
-      </div>
+      </output>
     )
   }
 
