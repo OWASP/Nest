@@ -9,7 +9,7 @@ import { ENVIRONMENT, POSTHOG_HOST, POSTHOG_KEY } from 'utils/env.client'
 const isPostHogEnabled =
   (ENVIRONMENT === 'staging' || ENVIRONMENT === 'production') && POSTHOG_KEY && POSTHOG_HOST
 
-if (typeof window !== 'undefined' && isPostHogEnabled) {
+if (typeof globalThis.window !== 'undefined' && isPostHogEnabled) {
   posthog.init(POSTHOG_KEY, {
     /* eslint-disable @typescript-eslint/naming-convention */
     api_host: POSTHOG_HOST,
@@ -27,7 +27,7 @@ function PostHogPageView() {
 
   useEffect(() => {
     if (pathname && posthogClient) {
-      let url = window.origin + pathname
+      let url = globalThis.window.origin + pathname
       if (searchParams.toString()) {
         url = url + '?' + searchParams.toString()
       }
@@ -39,7 +39,7 @@ function PostHogPageView() {
   return null
 }
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+export function PostHogProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   if (!isPostHogEnabled) {
     return <>{children}</>
   }
