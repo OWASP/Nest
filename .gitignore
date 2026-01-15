@@ -27,6 +27,7 @@ __pycache__
 *.pdf
 *.pem
 backend/data/backup*
+backend/generated_videos/
 backend/staticfiles
 design/
 frontend/blob-report/

@@ -200,7 +200,10 @@ const EntityActions: React.FC<EntityActionsProps> = ({
           <FaEllipsisV className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200" />
         </button>
         {dropdownOpen && (
-          <div className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+          <div
+            className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+            role="menu"
+          >
             {options.map((option) => {
               const handleMenuItemClick = (e: React.MouseEvent) => {
                 e.preventDefault()

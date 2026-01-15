@@ -45,13 +45,13 @@ const UserDetailsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await fetchHeatmapData(memberKey as string)
+      const result = await fetchHeatmapData(memberKey)
       if (!result) {
         setIsPrivateContributor(true)
         return
       }
       if (result?.contributions) {
-        setUsername(memberKey as string)
+        setUsername(memberKey)
         setData(result as HeatmapData)
       }
     }
@@ -83,9 +83,9 @@ const UserDetailsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div data-testid="user-loading-skeleton">
+      <output>
         <MemberDetailsPageSkeleton />
-      </div>
+      </output>
     )
   }
 
@@ -151,7 +151,7 @@ const UserDetailsPage: React.FC = () => {
     return (
       <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
         <div className="relative">
-          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+          <canvas ref={canvasRef} style={{ display: 'none' }} tabIndex={-1}></canvas>
           {imgSrc ? (
             <div className="h-32">
               <Image
