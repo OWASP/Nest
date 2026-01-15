@@ -210,6 +210,12 @@ const MetricsPage: FC = () => {
 
       return hasChanged ? nextFilters : prevFilters
     })
+
+    const nextActiveFilters = [searchParams.get('health'), searchParams.get('level')].filter(
+      (k): k is string => !!k
+    )
+
+    setActiveFilters(nextActiveFilters)
   }, [searchParams])
 
   useEffect(() => {
