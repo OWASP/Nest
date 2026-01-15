@@ -262,15 +262,20 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 className="border-b-1 border-b-gray-200 text-gray-600 last:border-b-0 dark:border-b-gray-700 dark:text-gray-300"
               >
                 <ul>
-                  {suggestion.hits.map((hit, subIndex) => (
-                    <li
-                      key={`${hit.key || hit.login || hit.url}-${subIndex}`}
-                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
-                          ? 'bg-gray-100 dark:bg-gray-700'
-                          : ''
-                      }`}
-                    >
+                  {suggestion.hits.map((hit, subIndex) => {
+                    const loginName = 'login' in hit ? (hit.login as string) : ''
+                    const urlPath = 'url' in hit ? (hit.url as string) : ''
+                    const uniqueKey = hit.key || loginName || urlPath || subIndex
+
+                    return (
+                      <li
+                        key={`${uniqueKey}-${subIndex}`}
+                        className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                          highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
+                            ? 'bg-gray-100 dark:bg-gray-700'
+                            : ''
+                        }`}
+                      >
                       <button
                         type="button"
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
@@ -278,10 +283,13 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                         className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                       >
                         {getIconForIndex(suggestion.indexName)}
-                        <span className="block max-w-full truncate">{hit.name || hit.login}</span>
+                        <span className="block max-w-full truncate">
+                          {hit.name || loginName}
+                        </span>
                       </button>
                     </li>
-                  ))}
+                 )
+                })}
                 </ul>
               </div>
             ))}

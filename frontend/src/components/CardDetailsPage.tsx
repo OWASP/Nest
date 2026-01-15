@@ -102,7 +102,7 @@ const DetailsCard = ({
   const { data } = useSession()
 
   // compute styles based on type prop
-  const typeStylesMap = {
+  const typeStylesMap: Partial<Record<CardType, string>> = {
     chapter: 'gap-2 md:col-span-3',
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
@@ -363,7 +363,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

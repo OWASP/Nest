@@ -1,9 +1,9 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
+import { JSX, useEffect } from 'react'
 
-export default function AutoScrollToTop() {
+export default function AutoScrollToTop(): JSX.Element | null {
   const pathname = usePathname()
 
   useEffect(() => {

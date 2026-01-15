@@ -1,17 +1,17 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetRepositoryMetadataDocument } from 'types/__generated__/repositoryQueries.generated'
+import { GetRepositoryMetadataDocument, GetRepositoryMetadataQuery } from 'types/__generated__/repositoryQueries.generated'
 import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
 const getRepositoryMetadata = cache(async (organizationKey: string, repositoryKey: string) => {
   try {
-    const { data } = await apolloClient.query({
+    const { data } = (await apolloClient.query<GetRepositoryMetadataQuery>({
       query: GetRepositoryMetadataDocument,
       variables: { organizationKey, repositoryKey },
-    })
+    })) as { data: GetRepositoryMetadataQuery }
     return data
   } catch {
     return null

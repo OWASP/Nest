@@ -15,7 +15,7 @@ async function checkIfProjectLeader(login: string): Promise<boolean> {
       query: IsProjectLeaderDocument,
       variables: { login },
       fetchPolicy: 'no-cache',
-    })
+    }) as { data: { isProjectLeader: boolean } }
     return data?.isProjectLeader ?? false
   } catch (err) {
     throw new Error(
@@ -32,7 +32,7 @@ async function checkIfMentor(login: string): Promise<boolean> {
       query: IsMentorDocument,
       variables: { login },
       fetchPolicy: 'no-cache',
-    })
+    }) as { data: { isMentor: boolean } }
     return data?.isMentor ?? false
   } catch (err) {
     throw new Error(

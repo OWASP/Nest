@@ -179,7 +179,7 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
     style: {
       fontSize: '12px',
     },
-    custom: ({ seriesIndex, dataPointIndex, w }) => {
+    custom: ({ seriesIndex, dataPointIndex, w }: { seriesIndex: number; dataPointIndex: number; w: any }) => {
       const data = w.config.series[seriesIndex].data[dataPointIndex]
       if (!data) return ''
 

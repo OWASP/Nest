@@ -3,7 +3,9 @@ import React from 'react'
 import { apolloClient } from 'server/apolloClient'
 import {
   GetUserDataDocument,
+  GetUserDataQuery,
   GetUserMetadataDocument,
+  GetUserMetadataQuery,
 } from 'types/__generated__/userQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import { generateProfilePageStructuredData } from 'utils/structuredData'
@@ -16,12 +18,12 @@ export async function generateMetadata({
   params: Promise<{ memberKey: string }>
 }): Promise<Metadata> {
   const { memberKey } = await params
-  const { data } = await apolloClient.query({
+  const { data } = (await apolloClient.query<GetUserMetadataQuery>({
     query: GetUserMetadataDocument,
     variables: {
       key: memberKey,
     },
-  })
+  })) as { data: GetUserMetadataQuery }
   const user = data?.user
   const title = user?.name || user?.login
 
@@ -32,8 +34,8 @@ export async function generateMetadata({
         keywords: [user.login, user.name, 'owasp', 'owasp community member'],
         title: title,
       })
-    : null
-}
+    : {}
+  }
 
 export default async function UserDetailsLayout({
   children,
@@ -44,12 +46,12 @@ export default async function UserDetailsLayout({
 }) {
   const { memberKey } = await params
 
-  const { data } = await apolloClient.query({
+  const { data } = (await apolloClient.query<GetUserDataQuery>({
     query: GetUserDataDocument,
     variables: {
       key: memberKey,
     },
-  })
+  })) as { data: GetUserDataQuery }
 
   if (!data?.user?.login) {
     return children
