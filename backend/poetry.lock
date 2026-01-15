@@ -2096,24 +2096,6 @@ files = [
 referencing = ">=0.31.0"
 
 [[package]]
-name = "kappa"
-version = "0.6.0"
-description = "A CLI tool for AWS Lambda developers"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "kappa-0.6.0-py2-none-any.whl", hash = "sha256:4d6b7b3accce4a0aaaac92b36237a6304f0f2fffbbe3caea3f7c9f52d12c9989"},
-    {file = "kappa-0.6.0.tar.gz", hash = "sha256:4b5b372872f25d619e427e04282551048dc975a107385b076b3ffc6406a15833"},
-]
-
-[package.dependencies]
-boto3 = ">=1.2.3"
-click = ">=5.1"
-placebo = ">=0.8.1"
-PyYAML = ">=3.11"
-
-[[package]]
 name = "langchain"
 version = "0.3.27"
 description = "Building applications with LLMs through composability"
@@ -5764,14 +5746,14 @@ propcache = ">=0.2.1"
 
 [[package]]
 name = "zappa"
-version = "0.60.2"
+version = "0.61.4"
 description = "Server-less Python Web Services for AWS Lambda and API Gateway"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "zappa-0.60.2-py3-none-any.whl", hash = "sha256:876b81210cc152b617b3ddd988a9376023d0b00e47a195d285d646198ef45563"},
-    {file = "zappa-0.60.2.tar.gz", hash = "sha256:f20a07e8e447c954c50adafe93dd10c0c8261d70e7818bb2d4ba6023c6114542"},
+    {file = "zappa-0.61.4-py3-none-any.whl", hash = "sha256:ee60bce0654f4223458b58bd39529d7a52a82fe2c084e09b67976dd6b73dbe17"},
+    {file = "zappa-0.61.4.tar.gz", hash = "sha256:f941285c07a65bdbb37ee793099d198740fb552c4b0bfc6069340337730b2d5c"},
 ]
 
 [package.dependencies]
@@ -5780,7 +5762,6 @@ boto3 = ">=1.17.28"
 durationpy = "*"
 hjson = "*"
 jmespath = "*"
-kappa = "0.6.0"
 pip = ">=24.0.0"
 placebo = "<0.10"
 python-dateutil = "*"
@@ -5934,4 +5915,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "ed97ad39247618b08ff73db98013a81082c423514168851f4c3685e88abd9a35"
+content-hash = "056fb89434bf8f3733c03fce81175250b972bc40299d4894464e5e1d5f121c76"
