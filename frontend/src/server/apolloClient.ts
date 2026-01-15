@@ -10,7 +10,6 @@ declare global {
 async function createApolloClient() {
   const authLink = setContext(
     async (_: unknown, { headers }: { headers?: Record<string, string> }) => {
-
       const csrfToken = await getCsrfTokenOnServer()
       return {
         headers: {

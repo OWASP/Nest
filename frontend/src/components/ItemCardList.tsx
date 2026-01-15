@@ -84,11 +84,11 @@ const ItemCardList = ({
                   )}
                   <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                     {cardItem?.url ? (
-                     <Link href={cardItem.url} target="_blank">
+                      <Link href={cardItem.url} target="_blank">
                         <TruncatedText text={cardItem.title || cardItem.name || ''} />
-                     </Link>
-                        ) : (
-                           <TruncatedText text={cardItem.title || cardItem.name || ''} />
+                      </Link>
+                    ) : (
+                      <TruncatedText text={cardItem.title || cardItem.name || ''} />
                     )}
                   </h3>
                 </div>

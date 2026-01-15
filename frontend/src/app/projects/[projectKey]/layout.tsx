@@ -1,26 +1,31 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetProjectMetadataDocument, GetProjectMetadataQuery } from 'types/__generated__/projectQueries.generated'
+import {
+  GetProjectMetadataDocument,
+  GetProjectMetadataQuery,
+} from 'types/__generated__/projectQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
-const getProjectMetadata = cache(async (projectKey: string): Promise<GetProjectMetadataQuery | null> => {
-  try {
-    const { data } = await apolloClient.query<GetProjectMetadataQuery>({
-      query: GetProjectMetadataDocument,
-      variables: { key: projectKey },
-    })
+const getProjectMetadata = cache(
+  async (projectKey: string): Promise<GetProjectMetadataQuery | null> => {
+    try {
+      const { data } = await apolloClient.query<GetProjectMetadataQuery>({
+        query: GetProjectMetadataDocument,
+        variables: { key: projectKey },
+      })
 
-    if (data && typeof data === 'object' && 'project' in data && data.project) {
-       return data as GetProjectMetadataQuery
+      if (data && typeof data === 'object' && 'project' in data && data.project) {
+        return data as GetProjectMetadataQuery
+      }
+
+      return null
+    } catch {
+      return null
     }
-
-    return null
-  } catch {
-    return null
   }
-})
+)
 
 export async function generateMetadata({
   params,
@@ -36,11 +41,11 @@ export async function generateMetadata({
   if (!project) return {}
 
   return generateSeoMetadata({
-        canonicalPath: `/projects/${projectKey}`,
-        description: project.summary ?? `${project.name} project details`,
-        keywords: ['owasp', 'project', projectKey, project.name],
-        title: project.name,
-      })
+    canonicalPath: `/projects/${projectKey}`,
+    description: project.summary ?? `${project.name} project details`,
+    keywords: ['owasp', 'project', projectKey, project.name],
+    title: project.name,
+  })
 }
 
 export default async function ProjectDetailsLayout({
