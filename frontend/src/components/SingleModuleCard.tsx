@@ -23,11 +23,10 @@ interface SingleModuleCardProps {
 }
 
 const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel, admins }) => {
-  const { data } = useSession()
+  const { data: sessionData } = useSession() as { data: ExtendedSession | null }
   const pathname = usePathname()
 
-  // NOSONAR Type assertion needed: ExtendedSession defines the `login` property that NextAuth adds at runtime
-  const currentUserLogin = (data as ExtendedSession)?.user?.login
+  const currentUserLogin = sessionData?.user?.login
 
   const isAdmin =
     accessLevel === 'admin' && admins?.some((admin) => admin.login === currentUserLogin)
