@@ -38,6 +38,9 @@ const leaders = {
   mamicidal: 'CISSP',
 }
 
+const PROJECT_LIMIT = 6
+const MILESTONE_LIMIT = 3
+
 const projectKey = 'nest'
 
 const getMilestoneStatus = (progress: number): string => {
@@ -210,7 +213,7 @@ const About = () => {
                 <>
                   <div className="grid gap-4">
                     {filteredMilestones
-                      .slice(0, showAllRoadmap ? filteredMilestones.length : 3)
+                      .slice(0, showAllRoadmap ? filteredMilestones.length : MILESTONE_LIMIT)
                       .map((milestone, index) => (
                         <div
                           key={milestone.url || milestone.title || index}
@@ -246,7 +249,7 @@ const About = () => {
                         </div>
                       ))}
                   </div>
-                  {filteredMilestones.length > 3 && (
+                  {filteredMilestones.length > MILESTONE_LIMIT && (
                     <ShowMoreButton onToggle={() => setShowAllRoadmap(!showAllRoadmap)} />
                   )}
                 </>
@@ -268,7 +271,7 @@ const About = () => {
             {(() => {
               const visibleTimeline = [...projectTimeline]
                 .reverse()
-                .slice(0, showAllTimeline ? projectTimeline.length : 6)
+                .slice(0, showAllTimeline ? projectTimeline.length : PROJECT_LIMIT)
               return visibleTimeline.map((milestone, index) => (
                 <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
                   {index !== visibleTimeline.length - 1 && (
@@ -287,7 +290,7 @@ const About = () => {
               ))
             })()}
           </div>
-          {projectTimeline.length > 6 && (
+          {projectTimeline.length > PROJECT_LIMIT && (
             <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
           )}
         </SecondaryCard>
