@@ -268,29 +268,31 @@ const MetricsPage: FC = () => {
             selectedLabels={getKeysLabels(filteringSections, activeFilters)}
             onAction={(key: string) => {
               // Because how apollo caches pagination, we need to reset the pagination.
-  setPagination({ offset: 0, limit: PAGINATION_LIMIT })
-  const newParams = new URLSearchParams(searchParams.toString())
+              setPagination({ offset: 0, limit: PAGINATION_LIMIT })
+              const newParams = new URLSearchParams(searchParams.toString())
 
-  if (key === 'reset') {
-    newParams.delete('health')
-    newParams.delete('level')
-  } else if (key in healthFiltersMapping) {
-    newParams.set('health', key)
-  } else if (key in levelFiltersMapping) {
-    newParams.set('level', key)
-  }
+              if (key === 'reset') {
+                newParams.delete('health')
+                newParams.delete('level')
+              } else if (key in healthFiltersMapping) {
+                newParams.set('health', key)
+              } else if (key in levelFiltersMapping) {
+                newParams.set('level', key)
+              }
 
-  const nextFilters = getFiltersFromParams(
-    newParams.get('health'),
-    newParams.get('level')
-  )
+              const nextFilters = getFiltersFromParams(
+                newParams.get('health'),
+                newParams.get('level')
+              )
 
-  setFilters(nextFilters)
-  setActiveFilters(
-    [newParams.get('health'), newParams.get('level')].filter((k): k is string => Boolean(k))
-  )
-  router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
-}}
+              setFilters(nextFilters)
+              setActiveFilters(
+                [newParams.get('health'), newParams.get('level')].filter((k): k is string =>
+                  Boolean(k)
+                )
+              )
+              router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
+            }}
           />
         </div>
       </div>

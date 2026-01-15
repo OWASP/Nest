@@ -1,25 +1,30 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetChapterMetadataDocument, GetChapterMetadataQuery } from 'types/__generated__/chapterQueries.generated'
+import {
+  GetChapterMetadataDocument,
+  GetChapterMetadataQuery,
+} from 'types/__generated__/chapterQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
-const getChapterMetadata = cache(async (chapterKey: string): Promise<GetChapterMetadataQuery | null> => {
-  try {
-    const { data } = await apolloClient.query({
-      query: GetChapterMetadataDocument,
-      variables: { key: chapterKey },
-    })
-    if (data && typeof data === 'object' && 'chapter' in data && data.chapter) {
-      return data as GetChapterMetadataQuery
-    }
+const getChapterMetadata = cache(
+  async (chapterKey: string): Promise<GetChapterMetadataQuery | null> => {
+    try {
+      const { data } = await apolloClient.query({
+        query: GetChapterMetadataDocument,
+        variables: { key: chapterKey },
+      })
+      if (data && typeof data === 'object' && 'chapter' in data && data.chapter) {
+        return data as GetChapterMetadataQuery
+      }
 
-    return null
-  } catch {
-    return null
+      return null
+    } catch {
+      return null
+    }
   }
-})
+)
 
 export async function generateMetadata({
   params,

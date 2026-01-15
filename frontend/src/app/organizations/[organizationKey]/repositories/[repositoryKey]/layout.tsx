@@ -1,7 +1,10 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetRepositoryMetadataDocument, GetRepositoryMetadataQuery } from 'types/__generated__/repositoryQueries.generated'
+import {
+  GetRepositoryMetadataDocument,
+  GetRepositoryMetadataQuery,
+} from 'types/__generated__/repositoryQueries.generated'
 import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'

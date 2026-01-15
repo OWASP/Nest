@@ -35,7 +35,7 @@ export async function generateMetadata({
         title: title,
       })
     : {}
-  }
+}
 
 export default async function UserDetailsLayout({
   children,

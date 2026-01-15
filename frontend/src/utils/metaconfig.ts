@@ -65,7 +65,10 @@ export function generateSeoMetadata({
   }
 }
 
-export function getStaticMetadata(pageKey: keyof typeof METADATA_CONFIG, canonicalPath?: string): Metadata {
+export function getStaticMetadata(
+  pageKey: keyof typeof METADATA_CONFIG,
+  canonicalPath?: string
+): Metadata {
   const config = METADATA_CONFIG[pageKey]
 
   if (!config) {

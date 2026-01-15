@@ -57,7 +57,8 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
       }
     }
     heatmapData.contributions = heatmapData.contributions.filter(
-      (item : { date: string; count: number }) => new Date(item.date) <= endDate && new Date(item.date) >= startDate
+      (item: { date: string; count: number }) =>
+        new Date(item.date) <= endDate && new Date(item.date) >= startDate
     )
 
     const allDates: string[] = []
@@ -66,7 +67,9 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
     }
 
     const transformedContributions: HeatmapContribution[] = allDates.map((date) => {
-      const contribution = (heatmapData.contributions as RawContribution[]).find((c) => c.date === date)
+      const contribution = (heatmapData.contributions as RawContribution[]).find(
+        (c) => c.date === date
+      )
       return contribution
         ? {
             date: contribution.date,

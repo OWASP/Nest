@@ -271,25 +271,24 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       <li
                         key={`${uniqueKey}-${subIndex}`}
                         className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                          highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
+                          highlightedIndex?.index === index &&
+                          highlightedIndex?.subIndex === subIndex
                             ? 'bg-gray-100 dark:bg-gray-700'
                             : ''
                         }`}
                       >
-                      <button
-                        type="button"
-                        onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                        onKeyDown={(e) => handleSuggestionKeyDown(e, hit, suggestion.indexName)}
-                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
-                      >
-                        {getIconForIndex(suggestion.indexName)}
-                        <span className="block max-w-full truncate">
-                          {hit.name || loginName}
-                        </span>
-                      </button>
-                    </li>
-                 )
-                })}
+                        <button
+                          type="button"
+                          onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
+                          onKeyDown={(e) => handleSuggestionKeyDown(e, hit, suggestion.indexName)}
+                          className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+                        >
+                          {getIconForIndex(suggestion.indexName)}
+                          <span className="block max-w-full truncate">{hit.name || loginName}</span>
+                        </button>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             ))}

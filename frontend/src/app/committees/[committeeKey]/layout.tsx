@@ -1,25 +1,30 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetCommitteeMetadataDocument, GetCommitteeMetadataQuery } from 'types/__generated__/committeeQueries.generated'
+import {
+  GetCommitteeMetadataDocument,
+  GetCommitteeMetadataQuery,
+} from 'types/__generated__/committeeQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
-const getCommitteeMetadata = cache(async (committeeKey: string): Promise<GetCommitteeMetadataQuery | null> => {
-  try {
-    const { data } = await apolloClient.query({
-      query: GetCommitteeMetadataDocument,
-      variables: { key: committeeKey },
-    })
-    if (data && typeof data === 'object' && 'committee' in data && data.committee) {
-      return data as GetCommitteeMetadataQuery
-    }
+const getCommitteeMetadata = cache(
+  async (committeeKey: string): Promise<GetCommitteeMetadataQuery | null> => {
+    try {
+      const { data } = await apolloClient.query({
+        query: GetCommitteeMetadataDocument,
+        variables: { key: committeeKey },
+      })
+      if (data && typeof data === 'object' && 'committee' in data && data.committee) {
+        return data as GetCommitteeMetadataQuery
+      }
 
-    return null
-  } catch {
-    return null
+      return null
+    } catch {
+      return null
+    }
   }
-})
+)
 
 export async function generateMetadata({
   params,

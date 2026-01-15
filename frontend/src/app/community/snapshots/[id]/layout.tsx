@@ -1,7 +1,10 @@
 import { Metadata } from 'next'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetSnapshotDetailsMetadataDocument, GetSnapshotDetailsMetadataQuery } from 'types/__generated__/snapshotQueries.generated'
+import {
+  GetSnapshotDetailsMetadataDocument,
+  GetSnapshotDetailsMetadataQuery,
+} from 'types/__generated__/snapshotQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 
 export async function generateMetadata({
@@ -21,11 +24,11 @@ export async function generateMetadata({
   }
 
   return generateSeoMetadata({
-        canonicalPath: `/community/snapshots/${snapshotKey}`,
-        description: `${snapshot.title} details.`,
-        keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
-        title: snapshot.title,
-      })
+    canonicalPath: `/community/snapshots/${snapshotKey}`,
+    description: `${snapshot.title} details.`,
+    keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
+    title: snapshot.title,
+  })
 }
 export default function SnapshotDetailsLayout({ children }: { children: React.ReactNode }) {
   return children
