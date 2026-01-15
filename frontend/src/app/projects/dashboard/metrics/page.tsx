@@ -23,6 +23,8 @@ interface HealthFilterStructure {
   }
 }
 
+type OrderKey = keyof typeof FIELD_MAPPING
+
 const PAGINATION_LIMIT = 10
 
 const FIELD_MAPPING = {
@@ -46,17 +48,14 @@ const levelFiltersMapping: Record<string, { level: string }> = {
   flagship: { level: 'flagship' },
 } as const
 
-type HealthFilterKey = keyof typeof healthFiltersMapping
-type LevelFilterKey = keyof typeof levelFiltersMapping
-type OrderKey = keyof typeof FIELD_MAPPING
 
 const getFiltersFromParams = (health: string | null, level: string | null) => {
   let filters = {}
   if (health && health in healthFiltersMapping) {
-    filters = { ...filters, ...healthFiltersMapping[health as HealthFilterKey] }
+    filters = { ...filters, ...healthFiltersMapping[health] }
   }
   if (level && level in levelFiltersMapping) {
-    filters = { ...filters, ...levelFiltersMapping[level as LevelFilterKey] }
+    filters = { ...filters, ...levelFiltersMapping[level] }
   }
   return filters
 }
@@ -168,7 +167,7 @@ const MetricsPage: FC = () => {
   const levelParam = searchParams.get('level')
 
   const currentFilters = getFiltersFromParams(healthParam, levelParam)
-  const currentFilterKeys = [healthParam, levelParam].filter((k): k is string => Boolean(k))
+  const currentFilterKeys = [healthParam, levelParam].filter(Boolean) as string[]
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
@@ -188,6 +187,27 @@ const MetricsPage: FC = () => {
       ordering: buildOrderingWithTieBreaker(ordering),
     },
   })
+
+  useEffect(() => {
+  const nextFilters = getFiltersFromParams(
+    searchParams.get('health'),
+    searchParams.get('level')
+  );
+
+  setFilters((prevFilters) => {
+    if (JSON.stringify(nextFilters) !== JSON.stringify(prevFilters)) {
+      return nextFilters;
+    }
+    return prevFilters;
+  });
+
+  const nextActiveFilters = [
+    searchParams.get('health'),
+    searchParams.get('level')
+  ].filter(Boolean) as string[];
+
+  setActiveFilters(nextActiveFilters);
+}, [searchParams]);
 
   useEffect(() => {
     const { field: f, direction: d } = parseOrderParam(searchParams.get('order'))
@@ -287,9 +307,7 @@ const MetricsPage: FC = () => {
 
               setFilters(nextFilters)
               setActiveFilters(
-                [newParams.get('health'), newParams.get('level')].filter((k): k is string =>
-                  Boolean(k)
-                )
+                [newParams.get('health'), newParams.get('level')].filter(Boolean) as string[]
               )
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}

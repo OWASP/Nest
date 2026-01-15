@@ -13,11 +13,11 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id: snapshotKey } = await params
-  const { data } = (await apolloClient.query<GetSnapshotDetailsMetadataQuery>({
+  const { data } = await apolloClient.query<GetSnapshotDetailsMetadataQuery>({
     query: GetSnapshotDetailsMetadataDocument,
     variables: { key: snapshotKey },
-  })) as { data: GetSnapshotDetailsMetadataQuery }
-  const snapshot = data?.snapshot
+  })
+  const snapshot = (data as GetSnapshotDetailsMetadataQuery)?.snapshot
 
   if (!snapshot) {
     return {}
@@ -26,7 +26,7 @@ export async function generateMetadata({
   return generateSeoMetadata({
     canonicalPath: `/community/snapshots/${snapshotKey}`,
     description: `${snapshot.title} details.`,
-    keywords: ['owasp', 'snapshot', snapshotKey, snapshot?.title],
+    keywords: ['owasp', 'snapshot', snapshotKey, snapshot.title],
     title: snapshot.title,
   })
 }
