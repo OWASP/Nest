@@ -145,6 +145,13 @@ resource "aws_db_proxy" "main" {
   })
   vpc_security_group_ids = var.proxy_security_group_ids
   vpc_subnet_ids         = var.db_subnet_ids
+
+  lifecycle {
+    precondition {
+      condition     = length(var.proxy_security_group_ids) > 0
+      error_message = "proxy_security_group_ids must be provided when create_rds_proxy is true."
+    }
+  }
 }
 
 resource "aws_db_proxy_default_target_group" "main" {
