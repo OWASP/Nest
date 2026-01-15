@@ -23,6 +23,18 @@ export const mockAboutData = {
         url: 'http/github.com/milestones/10',
         progress: 80,
       },
+      {
+        title: 'Milestone 4',
+        body: 'Milestone 4 Idea',
+        url: 'http/github.com/milestones/11',
+        progress: 20,
+      },
+      {
+        title: 'Milestone 5',
+        body: 'Milestone 5 Idea',
+        url: 'http/github.com/milestones/12',
+        progress: 40,
+      },
     ],
   },
   topContributors: Array.from({ length: 15 }, (_, i) => ({
