@@ -2,6 +2,7 @@ include backend/Makefile
 include cspell/Makefile
 include docs/Makefile
 include frontend/Makefile
+include infrastructure/Makefile
 
 MAKEFLAGS += --no-print-directory
 
