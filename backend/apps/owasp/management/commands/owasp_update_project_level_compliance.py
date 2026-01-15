@@ -49,14 +49,12 @@ class Command(BaseCommand):
         level non-compliant when a mismatch is detected.
         """
         try:
-             response = requests.get(LEVELS_URL, timeout=15)
-             response.raise_for_status()
-             official_data = response.json()
-         except requests.RequestException as exc:
-             self.stdout.write(
-                 self.style.ERROR(f"Failed to fetch official project levels: {exc}")
-             )
-             return
+            response = requests.get(LEVELS_URL, timeout=15)
+            response.raise_for_status()
+            official_data = response.json()
+        except requests.RequestException as exc:
+            self.stderr.write(self.style.ERROR(f"Failed to fetch official project levels: {exc}"))
+            return
 
         by_repo: dict[str, Decimal] = {}
         by_name: dict[str, Decimal] = {}
