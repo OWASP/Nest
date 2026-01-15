@@ -9,6 +9,7 @@ import {
   FaRectangleList,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
+import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
@@ -107,7 +108,8 @@ const DetailsCard = ({
     program: 'gap-2 md:col-span-7',
   }
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
-  const userLogin = (data as any)?.user?.login as string | undefined
+  const userLogin = (data as ExtendedSession)?.user?.login
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -154,26 +156,26 @@ const DetailsCard = ({
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
             className={secondaryCardStyles}
           >
-            {details?.map((detail) =>
-              detail?.label === 'Leaders' ? (
+            {details?.map((detail) => {
+              const isLeaders = detail?.label === 'Leaders'
+
+              const leadersValue =
+                detail?.value === null ||
+                detail?.value === undefined ||
+                typeof detail.value !== 'string'
+                  ? 'Unknown'
+                  : detail.value
+
+              return isLeaders ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
-                  <strong>{detail.label}:</strong>{' '}
-                  <LeadersList
-                    leaders={
-                      detail?.value === null || detail?.value === undefined
-                        ? 'Unknown'
-                        : typeof detail.value === 'string'
-                          ? detail.value
-                          : 'Unknown'
-                    }
-                  />{' '}
+                  <strong>{detail.label}:</strong> <LeadersList leaders={leadersValue} />{' '}
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
                   <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
                 </div>
               )
-            )}
+            })}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
             )}

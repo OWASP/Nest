@@ -15,7 +15,6 @@
     "incremental": true,
     "sourceMap": true,
     "inlineSources": true,
-    "noImplicitAny": true,
     "baseUrl": ".",
     "plugins": [
       {

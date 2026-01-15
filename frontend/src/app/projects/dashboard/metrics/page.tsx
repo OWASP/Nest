@@ -23,6 +23,13 @@ interface HealthFilterStructure {
   }
 }
 
+interface LevelFilterStructure {
+  level: string
+}
+
+type OrderKey = keyof typeof FIELD_MAPPING
+type FilterParams = Partial<HealthFilterStructure & { level: string }>
+
 const PAGINATION_LIMIT = 10
 
 const FIELD_MAPPING = {
@@ -33,22 +40,18 @@ const FIELD_MAPPING = {
   stars: 'starsCount',
 } as const
 
-type OrderKey = keyof typeof FIELD_MAPPING
-
 const healthFiltersMapping: Record<string, HealthFilterStructure> = {
   healthy: { score: { gte: 75 } },
   needsAttention: { score: { gte: 50, lt: 75 } },
   unhealthy: { score: { lt: 50 } },
 } as const
 
-const levelFiltersMapping: Record<string, { level: string }> = {
+const levelFiltersMapping: Record<string, LevelFilterStructure> = {
   incubator: { level: 'incubator' },
   lab: { level: 'lab' },
   production: { level: 'production' },
   flagship: { level: 'flagship' },
 } as const
-
-type FilterParams = Partial<HealthFilterStructure & { level: string }>
 
 const getFiltersFromParams = (health: string | null, level: string | null): FilterParams => {
   let filters: FilterParams = {}
@@ -194,17 +197,19 @@ const MetricsPage: FC = () => {
     const nextFilters = getFiltersFromParams(searchParams.get('health'), searchParams.get('level'))
 
     setFilters((prevFilters) => {
-      if (JSON.stringify(nextFilters) !== JSON.stringify(prevFilters)) {
-        return nextFilters
-      }
-      return prevFilters
+      const prevKeys = Object.keys(prevFilters)
+      const nextKeys = Object.keys(nextFilters)
+
+      if (prevKeys.length !== nextKeys.length) return nextFilters
+
+      const hasChanged = nextKeys.some(
+        (key) =>
+          prevFilters[key as keyof typeof prevFilters] !==
+          nextFilters[key as keyof typeof nextFilters]
+      )
+
+      return hasChanged ? nextFilters : prevFilters
     })
-
-    const nextActiveFilters = [searchParams.get('health'), searchParams.get('level')].filter(
-      Boolean
-    ) as string[]
-
-    setActiveFilters(nextActiveFilters)
   }, [searchParams])
 
   useEffect(() => {
