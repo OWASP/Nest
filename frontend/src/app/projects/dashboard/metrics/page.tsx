@@ -23,8 +23,6 @@ interface HealthFilterStructure {
   }
 }
 
-type OrderKey = keyof typeof FIELD_MAPPING
-
 const PAGINATION_LIMIT = 10
 
 const FIELD_MAPPING = {
@@ -34,6 +32,8 @@ const FIELD_MAPPING = {
   score: 'score',
   stars: 'starsCount',
 } as const
+
+type OrderKey = keyof typeof FIELD_MAPPING
 
 const healthFiltersMapping: Record<string, HealthFilterStructure> = {
   healthy: { score: { gte: 75 } },
@@ -48,8 +48,11 @@ const levelFiltersMapping: Record<string, { level: string }> = {
   flagship: { level: 'flagship' },
 } as const
 
-const getFiltersFromParams = (health: string | null, level: string | null) => {
-  let filters = {}
+type FilterParams = Partial<HealthFilterStructure & { level: string }>
+
+const getFiltersFromParams = (health: string | null, level: string | null): FilterParams => {
+  let filters: FilterParams = {}
+
   if (health && health in healthFiltersMapping) {
     filters = { ...filters, ...healthFiltersMapping[health] }
   }
@@ -166,7 +169,7 @@ const MetricsPage: FC = () => {
   const levelParam = searchParams.get('level')
 
   const currentFilters = getFiltersFromParams(healthParam, levelParam)
-  const currentFilterKeys = [healthParam, levelParam].filter(Boolean) as string[]
+  const currentFilterKeys = [healthParam, levelParam].filter((k): k is string => !!k)
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
