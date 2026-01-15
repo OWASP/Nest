@@ -123,6 +123,7 @@ const eslintConfig = [
       'react-hooks/rules-of-hooks': 'error',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
+      'import/no-duplicates': ['error', { considerQueryString: true }],
       'import/order': [
         'warn',
         {

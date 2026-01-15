@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { useState, useCallback } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
-import { footerIcons } from 'utils/constants'
-import { footerSections } from 'utils/constants'
+import { footerIcons, footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
