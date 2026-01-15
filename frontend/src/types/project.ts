@@ -70,6 +70,6 @@ export type RepositoryCardProps = {
   openIssuesCount: number
   organization?: Organization
   starsCount: number
-  subscribersCount: number
+  subscribersCount?: number
   url: string
 }

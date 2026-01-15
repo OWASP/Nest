@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockUserDetailsData } from '@mockData/mockUserDetails'
 import { screen, waitFor } from '@testing-library/react'
-import { mockUserDetailsData } from '@unit/data/mockUserDetails'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
 import UserDetailsPage from 'app/members/[memberKey]/page'
@@ -104,9 +104,9 @@ describe('UserDetailsPage', () => {
 
     render(<UserDetailsPage />)
 
-    // Use semantic role query instead of CSS selectors for better stability
+    // Check that the loading state is rendered using semantic role
     await waitFor(() => {
-      expect(screen.getByTestId('user-loading-skeleton')).toBeInTheDocument()
+      expect(screen.getByRole('status')).toBeInTheDocument()
     })
   })
 
@@ -281,7 +281,7 @@ describe('UserDetailsPage', () => {
     await waitFor(() => {
       const heatmapContainer = screen
         .getByAltText('Heatmap Background')
-        .closest('div.hidden.lg\\:block')
+        .closest(String.raw`div.hidden.lg\:block`)
       expect(heatmapContainer).toBeInTheDocument()
       expect(heatmapContainer).toHaveClass('hidden')
       expect(heatmapContainer).toHaveClass('lg:block')
@@ -350,12 +350,13 @@ describe('UserDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
+      loading: false,
     })
 
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('User not found')).toBeInTheDocument()
+      expect(screen.getByText('Error loading user')).toBeInTheDocument()
     })
 
     expect(addToast).toHaveBeenCalledWith({

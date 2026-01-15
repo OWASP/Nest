@@ -381,7 +381,7 @@ describe('RecentReleases Component', () => {
 
     // Check for main card structure - look for the card wrapper
     const cardElement = container.querySelector(
-      '.mb-4.w-full.rounded-lg.bg-gray-200.p-4.dark\\:bg-gray-700'
+      String.raw`.mb-4.w-full.rounded-lg.bg-gray-200.p-4.dark\:bg-gray-700`
     )
     expect(cardElement).toBeInTheDocument()
 

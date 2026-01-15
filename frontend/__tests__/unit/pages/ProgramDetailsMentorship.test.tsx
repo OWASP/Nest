@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client/react'
+import mockProgramDetailsData from '@mockData/mockProgramData'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
-import mockProgramDetailsData from '@unit/data/mockProgramData'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import ProgramDetailsPage from 'app/my/mentorship/programs/[programKey]/page'
@@ -93,7 +93,7 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByText('Test Program')).toBeInTheDocument()
       expect(screen.getByText('Sample summary')).toBeInTheDocument()
       expect(screen.getByText('Draft')).toBeInTheDocument()
-      expect(screen.queryByTestId('program-actions-button')).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Program actions menu/ })).not.toBeInTheDocument()
     })
   })
 
@@ -129,7 +129,7 @@ describe('ProgramDetailsPage', () => {
       mockUpdateProgram.mockResolvedValue({})
       render(<ProgramDetailsPage />)
 
-      const actionsButton = await screen.findByTestId('program-actions-button')
+      const actionsButton = await screen.findByRole('button', { name: /Program actions menu/ })
       fireEvent.click(actionsButton)
 
       const publishButton = await screen.findByRole('menuitem', { name: 'Publish' })

@@ -99,7 +99,7 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const { data } = useSession()
+  const { data: session } = useSession() as { data: ExtendedSession | null }
 
   // compute styles based on type prop
   const typeStylesMap: Partial<Record<CardType, string>> = {
@@ -107,6 +107,11 @@ const DetailsCard = ({
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
   }
+
+  const hasContributions =
+    (contributionStats && contributionStats.total > 0) ||
+    (contributionData && Object.keys(contributionData).length > 0)
+
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
   const userLogin = (data as ExtendedSession)?.user?.login
 
@@ -127,7 +132,7 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some((admin) => admin.login === userLogin) && (
+                admins?.some((admin) => admin.login === session?.user?.login) && (
                   <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
                 )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
@@ -168,7 +173,8 @@ const DetailsCard = ({
 
               return isLeaders ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
-                  <strong>{detail.label}:</strong> <LeadersList leaders={leadersValue} />{' '}
+                  <strong>{detail.label}:</strong>{' '}
+                  <LeadersList leaders={detail?.value == null ? 'Unknown' : String(detail.value)} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
@@ -269,7 +275,7 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
-        {(type === 'project' || type === 'chapter') && (contributionData || contributionStats) && (
+        {(type === 'project' || type === 'chapter') && hasContributions && (
           <div className="mb-8">
             <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
               {contributionStats && (

@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import L from 'leaflet'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useRef, useState, useMemo, JSX } from 'react'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { FaUnlock } from 'react-icons/fa'
 import { FaLocationDot } from 'react-icons/fa6'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
@@ -15,7 +15,7 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 
-const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }): JSX.Element | null => {
+const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   const map = useMap()
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
   useEffect(() => {
@@ -56,7 +56,7 @@ const MapViewUpdater = ({
   validGeoLocData: Chapter[]
   userLocation?: UserLocation | null
   showLocal: boolean
-}): JSX.Element | null => {
+}) => {
   const map = useMap()
 
   useEffect(() => {
