@@ -74,10 +74,9 @@ def sync_repository(
         year_ago = timezone.now() - td(days=365)
 
         # GitHub repository commits.
-        latest_commit = (
-            Commit.objects.filter(repository=repository).order_by("-created_at").first()
+        since = (
+            latest_commit.created_at if (latest_commit := repository.latest_commit) else year_ago
         )
-        since = latest_commit.created_at if latest_commit else year_ago
 
         commits_to_save = []
         for gh_commit in gh_repository.get_commits(since=since):

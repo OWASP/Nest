@@ -35,6 +35,7 @@ def mock_common_deps(mocker):
     mock_repository.latest_updated_milestone = None
     mock_repository.latest_updated_issue = None
     mock_repository.latest_updated_pull_request = None
+    mock_repository.latest_commit = None
     mock_repository.id = 1
 
     return mocks
