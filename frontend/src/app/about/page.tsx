@@ -202,49 +202,56 @@ const About = () => {
 
         {projectMetadata.recentMilestones.length > 0 && (
           <SecondaryCard icon={FaMapSigns} title={<AnchorTitle title="Roadmap" />}>
-            <div className="grid gap-4">
-              {[...projectMetadata.recentMilestones]
+            {(() => {
+              const filteredMilestones = [...projectMetadata.recentMilestones]
                 .filter((milestone) => milestone.state !== 'closed')
                 .sort((a, b) => (a.title > b.title ? 1 : -1))
-                .slice(0, showAllRoadmap ? projectMetadata.recentMilestones.length : 3)
-                .map((milestone, index) => (
-                  <div
-                    key={milestone.url || milestone.title || index}
-                    className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
-                  >
-                    <div className="flex-1">
-                      <div className="relative">
-                        <Link
-                          href={milestone.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
+              return (
+                <>
+                  <div className="grid gap-4">
+                    {filteredMilestones
+                      .slice(0, showAllRoadmap ? filteredMilestones.length : 3)
+                      .map((milestone, index) => (
+                        <div
+                          key={milestone.url || milestone.title || index}
+                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
                         >
-                          <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
-                            {milestone.title}
-                          </h3>
-                        </Link>
-                        <Tooltip
-                          closeDelay={100}
-                          content={getMilestoneStatus(milestone.progress)}
-                          id={`tooltip-state-${index}`}
-                          delay={100}
-                          placement="top"
-                          showArrow
-                        >
-                          <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
-                          </span>
-                        </Tooltip>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
-                    </div>
+                          <div className="flex-1">
+                            <div className="relative">
+                              <Link
+                                href={milestone.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
+                                  {milestone.title}
+                                </h3>
+                              </Link>
+                              <Tooltip
+                                closeDelay={100}
+                                content={getMilestoneStatus(milestone.progress)}
+                                id={`tooltip-state-${index}`}
+                                delay={100}
+                                placement="top"
+                                showArrow
+                              >
+                                <span className="absolute top-0 right-0 text-xl text-gray-400">
+                                  <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
+                                </span>
+                              </Tooltip>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                          </div>
+                        </div>
+                      ))}
                   </div>
-                ))}
-            </div>
-            {projectMetadata.recentMilestones.length > 3 && (
-              <ShowMoreButton onToggle={() => setShowAllRoadmap(!showAllRoadmap)} />
-            )}
+                  {filteredMilestones.length > 3 && (
+                    <ShowMoreButton onToggle={() => setShowAllRoadmap(!showAllRoadmap)} />
+                  )}
+                </>
+              )
+            })()}
           </SecondaryCard>
         )}
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
