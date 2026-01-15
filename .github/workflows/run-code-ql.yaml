@@ -58,3 +58,4 @@ jobs:
         uses: github/codeql-action/analyze@cdefb33c0f6224e58673d9004f47f7cb3e328b89
         with:
           category: /language:${{ matrix.language }}
+    timeout-minutes: 5

@@ -74,3 +74,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-e2e-latest
+    timeout-minutes: 15
