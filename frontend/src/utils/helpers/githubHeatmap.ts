@@ -57,8 +57,7 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
       }
     }
     heatmapData.contributions = heatmapData.contributions.filter(
-      (item: RawContribution) =>
-        new Date(item.date) <= endDate && new Date(item.date) >= startDate
+      (item: RawContribution) => new Date(item.date) <= endDate && new Date(item.date) >= startDate
     )
 
     const allDates: string[] = []

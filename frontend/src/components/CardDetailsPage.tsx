@@ -108,7 +108,7 @@ const DetailsCard = ({
     program: 'gap-2 md:col-span-7',
   }
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
-
+  const userLogin = (data as ExtendedSession)?.user?.login
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -126,7 +126,7 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some((admin) => admin.login === (data as ExtendedSession)?.user?.login) && (
+                admins?.some((admin) => admin.login === userLogin) && (
                   <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
                 )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
@@ -159,7 +159,13 @@ const DetailsCard = ({
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
+                  <LeadersList
+                    leaders={
+                      detail?.value === null || detail?.value === undefined
+                        ? 'Unknown'
+                        : String(detail.value)
+                    }
+                  />{' '}
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">

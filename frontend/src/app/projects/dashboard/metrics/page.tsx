@@ -48,7 +48,6 @@ const levelFiltersMapping: Record<string, { level: string }> = {
   flagship: { level: 'flagship' },
 } as const
 
-
 const getFiltersFromParams = (health: string | null, level: string | null) => {
   let filters = {}
   if (health && health in healthFiltersMapping) {
@@ -189,25 +188,21 @@ const MetricsPage: FC = () => {
   })
 
   useEffect(() => {
-  const nextFilters = getFiltersFromParams(
-    searchParams.get('health'),
-    searchParams.get('level')
-  );
+    const nextFilters = getFiltersFromParams(searchParams.get('health'), searchParams.get('level'))
 
-  setFilters((prevFilters) => {
-    if (JSON.stringify(nextFilters) !== JSON.stringify(prevFilters)) {
-      return nextFilters;
-    }
-    return prevFilters;
-  });
+    setFilters((prevFilters) => {
+      if (JSON.stringify(nextFilters) !== JSON.stringify(prevFilters)) {
+        return nextFilters
+      }
+      return prevFilters
+    })
 
-  const nextActiveFilters = [
-    searchParams.get('health'),
-    searchParams.get('level')
-  ].filter(Boolean) as string[];
+    const nextActiveFilters = [searchParams.get('health'), searchParams.get('level')].filter(
+      Boolean
+    ) as string[]
 
-  setActiveFilters(nextActiveFilters);
-}, [searchParams]);
+    setActiveFilters(nextActiveFilters)
+  }, [searchParams])
 
   useEffect(() => {
     const { field: f, direction: d } = parseOrderParam(searchParams.get('order'))
@@ -307,7 +302,7 @@ const MetricsPage: FC = () => {
 
               setFilters(nextFilters)
               setActiveFilters(
-                [newParams.get('health'), newParams.get('level')].filter(Boolean) as string[]
+                [newParams.get('health'), newParams.get('level')].filter((k): k is string => !!k)
               )
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
