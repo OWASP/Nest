@@ -3,6 +3,7 @@ import { BreadcrumbRoot } from 'contexts/BreadcrumbContext'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import React from 'react'
+import { PostHogProvider } from 'wrappers/PostHogProvider'
 import { Providers } from 'wrappers/provider'
 import { GTM_ID } from 'utils/env.client'
 import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
@@ -71,18 +72,20 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ minHeight: '100vh' }}
       >
-        <Providers>
-          <BreadcrumbRoot>
-            <div className="flex min-h-screen flex-col">
-              <AutoScrollToTop />
-              <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
-              <BreadCrumbsWrapper />
-              <main className="flex flex-1 flex-col justify-center">{children}</main>
-              <Footer />
-              <ScrollToTop />
-            </div>
-          </BreadcrumbRoot>
-        </Providers>
+        <PostHogProvider>
+          <Providers>
+            <BreadcrumbRoot>
+              <div className="flex min-h-screen flex-col">
+                <AutoScrollToTop />
+                <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+                <BreadCrumbsWrapper />
+                <main className="flex flex-1 flex-col justify-center">{children}</main>
+                <Footer />
+                <ScrollToTop />
+              </div>
+            </BreadcrumbRoot>
+          </Providers>
+        </PostHogProvider>
       </body>
       <GoogleAnalytics gaId={GTM_ID} />
     </html>
