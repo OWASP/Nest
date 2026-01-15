@@ -165,7 +165,7 @@ const UserDetailsPage: React.FC = () => {
         </div>
         {hasContributionData && dateRange.startDate && dateRange.endDate && (
           <div className="w-full lg:block">
-            <div className="overflow-x-auto rounded-lg bg-white dark:bg-gray-800">
+            <div className="overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800">
               <ContributionHeatmap
                 contributionData={contributionData}
                 startDate={dateRange.startDate}
