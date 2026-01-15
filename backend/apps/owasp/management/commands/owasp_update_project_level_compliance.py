@@ -52,7 +52,7 @@ class Command(BaseCommand):
             response = requests.get(LEVELS_URL, timeout=15)
             response.raise_for_status()
             official_data = response.json()
-        except requests.RequestException as exc:
+        except (requests.RequestException, ValueError) as exc:
             self.stderr.write(self.style.ERROR(f"Failed to fetch official project levels: {exc}"))
             return
 
