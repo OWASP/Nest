@@ -87,7 +87,6 @@ test-frontend-e2e:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local \
 	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend e2e-tests
 
-
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-unit \

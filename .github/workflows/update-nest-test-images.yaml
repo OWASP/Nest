@@ -88,4 +88,3 @@ jobs:
           push: true
           tags: owasp/nest:test-fuzz-backend-latest
     timeout-minutes: 15
-
