@@ -9,6 +9,7 @@ import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
+import { LabelList } from 'components/LabelList'
 import Markdown from 'components/MarkdownWrapper'
 
 const Card = ({
@@ -130,16 +131,7 @@ const Card = ({
           {/* Labels Section */}
           {labels && labels.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {labels.slice(0, 3).map((label, index) => (
-                <span
-                  key={label}
-                  className={`flex items-center justify-center gap-2 rounded-md border border-1 bg-transparent px-2 py-1 whitespace-nowrap text-zinc-300 transition-all hover:text-white ${
-                    index >= 2 ? 'hidden sm:flex' : ''
-                  }`}
-                >
-                  {label}
-                </span>
-              ))}
+              <LabelList labels={labels} maxVisible={5} />
             </div>
           )}
           {/* Contributors section */}
