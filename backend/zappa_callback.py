@@ -7,6 +7,8 @@ import tarfile
 import tempfile
 from pathlib import Path
 
+import boto3
+
 
 def clean_package(zappa):
     """Clean up Zappa package before deployment."""
@@ -38,3 +40,15 @@ def clean_package(zappa):
                     tf.add(filepath, filepath.relative_to(temp_path))
 
     print(f"New package size: {full_path.stat().st_size / 1024 / 1024:.2f} MB")
+
+
+def update_alias(zappa):
+    """Update Lambda alias."""
+    print("Updating Lambda alias...")
+
+    client = boto3.client("lambda")
+    versions = client.list_versions_by_function(FunctionName=zappa.lambda_name)["Versions"]
+    latest = [v["Version"] for v in versions if v["Version"] != "$LATEST"][-1]
+
+    client.update_alias(FunctionName=zappa.lambda_name, Name="live", FunctionVersion=latest)
+    print(f"Alias 'live' now points to version {latest}")

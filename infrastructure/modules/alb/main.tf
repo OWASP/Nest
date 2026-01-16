@@ -77,6 +77,7 @@ resource "aws_lambda_alias" "live" {
 
   lifecycle {
     create_before_destroy = true
+    ignore_changes        = [function_version]
   }
 }
 
