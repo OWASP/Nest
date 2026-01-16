@@ -9,12 +9,12 @@ CISSP
 Cañón
 DRF
 ELB
+ELEVENLABS
 GBP
 GFKs
 GSOC
 GTM
-Héllo
-Kateryna
+Héllo Kateryna
 NETTACKER
 NOASSERTION
 NOSONAR
@@ -37,6 +37,7 @@ Whistleblower
 Wörld
 Xmark
 a2eeef
+acodec
 agentic
 ahmedxgouda
 algoliasearch
@@ -63,6 +64,7 @@ dismissable
 dkr
 dockerhub
 dsn
+elevenlabs
 env
 facebookexternalhit
 gamesec
@@ -86,6 +88,11 @@ kasya
 langgraph
 lhci
 libexpat
+libgobject
+libharfbuzz
+libpango
+libpangoft
+libx
 lighthouseci
 linkify
 lte
@@ -101,6 +108,7 @@ menteemodule_set
 mentees
 mern
 millify
+mkv
 mpim
 navlink
 nestbot
@@ -112,9 +120,11 @@ openstreetmap
 owasppcitoolkit
 owtf
 pdfgen
+pdfium
 pentest
 pentesting
 pgvector
+pil
 pnpmrc
 psycopg
 pygithub
@@ -144,6 +154,7 @@ tsc
 unassigning
 unhover
 usefixtures
+vcodec
 webgoat
 winsrdf
 wsgi
@@ -152,6 +163,7 @@ xdg
 xdist
 xoxb
 xsser
+zapconfig
 zaproxy
 zsc
 éàëîôû

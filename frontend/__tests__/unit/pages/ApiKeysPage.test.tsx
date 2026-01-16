@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { useQuery, useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockApiKeys, mockCreateApiKeyResult } from '@mockData/mockApiKeysData'
 import { screen, waitFor, fireEvent, within } from '@testing-library/react'
-import { mockApiKeys, mockCreateApiKeyResult } from '@unit/data/mockApiKeysData'
 import { format, addDays } from 'date-fns'
 import React from 'react'
 import { render } from 'wrappers/testUtil'

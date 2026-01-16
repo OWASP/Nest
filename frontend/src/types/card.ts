@@ -21,6 +21,7 @@ export type CardProps = {
   button: Button
   icons?: Icon
   isActive?: boolean
+  labels?: string[]
   level?: Level
   projectLink?: string
   projectName?: string

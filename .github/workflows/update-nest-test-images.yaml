@@ -5,6 +5,8 @@ on:
     - cron: 30 0 * * *
   workflow_dispatch:
 
+permissions: {}
+
 env:
   FORCE_COLOR: 1
 
@@ -13,6 +15,7 @@ jobs:
     name: Update Nest test images
     if: ${{ github.repository == 'OWASP/Nest' }}
     permissions:
+      actions: write
       contents: read
     runs-on: ubuntu-latest
     steps:
@@ -71,3 +74,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-e2e-latest
+    timeout-minutes: 15
