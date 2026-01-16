@@ -11,14 +11,16 @@ import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
   const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetCommunitySnapshotsDocument)
 
   useEffect(() => {
     if (graphQLData) {
       setSnapshots(graphQLData.snapshots)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       addToast({
@@ -29,7 +31,6 @@ const SnapshotsPage: React.FC = () => {
         color: 'danger',
         variant: 'solid',
       })
-      setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError])
 

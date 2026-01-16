@@ -99,8 +99,10 @@ const Card = ({
         </Link>
       )}
 
-      {/* Project summary */}
-      <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
+      <Markdown
+        content={summary}
+        className="mt-2 w-full [overflow-wrap:anywhere] break-words text-gray-600 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
+      />
 
       <div className="mt-4 w-full">
         {/* Social icons section */}
@@ -147,7 +149,12 @@ const Card = ({
 
           {/* Action Button */}
           <div className="flex sm:justify-end">
-            <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
+            <ActionButton
+              tooltipLabel={tooltipLabel}
+              url={button.url}
+              onClick={button.onclick}
+              onKeyDown={button.onkeydown}
+            >
               {button.icon}
               {button.label}
             </ActionButton>

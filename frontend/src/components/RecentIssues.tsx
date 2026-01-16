@@ -33,7 +33,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
           </div>
           {item?.repositoryName && (
             <div className="flex flex-1 items-center overflow-hidden">
-              <FaFolderOpen className="mr-2 h-5 w-4" />
+              <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
               <button
                 type="button"
                 className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"

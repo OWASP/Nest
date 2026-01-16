@@ -71,13 +71,9 @@ const Pagination: React.FC<PaginationProps> = ({
         {pageNumbers.map((number, index) => (
           <React.Fragment key={`${number}-${index}`}>
             {number === '...' ? (
-              <span
-                className="flex h-10 w-10 items-center justify-center text-gray-600 dark:text-gray-400"
-                role="presentation"
-                aria-label="More pages"
-              >
-                <FaEllipsis className="h-5 w-5" />
-              </span>
+              <div className="flex h-10 w-10 items-center justify-center text-gray-600 dark:text-gray-400">
+                <FaEllipsis className="h-5 w-5" aria-hidden="true" />
+              </div>
             ) : (
               <Button
                 type="button"

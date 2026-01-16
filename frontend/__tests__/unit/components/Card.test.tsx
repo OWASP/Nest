@@ -1,8 +1,12 @@
 import { screen, render, fireEvent } from '@testing-library/react'
 import React, { ReactNode } from 'react'
-import { FaLeaf, FaFire, FaCrown, FaStar, FaGithub, FaTwitter } from 'react-icons/fa6'
+import type { IconType } from 'react-icons'
 import type { CardProps } from 'types/card'
 import Card from 'components/Card'
+
+const MockIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg data-testid="mock-icon" {...props} />
+)
 
 // Define proper types for mock props
 interface MockLinkProps {
@@ -61,6 +65,57 @@ jest.mock('next/link', () => {
   }
 })
 
+jest.mock('react-icons/fa6', () => ({
+  FaBluesky: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="bluesky-icon" {...props} />
+  ),
+  FaCalendar: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="calendar-icon" {...props} />
+  ),
+  FaXTwitter: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="x-twitter-icon" {...props} />
+  ),
+}))
+
+jest.mock('react-icons/fa', () => ({
+  FaDiscord: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="discord-icon" {...props} />
+  ),
+  FaFacebook: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="facebook-icon" {...props} />
+  ),
+  FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="github-icon" {...props} />,
+  FaGlobe: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="globe-icon" {...props} />,
+  FaGoogle: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="google-icon" {...props} />,
+  FaInstagram: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="instagram-icon" {...props} />
+  ),
+  FaLinkedin: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="linkedin-icon" {...props} />
+  ),
+  FaMedium: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="medium-icon" {...props} />,
+  FaMeetup: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="meetup-icon" {...props} />,
+  FaSlack: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="slack-icon" {...props} />,
+  FaSlideshare: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="slideshare-icon" {...props} />
+  ),
+  FaSpeakerDeck: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="speakerdeck-icon" {...props} />
+  ),
+  FaTelegram: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="telegram-icon" {...props} />
+  ),
+  FaTiktok: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="tiktok-icon" {...props} />,
+  FaTwitch: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="twitch-icon" {...props} />,
+  FaVimeo: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="vimeo-icon" {...props} />,
+  FaWhatsapp: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="whatsapp-icon" {...props} />
+  ),
+  FaYoutube: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="youtube-icon" {...props} />
+  ),
+}))
+
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children, content, id }: MockTooltipProps) => (
     <div data-testid="tooltip" title={content} id={id}>
@@ -71,25 +126,26 @@ jest.mock('@heroui/tooltip', () => ({
 
 jest.mock('wrappers/IconWrapper', () => ({
   IconWrapper: ({
-    icon,
+    icon: Icon,
     className,
+    ...props
   }: {
-    icon: React.ComponentType<{ className?: string }>
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
     className?: string
-  }) => {
-    const iconName = icon?.name?.toLowerCase().replace('fa', '') || 'icon'
-    return (
-      <span data-testid="icon-wrapper" data-icon={iconName} className={className}>
-        <svg />
-      </span>
-    )
-  },
+  }) => <Icon data-testid="icon-wrapper" className={className} {...props} />,
 }))
 
 jest.mock('components/ActionButton', () => {
   return function ActionButton({ children, onClick, tooltipLabel, url }: MockActionButtonProps) {
+    if (url) {
+      return (
+        <a href={url} data-testid="action-button" onClick={onClick} title={tooltipLabel}>
+          {children}
+        </a>
+      )
+    }
     return (
-      <button data-testid="action-button" onClick={onClick} data-url={url} title={tooltipLabel}>
+      <button data-testid="action-button" onClick={onClick} title={tooltipLabel}>
         {children}
       </button>
     )
@@ -127,33 +183,28 @@ jest.mock('components/MarkdownWrapper', () => {
   }
 })
 
-jest.mock('components/LabelList', () => {
+jest.mock('utils/urlIconMappings', () => {
+  const MockFaGithub = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="github-icon" {...props} />
+  )
+  const MockFaXTwitter = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="x-twitter-icon" {...props} />
+  )
+  const MockFaGlobe = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="globe-icon" {...props} />
+  )
+
   return {
-    LabelList: ({ labels, maxVisible = 5, className }: MockLabelListProps) => {
-      if (!labels || labels.length === 0) return null
-      const visibleLabels = labels.slice(0, maxVisible)
-      const remainingCount = labels.length - maxVisible
-      return (
-        <div data-testid="label-list" className={className}>
-          {visibleLabels.map((label, index) => (
-            <span key={`${label}-${index}`} data-testid="label">
-              {label}
-            </span>
-          ))}
-          {remainingCount > 0 && <span data-testid="label-more">+{remainingCount} more</span>}
-        </div>
-      )
-    },
+    getSocialIcon: jest.fn((url: string) => {
+      const hostname = new URL(url).hostname.toLowerCase()
+      if (hostname.includes('github')) return MockFaGithub
+      if (hostname === 'x.com' || hostname.endsWith('.x.com') || hostname.includes('twitter')) {
+        return MockFaXTwitter
+      }
+      return MockFaGlobe
+    }),
   }
 })
-
-jest.mock('utils/urlIconMappings', () => ({
-  getSocialIcon: jest.fn().mockReturnValue(({ className }: { className?: string }) => (
-    <span data-testid="social-icon" className={className}>
-      <svg />
-    </span>
-  )),
-}))
 
 jest.mock('utils/data', () => ({
   ICONS: {
@@ -200,7 +251,7 @@ describe('Card', () => {
   it('conditionally renders level badge when provided', () => {
     const propsWithLevel = {
       ...baseProps,
-      level: { level: 'Beginner', color: '#4CAF50', icon: FaLeaf },
+      level: { level: 'Beginner', color: '#4CAF50', icon: MockIcon as IconType },
     }
 
     render(<Card {...propsWithLevel} />)
@@ -243,27 +294,29 @@ describe('Card', () => {
   it('does not render project name when not provided', () => {
     render(<Card {...baseProps} />)
     const allLinks = screen.getAllByRole('link')
-    expect(allLinks).toHaveLength(1)
+    expect(allLinks).toHaveLength(2)
   })
 
   it('conditionally renders social icons when provided', () => {
     const propsWithSocial = {
       ...baseProps,
       social: [
-        { title: 'GitHub', url: 'https://github.com/test', icon: FaGithub },
-        { title: 'Twitter', url: 'https://twitter.com/test', icon: FaTwitter },
+        { title: 'GitHub', url: 'https://github.com/test', icon: MockIcon as IconType },
+        { title: 'Twitter', url: 'https://twitter.com/test', icon: MockIcon as IconType },
       ],
     }
     render(<Card {...propsWithSocial} />)
-    expect(screen.getAllByTestId('social-icon')).toHaveLength(2)
-
+    expect(screen.getByTestId('github-icon')).toBeInTheDocument()
+    expect(screen.getByTestId('x-twitter-icon')).toBeInTheDocument()
     const allLinks = screen.getAllByRole('link')
     expect(allLinks.length).toBeGreaterThan(1)
   })
 
   it('does not render social section when not provided', () => {
     render(<Card {...baseProps} />)
-    expect(screen.queryByTestId('font-awesome-icon')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('github-icon')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('x-twitter-icon')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('slack-icon')).not.toBeInTheDocument()
   })
 
   it('conditionally renders project name when provided', () => {
@@ -288,7 +341,7 @@ describe('Card', () => {
     render(<Card {...propsWithProjectNameOnly} />)
 
     expect(screen.getByText('Test Organization')).toBeInTheDocument()
-    expect(screen.getAllByRole('link')).toHaveLength(1)
+    expect(screen.getAllByRole('link')).toHaveLength(2)
   })
 
   it('conditionally renders contributor avatars', () => {
@@ -317,7 +370,7 @@ describe('Card', () => {
   it('applies different level badge colors based on props', () => {
     const propsWithLevel = {
       ...baseProps,
-      level: { level: 'Advanced', color: '#FF5722', icon: FaFire },
+      level: { level: 'Advanced', color: '#FF5722', icon: MockIcon as IconType },
     }
 
     render(<Card {...propsWithLevel} />)
@@ -421,7 +474,7 @@ describe('Card', () => {
   it('has proper accessibility attributes', () => {
     const propsWithTooltip = {
       ...baseProps,
-      level: { level: 'Intermediate', color: '#2196F3', icon: FaStar },
+      level: { level: 'Intermediate', color: '#2196F3', icon: MockIcon as IconType },
       tooltipLabel: 'Click to contribute',
     }
 
@@ -487,11 +540,11 @@ describe('Card', () => {
   it('renders complete card with all optional props', () => {
     const fullProps = {
       ...baseProps,
-      level: { level: 'Expert', color: '#9C27B0', icon: FaCrown },
+      level: { level: 'Expert', color: '#9C27B0', icon: MockIcon as IconType },
       icons: { react: 'active', typescript: 'active' },
       projectName: 'Full Stack Project',
       projectLink: 'https://fullstack.com',
-      social: [{ title: 'GitHub', url: 'https://github.com/full', icon: FaGithub }],
+      social: [{ title: 'GitHub', url: 'https://github.com/full', icon: MockIcon as IconType }],
       topContributors: [
         {
           login: 'expert',
@@ -507,7 +560,7 @@ describe('Card', () => {
     expect(screen.getByTestId('tooltip')).toBeInTheDocument()
     expect(screen.getAllByTestId('display-icon')).toHaveLength(2)
     expect(screen.getByRole('link', { name: 'Full Stack Project' })).toBeInTheDocument()
-    expect(screen.getByTestId('social-icon')).toBeInTheDocument()
+    expect(screen.getByTestId('github-icon')).toBeInTheDocument()
     expect(screen.getByTestId('contributor-avatar')).toBeInTheDocument()
   })
   it('renders labels when provided', () => {

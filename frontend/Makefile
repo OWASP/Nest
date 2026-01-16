@@ -1,5 +1,12 @@
 SHELL := /bin/bash
 
+build-frontend-local-image:
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+		--no-cache \
+		-f docker/frontend/Dockerfile \
+		-t nest-frontend-local \
+		frontend
+
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code \
@@ -49,24 +56,40 @@ generate-graphql-types:
 	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run graphql-codegen))
 
+scan-frontend-image: build-frontend-local-image
+	@trivy image \
+		--config trivy.yaml \
+		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
+		--exit-code 1 \
+		--severity CRITICAL,HIGH \
+		nest-frontend-local
+
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
 test-frontend: \
 	test-frontend-unit \
+	test-frontend-a11y \
 	test-frontend-e2e
+
+test-frontend-a11y:
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+		--cache-from nest-test-frontend-a11y \
+		-f docker/frontend/Dockerfile.a11y.test frontend \
+		-t nest-test-frontend-a11y
+	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
 test-frontend-e2e:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-e2e \
-		-f frontend/docker/Dockerfile.e2e.test frontend \
+		-f docker/frontend/Dockerfile.e2e.test frontend \
 		-t nest-test-frontend-e2e
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-e2e pnpm run test:e2e
 
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-unit \
-		-f frontend/docker/Dockerfile.unit.test frontend \
+		-f docker/frontend/Dockerfile.unit.test frontend \
 		-t nest-test-frontend-unit
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
 

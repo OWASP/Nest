@@ -1,22 +1,29 @@
-  - name: Deploy Production Nest Proxy
-    hosts: production_nest_proxy
-    tasks:
-      - name: Copy proxy configuration files
-        copy:
-          src: '{{ github_workspace }}/proxy/{{ item }}'
-          dest: ~/
-          mode: '0644'
-        loop:
-          - blocked_ips.conf
-          - docker-compose.yaml
-          - headers.conf
-          - production.conf
-          - redirects.conf
+- name: Deploy Production Nest Proxy
+  hosts: production_nest_proxy
+  tasks:
+    - name: Copy proxy configuration files
+      copy:
+        src: '{{ github_workspace }}/proxy/{{ item }}'
+        dest: ~/
+        mode: '0644'
+      loop:
+        - blocked_ips.conf
+        - cloudflare_realip.conf
+        - headers.conf
+        - production.conf
+        - proxy_cache.conf
+        - redirects.conf
 
-      - name: Retart services
-        shell:
-          cmd: docker compose up -d --pull always
+    - name: Copy docker compose file
+      copy:
+        src: '{{ github_workspace }}/docker-compose/proxy/compose.yaml'
+        dest: ~/docker-compose.yaml
+        mode: '0644'
 
-      - name: Prune docker images
-        shell:
-          cmd: docker image prune -f
+    - name: Restart services
+      shell:
+        cmd: docker compose up -d --pull always && docker compose restart
+
+    - name: Prune docker images
+      shell:
+        cmd: docker image prune -f

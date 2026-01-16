@@ -52,12 +52,12 @@ export function useSearchPage<T>({
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
       const orderParam = searchParams.get('order') || 'desc'
-      if (
-        indexName === 'projects' &&
-        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
-      ) {
-        setCurrentPage(1)
-      } else if (searchQuery !== searchQueryParam) {
+
+      const searchQueryChanged = searchQuery !== searchQueryParam
+      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
+
+      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
+      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
         setCurrentPage(1)
       }
     }
@@ -104,7 +104,7 @@ export function useSearchPage<T>({
 
         if ('hits' in response) {
           setItems(response.hits)
-          setTotalPages(response.totalPages as number)
+          setTotalPages(response.totalPages)
         } else {
           handleAppError(response)
         }

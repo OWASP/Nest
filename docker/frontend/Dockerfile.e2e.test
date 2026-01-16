@@ -1,0 +1,24 @@
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy
+
+ENV FORCE_COLOR=1 \
+    NPM_CACHE="/app/.npm" \
+    PNPM_HOME="/pnpm"
+
+ENV NPM_CONFIG_RETRY=5 \
+    NPM_CONFIG_TIMEOUT=30000 \
+    PATH="$PNPM_HOME:$PATH"
+
+RUN --mount=type=cache,target=${NPM_CACHE} \
+    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+
+WORKDIR /app
+
+COPY --chmod=444 package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile --ignore-scripts
+
+COPY __tests__/e2e __tests__/e2e
+COPY __tests__/mockData __tests__/mockData
+COPY .pnpmrc next.config.ts postcss.config.js playwright.config.ts tailwind.config.mjs tsconfig.json ./
+COPY public public
+COPY src src
