@@ -196,9 +196,7 @@ jest.mock('components/LabelList', () => {
               {label}
             </span>
           ))}
-          {remainingCount > 0 && (
-            <span data-testid="label-more">+{remainingCount} more</span>
-          )}
+          {remainingCount > 0 && <span data-testid="label-more">+{remainingCount} more</span>}
         </div>
       )
     },
