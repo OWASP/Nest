@@ -114,7 +114,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             defaultIconColor="#FDCE2D"
             hoverIconColor="#FDCE2D"
             text="Star"
-            className="hidden"
+            className="hidden lg:flex"
           />
 
           <NavButton
@@ -124,7 +124,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             defaultIconColor="#b55f95"
             hoverIconColor="#d9156c"
             text="Sponsor"
-            className="hidden"
+            className="hidden lg:flex"
           />
           {!isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
           <ModeToggle />

@@ -104,30 +104,26 @@ jest.mock('components/UserMenu', () => {
 })
 
 // Mock constants
-jest.mock('utils/constants', () => ({
-  desktopViewMinWidth: 1024,
-  headerLinks: [
-    {
-      text: 'Home',
-      href: '/',
-    },
-    {
-      text: 'About',
-      href: '/about',
-    },
-    {
-      text: 'Services',
-      submenu: [
-        { text: 'Web Development', href: '/services/web' },
-        { text: 'Mobile Development', href: '/services/mobile' },
-      ],
-    },
-    {
-      text: 'Contact',
-      href: '/contact',
-    },
-  ],
-}))
+// Mock constants
+jest.mock('utils/constants', () => {
+  const actual = jest.requireActual('utils/constants')
+  return {
+    ...actual,
+    desktopViewMinWidth: 1024, // Matches your logic
+    headerLinks: [
+      { text: 'Home', href: '/' },
+      { text: 'About', href: '/about' },
+      {
+        text: 'Services',
+        submenu: [
+          { text: 'Web Development', href: '/services/web' },
+          { text: 'Mobile Development', href: '/services/mobile' },
+        ],
+      },
+      { text: 'Contact', href: '/contact' },
+    ],
+  }
+})
 
 // Mock utility function
 jest.mock('utils/utility', () => ({
