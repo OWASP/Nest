@@ -49,12 +49,6 @@ interface MockMarkdownProps {
   className?: string
 }
 
-interface MockLabelListProps {
-  labels: string[]
-  maxVisible?: number
-  className?: string
-}
-
 jest.mock('next/link', () => {
   return function MockedLink({ children, href, ...props }: MockLinkProps) {
     return (
