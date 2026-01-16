@@ -30,11 +30,11 @@ def clean_package(zappa):
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
-        with tarfile.open(full_path, "r:gz") as tf:
+        with tarfile.open(full_path, "r:gz") as tf:  # NOSONAR archive is trusted
             tf.extractall(temp_path, filter="data")
         full_path.unlink()
 
-        with tarfile.open(full_path, "w:gz") as tf:
+        with tarfile.open(full_path, "w:gz") as tf:  # NOSONAR archive is trusted
             for filepath in temp_path.rglob("*"):
                 if filepath.is_file() and not any(re.search(p, str(filepath)) for p in excludes):
                     tf.add(filepath, filepath.relative_to(temp_path))
