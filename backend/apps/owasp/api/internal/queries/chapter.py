@@ -1,16 +1,19 @@
 """OWASP chapter GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.owasp.api.internal.nodes.chapter import ChapterNode
 from apps.owasp.models.chapter import Chapter
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
 class ChapterQuery:
     """Chapter queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def chapter(self, key: str) -> ChapterNode | None:
         """Resolve chapter."""
         try:
@@ -18,7 +21,22 @@ class ChapterQuery:
         except Chapter.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=[
+            "owasp_repository__organization",
+            "owasp_repository__owner__owasp_profile",
+        ],
+        prefetch_related=[
+            "leaders__user_badges__badge",
+            "suggested_leaders__user_badges__badge",
+            "members__user_badges__badge",
+            "entity_leaders__member__user_badges__badge",
+        ],
+    )
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""
-        return Chapter.active_chapters.order_by("-created_at")[:limit]
+        return (
+            Chapter.active_chapters.order_by("-created_at")[:limit]
+            if (limit := min(limit, MAX_LIMIT)) > 0
+            else []
+        )

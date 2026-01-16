@@ -1,17 +1,42 @@
 """GraphQL queries for handling GitHub issues."""
 
 import strawberry
-from django.db.models import OuterRef, Subquery
+import strawberry_django
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
 class IssueQuery:
     """GraphQL query class for retrieving GitHub issues."""
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=[
+            "author__owasp_profile",
+            "author__user_badges__badge",
+            "level",
+            "milestone__author__owasp_profile",
+            "milestone__author__user_badges__badge",
+            "milestone__repository__organization",
+            "repository__organization",
+        ],
+        prefetch_related=[
+            "assignees__owasp_profile",
+            "assignees__user_badges__badge",
+            "labels",
+            "participant_interests__user__user_badges",
+            "pull_requests__author__user_badges__badge",
+            "pull_requests__labels",
+            "pull_requests__milestone__author__user_badges",
+            "pull_requests__milestone__repository__organization",
+            "pull_requests__repository__organization",
+        ],
+    )
     def recent_issues(
         self,
         *,
@@ -32,34 +57,29 @@ class IssueQuery:
             list[IssueNode]: List of issue nodes.
 
         """
-        queryset = Issue.objects.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).order_by(
+        queryset = Issue.objects.order_by(
             "-created_at",
         )
+        filters = {}
 
         if login:
-            queryset = queryset.filter(
-                author__login=login,
-            )
-
+            filters["author__login"] = login
         if organization:
-            queryset = queryset.filter(
-                repository__organization__login=organization,
-            )
+            filters["repository__organization__login"] = organization
+
+        queryset = queryset.filter(**filters)
 
         if distinct:
-            latest_issue_per_author = (
-                queryset.filter(author_id=OuterRef("author_id"))
+            queryset = (
+                queryset.annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        partition_by=[F("author_id")],
+                        order_by=F("created_at").desc(),
+                    )
+                )
+                .filter(rank=1)
                 .order_by("-created_at")
-                .values("id")[:1]
-            )
-            queryset = queryset.filter(
-                id__in=Subquery(latest_issue_per_author),
-            ).order_by(
-                "-created_at",
             )
 
-        return queryset[:limit]
+        return queryset[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

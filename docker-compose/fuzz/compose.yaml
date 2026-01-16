@@ -92,15 +92,29 @@ services:
   graphql:
     container_name: fuzz-nest-graphql
     build:
-      context: ../../docker/backend
-      dockerfile: Dockerfile.fuzz
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile.fuzz
     environment:
       BASE_URL: http://backend:9500
+      TEST_FILE: graphql_test.py
     depends_on:
       backend:
         condition: service_healthy
-    volumes:
-      - ../../backend/fuzzing_results:/home/owasp/fuzzing_results
+    networks:
+      - fuzz-nest-network
+
+  rest:
+    container_name: fuzz-nest-rest
+    build:
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile.fuzz
+    environment:
+      BASE_URL: http://backend:9500
+      REST_URL: http://backend:9500/api/v0
+      TEST_FILE: rest_test.py
+    depends_on:
+      backend:
+        condition: service_healthy
     networks:
       - fuzz-nest-network
 

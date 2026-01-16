@@ -1,6 +1,5 @@
 """OWASP committee GraphQL node."""
 
-import strawberry
 import strawberry_django
 
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
@@ -11,32 +10,32 @@ from apps.owasp.models.committee import Committee
 class CommitteeNode(GenericEntityNode):
     """Committee node."""
 
-    @strawberry.field
-    def contributors_count(self) -> int:
+    @strawberry_django.field
+    def contributors_count(self, root: Committee) -> int:
         """Resolve contributors count."""
-        return self.owasp_repository.contributors_count
+        return root.owasp_repository.contributors_count if root.owasp_repository else 0
 
-    @strawberry.field
-    def created_at(self) -> float:
+    @strawberry_django.field
+    def created_at(self, root: Committee) -> float:
         """Resolve created at."""
-        return self.idx_created_at
+        return root.idx_created_at
 
-    @strawberry.field
-    def forks_count(self) -> int:
+    @strawberry_django.field
+    def forks_count(self, root: Committee) -> int:
         """Resolve forks count."""
-        return self.owasp_repository.forks_count
+        return root.owasp_repository.forks_count if root.owasp_repository else 0
 
-    @strawberry.field
-    def issues_count(self) -> int:
+    @strawberry_django.field
+    def issues_count(self, root: Committee) -> int:
         """Resolve issues count."""
-        return self.owasp_repository.open_issues_count
+        return root.owasp_repository.open_issues_count if root.owasp_repository else 0
 
-    @strawberry.field
-    def repositories_count(self) -> int:
+    @strawberry_django.field
+    def repositories_count(self, root: Committee) -> int:
         """Resolve repositories count."""
         return 1
 
-    @strawberry.field
-    def stars_count(self) -> int:
+    @strawberry_django.field
+    def stars_count(self, root: Committee) -> int:
         """Resolve stars count."""
-        return self.owasp_repository.stars_count
+        return root.owasp_repository.stars_count if root.owasp_repository else 0

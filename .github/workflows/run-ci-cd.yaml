@@ -265,13 +265,11 @@ jobs:
           - 5432:5432
       cache:
         image: redis:8.0.5-alpine3.21
-        env:
-          REDIS_PASSWORD: nest-cache-e2e-password
         options: >-
-          --health-cmd="redis-cli -a $$REDIS_PASSWORD ping"
+          --health-cmd="redis-cli ping"
           --health-interval=5s
-          --health-timeout=5s
           --health-retries=5
+          --health-timeout=5s
         ports:
           - 6379:6379
     steps:
@@ -293,6 +291,8 @@ jobs:
             --env-file backend/.env.e2e.example \
             --network host \
             -e DJANGO_DB_HOST=localhost \
+            -e DJANGO_REDIS_AUTH_ENABLED=False \
+            -e DJANGO_REDIS_HOST=localhost \
             -p 9000:9000 \
             owasp/nest:test-backend-latest \
             sh -c '
@@ -384,109 +384,24 @@ jobs:
           fi
     timeout-minutes: 5
 
-  run-fuzz-tests:
-    name: Run fuzz tests
+  run-graphql-fuzz-tests:
+    name: Run GraphQL fuzz tests
     needs:
       - scan-code
       - scan-ci-dependencies
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    services:
-      db:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_DB: nest_db_fuzz
-          POSTGRES_PASSWORD: nest_user_fuzz_password
-          POSTGRES_USER: nest_user_fuzz
-        options: >-
-          --health-cmd="pg_isready -U nest_user_fuzz -d nest_db_fuzz -h localhost -p 5432"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=5
-        ports:
-          - 5432:5432
-      cache:
-        image: redis:8.0.5-alpine3.21
-        env:
-          REDIS_PASSWORD: nest-fuzz-cache-password
-        options: >-
-          --health-cmd="redis-cli -a $$REDIS_PASSWORD ping"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=5
-        ports:
-          - 6379:6379
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+    uses: ./.github/workflows/run-fuzz-tests.yaml
+    with:
+      test-file: graphql_test.py
 
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
-
-      - name: Setup Backend environment
-        uses: ./.github/workflows/setup-backend-environment
-        with:
-          db_username: nest_user_fuzz
-          db_name: nest_db_fuzz
-
-      - name: Run backend with fuzz environment variables
-        run: |
-          docker run -d --rm --name fuzz-nest-backend \
-            --env-file backend/.env.fuzz.example \
-            --network host \
-            -e DJANGO_DB_HOST=localhost \
-            -p 9500:9500 \
-            owasp/nest:test-backend-latest \
-            sh -c '
-              python manage.py migrate &&
-              gunicorn wsgi:application --bind 0.0.0.0:9500
-            '
-
-      - name: Waiting for the backend to be ready
-        run: |
-          timeout 5m bash -c '
-            until wget --spider http://localhost:9500/a; do
-              echo "Waiting for backend..."
-              sleep 5
-            done
-          '
-          echo "Backend is up!"
-
-      - name: Load Postgres data
-        env:
-          PGPASSWORD: nest_user_fuzz_password
-        run: |
-          pg_restore -h localhost -U nest_user_fuzz -d nest_db_fuzz < backend/data/nest.dump
-
-      - name: Build Fuzz-testing image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
-        with:
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:test-fuzz-backend-cache
-          cache-to: |
-            type=gha,compression=zstd
-          context: docker/backend
-          file: docker/backend/Dockerfile.fuzz
-          load: true
-          platforms: linux/amd64
-          tags: owasp/nest:test-fuzz-backend-latest
-
-      - name: Run backend fuzz tests
-        run: |
-          mkdir -p ${{ github.workspace }}/fuzzing_results &&
-          chmod -R 777 ${{ github.workspace }}/fuzzing_results &&
-          docker run -e BASE_URL=http://localhost:9500 --network host \
-          -v ${{ github.workspace }}/fuzzing_results:/home/owasp/fuzzing_results \
-          owasp/nest:test-fuzz-backend-latest
-
-      - name: Upload fuzzing results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        if: always()
-        with:
-          name: fuzzing-results
-          path: fuzzing_results/
-          retention-days: 30
+  run-rest-fuzz-tests:
+    name: Run REST fuzz tests
+    needs:
+      - scan-code
+      - scan-ci-dependencies
+    uses: ./.github/workflows/run-fuzz-tests.yaml
+    with:
+      test-file: rest_test.py
+      rest-url: http://localhost:9500/api/v0
 
   build-staging-images:
     name: Build Staging Images

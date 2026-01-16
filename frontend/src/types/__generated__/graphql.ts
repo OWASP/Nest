@@ -547,7 +547,7 @@ export type ProjectHealthMetricsFilter = {
   DISTINCT?: InputMaybe<Scalars['Boolean']['input']>;
   NOT?: InputMaybe<ProjectHealthMetricsFilter>;
   OR?: InputMaybe<ProjectHealthMetricsFilter>;
-  level?: InputMaybe<Scalars['String']['input']>;
+  level?: InputMaybe<ProjectLevel>;
   score?: InputMaybe<FloatComparisonFilterLookup>;
 };
 
@@ -607,6 +607,14 @@ export type ProjectHealthStatsNode = {
   totalForks: Scalars['Int']['output'];
   totalStars: Scalars['Int']['output'];
 };
+
+export enum ProjectLevel {
+  Flagship = 'FLAGSHIP',
+  Incubator = 'INCUBATOR',
+  Lab = 'LAB',
+  Other = 'OTHER',
+  Production = 'PRODUCTION'
+}
 
 export type ProjectNode = Node & {
   __typename?: 'ProjectNode';
@@ -675,10 +683,10 @@ export type Query = {
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
   chapter?: Maybe<ChapterNode>;
   committee?: Maybe<CommitteeNode>;
-  getMenteeDetails: MenteeNode;
+  getMenteeDetails?: Maybe<MenteeNode>;
   getMenteeModuleIssues: Array<IssueNode>;
-  getModule: ModuleNode;
-  getProgram: ProgramNode;
+  getModule?: Maybe<ModuleNode>;
+  getProgram?: Maybe<ProgramNode>;
   getProgramModules: Array<ModuleNode>;
   getProjectModules: Array<ModuleNode>;
   isMentor: Scalars['Boolean']['output'];

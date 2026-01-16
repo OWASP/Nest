@@ -21,7 +21,6 @@ class TestMilestoneQuery:
     def get_queryset(self):
         """Return a mocked queryset."""
         queryset = MagicMock()
-        queryset.select_related.return_value.prefetch_related.return_value = queryset
         queryset.filter.return_value = queryset
         queryset.order_by.return_value = queryset
         queryset.__getitem__.return_value = [Mock()]
@@ -40,9 +39,6 @@ class TestMilestoneQuery:
         with patch.object(Milestone, manager, new_callable=Mock) as mock_manager:
             mock_manager.all.return_value = get_queryset
 
-            get_queryset.select_related.return_value = get_queryset
-            get_queryset.prefetch_related.return_value = get_queryset
-
             result = MilestoneQuery().recent_milestones(
                 distinct=False,
                 limit=5,
@@ -52,8 +48,6 @@ class TestMilestoneQuery:
             )
 
             assert isinstance(result, list)
-            assert get_queryset.select_related.called
-            assert get_queryset.prefetch_related.called
 
     def test_recent_milestones_with_filters(self, get_queryset):
         """Test recent milestones with login and organization filters."""
@@ -77,7 +71,6 @@ class TestMilestoneQuery:
         with patch.object(Milestone, "open_milestones", new_callable=Mock) as mock_manager:
             base_queryset = MagicMock()
             filtered_queryset = MagicMock()
-            base_queryset.select_related.return_value.prefetch_related.return_value = base_queryset
             base_queryset.filter.return_value = filtered_queryset
             filtered_queryset.filter.return_value = filtered_queryset
             filtered_queryset.order_by.return_value = filtered_queryset
