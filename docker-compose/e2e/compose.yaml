@@ -107,6 +107,7 @@ services:
 
 networks:
   e2e-nest-network:
+
 volumes:
-  e2e-db-data:
   e2e-cache-data:
+  e2e-db-data:

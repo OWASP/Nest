@@ -122,5 +122,5 @@ networks:
   fuzz-nest-network:
 
 volumes:
-  fuzz-db-data:
   fuzz-cache-data:
+  fuzz-db-data:
