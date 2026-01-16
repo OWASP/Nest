@@ -14,7 +14,8 @@ GBP
 GFKs
 GSOC
 GTM
-Héllo Kateryna
+Héllo
+Kateryna
 NETTACKER
 NOASSERTION
 NOSONAR
