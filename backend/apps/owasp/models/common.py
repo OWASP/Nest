@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import itertools
 import logging
 import re
 from urllib.parse import urlparse
@@ -198,17 +197,23 @@ class RepositoryBasedEntityModel(models.Model):
 
         leaders = []
         for line in content.split("\n"):
-            leaders.extend(
-                [
-                    name
-                    for name in itertools.chain(
-                        *re.findall(
-                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
-                        )
-                    )
-                    if name.strip()
-                ]
+            stripped_line = line.strip()
+            names = []
+
+            bracketed_pattern = (
+                r"[-*]\s{0,3}\[\s{0,3}([^\]\(]{1,200})"
+                r"(?:\s{0,3}\([^)]{0,100}\))?\s{0,3}\]"
             )
+            names.extend(re.findall(bracketed_pattern, stripped_line))
+            names.extend(re.findall(r"\*\s{0,3}([\w\s]{1,200})", stripped_line))
+
+            cleaned_names = []
+            for raw_name in names:
+                if raw_name.strip():
+                    cleaned = re.sub(r"\s{0,3}\([^)]{0,100}\)\s{0,3}$", "", raw_name).strip()
+                    cleaned_names.append(cleaned)
+
+            leaders.extend(cleaned_names)
 
         return leaders
 
