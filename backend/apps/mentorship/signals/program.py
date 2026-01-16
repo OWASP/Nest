@@ -24,7 +24,7 @@ class ProgramPostSaveHandler:
         clear_index_cache("programs")
 
     @receiver(post_save, sender=Program)
-    def program_post_save_clear_graphql_cache(self, sender, instance, **kwargs):  # noqa: N805
+    def program_post_save_clear_graphql_cache(sender, instance, **kwargs):  # noqa: N805
         """Signal handler to clear GraphQL cache for the program.
 
         This ensures that when a program's status changes (e.g. from published to draft),
