@@ -3,7 +3,6 @@
 import logging
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
@@ -20,14 +19,14 @@ class ProgramQuery:
     """Program queries."""
 
     @strawberry.field
-    def get_program(self, program_key: str) -> ProgramNode:
+    def get_program(self, program_key: str) -> ProgramNode | None:
         """Get a program by Key."""
         try:
             program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
-        except Program.DoesNotExist as err:
+        except Program.DoesNotExist:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
-            raise ObjectDoesNotExist(msg) from err
+            return None
 
         return program
 

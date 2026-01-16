@@ -121,6 +121,9 @@ migrate:
 migrations:
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
+migrations-empty:
+	@CMD="python manage.py makemigrations --empty $(APP_NAME)" $(MAKE) exec-backend-command
+
 purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 
@@ -188,6 +191,10 @@ test-fuzz:
 	@docker volume rm -f nest-fuzz_fuzz-db-data >/dev/null 2>&1 || true
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
+	@echo "Running REST API fuzz tests..."
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db backend rest
+	@echo "Running GraphQL fuzz tests..."
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
 
