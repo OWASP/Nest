@@ -39,7 +39,7 @@ variable "frontend_port" {
 }
 
 variable "lambda_function_name" {
-  description = "The name of the Lambda function for backend routing. Used to create an alias pointing to the latest published version for SnapStart support."
+  description = "The name of the Lambda function for backend routing."
   type        = string
   default     = null
 }

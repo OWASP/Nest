@@ -19,8 +19,7 @@ def clean_package(zappa):
         print(f"Unsupported archive format: {archive_path}")
         return
 
-    excludes = zappa.zappa_settings.get(zappa.api_stage, {}).get("regex_excludes")
-    if not excludes:
+    if not (excludes := zappa.zappa_settings.get(zappa.api_stage, {}).get("regex_excludes")):
         print("No regex_excludes provided, skipping")
         return
 
@@ -29,15 +28,18 @@ def clean_package(zappa):
 
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
+        new_archive_path = temp_path / "new.tar.gz"
 
         with tarfile.open(full_path, "r:gz") as tf:  # NOSONAR archive is trusted
             tf.extractall(temp_path, filter="data")
-        full_path.unlink()
 
-        with tarfile.open(full_path, "w:gz") as tf:  # NOSONAR archive is trusted
+        with tarfile.open(new_archive_path, "w:gz") as tf:  # NOSONAR archive is trusted
             for filepath in temp_path.rglob("*"):
                 if filepath.is_file() and not any(re.search(p, str(filepath)) for p in excludes):
                     tf.add(filepath, filepath.relative_to(temp_path))
+
+        full_path.unlink()
+        new_archive_path.rename(full_path)
 
     print(f"New package size: {full_path.stat().st_size / 1024 / 1024:.2f} MB")
 
@@ -48,10 +50,13 @@ def update_alias(zappa):
 
     client = boto3.client("lambda")
     versions = client.list_versions_by_function(FunctionName=zappa.lambda_name)["Versions"]
-    latest = [v["Version"] for v in versions if v["Version"] != "$LATEST"][-1]
 
-    client.update_alias(FunctionName=zappa.lambda_name, Name="live", FunctionVersion=latest)
-    print(f"Alias 'live' now points to version {latest}")
+    if not (published := [v["Version"] for v in versions if v["Version"] != "$LATEST"]):
+        print("No published versions found, skipping alias update")
+        return
+
+    client.update_alias(FunctionName=zappa.lambda_name, Name="live", FunctionVersion=published[-1])
+    print(f"Alias 'live' now points to version {published[-1]}")
 
 
 def cleanup_versions(zappa, keep=5):

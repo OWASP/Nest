@@ -27,7 +27,6 @@
     "memory_size": 3008,
     "project_name": "nest-backend",
     "regex_excludes": [
-      "/_distutils_hack/",
       "/boto3/",
       "/boto3-",
       "/botocore/",
