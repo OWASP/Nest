@@ -1,17 +1,27 @@
 """GraphQL queries for handling OWASP releases."""
 
 import strawberry
-from django.db.models import OuterRef, Subquery
+import strawberry_django
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.models.release import Release
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
 class ReleaseQuery:
     """GraphQL query class for retrieving recent GitHub releases."""
 
-    @strawberry.field
+    @strawberry_django.field(
+        select_related=[
+            "author__owasp_profile",
+            "author__user_badges__badge",
+            "repository__organization",
+        ]
+    )
     def recent_releases(
         self,
         *,
@@ -39,11 +49,7 @@ class ReleaseQuery:
         ).order_by("-published_at")
 
         if login:
-            queryset = queryset.select_related(
-                "author",
-                "repository",
-                "repository__organization",
-            ).filter(
+            queryset = queryset.filter(
                 author__login=login,
             )
 
@@ -53,15 +59,16 @@ class ReleaseQuery:
             )
 
         if distinct:
-            latest_release_per_author = (
-                queryset.filter(author_id=OuterRef("author_id"))
+            queryset = (
+                queryset.annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        partition_by=[F("author_id")],
+                        order_by=F("published_at").desc(),
+                    )
+                )
+                .filter(rank=1)
                 .order_by("-published_at")
-                .values("id")[:1]
-            )
-            queryset = queryset.filter(
-                id__in=Subquery(latest_release_per_author),
-            ).order_by(
-                "-published_at",
             )
 
-        return queryset[:limit]
+        return queryset[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []

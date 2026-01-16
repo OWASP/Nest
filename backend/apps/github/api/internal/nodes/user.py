@@ -1,6 +1,5 @@
 """GitHub user GraphQL node."""
 
-import strawberry
 import strawberry_django
 
 from apps.github.models.user import User
@@ -28,21 +27,19 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 class UserNode:
     """GitHub user node."""
 
-    @strawberry.field
-    def badge_count(self) -> int:
+    @strawberry_django.field(prefetch_related=["user_badges"])
+    def badge_count(self, root: User) -> int:
         """Resolve badge count."""
-        return self.user_badges.filter(is_active=True).count()
+        return root.user_badges.filter(is_active=True).count()
 
-    @strawberry.field
-    def badges(self) -> list[BadgeNode]:
+    @strawberry_django.field(prefetch_related=["user_badges__badge"])
+    def badges(self, root: User) -> list[BadgeNode]:
         """Return user badges."""
         user_badges = (
-            self.user_badges.filter(
+            root.user_badges.filter(
                 is_active=True,
             )
-            .select_related(
-                "badge",
-            )
+            .select_related("badge")
             .order_by(
                 "badge__weight",
                 "badge__name",
@@ -50,62 +47,62 @@ class UserNode:
         )
         return [user_badge.badge for user_badge in user_badges]
 
-    @strawberry.field
-    def created_at(self) -> float:
+    @strawberry_django.field
+    def created_at(self, root: User) -> float:
         """Resolve created at."""
-        return self.idx_created_at
+        return root.idx_created_at
 
-    @strawberry.field
-    def first_owasp_contribution_at(self) -> float | None:
+    @strawberry_django.field
+    def first_owasp_contribution_at(self, root: User) -> float | None:
         """Resolve first OWASP contribution date."""
-        if hasattr(self, "owasp_profile") and self.owasp_profile.first_contribution_at:
-            return self.owasp_profile.first_contribution_at.timestamp()
+        if hasattr(root, "owasp_profile") and root.owasp_profile.first_contribution_at:
+            return root.owasp_profile.first_contribution_at.timestamp()
         return None
 
-    @strawberry.field
-    def is_owasp_board_member(self) -> bool:
+    @strawberry_django.field
+    def is_owasp_board_member(self, root: User) -> bool:
         """Resolve if member is currently on OWASP Board of Directors."""
-        if hasattr(self, "owasp_profile"):
-            return self.owasp_profile.is_owasp_board_member
+        if hasattr(root, "owasp_profile"):
+            return root.owasp_profile.is_owasp_board_member
         return False
 
-    @strawberry.field
-    def is_former_owasp_staff(self) -> bool:
+    @strawberry_django.field
+    def is_former_owasp_staff(self, root: User) -> bool:
         """Resolve if member is a former OWASP staff member."""
-        if hasattr(self, "owasp_profile"):
-            return self.owasp_profile.is_former_owasp_staff
+        if hasattr(root, "owasp_profile"):
+            return root.owasp_profile.is_former_owasp_staff
         return False
 
-    @strawberry.field
-    def is_gsoc_mentor(self) -> bool:
+    @strawberry_django.field
+    def is_gsoc_mentor(self, root: User) -> bool:
         """Resolve if member is a Google Summer of Code mentor."""
-        if hasattr(self, "owasp_profile"):
-            return self.owasp_profile.is_gsoc_mentor
+        if hasattr(root, "owasp_profile"):
+            return root.owasp_profile.is_gsoc_mentor
         return False
 
-    @strawberry.field
-    def issues_count(self) -> int:
+    @strawberry_django.field
+    def issues_count(self, root: User) -> int:
         """Resolve issues count."""
-        return self.idx_issues_count
+        return root.idx_issues_count
 
-    @strawberry.field
-    def linkedin_page_id(self) -> str:
+    @strawberry_django.field
+    def linkedin_page_id(self, root: User) -> str:
         """Resolve LinkedIn page ID."""
-        if hasattr(self, "owasp_profile") and self.owasp_profile.linkedin_page_id:
-            return self.owasp_profile.linkedin_page_id
+        if hasattr(root, "owasp_profile") and root.owasp_profile.linkedin_page_id:
+            return root.owasp_profile.linkedin_page_id
         return ""
 
-    @strawberry.field
-    def releases_count(self) -> int:
+    @strawberry_django.field
+    def releases_count(self, root: User) -> int:
         """Resolve releases count."""
-        return self.idx_releases_count
+        return root.idx_releases_count
 
-    @strawberry.field
-    def updated_at(self) -> float:
+    @strawberry_django.field
+    def updated_at(self, root: User) -> float:
         """Resolve updated at."""
-        return self.idx_updated_at
+        return root.idx_updated_at
 
-    @strawberry.field
-    def url(self) -> str:
+    @strawberry_django.field
+    def url(self, root: User) -> str:
         """Resolve URL."""
-        return self.url
+        return root.url

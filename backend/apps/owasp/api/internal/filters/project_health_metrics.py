@@ -17,6 +17,6 @@ class ProjectHealthMetricsFilter:
     @strawberry_django.filter_field
     # prefix is required for strawberry to work with nested filters
     # Q is the return type for the filter
-    def level(self, value: str, prefix: str):
+    def level(self, value: ProjectLevel, prefix: str):
         """Filter by project level."""
         return Q(project__level=ProjectLevel(value)) if value else Q()

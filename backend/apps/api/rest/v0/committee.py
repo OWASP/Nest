@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.owasp.models.committee import Committee as CommitteeModel
 
 router = RouterPaginated(tags=["Committees"])
@@ -70,6 +71,7 @@ def list_committees(
     description="Retrieve committee details.",
     operation_id="get_committee",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: CommitteeError,
         HTTPStatus.OK: CommitteeDetail,
     },

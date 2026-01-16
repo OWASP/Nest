@@ -11,6 +11,11 @@ class Snapshot(models.Model):
         db_table = "owasp_snapshots"
         verbose_name_plural = "Snapshots"
 
+        indexes = [
+            models.Index(fields=["-created_at"], name="owasp_snapshot_created_at_idx"),
+            models.Index(fields=["key", "status"], name="owasp_snapshot_key_status_idx"),
+        ]
+
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
         PROCESSING = "processing", "Processing"
