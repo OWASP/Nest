@@ -43,7 +43,7 @@ def clean_package(zappa):
 
 
 def update_alias(zappa):
-    """Update Lambda alias."""
+    """Update Lambda alias to latest published version."""
     print("Updating Lambda alias...")
 
     client = boto3.client("lambda")
@@ -52,3 +52,28 @@ def update_alias(zappa):
 
     client.update_alias(FunctionName=zappa.lambda_name, Name="live", FunctionVersion=latest)
     print(f"Alias 'live' now points to version {latest}")
+
+
+def cleanup_versions(zappa, keep=5):
+    """Delete old Lambda versions."""
+    print("Cleaning up old Lambda versions...")
+
+    client = boto3.client("lambda")
+    versions = client.list_versions_by_function(FunctionName=zappa.lambda_name)["Versions"]
+    published = [v for v in versions if v["Version"] != "$LATEST"]
+
+    if len(published) <= keep:
+        print(f"Only {len(published)} versions exist, nothing to delete")
+        return
+
+    to_delete = published[:-keep]
+    for version in to_delete:
+        client.delete_function(FunctionName=version["FunctionArn"])
+
+    print(f"Deleted {len(to_delete)} old versions, kept {keep}")
+
+
+def post(zappa):
+    """Post deploy callback."""
+    update_alias(zappa)
+    cleanup_versions(zappa)

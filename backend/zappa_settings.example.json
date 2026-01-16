@@ -6,7 +6,7 @@
       "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/owasp-nest/staging"
     },
     "callbacks": {
-      "post": "zappa_callback.update_alias",
+      "post": "zappa_callback.post",
       "zip": "zappa_callback.clean_package"
     },
     "django_settings": "settings.staging",
