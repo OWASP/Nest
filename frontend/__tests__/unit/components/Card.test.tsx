@@ -49,6 +49,12 @@ interface MockMarkdownProps {
   className?: string
 }
 
+interface MockLabelListProps {
+  labels: string[]
+  maxVisible?: number
+  className?: string
+}
+
 jest.mock('next/link', () => {
   return function MockedLink({ children, href, ...props }: MockLinkProps) {
     return (
@@ -174,6 +180,28 @@ jest.mock('components/MarkdownWrapper', () => {
         {content}
       </div>
     )
+  }
+})
+
+jest.mock('components/LabelList', () => {
+  return {
+    LabelList: ({ labels, maxVisible = 5, className }: MockLabelListProps) => {
+      if (!labels || labels.length === 0) return null
+      const visibleLabels = labels.slice(0, maxVisible)
+      const remainingCount = labels.length - maxVisible
+      return (
+        <div data-testid="label-list" className={className}>
+          {visibleLabels.map((label, index) => (
+            <span key={`${label}-${index}`} data-testid="label">
+              {label}
+            </span>
+          ))}
+          {remainingCount > 0 && (
+            <span data-testid="label-more">+{remainingCount} more</span>
+          )}
+        </div>
+      )
+    },
   }
 })
 
