@@ -165,8 +165,6 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
     cd ../infrastructure/staging/
     terraform apply
     ```
-    > [!NOTE]
-    > It's necessary to run `terraform apply` after each `zappa update` to update Lambda function alias.
 
 ## Populate ECR Repositories
 ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
