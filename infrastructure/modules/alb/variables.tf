@@ -38,14 +38,8 @@ variable "frontend_port" {
   default     = 3000
 }
 
-variable "lambda_arn" {
-  description = "The ARN of the Lambda function for backend routing (null to skip Lambda routing)."
-  type        = string
-  default     = null
-}
-
 variable "lambda_function_name" {
-  description = "The name of the Lambda function for backend routing."
+  description = "The name of the Lambda function for backend routing. Used to create an alias pointing to the latest published version for SnapStart support."
   type        = string
   default     = null
 }

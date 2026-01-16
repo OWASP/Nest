@@ -156,7 +156,6 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
   - Update `terraform.tfvars` with the Lambda details:
 
     ```hcl
-    lambda_arn           = "arn:aws:lambda:us-east-2:000000000000:function:nest-backend-staging"
     lambda_function_name = "nest-backend-staging"
     ```
 
@@ -166,6 +165,8 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
     cd ../infrastructure/staging/
     terraform apply
     ```
+    > [!NOTE]
+    > It's necessary to run `terraform apply` after each `zappa update` to update Lambda function alias.
 
 ## Populate ECR Repositories
 ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
@@ -338,9 +339,3 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
-
-## Known Issues
-There's a known issue with Zappa removing permissions and disconnecting the externally managed
-API Gateway on each `update` or `deploy` action.
-The temporary fix is to run `terraform apply` right after these actions.
-Reference: https://github.com/zappa/Zappa/issues/939
