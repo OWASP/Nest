@@ -82,7 +82,14 @@ describe('EntityActions', () => {
 
   describe('Module Actions - View Issues', () => {
     it('navigates to view issues page when View Issues is clicked with moduleKey', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -95,7 +102,7 @@ describe('EntityActions', () => {
     })
 
     it('does not navigate when moduleKey is missing for view issues action', () => {
-      render(<EntityActions type="module" programKey="test-program" />)
+      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
@@ -106,7 +113,14 @@ describe('EntityActions', () => {
     })
 
     it('closes dropdown after clicking View Issues', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
       const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')

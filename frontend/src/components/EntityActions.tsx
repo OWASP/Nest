@@ -160,7 +160,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
         ]
       : [
           { key: 'edit_module', label: 'Edit' },
-          { key: 'view_issues', label: 'View Issues' },
+          ...(isAdmin ? [{ key: 'view_issues', label: 'View Issues' }] : []),
           ...(isAdmin
             ? [{ key: 'delete_module', label: 'Delete', className: 'text-red-500' }]
             : []),
