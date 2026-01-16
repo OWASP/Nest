@@ -3,6 +3,7 @@
 # ruff: noqa: T201
 
 import re
+import shutil
 import tarfile
 import tempfile
 from pathlib import Path
@@ -35,11 +36,13 @@ def clean_package(zappa):
 
         with tarfile.open(new_archive_path, "w:gz") as tf:  # NOSONAR archive is trusted
             for filepath in temp_path.rglob("*"):
+                if filepath == new_archive_path:
+                    continue
                 if filepath.is_file() and not any(re.search(p, str(filepath)) for p in excludes):
                     tf.add(filepath, filepath.relative_to(temp_path))
 
         full_path.unlink()
-        new_archive_path.rename(full_path)
+        shutil.move(new_archive_path, full_path)
 
     print(f"New package size: {full_path.stat().st_size / 1024 / 1024:.2f} MB")
 
