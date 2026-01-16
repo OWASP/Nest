@@ -49,6 +49,12 @@ interface MockMarkdownProps {
   className?: string
 }
 
+interface MockLabelListProps {
+  labels: string[]
+  maxVisible?: number
+  className?: string
+}
+
 jest.mock('next/link', () => {
   return function MockedLink({ children, href, ...props }: MockLinkProps) {
     return (
@@ -174,6 +180,26 @@ jest.mock('components/MarkdownWrapper', () => {
         {content}
       </div>
     )
+  }
+})
+
+jest.mock('components/LabelList', () => {
+  return {
+    LabelList: ({ labels, maxVisible = 5, className }: MockLabelListProps) => {
+      if (!labels || labels.length === 0) return null
+      const visibleLabels = labels.slice(0, maxVisible)
+      const remainingCount = labels.length - maxVisible
+      return (
+        <div data-testid="label-list" className={className}>
+          {visibleLabels.map((label, index) => (
+            <span key={`${label}-${index}`} data-testid="label">
+              {label}
+            </span>
+          ))}
+          {remainingCount > 0 && <span data-testid="label-more">+{remainingCount} more</span>}
+        </div>
+      )
+    },
   }
 })
 
@@ -556,5 +582,56 @@ describe('Card', () => {
     expect(screen.getByRole('link', { name: 'Full Stack Project' })).toBeInTheDocument()
     expect(screen.getByTestId('github-icon')).toBeInTheDocument()
     expect(screen.getByTestId('contributor-avatar')).toBeInTheDocument()
+  })
+  it('renders labels when provided', () => {
+    const propsWithLabels = {
+      ...baseProps,
+      labels: ['good first issue', 'help wanted'],
+    }
+    render(<Card {...propsWithLabels} />)
+    expect(screen.getByTestId('label-list')).toBeInTheDocument()
+    expect(screen.getByText('good first issue')).toBeInTheDocument()
+    expect(screen.getByText('help wanted')).toBeInTheDocument()
+    expect(screen.getAllByTestId('label')).toHaveLength(2)
+  })
+
+  it('does not render labels section when labels are not provided', () => {
+    render(<Card {...baseProps} />)
+    expect(screen.queryByTestId('label-list')).not.toBeInTheDocument()
+  })
+
+  it('displays only first 5 labels when more than 5 labels are provided', () => {
+    const propsWithManyLabels = {
+      ...baseProps,
+      labels: ['label1', 'label2', 'label3', 'label4', 'label5', 'label6', 'label7'],
+    }
+    render(<Card {...propsWithManyLabels} />)
+    expect(screen.getByTestId('label-list')).toBeInTheDocument()
+    expect(screen.getByText('label1')).toBeInTheDocument()
+    expect(screen.getByText('label2')).toBeInTheDocument()
+    expect(screen.getByText('label3')).toBeInTheDocument()
+    expect(screen.getByText('label4')).toBeInTheDocument()
+    expect(screen.getByText('label5')).toBeInTheDocument()
+    expect(screen.getByText('+2 more')).toBeInTheDocument()
+
+    expect(screen.queryByText('label6')).not.toBeInTheDocument()
+    expect(screen.queryByText('label7')).not.toBeInTheDocument()
+    expect(screen.getAllByTestId('label')).toHaveLength(5)
+  })
+
+  it('displays all labels when 5 or fewer labels are provided', () => {
+    const propsWithFiveLabels = {
+      ...baseProps,
+      labels: ['label1', 'label2', 'label3', 'label4', 'label5'],
+    }
+    render(<Card {...propsWithFiveLabels} />)
+    expect(screen.getByTestId('label-list')).toBeInTheDocument()
+    expect(screen.getByText('label1')).toBeInTheDocument()
+    expect(screen.getByText('label2')).toBeInTheDocument()
+    expect(screen.getByText('label3')).toBeInTheDocument()
+    expect(screen.getByText('label4')).toBeInTheDocument()
+    expect(screen.getByText('label5')).toBeInTheDocument()
+    expect(screen.queryByTestId('label-more')).not.toBeInTheDocument()
+    expect(screen.getAllByTestId('label')).toHaveLength(5)
   })
 })
