@@ -70,10 +70,10 @@ class ProjectQuery:
             "owasp_repository__owner__user_badges__badge",
         ],
         prefetch_related=[
+            "entity_leaders__member",
             "organizations",
             "owners",
             "repositories__organization",
-            "entity_leaders__member",
         ],
     )
     def search_projects(self, query: str) -> list[ProjectNode]:

@@ -38,4 +38,4 @@ class PullRequestNode(strawberry.relay.Node):
     @strawberry_django.field
     def url(self, root: PullRequest) -> str:
         """Resolve URL."""
-        return str(root.url) if root.url else ""
+        return root.url or ""

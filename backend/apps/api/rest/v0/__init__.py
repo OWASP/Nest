@@ -69,7 +69,6 @@ elif settings.IS_E2E_ENVIRONMENT:
         ],
         "throttle": [],
     }
-
 elif settings.IS_FUZZ_ENVIRONMENT:
     api_settings_customization = {
         "auth": None,

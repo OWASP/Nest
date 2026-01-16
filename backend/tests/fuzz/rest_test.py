@@ -5,16 +5,13 @@ import os
 
 import schemathesis
 
-CSRF_TOKEN = os.getenv("CSRF_TOKEN")
-REST_URL = os.getenv("REST_URL")
-
-if not CSRF_TOKEN or not REST_URL:
-    message = "CSRF_TOKEN and REST_URL must be set in the environment."
-    raise OSError(message)
+if not (REST_URL := os.getenv("REST_URL")) or not (CSRF_TOKEN := os.getenv("CSRF_TOKEN")):
+    message = "REST_URL and CSRF_TOKEN must be set in the environment."
+    raise ValueError(message)
 
 HEADERS = {
-    "X-CSRFToken": CSRF_TOKEN,
     "Cookie": f"csrftoken={CSRF_TOKEN}",
+    "X-CSRFToken": CSRF_TOKEN,
 }
 
 logger = logging.getLogger(__name__)
@@ -22,7 +19,7 @@ schema = schemathesis.openapi.from_url(
     f"{REST_URL}/openapi.json",
     headers=HEADERS,
     timeout=30,
-    wait_for_schema=10.0,
+    wait_for_schema=10,
 )
 
 

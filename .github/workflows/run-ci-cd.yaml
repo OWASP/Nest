@@ -1,4 +1,4 @@
-name: Run CI/CD
+﻿name: Run CI/CD
 
 on:
   merge_group:
@@ -266,8 +266,8 @@ jobs:
         options: >-
           --health-cmd="redis-cli ping"
           --health-interval=5s
-          --health-timeout=5s
           --health-retries=5
+          --health-timeout=5s
         ports:
           - 6379:6379
     steps:
@@ -289,8 +289,8 @@ jobs:
             --env-file backend/.env.e2e.example \
             --network host \
             -e DJANGO_DB_HOST=localhost \
-            -e DJANGO_REDIS_HOST=localhost \
             -e DJANGO_REDIS_AUTH_ENABLED=False \
+            -e DJANGO_REDIS_HOST=localhost \
             -p 9000:9000 \
             owasp/nest:test-backend-latest \
             sh -c '

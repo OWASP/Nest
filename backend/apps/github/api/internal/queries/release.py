@@ -18,8 +18,8 @@ class ReleaseQuery:
     @strawberry_django.field(
         select_related=[
             "author__owasp_profile",
-            "repository__organization",
             "author__user_badges__badge",
+            "repository__organization",
         ]
     )
     def recent_releases(

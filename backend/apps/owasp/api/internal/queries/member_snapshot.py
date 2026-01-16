@@ -62,13 +62,14 @@ class MemberSnapshotQuery:
             List of MemberSnapshotNode objects
 
         """
-        query = MemberSnapshot.objects.all().select_related("github_user")
+        snapshots = MemberSnapshot.objects.all().select_related("github_user")
 
         if user_login:
             try:
-                user = User.objects.get(login=user_login)
-                query = query.filter(github_user=user)
+                snapshots = snapshots.filter(github_user=User.objects.get(login=user_login))
             except User.DoesNotExist:
                 return []
 
-        return query.order_by("-start_at")[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []
+        return (
+            snapshots.order_by("-start_at")[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []
+        )

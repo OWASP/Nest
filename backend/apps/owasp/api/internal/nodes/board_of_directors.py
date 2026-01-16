@@ -10,9 +10,9 @@ from apps.owasp.models.board_of_directors import BoardOfDirectors
 @strawberry_django.type(
     BoardOfDirectors,
     fields=[
-        "year",
         "created_at",
         "updated_at",
+        "year",
     ],
 )
 class BoardOfDirectorsNode(strawberry.relay.Node):

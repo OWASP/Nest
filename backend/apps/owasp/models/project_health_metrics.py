@@ -170,16 +170,14 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             QuerySet[ProjectHealthMetrics]: QuerySet of project health metrics.
 
         """
-        return (
-            # To have a queryset that supports further filtering/ordering,
-            # we use a subquery to get the latest metrics per project
-            ProjectHealthMetrics.objects.filter(
-                id__in=ProjectHealthMetrics.objects.filter(project__is_active=True)
-                .select_related("project")
-                .order_by("project_id", "-nest_created_at")
-                .distinct("project_id")
-                .values_list("id", flat=True)
-            )
+        # To have a queryset that supports further filtering/ordering,
+        # we use a subquery to get the latest metrics per project.
+        return ProjectHealthMetrics.objects.filter(
+            id__in=ProjectHealthMetrics.objects.filter(project__is_active=True)
+            .select_related("project")
+            .order_by("project_id", "-nest_created_at")
+            .distinct("project_id")
+            .values_list("id", flat=True)
         )
 
     @staticmethod
@@ -228,6 +226,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         for entry in monthly_overall_metrics:
             months.append(entry["month"])
             scores.append(entry["score"])
+
         return ProjectHealthStatsNode(
             average_score=stats["average_score"],
             # We use all metrics instead of latest metrics to get the monthly trend

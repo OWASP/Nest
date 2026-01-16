@@ -202,14 +202,14 @@ class Project(
                 repository__in=self.repositories.all(),
             )
             .select_related(
-                "repository",
                 "author",
                 "level",
                 "milestone",
+                "repository",
             )
             .prefetch_related(
-                "labels",
                 "assignees",
+                "labels",
             )
         )
 
@@ -264,8 +264,16 @@ class Project(
             PullRequest.objects.filter(
                 repository__in=self.repositories.all(),
             )
-            .select_related("author", "repository", "repository__organization", "milestone")
-            .prefetch_related("labels", "assignees")
+            .select_related(
+                "author",
+                "milestone",
+                "repository__organization",
+                "repository",
+            )
+            .prefetch_related(
+                "assignees",
+                "labels",
+            )
         )
 
     @property
@@ -287,7 +295,11 @@ class Project(
             is_draft=False,
             published_at__isnull=False,
             repository__in=self.repositories.all(),
-        ).select_related("author", "repository", "repository__organization")
+        ).select_related(
+            "author",
+            "repository",
+            "repository__organization",
+        )
 
     @property
     def recent_milestones(self):
@@ -297,8 +309,8 @@ class Project(
                 repository__in=self.repositories.all(),
             )
             .select_related(
-                "repository",
                 "author",
+                "repository",
             )
             .prefetch_related(
                 "labels",

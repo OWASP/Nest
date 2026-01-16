@@ -85,9 +85,7 @@ class MilestoneQuery:
             )
 
         return (
-            milestones.order_by(
-                "-created_at",
-            )[:limit]
+            milestones.order_by("-created_at")[:limit]
             if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )

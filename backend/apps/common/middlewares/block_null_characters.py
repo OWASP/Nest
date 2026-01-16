@@ -36,7 +36,7 @@ class BlockNullCharactersMiddleware:
             return JsonResponse({"message": message, "errors": {}}, status=HTTPStatus.BAD_REQUEST)
 
         content_length = int(request.META.get("CONTENT_LENGTH", 0) or 0)
-        if content_length > 0 and (b"\x00" in request.body or b"\\u0000" in request.body):
+        if content_length and (b"\x00" in request.body or b"\\u0000" in request.body):
             message = "Request contains null characters in body which are not allowed."
             logger.warning(message)
             return JsonResponse({"message": message, "errors": {}}, status=HTTPStatus.BAD_REQUEST)

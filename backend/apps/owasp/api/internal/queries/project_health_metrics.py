@@ -47,10 +47,12 @@ class ProjectHealthMetricsQuery:
             if pagination.offset < 0:
                 return []
             pagination.offset = min(pagination.offset, MAX_OFFSET)
+
             if pagination.limit is not None and pagination.limit != UNSET:
                 if pagination.limit <= 0:
                     return []
                 pagination.limit = min(pagination.limit, MAX_LIMIT)
+
         return ProjectHealthMetrics.get_latest_health_metrics()
 
     @strawberry_django.field(

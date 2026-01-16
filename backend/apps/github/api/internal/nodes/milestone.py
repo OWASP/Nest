@@ -36,10 +36,11 @@ class MilestoneNode(strawberry.relay.Node):
     @strawberry_django.field
     def progress(self, root: Milestone) -> float:
         """Resolve milestone progress."""
-        total_issues_count = root.closed_issues_count + root.open_issues_count
-        if not total_issues_count:
-            return 0.0
-        return round((root.closed_issues_count / total_issues_count) * 100, 2)
+        return (
+            round((root.closed_issues_count / total_issues_count) * 100, 2)
+            if (total_issues_count := root.closed_issues_count + root.open_issues_count)
+            else 0.0
+        )
 
     @strawberry_django.field(select_related=["repository"])
     def repository_name(self, root: Milestone) -> str | None:

@@ -14,13 +14,13 @@ class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
             field.name for field in BoardOfDirectorsNode.__strawberry_definition__.fields
         }
         expected_field_names = {
+            "_id",
             "candidates",
             "created_at",
             "members",
             "owasp_url",
             "updated_at",
             "year",
-            "_id",
         }
         assert field_names == expected_field_names
 

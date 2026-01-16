@@ -22,8 +22,8 @@ from apps.github.models.issue import Issue
 class IssueNode(strawberry.relay.Node):
     """GitHub issue node."""
 
-    author: UserNode | None = strawberry_django.field()
     assignees: list[UserNode] = strawberry_django.field()
+    author: UserNode | None = strawberry_django.field()
     pull_requests: list[PullRequestNode] = strawberry_django.field()
 
     @strawberry_django.field(select_related=["repository__organization", "repository"])

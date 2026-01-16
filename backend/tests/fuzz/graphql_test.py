@@ -7,15 +7,13 @@ from contextlib import suppress
 import schemathesis
 from schemathesis.graphql.checks import GraphQLClientError
 
-CSRF_TOKEN = os.getenv("CSRF_TOKEN")
-BASE_URL = os.getenv("BASE_URL")
-if not CSRF_TOKEN or not BASE_URL:
-    message = "CSRF_TOKEN and BASE_URL must be set in the environment."
-    raise OSError(message)
+if not (BASE_URL := os.getenv("BASE_URL")) or not (CSRF_TOKEN := os.getenv("CSRF_TOKEN")):
+    message = "BASE_URL and CSRF_TOKEN must be set in the environment."
+    raise ValueError(message)
 
 HEADERS = {
-    "X-CSRFToken": CSRF_TOKEN,
     "Cookie": f"csrftoken={CSRF_TOKEN}",
+    "X-CSRFToken": CSRF_TOKEN,
 }
 
 logger = logging.getLogger(__name__)
@@ -23,7 +21,7 @@ schema = schemathesis.graphql.from_url(
     f"{BASE_URL}/graphql/",
     headers=HEADERS,
     timeout=30,
-    wait_for_schema=10.0,
+    wait_for_schema=10,
 )
 
 

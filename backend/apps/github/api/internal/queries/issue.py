@@ -19,22 +19,22 @@ class IssueQuery:
         select_related=[
             "author__owasp_profile",
             "author__user_badges__badge",
-            "repository__organization",
+            "level",
             "milestone__author__owasp_profile",
             "milestone__author__user_badges__badge",
             "milestone__repository__organization",
-            "level",
+            "repository__organization",
         ],
         prefetch_related=[
-            "labels",
             "assignees__owasp_profile",
             "assignees__user_badges__badge",
-            "pull_requests__repository__organization",
+            "labels",
+            "participant_interests__user__user_badges",
             "pull_requests__author__user_badges__badge",
+            "pull_requests__labels",
             "pull_requests__milestone__author__user_badges",
             "pull_requests__milestone__repository__organization",
-            "pull_requests__labels",
-            "participant_interests__user__user_badges",
+            "pull_requests__repository__organization",
         ],
     )
     def recent_issues(
