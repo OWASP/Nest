@@ -37,6 +37,7 @@ backend/*nest-backend-dev*.zip
 backend/*nest-backend-staging*.tar.gz
 backend/*nest-backend-staging*.zip
 backend/data/backup*
+backend/generated_videos/
 backend/staticfiles
 backend/zappa_settings.json
 design/

@@ -104,7 +104,7 @@ export function useSearchPage<T>({
 
         if ('hits' in response) {
           setItems(response.hits)
-          setTotalPages(response.totalPages as number)
+          setTotalPages(response.totalPages)
         } else {
           handleAppError(response)
         }

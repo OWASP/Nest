@@ -1,6 +1,5 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import path from 'path'
+import path, { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
@@ -124,6 +123,7 @@ const eslintConfig = [
       'react-hooks/rules-of-hooks': 'error',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
+      'import/no-duplicates': ['error', { considerQueryString: true }],
       'import/order': [
         'warn',
         {

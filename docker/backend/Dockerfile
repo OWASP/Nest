@@ -33,7 +33,7 @@ USER owasp
 
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry install --no-root --without dev --without test
+    poetry install --no-root --without dev --without test --without video
 
 COPY apps apps
 COPY Makefile entrypoint.sh manage.py wsgi.py ./

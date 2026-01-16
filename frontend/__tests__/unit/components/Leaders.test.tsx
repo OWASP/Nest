@@ -1,5 +1,5 @@
+import { mockProjectDetailsData } from '@mockData/mockProjectDetailsData'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { useRouter } from 'next/navigation'
 import Leaders from 'components/Leaders'
 
