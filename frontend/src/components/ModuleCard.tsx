@@ -75,13 +75,11 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
   const mentorsWithAvatars = mentors.filter((m) => m?.avatarUrl)
   const menteesWithAvatars = mentees.filter((m) => m?.avatarUrl)
 
-  const hasContributors = mentorsWithAvatars.length > 0 || menteesWithAvatars.length > 0
-  const isAdminView = pathname?.startsWith('/my/mentorship')
   const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
   const moduleKey = module.key || module.id
 
   const getMenteeUrl = (login: string) => {
-    if (isAdminView) {
+    if (pathname?.startsWith('/my/mentorship')) {
       return `/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${login}`
     }
     return `/members/${login}`
@@ -114,83 +112,79 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
         value={getSimpleDuration(module.startedAt, module.endedAt)}
       />
 
-      {
-        hasContributors && (
-          <div className="mt-auto flex w-full gap-4">
-            {mentorsWithAvatars.length > 0 && (
-              <div className="flex flex-1 flex-col gap-2">
-                <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
-                  Mentors
-                </span>
-                <div className="flex flex-wrap gap-1">
-                  {mentorsWithAvatars.slice(0, 4).map((contributor) => (
-                    <Link
-                      key={contributor.login}
-                      href={`/members/${contributor.login}`}
-                      className="transition-opacity hover:opacity-80"
-                    >
-                      <Image
-                        alt={contributor.name || contributor.login}
-                        className="rounded-full border-1 border-gray-200 dark:border-gray-700"
-                        height={24}
-                        src={getAvatarUrlWithSize(contributor.avatarUrl)}
-                        title={contributor.name || contributor.login}
-                        width={24}
-                      />
-                    </Link>
-                  ))}
-                  {mentorsWithAvatars.length > 4 && (
-                    <span className="self-center text-xs font-medium text-gray-400">
-                      +{mentorsWithAvatars.length - 4}
-                    </span>
-                  )}
-                </div>
+      {(mentorsWithAvatars.length > 0 || menteesWithAvatars.length > 0) && (
+        <div className="mt-auto flex w-full gap-4">
+          {mentorsWithAvatars.length > 0 && (
+            <div className="flex flex-1 flex-col gap-2">
+              <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
+                Mentors
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {mentorsWithAvatars.slice(0, 4).map((contributor) => (
+                  <Link
+                    key={contributor.login}
+                    href={`/members/${contributor.login}`}
+                    className="transition-opacity hover:opacity-80"
+                  >
+                    <Image
+                      alt={contributor.name || contributor.login}
+                      className="rounded-full border-1 border-gray-200 dark:border-gray-700"
+                      height={24}
+                      src={getAvatarUrlWithSize(contributor.avatarUrl)}
+                      title={contributor.name || contributor.login}
+                      width={24}
+                    />
+                  </Link>
+                ))}
+                {mentorsWithAvatars.length > 4 && (
+                  <span className="self-center text-xs font-medium text-gray-400">
+                    +{mentorsWithAvatars.length - 4}
+                  </span>
+                )}
               </div>
-            )}
-            {menteesWithAvatars.length > 0 && (
-              <div
-                className={`flex flex-1 flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}
-              >
-                <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
-                  Mentees
-                </span>
-                <div className="flex flex-wrap gap-1">
-                  {menteesWithAvatars.slice(0, 4).map((contributor) => (
-                    <Link
-                      key={contributor.login}
-                      href={getMenteeUrl(contributor.login)}
-                      className="transition-opacity hover:opacity-80"
-                    >
-                      <Image
-                        alt={contributor.name || contributor.login}
-                        className="rounded-full border-1 border-gray-200 dark:border-gray-700"
-                        height={24}
-                        src={getAvatarUrlWithSize(contributor.avatarUrl)}
-                        title={contributor.name || contributor.login}
-                        width={24}
-                      />
-                    </Link>
-                  ))}
-                  {menteesWithAvatars.length > 4 && (
-                    <span className="self-center text-xs font-medium text-gray-400">
-                      +{menteesWithAvatars.length - 4}
-                    </span>
-                  )}
-                </div>
+            </div>
+          )}
+          {menteesWithAvatars.length > 0 && (
+            <div
+              className={`flex flex-1 flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}
+            >
+              <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
+                Mentees
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {menteesWithAvatars.slice(0, 4).map((contributor) => (
+                  <Link
+                    key={contributor.login}
+                    href={getMenteeUrl(contributor.login)}
+                    className="transition-opacity hover:opacity-80"
+                  >
+                    <Image
+                      alt={contributor.name || contributor.login}
+                      className="rounded-full border-1 border-gray-200 dark:border-gray-700"
+                      height={24}
+                      src={getAvatarUrlWithSize(contributor.avatarUrl)}
+                      title={contributor.name || contributor.login}
+                      width={24}
+                    />
+                  </Link>
+                ))}
+                {menteesWithAvatars.length > 4 && (
+                  <span className="self-center text-xs font-medium text-gray-400">
+                    +{menteesWithAvatars.length - 4}
+                  </span>
+                )}
               </div>
-            )}
-          </div>
-        )
-      }
+            </div>
+          )}
+        </div>
+      )}
 
-      {
-        isAdmin && module.labels && module.labels.length > 0 && (
-          <div className="mt-2">
-            <LabelList labels={module.labels} maxVisible={3} />
-          </div>
-        )
-      }
-    </div >
+      {isAdmin && module.labels && module.labels.length > 0 && (
+        <div className="mt-2">
+          <LabelList labels={module.labels} maxVisible={3} />
+        </div>
+      )}
+    </div>
   )
 }
 
