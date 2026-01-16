@@ -104,12 +104,11 @@ jest.mock('components/UserMenu', () => {
 })
 
 // Mock constants
-// Mock constants
 jest.mock('utils/constants', () => {
   const actual = jest.requireActual('utils/constants')
   return {
     ...actual,
-    desktopViewMinWidth: 1024, // Matches your logic
+    desktopViewMinWidth: 1024, //Updated breakpoint threshold for lg screens
     headerLinks: [
       { text: 'Home', href: '/' },
       { text: 'About', href: '/about' },
