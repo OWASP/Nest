@@ -5,7 +5,6 @@ import { screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
 import UserDetailsPage from 'app/members/[memberKey]/page'
-import { fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 
 // Mock Apollo Client
 jest.mock('@apollo/client/react', () => ({
@@ -53,10 +52,6 @@ jest.mock('next/navigation', () => ({
   useParams: () => ({ memberKey: 'test-user' }),
 }))
 
-// Mock GitHub heatmap utilities
-jest.mock('utils/helpers/githubHeatmap', () => ({
-  fetchHeatmapData: jest.fn(),
-}))
 
 jest.mock('components/ContributionHeatmap', () => {
   const MockContributionHeatmap = () => <div data-testid="contribution-heatmap">Heatmap</div>
@@ -77,13 +72,6 @@ describe('UserDetailsPage', () => {
       data: mockUserDetailsData,
       loading: false,
       error: null,
-    })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      years: [{ year: '2023' }],
-      contributions: [
-        { date: '2023-01-01', count: 5, intensity: '2' },
-        { date: '2023-01-02', count: 3, intensity: '1' },
-      ],
     })
   })
 
@@ -282,17 +270,9 @@ describe('UserDetailsPage', () => {
       error: null,
       loading: false,
     })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      years: [{ year: '2023' }],
-      contributions: [
-        { date: '2023-01-01', count: 5, intensity: '2' },
-        { date: '2023-01-02', count: 3, intensity: '1' },
-      ],
-    })
 
     render(<UserDetailsPage />)
 
-    // Wait for useEffect to process the fetchHeatmapData result
     await waitFor(() => {
       const heatmap = screen.getByTestId('contribution-heatmap')
       expect(heatmap).toBeInTheDocument()
@@ -825,21 +805,6 @@ describe('UserDetailsPage', () => {
   })
 
   describe('Contribution Heatmap', () => {
-    test('renders contribution heatmap when user has contribution data', async () => {
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
-        data: mockUserDetailsData,
-        loading: false,
-        error: null,
-      })
-
-      render(<UserDetailsPage />)
-
-      await waitFor(() => {
-        const heatmap = screen.getByTestId('contribution-heatmap')
-        expect(heatmap).toBeInTheDocument()
-      })
-    })
-
     test('does not render heatmap when user has empty contribution data', async () => {
       const dataWithEmptyContributions = {
         ...mockUserDetailsData,
