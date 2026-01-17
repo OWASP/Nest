@@ -1,6 +1,5 @@
 'use client'
 import { Button } from '@heroui/button'
-import { useIsMobile } from 'hooks/useIsMobile'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -22,7 +21,6 @@ import UserMenu from 'components/UserMenu'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
-  const isMobile = useIsMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
@@ -107,26 +105,30 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </div>
         <div className="flex items-center justify-normal gap-4">
-          <NavButton
-            href="https://github.com/OWASP/Nest"
-            defaultIcon={FaRegStar}
-            hoverIcon={FaSolidStar}
-            defaultIconColor="#FDCE2D"
-            hoverIconColor="#FDCE2D"
-            text="Star"
-            className="hidden lg:flex"
-          />
+          <div className="hidden md:flex">
+            <NavButton
+              href="https://github.com/OWASP/Nest"
+              defaultIcon={FaRegStar}
+              hoverIcon={FaSolidStar}
+              defaultIconColor="#FDCE2D"
+              hoverIconColor="#FDCE2D"
+              text="Star"
+            />
+          </div>
 
-          <NavButton
-            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-            defaultIcon={FaRegHeart}
-            hoverIcon={FaSolidHeart}
-            defaultIconColor="#b55f95"
-            hoverIconColor="#d9156c"
-            text="Sponsor"
-            className="hidden lg:flex"
-          />
-          {!isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
+          <div className="hidden md:flex">
+            <NavButton
+              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+              defaultIcon={FaRegHeart}
+              hoverIcon={FaSolidHeart}
+              defaultIconColor="#b55f95"
+              hoverIconColor="#d9156c"
+              text="Sponsor"
+            />
+          </div>
+          <div className="hidden md:flex">
+            <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
+          </div>
           <ModeToggle />
           <div className="lg:hidden">
             <Button
@@ -211,8 +213,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               )}
           </div>
 
-          <div className="flex flex-col gap-y-2">
-            {isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
+          <div className="flex flex-col gap-y-2 md:hidden">
+            <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={FaRegStar}

@@ -122,7 +122,7 @@ export const themeToggleTooltip = {
   padding: '3px 7px',
 }
 
-export const desktopViewMinWidth = 1024
+export const desktopViewMinWidth = 768
 
 export const userAuthStatus = {
   AUTHENTICATED: 'authenticated',
