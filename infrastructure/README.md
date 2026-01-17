@@ -118,7 +118,7 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
   - Steps for Linux:
 
     ```bash
-    poetry install && eval $(poetry env activate)
+    poetry sync --without dev --without test --without video && eval $(poetry env activate)
     ```
 
 3. **Create Zappa Settings File**:
@@ -156,7 +156,6 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
   - Update `terraform.tfvars` with the Lambda details:
 
     ```hcl
-    lambda_arn           = "arn:aws:lambda:us-east-2:000000000000:function:nest-backend-staging"
     lambda_function_name = "nest-backend-staging"
     ```
 
@@ -338,9 +337,3 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
-
-## Known Issues
-There's a known issue with Zappa removing permissions and disconnecting the externally managed
-API Gateway on each `update` or `deploy` action.
-The temporary fix is to run `terraform apply` right after these actions.
-Reference: https://github.com/zappa/Zappa/issues/939
