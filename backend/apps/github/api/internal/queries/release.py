@@ -33,7 +33,7 @@ class ReleaseQuery:
         """Resolve recent releases with optional distinct filtering.
 
         Args:
-            distinct (bool): Whether to return unique releases per author and repository.
+            distinct (bool): Whether to return unique releases per author.
             limit (int): Maximum number of releases to return.
             login (str, optional): Filter releases by a specific author's login.
             organization (str, optional): Filter releases by a specific organization's login.

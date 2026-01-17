@@ -49,7 +49,7 @@ class PullRequestQuery:
         """Resolve recent pull requests.
 
         Args:
-            distinct (bool): Whether to return unique pull requests per author and repository.
+            distinct (bool): Whether to return unique pull requests per author.
             limit (int): Maximum number of pull requests to return.
             login (str, optional): Filter pull requests by a specific author's login.
             organization (str, optional): Filter pull requests by a specific organization's login.
