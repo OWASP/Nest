@@ -193,12 +193,6 @@ variable "frontend_use_fargate_spot" {
   default     = true
 }
 
-variable "lambda_arn" {
-  description = "The ARN of the Zappa Lambda function for backend routing."
-  type        = string
-  default     = null
-}
-
 variable "lambda_function_name" {
   description = "The name of the Zappa Lambda function."
   type        = string
