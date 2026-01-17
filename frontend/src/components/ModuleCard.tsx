@@ -8,7 +8,6 @@ import { FaChevronDown, FaChevronUp, FaTurnUp, FaCalendar, FaHourglassHalf } fro
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
-import { LabelList } from 'components/LabelList'
 import SingleModuleCard from 'components/SingleModuleCard'
 import { TruncatedText } from 'components/TruncatedText'
 
@@ -26,7 +25,6 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   }
 
   const displayedModule = showAllModule ? modules : modules.slice(0, 4)
-  const isAdmin = accessLevel === 'admin'
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -39,7 +37,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
     <div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
         {displayedModule.map((module) => {
-          return <ModuleItem key={module.key || module.id} module={module} isAdmin={isAdmin} />
+          return <ModuleItem key={module.key || module.id} module={module} />
         })}
       </div>
       {modules.length > 4 && (
@@ -66,7 +64,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   )
 }
 
-const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) => {
+const ModuleItem = ({ module }: { module: Module }) => {
   const pathname = usePathname()
 
   const mentors = module.mentors || []
@@ -116,7 +114,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
         <div className="mt-auto flex w-full gap-4">
           {mentorsWithAvatars.length > 0 && (
             <div className="flex flex-1 flex-col gap-2">
-              <span className="text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
+              <span className="text-xs font-bold tracking-wider text-gray-600 uppercase dark:text-gray-300">
                 Mentors
               </span>
               <div className="flex flex-wrap gap-1">
@@ -148,7 +146,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
             <div
               className={`flex flex-1 flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}
             >
-              <span className="text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
+              <span className="text-xs font-bold tracking-wider text-gray-600 uppercase dark:text-gray-300">
                 Mentees
               </span>
               <div className="flex flex-wrap gap-1">
@@ -176,12 +174,6 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {isAdmin && module.labels && module.labels.length > 0 && (
-        <div className="mt-2">
-          <LabelList labels={module.labels} maxVisible={3} />
         </div>
       )}
     </div>
