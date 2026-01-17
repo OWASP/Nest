@@ -1,14 +1,10 @@
 filesystem:
   skip-files:
-    # Skip the PyJWT package metadata file to avoid false positives.
-    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/METADATA
 
 ignorefile: trivyignore.yaml
 
 scan:
   skip-files:
-    # Skip the PyJWT package metadata file to avoid false positives.
-    - /home/owasp/.venv/lib/python3.13/site-packages/PyJWT-2.10.1.dist-info/METADATA
 
 severity:
   - CRITICAL
