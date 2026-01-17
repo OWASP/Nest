@@ -21,11 +21,34 @@ router = RouterPaginated(tags=["Projects"])
 class ProjectBase(Schema):
     """Base schema for Project (used in list endpoints)."""
 
-    created_at: datetime
-    key: str
-    level: ProjectLevel
-    name: str
-    updated_at: datetime
+    created_at: datetime = Field(
+        ...,
+        description="Project creation timestamp (ISO 8601).",
+        example="2019-09-12T20:15:45Z",
+    )
+    key: str = Field(
+        ...,
+        description=(
+            "Stable project key used as the identifier in API URLs. "
+            "Use this value as `{project_id}` in `GET /api/v0/projects/{project_id}`."
+        ),
+        example="cheat-sheets",
+    )
+    level: ProjectLevel = Field(
+        ...,
+        description="Project maturity level.",
+        example="flagship",
+    )
+    name: str = Field(
+        ...,
+        description="Human-readable project name.",
+        example="OWASP Cheat Sheet Series",
+    )
+    updated_at: datetime = Field(
+        ...,
+        description="Last updated timestamp (ISO 8601).",
+        example="2025-12-15T15:12:05Z",
+    )
 
     @staticmethod
     def resolve_key(obj: ProjectModel) -> str:
@@ -63,13 +86,32 @@ class ProjectFilter(FilterSchema):
 
     level: ProjectLevel | None = Field(
         None,
-        description="Level of the project",
+        description=(
+            "Filter by project level.\n\n"
+            "Must be one of: `other`, `incubator`, `lab`, `production`, `flagship`."
+        ),
+        example="flagship",
     )
 
 
 @router.get(
     "/",
-    description="Retrieve a paginated list of OWASP projects.",
+    description=(
+        "Retrieve a paginated list of OWASP projects.\n\n"
+        "Use this endpoint to discover project keys/IDs that can be used with "
+        "`GET /api/v0/projects/{project_id}`.\n\n"
+        "### Authentication\n"
+        "In non-local environments this endpoint requires an API key in the `X-API-Key` header. "
+        "Missing/invalid keys return `401 Unauthorized`.\n\n"
+        "### Pagination\n"
+        "Pagination query parameters are provided by the API's configured Django Ninja pagination class "
+        "(see the query params shown below in Swagger).\n\n"
+        "Common patterns are either:\n"
+        "- `page` and `page_size` (page-number pagination)\n"
+        "- `limit` and `offset` (limit-offset pagination)\n\n"
+        "### Validation errors\n"
+        "Invalid `level`, `ordering`, or pagination values may return `422 Unprocessable Content`."
+    ),
     operation_id="list_projects",
     response=list[Project],
     summary="List projects",
@@ -80,7 +122,13 @@ def list_projects(
     filters: ProjectFilter = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=(
+        "Sort order for results.\n\n"
+        "Allowed values: `created_at`, `-created_at`, `updated_at`, `-updated_at`.\n"
+        "If not provided, the API applies a default ordering."
+    ),
+    example="-updated_at",
+),
     ),
 ) -> list[Project]:
     """Get projects."""
