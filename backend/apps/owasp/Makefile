@@ -77,6 +77,10 @@ owasp-scrape-projects:
 owasp-sync-posts:
 	@CMD="python manage.py owasp_sync_posts" $(MAKE) exec-backend-command
 
+owasp-sync-project-levels:
+	@echo "Syncing OWASP project levels from official source"
+	@CMD="python manage.py owasp_sync_project_levels" $(MAKE) exec-backend-command
+
 owasp-update-events:
 	@echo "Getting OWASP events data"
 	@CMD="python manage.py owasp_update_events" $(MAKE) exec-backend-command
