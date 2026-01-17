@@ -212,6 +212,8 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             user (User, optional): The user instance.
 
         """
+        from github.GithubException import GithubException
+
         field_mapping = {
             "created_at": "created_at",
             "default_branch": "default_branch",
@@ -249,8 +251,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             organization is not None and organization.login.lower() == OWASP_LOGIN
         )
         self.is_owasp_site_repository = check_owasp_site_repository(self.key)
-
-        from github.GithubException import GithubException
 
         # Commits.
         if commits is not None:
