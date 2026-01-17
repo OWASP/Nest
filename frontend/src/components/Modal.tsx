@@ -21,16 +21,13 @@ const DialogComp: React.FC<ModalProps> = ({
   button,
   children,
   description,
-}: ModalProps) => {
+}) => {
   return (
     <Modal
       isOpen={isOpen}
       size="lg"
       scrollBehavior="inside"
       onClose={onClose}
-      classNames={{
-        base: 'max-h-[100vh] sm:max-h-[90vh]',
-      }}
     >
       <ModalContent
         aria-labelledby="modal-title"
@@ -41,14 +38,13 @@ const DialogComp: React.FC<ModalProps> = ({
           w-[95vw]
           sm:w-full
           max-w-4xl
-          max-h-[100vh]
-          sm:max-h-[90vh]
+          max-h-[90vh]
           flex
           flex-col
           rounded-lg
           bg-white
           shadow-xl
-          backdrop-blur-xs
+          backdrop-blur-sm
           transition-all
           duration-300
           ease-in-out
@@ -57,7 +53,6 @@ const DialogComp: React.FC<ModalProps> = ({
           dark:bg-[#212529]
         "
       >
-        {/* ---------- HEADER ---------- */}
         <ModalHeader
           className="
             px-5
@@ -80,7 +75,7 @@ const DialogComp: React.FC<ModalProps> = ({
               text-gray-900
               dark:text-white
               break-words
-              overflow-wrap-anywhere
+              [overflow-wrap:anywhere]
             "
           >
             {title}
@@ -93,36 +88,36 @@ const DialogComp: React.FC<ModalProps> = ({
           )}
         </ModalHeader>
 
-        {/* ---------- BODY (SCROLLABLE) ---------- */}
         <ModalBody className="flex-1 overflow-y-auto px-5 py-4">
           <p className="mb-2 text-base font-semibold">Summary</p>
 
           <Markdown
+            content={summary}
             className="
               text-base
               text-gray-600
               dark:text-gray-300
               break-words
-              overflow-wrap-anywhere
+              [overflow-wrap:anywhere]
             "
-            content={summary}
           />
 
           {hint && (
             <div className="mt-4 rounded-md">
               <p className="mb-1 flex items-center gap-2 text-base font-semibold">
-                <FaBolt size={14} /> How to tackle it
+                <FaBolt size={14} />
+                How to tackle it
               </p>
 
               <Markdown
+                content={hint}
                 className="
                   text-base
                   text-gray-800
                   dark:text-gray-200
                   break-words
-                  overflow-wrap-anywhere
+                  [overflow-wrap:anywhere]
                 "
-                content={hint}
               />
             </div>
           )}
@@ -130,10 +125,6 @@ const DialogComp: React.FC<ModalProps> = ({
           {children}
         </ModalBody>
 
-        {/* ---------- DIVIDER ---------- */}
-        <div className="mx-5 h-px bg-gray-300 dark:bg-gray-700" />
-
-        {/* ---------- FOOTER ---------- */}
         <ModalFooter
           className="
             sticky
