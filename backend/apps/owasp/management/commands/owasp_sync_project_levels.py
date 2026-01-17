@@ -45,7 +45,7 @@ class Command(BaseCommand):
         try:
             official_project_levels = json.loads(project_levels_content)
         except json.JSONDecodeError as e:
-            self.stdout.write(self.style.ERROR(f"Failed to parse project levels JSON: {str(e)}"))
+            self.stdout.write(self.style.ERROR(f"Failed to parse project levels JSON: {e!s}"))
             return
 
         # Create a mapping of repo key to normalized official level
@@ -55,6 +55,7 @@ class Command(BaseCommand):
             repo_key = project_data.get("repo")
             level = project_data.get("level")
             if repo_key and level is not None:
+                repo_key = repo_key.lower()
                 normalized = normalize_level(level)
                 if normalized is not None:
                     official_levels_map[repo_key] = normalized
@@ -67,11 +68,12 @@ class Command(BaseCommand):
 
         # Compute coverage: which official projects are not in Nest
         official_keys = set(official_levels_map.keys())
-        local_keys = set(Project.active_projects.values_list("key", flat=True))
+        local_keys = {key.lower() for key in Project.active_projects.values_list("key", flat=True)}
         missing_locally = official_keys - local_keys
         self.stdout.write(
             self.style.NOTICE(
-                f"{len(missing_locally)} official OWASP projects are not present in Nest (ignored)."
+                f"{len(missing_locally)} official OWASP projects are not present "
+                "in Nest (ignored)."
             )
         )
 
@@ -80,7 +82,7 @@ class Command(BaseCommand):
         changes_made = []
 
         for project in Project.active_projects.all():
-            official_level = official_levels_map.get(project.key)
+            official_level = official_levels_map.get(project.key.lower())
 
             # Determine if project should be marked as non-compliant
             # True = non-compliant, False = compliant
@@ -138,10 +140,18 @@ class Command(BaseCommand):
         # Log all changes
         for change in changes_made:
             if change["new"] == "non-compliant":
-                logger.warning(f"Project {change['key']}: {change['reason']} → non-compliant")
+                logger.warning(
+                    "Project %s: %s → non-compliant",
+                    change["key"],
+                    change["reason"],
+                )
                 self.stdout.write(self.style.WARNING(f"  {change['key']}: {change['reason']}"))
             else:
-                logger.info(f"Project {change['key']}: {change['reason']}")
+                logger.info(
+                    "Project %s: %s",
+                    change["key"],
+                    change["reason"],
+                )
 
         # Perform bulk update
         Project.objects.bulk_update(

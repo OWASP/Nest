@@ -18,7 +18,6 @@ class TestSyncProjectLevelsCommand:
     def _setup(self):
         """Set up test environment."""
         self.stdout = StringIO()
-        yield
 
     def test_successful_sync_compliant_projects(self):
         """Test successful sync when projects are compliant with official levels."""
@@ -45,15 +44,14 @@ class TestSyncProjectLevelsCommand:
         mock_manager.count.return_value = 2
         mock_manager.values_list.return_value = ["project-1", "project-2"]
 
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=json.dumps(official_data),
-        ), patch(
-            "apps.owasp.models.project.Project.active_projects", mock_manager
-        ), patch(
-            "apps.owasp.models.project.Project.objects.bulk_update"
-        ) as mock_bulk_update, patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=json.dumps(official_data),
+            ),
+            patch("apps.owasp.models.project.Project.active_projects", mock_manager),
+            patch("apps.owasp.models.project.Project.objects.bulk_update") as mock_bulk_update,
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
@@ -86,15 +84,14 @@ class TestSyncProjectLevelsCommand:
         mock_manager.count.return_value = 2
         mock_manager.values_list.return_value = ["project-1", "project-2"]
 
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=json.dumps(official_data),
-        ), patch(
-            "apps.owasp.models.project.Project.active_projects", mock_manager
-        ), patch(
-            "apps.owasp.models.project.Project.objects.bulk_update"
-        ) as mock_bulk_update, patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=json.dumps(official_data),
+            ),
+            patch("apps.owasp.models.project.Project.active_projects", mock_manager),
+            patch("apps.owasp.models.project.Project.objects.bulk_update") as mock_bulk_update,
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
@@ -129,15 +126,14 @@ class TestSyncProjectLevelsCommand:
         mock_manager.count.return_value = 2
         mock_manager.values_list.return_value = ["project-1", "project-2"]
 
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=json.dumps(official_data),
-        ), patch(
-            "apps.owasp.models.project.Project.active_projects", mock_manager
-        ), patch(
-            "apps.owasp.models.project.Project.objects.bulk_update"
-        ) as mock_bulk_update, patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=json.dumps(official_data),
+            ),
+            patch("apps.owasp.models.project.Project.active_projects", mock_manager),
+            patch("apps.owasp.models.project.Project.objects.bulk_update") as mock_bulk_update,
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
@@ -168,15 +164,14 @@ class TestSyncProjectLevelsCommand:
         mock_manager.count.return_value = 1
         mock_manager.values_list.return_value = ["project-1"]
 
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=json.dumps(official_data),
-        ), patch(
-            "apps.owasp.models.project.Project.active_projects", mock_manager
-        ), patch(
-            "apps.owasp.models.project.Project.objects.bulk_update"
-        ), patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=json.dumps(official_data),
+            ),
+            patch("apps.owasp.models.project.Project.active_projects", mock_manager),
+            patch("apps.owasp.models.project.Project.objects.bulk_update"),
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
@@ -186,11 +181,12 @@ class TestSyncProjectLevelsCommand:
 
     def test_failed_fetch_from_official_source(self):
         """Test handling when fetching official levels fails."""
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=None,
-        ), patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=None,
+            ),
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
@@ -201,11 +197,12 @@ class TestSyncProjectLevelsCommand:
         """Test handling when JSON parsing fails."""
         invalid_json = "{invalid json"
 
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=invalid_json,
-        ), patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=invalid_json,
+            ),
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
@@ -229,15 +226,14 @@ class TestSyncProjectLevelsCommand:
         mock_manager.count.return_value = 1
         mock_manager.values_list.return_value = ["incubator-project"]
 
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=json.dumps(official_data),
-        ), patch(
-            "apps.owasp.models.project.Project.active_projects", mock_manager
-        ), patch(
-            "apps.owasp.models.project.Project.objects.bulk_update"
-        ) as mock_bulk_update, patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=json.dumps(official_data),
+            ),
+            patch("apps.owasp.models.project.Project.active_projects", mock_manager),
+            patch("apps.owasp.models.project.Project.objects.bulk_update") as mock_bulk_update,
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
@@ -264,15 +260,14 @@ class TestSyncProjectLevelsCommand:
         mock_manager.count.return_value = 1
         mock_manager.values_list.return_value = ["project-1"]
 
-        with patch(
-            "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
-            return_value=json.dumps(official_data),
-        ), patch(
-            "apps.owasp.models.project.Project.active_projects", mock_manager
-        ), patch(
-            "apps.owasp.models.project.Project.objects.bulk_update"
-        ) as mock_bulk_update, patch(
-            "sys.stdout", new=self.stdout
+        with (
+            patch(
+                "apps.owasp.management.commands.owasp_sync_project_levels.get_repository_file_content",
+                return_value=json.dumps(official_data),
+            ),
+            patch("apps.owasp.models.project.Project.active_projects", mock_manager),
+            patch("apps.owasp.models.project.Project.objects.bulk_update") as mock_bulk_update,
+            patch("sys.stdout", new=self.stdout),
         ):
             call_command("owasp_sync_project_levels")
 
