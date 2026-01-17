@@ -7,7 +7,7 @@ from subprocess import CalledProcessError, run
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from psycopg2 import ProgrammingError, connect, sql
+from psycopg2 import OperationalError, ProgrammingError, connect, sql
 
 DEFAULT_DATABASE = settings.DATABASES["default"]
 DB_HOST = DEFAULT_DATABASE.get("HOST", "localhost")
@@ -52,7 +52,14 @@ class Command(BaseCommand):
 
         temp_db = f"temp_{DB_NAME}"
         try:
-            self._execute_sql("postgres", [f"CREATE DATABASE {temp_db} TEMPLATE {DB_NAME};"])
+            self._execute_sql(
+                "postgres",
+                [
+                    sql.SQL("CREATE DATABASE {temp_db} TEMPLATE {DB_NAME};").format(
+                        temp_db=sql.Identifier(temp_db), DB_NAME=sql.Identifier(DB_NAME)
+                    )
+                ],
+            )
 
             self.stdout.write(self.style.SUCCESS(f"Created temporary DB: {temp_db}"))
 
@@ -86,20 +93,27 @@ class Command(BaseCommand):
             raise CommandError(message) from e
         finally:
             try:
-                self._execute_sql("postgres", [f"DROP DATABASE IF EXISTS {temp_db};"])
-            except CalledProcessError:
+                self._execute_sql(
+                    "postgres",
+                    [
+                        sql.SQL("DROP DATABASE IF EXISTS {temp_db};").format(
+                            table=sql.Identifier(temp_db)
+                        )
+                    ],
+                )
+            except OperationalError:
                 self.stderr.write(
                     self.style.WARNING(f"Failed to drop temp DB {temp_db} (ignored).")
                 )
 
-    def _table_list_query(self) -> str:
-        return """
+    def _table_list_query(self) -> sql.Composable:
+        return sql.SQL("""
         SELECT table_name
         FROM information_schema.columns
         WHERE table_schema = 'public' AND column_name = 'email';
-        """
+        """)
 
-    def _remove_emails(self, tables: list[str]) -> list[str]:
+    def _remove_emails(self, tables: list[str]) -> list[sql.Composable]:
         return [
             sql.SQL("UPDATE {table} SET email = '';").format(table=sql.Identifier(table))
             for table in tables
@@ -108,7 +122,7 @@ class Command(BaseCommand):
     def _execute_sql(
         self,
         dbname: str,
-        sql_queries: list[str],
+        sql_queries: list[sql.Composable],
     ):
         connection = connect(
             dbname=dbname,
