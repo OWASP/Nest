@@ -114,6 +114,16 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
         return self.path
 
     @property
+    def latest_commit(self):
+        """Get the latest commit for the repository.
+
+        Returns
+            Commit: The most recently created commit.
+
+        """
+        return self.commits.order_by("-created_at").first()
+
+    @property
     def latest_pull_request(self):
         """Get the latest pull request for the repository.
 
