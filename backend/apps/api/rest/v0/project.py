@@ -104,7 +104,8 @@ class ProjectFilter(FilterSchema):
         "In non-local environments this endpoint requires an API key in the `X-API-Key` header. "
         "Missing/invalid keys return `401 Unauthorized`.\n\n"
         "### Pagination\n"
-        "Pagination query parameters are provided by the API's configured Django Ninja pagination class "
+        "Pagination query parameters are provided by the API's configured Django Ninja pagination "
+        "class "
         "(see the query params shown below in Swagger).\n\n"
         "Common patterns are either:\n"
         "- `page` and `page_size` (page-number pagination)\n"
@@ -123,12 +124,11 @@ def list_projects(
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description=(
-        "Sort order for results.\n\n"
-        "Allowed values: `created_at`, `-created_at`, `updated_at`, `-updated_at`.\n"
-        "If not provided, the API applies a default ordering."
-    ),
-    example="-updated_at",
-),
+            "Sort order for results.\n\n"
+            "Allowed values: `created_at`, `-created_at`, `updated_at`, `-updated_at`.\n"
+            "If not provided, the API applies a default ordering."
+        ),
+        example="-updated_at",
     ),
 ) -> list[Project]:
     """Get projects."""
