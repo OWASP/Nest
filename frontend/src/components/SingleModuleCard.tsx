@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { HiUserGroup } from 'react-icons/hi'
-import { ExtendedSession } from 'types/auth'
+import type { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import EntityActions from 'components/EntityActions'
@@ -24,12 +24,15 @@ interface SingleModuleCardProps {
 }
 
 const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel, admins }) => {
-  const { data } = useSession()
+  const { data: sessionData } = useSession() as { data: ExtendedSession | null }
   const pathname = usePathname()
 
+  const currentUserLogin = sessionData?.user?.login
+
   const isAdmin =
-    accessLevel === 'admin' &&
-    admins?.some((admin) => admin.login === (data as ExtendedSession)?.user?.login)
+    accessLevel === 'admin' && admins?.some((admin) => admin.login === currentUserLogin)
+
+  const isMentor = module.mentors?.some((mentor) => mentor.login === currentUserLogin)
 
   // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
   const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
@@ -51,6 +54,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1"
+            data-testid="module-link"
           >
             <h1
               className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
@@ -63,7 +67,14 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
           </Link>
         </div>
 
-        {isAdmin && <EntityActions type="module" programKey={programKey} moduleKey={module.key} />}
+        {(isAdmin || isMentor) && (
+          <EntityActions
+            type="module"
+            programKey={programKey}
+            moduleKey={module.key}
+            isAdmin={isAdmin}
+          />
+        )}
       </div>
 
       {/* Description */}
