@@ -6,6 +6,5 @@ ecs_use_fargate_spot          = true
 ecs_use_public_subnets        = false
 environment                   = "staging"
 frontend_use_fargate_spot     = true
-lambda_arn                    = null
 lambda_function_name          = null
 project_name                  = "owasp-nest"
