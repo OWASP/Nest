@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --turbo --port 3000",
+    "dev": "next dev --port 3000 --turbo",
     "format": "prettier --log-level warn --write .",
     "format:check": "prettier --check .",
     "graphql-codegen": "graphql-codegen --config graphql-codegen.ts",

@@ -5,11 +5,9 @@ const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
 const nextConfig: NextConfig = {
   devIndicators: false,
-  // Fix: Force Next.js to transpile ESM Leaflet packages for React 19/Turbopack compatibility
-  transpilePackages: ['react-leaflet', 'leaflet', 'react-leaflet-cluster', '@react-leaflet/core'],
-  // This is a list of remote patterns that Next.js will use to determine
-  // if an image is allowed to be loaded from a remote source.
   images: {
+    // This is a list of remote patterns that Next.js will use to determine
+    // if an image is allowed to be loaded from a remote source.
     remotePatterns: [
       {
         protocol: 'https',
@@ -29,11 +27,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-   // https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader
+  // https://nextjs.org/docs/app/api-reference/config/next-config-js/poweredByHeader
   poweredByHeader: false,
   // https://nextjs.org/docs/app/api-reference/config/next-config-js/productionBrowserSourceMaps
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
+  transpilePackages: ['@react-leaflet/core', 'leaflet', 'react-leaflet', 'react-leaflet-cluster'],
+
   ...(isLocal ? {} : { output: 'standalone' }),
 }
 
@@ -51,7 +51,7 @@ export default withSentryConfig(nextConfig, {
   ...(process.env.NEXT_SENTRY_AUTH_TOKEN
     ? {
         authToken: process.env.NEXT_SENTRY_AUTH_TOKEN,
-         // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps
+        // https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/
         sourcemaps: {
           deleteSourcemapsAfterUpload: true,
           disable: false,

@@ -1,7 +1,0 @@
-ignoredBuiltDependencies:
-  - '@heroui/shared-utils'
-  - '@sentry/cli'
-  - '@swc/core'
-  - core-js
-  - sharp
-  - unrs-resolver
