@@ -97,7 +97,7 @@ class Command(BaseCommand):
                     "postgres",
                     [
                         sql.SQL("DROP DATABASE IF EXISTS {temp_db};").format(
-                            table=sql.Identifier(temp_db)
+                            temp_db=sql.Identifier(temp_db)
                         )
                     ],
                 )

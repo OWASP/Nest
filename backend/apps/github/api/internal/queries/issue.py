@@ -48,7 +48,7 @@ class IssueQuery:
         """Resolve recent issues with optional filtering.
 
         Args:
-            distinct (bool): Whether to return unique issues per author and repository.
+            distinct (bool): Whether to return unique issues per author.
             limit (int): Maximum number of issues to return.
             login (str, optional): Filter issues by a specific author's login.
             organization (str, optional): Filter issues by a specific organization's login.

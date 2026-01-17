@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
 from django.test import override_settings
+from psycopg2 import sql
 
 DATABASES = {
     "default": {
@@ -20,8 +21,7 @@ class TestDumpDataCommand:
     @patch("apps.common.management.commands.dump_data.run")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
-    @patch("apps.common.management.commands.dump_data.sql")
-    def test_dump_data(self, mock_sql, mock_path, mock_connect, mock_run):
+    def test_dump_data(self, mock_path, mock_connect, mock_run):
         # Mock psycopg2 connection/cursor
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
@@ -30,7 +30,6 @@ class TestDumpDataCommand:
         mock_cursor.fetchall.return_value = [("public.users",), ("public.members",)]
         mock_resolve = MagicMock()
         mock_path.return_value.resolve.return_value = mock_resolve
-        mock_sql.SQL.return_value.format.return_value = "UPDATE public.users SET email = '';"
         call_command(
             "dump_data",
             "--output",
@@ -48,18 +47,23 @@ class TestDumpDataCommand:
             port="5432",
         )
         mock_cursor.execute.assert_any_call(
-            f"CREATE DATABASE {expected_temp_db} TEMPLATE db-name;"
+            sql.SQL("CREATE DATABASE {temp_db} TEMPLATE {DB_NAME};").format(
+                temp_db=sql.Identifier(expected_temp_db),
+                DB_NAME=sql.Identifier("db-name"),
+            )
         )
         executed_sql = [str(c.args[0]) for c in mock_cursor.execute.call_args_list]
-        assert "UPDATE public.users SET email = '';" in executed_sql
-        assert any(
-            """
+        assert (
+            str(
+                sql.SQL(
+                    """
         SELECT table_name
         FROM information_schema.columns
         WHERE table_schema = 'public' AND column_name = 'email';
-        """.strip()
-            in str(query).strip()
-            for query in executed_sql
+        """
+                )
+            )
+            in executed_sql
         )
 
         assert [
@@ -87,6 +91,10 @@ class TestDumpDataCommand:
             str(mock_resolve),
         ] == mock_run.call_args[0][0]
         # Ensure DROP DATABASE executed at the end
-        mock_cursor.execute.assert_any_call(f"DROP DATABASE IF EXISTS {expected_temp_db};")
+        mock_cursor.execute.assert_any_call(
+            sql.SQL("DROP DATABASE IF EXISTS {temp_db};").format(
+                temp_db=sql.Identifier(expected_temp_db)
+            )
+        )
         mock_path.return_value.resolve.assert_called_once()
         mock_resolve.parent.mkdir.assert_called_once_with(parents=True, exist_ok=True)

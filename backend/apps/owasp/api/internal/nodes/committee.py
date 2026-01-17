@@ -16,7 +16,7 @@ class CommitteeNode(GenericEntityNode):
         return root.owasp_repository.contributors_count if root.owasp_repository else 0
 
     @strawberry_django.field
-    def created_at(self, root: Committee) -> float:
+    def created_at(self, root: Committee) -> float | None:
         """Resolve created at."""
         return root.idx_created_at
 
