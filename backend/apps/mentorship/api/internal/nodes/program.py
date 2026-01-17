@@ -4,11 +4,11 @@ from datetime import datetime
 
 import strawberry
 
+from apps.mentorship.api.internal.nodes.admin import AdminNode
 from apps.mentorship.api.internal.nodes.enum import (
     ExperienceLevelEnum,
     ProgramStatusEnum,
 )
-from apps.mentorship.api.internal.nodes.mentor import MentorNode
 
 
 @strawberry.type
@@ -29,9 +29,9 @@ class ProgramNode:
     tags: list[str] | None = None
 
     @strawberry.field
-    def admins(self) -> list[MentorNode] | None:
+    def admins(self) -> list[AdminNode] | None:
         """Get the list of program administrators."""
-        return self.admins.all()
+        return list(self.admins.all()) or None
 
 
 @strawberry.type
