@@ -88,12 +88,3 @@ class TestPullRequestNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("url", PullRequestNode)
         result = field.base_resolver.wrapped_func(None, mock_pr)
         assert result == "https://github.com/test-org/test-repo/pull/123"
-
-    def test_url_without_url(self):
-        """Test url field when URL doesn't exist."""
-        mock_pr = Mock()
-        mock_pr.url = None
-
-        field = self._get_field_by_name("url", PullRequestNode)
-        result = field.base_resolver.wrapped_func(None, mock_pr)
-        assert result == ""

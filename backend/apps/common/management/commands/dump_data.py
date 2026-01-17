@@ -101,7 +101,7 @@ class Command(BaseCommand):
                         )
                     ],
                 )
-            except OperationalError:
+            except (ProgrammingError, OperationalError):
                 self.stderr.write(
                     self.style.WARNING(f"Failed to drop temp DB {temp_db} (ignored).")
                 )
