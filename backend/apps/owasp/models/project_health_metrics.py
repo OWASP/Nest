@@ -149,7 +149,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     @cached_property
     def project_requirements(self) -> ProjectHealthRequirements | None:
         """Get the project health requirements for the project's level."""
-        return ProjectHealthRequirements.objects.get(level=self.project.level)
+        return ProjectHealthRequirements.objects.filter(level=self.project.level).first()
 
     @staticmethod
     def bulk_save(metrics: list, fields: list | None = None) -> None:  # type: ignore[override]
