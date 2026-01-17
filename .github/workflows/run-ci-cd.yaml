@@ -121,6 +121,25 @@ jobs:
         run: |
           make check-spelling
 
+  semgrep-scan:
+    name: Run Semgrep Scan
+    needs:
+      - check-frontend
+      - pre-commit
+      - spellcheck
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Run Semgrep scan
+        run: semgrep scan --config p/security-audit
+    timeout-minutes: 10
+
   scan-code:
     name: Run Code Scan
     needs:
