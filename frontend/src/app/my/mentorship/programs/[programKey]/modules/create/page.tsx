@@ -4,7 +4,7 @@ import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
+import { ErrorDisplay } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import {
@@ -100,29 +100,8 @@ const CreateModulePage = () => {
 
       await createModule({
         variables: { input },
-        update: (cache, { data: mutationData }) => {
-          const created = mutationData?.createModule
-          if (!created) return
-          try {
-            const existing = cache.readQuery({
-              query: GetProgramAndModulesDocument,
-              variables: { programKey },
-            })
-            if (existing?.getProgram && existing?.getProgramModules) {
-              cache.writeQuery({
-                query: GetProgramAndModulesDocument,
-                variables: { programKey },
-                data: {
-                  getProgram: existing.getProgram,
-                  getProgramModules: [created, ...existing.getProgramModules],
-                },
-              })
-            }
-          } catch (_err) {
-            handleAppError(_err)
-            return
-          }
-        },
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        awaitRefetchQueries: true,
       })
 
       addToast({

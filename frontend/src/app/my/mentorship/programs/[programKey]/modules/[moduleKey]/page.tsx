@@ -25,6 +25,7 @@ const ModuleDetailsPage = () => {
       programKey,
       moduleKey,
     },
+    fetchPolicy: 'cache-and-network',
   })
 
   useEffect(() => {
@@ -32,7 +33,10 @@ const ModuleDetailsPage = () => {
       setModule(data.getModule)
       setAdmins(data.getProgram.admins)
     } else if (error) {
-      handleAppError(error)
+      const isNotFound = error.message?.toLowerCase().includes('not found')
+      if (!isNotFound) {
+        handleAppError(error)
+      }
     }
   }, [data, error])
 

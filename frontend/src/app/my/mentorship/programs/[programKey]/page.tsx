@@ -32,6 +32,7 @@ const ProgramDetailsPage = () => {
   const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
+    fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   })
 
