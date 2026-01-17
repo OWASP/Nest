@@ -97,10 +97,10 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
   }
 
   return (
-    <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 text-gray-600 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
       <Link
         href={`${pathname}/modules/${module.key}`}
-        className="text-start font-semibold text-blue-400 hover:underline"
+        className="text-start font-semibold text-gray-600 hover:underline dark:text-gray-300"
       >
         <TruncatedText text={module?.name} />
       </Link>
@@ -116,7 +116,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
         <div className="mt-auto flex w-full gap-4">
           {mentorsWithAvatars.length > 0 && (
             <div className="flex flex-1 flex-col gap-2">
-              <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
+              <span className="text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
                 Mentors
               </span>
               <div className="flex flex-wrap gap-1">
@@ -137,7 +137,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                   </Link>
                 ))}
                 {mentorsWithAvatars.length > 4 && (
-                  <span className="self-center text-xs font-medium text-gray-400">
+                  <span className="self-center text-xs font-medium text-gray-600 dark:text-gray-300">
                     +{mentorsWithAvatars.length - 4}
                   </span>
                 )}
@@ -148,7 +148,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
             <div
               className={`flex flex-1 flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}
             >
-              <span className="text-xs font-medium tracking-wider text-gray-400 uppercase">
+              <span className="text-xs font-medium tracking-wider text-gray-600 uppercase dark:text-gray-300">
                 Mentees
               </span>
               <div className="flex flex-wrap gap-1">
@@ -169,7 +169,7 @@ const ModuleItem = ({ module, isAdmin }: { module: Module; isAdmin: boolean }) =
                   </Link>
                 ))}
                 {menteesWithAvatars.length > 4 && (
-                  <span className="self-center text-xs font-medium text-gray-400">
+                  <span className="self-center text-xs font-medium text-gray-600 dark:text-gray-300">
                     +{menteesWithAvatars.length - 4}
                   </span>
                 )}
