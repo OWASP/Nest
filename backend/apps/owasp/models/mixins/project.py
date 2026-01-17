@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from django.conf import settings
 
 from apps.common.utils import join_values
@@ -19,73 +21,143 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
 
     @property
     def idx_companies(self) -> str:
-        """Return companies for indexing."""
+        """Return companies for indexing.
+
+        Returns:
+            str: A space-separated string of company names.
+
+        """
         return join_values(fields=[o.company for o in self.organizations.all()])
 
     @property
     def idx_contributors_count(self) -> int:
-        """Return contributors count for indexing."""
+        """Return contributors count for indexing.
+
+        Returns:
+            int: The total number of contributors to the project.
+
+        """
         return self.contributors_count
 
     @property
     def idx_custom_tags(self) -> str:
-        """Return custom tags for indexing."""
+        """Return custom tags for indexing.
+
+        Returns:
+            str: Custom tags associated with the project.
+
+        """
         return self.custom_tags
 
     @property
     def idx_forks_count(self) -> int:
-        """Return forks count for indexing."""
+        """Return forks count for indexing.
+
+        Returns:
+            int: The total number of forks across project repositories.
+
+        """
         return self.forks_count
 
     @property
     def idx_health_score(self) -> float | None:
-        """Return health score for indexing."""
+        """Return health score for indexing.
+
+        Returns:
+            float | None: The health score or None.
+
+        """
         # TODO(arkid15r): Enable real health score in production when ready.
         return DEFAULT_HEALTH_SCORE if settings.IS_PRODUCTION_ENVIRONMENT else self.health_score
 
     @property
     def idx_is_active(self) -> bool:
-        """Return active status for indexing."""
+        """Return active status for indexing.
+
+        Returns:
+            bool: True if the project is active, False otherwise.
+
+        """
         return self.is_active
 
     @property
     def idx_issues_count(self) -> int:
-        """Return issues count for indexing."""
+        """Return issues count for indexing.
+
+        Returns:
+            int: The number of open issues in the project.
+
+        """
         return self.open_issues.count()
 
     @property
     def idx_key(self) -> str:
-        """Return key for indexing."""
+        """Return key for indexing.
+
+        Returns:
+            str: The project key.
+
+        """
         return self.key.replace("www-project-", "")
 
     @property
     def idx_languages(self) -> list[str]:
-        """Return languages for indexing."""
+        """Return languages for indexing.
+
+        Returns:
+            list[str]: A list of programming languages used in the project.
+
+        """
         return self.languages
 
     @property
     def idx_level(self) -> str:
-        """Return level text value for indexing."""
+        """Return level text value for indexing.
+
+        Returns:
+            str: The project level as text.
+
+        """
         return self.level
 
     @property
     def idx_level_raw(self) -> float | None:
-        """Return level for indexing."""
+        """Return raw level for indexing.
+
+        Returns:
+            float | None: The raw numeric level of the project.
+
+        """
         return float(self.level_raw) if self.level_raw else None
 
     @property
     def idx_name(self) -> str:
-        """Return name for indexing."""
+        """Return name for indexing.
+
+        Returns:
+            str: The name of the project.
+
+        """
         return self.name or " ".join(self.key.replace("www-project-", "").capitalize().split("-"))
 
     @property
     def idx_organizations(self) -> str:
-        """Return organizations for indexing."""
+        """Return organizations for indexing.
+
+        Returns:
+            str: A space-separated string of organization names.
+
+        """
         return join_values(fields=[o.name for o in self.organizations.all()])
 
     @property
-    def idx_repositories(self) -> list[dict]:
-        """Return repositories for indexing."""
+    def idx_repositories(self) -> list[dict[str, Any]]:
+        """Return repositories for indexing.
+
+        Returns:
+            list[dict[str, Any]]: A list of repository details for the project.
+
+        """
         return [
             {
                 "contributors_count": r.contributors_count,
@@ -103,25 +175,51 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
 
     @property
     def idx_repositories_count(self) -> int:
-        """Return repositories count for indexing."""
+        """Return repositories count for indexing.
+
+        Returns:
+            int: The total number of repositories in the project.
+
+        """
         return self.repositories.count()
 
     @property
     def idx_stars_count(self) -> int:
-        """Return stars count for indexing."""
+        """Return stars count for indexing.
+
+        Returns:
+            int: The total number of stars across project repositories.
+
+        """
         return self.stars_count
 
     @property
-    def idx_top_contributors(self) -> list:
-        """Return top contributors for indexing."""
+    def idx_top_contributors(self) -> list[dict[str, Any]]:
+        """Return top contributors for indexing.
+
+        Returns:
+            list[dict[str, Any]]: A list of top contributor details for the project.
+
+        """
         return RepositoryContributor.get_top_contributors(project=self.key)
 
     @property
     def idx_type(self) -> str:
-        """Return type for indexing."""
+        """Return type for indexing.
+
+        Returns:
+            str: The type of the project.
+
+        """
         return self.type
 
     @property
     def idx_updated_at(self) -> str | float:
-        """Return updated at for indexing."""
+        """Return updated at timestamp for indexing.
+
+        Returns:
+            str | float: The project's last update timestamp as a float,
+            or empty string if unavailable.
+
+        """
         return self.updated_at.timestamp() if self.updated_at else ""
