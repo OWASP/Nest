@@ -196,21 +196,23 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         leaders = []
+        # Compile regex patterns once per method call (before loop).
+        re_bracketed_pattern = re.compile(
+            r"[-*]\s{0,3}\[\s{0,3}([^\]\(]{1,200})(?:\s{0,3}\([^)]{0,100}\))?\s{0,3}\]"
+        )
+        re_plain_pattern = re.compile(r"\*\s{0,3}([\w\s]{1,200})")
+        re_parenthetical_cleanup_pattern = re.compile(r"\s{0,3}\([^)]{0,100}\)\s{0,3}$")
         for line in content.split("\n"):
             stripped_line = line.strip()
             names = []
 
-            bracketed_pattern = (
-                r"[-*]\s{0,3}\[\s{0,3}([^\]\(]{1,200})"
-                r"(?:\s{0,3}\([^)]{0,100}\))?\s{0,3}\]"
-            )
-            names.extend(re.findall(bracketed_pattern, stripped_line))
-            names.extend(re.findall(r"\*\s{0,3}([\w\s]{1,200})", stripped_line))
+            names.extend(re_bracketed_pattern.findall(stripped_line))
+            names.extend(re_plain_pattern.findall(stripped_line))
 
             cleaned_names = []
             for raw_name in names:
                 if raw_name.strip():
-                    cleaned = re.sub(r"\s{0,3}\([^)]{0,100}\)\s{0,3}$", "", raw_name).strip()
+                    cleaned = re_parenthetical_cleanup_pattern.sub("", raw_name).strip()
                     cleaned_names.append(cleaned)
 
             leaders.extend(cleaned_names)
