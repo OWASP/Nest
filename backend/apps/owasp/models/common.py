@@ -5,6 +5,7 @@ from __future__ import annotations
 import itertools
 import logging
 import re
+from functools import cached_property
 from urllib.parse import urlparse
 
 import yaml
@@ -90,12 +91,17 @@ class RepositoryBasedEntityModel(models.Model):
         blank=True,
     )
 
-    entity_leaders = GenericRelation(
+    entity_members = GenericRelation(
         EntityMember,
         content_type_field="entity_type",
         object_id_field="entity_id",
         related_query_name="entity",
     )
+
+    @cached_property
+    def entity_leaders(self) -> list[EntityMember]:
+        """Return entity's leaders."""
+        return self.entity_members.filter(role=EntityMember.Role.LEADER).order_by("order")
 
     @property
     def github_url(self) -> str:
