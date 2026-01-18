@@ -118,7 +118,9 @@ class ProjectFilter(FilterSchema):
     openapi_extra={
         "responses": {
             401: {
-                "description": "Unauthorized — missing or invalid API key (non-local environments).",
+                "description": (
+                    "Unauthorized — missing or invalid API key (non-local environments)."
+                ),
                 "content": {
                     "application/json": {
                         "examples": {
@@ -136,7 +138,9 @@ class ProjectFilter(FilterSchema):
                         "examples": {
                             "Page out of range": {
                                 "value": {
-                                    "detail": "Not Found: Page 3000 not found. Valid pages are 1 to 3."
+                                    "detail": (
+                                        "Not Found: Page 3000 not found. Valid pages are 1 to 3."
+                                    )
                                 }
                             }
                         }
@@ -144,7 +148,10 @@ class ProjectFilter(FilterSchema):
                 },
             },
             422: {
-                "description": "Unprocessable Content — invalid query parameters (e.g., invalid level, ordering, or page).",
+                "description": (
+                    "Unprocessable Content — invalid query parameters "
+                    "(e.g., invalid level, ordering, or page)."
+                ),
                 "content": {
                     "application/json": {
                         "examples": {
@@ -154,14 +161,33 @@ class ProjectFilter(FilterSchema):
                                         {
                                             "type": "enum",
                                             "loc": ["query", "level"],
-                                            "msg": "Input should be 'other', 'incubator', 'lab', 'production' or 'flagship'",
-                                            "ctx": {"expected": "'other', 'incubator', 'lab', 'production' or 'flagship'"},
+                                            "msg": (
+                                                "Input should be 'other', "
+                                                "'incubator', 'lab', "
+                                                "'production' or 'flagship'"
+                                            ),
+                                            "ctx": {
+                                                "expected": (
+                                                    "'other', 'incubator', "
+                                                    "'lab', 'production' "
+                                                    "or 'flagship'"
+                                                )
+                                            },
                                         },
                                         {
                                             "type": "literal_error",
                                             "loc": ["query", "ordering"],
-                                            "msg": "Input should be 'created_at', '-created_at', 'updated_at' or '-updated_at'",
-                                            "ctx": {"expected": "'created_at', '-created_at', 'updated_at' or '-updated_at'"},
+                                            "msg": (
+                                                "Input should be 'created_at', "
+                                                "'-created_at', 'updated_at' "
+                                                "or '-updated_at'"
+                                            ),
+                                            "ctx": {
+                                                "expected": (
+                                                    "'created_at', '-created_at', "
+                                                    "'updated_at' or '-updated_at'"
+                                                )
+                                            },
                                         },
                                     ]
                                 }
