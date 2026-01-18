@@ -23,6 +23,7 @@ class TestUserNode:
             "badges",
             "bio",
             "company",
+            "contribution_data",
             "contributions_count",
             "created_at",
             "email",

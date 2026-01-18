@@ -85,6 +85,7 @@ export const GET_USER_DATA = gql`
       }
       bio
       company
+      contributionData
       contributionsCount
       createdAt
       email
