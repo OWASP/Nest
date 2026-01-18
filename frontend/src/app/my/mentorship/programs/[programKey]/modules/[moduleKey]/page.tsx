@@ -25,6 +25,7 @@ const ModuleDetailsPage = () => {
       programKey,
       moduleKey,
     },
+    fetchPolicy: 'cache-and-network',
   })
 
   useEffect(() => {
@@ -36,7 +37,7 @@ const ModuleDetailsPage = () => {
     }
   }, [data, error])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (!module) {
     return (

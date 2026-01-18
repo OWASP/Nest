@@ -20,6 +20,7 @@ const ProgramDetailsPage = () => {
   } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
+    fetchPolicy: 'cache-and-network',
   })
 
   const program = data?.getProgram
@@ -29,9 +30,9 @@ const ProgramDetailsPage = () => {
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [graphQLRequestError, programKey])
+  }, [graphQLRequestError])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (graphQLRequestError) {
     return (

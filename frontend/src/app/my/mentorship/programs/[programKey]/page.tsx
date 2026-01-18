@@ -32,6 +32,7 @@ const ProgramDetailsPage = () => {
   const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
+    fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   })
 
@@ -89,7 +90,7 @@ const ProgramDetailsPage = () => {
     }
   }, [data])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (!program && !isLoading) {
     return (
