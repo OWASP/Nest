@@ -4,14 +4,15 @@ on:
   pull_request:
     branches:
       - main
-      - feature/**
+      - "feature/**"
   push:
     branches:
       - main
-      - feature/**
+      - "feature/**"
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   semgrep:
@@ -19,7 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Run Semgrep
         uses: semgrep/semgrep-action@v1
         with:
