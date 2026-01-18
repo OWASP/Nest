@@ -83,6 +83,17 @@ repos:
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
 
+  - repo: https://github.com/semgrep/pre-commit
+    rev: v1.148.0
+    hooks:
+      - id: semgrep
+        args:
+          - --config
+          - p/security-audit
+          - --skip-unknown-extensions
+        stages:
+          - manual
+
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: v2.11.1
     hooks:
