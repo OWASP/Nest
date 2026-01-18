@@ -55,30 +55,30 @@ class UserNode:
     @strawberry_django.field(select_related=["owasp_profile"])
     def first_owasp_contribution_at(self, root: User) -> float | None:
         """Resolve first OWASP contribution date."""
-        if hasattr(root, "owasp_profile") and root.owasp_profile.first_contribution_at:
-            return root.owasp_profile.first_contribution_at.timestamp()
-        return None
+        return (
+            root.owasp_profile.first_contribution_at.timestamp()
+            if hasattr(root, "owasp_profile") and root.owasp_profile.first_contribution_at
+            else None
+        )
 
     @strawberry_django.field(select_related=["owasp_profile"])
     def is_owasp_board_member(self, root: User) -> bool:
         """Resolve if member is currently on OWASP Board of Directors."""
-        if hasattr(root, "owasp_profile"):
-            return root.owasp_profile.is_owasp_board_member
-        return False
+        return (
+            root.owasp_profile.is_owasp_board_member if hasattr(root, "owasp_profile") else False
+        )
 
     @strawberry_django.field(select_related=["owasp_profile"])
     def is_former_owasp_staff(self, root: User) -> bool:
         """Resolve if member is a former OWASP staff member."""
-        if hasattr(root, "owasp_profile"):
-            return root.owasp_profile.is_former_owasp_staff
-        return False
+        return (
+            root.owasp_profile.is_former_owasp_staff if hasattr(root, "owasp_profile") else False
+        )
 
     @strawberry_django.field(select_related=["owasp_profile"])
     def is_gsoc_mentor(self, root: User) -> bool:
         """Resolve if member is a Google Summer of Code mentor."""
-        if hasattr(root, "owasp_profile"):
-            return root.owasp_profile.is_gsoc_mentor
-        return False
+        return root.owasp_profile.is_gsoc_mentor if hasattr(root, "owasp_profile") else False
 
     @strawberry_django.field
     def issues_count(self, root: User) -> int:
@@ -88,9 +88,11 @@ class UserNode:
     @strawberry_django.field(select_related=["owasp_profile"])
     def linkedin_page_id(self, root: User) -> str:
         """Resolve LinkedIn page ID."""
-        if hasattr(root, "owasp_profile") and root.owasp_profile.linkedin_page_id:
-            return root.owasp_profile.linkedin_page_id
-        return ""
+        return (
+            root.owasp_profile.linkedin_page_id
+            if hasattr(root, "owasp_profile") and root.owasp_profile.linkedin_page_id
+            else ""
+        )
 
     @strawberry_django.field
     def releases_count(self, root: User) -> int:

@@ -91,6 +91,7 @@ class RepositoryBasedEntityModel(models.Model):
         blank=True,
     )
 
+    # GRs.
     entity_members = GenericRelation(
         EntityMember,
         content_type_field="entity_type",
