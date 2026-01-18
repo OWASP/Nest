@@ -16,26 +16,7 @@ MAX_LIMIT = 1000
 class PullRequestQuery:
     """Pull request queries."""
 
-    @strawberry_django.field(
-        select_related=[
-            "author__owasp_profile",
-            "author__user_badges__badge",
-            "milestone__author__owasp_profile",
-            "milestone__author__user_badges__badge",
-            "repository__organization",
-            "milestone__repository__organization",
-        ],
-        prefetch_related=[
-            "assignees__owasp_profile",
-            "assignees__user_badges__badge",
-            "labels",
-            "related_issues__repository__organization",
-            "related_issues__assignees__user_badges__badge",
-            "related_issues__labels",
-            "related_issues__milestone__author",
-            "related_issues__level",
-        ],
-    )
+    @strawberry_django.field
     def recent_pull_requests(
         self,
         *,

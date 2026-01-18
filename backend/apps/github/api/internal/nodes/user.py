@@ -52,28 +52,28 @@ class UserNode:
         """Resolve created at."""
         return root.idx_created_at
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["owasp_profile"])
     def first_owasp_contribution_at(self, root: User) -> float | None:
         """Resolve first OWASP contribution date."""
         if hasattr(root, "owasp_profile") and root.owasp_profile.first_contribution_at:
             return root.owasp_profile.first_contribution_at.timestamp()
         return None
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["owasp_profile"])
     def is_owasp_board_member(self, root: User) -> bool:
         """Resolve if member is currently on OWASP Board of Directors."""
         if hasattr(root, "owasp_profile"):
             return root.owasp_profile.is_owasp_board_member
         return False
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["owasp_profile"])
     def is_former_owasp_staff(self, root: User) -> bool:
         """Resolve if member is a former OWASP staff member."""
         if hasattr(root, "owasp_profile"):
             return root.owasp_profile.is_former_owasp_staff
         return False
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["owasp_profile"])
     def is_gsoc_mentor(self, root: User) -> bool:
         """Resolve if member is a Google Summer of Code mentor."""
         if hasattr(root, "owasp_profile"):
@@ -85,7 +85,7 @@ class UserNode:
         """Resolve issues count."""
         return root.idx_issues_count
 
-    @strawberry_django.field
+    @strawberry_django.field(select_related=["owasp_profile"])
     def linkedin_page_id(self, root: User) -> str:
         """Resolve LinkedIn page ID."""
         if hasattr(root, "owasp_profile") and root.owasp_profile.linkedin_page_id:

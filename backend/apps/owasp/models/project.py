@@ -28,7 +28,6 @@ from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
 
 if TYPE_CHECKING:
-    from apps.owasp.models.entity_member import EntityMember
     from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 MAX_LEADERS_COUNT = 5
@@ -156,11 +155,6 @@ class Project(
     def __str__(self) -> str:
         """Project human readable representation."""
         return f"{self.name or self.key}"
-
-    @property
-    def entity_leaders(self) -> list[EntityMember]:
-        """Return project leaders."""
-        return super().entity_leaders[:MAX_LEADERS_COUNT]
 
     @property
     def health_score(self) -> float | None:

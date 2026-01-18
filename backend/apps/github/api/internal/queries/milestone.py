@@ -25,15 +25,7 @@ class MilestoneStateEnum(str, enum.Enum):
 class MilestoneQuery:
     """Github Milestone Queries."""
 
-    @strawberry_django.field(
-        select_related=["author__owasp_profile", "repository__organization"],
-        prefetch_related=[
-            "issues__author__user_badges__badge",
-            "labels",
-            "pull_requests__repository__organization",
-            "pull_requests__author__user_badges__badge",
-        ],
-    )
+    @strawberry_django.field
     def recent_milestones(
         self,
         *,

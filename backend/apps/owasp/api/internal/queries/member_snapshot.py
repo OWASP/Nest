@@ -45,10 +45,7 @@ class MemberSnapshotQuery:
         except User.DoesNotExist:
             return None
 
-    @strawberry_django.field(
-        select_related=["github_user__owasp_profile", "github_user__user_badges__badge"],
-        prefetch_related=["issues", "pull_requests", "messages"],
-    )
+    @strawberry_django.field
     def member_snapshots(
         self, user_login: str | None = None, limit: int = 10
     ) -> list[MemberSnapshotNode]:
