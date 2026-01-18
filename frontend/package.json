@@ -123,6 +123,7 @@
   "pnpm": {
     "overrides": {
       "glob": "^11.1.0",
+      "tar": "^7.5.3",
       "test-exclude": "^7.0.1"
     }
   },
