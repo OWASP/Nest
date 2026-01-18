@@ -15,7 +15,8 @@ try {
 }
 
 if (!response.ok) {
-  throw new Error(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`)
+  console.log(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`)
+  process.exit(1)
 }
 const csrfToken = (await response.json()).csrftoken
 
