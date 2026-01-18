@@ -1,6 +1,7 @@
 """OWASP sponsors GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.owasp.api.internal.nodes.sponsor import SponsorNode
 from apps.owasp.models.sponsor import Sponsor
@@ -10,7 +11,7 @@ from apps.owasp.models.sponsor import Sponsor
 class SponsorQuery:
     """Sponsor queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def sponsors(self) -> list[SponsorNode]:
         """Resolve sponsors."""
         return sorted(

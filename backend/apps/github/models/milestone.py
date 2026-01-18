@@ -19,6 +19,11 @@ class Milestone(GenericIssueModel):
         verbose_name_plural = "Milestones"
         ordering = ["-updated_at", "-state"]
 
+        indexes = [
+            models.Index(fields=["-created_at"], name="github_milestone_created_at"),
+            models.Index(fields=["-updated_at"], name="github_milestone_updated_at"),
+        ]
+
     open_issues_count = models.PositiveIntegerField(default=0)
     closed_issues_count = models.PositiveIntegerField(default=0)
     due_on = models.DateTimeField(blank=True, null=True)

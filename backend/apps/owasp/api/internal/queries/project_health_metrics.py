@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from strawberry.types.unset import UNSET
 
 from apps.owasp.api.internal.filters.project_health_metrics import ProjectHealthMetricsFilter
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
@@ -9,6 +10,9 @@ from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStat
 from apps.owasp.api.internal.ordering.project_health_metrics import ProjectHealthMetricsOrder
 from apps.owasp.api.internal.permissions.project_health_metrics import HasDashboardAccess
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
+
+MAX_LIMIT = 1000
+MAX_OFFSET = 10000
 
 
 @strawberry.type
@@ -39,9 +43,19 @@ class ProjectHealthMetricsQuery:
             list[ProjectHealthMetricsNode]: List of project health metrics.
 
         """
+        if pagination:
+            if pagination.offset < 0:
+                return []
+            pagination.offset = min(pagination.offset, MAX_OFFSET)
+
+            if pagination.limit is not None and pagination.limit != UNSET:
+                if pagination.limit <= 0:
+                    return []
+                pagination.limit = min(pagination.limit, MAX_LIMIT)
+
         return ProjectHealthMetrics.get_latest_health_metrics()
 
-    @strawberry.field(
+    @strawberry_django.field(
         permission_classes=[HasDashboardAccess],
     )
     def project_health_stats(self) -> ProjectHealthStatsNode:
