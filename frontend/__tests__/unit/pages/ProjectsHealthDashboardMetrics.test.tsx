@@ -244,20 +244,20 @@ describe('MetricsPage', () => {
   const testMetricsDataDisplay = async () => {
     const metrics = mockHealthMetricsData.projectHealthMetrics
     for (const metric of metrics) {
-      expect(screen.getByText(metric.projectName)).toBeInTheDocument()
-      expect(screen.getByText(metric.starsCount.toString())).toBeInTheDocument()
-      expect(screen.getByText(metric.forksCount.toString())).toBeInTheDocument()
-      expect(screen.getByText(metric.contributorsCount.toString())).toBeInTheDocument()
+      expect(screen.getAllByText(metric.projectName)[0]).toBeInTheDocument()
+      expect(screen.getAllByText(metric.starsCount.toString())[0]).toBeInTheDocument()
+      expect(screen.getAllByText(metric.forksCount.toString())[0]).toBeInTheDocument()
+      expect(screen.getAllByText(metric.contributorsCount.toString())[0]).toBeInTheDocument()
       expect(
-        screen.getByText(
+        screen.getAllByText(
           new Date(metric.createdAt).toLocaleString('default', {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
           })
-        )
+        )[0]
       ).toBeInTheDocument()
-      expect(screen.getByText(metric.score.toString())).toBeInTheDocument()
+      expect(screen.getAllByText(metric.score.toString())[0]).toBeInTheDocument()
     }
   }
 

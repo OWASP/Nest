@@ -39,12 +39,12 @@ describe('MetricsCard component', () => {
     const metric = makeMetric()
     render(<MetricsCard metric={metric} />)
 
-    expect(screen.getByText('Test Project')).toBeInTheDocument()
-    expect(screen.getByText('42')).toBeInTheDocument()
-    expect(screen.getByText('13')).toBeInTheDocument()
-    expect(screen.getByText('5')).toBeInTheDocument()
-    expect(screen.getByText('Mar 25, 2023')).toBeInTheDocument()
-    expect(screen.getByText('80')).toBeInTheDocument()
+    expect(screen.getAllByText('Test Project')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('42')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('13')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('5')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Mar 25, 2023')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('80')[0]).toBeInTheDocument()
 
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', '/projects/dashboard/metrics/test-project')
@@ -53,7 +53,7 @@ describe('MetricsCard component', () => {
   it('renders "No name" placeholder when projectName is empty', () => {
     const metric = makeMetric({ projectName: '' })
     render(<MetricsCard metric={metric} />)
-    expect(screen.getByText('No name')).toBeInTheDocument()
+    expect(screen.getAllByText('No name')[0]).toBeInTheDocument()
   })
 
   it('applies correct styling class depending on score thresholds', () => {
@@ -75,8 +75,8 @@ describe('MetricsCard component', () => {
 
   it('updates displayed values and link when metric props change via rerender', () => {
     const { rerender } = render(<MetricsCard metric={makeMetric()} />)
-    expect(screen.getByText('Test Project')).toBeInTheDocument()
-    expect(screen.getByText('80')).toBeInTheDocument()
+    expect(screen.getAllByText('Test Project')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('80')[0]).toBeInTheDocument()
 
     const updated = makeMetric({
       projectKey: 'another',
@@ -89,12 +89,12 @@ describe('MetricsCard component', () => {
     })
     rerender(<MetricsCard metric={updated} />)
 
-    expect(screen.getByText('Another Project')).toBeInTheDocument()
-    expect(screen.getByText('99')).toBeInTheDocument()
-    expect(screen.getByText('20')).toBeInTheDocument()
-    expect(screen.getByText('7')).toBeInTheDocument()
-    expect(screen.getByText('Jan 1, 2024')).toBeInTheDocument()
-    expect(screen.getByText('55')).toBeInTheDocument()
+    expect(screen.getAllByText('Another Project')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('99')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('20')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('7')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Jan 1, 2024')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('55')[0]).toBeInTheDocument()
     expect(screen.getByRole('link')).toHaveAttribute('href', '/projects/dashboard/metrics/another')
   })
 })

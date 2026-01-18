@@ -21,19 +21,59 @@ test.describe('Projects Health Dashboard Metrics', () => {
     await mockDashboardCookies(page, mockHealthMetricsData, true)
     await page.goto('/projects/dashboard/metrics')
     const firstMetric = mockHealthMetricsData.projectHealthMetrics[0]
-    await expect(page.getByText(firstMetric.projectName)).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText(firstMetric.starsCount.toString())).toBeVisible()
-    await expect(page.getByText(firstMetric.forksCount.toString())).toBeVisible()
-    await expect(page.getByText(firstMetric.contributorsCount.toString())).toBeVisible()
+    const metricsLink = page
+      .getByRole('link')
+      .filter({
+        has: page.getByText(firstMetric.projectName),
+      })
+      .first()
+
+    await expect(metricsLink).toBeVisible({ timeout: 10000 })
     await expect(
-      page.getByText(
-        new Date(firstMetric.createdAt).toLocaleString('default', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
+      page
+        .getByRole('link')
+        .filter({
+          has: page.getByText(firstMetric.starsCount.toString()),
         })
-      )
+        .first()
     ).toBeVisible()
-    await expect(page.getByText(firstMetric.score.toString())).toBeVisible()
+    await expect(
+      page
+        .getByRole('link')
+        .filter({
+          has: page.getByText(firstMetric.forksCount.toString()),
+        })
+        .first()
+    ).toBeVisible()
+    await expect(
+      page
+        .getByRole('link')
+        .filter({
+          has: page.getByText(firstMetric.contributorsCount.toString()),
+        })
+        .first()
+    ).toBeVisible()
+    await expect(
+      page
+        .getByRole('link')
+        .filter({
+          has: page.getByText(
+            new Date(firstMetric.createdAt).toLocaleString('default', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })
+          ),
+        })
+        .first()
+    ).toBeVisible()
+    await expect(
+      page
+        .getByRole('link')
+        .filter({
+          has: page.getByText(firstMetric.score.toString()),
+        })
+        .first()
+    ).toBeVisible()
   })
 })

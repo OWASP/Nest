@@ -4,7 +4,14 @@ import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import type { IconType } from 'react-icons'
-import { FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa6'
+import {
+  FaFilter,
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+  FaArrowDownWideShort,
+  FaArrowUpWideShort,
+} from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { handleAppError } from 'app/global-error'
 import { Ordering } from 'types/__generated__/graphql'
@@ -27,6 +34,14 @@ const FIELD_MAPPING = {
 } as const
 
 type OrderKey = keyof typeof FIELD_MAPPING
+
+const MOBILE_SORT_FIELDS = [
+  { label: 'Score', key: 'score' },
+  { label: 'Stars', key: 'stars' },
+  { label: 'Forks', key: 'forks' },
+  { label: 'Contributors', key: 'contributors' },
+  { label: 'Last checked', key: 'createdAt' },
+] as const
 
 const parseOrderParam = (orderParam: string | null) => {
   if (!orderParam) {
@@ -57,6 +72,14 @@ const buildOrderingWithTieBreaker = (primaryOrdering: Record<string, Ordering>) 
     project_Name: Ordering.Asc,
   },
 ]
+
+const getNextOrderKey = (fieldKey: OrderKey, currentOrderKey: string) => {
+  if (!currentOrderKey || currentOrderKey.replace('-', '') !== fieldKey) {
+    return `-${fieldKey}`
+  }
+  return currentOrderKey.startsWith('-') ? fieldKey : `-${fieldKey}`
+}
+
 const SortableColumnHeader: FC<{
   label: string
   fieldKey: OrderKey
@@ -270,6 +293,42 @@ const MetricsPage: FC = () => {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Project Health Metrics</h1>
         <div className="flex flex-row items-center gap-2">
+          {/* Mobile Sort */}
+          <div className="sm:hidden">
+            <ProjectsDashboardDropDown
+              buttonDisplayName="Sort By"
+              icon={urlKey && urlKey.startsWith('-') ? FaArrowDownWideShort : FaArrowUpWideShort}
+              sections={[
+                {
+                  title: 'Sort by',
+                  items: MOBILE_SORT_FIELDS.map((field) => ({
+                    label: field.label,
+                    key: field.key,
+                  })),
+                },
+                {
+                  title: 'Actions',
+                  items: [{ label: 'Clear sorting', key: 'clear-sort' }],
+                },
+              ]}
+              selectionMode="single"
+              selectedKeys={urlKey ? [urlKey.startsWith('-') ? urlKey.slice(1) : urlKey] : []}
+              selectedLabels={
+                urlKey
+                  ? [MOBILE_SORT_FIELDS.find((f) => f.key === urlKey.replace('-', ''))?.label || '']
+                  : []
+              }
+              onAction={(key: string) => {
+                if (key === 'clear-sort') {
+                  handleSort(null)
+                  return
+                }
+
+                const nextOrderKey = getNextOrderKey(key as OrderKey, urlKey)
+                handleSort(nextOrderKey)
+              }}
+            />
+          </div>
           <ProjectsDashboardDropDown
             buttonDisplayName="Filter By"
             icon={FaFilter}
@@ -307,7 +366,7 @@ const MetricsPage: FC = () => {
           />
         </div>
       </div>
-      <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] gap-2 border-b border-gray-200 p-4 dark:border-gray-700">
+      <div className="hidden grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] gap-2 border-b border-gray-200 p-4 sm:grid dark:border-gray-700">
         <div className="truncate font-semibold">Project Name</div>
         <SortableColumnHeader
           label="Stars"
