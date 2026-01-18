@@ -2,7 +2,7 @@ import { CodegenConfig } from '@graphql-codegen/cli'
 
 const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:8000'
 
-export default (async (): Promise<CodegenConfig> => {
+export default async function getCodegenConfig(): Promise<CodegenConfig> {
   let response
 
   try {
@@ -12,7 +12,7 @@ export default (async (): Promise<CodegenConfig> => {
   } catch {
     /* eslint-disable no-console */
     console.log('Failed to fetch CSRF token: make sure the backend is running.')
-    return
+    throw new Error('Failed to fetch CSRF token: make sure the backend is running.')
   }
 
   if (!response.ok) {
@@ -74,4 +74,4 @@ export default (async (): Promise<CodegenConfig> => {
       },
     },
   }
-})()
+}
