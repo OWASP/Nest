@@ -3,6 +3,8 @@
 import logging
 
 import strawberry
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module
@@ -19,8 +21,6 @@ def _is_program_admin_or_mentor(user, program) -> bool:
 
     if not user.github_user:
         return False
-
-    from django.db.models import Q
 
     try:
         mentor = Mentor.objects.get(github_user=user.github_user)

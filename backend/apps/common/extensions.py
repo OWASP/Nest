@@ -7,11 +7,14 @@ from functools import lru_cache
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from strawberry.extensions import SchemaExtension
 from strawberry.permission import PermissionExtension
 from strawberry.schema import Schema
 from strawberry.utils.str_converters import to_camel_case
+
+from apps.mentorship.models import Program
+from apps.mentorship.models.mentor import Mentor
 
 
 @lru_cache(maxsize=1)
@@ -59,15 +62,10 @@ class CacheExtension(SchemaExtension):
         if not user or not user.is_authenticated or not program_key:
             return "public"
 
-        from apps.mentorship.models import Program
-        from apps.mentorship.models.mentor import Mentor
-
         github_user = getattr(user, "github_user", None)
         mentor = Mentor.objects.filter(github_user=github_user).first() if github_user else None
         if not mentor:
             return "public"
-
-        from django.db.models import Q
 
         is_admin_or_mentor = Program.objects.filter(
             Q(key=program_key) & (Q(admins=mentor) | Q(modules__mentors=mentor))

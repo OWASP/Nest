@@ -33,10 +33,9 @@ const ProgramsPage = () => {
     )
   }
 
-  const publishedPrograms = programs?.filter((p) => {
-    const isPublished = p.status?.toUpperCase() === ProgramStatusEnum.Published
-    return isPublished
-  })
+  const publishedPrograms = programs?.filter(
+    (p) => p.status?.toUpperCase() === ProgramStatusEnum.Published
+  )
 
   return (
     <SearchPageLayout
