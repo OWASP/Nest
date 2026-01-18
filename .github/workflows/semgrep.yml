@@ -17,14 +17,14 @@ jobs:
   semgrep:
     name: Run Semgrep Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Run Semgrep
-        run: |
-          docker run --rm -v $(pwd):/src returntocorp/semgrep semgrep \
-          --config=p/owasp-top-ten \
-          --config=p/python \
-          --config=p/javascript \
-          --error
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/owasp-top-ten
+            p/python
+            p/javascript
+        continue-on-error: false
