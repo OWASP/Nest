@@ -143,6 +143,7 @@ slackbot
 slideshare
 speakerdeck
 superfences
+tgz
 tiktok
 trivyignores
 tsc
@@ -158,6 +159,7 @@ xdg
 xdist
 xoxb
 xsser
+xzf
 zapconfig
 zaproxy
 zsc
