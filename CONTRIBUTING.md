@@ -491,6 +491,7 @@ flowchart TD
     linkStyle 23 stroke:#4caf50,stroke-width:2px
     linkStyle 24 stroke:#f44336,stroke-width:2px
 ```
+
 ### Keep Your Fork in Sync with Upstream
 
 To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP Nest repository.
