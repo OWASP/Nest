@@ -55,7 +55,7 @@ const ContributorsList = ({
                                 alt={item?.name ? `${item.name}'s avatar` : 'Contributor avatar'}
                                 className="rounded-full"
                                 height={24}
-                                src={`${item?.avatarUrl}&s=60`}
+                                src={`${item?.avatarUrl}${item?.avatarUrl?.includes('?') ? '&' : '?'}s=60`}
                                 title={item?.name || item?.login}
                                 width={24}
                             />
@@ -70,7 +70,12 @@ const ContributorsList = ({
                     </div>
                 ))}
             </div>
-            {contributors.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleContributors} />}
+            {contributors.length > maxInitialDisplay && (
+                <ShowMoreButton
+                    isExpanded={showAllContributors}
+                    onToggle={toggleContributors}
+                />
+            )}
         </SecondaryCard>
     )
 }

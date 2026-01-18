@@ -1,12 +1,12 @@
 import { Button } from '@heroui/button'
-import { useState } from 'react'
+
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa'
 
-const ShowMoreButton = ({ onToggle }: { onToggle: () => void }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
-
+const ShowMoreButton = ({
+  onToggle,
+  isExpanded,
+}: { onToggle: () => void; isExpanded: boolean }) => {
   const handleToggle = () => {
-    setIsExpanded(!isExpanded)
     onToggle()
   }
 
