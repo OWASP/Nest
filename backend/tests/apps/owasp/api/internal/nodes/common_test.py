@@ -13,13 +13,9 @@ class TestGenericEntityNode:
         mock_leader2 = Mock()
 
         mock_entity = Mock()
-        mock_entity.entity_leaders.order_by.return_value = [
-            mock_leader1,
-            mock_leader2,
-        ]
+        mock_entity.entity_leaders = [mock_leader1, mock_leader2]
 
-        result = GenericEntityNode.entity_leaders(None, mock_entity)
-        mock_entity.entity_leaders.order_by.assert_called_once_with("order")
+        result = GenericEntityNode().entity_leaders(mock_entity)
 
         assert result == [mock_leader1, mock_leader2]
 
