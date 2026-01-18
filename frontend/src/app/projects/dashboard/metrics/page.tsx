@@ -291,13 +291,15 @@ const MetricsPage: FC = () => {
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Project Health Metrics</h1>
+        <h1 className="text-xl leading-tight font-bold sm:text-2xl">
+          Project Health <span className="block sm:inline">Metrics</span>
+        </h1>
         <div className="flex flex-row items-center gap-2">
           {/* Mobile Sort */}
           <div className="sm:hidden">
             <ProjectsDashboardDropDown
               buttonDisplayName="Sort By"
-              icon={urlKey && urlKey.startsWith('-') ? FaArrowDownWideShort : FaArrowUpWideShort}
+              icon={urlKey?.startsWith('-') ? FaArrowDownWideShort : FaArrowUpWideShort}
               sections={[
                 {
                   title: 'Sort by',

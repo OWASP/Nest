@@ -58,7 +58,7 @@ test.describe('Projects Health Dashboard Metrics', () => {
         .getByRole('link')
         .filter({
           has: page.getByText(
-            new Date(firstMetric.createdAt).toLocaleString('default', {
+            new Date(firstMetric.createdAt).toLocaleString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
