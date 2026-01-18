@@ -31,6 +31,12 @@ class Base(Configuration):
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
 
+    # --- CSRF cookie settings (SPA-safe, OWASP compliant) ---
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = "Strict"
+    # CSRF_COOKIE_HTTPONLY is intentionally NOT enabled
+    # Django CSRF cookies must be readable by JS for SPA frameworks
+
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
 
