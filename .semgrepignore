@@ -1,0 +1,9 @@
+.venv/
+node_modules/
+backend/static/
+frontend/.next/
+.git/
+.github/
+backend/data/
+backend/poetry.lock
+frontend/src/app/organizations/[organizationKey]/layout.tsx

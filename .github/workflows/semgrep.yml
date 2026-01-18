@@ -1,0 +1,30 @@
+name: Semgrep Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+      - feature/**
+  push:
+    branches:
+      - main
+      - feature/**
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: Run Semgrep Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          docker run --rm -v $(pwd):/src returntocorp/semgrep semgrep \
+          --config=p/owasp-top-ten \
+          --config=p/python \
+          --config=p/javascript \
+          --error

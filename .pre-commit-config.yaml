@@ -87,3 +87,9 @@ repos:
     rev: v2.11.1
     hooks:
       - id: pyproject-fmt
+
+  - repo: https://github.com/semgrep/semgrep
+    rev: v1.104.0
+    hooks:
+      - id: semgrep
+        args: [--config=p/owasp-top-ten, --config=p/python, --config=p/javascript, --error]
