@@ -29,3 +29,4 @@ jobs:
           no_issue_message: 'The PR must be linked to an issue assigned to the PR author.'
           require_assignee: 'true'
           skip_users_file_path: '.github/workflows/check-pr-issue-skip-usernames.txt'
+    timeout-minutes: 5

@@ -83,9 +83,9 @@ const UserDetailsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div data-testid="user-loading-skeleton">
+      <output>
         <MemberDetailsPageSkeleton />
-      </div>
+      </output>
     )
   }
 
@@ -151,7 +151,7 @@ const UserDetailsPage: React.FC = () => {
     return (
       <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
         <div className="relative">
-          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+          <canvas ref={canvasRef} style={{ display: 'none' }} tabIndex={-1}></canvas>
           {imgSrc ? (
             <div className="h-32">
               <Image

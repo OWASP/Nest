@@ -8,6 +8,7 @@ CCSP
 CISSP
 Cañón
 DRF
+ELEVENLABS
 GBP
 GFKs
 GSOC
@@ -29,12 +30,14 @@ Sonarqube
 Stegen
 T04T40NHX
 Truncator
+Turbopack
 Twitterbot
 WSL
 Whistleblower
 Wörld
 Xmark
 a2eeef
+acodec
 agentic
 ahmedxgouda
 algoliasearch
@@ -60,6 +63,7 @@ demojize
 dismissable
 dockerhub
 dsn
+elevenlabs
 env
 facebookexternalhit
 gamesec
@@ -81,6 +85,11 @@ kasya
 langgraph
 lhci
 libexpat
+libgobject
+libharfbuzz
+libpango
+libpangoft
+libx
 lighthouseci
 linkify
 lte
@@ -96,6 +105,7 @@ menteemodule_set
 mentees
 mern
 millify
+mkv
 mpim
 navlink
 nestbot
@@ -107,9 +117,11 @@ openstreetmap
 owasppcitoolkit
 owtf
 pdfgen
+pdfium
 pentest
 pentesting
 pgvector
+pil
 pnpmrc
 psycopg
 pygithub
@@ -137,6 +149,7 @@ tsc
 unassigning
 unhover
 usefixtures
+vcodec
 webgoat
 winsrdf
 wsgi
