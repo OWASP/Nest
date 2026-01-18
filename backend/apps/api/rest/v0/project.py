@@ -102,7 +102,6 @@ class ProjectFilter(FilterSchema):
         "`GET /api/v0/projects/{project_id}`.\n\n"
         "### Authentication\n"
         "In non-local environments this endpoint requires an API key in the `X-API-Key` header. "
-        "Missing/invalid keys return `401 Unauthorized`.\n\n"
         "### Pagination\n"
         "Pagination query parameters are provided by the API's configured Django Ninja pagination "
         "class "
@@ -116,6 +115,75 @@ class ProjectFilter(FilterSchema):
     operation_id="list_projects",
     response=list[Project],
     summary="List projects",
+    openapi_extra={
+        "responses": {
+            401: {
+                "description": "Unauthorized — missing or invalid API key (non-local environments).",
+                "content": {
+                    "application/json": {
+                        "examples": {
+                            "Missing or invalid API key": {
+                                "value": {"message": "Missing or invalid API key"}
+                            }
+                        }
+                    }
+                },
+            },
+            404: {
+                "description": "Not Found — page out of range (when using page-based pagination).",
+                "content": {
+                    "application/json": {
+                        "examples": {
+                            "Page out of range": {
+                                "value": {
+                                    "detail": "Not Found: Page 3000 not found. Valid pages are 1 to 3."
+                                }
+                            }
+                        }
+                    }
+                },
+            },
+            422: {
+                "description": "Unprocessable Content — invalid query parameters (e.g., invalid level, ordering, or page).",
+                "content": {
+                    "application/json": {
+                        "examples": {
+                            "Invalid level + ordering": {
+                                "value": {
+                                    "detail": [
+                                        {
+                                            "type": "enum",
+                                            "loc": ["query", "level"],
+                                            "msg": "Input should be 'other', 'incubator', 'lab', 'production' or 'flagship'",
+                                            "ctx": {"expected": "'other', 'incubator', 'lab', 'production' or 'flagship'"},
+                                        },
+                                        {
+                                            "type": "literal_error",
+                                            "loc": ["query", "ordering"],
+                                            "msg": "Input should be 'created_at', '-created_at', 'updated_at' or '-updated_at'",
+                                            "ctx": {"expected": "'created_at', '-created_at', 'updated_at' or '-updated_at'"},
+                                        },
+                                    ]
+                                }
+                            },
+                            "Invalid page (page=0)": {
+                                "value": {
+                                    "detail": [
+                                        {
+                                            "type": "greater_than_equal",
+                                            "loc": ["query", "page"],
+                                            "msg": "Input should be greater than or equal to 1",
+                                            "ctx": {"ge": 1},
+                                        }
+                                    ]
+                                }
+                            },
+                        }
+                    }
+                },
+            },
+        }
+    },
 )
 @decorate_view(cache_response())
 def list_projects(
