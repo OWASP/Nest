@@ -15,28 +15,7 @@ MAX_LIMIT = 1000
 class IssueQuery:
     """GraphQL query class for retrieving GitHub issues."""
 
-    @strawberry_django.field(
-        select_related=[
-            "author__owasp_profile",
-            "author__user_badges__badge",
-            "level",
-            "milestone__author__owasp_profile",
-            "milestone__author__user_badges__badge",
-            "milestone__repository__organization",
-            "repository__organization",
-        ],
-        prefetch_related=[
-            "assignees__owasp_profile",
-            "assignees__user_badges__badge",
-            "labels",
-            "participant_interests__user__user_badges",
-            "pull_requests__author__user_badges__badge",
-            "pull_requests__labels",
-            "pull_requests__milestone__author__user_badges",
-            "pull_requests__milestone__repository__organization",
-            "pull_requests__repository__organization",
-        ],
-    )
+    @strawberry_django.field
     def recent_issues(
         self,
         *,

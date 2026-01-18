@@ -24,15 +24,7 @@ class SnapshotQuery:
         except Snapshot.DoesNotExist:
             return None
 
-    @strawberry_django.field(
-        prefetch_related=[
-            "new_chapters",
-            "new_issues",
-            "new_projects",
-            "new_releases",
-            "new_users",
-        ],
-    )
+    @strawberry_django.field
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
         return (
