@@ -4,7 +4,9 @@ import React from 'react'
 import { apolloClient } from 'server/apolloClient'
 import {
   GetOrganizationDataDocument,
+  GetOrganizationDataQuery,
   GetOrganizationMetadataDocument,
+  GetOrganizationMetadataQuery,
 } from 'types/__generated__/organizationQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
@@ -15,12 +17,12 @@ export async function generateMetadata({
   params: Promise<{ organizationKey: string }>
 }): Promise<Metadata> {
   const { organizationKey } = await params
-  const { data } = await apolloClient.query({
+  const { data } = (await apolloClient.query<GetOrganizationMetadataQuery>({
     query: GetOrganizationMetadataDocument,
     variables: {
       login: organizationKey,
     },
-  })
+  })) as { data: GetOrganizationMetadataQuery }
   const organization = data?.organization
   const title = organization?.name ?? organization?.login
 
@@ -30,18 +32,18 @@ export async function generateMetadata({
         description: organization?.description ?? `${title} organization details`,
         title: title,
       })
-    : null
+    : {}
 }
 
 async function generateOrganizationStructuredData(organizationKey: string) {
   // https://developers.google.com/search/docs/appearance/structured-data/organization#structured-data-type-definitions
 
-  const { data } = await apolloClient.query({
+  const { data } = (await apolloClient.query<GetOrganizationDataQuery>({
     query: GetOrganizationDataDocument,
     variables: {
       login: organizationKey,
     },
-  })
+  })) as { data: GetOrganizationDataQuery }
 
   const organization = data?.organization
   if (!organization) return null
@@ -101,10 +103,10 @@ export default async function OrganizationDetailsLayout({
   const structuredData = await generateOrganizationStructuredData(organizationKey)
 
   // Fetch organization name for breadcrumb
-  const { data } = await apolloClient.query({
+  const { data } = (await apolloClient.query<GetOrganizationMetadataQuery>({
     query: GetOrganizationMetadataDocument,
     variables: { login: organizationKey },
-  })
+  })) as { data: GetOrganizationMetadataQuery }
   const orgName = data?.organization?.name || data?.organization?.login || organizationKey
 
   return (

@@ -3,6 +3,14 @@ import { useTheme } from 'next-themes'
 import React, { useMemo } from 'react'
 import { pluralize } from 'utils/pluralize'
 
+interface TooltipContext {
+  config: {
+    series: Array<{
+      data: Array<{ x: string; y: number; date: string }>
+    }>
+  }
+}
+
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
 })
@@ -179,7 +187,15 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
     style: {
       fontSize: '12px',
     },
-    custom: ({ seriesIndex, dataPointIndex, w }) => {
+    custom: ({
+      seriesIndex,
+      dataPointIndex,
+      w,
+    }: {
+      seriesIndex: number
+      dataPointIndex: number
+      w: TooltipContext
+    }) => {
       const data = w.config.series[seriesIndex].data[dataPointIndex]
       if (!data) return ''
 

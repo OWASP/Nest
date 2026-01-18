@@ -102,7 +102,7 @@ const DetailsCard = ({
   const { data: session } = useSession() as { data: ExtendedSession | null }
 
   // compute styles based on type prop
-  const typeStylesMap = {
+  const typeStylesMap: Partial<Record<CardType, string>> = {
     chapter: 'gap-2 md:col-span-3',
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
@@ -113,6 +113,7 @@ const DetailsCard = ({
     (contributionData && Object.keys(contributionData).length > 0)
 
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
+  const userLogin = session?.user?.login
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -131,7 +132,7 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some((admin) => admin.login === session?.user?.login) && (
+                admins?.some((admin) => admin.login === userLogin) && (
                   <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
                 )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
@@ -160,18 +161,26 @@ const DetailsCard = ({
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
             className={secondaryCardStyles}
           >
-            {details?.map((detail) =>
-              detail?.label === 'Leaders' ? (
+            {details?.map((detail) => {
+              const isLeaders = detail?.label === 'Leaders'
+
+              const leadersValue =
+                detail?.value === null ||
+                detail?.value === undefined ||
+                typeof detail.value !== 'string'
+                  ? 'Unknown'
+                  : detail.value
+
+              return isLeaders ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
-                  <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value == null ? 'Unknown' : String(detail.value)} />
+                  <strong>{detail.label}:</strong> <LeadersList leaders={leadersValue} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
                   <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
                 </div>
               )
-            )}
+            })}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
             )}
@@ -368,7 +377,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

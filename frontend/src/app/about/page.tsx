@@ -32,7 +32,7 @@ import ShowMoreButton from 'components/ShowMoreButton'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import TopContributorsList from 'components/TopContributorsList'
 
-const leaders = {
+const leaders: Record<string, string> = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
@@ -351,7 +351,7 @@ const useLeadersData = () => {
   const leadersData = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
     .filter(Boolean)
     .map((user) => ({
-      description: leaders[user.login],
+      description: leaders[user.login as keyof typeof leaders] || '',
       memberName: user.name || user.login,
       member: user,
     }))
