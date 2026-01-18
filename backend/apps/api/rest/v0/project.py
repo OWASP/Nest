@@ -101,7 +101,7 @@ class ProjectFilter(FilterSchema):
         "Use this endpoint to discover project keys/IDs that can be used with "
         "`GET /api/v0/projects/{project_id}`.\n\n"
         "### Authentication\n"
-        "In non-local environments this endpoint requires an API key in the `X-API-Key` header. "
+        "In non-local environments this endpoint requires an API key in the `X-API-Key` header.\n"
         "### Pagination\n"
         "Pagination query parameters are provided by the API's configured Django Ninja pagination "
         "class "
