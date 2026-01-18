@@ -30,6 +30,7 @@ Sonarqube
 Stegen
 T04T40NHX
 Truncator
+Turbopack
 Twitterbot
 WSL
 Whistleblower
