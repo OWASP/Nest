@@ -1,11 +1,13 @@
 """Strawberry extensions."""
 
+import asyncio
 import hashlib
 import json
 from functools import lru_cache
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import QuerySet
 from strawberry.extensions import SchemaExtension
 from strawberry.permission import PermissionExtension
 from strawberry.schema import Schema
@@ -32,27 +34,68 @@ def get_protected_fields(schema: Schema) -> tuple[str, ...]:
     )
 
 
-class CacheExtension(SchemaExtension):
-    """CacheExtension class."""
+CACHE_MISS = object()
 
-    def generate_key(self, field_name: str, field_args: dict) -> str:
+
+class CacheExtension(SchemaExtension):
+    """CacheExtension class with role-aware caching."""
+
+    ROLE_AWARE_FIELDS = ("getProgram", "getProgramModules")
+
+    def _get_user_role(self, info, field_args: dict) -> str:
+        """Determine user role.
+
+        Args:
+            info: GraphQL resolver info.
+            field_args: Query arguments (may contain programKey).
+
+        Returns:
+            str: 'admin' or 'public'
+
+        """
+        user = getattr(info.context.request, "user", None)
+        program_key = field_args.get("programKey")
+
+        if not user or not user.is_authenticated or not program_key:
+            return "public"
+
+        from apps.mentorship.models import Program
+        from apps.mentorship.models.mentor import Mentor
+
+        github_user = getattr(user, "github_user", None)
+        mentor = Mentor.objects.filter(github_user=github_user).first() if github_user else None
+        if not mentor:
+            return "public"
+
+        from django.db.models import Q
+
+        is_admin_or_mentor = Program.objects.filter(
+            Q(key=program_key) & (Q(admins=mentor) | Q(modules__mentors=mentor))
+        ).exists()
+
+        return "admin" if is_admin_or_mentor else "public"
+
+    def generate_key(self, field_name: str, field_args: dict, role: str | None = None) -> str:
         """Generate a unique cache key for a query.
 
         Args:
             field_name (str): The GraphQL field name.
             field_args (dict): The field's arguments.
+            role (str | None): User role ('admin' or 'public') for role-aware fields.
 
         Returns:
             str: The unique cache key.
 
         """
-        key = f"{field_name}:{json.dumps(field_args, sort_keys=True)}"
+        cache_data = {"field": field_name, "args": field_args, "role": role}
+
+        key = json.dumps(cache_data, sort_keys=True)
         return (
             f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
         )
 
     def resolve(self, _next, root, info, *args, **kwargs):
-        """Wrap the resolver to provide caching."""
+        """Wrap the resolver to provide role-aware caching."""
         if (
             info.field_name.startswith("__")
             or info.parent_type.name != "Query"
@@ -60,8 +103,22 @@ class CacheExtension(SchemaExtension):
         ):
             return _next(root, info, *args, **kwargs)
 
-        return cache.get_or_set(
-            self.generate_key(info.field_name, kwargs),
-            lambda: _next(root, info, *args, **kwargs),
-            settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS,
-        )
+        role = None
+        if info.field_name in self.ROLE_AWARE_FIELDS:
+            role = self._get_user_role(info, kwargs)
+
+        cache_key = self.generate_key(info.field_name, kwargs, role)
+        cached_result = cache.get(cache_key, CACHE_MISS)
+        if cached_result is not CACHE_MISS:
+            return cached_result
+
+        result = _next(root, info, *args, **kwargs)
+
+        if asyncio.iscoroutine(result):
+            return result
+
+        if isinstance(result, QuerySet):
+            result = list(result)
+
+        cache.set(cache_key, result, settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS)
+        return result

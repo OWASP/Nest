@@ -144,20 +144,23 @@ class TestResolve:
     def test_returns_cached_result_on_hit(self, mock_cache, extension, mock_info, mock_next):
         """Test that cached result is returned on cache hit."""
         cached_result = {"name": "Cached OWASP"}
-        mock_cache.get_or_set.return_value = cached_result
+        mock_cache.get.return_value = cached_result
 
         result = extension.resolve(mock_next, None, mock_info, key="germany")
 
         assert result == cached_result
-        mock_cache.get_or_set.assert_called_once()
+        mock_cache.get.assert_called_once()
         mock_next.assert_not_called()
 
+    @patch("apps.common.extensions.CACHE_MISS", new_callable=lambda: object())
     @patch("apps.common.extensions.cache")
-    def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
+    def test_caches_result_on_miss(
+        self, mock_cache, mock_cache_miss, extension, mock_info, mock_next
+    ):
         """Test that result is cached on cache miss."""
-        mock_cache.get_or_set.side_effect = lambda _key, default, _timeout: default()
+        mock_cache.get.return_value = mock_cache_miss
 
         extension.resolve(mock_next, None, mock_info, key="germany")
 
         mock_next.assert_called_once()
-        mock_cache.get_or_set.assert_called_once()
+        mock_cache.set.assert_called_once()
