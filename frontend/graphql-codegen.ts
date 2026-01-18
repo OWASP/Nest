@@ -2,25 +2,19 @@ import { CodegenConfig } from '@graphql-codegen/cli'
 
 const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:8000'
 
-export default (async (): Promise<CodegenConfig> => {
-  let response
+let config: CodegenConfig | undefined
 
-  try {
-    response = await fetch(`${PUBLIC_API_URL}/csrf/`, {
-      method: 'GET',
-    })
-  } catch {
-    /* eslint-disable no-console */
-    console.log('Failed to fetch CSRF token: make sure the backend is running.')
-    return
-  }
+try {
+  const response = await fetch(`${PUBLIC_API_URL}/csrf/`, {
+    method: 'GET',
+  })
 
   if (!response.ok) {
     throw new Error(`Failed to fetch CSRF token: ${response.status} ${response.statusText}`)
   }
   const csrfToken = (await response.json()).csrftoken
 
-  return {
+  config = {
     documents: ['src/**/*.{ts,tsx}', '!src/types/__generated__/**'],
     generates: {
       './src/': {
@@ -74,4 +68,9 @@ export default (async (): Promise<CodegenConfig> => {
       },
     },
   }
-})()
+} catch {
+  /* eslint-disable no-console */
+  console.log('Failed to fetch CSRF token: make sure the backend is running.')
+}
+
+export default config
