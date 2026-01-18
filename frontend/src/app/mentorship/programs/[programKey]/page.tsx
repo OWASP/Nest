@@ -28,26 +28,18 @@ const ProgramDetailsPage = () => {
 
   useEffect(() => {
     if (graphQLRequestError) {
-      const isNotFound = graphQLRequestError.message?.toLowerCase().includes('not found')
-      if (!isNotFound) {
-        handleAppError(graphQLRequestError)
-      }
+      handleAppError(graphQLRequestError)
     }
-  }, [graphQLRequestError, programKey])
+  }, [graphQLRequestError])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (graphQLRequestError) {
-    const isNotFound = graphQLRequestError.message?.toLowerCase().includes('not found')
     return (
       <ErrorDisplay
-        statusCode={isNotFound ? 404 : 500}
-        title={isNotFound ? 'Program Not Found' : 'Error loading program'}
-        message={
-          isNotFound
-            ? "Sorry, the program you're looking for doesn't exist."
-            : 'An error occurred while loading the program data'
-        }
+        statusCode={500}
+        title="Error loading program"
+        message="An error occurred while loading the program data"
       />
     )
   }

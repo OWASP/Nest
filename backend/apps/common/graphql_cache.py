@@ -19,11 +19,13 @@ def invalidate_graphql_cache(field_name: str, field_args: dict) -> bool:
 
     Returns:
         True if cache was invalidated, False if key didn't exist.
+
     """
     key = f"{field_name}:{json.dumps(field_args, sort_keys=True)}"
-    cache_key = f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
-    result = cache.delete(cache_key)
-    return result
+    cache_key = (
+        f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
+    )
+    return cache.delete(cache_key)
 
 
 def invalidate_program_cache(program_key: str) -> None:
@@ -31,6 +33,7 @@ def invalidate_program_cache(program_key: str) -> None:
 
     Args:
         program_key: The program's key identifier.
+
     """
     invalidate_graphql_cache("getProgram", {"programKey": program_key})
 
@@ -43,8 +46,8 @@ def invalidate_module_cache(program_key: str, module_key: str) -> None:
     Args:
         program_key: The program's key identifier.
         module_key: The module's key identifier.
-    """
 
+    """
     invalidate_graphql_cache("getModule", {"moduleKey": module_key, "programKey": program_key})
 
     invalidate_program_cache(program_key)

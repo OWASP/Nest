@@ -174,6 +174,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
             },
           },
           awaitRefetchQueries: true,
+          refetchQueries: expect.any(Array),
         })
       )
 

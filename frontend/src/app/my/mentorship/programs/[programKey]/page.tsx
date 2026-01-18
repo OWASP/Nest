@@ -90,7 +90,7 @@ const ProgramDetailsPage = () => {
     }
   }, [data])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (!program && !isLoading) {
     return (

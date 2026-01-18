@@ -31,26 +31,18 @@ const ModuleDetailsPage = () => {
 
   useEffect(() => {
     if (error) {
-      const isNotFound = error.message?.toLowerCase().includes('not found')
-      if (!isNotFound) {
-        handleAppError(error)
-      }
+      handleAppError(error)
     }
   }, [error])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (error) {
-    const isNotFound = error.message?.toLowerCase().includes('not found')
     return (
       <ErrorDisplay
-        statusCode={isNotFound ? 404 : 500}
-        title={isNotFound ? 'Module Not Found' : 'Error loading module'}
-        message={
-          isNotFound
-            ? "Sorry, the module you're looking for doesn't exist."
-            : 'An error occurred while loading the module data'
-        }
+        statusCode={500}
+        title="Error loading module"
+        message="An error occurred while loading the module data"
       />
     )
   }

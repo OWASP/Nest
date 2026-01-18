@@ -33,14 +33,11 @@ const ModuleDetailsPage = () => {
       setModule(data.getModule)
       setAdmins(data.getProgram.admins)
     } else if (error) {
-      const isNotFound = error.message?.toLowerCase().includes('not found')
-      if (!isNotFound) {
-        handleAppError(error)
-      }
+      handleAppError(error)
     }
   }, [data, error])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (!module) {
     return (
