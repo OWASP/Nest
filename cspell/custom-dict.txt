@@ -148,7 +148,6 @@ trivyignores
 tsc
 unassigning
 unhover
-unrs
 usefixtures
 vcodec
 webgoat
