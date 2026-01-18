@@ -66,6 +66,11 @@ class Project(
         default=ProjectLevel.OTHER,
     )
     level_raw = models.CharField(verbose_name="Level raw", max_length=50, default="")
+    is_level_non_compliant = models.BooleanField(
+        verbose_name="Is level non-compliant",
+        default=False,
+        help_text="Indicates if the project level does not match the official OWASP level",
+    )
 
     type = models.CharField(
         verbose_name="Type",
