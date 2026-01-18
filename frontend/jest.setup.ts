@@ -113,8 +113,14 @@ beforeAll(() => {
   }
 
   globalThis.ResizeObserver = class {
+
+      // Intentionally empty: mock implementation for test environment
     disconnect() {}
+
+    // Intentionally empty: mock implementation for test environment
     observe() {}
+
+    // Intentionally empty: mock implementation for test environment
     unobserve() {}
   }
 })
