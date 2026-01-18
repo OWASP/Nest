@@ -15,7 +15,7 @@ class TestGenericEntityNode:
         mock_entity = Mock()
         mock_entity.entity_leaders = [mock_leader1, mock_leader2]
 
-        result = GenericEntityNode.entity_leaders(None, mock_entity)
+        result = GenericEntityNode().entity_leaders(mock_entity)
 
         assert result == [mock_leader1, mock_leader2]
 
