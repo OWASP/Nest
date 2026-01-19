@@ -51,6 +51,41 @@ class CacheExtension(SchemaExtension):
             f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
         )
 
+    def invalidate_cache(self, field_name: str, field_args: dict) -> bool:
+        """Invalidate a specific GraphQL query from the resolver cache.
+
+        Args:
+            field_name: The GraphQL field name (e.g., 'getProgram').
+            field_args: The field's arguments as a dict (e.g., {'programKey': 'my-program'}).
+
+        Returns:
+            True if cache was invalidated, False if key didn't exist.
+
+        """
+        cache_key = self.generate_key(field_name, field_args)
+        return cache.delete(cache_key)
+
+    def invalidate_program_cache(self, program_key: str) -> None:
+        """Invalidate all GraphQL caches related to a program.
+
+        Args:
+            program_key: The program's key identifier.
+
+        """
+        self.invalidate_cache("getProgram", {"programKey": program_key})
+        self.invalidate_cache("getProgramModules", {"programKey": program_key})
+
+    def invalidate_module_cache(self, program_key: str, module_key: str) -> None:
+        """Invalidate all GraphQL caches related to a module.
+
+        Args:
+            program_key: The program's key identifier.
+            module_key: The module's key identifier.
+
+        """
+        self.invalidate_cache("getModule", {"moduleKey": module_key, "programKey": program_key})
+        self.invalidate_program_cache(program_key)
+
     def resolve(self, _next, root, info, *args, **kwargs):
         """Wrap the resolver to provide caching."""
         if (
@@ -65,3 +100,42 @@ class CacheExtension(SchemaExtension):
             lambda: _next(root, info, *args, **kwargs),
             settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS,
         )
+
+
+# Module-level helper functions for use in mutations
+_cache_extension = CacheExtension()
+
+
+def invalidate_graphql_cache(field_name: str, field_args: dict) -> bool:
+    """Invalidate a specific GraphQL query from the resolver cache.
+
+    Args:
+        field_name: The GraphQL field name (e.g., 'getProgram').
+        field_args: The field's arguments as a dict (e.g., {'programKey': 'my-program'}).
+
+    Returns:
+        True if cache was invalidated, False if key didn't exist.
+
+    """
+    return _cache_extension.invalidate_cache(field_name, field_args)
+
+
+def invalidate_program_cache(program_key: str) -> None:
+    """Invalidate all GraphQL caches related to a program.
+
+    Args:
+        program_key: The program's key identifier.
+
+    """
+    _cache_extension.invalidate_program_cache(program_key)
+
+
+def invalidate_module_cache(program_key: str, module_key: str) -> None:
+    """Invalidate all GraphQL caches related to a module.
+
+    Args:
+        program_key: The program's key identifier.
+        module_key: The module's key identifier.
+
+    """
+    _cache_extension.invalidate_module_cache(program_key, module_key)
