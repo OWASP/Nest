@@ -2,6 +2,7 @@ Agentic
 Agsoc
 Aichi
 Aissue
+Atqc
 Aupdated
 BOTTOMPADDING
 CCSP
@@ -21,6 +22,7 @@ NOASSERTION
 NOSONAR
 Nadu
 Nominatim
+PGPASSWORD
 PLR
 PYTHONPATH
 PYTHONUNBUFFERED
@@ -32,6 +34,7 @@ Sonarqube
 Stegen
 T04T40NHX
 Truncator
+Turbopack
 Twitterbot
 WSL
 Whistleblower
@@ -49,6 +52,7 @@ aquasecurity
 arithmatex
 arkid15r
 askowasp
+attisdropped
 bangbang
 bsky
 certbot
@@ -67,6 +71,7 @@ dockerhub
 dsn
 elevenlabs
 env
+euo
 facebookexternalhit
 gamesec
 geocoders
@@ -74,6 +79,7 @@ geoloc
 geopy
 gha
 graphiql
+graphqler
 gunicorn
 hackathon
 hcl
@@ -116,7 +122,9 @@ nestbot
 ngx
 noinput
 nosniff
+nspname
 numfmt
+openblas
 openstreetmap
 owasppcitoolkit
 owtf
@@ -142,6 +150,7 @@ rsc
 saft
 sakanashi
 samm
+schemathesis
 seo
 skillstruck
 slackbot
@@ -149,7 +158,9 @@ slideshare
 speakerdeck
 superfences
 tfbackend
+tgz
 tiktok
+trgm
 trivyignores
 tsc
 unassigning
@@ -164,6 +175,7 @@ xdg
 xdist
 xoxb
 xsser
+xzf
 zapconfig
 zaproxy
 zsc

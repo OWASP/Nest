@@ -65,5 +65,3 @@ RUN rm -rf /home/owasp/.cache && \
     chmod +x /home/owasp/entrypoint.sh
 
 USER owasp
-
-CMD ["/home/owasp/entrypoint.sh"]

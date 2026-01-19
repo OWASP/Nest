@@ -14,6 +14,27 @@ const mockMap = {
     enable: jest.fn(),
     disable: jest.fn(),
   },
+  dragging: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  touchZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  doubleClickZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  keyboard: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  getContainer: jest.fn(() => ({
+    clientWidth: 800,
+    clientHeight: 400,
+  })),
+  setMinZoom: jest.fn(),
 }
 
 const mockZoomControl = {

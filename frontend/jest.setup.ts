@@ -113,9 +113,9 @@ beforeAll(() => {
   }
 
   globalThis.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
+    disconnect() {} // NOSONAR: empty mock implementation for test environment.
+    observe() {} // NOSONAR: empty mock implementation for test environment.
+    unobserve() {} // NOSONAR: empty mock implementation for test environment.
   }
 })
 
