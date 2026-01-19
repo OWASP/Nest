@@ -1,18 +1,31 @@
 """Github Milestone Queries."""
 
+import enum
+
 import strawberry
-from django.core.exceptions import ValidationError
+import strawberry_django
 from django.db.models import OuterRef, Subquery
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
+from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone
+
+MAX_LIMIT = 1000
+
+
+@strawberry.enum
+class MilestoneStateEnum(str, enum.Enum):
+    """Milestone state filter options."""
+
+    CLOSED = GenericIssueModel.State.CLOSED.value
+    OPEN = GenericIssueModel.State.OPEN.value
 
 
 @strawberry.type
 class MilestoneQuery:
     """Github Milestone Queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def recent_milestones(
         self,
         *,
@@ -20,7 +33,7 @@ class MilestoneQuery:
         limit: int = 5,
         login: str | None = None,
         organization: str | None = None,
-        state: str = "open",
+        state: MilestoneStateEnum | None = None,
     ) -> list[MilestoneNode]:
         """Resolve milestones.
 
@@ -29,32 +42,20 @@ class MilestoneQuery:
             limit (int): The maximum number of milestones to return.
             login (str, optional): The GitHub username to filter milestones.
             organization (str, optional): The GitHub organization to filter milestones.
-            state (str, optional): The state of the milestones to return.
+            state (MilestoneStateEnum, optional): The state filter. Returns all if not provided.
 
         Returns:
             list[MilestoneNode]: A list of milestones.
 
         """
-        match state.lower():
-            case "open":
+        match state:
+            case MilestoneStateEnum.OPEN:
                 milestones = Milestone.open_milestones.all()
-            case "closed":
+            case MilestoneStateEnum.CLOSED:
                 milestones = Milestone.closed_milestones.all()
-            case "all":
-                milestones = Milestone.objects.all()
             case _:
-                message = f"Invalid state: {state}. Valid states are 'open', 'closed', or 'all'."
-                raise ValidationError(message)
+                milestones = Milestone.objects.all()
 
-        milestones = milestones.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).prefetch_related(
-            "issues",
-            "labels",
-            "pull_requests",
-        )
         if login:
             milestones = milestones.filter(
                 author__login=login,
@@ -75,6 +76,8 @@ class MilestoneQuery:
                 id__in=Subquery(latest_milestone_per_author),
             )
 
-        return milestones.order_by(
-            "-created_at",
-        )[:limit]
+        return (
+            milestones.order_by("-created_at")[:limit]
+            if (limit := min(limit, MAX_LIMIT)) > 0
+            else []
+        )

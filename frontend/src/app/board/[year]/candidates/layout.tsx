@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: 'OWASP Board of Directors election candidates',
 }
 
-export default function BoardCandidatesLayout({ children }: { children: React.ReactNode }) {
+export default function BoardCandidatesLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return <>{children}</>
 }

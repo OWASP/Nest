@@ -11,6 +11,7 @@ import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import EntityActions from 'components/EntityActions'
 import Markdown from 'components/MarkdownWrapper'
+import MenteeContributorsList from 'components/MenteeContributorsList'
 import { getSimpleDuration } from 'components/ModuleCard'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -88,6 +89,24 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
           label="Mentors"
         />
       )}
+      {module.mentees?.length > 0 &&
+        (pathname?.startsWith('/my/mentorship') ? (
+          <MenteeContributorsList
+            icon={HiUserGroup}
+            contributors={module.mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+            programKey={programKey}
+            moduleKey={module.key}
+          />
+        ) : (
+          <TopContributorsList
+            icon={HiUserGroup}
+            contributors={module.mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+          />
+        ))}
     </div>
   )
 }

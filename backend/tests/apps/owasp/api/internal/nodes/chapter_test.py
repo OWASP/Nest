@@ -1,9 +1,10 @@
 """Test cases for ChapterNode."""
 
 from apps.owasp.api.internal.nodes.chapter import ChapterNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestChapterNode:
+class TestChapterNode(GraphQLNodeBaseTest):
     def test_chapter_node_inheritance(self):
         assert hasattr(ChapterNode, "__strawberry_definition__")
 
@@ -27,38 +28,33 @@ class TestChapterNode:
         }
         assert expected_field_names.issubset(field_names)
 
-    def _get_field_by_name(self, name):
-        return next(
-            (f for f in ChapterNode.__strawberry_definition__.fields if f.name == name), None
-        )
-
     def test_resolve_key(self):
-        field = self._get_field_by_name("key")
+        field = self._get_field_by_name("key", ChapterNode)
         assert field is not None
         assert field.type is str
 
     def test_resolve_country(self):
-        field = self._get_field_by_name("country")
+        field = self._get_field_by_name("country", ChapterNode)
         assert field is not None
         assert field.type is str
 
     def test_resolve_region(self):
-        field = self._get_field_by_name("region")
+        field = self._get_field_by_name("region", ChapterNode)
         assert field is not None
         assert field.type is str
 
     def test_resolve_is_active(self):
-        field = self._get_field_by_name("is_active")
+        field = self._get_field_by_name("is_active", ChapterNode)
         assert field is not None
         assert field.type is bool
 
     def test_resolve_contribution_data(self):
-        field = self._get_field_by_name("contribution_data")
+        field = self._get_field_by_name("contribution_data", ChapterNode)
         assert field is not None
         assert field.type.__class__.__name__ == "NewType"
 
     def test_resolve_contribution_stats(self):
-        field = self._get_field_by_name("contribution_stats")
+        field = self._get_field_by_name("contribution_stats", ChapterNode)
         assert field is not None
         assert field.type.__class__.__name__ == "StrawberryOptional"
 
@@ -78,10 +74,8 @@ class TestChapterNode:
         instance = type("BoundNode", (), {})()
         instance.contribution_stats = mock_chapter.contribution_stats
 
-        field = self._get_field_by_name("contribution_stats")
-        resolver = field.base_resolver.wrapped_func
-
-        result = resolver(instance)
+        field = self._get_field_by_name("contribution_stats", ChapterNode)
+        result = field.base_resolver.wrapped_func(None, instance)
 
         assert result is not None
         assert result["commits"] == 75

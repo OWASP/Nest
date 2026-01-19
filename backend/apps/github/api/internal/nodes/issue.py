@@ -22,51 +22,40 @@ from apps.github.models.issue import Issue
 class IssueNode(strawberry.relay.Node):
     """GitHub issue node."""
 
-    @strawberry.field
-    def author(self) -> UserNode | None:
-        """Resolve author."""
-        return self.author
+    assignees: list[UserNode] = strawberry_django.field()
+    author: UserNode | None = strawberry_django.field()
+    pull_requests: list[PullRequestNode] = strawberry_django.field()
 
-    @strawberry.field
-    def organization_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository__organization", "repository"])
+    def organization_name(self, root: Issue) -> str | None:
         """Resolve organization name."""
         return (
-            self.repository.organization.login
-            if self.repository and self.repository.organization
+            root.repository.organization.login
+            if root.repository and root.repository.organization
             else None
         )
 
-    @strawberry.field
-    def repository_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository"])
+    def repository_name(self, root: Issue) -> str | None:
         """Resolve the repository name."""
-        return self.repository.name if self.repository else None
+        return root.repository.name if root.repository else None
 
-    @strawberry.field
-    def assignees(self) -> list[UserNode]:
-        """Resolve assignees list."""
-        return list(self.assignees.all())
-
-    @strawberry.field
-    def labels(self) -> list[str]:
+    @strawberry_django.field(prefetch_related=["labels"])
+    def labels(self, root: Issue) -> list[str]:
         """Resolve label names for the issue."""
-        return list(self.labels.values_list("name", flat=True))
+        return [label.name for label in root.labels.all()]
 
-    @strawberry.field
-    def is_merged(self) -> bool:
+    @strawberry_django.field(prefetch_related=["pull_requests"])
+    def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
-        return self.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
+        return root.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
 
-    @strawberry.field
-    def interested_users(self) -> list[UserNode]:
+    @strawberry_django.field(prefetch_related=["participant_interests__user"])
+    def interested_users(self, root: Issue) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
         return [
             interest.user
-            for interest in self.participant_interests.select_related("user").order_by(
+            for interest in root.participant_interests.select_related("user").order_by(
                 "user__login"
             )
         ]
-
-    @strawberry.field
-    def pull_requests(self) -> list[PullRequestNode]:
-        """Return all pull requests linked to this issue."""
-        return list(self.pull_requests.select_related("author", "repository").all())

@@ -1,16 +1,19 @@
 """OWASP repository GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.models.repository import Repository
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
 class RepositoryQuery:
     """Repository queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def repository(
         self,
         organization_key: str,
@@ -34,7 +37,7 @@ class RepositoryQuery:
         except Repository.DoesNotExist:
             return None
 
-    @strawberry.field
+    @strawberry_django.field
     def repositories(
         self,
         organization: str,
@@ -52,11 +55,11 @@ class RepositoryQuery:
 
         """
         return (
-            Repository.objects.select_related(
-                "organization",
+            (
+                Repository.objects.filter(
+                    organization__login__iexact=organization,
+                ).order_by("-stars_count")[:limit]
             )
-            .filter(
-                organization__login__iexact=organization,
-            )
-            .order_by("-stars_count")[:limit]
+            if (limit := min(limit, MAX_LIMIT)) > 0
+            else []
         )

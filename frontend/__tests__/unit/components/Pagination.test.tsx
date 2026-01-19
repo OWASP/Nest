@@ -134,6 +134,6 @@ describe('<Pagination />', () => {
   // Edge-case: very small totalPages (2)
   it('renders exactly pages [1, 2] when totalPages = 2', () => {
     renderComponent({ totalPages: 2, currentPage: 2 })
-    expect(screen.getAllByRole('button', { name: /^Go to page (1|2)$/ })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: /^Go to page [12]$/ })).toHaveLength(2)
   })
 })

@@ -10,6 +10,13 @@ class Leader(Schema):
     name: str
 
 
+class ValidationErrorSchema(Schema):
+    """Schema for validation error."""
+
+    message: str
+    errors: list[dict] | dict | None = None
+
+
 class LocationFilter(FilterSchema):
     """Filter for Location."""
 

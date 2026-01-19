@@ -1,0 +1,118 @@
+name: Run fuzz tests
+
+on:
+  workflow_call:
+    inputs:
+      test-file:
+        description: 'The test file to run fuzz tests on'
+        required: true
+        type: string
+      rest-url:
+        description: 'The REST API URL to test against'
+        required: false
+        type: string
+        default: 'http://localhost:9500/api/v0'
+
+jobs:
+  run-fuzz-tests:
+    name: Run Fuzz Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: nest_db_fuzz
+          POSTGRES_PASSWORD: nest_user_fuzz_password
+          POSTGRES_USER: nest_user_fuzz
+        options: >-
+          --health-cmd="pg_isready -U nest_user_fuzz -d nest_db_fuzz -h localhost -p 5432"
+          --health-interval=5s
+          --health-retries=5
+          --health-timeout=5s
+        ports:
+          - 5432:5432
+      cache:
+        image: redis:8.0.5-alpine3.21
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-retries=5
+          --health-timeout=5s
+        ports:
+          - 6379:6379
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Set up Docker buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+
+      - name: Setup Backend environment
+        uses: ./.github/workflows/setup-backend-environment
+        with:
+          db_username: nest_user_fuzz
+          db_name: nest_db_fuzz
+
+      - name: Run backend with fuzz environment variables
+        run: |
+          docker run -d --rm --name fuzz-nest-backend \
+            --env-file backend/.env.fuzz.example \
+            --network host \
+            -e DJANGO_DB_HOST=localhost \
+            -e DJANGO_REDIS_AUTH_ENABLED=False \
+            -e DJANGO_REDIS_HOST=localhost \
+            -p 9500:9500 \
+            owasp/nest:test-backend-latest \
+            sh -c '
+              python manage.py migrate &&
+              gunicorn wsgi:application --bind 0.0.0.0:9500
+            '
+
+      - name: Waiting for the backend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:9500/a; do
+              echo "Waiting for backend..."
+              sleep 5
+            done
+          '
+          echo "Backend is up!"
+
+      - name: Load Postgres data
+        env:
+          PGPASSWORD: nest_user_fuzz_password
+        run: |
+          set -euo pipefail
+          if ! pg_restore -h localhost -U nest_user_fuzz -d nest_db_fuzz < backend/data/nest.dump; then
+            echo "Data loading failed"
+            exit 1
+          fi
+          echo "Data loading completed."
+
+      - name: Build Fuzz-testing image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:test-fuzz-backend-cache
+          cache-to: |
+            type=gha,compression=zstd
+          context: backend
+          file: docker/backend/Dockerfile.fuzz
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:test-fuzz-backend-latest
+
+      - name: Run fuzz tests
+        env:
+          TEST_FILE: ${{ inputs.test-file }}
+          REST_URL: ${{ inputs.rest-url }}
+        run: |
+          docker run \
+            --network host \
+            -e BASE_URL=http://localhost:9500 \
+            -e CI=true \
+            -e REST_URL="$REST_URL" \
+            -e TEST_FILE="$TEST_FILE" \
+            owasp/nest:test-fuzz-backend-latest

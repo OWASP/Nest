@@ -220,9 +220,10 @@ class TestRepositoryContributor(TestCase):
             expected = [
                 {
                     "avatar_url": "url1",
+                    "contributions_count": 100,
+                    "id": "user1",
                     "login": "user1",
                     "name": "User One",
-                    "contributions_count": 100,
                 }
             ]
             assert result == expected

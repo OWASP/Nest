@@ -12,7 +12,7 @@ class CommitteeIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_created_at(self):
         """Return created at for indexing."""
-        return self.created_at.timestamp()
+        return self.created_at.timestamp() if self.created_at else None
 
     @property
     def idx_key(self):
@@ -32,4 +32,4 @@ class CommitteeIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_updated_at(self):
         """Return updated at for indexing."""
-        return self.updated_at.timestamp()
+        return self.updated_at.timestamp() if self.updated_at else None
