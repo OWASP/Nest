@@ -36,6 +36,11 @@ locals {
 
 data "aws_elb_service_account" "main" {}
 
+data "aws_lambda_function" "backend" {
+  count         = var.lambda_function_name != null ? 1 : 0
+  function_name = var.lambda_function_name
+}
+
 data "aws_iam_policy_document" "alb_logs" {
   statement {
     actions   = ["s3:PutObject"]
@@ -63,11 +68,25 @@ resource "aws_acm_certificate" "main" {
   }
 }
 
+resource "aws_lambda_alias" "live" {
+  count            = var.lambda_function_name != null ? 1 : 0
+  description      = "Alias pointing to latest published version for SnapStart"
+  function_name    = var.lambda_function_name
+  function_version = data.aws_lambda_function.backend[0].version
+  name             = "live"
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes        = [function_version]
+  }
+}
+
 resource "aws_lambda_permission" "alb" {
-  count         = var.lambda_arn != null ? 1 : 0
+  count         = var.lambda_function_name != null ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = var.lambda_function_name
   principal     = "elasticloadbalancing.amazonaws.com"
+  qualifier     = aws_lambda_alias.live[0].name
   source_arn    = aws_lb_target_group.lambda[0].arn
   statement_id  = "AllowALBInvoke"
 }
@@ -95,10 +114,6 @@ resource "aws_lb" "main" {
     precondition {
       condition     = var.enable_https ? var.domain_name != null : true
       error_message = "domain_name must be provided when enable_https is true."
-    }
-    precondition {
-      condition     = var.lambda_arn != null ? var.lambda_function_name != null : true
-      error_message = "lambda_function_name must be provided when lambda_arn is set."
     }
   }
 }
@@ -150,7 +165,7 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_lb_listener_rule" "backend_http" {
-  for_each     = var.lambda_arn != null && !var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  for_each     = var.lambda_function_name != null && !var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
   listener_arn = aws_lb_listener.http[0].arn
   priority     = 100 + each.key
   tags         = var.common_tags
@@ -168,7 +183,7 @@ resource "aws_lb_listener_rule" "backend_http" {
 }
 
 resource "aws_lb_listener_rule" "backend_https" {
-  for_each     = var.lambda_arn != null && var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  for_each     = var.lambda_function_name != null && var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
   listener_arn = aws_lb_listener.https[0].arn
   priority     = 100 + each.key
   tags         = var.common_tags
@@ -209,7 +224,7 @@ resource "aws_lb_target_group" "frontend" {
 }
 
 resource "aws_lb_target_group" "lambda" {
-  count       = var.lambda_arn != null ? 1 : 0
+  count       = var.lambda_function_name != null ? 1 : 0
   name        = "${var.project_name}-${var.environment}-lambda-tg"
   target_type = "lambda"
   tags = merge(var.common_tags, {
@@ -218,10 +233,10 @@ resource "aws_lb_target_group" "lambda" {
 }
 
 resource "aws_lb_target_group_attachment" "lambda" {
-  count            = var.lambda_arn != null ? 1 : 0
-  target_group_arn = aws_lb_target_group.lambda[0].arn
-  target_id        = var.lambda_arn
+  count            = var.lambda_function_name != null ? 1 : 0
   depends_on       = [aws_lambda_permission.alb]
+  target_group_arn = aws_lb_target_group.lambda[0].arn
+  target_id        = aws_lambda_alias.live[0].arn
 }
 
 resource "aws_s3_bucket" "alb_logs" { # NOSONAR

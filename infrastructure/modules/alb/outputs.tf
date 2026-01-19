@@ -42,8 +42,3 @@ output "https_listener_arn" {
   description = "The ARN of the HTTPS listener (null if HTTPS disabled)."
   value       = var.enable_https ? aws_lb_listener.https[0].arn : null
 }
-
-output "lambda_target_group_arn" {
-  description = "The ARN of the Lambda target group (null if Lambda not configured)."
-  value       = var.lambda_arn != null ? aws_lb_target_group.lambda[0].arn : null
-}

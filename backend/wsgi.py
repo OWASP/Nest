@@ -4,6 +4,11 @@ import os
 from pathlib import Path
 
 import boto3
+from aws_xray_sdk.core import patch_all, xray_recorder
+
+if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    xray_recorder.configure(context_missing="LOG_ERROR", service="nest-backend")
+    patch_all()
 
 
 def populate_environ_from_ssm():

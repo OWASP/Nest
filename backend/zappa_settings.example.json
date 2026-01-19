@@ -5,6 +5,10 @@
     "aws_environment_variables": {
       "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/owasp-nest/staging"
     },
+    "callbacks": {
+      "post": "zappa_callback.post",
+      "zip": "zappa_callback.clean_package"
+    },
     "django_settings": "settings.staging",
     "extra_permissions": [
       {
@@ -20,10 +24,25 @@
       }
     ],
     "manage_roles": true,
+    "memory_size": 3008,
     "project_name": "nest-backend",
+    "regex_excludes": [
+      "/boto3/",
+      "/boto3-",
+      "/botocore/",
+      "/botocore-",
+      "/data/",
+      "/pip/",
+      "/pip-",
+      "/setuptools/",
+      "/setuptools-",
+      "/tests/",
+      "/troposphere/"
+    ],
     "runtime": "python3.13",
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
     "slim_handler": true,
+    "snap_start": "PublishedVersions",
     "timeout_seconds": 60,
     "vpc_config": {
       "SecurityGroupIds": ["${AWS_LAMBDA_VPC_SECURITY_GROUP_ID}"],
@@ -32,6 +51,7 @@
         "${AWS_PRIVATE_SUBNET_B}",
         "${AWS_PRIVATE_SUBNET_C}"
       ]
-    }
+    },
+    "xray_tracing": true
   }
 }
