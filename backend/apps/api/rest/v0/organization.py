@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.github.models.organization import Organization as OrganizationModel
 
 router = RouterPaginated(tags=["Community"])
@@ -81,6 +82,7 @@ def list_organization(
     description="Retrieve project details.",
     operation_id="get_organization",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: OrganizationError,
         HTTPStatus.OK: OrganizationDetail,
     },

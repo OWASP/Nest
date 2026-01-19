@@ -275,6 +275,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Load Initial Data**:
 
+   - Make sure you have `gzip` installed on your machine.
+
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
    ```bash
@@ -404,6 +406,60 @@ make test
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
 
+### Running e2e Tests
+
+Run the frontend e2e tests with the following command:
+
+```bash
+make test-frontend-e2e
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the e2e tests
+- Cleans up containers when done
+
+For debugging, you can run the e2e backend separately:
+
+```bash
+make run-backend-e2e
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-e2e
+```
+
+### Running Fuzz Tests
+
+Run the fuzz tests with the following command:
+
+```bash
+make test-fuzz
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the fuzz tests
+- Cleans up containers when done
+
+For debugging, you can run the fuzz backend separately:
+
+```bash
+make run-backend-fuzz
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-fuzz
+```
+
 ### Test Coverage
 
 - There is a **minimum test coverage requirement** for the **backend** code -- see [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml).
@@ -492,9 +548,40 @@ flowchart TD
     linkStyle 24 stroke:#f44336,stroke-width:2px
 ```
 
+### Keep Your Fork in Sync with Upstream
+
+To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP Nest repository.
+
+<details>
+<summary>Setting up the upstream remote</summary>
+
+If you haven't added the upstream remote yet, add it using:
+
+```bash
+git remote add upstream https://github.com/OWASP/Nest.git
+```
+
+Verify that the upstream remote has been added by running:
+
+```bash
+git remote -v
+```
+
+This should show both `origin` (your fork) and `upstream` (the main repository) remotes.
+
+</details>
+
+Before working on a **new** feature or issue, update your local `main` branch from `upstream/main`:
+
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main
+```
+
 ### 1. Find Something to Work On
 
-- Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)
+- Check the **Issues** tab for open issues: [https://github.com/OWASP/Nest/issues](https://github.com/OWASP/Nest/issues)
 - Found a bug or have a feature request? Open a new issue.
 - Want to work on an existing issue? Ask the maintainers to assign it to you before submitting a pull request.
 - New to the project? Start with issues labeled `good first issue` for an easier onboarding experience.
