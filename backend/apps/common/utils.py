@@ -8,7 +8,13 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
+from backend.apps.owasp.api.common.query_parser import (
+    FieldType,
+    QueryParser,
+    QueryParserError,
+)
 from django.conf import settings
+from django.db.models import Q
 from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
@@ -234,3 +240,67 @@ def validate_url(url: str | None) -> bool:
         return False
 
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+OPERATOR_MAPPING = {
+    "=": "",
+    ">": "__gt",
+    "<": "__lt",
+    ">=": "__gte",
+    "<=": "__lte",
+}
+
+
+def apply_structured_search(
+    queryset,
+    query: str,
+    field_schema: dict[str, str],
+):
+    """Apply structured search filtering to a Django queryset.
+
+    This utility parses a structured search query string (e.g. "name:nest stars>100")
+    using the existing QueryParser and converts the parsed conditions into Django ORM
+    filters. Only fields defined in the provided field schema are allowed.
+
+    The function is intentionally generic and reusable across different endpoints
+    and models.
+
+    Args:
+        queryset: Base Django queryset to apply filters on.
+        query (str): Structured search query string.
+        field_schema (Dict[str, str]): Mapping of allowed field names to their types
+            (e.g. {"stars": "number", "name": "string"}).
+
+    Returns:
+        QuerySet: Filtered queryset based on the structured search conditions.
+
+    """
+    if not query:
+        return queryset
+
+    try:
+        parser = QueryParser(field_schema=field_schema, strict=False)
+        conditions = parser.parse(query)
+    except QueryParserError:
+        # fail safely without breaking the API
+        return queryset
+
+    q_object = Q()
+
+    for condition in conditions:
+        field = condition["field"]
+        value = condition["value"]
+        field_type = condition["type"]
+        operator = condition.get("op", "=")
+
+        # Ignore unsupported fields (including default text search field)
+        if field not in field_schema:
+            continue
+
+        lookup = field
+        if field_type in (FieldType.NUMBER.value, FieldType.DATE.value):
+            lookup += OPERATOR_MAPPING.get(operator, "")
+
+        q_object &= Q(**{lookup: value})
+
+    return queryset.filter(q_object)
