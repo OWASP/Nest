@@ -1,9 +1,9 @@
-"""Test cases for github_aggregate_contributions management command."""
+"""Test cases for github_aggregate_user_contributions management command."""
 
 from datetime import UTC, datetime, timedelta
 from unittest import mock
 
-from apps.github.management.commands.github_aggregate_contributions import Command
+from apps.github.management.commands.github_aggregate_user_contributions import Command
 
 
 class MockQuerySet:
@@ -42,7 +42,7 @@ class MockQuerySet:
 
 
 class TestAggregateContributionsCommand:
-    """Test suite for github_aggregate_contributions management command."""
+    """Test suite for github_aggregate_user_contributions management command."""
 
     def test_aggregate_user_contributions_empty(self):
         """Test aggregation with no contributions."""
@@ -56,16 +56,16 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.Commit"
+                "apps.github.management.commands.github_aggregate_user_contributions.Commit"
             ) as mock_commit,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.PullRequest"
+                "apps.github.management.commands.github_aggregate_user_contributions.PullRequest"
             ) as mock_pr,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.Issue"
+                "apps.github.management.commands.github_aggregate_user_contributions.Issue"
             ) as mock_issue,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.timezone.now"
+                "apps.github.management.commands.github_aggregate_user_contributions.timezone.now"
             ) as mock_tz_now,
         ):
             mock_tz_now.return_value = fixed_now
@@ -89,16 +89,16 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.Commit"
+                "apps.github.management.commands.github_aggregate_user_contributions.Commit"
             ) as mock_commit,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.PullRequest"
+                "apps.github.management.commands.github_aggregate_user_contributions.PullRequest"
             ) as mock_pr,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.Issue"
+                "apps.github.management.commands.github_aggregate_user_contributions.Issue"
             ) as mock_issue,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.timezone"
+                "apps.github.management.commands.github_aggregate_user_contributions.timezone"
             ) as mock_tz,
         ):
             mock_tz.now.return_value = datetime(2024, 1, 5, tzinfo=UTC)
@@ -141,7 +141,7 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.User"
+                "apps.github.management.commands.github_aggregate_user_contributions.User"
             ) as mock_user_model,
             mock.patch.object(
                 command, "_aggregate_user_contributions", return_value={"2024-01-01": 5}
@@ -164,7 +164,7 @@ class TestAggregateContributionsCommand:
         command.style.SUCCESS = lambda x: x
 
         with mock.patch(
-            "apps.github.management.commands.github_aggregate_contributions.User"
+            "apps.github.management.commands.github_aggregate_user_contributions.User"
         ) as mock_user_model:
             mock_queryset = MockQuerySet([])
             mock_user_model.objects.filter.return_value = mock_queryset
@@ -192,7 +192,7 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.User"
+                "apps.github.management.commands.github_aggregate_user_contributions.User"
             ) as mock_user_model,
             mock.patch.object(
                 command, "_aggregate_user_contributions", return_value={"2024-01-01": 5}
@@ -221,13 +221,13 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.User"
+                "apps.github.management.commands.github_aggregate_user_contributions.User"
             ) as mock_user_model,
             mock.patch.object(
                 command, "_aggregate_user_contributions", return_value={}
             ) as mock_aggregate,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.timezone"
+                "apps.github.management.commands.github_aggregate_user_contributions.timezone"
             ) as mock_tz,
         ):
             mock_tz.now.return_value = datetime(2024, 1, 31, tzinfo=UTC)
@@ -250,16 +250,16 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.Commit"
+                "apps.github.management.commands.github_aggregate_user_contributions.Commit"
             ) as mock_commit,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.PullRequest"
+                "apps.github.management.commands.github_aggregate_user_contributions.PullRequest"
             ) as mock_pr,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.Issue"
+                "apps.github.management.commands.github_aggregate_user_contributions.Issue"
             ) as mock_issue,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_contributions.timezone"
+                "apps.github.management.commands.github_aggregate_user_contributions.timezone"
             ) as mock_tz,
         ):
             mock_tz.now.return_value = datetime(2024, 1, 3, tzinfo=UTC)

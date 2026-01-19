@@ -22,6 +22,6 @@ github-update-users:
 	@echo "Updating GitHub users"
 	@CMD="python manage.py github_update_users" $(MAKE) exec-backend-command
 
-github-aggregate-contributions:
+github-aggregate-user-contributions:
 	@echo "Aggregating GitHub user contributions"
-	@CMD="python manage.py github_aggregate_contributions" $(MAKE) exec-backend-command
+	@CMD="python manage.py github_aggregate_user_contributions" $(MAKE) exec-backend-command
