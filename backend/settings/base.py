@@ -94,6 +94,7 @@ class Base(Configuration):
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
         "apps.common.middlewares.block_null_characters.BlockNullCharactersMiddleware",
+        "apps.common.middlewares.rate_limit_headers.RateLimitHeadersMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
     ]

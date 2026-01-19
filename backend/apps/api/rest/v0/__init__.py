@@ -6,9 +6,9 @@ from django.conf import settings
 from ninja import NinjaAPI, Swagger
 from ninja.errors import ValidationError
 from ninja.pagination import RouterPaginated
-from ninja.throttling import AuthRateThrottle
 
 from apps.api.rest.auth.api_key import ApiKey
+from apps.api.rest.throttle.rate_limit_headers import RateLimitHeadersThrottle
 from apps.api.rest.v0.chapter import router as chapter_router
 from apps.api.rest.v0.committee import router as committee_router
 from apps.api.rest.v0.event import router as event_router
@@ -43,7 +43,7 @@ api_settings = {
     "default_router": RouterPaginated(),
     "description": "Open Worldwide Application Security Project API",
     "docs": Swagger(settings={"persistAuthorization": True}),
-    "throttle": [AuthRateThrottle("10/s")],
+    "throttle": [RateLimitHeadersThrottle("10/s")],
     "title": "OWASP Nest",
     "version": "0.3.6",
 }
