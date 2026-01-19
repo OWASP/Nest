@@ -14,13 +14,13 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-builder" \
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+&& --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
 
-RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+&& --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
 USER owasp
@@ -44,13 +44,13 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-stage" \
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
-RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+&& --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && apk upgrade && \
     apk add postgresql16-client redis && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp
 
-RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+&& --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
 EXPOSE 8000
