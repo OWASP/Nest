@@ -5,9 +5,10 @@ from datetime import datetime
 import pytest
 
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestProjectHealthMetricsNode:
+class TestProjectHealthMetricsNode(GraphQLNodeBaseTest):
     def test_project_health_metrics_node_inheritance(self):
         assert hasattr(ProjectHealthMetricsNode, "__strawberry_definition__")
 
@@ -42,16 +43,6 @@ class TestProjectHealthMetricsNode:
         }
         assert expected_field_names.issubset(field_names)
 
-    def _get_field_by_name(self, name):
-        return next(
-            (
-                f
-                for f in ProjectHealthMetricsNode.__strawberry_definition__.fields
-                if f.name == name
-            ),
-            None,
-        )
-
     @pytest.mark.parametrize(
         ("field_name", "expected_type"),
         [
@@ -80,6 +71,6 @@ class TestProjectHealthMetricsNode:
         ],
     )
     def test_field_types(self, field_name, expected_type):
-        field = self._get_field_by_name(field_name)
+        field = self._get_field_by_name(field_name, ProjectHealthMetricsNode)
         assert field is not None
         assert field.type is expected_type
