@@ -275,7 +275,7 @@ const ModuleIssueDetailsPage = () => {
           </h2>
           <div className="flex flex-wrap gap-2">
             {visibleLabels.map((label, index) => (
-              <span key={index} className={labelButtonClassName}>
+              <span key={`${label}-${index}`} className={labelButtonClassName}>
                 {label}
               </span>
             ))}

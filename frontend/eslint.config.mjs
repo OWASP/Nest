@@ -17,6 +17,7 @@ import noGlobalIsNaNRule from './eslint-rules/no-global-isnan.mjs'
 import noGlobalNaNRule from './eslint-rules/no-global-nan.mjs'
 import noGlobalParseFloatRule from './eslint-rules/no-global-parsefloat.mjs'
 import noGlobalParseIntRule from './eslint-rules/no-global-parseint.mjs'
+import noIndexKeyRule from './eslint-rules/no-index-key.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -64,6 +65,7 @@ const eslintConfig = [
           'no-global-nan': noGlobalNaNRule,
           'no-global-parsefloat': noGlobalParseFloatRule,
           'no-global-parseint': noGlobalParseIntRule,
+          'no-index-key': noIndexKeyRule,
         },
       },
     },
@@ -160,6 +162,7 @@ const eslintConfig = [
       'nest/no-global-nan': 'error',
       'nest/no-global-parsefloat': 'error',
       'nest/no-global-parseint': 'error',
+      'nest/no-index-key': 'error',
       quotes: ['error', 'single', { avoidEscape: true }],
     },
   },

@@ -129,6 +129,7 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+quasis
 relativedelta
 repositorycontributor
 requirepass

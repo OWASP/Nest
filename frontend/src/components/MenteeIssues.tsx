@@ -74,7 +74,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
                   <div className="mb-2 flex flex-wrap gap-1">
                     {issue.labels.slice(0, 3).map((label, index) => (
                       <span
-                        key={index}
+                        key={`${label}-${index}`}
                         className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800"
                       >
                         {label}

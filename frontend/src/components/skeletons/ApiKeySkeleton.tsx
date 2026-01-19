@@ -52,7 +52,10 @@ export function ApiKeysSkeleton() {
               <tbody>
                 {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
                 {Array.from({ length: totalRows }).map((_, i) => (
-                  <tr key={i} className="border-b-1 border-b-gray-200 dark:border-b-gray-700">
+                  <tr
+                    key={`api-key-${i}`}
+                    className="border-b-1 border-b-gray-200 dark:border-b-gray-700"
+                  >
                     <td className="py-3">
                       <div className="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
                     </td>

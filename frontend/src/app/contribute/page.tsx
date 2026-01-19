@@ -54,7 +54,7 @@ const ContributePage = () => {
           labels={issue.labels}
         />
         <DialogComp
-          key={`modal-${index}`}
+          key={`modal-${issue.objectID}`}
           isOpen={modalOpenIndex === index}
           onClose={() => setModalOpenIndex(null)}
           title={issue.title}

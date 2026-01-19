@@ -28,7 +28,7 @@ const AboutSkeleton = () => {
           <Skeleton className="mb-4 h-6 w-40" />
           <div className="grid gap-4 md:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+              <div key={`feature-${i}`} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                 <Skeleton className="mb-2 h-5 w-3/4" />
                 <Skeleton className="mb-2 h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
@@ -42,7 +42,7 @@ const AboutSkeleton = () => {
           <Skeleton className="mb-4 h-6 w-32" />
           <div className="grid gap-4 md:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col items-center">
+              <div key={`leader-${i}`} className="flex flex-col items-center">
                 <Skeleton className="mb-3 h-24 w-24 rounded-full" />
                 <Skeleton className="mb-2 h-5 w-32" />
                 <Skeleton className="h-4 w-24" />
@@ -56,7 +56,7 @@ const AboutSkeleton = () => {
           <Skeleton className="mb-4 h-6 w-48" />
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-              <div key={i} className="flex flex-col items-center">
+              <div key={`contributor-${i}`} className="flex flex-col items-center">
                 <Skeleton className="mb-2 h-16 w-16 rounded-full" />
                 <Skeleton className="mb-1 h-4 w-24" />
                 <Skeleton className="h-3 w-16" />
@@ -70,11 +70,11 @@ const AboutSkeleton = () => {
           <Skeleton className="mb-4 h-6 w-52" />
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i}>
+              <div key={`technology-${i}`}>
                 <Skeleton className="mb-3 h-5 w-32" />
                 <div className="flex flex-col gap-3">
                   {[1, 2, 3, 4].map((j) => (
-                    <div key={j} className="flex items-center gap-2">
+                    <div key={`technology-${i}-${j}`} className="flex items-center gap-2">
                       <Skeleton className="h-6 w-6 rounded" />
                       <Skeleton className="h-4 w-24" />
                     </div>
@@ -91,7 +91,7 @@ const AboutSkeleton = () => {
           <Skeleton className="mb-2 h-4 w-full" />
           <div className="mb-6 space-y-2">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-4 w-full" />
+              <Skeleton key={`get-involved-${i}`} className="h-4 w-full" />
             ))}
           </div>
           <Skeleton className="h-4 w-2/3" />
@@ -102,7 +102,7 @@ const AboutSkeleton = () => {
           <Skeleton className="mb-4 h-6 w-32" />
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-lg bg-gray-200 p-6 dark:bg-gray-700">
+              <div key={`roadmap-${i}`} className="rounded-lg bg-gray-200 p-6 dark:bg-gray-700">
                 <Skeleton className="mb-2 h-6 w-2/3" />
                 <Skeleton className="mb-2 h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
@@ -115,7 +115,7 @@ const AboutSkeleton = () => {
         <div className="mb-6 rounded-lg bg-gray-100 p-6 dark:bg-gray-800">
           <Skeleton className="mb-4 h-6 w-32" />
           {[1, 2, 3].map((i) => (
-            <div key={i} className="mb-4">
+            <div key={`story-${i}`} className="mb-4">
               <Skeleton className="mb-2 h-4 w-full" />
               <Skeleton className="mb-2 h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
@@ -128,7 +128,7 @@ const AboutSkeleton = () => {
           <Skeleton className="mb-4 h-6 w-48" />
           <div className="space-y-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="relative pl-10">
+              <div key={`project-timeline-${i}`} className="relative pl-10">
                 <Skeleton className="absolute top-[10px] left-0 h-3 w-3 rounded-full" />
                 <Skeleton className="mb-1 h-5 w-48" />
                 <Skeleton className="mb-2 h-4 w-24" />
@@ -142,7 +142,10 @@ const AboutSkeleton = () => {
         {/* Stats Grid */}
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="mb-6 rounded-lg bg-gray-100 p-6 text-center dark:bg-gray-800">
+            <div
+              key={`stat-${i}`}
+              className="mb-6 rounded-lg bg-gray-100 p-6 text-center dark:bg-gray-800"
+            >
               <Skeleton className="mx-auto mb-2 h-8 w-20" />
               <Skeleton className="mx-auto h-4 w-24" />
             </div>
