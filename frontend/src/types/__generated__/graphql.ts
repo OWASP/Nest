@@ -87,7 +87,7 @@ export type ChapterNode = Node & {
 export type CommitteeNode = Node & {
   __typename?: 'CommitteeNode';
   contributorsCount: Scalars['Int']['output'];
-  createdAt: Scalars['Float']['output'];
+  createdAt?: Maybe<Scalars['Float']['output']>;
   entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
