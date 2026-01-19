@@ -95,7 +95,10 @@ def list_projects(
         field_schema=PROJECT_SEARCH_FIELDS,
     )
 
-    return filters.filter(queryset)
+    if filters.level is not None:
+        queryset = queryset.filter(level=filters.level)
+
+    return queryset
 
 
 @router.get(

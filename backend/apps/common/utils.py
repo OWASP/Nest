@@ -15,12 +15,6 @@ from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
 
-from apps.owasp.api.common.query_parser import (
-    FieldType,
-    QueryParser,
-    QueryParserError,
-)
-
 if TYPE_CHECKING:
     from django.http import HttpRequest
 
@@ -276,6 +270,12 @@ def apply_structured_search(
         QuerySet: Filtered queryset based on the structured search conditions.
 
     """
+    from apps.common.search.query_parser import (
+        FieldType,
+        QueryParser,
+        QueryParserError,
+    )
+
     if not query:
         return queryset
 
