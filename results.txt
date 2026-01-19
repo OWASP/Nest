@@ -1,0 +1,76 @@
+                    
+                    
+┌──────────────────┐
+│ 11 Code Findings │
+└──────────────────┘
+                                                       
+  [36m[22m[24m  backend/apps/api/decorators/cache.py[0m
+    ❯❱ python.flask.security.audit.directly-returned-format-string.directly-returned-format-string
+          Detected Flask route directly returning a formatted string. This is subject to cross-site scripting
+          if user input can reach the string. Consider using the template engine instead and rendering pages 
+          with 'render_template()'.                                                                          
+          Details: https://sg.run/Zv6o                                                                       
+                                                                                                             
+           16┆ return f"{prefix}:{request.get_full_path()}"
+                                                                 
+  [36m[22m[24m  backend/apps/api/internal/mutations/api_key.py[0m
+    ❯❱ python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure
+          Detected a python logger call with a potential hardcoded secret "Error creating API key: %s" being 
+          logged. This may lead to secret credentials being exposed. Make sure that the logger is not logging
+          sensitive information.                                                                             
+          Details: https://sg.run/ydNx                                                                       
+                                                                                                             
+           80┆ logger.warning("Error creating API key: %s", err)
+                                      
+  [36m[22m[24m  frontend/nginx.conf[0m
+    ❯❱ generic.nginx.security.request-host-used.request-host-used
+          '$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host'
+          request header. Use an explicitly configured host value or a allow list for validation.         
+          Details: https://sg.run/4x3Z                                                                    
+                                                                                                          
+           15┆ proxy_set_header Host $host;
+                                                                              
+  [36m[22m[24m  frontend/src/app/organizations/[organizationKey]/layout.tsx[0m
+    ❯❱ typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml
+          Detection of dangerouslySetInnerHTML from non-constant definition. This can inadvertently expose  
+          users to cross-site scripting (XSS) attacks if this comes from user-provided input. If you have to
+          use dangerouslySetInnerHTML, consider using a sanitization library such as DOMPurify to sanitize  
+          your HTML.                                                                                        
+          Details: https://sg.run/rAx6                                                                      
+                                                                                                            
+          117┆ __html: JSON.stringify(structuredData, null, 2),
+                                                                   
+  [36m[22m[24m  frontend/src/components/StructuredDataScript.tsx[0m
+    ❯❱ typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml
+          Detection of dangerouslySetInnerHTML from non-constant definition. This can inadvertently expose  
+          users to cross-site scripting (XSS) attacks if this comes from user-provided input. If you have to
+          use dangerouslySetInnerHTML, consider using a sanitization library such as DOMPurify to sanitize  
+          your HTML.                                                                                        
+          Details: https://sg.run/rAx6                                                                      
+                                                                                                            
+           15┆ __html: JSON.stringify(data, null, 2), // include everything with 2 spaces indentation
+                                        
+  [36m[22m[24m  proxy/production.conf[0m
+    ❯❱ generic.nginx.security.request-host-used.request-host-used
+          '$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host'
+          request header. Use an explicitly configured host value or a allow list for validation.         
+          Details: https://sg.run/4x3Z                                                                    
+                                                                                                          
+           26┆ proxy_set_header Host $host;
+            ⋮┆----------------------------------------
+           42┆ proxy_set_header Host $host;
+            ⋮┆----------------------------------------
+           80┆ return 301 https://$host$request_uri;
+                                     
+  [36m[22m[24m  proxy/staging.conf[0m
+    ❯❱ generic.nginx.security.request-host-used.request-host-used
+          '$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host'
+          request header. Use an explicitly configured host value or a allow list for validation.         
+          Details: https://sg.run/4x3Z                                                                    
+                                                                                                          
+           26┆ proxy_set_header Host $host;
+            ⋮┆----------------------------------------
+           42┆ proxy_set_header Host $host;
+            ⋮┆----------------------------------------
+           83┆ return 301 https://$host$request_uri;
+

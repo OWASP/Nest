@@ -1,0 +1,8 @@
+extends:
+  - p/owasp-top-ten
+  - p/python
+  - p/javascript
+  - p/typescript
+  - p/sql-injection
+  - p/secrets
+rules: []

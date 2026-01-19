@@ -92,4 +92,4 @@ repos:
     rev: v1.148.0
     hooks:
       - id: semgrep
-        args: [--config=p/owasp-top-ten, --config=p/python, --config=p/javascript, --error]
+        args: [--config, .semgrep.yml, --error]
