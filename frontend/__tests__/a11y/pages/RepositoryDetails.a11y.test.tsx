@@ -13,10 +13,11 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => ({ push: jest.fn() })),
   useParams: jest.fn(() => ({
     repositoryKey: 'test-repository',
+    organizationKey: 'test-organization',
   })),
 }))
 
-describe('RepositoryDetails Accessibility', () => {
+describe('RepositoryDetailsPage Accessibility', () => {
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockRepositoryData,

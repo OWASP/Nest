@@ -45,7 +45,7 @@ describe('ProjectHealthDashboardOverviewPage Accessibility', () => {
     expect(results).toHaveNoViolations()
   })
 
-  it('should have no accessibility violations when no data exits', async () => {
+  it('should have no accessibility violations when no data exists', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: false,

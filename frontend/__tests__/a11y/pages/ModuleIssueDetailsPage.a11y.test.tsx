@@ -72,12 +72,7 @@ const mockIssueData = {
 
 describe('ModuleIssueDetailsPage Accessibility', () => {
   const mockUseQuery = useQuery as unknown as jest.Mock
-
-  it('should have no accessibility violations', async () => {
-    mockUseQuery.mockReturnValue({
-      loading: false,
-      data: mockIssueData,
-    })
+  beforeEach(() => {
     ;(useIssueMutations as jest.Mock).mockReturnValue({
       assignIssue: jest.fn(),
       unassignIssue: jest.fn(),
@@ -91,6 +86,13 @@ describe('ModuleIssueDetailsPage Accessibility', () => {
       setIsEditingDeadline: jest.fn(),
       deadlineInput: '',
       setDeadlineInput: jest.fn(),
+    })
+  })
+
+  it('should have no accessibility violations', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: mockIssueData,
     })
 
     const { container } = render(<ModuleIssueDetailsPage />)

@@ -13,6 +13,7 @@ describe('ContributePage Accessibility', () => {
   it('should have no accessibility violations', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockContributeData.issues,
+      totalPages: 1,
     })
 
     const { container } = render(<ContributePage />)

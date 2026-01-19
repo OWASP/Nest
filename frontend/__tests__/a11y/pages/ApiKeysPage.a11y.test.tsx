@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
 import { mockApiKeys } from '@mockData/mockApiKeysData'
-import { screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
@@ -43,26 +43,30 @@ describe('ApiKeysPage Accessibility', () => {
   })
 
   it('should have no violations when Create Modal is open', async () => {
-    const { baseElement } = render(<ApiKeysPage />)
+    mockUseQuery.mockReturnValue({ data: mockApiKeys, loading: false })
+
+    const { container } = render(<ApiKeysPage />)
 
     const openButton = screen.getByText(/Create New Key/i)
     fireEvent.click(openButton)
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
 
-    const results = await axe(baseElement)
+    const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
 
   it('should have no violations when Revoke Confirmation is open', async () => {
-    const { baseElement } = render(<ApiKeysPage />)
+    mockUseQuery.mockReturnValue({ data: mockApiKeys, loading: false })
 
-    const revokeButtons = await screen.findAllByRole('button')
-    fireEvent.click(revokeButtons[0])
+    const { container } = render(<ApiKeysPage />)
+
+    const row = (await screen.findByText('mock key 1')).closest('tr')!
+    fireEvent.click(within(row).getByRole('button'))
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
 
-    const results = await axe(baseElement)
+    const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
 })

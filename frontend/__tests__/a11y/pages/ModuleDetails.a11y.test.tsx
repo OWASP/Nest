@@ -66,7 +66,7 @@ describe('ModuleDetails Accessibility', () => {
   it('should have no accessibility violations when no data exists', async () => {
     mockUseQuery.mockReturnValue({
       data: null,
-      loading: true,
+      loading: false,
       error: null,
     })
 

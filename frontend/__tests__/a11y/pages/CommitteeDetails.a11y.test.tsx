@@ -2,11 +2,17 @@ import { useQuery } from '@apollo/client/react'
 import { mockCommitteeDetailsData } from '@mockData/mockCommitteeDetailsData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
-import CommitteeDetails from 'app/committees/[committeeKey]/page'
+import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
+}))
+
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useParams: () => ({ committeeKey: 'test-committee' }),
+  usePathname: jest.fn(() => '/committees/test-committee'),
 }))
 
 describe('CommitteeDetailsPage Accessibility', () => {
@@ -19,7 +25,7 @@ describe('CommitteeDetailsPage Accessibility', () => {
       error: null,
     })
 
-    const { container } = render(<CommitteeDetails />)
+    const { container } = render(<CommitteeDetailsPage />)
 
     const results = await axe(container)
 
@@ -33,7 +39,7 @@ describe('CommitteeDetailsPage Accessibility', () => {
       error: null,
     })
 
-    const { container } = render(<CommitteeDetails />)
+    const { container } = render(<CommitteeDetailsPage />)
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
@@ -45,7 +51,7 @@ describe('CommitteeDetailsPage Accessibility', () => {
       error: new Error('test error'),
     })
 
-    const { container } = render(<CommitteeDetails />)
+    const { container } = render(<CommitteeDetailsPage />)
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
@@ -57,7 +63,7 @@ describe('CommitteeDetailsPage Accessibility', () => {
       error: null,
     })
 
-    const { container } = render(<CommitteeDetails />)
+    const { container } = render(<CommitteeDetailsPage />)
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })

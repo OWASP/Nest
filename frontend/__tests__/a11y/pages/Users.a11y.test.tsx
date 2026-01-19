@@ -13,6 +13,7 @@ describe('UsersPage Accessibility', () => {
   it('should have no accessibility violations', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockUserData.users,
+      totalPages: 1,
     })
 
     const { container } = render(<UsersPage />)

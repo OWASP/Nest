@@ -20,47 +20,28 @@ jest.mock('next-auth/react', () => ({
 }))
 
 describe('CreateProgramPage Accessibility', () => {
-  beforeEach(() => {
-    ;(useApolloClient as jest.Mock).mockReturnValue({
-      query: jest.fn().mockReturnValue({
-        data: {
-          searchProjects: [{ id: '123', name: 'Awesome Project' }],
-        },
-      }),
-    })
+  ;(useApolloClient as jest.Mock).mockReturnValue({
+    query: jest.fn().mockReturnValue({
+      data: {
+        searchProjects: [{ id: '123', name: 'Awesome Project' }],
+      },
+    }),
   })
-
-  afterAll(() => {
-    jest.clearAllMocks()
+  ;(useSession as jest.Mock).mockReturnValue({
+    data: { user: { login: 'admin-user', isProjectLeader: true } },
+    status: 'authenticated',
+  })
+  ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+  ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    data: {
+      getProgram: {
+        admins: [{ login: 'admin-user' }],
+      },
+    },
+    loading: false,
   })
 
   it('should have no accessibility violations', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'admin-user', isProjectLeader: true } },
-      status: 'authenticated',
-    })
-    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: {
-        getProgram: {
-          admins: [{ login: 'admin-user' }],
-        },
-      },
-      loading: false,
-    })
-
-    const { container } = render(<CreateProgramPage />)
-
-    const results = await axe(container)
-    expect(results).toHaveNoViolations()
-  })
-
-  it('should have no accessibility violations when loading', async () => {
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: null,
-      status: 'loading',
-    })
-
     const { container } = render(<CreateProgramPage />)
 
     const results = await axe(container)

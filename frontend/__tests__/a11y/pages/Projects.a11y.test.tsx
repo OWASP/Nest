@@ -37,6 +37,7 @@ describe('ProjectsPage Accessibility', () => {
   it('should have no accessibility violations', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockProjectData.projects,
+      totalPages: 1,
     })
 
     const { container } = render(<ProjectsPage />)

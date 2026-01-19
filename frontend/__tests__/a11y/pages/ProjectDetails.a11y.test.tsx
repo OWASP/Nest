@@ -6,7 +6,7 @@ import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage from 'app/projects/[projectKey]/page'
 
 jest.mock('next/navigation', () => ({
-  useParams: jest.fn(() => ({ programKey: 'test-program' })),
+  useParams: jest.fn(() => ({ projectKey: 'test-project' })),
   useRouter: jest.fn(() => ({ push: jest.fn() })),
 }))
 

@@ -21,6 +21,7 @@ jest.mock('@/components/MarkdownWrapper', () => {
 describe('CommitteesPage Accessibility', () => {
   ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
     hits: mockCommitteeData.committees,
+    totalPages: 1,
   })
 
   it('should have no accessibility violations', async () => {
