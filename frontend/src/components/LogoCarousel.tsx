@@ -7,7 +7,9 @@ interface MovingLogosProps {
   sponsors: Sponsor[]
 }
 
-export default function MovingLogos({ sponsors }: MovingLogosProps) {
+export default function MovingLogos({
+  sponsors,
+}: Readonly<MovingLogosProps>) {
   const scrollerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
