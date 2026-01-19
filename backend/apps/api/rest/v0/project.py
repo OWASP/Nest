@@ -19,7 +19,7 @@ from apps.owasp.models.project import Project as ProjectModel
 PROJECT_SEARCH_FIELDS = {
     "name": "string",
     "is_active": "boolean",
-    "stars": "number",
+    "stars_count": "number",
 }
 
 router = RouterPaginated(tags=["Projects"])
