@@ -8,17 +8,18 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
-from backend.apps.owasp.api.common.query_parser import (
-    FieldType,
-    QueryParser,
-    QueryParserError,
-)
 from django.conf import settings
 from django.db.models import Q
 from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
+
+from apps.owasp.api.common.query_parser import (
+    FieldType,
+    QueryParser,
+    QueryParserError,
+)
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -253,7 +254,7 @@ OPERATOR_MAPPING = {
 
 def apply_structured_search(
     queryset,
-    query: str,
+    query: str | None,
     field_schema: dict[str, str],
 ):
     """Apply structured search filtering to a Django queryset.

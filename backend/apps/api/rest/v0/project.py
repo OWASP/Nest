@@ -11,8 +11,15 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.common.utils import apply_structured_search
 from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project import Project as ProjectModel
+
+PROJECT_SEARCH_FIELDS = {
+    "name": "string",
+    "is_active": "boolean",
+    "stars": "number",
+}
 
 router = RouterPaginated(tags=["Projects"])
 
@@ -55,6 +62,10 @@ class ProjectFilter(FilterSchema):
         None,
         description="Level of the project",
     )
+    q: str | None = Field(
+        None,
+        description="Structured search query (e.g. 'name:nest stars>100')",
+    )
 
 
 @router.get(
@@ -74,11 +85,17 @@ def list_projects(
     ),
 ) -> list[Project]:
     """Get projects."""
-    return filters.filter(
-        ProjectModel.active_projects.order_by(
-            ordering or "-level_raw", "-stars_count", "-forks_count"
-        )
+    queryset = ProjectModel.active_projects.order_by(
+        ordering or "-level_raw", "-stars_count", "-forks_count"
     )
+
+    queryset = apply_structured_search(
+        queryset=queryset,
+        query=filters.q,
+        field_schema=PROJECT_SEARCH_FIELDS,
+    )
+
+    return filters.filter(queryset)
 
 
 @router.get(
