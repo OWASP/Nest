@@ -299,7 +299,9 @@ def apply_structured_search(
             continue
 
         lookup = field
-        if field_type in (FieldType.NUMBER.value, FieldType.DATE.value):
+        if field_type == FieldType.STRING.value:
+            lookup += "__icontains"
+        elif field_type in (FieldType.NUMBER.value, FieldType.DATE.value):
             lookup += OPERATOR_MAPPING.get(operator, "")
 
         q_object &= Q(**{lookup: value})
