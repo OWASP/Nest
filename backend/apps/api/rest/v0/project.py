@@ -74,7 +74,7 @@ class ProjectFilter(FilterSchema):
     )
     q: str | None = Field(
         None,
-        description="Structured search query (e.g. 'name:nest stars>100')",
+        description="Structured search query (e.g. 'name:nest stars_count>100')",
     )
 
 
