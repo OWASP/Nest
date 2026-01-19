@@ -383,6 +383,7 @@ export const SocialLinks = ({ urls }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+              aria-label={`Link to ${url}`}
             >
               <SocialIcon className="h-5 w-5" />
             </a>

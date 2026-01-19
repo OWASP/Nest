@@ -23,34 +23,34 @@ const DonutBarChart: React.FC<{
 
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
-      <div aria-label="Donut chart depicting health statuses">
-        <Chart
-          key={theme}
-          options={{
-            chart: {
-              animations: {
-                enabled: true,
-                speed: 1000,
-              },
+      {/* <div aria-label="Donut chart depicting health statuses"> */}
+      <Chart
+        key={theme}
+        options={{
+          chart: {
+            animations: {
+              enabled: true,
+              speed: 1000,
             },
-            legend: {
-              show: true,
-              position: 'bottom',
-              labels: {
-                colors: theme === 'dark' ? '#ececec' : '#1E1E2C',
-              },
+          },
+          legend: {
+            show: true,
+            position: 'bottom',
+            labels: {
+              colors: theme === 'dark' ? '#ececec' : '#1E1E2C',
             },
-            stroke: {
-              show: false,
-            },
-            colors: [greenColor, orangeColor, redColor],
-            labels: ['Healthy', 'Need Attention', 'Unhealthy'],
-          }}
-          series={series.map((value) => round(value, 1))}
-          height={250}
-          type="donut"
-        />
-      </div>
+          },
+          stroke: {
+            show: false,
+          },
+          colors: [greenColor, orangeColor, redColor],
+          labels: ['Healthy', 'Need Attention', 'Unhealthy'],
+        }}
+        series={series.map((value) => round(value, 1))}
+        height={250}
+        type="donut"
+      />
+      {/* </div> */}
     </SecondaryCard>
   )
 }

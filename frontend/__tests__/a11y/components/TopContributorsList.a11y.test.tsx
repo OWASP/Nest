@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import { Contributor } from 'types/contributor'
 import TopContributorsList from 'components/TopContributorsList'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/link', () => {
   return function MockLink({

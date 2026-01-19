@@ -1,6 +1,6 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import React from 'react'
 import { FaCode, FaTags } from 'react-icons/fa6'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
@@ -141,8 +141,6 @@ const defaultProps: DetailsCardProps = {
   healthMetricsData: mockHealthMetricsData,
   socialLinks: [],
 }
-
-expect.extend(toHaveNoViolations)
 
 describe('CardDetailsPage a11y', () => {
   it('should have no accessibility violations', async () => {
