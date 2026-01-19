@@ -14,11 +14,14 @@ import type { Milestone } from 'types/milestone'
 import type { RepositoryCardProps } from 'types/project'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
+import type { ContributionStats } from 'utils/contributionDataUtils'
+import type { CardType } from 'components/CardDetailsPage'
 
 export type CardProps = {
   button: Button
   icons?: Icon
   isActive?: boolean
+  labels?: string[]
   level?: Level
   projectLink?: string
   projectName?: string
@@ -42,15 +45,19 @@ type Stats = {
 }
 export interface DetailsCardProps {
   accessLevel?: string
+  contributionData?: Record<string, number>
+  contributionStats?: ContributionStats
   description?: string
   details?: { label: string; value: string | JSX.Element }[]
   domains?: string[]
+  endDate?: string
   entityLeaders?: Leader[]
   entityKey?: string
   geolocationData?: Chapter[]
   healthMetricsData?: HealthMetricsProps[]
   heatmap?: JSX.Element
   isActive?: boolean
+  startDate?: string
   isArchived?: boolean
   labels?: string[]
   languages?: string[]
@@ -76,7 +83,7 @@ export interface DetailsCardProps {
   topContributors?: Contributor[]
   topics?: string[]
   tags?: string[]
-  type: string
+  type: CardType
   userSummary?: JSX.Element
 }
 

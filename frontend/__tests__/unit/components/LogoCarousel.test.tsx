@@ -3,23 +3,6 @@ import React from 'react'
 import { Sponsor } from 'types/home'
 import MovingLogos from 'components/LogoCarousel'
 
-jest.mock('next/image', () => {
-  return function MockImage({
-    src,
-    alt,
-    style,
-    fill,
-  }: {
-    src: string
-    alt: string
-    style?: React.CSSProperties
-    fill?: boolean
-  }) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} style={style} data-testid="sponsor-image" data-fill={fill} />
-  }
-})
-
 jest.mock('next/link', () => {
   return function MockLink({
     href,
@@ -41,6 +24,24 @@ jest.mock('next/link', () => {
     )
   }
 })
+
+jest.mock('next/image', () => {
+  return function MockImage({
+    src,
+    alt,
+    style,
+    fill,
+  }: {
+    src: string
+    alt: string
+    style?: React.CSSProperties
+    fill?: boolean
+  }) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} style={style} data-testid="sponsor-image" data-fill={fill} />
+  }
+})
+
 const mockSponsors: Sponsor[] = [
   {
     name: 'Test Sponsor 1',

@@ -62,7 +62,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           if (filteredEvents.length > 0) {
             results.push({
               indexName: 'events',
-              hits: filteredEvents.slice(0, suggestionCount) as Event[],
+              hits: filteredEvents.slice(0, suggestionCount),
               totalPages: 1,
             })
           }
@@ -119,10 +119,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       } else if (event.key === 'Enter' && highlightedIndex !== null) {
         const { index, subIndex } = highlightedIndex
         const suggestion = suggestions[index].hits[subIndex]
-        handleSuggestionClick(
-          suggestion as Chapter | Organization | Project | User | Event,
-          suggestions[index].indexName
-        )
+        handleSuggestionClick(suggestion, suggestions[index].indexName)
       } else if (event.key === 'ArrowDown') {
         event.preventDefault()
         if (highlightedIndex === null) {
@@ -196,6 +193,18 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     }
   }
 
+  const handleSuggestionKeyDown = (
+    e: React.KeyboardEvent,
+    hit: Chapter | Project | User | Event | Organization,
+    indexName: string
+  ) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      e.stopPropagation()
+      handleSuggestionClick(hit, indexName)
+    }
+  }
+
   const getIconForIndex = (indexName: string) => {
     switch (indexName) {
       case 'chapters':
@@ -257,9 +266,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                     <li
                       key={`${hit.key || hit.login || hit.url}-${subIndex}`}
                       className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex &&
-                        highlightedIndex.index === index &&
-                        highlightedIndex.subIndex === subIndex
+                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
                           ? 'bg-gray-100 dark:bg-gray-700'
                           : ''
                       }`}
@@ -267,7 +274,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                       <button
                         type="button"
                         onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left"
+                        onKeyDown={(e) => handleSuggestionKeyDown(e, hit, suggestion.indexName)}
+                        className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                       >
                         {getIconForIndex(suggestion.indexName)}
                         <span className="block max-w-full truncate">{hit.name || hit.login}</span>

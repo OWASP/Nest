@@ -12,7 +12,7 @@ class TestOrganizationModel:
         mock_org = [Mock(id=None), Mock(id=1)]
         with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
             Organization.bulk_save(mock_org)
-            mock_bulk_save.assert_called_once_with(Organization, mock_org)
+            mock_bulk_save.assert_called_once_with(Organization, mock_org, fields=None)
 
     @patch("apps.github.models.organization.Organization.objects.get")
     def test_update_data(self, mock_get):

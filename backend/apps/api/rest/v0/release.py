@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.github.models.release import Release as ReleaseModel
 
 router = RouterPaginated(tags=["Releases"])
@@ -98,6 +99,7 @@ def list_release(
     description="Retrieve a specific GitHub release by organization, repository, and tag name.",
     operation_id="get_release",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: ReleaseError,
         HTTPStatus.OK: ReleaseDetail,
     },

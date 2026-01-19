@@ -10,6 +10,8 @@ import { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import EntityActions from 'components/EntityActions'
+import Markdown from 'components/MarkdownWrapper'
+import MenteeContributorsList from 'components/MenteeContributorsList'
 import { getSimpleDuration } from 'components/ModuleCard'
 import TopContributorsList from 'components/TopContributorsList'
 
@@ -27,7 +29,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
   const isAdmin =
     accessLevel === 'admin' &&
-    admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
+    admins?.some((admin) => admin.login === (data as ExtendedSession)?.user?.login)
 
   // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
   const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
@@ -66,7 +68,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
       {/* Description */}
       <div>
-        <p>{module.description}</p>
+        <Markdown content={module.description || 'No description available.'} />
       </div>
 
       {/* Details */}
@@ -87,6 +89,24 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
           label="Mentors"
         />
       )}
+      {module.mentees?.length > 0 &&
+        (pathname?.startsWith('/my/mentorship') ? (
+          <MenteeContributorsList
+            icon={HiUserGroup}
+            contributors={module.mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+            programKey={programKey}
+            moduleKey={module.key}
+          />
+        ) : (
+          <TopContributorsList
+            icon={HiUserGroup}
+            contributors={module.mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+          />
+        ))}
     </div>
   )
 }

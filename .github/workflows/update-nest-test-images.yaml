@@ -5,22 +5,24 @@ on:
     - cron: 30 0 * * *
   workflow_dispatch:
 
+permissions: {}
+
 env:
   FORCE_COLOR: 1
-
-permissions:
-  contents: read
 
 jobs:
   update-nest-test-images:
     name: Update Nest test images
     if: ${{ github.repository == 'OWASP/Nest' }}
+    permissions:
+      actions: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
 
       - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Login to Docker Hub
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
@@ -38,7 +40,7 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-backend-cache
           context: backend
-          file: backend/docker/Dockerfile.test
+          file: docker/backend/Dockerfile.test
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-backend-latest
@@ -53,7 +55,7 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-frontend-unit-cache
           context: frontend
-          file: frontend/docker/Dockerfile.unit.test
+          file: docker/frontend/Dockerfile.unit.test
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-unit-latest
@@ -68,7 +70,21 @@ jobs:
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-frontend-e2e-cache
           context: frontend
-          file: frontend/docker/Dockerfile.e2e.test
+          file: docker/frontend/Dockerfile.e2e.test
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-e2e-latest
+
+      - name: Build and push fuzz-test-backend image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
+          cache-from: type=registry,ref=owasp/nest:test-fuzz-backend-cache
+          cache-to: |
+            type=gha,compression=zstd
+            type=registry,ref=owasp/nest:test-fuzz-backend-cache
+          context: backend
+          file: docker/backend/Dockerfile.fuzz
+          platforms: linux/amd64
+          push: true
+          tags: owasp/nest:test-fuzz-backend-latest
+    timeout-minutes: 15
