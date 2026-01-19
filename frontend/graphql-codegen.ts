@@ -2,7 +2,7 @@ import { CodegenConfig } from '@graphql-codegen/cli'
 
 const PUBLIC_API_URL = process.env.PUBLIC_API_URL || 'http://localhost:8000'
 
-let response
+let response: Response
 
 try {
   response = await fetch(`${PUBLIC_API_URL}/csrf/`, {
