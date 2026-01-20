@@ -210,12 +210,12 @@ describe('MetricsPage', () => {
     await waitFor(() => {
       const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
       const url = new URL(lastCall, 'http://localhost')
-      expect(url.searchParams.get('order')).toBe('-stars')
+      expect(url.searchParams.get('order')).toBe('starsDesc')
     })
 
     // Test descending -> ascending
     mockReplace.mockClear()
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=-stars'))
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=starsDesc'))
     rerender(<MetricsPage />)
 
     const sortButtonDesc = screen.getByTitle('Sort by Stars')
@@ -224,12 +224,12 @@ describe('MetricsPage', () => {
     await waitFor(() => {
       const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
       const url = new URL(lastCall, 'http://localhost')
-      expect(url.searchParams.get('order')).toBe('stars')
+      expect(url.searchParams.get('order')).toBe('starsAsc')
     })
 
-    // Test ascending -> unsorted (removes order param, defaults to -score)
+    // Test ascending -> unsorted (removes order param, defaults to scoreDesc)
     mockReplace.mockClear()
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=stars'))
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=starsAsc'))
     rerender(<MetricsPage />)
 
     const sortButtonAsc = screen.getByTitle('Sort by Stars')

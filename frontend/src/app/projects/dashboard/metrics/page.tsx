@@ -25,38 +25,44 @@ import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 const PAGINATION_LIMIT = 10
 
-const FIELD_MAPPING = {
-  contributors: 'contributorsCount',
-  createdAt: 'createdAt',
-  forks: 'forksCount',
-  score: 'score',
-  stars: 'starsCount',
+type OrderKey = 'score' | 'stars' | 'forks' | 'contributors' | 'createdAt'
+
+const MOBILE_ORDERING_MAP = {
+  scoreDesc: { field: 'score', direction: Ordering.Desc },
+  scoreAsc: { field: 'score', direction: Ordering.Asc },
+  starsDesc: { field: 'starsCount', direction: Ordering.Desc },
+  starsAsc: { field: 'starsCount', direction: Ordering.Asc },
+  forksDesc: { field: 'forksCount', direction: Ordering.Desc },
+  forksAsc: { field: 'forksCount', direction: Ordering.Asc },
+  contributorsDesc: { field: 'contributorsCount', direction: Ordering.Desc },
+  contributorsAsc: { field: 'contributorsCount', direction: Ordering.Asc },
+  createdAtDesc: { field: 'createdAt', direction: Ordering.Desc },
+  createdAtAsc: { field: 'createdAt', direction: Ordering.Asc },
 } as const
 
-type OrderKey = keyof typeof FIELD_MAPPING
+type MobileOrderingKey = keyof typeof MOBILE_ORDERING_MAP
 
 const MOBILE_SORT_FIELDS = [
-  { label: 'Score', key: 'score' },
-  { label: 'Stars', key: 'stars' },
-  { label: 'Forks', key: 'forks' },
-  { label: 'Contributors', key: 'contributors' },
-  { label: 'Last checked', key: 'createdAt' },
+  { label: 'Score (High → Low)', key: 'scoreDesc' },
+  { label: 'Score (Low → High)', key: 'scoreAsc' },
+  { label: 'Stars (High → Low)', key: 'starsDesc' },
+  { label: 'Stars (Low → High)', key: 'starsAsc' },
+  { label: 'Forks (High → Low)', key: 'forksDesc' },
+  { label: 'Forks (Low → High)', key: 'forksAsc' },
+  { label: 'Contributors (High → Low)', key: 'contributorsDesc' },
+  { label: 'Contributors (Low → High)', key: 'contributorsAsc' },
+  { label: 'Last checked (Newest)', key: 'createdAtDesc' },
+  { label: 'Last checked (Oldest)', key: 'createdAtAsc' },
 ] as const
 
 const parseOrderParam = (orderParam: string | null) => {
-  if (!orderParam) {
-    return { field: 'score', direction: Ordering.Desc, urlKey: '-score' }
+  if (!orderParam || !(orderParam in MOBILE_ORDERING_MAP)) {
+    return { field: 'score', direction: Ordering.Desc, urlKey: 'scoreDesc' }
   }
 
-  const isDescending = orderParam.startsWith('-')
-  const fieldKey = isDescending ? orderParam.slice(1) : orderParam
-  const isValidKey = fieldKey in FIELD_MAPPING
-  const normalizedKey = isValidKey ? fieldKey : 'score'
-  const graphqlField = FIELD_MAPPING[normalizedKey as OrderKey]
-  const direction = isDescending ? Ordering.Desc : Ordering.Asc
-  const normalizedUrlKey = direction === Ordering.Desc ? `-${normalizedKey}` : normalizedKey
+  const { field, direction } = MOBILE_ORDERING_MAP[orderParam as MobileOrderingKey]
 
-  return { field: graphqlField, direction, urlKey: normalizedUrlKey }
+  return { field, direction, urlKey: orderParam }
 }
 
 const buildGraphQLOrdering = (field: string, direction: Ordering) => {
@@ -73,13 +79,6 @@ const buildOrderingWithTieBreaker = (primaryOrdering: Record<string, Ordering>) 
   },
 ]
 
-const getNextOrderKey = (fieldKey: OrderKey, currentOrderKey: string) => {
-  if (!currentOrderKey || currentOrderKey.replace('-', '') !== fieldKey) {
-    return `-${fieldKey}`
-  }
-  return currentOrderKey.startsWith('-') ? fieldKey : `-${fieldKey}`
-}
-
 const SortableColumnHeader: FC<{
   label: string
   fieldKey: OrderKey
@@ -87,15 +86,18 @@ const SortableColumnHeader: FC<{
   onSort: (orderKey: string | null) => void
   align?: 'left' | 'center' | 'right'
 }> = ({ label, fieldKey, currentOrderKey, onSort, align = 'left' }) => {
-  const isActiveSortDesc = currentOrderKey === `-${fieldKey}`
-  const isActiveSortAsc = currentOrderKey === fieldKey
+  const descOrderKey = `${fieldKey}Desc` as MobileOrderingKey
+  const ascOrderKey = `${fieldKey}Asc` as MobileOrderingKey
+
+  const isActiveSortDesc = currentOrderKey === descOrderKey
+  const isActiveSortAsc = currentOrderKey === ascOrderKey
   const isActive = isActiveSortDesc || isActiveSortAsc
 
   const handleClick = () => {
     if (!isActive) {
-      onSort(`-${fieldKey}`)
+      onSort(descOrderKey)
     } else if (isActiveSortDesc) {
-      onSort(fieldKey)
+      onSort(ascOrderKey)
     } else {
       onSort(null)
     }
@@ -290,11 +292,9 @@ const MetricsPage: FC = () => {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl leading-tight font-bold sm:text-2xl">
-          Project Health <span className="block sm:inline">Metrics</span>
-        </h1>
-        <div className="flex flex-row items-center gap-2">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="mb-2 text-2xl font-bold">Project Health Metrics</h1>
+        <div className="flex flex-row items-center gap-2 self-end">
           {/* Mobile Sort */}
           <div className="sm:hidden">
             <ProjectsDashboardDropDown
@@ -309,25 +309,22 @@ const MetricsPage: FC = () => {
                   })),
                 },
                 {
-                  title: 'Actions',
-                  items: [{ label: 'Clear sorting', key: 'clear-sort' }],
+                  title: 'Reset',
+                  items: [{ label: 'Reset Sorting', key: 'reset-sort' }],
                 },
               ]}
               selectionMode="single"
-              selectedKeys={urlKey ? [urlKey.startsWith('-') ? urlKey.slice(1) : urlKey] : []}
+              selectedKeys={urlKey ? [urlKey] : []}
               selectedLabels={
-                urlKey
-                  ? [MOBILE_SORT_FIELDS.find((f) => f.key === urlKey.replace('-', ''))?.label || '']
-                  : []
+                urlKey ? [MOBILE_SORT_FIELDS.find((f) => f.key === urlKey)?.label || ''] : []
               }
               onAction={(key: string) => {
-                if (key === 'clear-sort') {
+                if (key === 'reset-sort') {
                   handleSort(null)
                   return
                 }
 
-                const nextOrderKey = getNextOrderKey(key as OrderKey, urlKey)
-                handleSort(nextOrderKey)
+                handleSort(key)
               }}
             />
           </div>
