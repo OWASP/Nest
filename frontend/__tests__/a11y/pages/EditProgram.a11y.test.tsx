@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import mockProgramDetailsData from '@mockData/mockProgramData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useSession } from 'next-auth/react'
 import EditProgramPage from 'app/my/mentorship/programs/[programKey]/edit/page'
 
 jest.mock('next/navigation', () => ({
@@ -15,6 +16,10 @@ jest.mock('@apollo/client/react', () => ({
   useApolloClient: jest.fn(),
 }))
 
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(),
+}))
+
 describe('EditProgramPage Accessibility', () => {
   it('should have no accessibility violations', async () => {
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
@@ -23,6 +28,10 @@ describe('EditProgramPage Accessibility', () => {
         getProgram: mockProgramDetailsData.getProgram,
       },
       loading: false,
+    })
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
     })
 
     const { container } = render(<EditProgramPage />)
