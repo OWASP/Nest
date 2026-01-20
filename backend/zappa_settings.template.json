@@ -32,6 +32,7 @@
       "/botocore/",
       "/botocore-",
       "/data/",
+      "/generated_videos/",
       "/pip/",
       "/pip-",
       "/setuptools/",
@@ -45,7 +46,9 @@
     "snap_start": "PublishedVersions",
     "timeout_seconds": 60,
     "vpc_config": {
-      "SecurityGroupIds": ["${AWS_LAMBDA_VPC_SECURITY_GROUP_ID}"],
+      "SecurityGroupIds": [
+        "${ZAPPA_VPC_SECURITY_GROUP_ID}"
+      ],
       "SubnetIds": [
         "${AWS_PRIVATE_SUBNET_A}",
         "${AWS_PRIVATE_SUBNET_B}",

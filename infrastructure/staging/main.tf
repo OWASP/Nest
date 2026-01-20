@@ -142,6 +142,8 @@ module "parameters" {
   project_name       = var.project_name
   redis_host         = module.cache.redis_primary_endpoint
   redis_password_arn = module.cache.redis_password_arn
+  server_csrf_url    = var.domain_name != null ? "https://${var.domain_name}/csrf/" : "http://${module.alb.alb_dns_name}/csrf/"
+  server_graphql_url = var.domain_name != null ? "https://${var.domain_name}/graphql/" : "http://${module.alb.alb_dns_name}/graphql/"
 }
 
 module "security" {

@@ -447,6 +447,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
+
       - name: Build backend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
@@ -463,7 +473,9 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
-          tags: owasp/nest:backend-staging
+          tags: |
+            owasp/nest:backend-staging
+            ${{ secrets.AWS_ECR_BACKEND_REPOSITORY_URL }}:latest
 
       - name: Prepare frontend public environment
         env:
@@ -514,7 +526,9 @@ jobs:
           secrets: |
             RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          tags: owasp/nest:frontend-staging
+          tags: |
+            owasp/nest:frontend-staging
+            ${{ secrets.AWS_ECR_FRONTEND_REPOSITORY_URL }}:latest
 
       - name: Get frontend image size
         id: frontend-size
@@ -532,7 +546,7 @@ jobs:
             echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
             echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
           } >> $GITHUB_STEP_SUMMARY
-    timeout-minutes: 5
+    timeout-minutes: 10
 
   scan-staging-images:
     name: Scan Staging Images
@@ -572,20 +586,16 @@ jobs:
   plan-staging-nest:
     name: Plan Nest Staging
     env:
-      # NOTE: update to us-east-2
-      AWS_REGION: ap-south-1
-      AWS_AVAILABILITY_ZONES: '["ap-south-1a", "ap-south-1b", "ap-south-1c"]'
       FORCE_COLOR: 1
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    # NOTE: uncomment
     #if: |
       #github.repository == 'OWASP/Nest' &&
       #github.ref == 'refs/heads/main'
-    #needs:
+    needs:
       #- scan-staging-images
-      #- set-release-version
+      - set-release-version
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -597,7 +607,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Install Terraform
@@ -607,7 +617,7 @@ jobs:
 
       - name: Prepare terraform backend
         env:
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
           TF_STATE_DYNAMODB_TABLE: ${{ secrets.TF_STATE_DYNAMODB_TABLE }}
         run: |
@@ -620,10 +630,10 @@ jobs:
 
       - name: Prepare terraform variables
         env:
-          AVAILABILITY_ZONES: ${{ env.AWS_AVAILABILITY_ZONES }}
-          AWS_REGION: ${{ env.AWS_REGION }}
+          AVAILABILITY_ZONES: ${{ vars.AWS_AVAILABILITY_ZONES }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
           CREATE_RDS_PROXY: false
-          DOMAIN_NAME: "nest.owasp.dev"
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           ECS_USE_FARGATE_SPOT: true
           ECS_USE_PUBLIC_SUBNETS: false
           ENVIRONMENT: "staging"
@@ -643,6 +653,11 @@ jobs:
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
           lambda_function_name="$LAMBDA_FUNCTION_NAME"
           project_name="$PROJECT_NAME"
+
+          secret_recovery_window_in_days = 0
+          db_backup_retention_period     = 0
+          db_deletion_protection         = false
+          db_skip_final_snapshot         = true
           EOF
 
       - name: Terraform Init
@@ -674,10 +689,175 @@ jobs:
           retention-days: 3
     timeout-minutes: 15
 
+  deploy-staging-nest:
+    name: Deploy Nest Staging
+    env:
+      FORCE_COLOR: 1
+      TF_INPUT: false
+      TF_IN_AUTOMATION: true
+    environment: staging
+    #if: |
+      #github.repository == 'OWASP/Nest' &&
+      #github.ref == 'refs/heads/main'
+    needs:
+      - plan-staging-nest
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        with:
+          terraform_version: 1.14.0
+
+      - name: Prepare terraform backend
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+          TF_STATE_DYNAMODB_TABLE: ${{ secrets.TF_STATE_DYNAMODB_TABLE }}
+        run: |
+          umask 377
+          cat > infrastructure/staging/terraform.tfbackend <<-EOF
+          bucket="$TF_STATE_BUCKET"
+          dynamodb_table="$TF_STATE_DYNAMODB_TABLE"
+          region="$AWS_REGION"
+          EOF
+
+      - name: Terraform Init
+        working-directory: infrastructure/staging
+        run: terraform init -backend-config=terraform.tfbackend
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+        with:
+          name: tfplan
+          path: infrastructure/staging
+
+      - name: Terraform Apply
+        working-directory: infrastructure/staging
+        run: terraform apply -auto-approve tfplan
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          cache: 'poetry'
+          cache-dependency-path: backend/poetry.lock
+          python-version: '3.13'
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: poetry sync --no-root --without dev --without test --without video
+
+      - name: Prepare Zappa settings
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_PRIVATE_SUBNET_A: ${{ secrets.AWS_PRIVATE_SUBNET_A }}
+          AWS_PRIVATE_SUBNET_B: ${{ secrets.AWS_PRIVATE_SUBNET_B }}
+          AWS_PRIVATE_SUBNET_C: ${{ secrets.AWS_PRIVATE_SUBNET_C }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          ZAPPA_S3_BUCKET: ${{ secrets.ZAPPA_S3_BUCKET }}
+          ZAPPA_VPC_SECURITY_GROUP_ID: ${{ secrets.ZAPPA_VPC_SECURITY_GROUP_ID }}
+        run: envsubst < backend/zappa_settings.template.json > backend/zappa_settings.json
+
+      - name: Update Zappa deployment
+        working-directory: backend
+        run: poetry run zappa update staging
+
+      - name: Run ECS migrate task
+        id: migrate-task
+        env:
+          CLUSTER_NAME: nest-staging-tasks-cluster
+          ECS_SECURITY_GROUP_ID: ${{ secrets.AWS_ECS_SECURITY_GROUP_ID }}
+          PRIVATE_SUBNET_A: ${{ secrets.AWS_PRIVATE_SUBNET_A }}
+          PRIVATE_SUBNET_B: ${{ secrets.AWS_PRIVATE_SUBNET_B }}
+          PRIVATE_SUBNET_C: ${{ secrets.AWS_PRIVATE_SUBNET_C }}
+          TASK_DEFINITION: nest-staging-migrate
+        run: |
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_A,$PRIVATE_SUBNET_B,$PRIVATE_SUBNET_C],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+          echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
+
+      - name: Wait for migrate task
+        env:
+          CLUSTER_NAME: nest-staging-tasks-cluster
+        run: |
+          aws ecs wait tasks-stopped \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}"
+
+      - name: Check migrate task exit code
+        env:
+          CLUSTER_NAME: nest-staging-tasks-cluster
+        run: |
+          EXIT_CODE=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}" \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "::error::Migrate task failed with exit code $EXIT_CODE"
+            exit 1
+          fi
+          echo "Migrate task completed successfully"
+
+      - name: Run ECS index-data task
+        env:
+          CLUSTER_NAME: nest-staging-tasks-cluster
+          ECS_SECURITY_GROUP_ID: ${{ secrets.AWS_ECS_SECURITY_GROUP_ID }}
+          PRIVATE_SUBNET_A: ${{ secrets.AWS_PRIVATE_SUBNET_A }}
+          PRIVATE_SUBNET_B: ${{ secrets.AWS_PRIVATE_SUBNET_B }}
+          PRIVATE_SUBNET_C: ${{ secrets.AWS_PRIVATE_SUBNET_C }}
+          TASK_DEFINITION: nest-staging-index-data
+        run: |
+          aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_A,$PRIVATE_SUBNET_B,$PRIVATE_SUBNET_C],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
+          echo "Index-data task started (runs async, ~30 min)"
+
+      - name: Force new frontend deployment
+        env:
+          CLUSTER_NAME: nest-staging-frontend-cluster
+          SERVICE_NAME: nest-staging-frontend-service
+        run: |
+          aws ecs update-service \
+            --cluster "$CLUSTER_NAME" \
+            --service "$SERVICE_NAME" \
+            --force-new-deployment
+
+      - name: Wait for frontend service stability
+        env:
+          CLUSTER_NAME: nest-staging-frontend-cluster
+          SERVICE_NAME: nest-staging-frontend-service
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+
   run-staging-lighthouse-ci:
     name: Run Lighthouse CI
     needs:
-      - deploy-production-nest
+      - deploy-staging-nest
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -709,7 +889,7 @@ jobs:
   run-staging-zap-baseline-scan:
     name: Run staging ZAP baseline scan
     needs:
-      - deploy-production-nest
+      - deploy-staging-nest
     permissions:
       contents: read
     runs-on: ubuntu-latest

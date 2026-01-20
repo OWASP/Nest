@@ -18,6 +18,11 @@ output "backend_ecr_repository_url" {
   value       = module.ecs.ecr_repository_url
 }
 
+output "ecs_security_group_id" {
+  description = "The ID of the security group for ECS tasks."
+  value       = module.security.ecs_sg_id
+}
+
 output "frontend_ecr_repository_url" {
   description = "The URL of the frontend ECR repository."
   value       = module.frontend.ecr_repository_url

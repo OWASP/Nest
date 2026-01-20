@@ -71,6 +71,7 @@ dockerhub
 dsn
 elevenlabs
 env
+envsubst
 euo
 facebookexternalhit
 gamesec
