@@ -11,11 +11,11 @@ import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
 async function checkIfProjectLeader(login: string): Promise<boolean> {
   try {
     const client = await apolloClient
-    const { data } = (await client.query({
+    const { data } = await client.query({
       query: IsProjectLeaderDocument,
       variables: { login },
       fetchPolicy: 'no-cache',
-    })) as { data: { isProjectLeader: boolean } }
+    })
     return data?.isProjectLeader ?? false
   } catch (err) {
     throw new Error(
@@ -28,11 +28,11 @@ async function checkIfProjectLeader(login: string): Promise<boolean> {
 async function checkIfMentor(login: string): Promise<boolean> {
   try {
     const client = await apolloClient
-    const { data } = (await client.query({
+    const { data } = await client.query({
       query: IsMentorDocument,
       variables: { login },
       fetchPolicy: 'no-cache',
-    })) as { data: { isMentor: boolean } }
+    })
     return data?.isMentor ?? false
   } catch (err) {
     throw new Error(

@@ -37,8 +37,9 @@ const noopApolloClient = {
   mutate: async (): Promise<{ data: unknown }> => ({ data: null }),
   query: async (): Promise<{ data: unknown }> => ({ data: null }),
 }
-export const apolloClient =
+export const apolloClient = (
   process.env.NEXT_SERVER_DISABLE_SSR === 'true' ? noopApolloClient : await createApolloClient()
+) as Pick<Awaited<ReturnType<typeof createApolloClient>>, 'query' | 'mutate'>
 
 export const getCsrfTokenOnServer = async () => {
   const cookieStore = await cookies()
