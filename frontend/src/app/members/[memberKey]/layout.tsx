@@ -38,10 +38,10 @@ export async function generateMetadata({
 export default async function UserDetailsLayout({
   children,
   params,
-}: {
+}: Readonly<{
   children: React.ReactNode
   params: Promise<{ memberKey: string }>
-}) {
+}>) {
   const { memberKey } = await params
 
   const { data } = await apolloClient.query({
