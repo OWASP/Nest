@@ -8,8 +8,7 @@ interface NavDropDownProps {
   pathname: string
   link: LinkType
 }
-
-export default function NavDropdown({ link, pathname }: NavDropDownProps) {
+export default function NavDropdown({ link, pathname }: Readonly<NavDropDownProps>) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
   const dropdownId = useId()
