@@ -18,7 +18,6 @@ jest.mock('@apollo/client/react', () => ({
 describe('EditProgramPage Accessibility', () => {
   it('should have no accessibility violations', async () => {
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
-    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         getProgram: mockProgramDetailsData.getProgram,
