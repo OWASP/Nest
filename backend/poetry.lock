@@ -5010,14 +5010,14 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "weasyprint"
-version = "67.0"
+version = "68.0"
 description = "The Awesome Document Factory"
 optional = false
 python-versions = ">=3.10"
 groups = ["video"]
 files = [
-    {file = "weasyprint-67.0-py3-none-any.whl", hash = "sha256:abc2f40872ea01c29c11f7799dafc4b23c078335bf7777f72a8affeb36e1d201"},
-    {file = "weasyprint-67.0.tar.gz", hash = "sha256:fdfbccf700e8086c8fd1607ec42e25d4b584512c29af2d9913587a4e448dead4"},
+    {file = "weasyprint-68.0-py3-none-any.whl", hash = "sha256:c2cb40c71b50837c5971f00171c9e4078e8c9912dd7c217f3e90e068f11e8aa1"},
+    {file = "weasyprint-68.0.tar.gz", hash = "sha256:447f40898b747cb44ac31a5d493d512e7441fd56e13f63744c099383bbf9cda9"},
 ]
 
 [package.dependencies]
@@ -5032,7 +5032,7 @@ tinyhtml5 = ">=2.0.0b1"
 
 [package.extras]
 doc = ["furo", "sphinx"]
-test = ["pytest", "ruff"]
+test = ["Pillow (>=12.1.0)", "pytest", "ruff"]
 
 [[package]]
 name = "webencodings"
@@ -5552,4 +5552,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "4b80bb6e5802d0b2d1171bf2047c7e2fb42d4ba47f3390f2a6555a245306e334"
+content-hash = "d86f3d070df8022ce1e47199bc2cfedf270752dc9b86bf2925b82d0e1e0ed542"
