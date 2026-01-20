@@ -7,10 +7,10 @@ from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.utils import timezone
 
-from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
@@ -26,10 +26,10 @@ from apps.owasp.models.enums.project import (
 )
 from apps.owasp.models.managers.project import ActiveProjectManager
 from apps.owasp.models.mixins.project import ProjectIndexMixin
-from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 if TYPE_CHECKING:
     from apps.owasp.models.entity_member import EntityMember
+    from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 MAX_LEADERS_COUNT = 5
 
@@ -50,6 +50,18 @@ class Project(
         indexes = [
             models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
             models.Index(fields=["-updated_at"], name="project_updated_at_desc_idx"),
+            GinIndex(
+                fields=["name"],
+                name="project_name_gin_idx",
+                opclasses=["gin_trgm_ops"],
+                condition=models.Q(is_active=True),
+            ),
+            GinIndex(
+                OpClass(
+                    models.functions.Cast("leaders_raw", models.TextField()), name="gin_trgm_ops"
+                ),
+                name="project_leaders_raw_gin_idx",
+            ),
         ]
         verbose_name_plural = "Projects"
 
@@ -151,7 +163,7 @@ class Project(
         return f"{self.name or self.key}"
 
     @property
-    def entity_leaders(self) -> models.QuerySet[EntityMember]:
+    def entity_leaders(self) -> list[EntityMember]:
         """Return project leaders."""
         return super().entity_leaders[:MAX_LEADERS_COUNT]
 
@@ -190,10 +202,20 @@ class Project(
     @property
     def issues(self):
         """Return issues."""
-        return Issue.objects.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
+        return (
+            Issue.objects.filter(
+                repository__in=self.repositories.all(),
+            )
+            .select_related(
+                "author",
+                "level",
+                "milestone",
+                "repository",
+            )
+            .prefetch_related(
+                "assignees",
+                "labels",
+            )
         )
 
     @property
@@ -204,9 +226,7 @@ class Project(
     @property
     def last_health_metrics(self) -> ProjectHealthMetrics | None:
         """Return last health metrics for the project."""
-        return (
-            ProjectHealthMetrics.objects.filter(project=self).order_by("-nest_created_at").first()
-        )
+        return self.health_metrics.order_by("-nest_created_at").first()
 
     @property
     def leaders_count(self) -> int:
@@ -245,10 +265,20 @@ class Project(
     @property
     def pull_requests(self):
         """Return pull requests."""
-        return PullRequest.objects.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
+        return (
+            PullRequest.objects.filter(
+                repository__in=self.repositories.all(),
+            )
+            .select_related(
+                "author",
+                "milestone",
+                "repository__organization",
+                "repository",
+            )
+            .prefetch_related(
+                "assignees",
+                "labels",
+            )
         )
 
     @property
@@ -271,16 +301,25 @@ class Project(
             published_at__isnull=False,
             repository__in=self.repositories.all(),
         ).select_related(
+            "author",
             "repository",
+            "repository__organization",
         )
 
     @property
     def recent_milestones(self):
         """Return recent milestones."""
-        return Milestone.objects.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
+        return (
+            Milestone.objects.filter(
+                repository__in=self.repositories.all(),
+            )
+            .select_related(
+                "author",
+                "repository",
+            )
+            .prefetch_related(
+                "labels",
+            )
         )
 
     @property
@@ -365,7 +404,10 @@ class Project(
     @lru_cache
     def active_projects_count():
         """Return active projects count."""
-        return IndexBase.get_total_count("projects", search_filters="idx_is_active:true")
+        return Project.objects.filter(
+            has_active_repositories=True,
+            is_active=True,
+        ).count()
 
     @staticmethod
     def bulk_save(projects: list, fields: list | None = None) -> None:  # type: ignore[override]

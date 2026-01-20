@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, cast
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -19,6 +19,8 @@ from apps.mentorship.models.mentor import Mentor
 
 if TYPE_CHECKING:
     from apps.github.api.internal.nodes.issue import IssueNode
+
+logger = logging.getLogger(__name__)
 
 
 @strawberry.type
@@ -48,7 +50,9 @@ class MentorshipQuery:
         return Mentor.objects.filter(github_user=github_user).exists()
 
     @strawberry.field
-    def get_mentee_details(self, program_key: str, module_key: str, mentee_key: str) -> MenteeNode:
+    def get_mentee_details(
+        self, program_key: str, module_key: str, mentee_key: str
+    ) -> MenteeNode | None:
         """Get detailed information about a mentee in a specific module."""
         try:
             module = Module.objects.only("id").get(key=module_key, program__key=program_key)
@@ -64,7 +68,8 @@ class MentorshipQuery:
 
             if not is_enrolled:
                 message = f"Mentee {mentee_key} is not enrolled in module {module_key}"
-                raise ObjectDoesNotExist(message)
+                logger.warning(message)
+                return None
 
             return MenteeNode(
                 id=cast("strawberry.ID", str(mentee.id)),
@@ -79,7 +84,8 @@ class MentorshipQuery:
 
         except (Module.DoesNotExist, GithubUser.DoesNotExist, Mentee.DoesNotExist) as e:
             message = f"Mentee details not found: {e}"
-            raise ObjectDoesNotExist(message) from e
+            logger.warning(message)
+            return None
 
     @strawberry.field
     def get_mentee_module_issues(
@@ -101,7 +107,8 @@ class MentorshipQuery:
 
             if not is_enrolled:
                 message = f"Mentee {mentee_key} is not enrolled in module {module_key}"
-                raise ObjectDoesNotExist(message)
+                logger.warning(message)
+                return []
 
             issues_qs = (
                 module.issues.filter(assignees=github_user)
@@ -121,4 +128,5 @@ class MentorshipQuery:
 
         except (Module.DoesNotExist, GithubUser.DoesNotExist, Mentee.DoesNotExist) as e:
             message = f"Mentee issues not found: {e}"
-            raise ObjectDoesNotExist(message) from e
+            logger.warning(message)
+            return []

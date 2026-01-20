@@ -34,7 +34,9 @@ COPY manage.py wsgi.py ./
 COPY settings settings
 COPY static static
 COPY templates templates
-COPY tests tests
+COPY tests/apps tests/apps
+COPY tests/__init__.py tests/__init__.py
+COPY tests/conftest.py tests/conftest.py
 
 FROM python:3.13.7-alpine
 

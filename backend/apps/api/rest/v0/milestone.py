@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone as MilestoneModel
 
@@ -101,6 +102,7 @@ def list_milestones(
     ),
     operation_id="get_milestone",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: MilestoneError,
         HTTPStatus.OK: MilestoneDetail,
     },
