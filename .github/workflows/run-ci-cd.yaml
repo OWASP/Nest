@@ -590,11 +590,11 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    #if: |
-      #github.repository == 'OWASP/Nest' &&
-      #github.ref == 'refs/heads/main'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
-      #- scan-staging-images
+      - scan-staging-images
       - set-release-version
     permissions:
       contents: read
@@ -653,11 +653,6 @@ jobs:
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
           lambda_function_name="$LAMBDA_FUNCTION_NAME"
           project_name="$PROJECT_NAME"
-
-          secret_recovery_window_in_days = 0
-          db_backup_retention_period     = 0
-          db_deletion_protection         = false
-          db_skip_final_snapshot         = true
           EOF
 
       - name: Terraform Init
@@ -696,9 +691,9 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    #if: |
-      #github.repository == 'OWASP/Nest' &&
-      #github.ref == 'refs/heads/main'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
       - plan-staging-nest
     permissions:

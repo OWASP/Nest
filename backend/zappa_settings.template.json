@@ -43,7 +43,7 @@
     "runtime": "python3.13",
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
     "slim_handler": true,
-    "snap_start": "PublishedVersions",
+    "snap_start": "None",
     "timeout_seconds": 60,
     "vpc_config": {
       "SecurityGroupIds": [
