@@ -62,20 +62,24 @@ jobs:
 
   semgrep:
     name: Run Semgrep Security Scan
-    permissions:
-      contents: read
-      security-events: write
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@b4ffde65f463366882ddc3bfe93e684e7eeb5e40
 
-      - name: Run Semgrep
-        uses: semgrep/semgrep-action@2f647c0b06b515d0da467389a425a898668700a0
+      - name: Set up Python
+        uses: actions/setup-python@0a5c67180987335e654e57e3831d0542385a4a55
         with:
-          config: .semgrep.yml
-        continue-on-error: false
+          python-version: '3.11'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Security Scan
+        run: make security-scan
 
   check-frontend:
     name: Run frontend checks
