@@ -71,6 +71,7 @@ jest.mock('next/image', () => ({
 const now = Date.now()
 const mockReleases: ReleaseType[] = [
   {
+    id: 'release-test-1',
     name: 'v1.0 The First Release',
     publishedAt: now,
     repositoryName: 'our-awesome-project',
@@ -91,6 +92,7 @@ const mockReleases: ReleaseType[] = [
     },
   },
   {
+    id: 'release-test-2',
     name: 'v2.0 The Second Release',
     publishedAt: now,
     repositoryName: 'another-cool-project',

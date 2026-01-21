@@ -37,7 +37,7 @@ describe('ToggleableList', () => {
   })
 
   it('renders with limited props initially', () => {
-    render(<ToggleableList items={mockItems} label="test-label" />)
+    render(<ToggleableList entityKey="test" items={mockItems} label="test-label" />)
 
     // First 10 items should be visible
     for (const item of mockItems.slice(0, 10)) {
@@ -51,7 +51,7 @@ describe('ToggleableList', () => {
   })
 
   it('renders with an icon', () => {
-    render(<ToggleableList items={mockItems} label="test-label" icon={FaUser} />)
+    render(<ToggleableList entityKey="test" items={mockItems} label="test-label" icon={FaUser} />)
 
     const iconElement = screen.getByTestId('react-icon')
     expect(iconElement).toBeInTheDocument()
@@ -59,7 +59,7 @@ describe('ToggleableList', () => {
   })
 
   it('respects custom limit prop', () => {
-    render(<ToggleableList items={mockItems} label="test-label" limit={3} />)
+    render(<ToggleableList entityKey="test" items={mockItems} label="test-label" limit={3} />)
 
     expect(screen.getByText('Item 1')).toBeInTheDocument()
     expect(screen.getByText('Item 2')).toBeInTheDocument()
@@ -69,19 +69,19 @@ describe('ToggleableList', () => {
 
   it('does not show Show More button when item count is less than the limit', () => {
     const limitedItems = mockItems.slice(0, 5)
-    render(<ToggleableList items={limitedItems} label="test-label" />)
+    render(<ToggleableList entityKey="test" items={limitedItems} label="test-label" />)
 
     expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
 
   it('shows Show More button when items exceed limit', () => {
-    render(<ToggleableList items={mockItems} label="test-label" limit={5} />)
+    render(<ToggleableList entityKey="test" items={mockItems} label="test-label" limit={5} />)
 
     expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
   })
 
   it('expands to show all items when ShowMoreButton is clicked', () => {
-    render(<ToggleableList items={mockItems} label="Expandable Items" limit={5} />)
+    render(<ToggleableList entityKey="test" items={mockItems} label="Expandable Items" limit={5} />)
 
     // Initially hidden items
     expect(screen.queryByText('Item 6')).not.toBeInTheDocument()
@@ -96,7 +96,9 @@ describe('ToggleableList', () => {
   })
 
   it('collapses back to limited view when ShowMoreButton is clicked again', () => {
-    render(<ToggleableList items={mockItems} label="Collapsible Items" limit={5} />)
+    render(
+      <ToggleableList entityKey="test" items={mockItems} label="Collapsible Items" limit={5} />
+    )
 
     // Expand
     fireEvent.click(screen.getByRole('button', { name: /show more/i }))
@@ -109,21 +111,28 @@ describe('ToggleableList', () => {
   })
 
   it('navigates on item button click', () => {
-    render(<ToggleableList items={['React', 'Next.js', 'FastAPI']} label="Tags" limit={2} />)
+    render(
+      <ToggleableList
+        entityKey="test"
+        items={['React', 'Next.js', 'FastAPI']}
+        label="Tags"
+        limit={2}
+      />
+    )
     const button = screen.getByText('React')
     fireEvent.click(button)
     expect(mockPush).toHaveBeenCalledWith('/projects?q=React')
   })
 
   it('handles empty items array', () => {
-    render(<ToggleableList items={[]} label="Empty List" />)
+    render(<ToggleableList entityKey="test" items={[]} label="Empty List" />)
 
     expect(screen.getByText('Empty List')).toBeInTheDocument()
     expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
 
   it('handles single item', () => {
-    render(<ToggleableList items={['Single Item']} label="Single" />)
+    render(<ToggleableList entityKey="test" items={['Single Item']} label="Single" />)
 
     expect(screen.getByText('Single Item')).toBeInTheDocument()
     expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
@@ -131,14 +140,14 @@ describe('ToggleableList', () => {
 
   it('handles items exactly equal to limit', () => {
     const exactItems = Array.from({ length: 5 }, (_, i) => `Item ${i + 1}`)
-    render(<ToggleableList items={exactItems} label="Exact Items" limit={5} />)
+    render(<ToggleableList entityKey="test" items={exactItems} label="Exact Items" limit={5} />)
 
     expect(screen.getByText('Item 5')).toBeInTheDocument()
     expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
   })
 
   it('handles limit of 0', () => {
-    render(<ToggleableList items={mockItems} label="test-label" limit={0} />)
+    render(<ToggleableList entityKey="test" items={mockItems} label="test-label" limit={0} />)
     // Should show ShowMoreButton since limit is exceeded
     expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument()
     for (const item of mockItems) {
@@ -148,7 +157,7 @@ describe('ToggleableList', () => {
 
   it('properly encodes special character in item names', () => {
     const itemsWithSpecialChars = ['C++', 'C#', 'Node.js & Express']
-    render(<ToggleableList items={itemsWithSpecialChars} label="Special Items" />)
+    render(<ToggleableList entityKey="test" items={itemsWithSpecialChars} label="Special Items" />)
     const specialButton = screen.getByText('C++')
     fireEvent.click(specialButton)
 
@@ -156,20 +165,22 @@ describe('ToggleableList', () => {
   })
 
   it('applies correct CSS classes to main container', () => {
-    const { container } = render(<ToggleableList items={mockItems} label="Styled List" />)
+    const { container } = render(
+      <ToggleableList entityKey="test" items={mockItems} label="Styled List" />
+    )
     const mainDiv = container.firstChild
     expect(mainDiv).toHaveClass('rounded-lg', 'bg-gray-100', 'p-6', 'shadow-md', 'dark:bg-gray-800')
   })
 
   it('applies correct CSS classes to header', () => {
-    render(<ToggleableList items={mockItems} label="Styled header" />)
+    render(<ToggleableList entityKey="test" items={mockItems} label="Styled header" />)
     const header = screen.getByRole('heading', { level: 2 })
     expect(header).toHaveClass('mb-4', 'text-2xl', 'font-semibold')
   })
 
   it('applies correct CSS to button items (no underline, no transition, only hover background)', () => {
     const randomItems = ['React', 'Vue', 'Angular']
-    render(<ToggleableList items={randomItems} label="Styled Buttons" />)
+    render(<ToggleableList entityKey="test" items={randomItems} label="Styled Buttons" />)
     const button = screen.getByText('React')
     expect(button).toHaveClass(
       'rounded-lg',

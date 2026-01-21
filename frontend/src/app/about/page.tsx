@@ -24,13 +24,14 @@ import {
   projectTimeline,
   projectStory,
 } from 'utils/aboutData'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
+import ContributorsList from 'components/ContributorsList'
 import Leaders from 'components/Leaders'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
 import ShowMoreButton from 'components/ShowMoreButton'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
-import TopContributorsList from 'components/TopContributorsList'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
@@ -150,11 +151,12 @@ const About = () => {
         <Leaders users={leadersData} />
 
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
             icon={HiUserGroup}
             label="Wall of Fame"
             maxInitialDisplay={12}
+            getUrl={getMemberUrl}
           />
         )}
 

@@ -2,6 +2,7 @@ import type { RepositoryDetails, User } from 'types/user'
 
 export type Release = {
   author?: User
+  id: string
   isPreRelease?: boolean
   name: string
   organizationName?: string

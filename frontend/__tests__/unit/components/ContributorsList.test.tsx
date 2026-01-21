@@ -3,7 +3,8 @@ import React from 'react'
 import { FaUsers } from 'react-icons/fa6'
 import { render } from 'wrappers/testUtil'
 import type { Contributor } from 'types/contributor'
-import TopContributorsList from 'components/TopContributorsList'
+import { getMemberUrl } from 'utils/urlFormatter'
+import ContributorsList from 'components/ContributorsList'
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -156,6 +157,7 @@ jest.mock('react-icons/fa6', () => ({
 
 const mockContributors: Contributor[] = [
   {
+    id: 'contributor-developer1',
     avatarUrl: 'https://github.com/developer1.avatar',
     login: 'developer1',
     name: 'Alex Developer',
@@ -163,6 +165,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 50,
   },
   {
+    id: 'contributor-contributor2',
     avatarUrl: 'https://github.com/contributor2.avatar',
     login: 'contributor2',
     name: 'Jane Developer',
@@ -170,6 +173,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 30,
   },
   {
+    id: 'contributor-user3',
     avatarUrl: 'https://github.com/user3.avatar',
     login: 'user3',
     name: '',
@@ -178,9 +182,10 @@ const mockContributors: Contributor[] = [
   },
 ]
 
-describe('TopContributorsList Component', () => {
+describe('ContributorsList Component', () => {
   const defaultProps = {
     contributors: mockContributors,
+    getUrl: getMemberUrl,
   }
 
   afterEach(() => {
@@ -188,8 +193,8 @@ describe('TopContributorsList Component', () => {
   })
 
   describe('Renders successfully with minimal required props', () => {
-    it('renders with minimal props (only contributors)', () => {
-      render(<TopContributorsList contributors={mockContributors} />)
+    it('renders with minimal props (only contributors and getUrl)', () => {
+      render(<ContributorsList contributors={mockContributors} getUrl={getMemberUrl} />)
 
       expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
       expect(screen.getByTestId('anchor-title')).toBeInTheDocument()
@@ -198,12 +203,12 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders component without crashing', () => {
-      const { container } = render(<TopContributorsList {...defaultProps} />)
+      const { container } = render(<ContributorsList {...defaultProps} />)
       expect(container).toBeInTheDocument()
     })
 
     it('renders without crashing with empty contributors array', () => {
-      render(<TopContributorsList contributors={[]} />)
+      render(<ContributorsList contributors={[]} getUrl={getMemberUrl} />)
       // Component returns early for empty array, so no secondary card should be rendered
       expect(screen.queryByTestId('secondary-card')).not.toBeInTheDocument()
     })
@@ -211,7 +216,7 @@ describe('TopContributorsList Component', () => {
 
   describe('Conditional rendering logic', () => {
     it('does not render anything when contributors array is empty', () => {
-      render(<TopContributorsList contributors={[]} />)
+      render(<ContributorsList contributors={[]} getUrl={getMemberUrl} />)
       // Component returns early for empty array, so no secondary card should be rendered
       expect(screen.queryByTestId('secondary-card')).not.toBeInTheDocument()
     })
@@ -219,7 +224,11 @@ describe('TopContributorsList Component', () => {
     it('renders show more/less button only when contributors exceed maxInitialDisplay', () => {
       // Test with few contributors (should not show button)
       const { rerender } = render(
-        <TopContributorsList contributors={mockContributors.slice(0, 2)} maxInitialDisplay={12} />
+        <ContributorsList
+          contributors={mockContributors.slice(0, 2)}
+          maxInitialDisplay={12}
+          getUrl={getMemberUrl}
+        />
       )
       expect(screen.queryByRole('button')).not.toBeInTheDocument()
 
@@ -232,7 +241,13 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      rerender(<TopContributorsList contributors={manyContributors} maxInitialDisplay={12} />)
+      rerender(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={12}
+          getUrl={getMemberUrl}
+        />
+      )
       expect(screen.getByRole('button')).toBeInTheDocument()
       expect(screen.getByText('Show more')).toBeInTheDocument()
     })
@@ -246,7 +261,13 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
+      render(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={5}
+          getUrl={getMemberUrl}
+        />
+      )
 
       // Should only show 5 initially
       expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(5)
@@ -256,12 +277,14 @@ describe('TopContributorsList Component', () => {
     it('renders contributor name when available, falls back to login', () => {
       const contributorsWithMissingNames: Contributor[] = [
         {
+          id: 'contributor-dev1',
           avatarUrl: 'https://github.com/developer1.avatar',
           login: 'developer1',
           name: 'Alex Developer',
           projectKey: 'project1',
         },
         {
+          id: 'contributor-contrib2',
           avatarUrl: 'https://github.com/contributor2.avatar',
           login: 'contributor2',
           name: '',
@@ -269,7 +292,7 @@ describe('TopContributorsList Component', () => {
         },
       ]
 
-      render(<TopContributorsList contributors={contributorsWithMissingNames} />)
+      render(<ContributorsList contributors={contributorsWithMissingNames} getUrl={getMemberUrl} />)
 
       expect(screen.getByText('Alex Developer')).toBeInTheDocument()
       expect(screen.getByText('Contributor2')).toBeInTheDocument() // capitalize utility should be applied
@@ -279,15 +302,15 @@ describe('TopContributorsList Component', () => {
   describe('Prop-based behavior', () => {
     it('uses custom label when provided', () => {
       const customLabel = 'Featured Contributors'
-      render(<TopContributorsList {...defaultProps} label={customLabel} />)
+      render(<ContributorsList {...defaultProps} label={customLabel} />)
 
       expect(screen.getByText(customLabel)).toBeInTheDocument()
     })
 
     it('uses default label when not provided', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
 
-      expect(screen.getByText('Top Contributors')).toBeInTheDocument()
+      expect(screen.getByText('Contributors')).toBeInTheDocument()
     })
 
     it('respects custom maxInitialDisplay prop', () => {
@@ -299,19 +322,25 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={3} />)
+      render(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={3}
+          getUrl={getMemberUrl}
+        />
+      )
 
       expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(3)
       expect(screen.getByRole('button')).toBeInTheDocument()
     })
 
     it('displays icon when provided', () => {
-      render(<TopContributorsList {...defaultProps} icon={FaUsers} />)
+      render(<ContributorsList {...defaultProps} icon={FaUsers} />)
       expect(screen.getByTestId('card-icon')).toBeInTheDocument()
     })
 
     it('does not display icon when not provided', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
       expect(screen.queryByTestId('card-icon')).not.toBeInTheDocument()
     })
   })
@@ -326,7 +355,13 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
+      render(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={5}
+          getUrl={getMemberUrl}
+        />
+      )
 
       // Initially shows 5 contributors
       expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(5)
@@ -359,7 +394,13 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={3} />)
+      render(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={3}
+          getUrl={getMemberUrl}
+        />
+      )
 
       const toggleButton = screen.getByRole('button')
 
@@ -385,7 +426,13 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
+      render(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={5}
+          getUrl={getMemberUrl}
+        />
+      )
 
       // Initial state - collapsed
       expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(5)
@@ -408,7 +455,9 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={contributors} maxInitialDisplay={3} />)
+      render(
+        <ContributorsList contributors={contributors} maxInitialDisplay={3} getUrl={getMemberUrl} />
+      )
 
       // Should show first 3 contributors
       expect(screen.getByText('User 0')).toBeInTheDocument()
@@ -428,7 +477,7 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={contributors} />)
+      render(<ContributorsList contributors={contributors} getUrl={getMemberUrl} />)
 
       // Should show 12 by default (based on component default)
       expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(12)
@@ -438,6 +487,7 @@ describe('TopContributorsList Component', () => {
     it('falls back to login when name is empty or missing', () => {
       const contributorWithoutName: Contributor[] = [
         {
+          id: 'contributor-testuser',
           avatarUrl: 'https://github.com/user1.avatar',
           login: 'testuser',
           name: '',
@@ -445,7 +495,7 @@ describe('TopContributorsList Component', () => {
         },
       ]
 
-      render(<TopContributorsList contributors={contributorWithoutName} />)
+      render(<ContributorsList contributors={contributorWithoutName} getUrl={getMemberUrl} />)
 
       expect(screen.getByText('Testuser')).toBeInTheDocument()
     })
@@ -453,6 +503,7 @@ describe('TopContributorsList Component', () => {
     it('handles missing avatar URL gracefully', () => {
       const contributorWithEmptyAvatar: Contributor[] = [
         {
+          id: 'contributor-dev1-empty-avatar',
           avatarUrl: '',
           login: 'developer1',
           name: 'Alex Developer',
@@ -460,16 +511,16 @@ describe('TopContributorsList Component', () => {
         },
       ]
 
-      render(<TopContributorsList contributors={contributorWithEmptyAvatar} />)
+      render(<ContributorsList contributors={contributorWithEmptyAvatar} getUrl={getMemberUrl} />)
 
       const avatar = screen.getByTestId('contributor-avatar')
-      expect(avatar).toHaveAttribute('src', '&s=60') // Should append size parameter even with empty URL
+      expect(avatar).toHaveAttribute('src', '?s=60') // Should append size parameter even with empty URL
     })
   })
 
   describe('Text and content rendering', () => {
     it('renders contributor names correctly', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
 
       expect(screen.getByText('Alex Developer')).toBeInTheDocument()
       expect(screen.getByText('Jane Developer')).toBeInTheDocument()
@@ -485,7 +536,13 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
+      render(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={5}
+          getUrl={getMemberUrl}
+        />
+      )
 
       expect(screen.getByText('Show more')).toBeInTheDocument()
 
@@ -494,7 +551,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders title with proper structure', () => {
-      render(<TopContributorsList {...defaultProps} label="Custom Title" />)
+      render(<ContributorsList {...defaultProps} label="Custom Title" />)
 
       expect(screen.getByTestId('anchor-title')).toBeInTheDocument()
       expect(screen.getByText('Custom Title')).toBeInTheDocument()
@@ -505,12 +562,14 @@ describe('TopContributorsList Component', () => {
     it('handles contributors with missing required fields', () => {
       const incompleteContributors: Contributor[] = [
         {
+          id: 'contributor-incomplete1',
           avatarUrl: 'https://github.com/user1.avatar',
           login: '',
           name: '',
           projectKey: 'project1',
         },
         {
+          id: 'contributor-incomplete2',
           avatarUrl: '',
           login: 'user2',
           name: 'User 2',
@@ -518,14 +577,20 @@ describe('TopContributorsList Component', () => {
         },
       ]
 
-      render(<TopContributorsList contributors={incompleteContributors} />)
+      render(<ContributorsList contributors={incompleteContributors} getUrl={getMemberUrl} />)
 
       // Should still render without crashing
       expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
     })
 
     it('handles zero maxInitialDisplay value', () => {
-      render(<TopContributorsList contributors={mockContributors} maxInitialDisplay={0} />)
+      render(
+        <ContributorsList
+          contributors={mockContributors}
+          maxInitialDisplay={0}
+          getUrl={getMemberUrl}
+        />
+      )
 
       // Should still show button since contributors length > 0
       expect(screen.getByRole('button')).toBeInTheDocument()
@@ -533,14 +598,26 @@ describe('TopContributorsList Component', () => {
     })
 
     it('handles negative maxInitialDisplay value', () => {
-      render(<TopContributorsList contributors={mockContributors} maxInitialDisplay={-1} />)
+      render(
+        <ContributorsList
+          contributors={mockContributors}
+          maxInitialDisplay={-1}
+          getUrl={getMemberUrl}
+        />
+      )
 
       // slice with negative number should still work
       expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
     })
 
     it('handles very large maxInitialDisplay value', () => {
-      render(<TopContributorsList contributors={mockContributors} maxInitialDisplay={1000} />)
+      render(
+        <ContributorsList
+          contributors={mockContributors}
+          maxInitialDisplay={1000}
+          getUrl={getMemberUrl}
+        />
+      )
 
       // Should show all contributors and no button
       expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(3)
@@ -550,7 +627,7 @@ describe('TopContributorsList Component', () => {
 
   describe('Accessibility roles and labels', () => {
     it('renders proper image alt text and titles', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
 
       const avatars = screen.getAllByTestId('contributor-avatar')
       expect(avatars[0]).toHaveAttribute('alt', "Alex Developer's avatar")
@@ -562,7 +639,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders proper link titles and hrefs', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
 
       const links = screen.getAllByTestId('contributor-link')
       expect(links[0]).toHaveAttribute('href', '/members/developer1')
@@ -582,7 +659,13 @@ describe('TopContributorsList Component', () => {
           name: `User ${index}`,
         }))
 
-      render(<TopContributorsList contributors={manyContributors} maxInitialDisplay={5} />)
+      render(
+        <ContributorsList
+          contributors={manyContributors}
+          maxInitialDisplay={5}
+          getUrl={getMemberUrl}
+        />
+      )
 
       const button = screen.getByRole('button')
       expect(button).toBeInTheDocument()
@@ -592,7 +675,7 @@ describe('TopContributorsList Component', () => {
 
   describe('DOM structure / classNames / styles', () => {
     it('renders correct CSS classes on components', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
 
       const contributorItems = screen
         .getAllByTestId('contributor-avatar')
@@ -610,7 +693,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders proper grid structure', () => {
-      const { container } = render(<TopContributorsList {...defaultProps} />)
+      const { container } = render(<ContributorsList {...defaultProps} />)
 
       const gridContainer = container.querySelector('.grid')
       expect(gridContainer).toHaveClass(
@@ -622,7 +705,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders avatar with correct dimensions and styling', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
 
       const avatars = screen.getAllByTestId('contributor-avatar')
       for (const avatar of avatars) {
@@ -633,7 +716,7 @@ describe('TopContributorsList Component', () => {
     })
 
     it('renders contributor links with proper styling', () => {
-      render(<TopContributorsList {...defaultProps} />)
+      render(<ContributorsList {...defaultProps} />)
 
       const links = screen.getAllByTestId('contributor-link')
 

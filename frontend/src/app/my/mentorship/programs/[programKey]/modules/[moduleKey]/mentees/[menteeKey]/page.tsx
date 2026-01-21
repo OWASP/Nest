@@ -157,13 +157,21 @@ const MenteeProfilePage = () => {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {menteeDetails.domains && menteeDetails.domains.length > 0 && (
               <SecondaryCard title="Domains">
-                <LabelList labels={menteeDetails.domains} maxVisible={5} />
+                <LabelList
+                  entityKey={`${menteeDetails.login}-domains`}
+                  labels={menteeDetails.domains}
+                  maxVisible={5}
+                />
               </SecondaryCard>
             )}
 
             {menteeDetails.tags && menteeDetails.tags.length > 0 && (
               <SecondaryCard title="Skills & Technologies">
-                <LabelList labels={menteeDetails.tags} maxVisible={5} />
+                <LabelList
+                  entityKey={`${menteeDetails.login}-tags`}
+                  labels={menteeDetails.tags}
+                  maxVisible={5}
+                />
               </SecondaryCard>
             )}
           </div>

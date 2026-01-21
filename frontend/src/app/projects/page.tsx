@@ -47,6 +47,7 @@ const ProjectsPage = () => {
     return (
       <Card
         button={submitButton}
+        cardKey={project.key}
         icons={filteredIcons}
         key={project.key}
         level={level[`${project.level as keyof typeof level}`]}

@@ -46,11 +46,13 @@ const mockModule: Module = {
   experienceLevel: ExperienceLevelEnum.Intermediate,
   mentors: [
     {
+      id: 'mentor-user1-a11y',
       name: 'user1',
       login: 'user1',
       avatarUrl: 'https://example.com/avatar1.jpg',
     },
     {
+      id: 'mentor-user2-a11y',
       name: 'user2',
       login: 'user2',
       avatarUrl: 'https://example.com/avatar2.jpg',

@@ -160,6 +160,7 @@ const eslintConfig = [
       'nest/no-global-nan': 'error',
       'nest/no-global-parsefloat': 'error',
       'nest/no-global-parseint': 'error',
+      'react/no-array-index-key': 'error',
       quotes: ['error', 'single', { avoidEscape: true }],
     },
   },
@@ -167,6 +168,12 @@ const eslintConfig = [
     files: ['src/utils/logger.ts'],
     rules: {
       'no-console': 'off',
+    },
+  },
+  {
+    files: ['**/skeletons/**/*.{ts,tsx,js,jsx}', '**/*.skeleton.{ts,tsx,js,jsx}'],
+    rules: {
+      'react/no-array-index-key': 'off',
     },
   },
 ]

@@ -16,21 +16,26 @@ const Label: React.FC<LabelProps> = ({ label, className = '' }) => {
 }
 
 interface LabelListProps {
+  entityKey: string
   labels: string[]
   maxVisible?: number
   className?: string
 }
 
-const LabelList: React.FC<LabelListProps> = ({ labels, maxVisible = 5, className = '' }) => {
+const LabelList: React.FC<LabelListProps> = ({
+  entityKey,
+  labels,
+  maxVisible = 5,
+  className = '',
+}) => {
   if (!labels || labels.length === 0) return null
 
   const visibleLabels = labels.slice(0, maxVisible)
   const remainingCount = labels.length - maxVisible
-
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
-      {visibleLabels.map((label, index) => (
-        <Label key={`${label}-${index}`} label={label} />
+      {visibleLabels.map((label) => (
+        <Label key={`${entityKey}-${label}`} label={label} />
       ))}
       {remainingCount > 0 && <Label label={`+${remainingCount} more`} />}
     </div>

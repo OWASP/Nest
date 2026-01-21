@@ -8,7 +8,7 @@
 
 [![Issues](https://img.shields.io/github/issues/owasp/nest?color=blue&style=for-the-badge&label=Issues)](https://github.com/OWASP/Nest/issues) [![Pull Requests](https://img.shields.io/github/issues-pr/owasp/nest?color=blue&style=for-the-badge&label=Pull%20Requests)](https://github.com/OWASP/Nest/pulls)
 
-[![OpenSSF](https://img.shields.io/badge/OpenSSF-84%25-blue?style=for-the-badge)](https://www.bestpractices.dev/projects/10174) [![Snyk Security](https://img.shields.io/badge/Snyk-Scanned-blue?style=for-the-badge)](https://snyk.io)
+[![OpenSSF](https://img.shields.io/badge/OpenSSF-passing-blue?style=for-the-badge)](https://www.bestpractices.dev/projects/10174) [![Snyk Security](https://img.shields.io/badge/Snyk-Scanning-blue?style=for-the-badge)](https://snyk.io)
 
 [![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)](https://github.com/OWASP/Nest/network/members) [![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)](https://github.com/OWASP/Nest/stargazers)
 

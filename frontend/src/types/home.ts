@@ -34,6 +34,7 @@ export type MainPageData = {
 }
 
 export type Sponsor = {
+  id: string
   imageUrl: string
   name: string
   sponsorType: string

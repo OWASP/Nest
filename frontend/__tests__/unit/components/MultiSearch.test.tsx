@@ -324,11 +324,35 @@ describe('Rendering', () => {
     })
 
     it('filters event data based on query', async () => {
-      const eventData = [
-        { name: 'JavaScript Conference', url: 'https://example.com/js' },
-        { name: 'Python Workshop', url: 'https://example.com/py' },
-        { name: 'React Meetup', url: 'https://example.com/react' },
-      ] as Event[]
+      const eventData: Event[] = [
+        {
+          id: 'event-1',
+          name: 'JavaScript Conference',
+          url: 'https://example.com/js',
+          objectID: 'event-1',
+          key: 'js-conf',
+          category: 'other',
+          startDate: '2024-01-01',
+        },
+        {
+          id: 'event-2',
+          name: 'Python Workshop',
+          url: 'https://example.com/py',
+          objectID: 'event-2',
+          key: 'py-workshop',
+          category: 'other',
+          startDate: '2024-02-01',
+        },
+        {
+          id: 'event-3',
+          name: 'React Meetup',
+          url: 'https://example.com/react',
+          objectID: 'event-3',
+          key: 'react-meetup',
+          category: 'other',
+          startDate: '2024-03-01',
+        },
+      ]
 
       const user = userEvent.setup()
       render(<MultiSearchBar {...defaultProps} eventData={eventData} />)

@@ -52,8 +52,8 @@ const SnapshotDetailsPage: React.FC = () => {
     return (
       <Card
         button={submitButton}
+        cardKey={project.key}
         icons={filteredIcons}
-        key={project.key}
         level={level[`${project.level.toLowerCase() as keyof typeof level}`]}
         summary={project.summary}
         title={project.name}
@@ -81,8 +81,8 @@ const SnapshotDetailsPage: React.FC = () => {
     return (
       <Card
         button={submitButton}
+        cardKey={chapter.key}
         icons={filteredIcons}
-        key={chapter.key}
         social={formattedUrls}
         summary={chapter.summary}
         title={chapter.name}
@@ -149,7 +149,11 @@ const SnapshotDetailsPage: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-6">
-            {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
+            {snapshot.newChapters
+              .filter((chapter) => chapter.isActive)
+              .map((chapter) => (
+                <React.Fragment key={chapter.key}>{renderChapterCard(chapter)}</React.Fragment>
+              ))}
           </div>
         </div>
       )}
@@ -160,7 +164,11 @@ const SnapshotDetailsPage: React.FC = () => {
             New Projects
           </h2>
           <div className="flex flex-col gap-6">
-            {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
+            {snapshot.newProjects
+              .filter((project) => project.isActive)
+              .map((project) => (
+                <React.Fragment key={project.key}>{renderProjectCard(project)}</React.Fragment>
+              ))}
           </div>
         </div>
       )}
@@ -171,14 +179,16 @@ const SnapshotDetailsPage: React.FC = () => {
             New Releases
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {snapshot.newReleases.map((release, index) => (
-              <Release
-                key={`${release.tagName}-${index}`}
-                release={release}
-                showAvatar={true}
-                index={index}
-              />
-            ))}
+            {snapshot.newReleases.map((release, index) => {
+              return (
+                <Release
+                  key={release.id || `${release.tagName}-${release.repositoryName}-${index}`}
+                  release={release}
+                  showAvatar={true}
+                  index={index}
+                />
+              )
+            })}
           </div>
         </div>
       )}

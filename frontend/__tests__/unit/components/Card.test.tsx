@@ -50,6 +50,7 @@ interface MockMarkdownProps {
 }
 
 interface MockLabelListProps {
+  entityKey?: string
   labels: string[]
   maxVisible?: number
   className?: string
@@ -185,14 +186,19 @@ jest.mock('components/MarkdownWrapper', () => {
 
 jest.mock('components/LabelList', () => {
   return {
-    LabelList: ({ labels, maxVisible = 5, className }: MockLabelListProps) => {
+    LabelList: ({
+      labels,
+      entityKey: _entityKey,
+      maxVisible = 5,
+      className,
+    }: MockLabelListProps) => {
       if (!labels || labels.length === 0) return null
       const visibleLabels = labels.slice(0, maxVisible)
       const remainingCount = labels.length - maxVisible
       return (
         <div data-testid="label-list" className={className}>
-          {visibleLabels.map((label, index) => (
-            <span key={`${label}-${index}`} data-testid="label">
+          {visibleLabels.map((label) => (
+            <span key={`${_entityKey}-${label}`} data-testid="label">
               {label}
             </span>
           ))}
@@ -237,6 +243,7 @@ jest.mock('utils/data', () => ({
 
 describe('Card', () => {
   const baseProps: CardProps = {
+    cardKey: 'test-project',
     title: 'Test Project',
     url: 'https://github.com/test/project',
     summary: 'This is a test project summary',
@@ -369,12 +376,14 @@ describe('Card', () => {
       ...baseProps,
       topContributors: [
         {
+          id: 'contributor-user1',
           login: 'user1',
           name: 'User One',
           avatarUrl: 'https://github.com/user1.png',
           projectKey: 'project1',
         },
         {
+          id: 'contributor-user2',
           login: 'user2',
           name: 'User Two',
           avatarUrl: 'https://github.com/user2.png',
@@ -415,12 +424,14 @@ describe('Card', () => {
       ...baseProps,
       topContributors: [
         {
+          id: 'contributor-anonymous',
           login: '',
           name: 'Anonymous',
           avatarUrl: 'https://github.com/user1.png',
           projectKey: 'project-key-1',
         },
         {
+          id: 'contributor-user2-partial',
           login: 'user2',
           name: 'User Two',
           avatarUrl: 'https://github.com/user2.png',
@@ -447,6 +458,7 @@ describe('Card', () => {
       ...baseProps,
       topContributors: [
         {
+          id: 'contributor-singleuser',
           login: 'singleuser',
           name: 'Single User',
           avatarUrl: 'https://github.com/single.png',
@@ -567,6 +579,7 @@ describe('Card', () => {
       social: [{ title: 'GitHub', url: 'https://github.com/full', icon: MockIcon as IconType }],
       topContributors: [
         {
+          id: 'contributor-expert',
           login: 'expert',
           avatarUrl: 'https://github.com/expert.png',
           name: 'John Doe',
