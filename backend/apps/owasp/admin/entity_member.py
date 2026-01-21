@@ -45,8 +45,8 @@ class EntityMemberAdmin(admin.ModelAdmin):
         """Activate and mark members as reviewed for display in the entity roster.
 
         Args:
-            request (HttpRequest): The current admin request.
-            queryset (QuerySet): Selected EntityMember instances.
+            request (HttpRequest): The current request.
+            queryset (QuerySet): The selected EntityMember instances.
 
         """
         self.message_user(
@@ -83,12 +83,12 @@ class EntityMemberAdmin(admin.ModelAdmin):
         """Extend search to include associated entity names and keys.
 
         Args:
-            request (HttpRequest): The current admin request.
-            queryset (QuerySet): Initial queryset of EntityMember instances.
+            request (HttpRequest): The current request.
+            queryset (QuerySet): The initial queryset of EntityMember instances.
             search_term (str): The search term entered by the user.
 
         Returns:
-            tuple: Filtered queryset and boolean indicating if DISTINCT is needed.
+            tuple: The filtered queryset and a boolean indicating if DISTINCT is needed.
 
         """
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)

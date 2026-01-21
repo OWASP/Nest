@@ -13,8 +13,8 @@ def mark_as_reviewed(_modeladmin, request, queryset):
 
     Args:
         _modeladmin (EntityChannelAdmin): The admin instance.
-        request (HttpRequest): The current admin request.
-        queryset (QuerySet): Selected EntityChannel instances.
+        request (HttpRequest): The current request.
+        queryset (QuerySet): The selected EntityChannel instances.
 
     """
     messages.success(
@@ -85,12 +85,12 @@ class EntityChannelAdmin(admin.ModelAdmin):
         """Customize the EntityChannel form for Slack conversation selection.
 
         Args:
-            request (HttpRequest): The current admin request.
+            request (HttpRequest): The current request.
             obj (EntityChannel, optional): The instance being edited.
             **kwargs: Additional keyword arguments.
 
         Returns:
-            Form: The customized form class.
+            Form: The customized form.
 
         """
         form = super().get_form(request, obj, **kwargs)
