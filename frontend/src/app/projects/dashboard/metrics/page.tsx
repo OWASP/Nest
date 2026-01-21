@@ -56,7 +56,7 @@ const MOBILE_SORT_FIELDS = [
 ] as const
 
 const parseOrderParam = (orderParam: string | null) => {
-  if (!orderParam || !(orderParam in MOBILE_ORDERING_MAP)) {
+  if (!orderParam || !Object.prototype.hasOwnProperty.call(MOBILE_ORDERING_MAP, orderParam)) {
     return { field: 'score', direction: Ordering.Desc, urlKey: 'scoreDesc' }
   }
 
