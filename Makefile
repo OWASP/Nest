@@ -97,4 +97,4 @@ update-nest-app-dependencies: \
 update-pre-commit:
 	@pre-commit autoupdate
 
-.PHONY: build clean check pre-commit prune run scan-images security-scan test update
+.PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-ci test update

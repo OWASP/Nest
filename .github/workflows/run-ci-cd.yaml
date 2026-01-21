@@ -76,12 +76,9 @@ jobs:
           python-version: '3.11'
 
       - name: Install Semgrep
-        run: pip install semgrep
+        run: pip install semgrep==1.148.0
 
-      - name: Run Security Scan
-        run: make security-scan
-
-      - name: Run Security Scan
+      - name: Run Security CI Scan
         run: make security-scan-ci
 
   check-frontend:
