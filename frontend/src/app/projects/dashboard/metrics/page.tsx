@@ -299,7 +299,7 @@ const MetricsPage: FC = () => {
           <div className="sm:hidden">
             <ProjectsDashboardDropDown
               buttonDisplayName="Sort By"
-              icon={urlKey?.startsWith('-') ? FaArrowDownWideShort : FaArrowUpWideShort}
+              icon={urlKey?.endsWith('Desc') ? FaArrowDownWideShort : FaArrowUpWideShort}
               sections={[
                 {
                   title: 'Sort by',
