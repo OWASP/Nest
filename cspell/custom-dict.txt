@@ -116,6 +116,7 @@ navlink
 nestbot
 ngx
 noinput
+nosemgrep
 nosniff
 nspname
 numfmt
@@ -146,6 +147,7 @@ saft
 sakanashi
 samm
 schemathesis
+semgrep
 seo
 skillstruck
 slackbot
