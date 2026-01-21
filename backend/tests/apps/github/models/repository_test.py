@@ -298,17 +298,18 @@ class TestRepositoryProperties:
                 is_draft=False, is_pre_release=False, published_at__isnull=False
             )
 
-    def test_recent_milestones(self, mocker, repository_setup):
+    def test_recent_milestones(self, repository_setup):
         """Test the recent_milestones property to ensure it returns milestones.
 
         ordered by creation date.
         """
         _owner, repository = repository_setup
-        mock_filter = mocker.patch("apps.github.models.repository.Milestone.objects.filter")
-        mock_filter.return_value.order_by.return_value = "recent_milestones"
-        assert repository.recent_milestones == "recent_milestones"
-        mock_filter.assert_called_with(repository=repository)
-        mock_filter.return_value.order_by.assert_called_with("-created_at")
+        with patch.object(Repository, "milestones", new_callable=PropertyMock) as mock_prop:
+            mock_manager = mock_prop.return_value
+            mock_manager.order_by.return_value = "recent_milestones"
+            repository.pk = 123
+            assert repository.recent_milestones == "recent_milestones"
+            mock_manager.order_by.assert_called_with("-created_at")
 
     def test_top_languages(self, repository_setup):
         """Test the top_languages property to ensure it returns a sorted list of.
