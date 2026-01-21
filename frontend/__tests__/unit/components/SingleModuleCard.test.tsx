@@ -67,10 +67,17 @@ jest.mock('components/ModuleCard', () => ({
   }),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ContributorsList', () => ({
   __esModule: true,
-  default: ({ contributors, label }: { contributors: unknown[]; label: string }) => (
-    <div data-testid="top-contributors-list">
+  default: ({
+    contributors,
+    label,
+  }: {
+    contributors: unknown[]
+    label: string
+    getUrl: (login: string) => string
+  }) => (
+    <div data-testid="contributors-list">
       <span>
         {label}: {contributors.length} contributors
       </span>
@@ -153,7 +160,7 @@ describe('SingleModuleCard', () => {
     it('renders mentors list when mentors exist', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
+      expect(screen.getByTestId('contributors-list')).toBeInTheDocument()
       expect(screen.getByText('Mentors: 2 contributors')).toBeInTheDocument()
     })
 
@@ -161,7 +168,7 @@ describe('SingleModuleCard', () => {
       const moduleWithoutMentors = { ...mockModule, mentors: [] }
       render(<SingleModuleCard module={moduleWithoutMentors} />)
 
-      expect(screen.queryByTestId('top-contributors-list')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('contributors-list')).not.toBeInTheDocument()
     })
 
     it('renders module link with correct href', () => {
@@ -222,7 +229,7 @@ describe('SingleModuleCard', () => {
       render(<SingleModuleCard module={incompleteModule} />)
 
       expect(screen.getByText('Test Module')).toBeInTheDocument()
-      expect(screen.queryByTestId('top-contributors-list')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('contributors-list')).not.toBeInTheDocument()
     })
 
     it('handles undefined admins array gracefully', () => {

@@ -349,25 +349,27 @@ jest.mock('components/ToggleableList', () => ({
   ),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ContributorsList', () => ({
   __esModule: true,
   default: ({
     contributors,
     maxInitialDisplay,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon,
+    label = 'Contributors',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    label,
+    getUrl,
     ...props
   }: {
     contributors: unknown[]
     icon?: unknown
     label?: string
     maxInitialDisplay: number
+    getUrl: (login: string) => string
     [key: string]: unknown
   }) => (
-    <div data-testid="top-contributors-list" {...props}>
-      Top Contributors ({contributors.length} items, max display: {maxInitialDisplay})
+    <div data-testid="contributors-list" {...props}>
+      {label} ({contributors.length} items, max display: {maxInitialDisplay})
     </div>
   ),
 }))
@@ -951,7 +953,7 @@ describe('CardDetailsPage', () => {
     it('passes correct props to child components', () => {
       render(<CardDetailsPage {...defaultProps} topContributors={mockContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (2 items, max display: 12)'
       )
     })
@@ -1041,9 +1043,7 @@ describe('CardDetailsPage', () => {
       )
 
       expect(screen.getByTestId('health-metrics')).toHaveTextContent('Health Metrics (1 items)')
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
-        'Top Contributors (2 items'
-      )
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent('Top Contributors (2 items')
       expect(screen.getByTestId('repositories-card')).toHaveTextContent('Repositories (2 items)')
     })
 
@@ -1152,7 +1152,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributorsList} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (50 items, max display: 12)'
       )
     })
@@ -1212,7 +1212,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (1000 items, max display: 12)'
       )
     })
@@ -1362,7 +1362,7 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Project summary text')).toBeInTheDocument()
       expect(screen.getByText('User summary content')).toBeInTheDocument()
       expect(screen.getByTestId('health-metrics')).toBeInTheDocument()
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
+      expect(screen.getByTestId('contributors-list')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
       expect(screen.getByTestId('sponsor-card')).toBeInTheDocument()
     })
