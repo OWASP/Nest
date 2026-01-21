@@ -72,6 +72,10 @@ security-scan:
 	semgrep $(SEMGREP_CONFIGS) --error --output findings.txt .
 	@echo "✅ Scan Complete. Detailed findings saved to findings.txt"
 
+security-scan-ci:
+	@echo "🛡️  Running CI Security Scan..."
+	semgrep $(SEMGREP_CONFIGS) --error .
+
 test: \
 	test-nest-app
 

@@ -81,6 +81,9 @@ jobs:
       - name: Run Security Scan
         run: make security-scan
 
+      - name: Run Security Scan
+        run: make security-scan-ci
+
   check-frontend:
     name: Run frontend checks
     permissions:

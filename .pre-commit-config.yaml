@@ -93,7 +93,17 @@ repos:
     hooks:
       - id: semgrep
         name: Semgrep Security Scan
-        pass_filenames: false
-        verbose: true
-        entry: make security-scan
-        args: []
+        args:
+          - --config
+          - p/owasp-top-ten
+          - --config
+          - p/python
+          - --config
+          - p/javascript
+          - --config
+          - p/typescript
+          - --config
+          - p/sql-injection
+          - --config
+          - p/secrets
+          - --error
