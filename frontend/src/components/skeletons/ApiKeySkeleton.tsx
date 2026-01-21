@@ -50,10 +50,9 @@ export function ApiKeysSkeleton() {
                 </tr>
               </thead>
               <tbody>
-                {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
                 {Array.from({ length: totalRows }).map((_, i) => (
                   <tr
-                    key={`api-key-${i}`}
+                    key={`api-key-${i}`} // NOSONAR - Safe to use index as key for static skeleton items with fixed length
                     className="border-b-1 border-b-gray-200 dark:border-b-gray-700"
                   >
                     <td className="py-3">

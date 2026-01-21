@@ -5,8 +5,8 @@ import type { Link as LinkType } from 'types/link'
 import { cn } from 'utils/utility'
 
 interface NavDropDownProps {
-  pathname: string
-  link: LinkType
+  readonly pathname: string
+  readonly link: LinkType
 }
 
 export default function NavDropdown({ link, pathname }: NavDropDownProps) {

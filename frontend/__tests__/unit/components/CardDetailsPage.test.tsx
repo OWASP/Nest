@@ -175,7 +175,7 @@ jest.mock('components/LeadersList', () => ({
     ...props
   }: {
     leaders: string
-    _entityKey: string
+    entityKey: string
     [key: string]: unknown
   }) => (
     <span data-testid="leaders-list" {...props}>
@@ -350,7 +350,7 @@ jest.mock('components/ToggleableList', () => ({
     items: string[]
     _icon: unknown
     label: React.ReactNode
-    _entityKey: string
+    entityKey: string
     [key: string]: unknown
   }) => (
     <div data-testid="toggleable-list" {...props}>

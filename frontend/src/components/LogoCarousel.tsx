@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import type { Sponsor } from 'types/home'
 
 interface MovingLogosProps {
-  sponsors: Sponsor[]
+  readonly sponsors: Sponsor[]
 }
 
 export default function MovingLogos({ sponsors }: MovingLogosProps) {
