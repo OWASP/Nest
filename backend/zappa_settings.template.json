@@ -3,7 +3,7 @@
     "apigateway_enabled": false,
     "app_function": "wsgi.application",
     "aws_environment_variables": {
-      "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/owasp-nest/staging"
+      "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/nest/staging"
     },
     "callbacks": {
       "post": "zappa_callback.post",
@@ -18,8 +18,8 @@
           "ssm:GetParameter"
         ],
         "Resource": [
-          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/owasp-nest/staging",
-          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/owasp-nest/staging/*"
+          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/nest/staging",
+          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/nest/staging/*"
         ]
       }
     ],
