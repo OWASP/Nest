@@ -5,6 +5,15 @@ include frontend/Makefile
 
 MAKEFLAGS += --no-print-directory
 
+SEMGREP_CONFIGS := --config p/owasp-top-ten \
+                   --config p/python \
+                   --config p/javascript \
+                   --config p/typescript \
+                   --config p/sql-injection \
+                   --config p/secrets \
+                   --timeout 10 \
+                   --timeout-threshold 3 \
+
 build:
 	@docker compose build
 
@@ -58,6 +67,11 @@ scan-images: \
 	scan-backend-image \
 	scan-frontend-image
 
+security-scan:
+	@echo "🛡️  Running Centralized Security Scan..."
+	semgrep $(SEMGREP_CONFIGS) --error --output findings.txt .
+	@echo "✅ Scan Complete. Detailed findings saved to findings.txt"
+
 test: \
 	test-nest-app
 
@@ -78,3 +92,5 @@ update-nest-app-dependencies: \
 
 update-pre-commit:
 	@pre-commit autoupdate
+
+.PHONY: build clean check pre-commit prune run scan-images security-scan test update
