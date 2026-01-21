@@ -7,7 +7,7 @@ import type { IconType } from 'react-icons'
 import { FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { handleAppError } from 'app/global-error'
-import { Ordering } from 'types/__generated__/graphql'
+import { Ordering, ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 import { HealthMetricsProps } from 'types/healthMetrics'
@@ -24,11 +24,11 @@ interface HealthFilterStructure {
 }
 
 interface LevelFilterStructure {
-  level: string
+  level: ProjectLevel
 }
 
 type OrderKey = keyof typeof FIELD_MAPPING
-type FilterParams = Partial<HealthFilterStructure & { level: string }>
+type FilterParams = Partial<HealthFilterStructure & { level: ProjectLevel }>
 
 const PAGINATION_LIMIT = 10
 
@@ -47,10 +47,10 @@ const healthFiltersMapping: Record<string, HealthFilterStructure> = {
 } as const
 
 const levelFiltersMapping: Record<string, LevelFilterStructure> = {
-  incubator: { level: 'incubator' },
-  lab: { level: 'lab' },
-  production: { level: 'production' },
-  flagship: { level: 'flagship' },
+  incubator: { level: ProjectLevel.Incubator },
+  lab: { level: ProjectLevel.Lab },
+  production: { level: ProjectLevel.Production },
+  flagship: { level: ProjectLevel.Flagship },
 } as const
 
 const getFiltersFromParams = (health: string | null, level: string | null): FilterParams => {

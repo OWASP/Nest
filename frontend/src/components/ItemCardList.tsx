@@ -24,10 +24,10 @@ interface BaseItem {
 }
 
 type RenderItem = BaseItem & {
-  createdAt?: string
+  createdAt?: Issue['createdAt'] | Milestone['createdAt'] | PullRequest['createdAt']
   commentsCount?: number
-  organizationName?: string
-  publishedAt?: string
+  organizationName?: string | null
+  publishedAt?: Release['publishedAt']
   tagName?: string
   openIssuesCount?: number
   closedIssuesCount?: number
@@ -54,7 +54,7 @@ const ItemCardList = ({
         className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
       >
         {data.map((item, index: number) => {
-          const cardItem = item as RenderItem & BaseItem
+          const cardItem = item as RenderItem
           return (
             <div
               key={
@@ -65,18 +65,18 @@ const ItemCardList = ({
             >
               <div className="flex w-full flex-col justify-between">
                 <div className="flex w-full items-center">
-                  {showAvatar && cardItem?.author?.avatarUrl && (
+                  {showAvatar && cardItem?.author && (
                     <Tooltip
-                      content={cardItem?.author?.name || cardItem?.author?.login}
+                      content={cardItem.author.name || cardItem.author.login}
                       id={`avatar-tooltip-${index}`}
                       placement="bottom"
                     >
-                      <Link href={`/members/${cardItem?.author?.login}`}>
+                      <Link href={`/members/${cardItem.author.login}`}>
                         <Image
                           height={24}
                           width={24}
-                          src={cardItem?.author?.avatarUrl || '/images/default-avatar.png'}
-                          alt={`${cardItem?.author?.name || cardItem?.author?.login || 'Author'}'s avatar`}
+                          src={cardItem.author.avatarUrl || '/images/default-avatar.png'}
+                          alt={`${cardItem.author.name || cardItem.author.login || 'Author'}'s avatar`}
                           className="mr-2 rounded-full"
                         />
                       </Link>

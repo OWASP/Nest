@@ -8,6 +8,9 @@ declare module 'react-leaflet' {
     scrollWheelZoom?: boolean
     style?: React.CSSProperties
     zoomControl?: boolean
+    minZoom?: number
+    maxZoom?: number
+    worldCopyJump?: boolean
     maxBounds?: L.LatLngBoundsExpression
     maxBoundsViscosity?: number
     children?: React.ReactNode

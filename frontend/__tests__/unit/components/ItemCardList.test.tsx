@@ -560,20 +560,20 @@ describe('ItemCardList Component', () => {
 
     it('renders custom renderDetails content', () => {
       const customRenderDetails = (item: {
-        createdAt: string
-        commentsCount: number
-        organizationName: string
-        publishedAt: string
-        repositoryName: string
-        tagName: string
-        openIssuesCount: number
-        closedIssuesCount: number
+        createdAt?: string | number
+        commentsCount?: number
+        organizationName?: string | null
+        publishedAt?: string | number
+        repositoryName?: string
+        tagName?: string
+        openIssuesCount?: number
+        closedIssuesCount?: number
         title?: string
         name?: string
-        author: {
+        author?: {
           avatarUrl: string
           login: string
-          name: string
+          name?: string
         }
       }) => (
         <div data-testid="custom-details">
@@ -731,7 +731,7 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      // When author is null, no avatar is rendered since there's no avatarUrl
+      // When author is null, no avatar is rendered
       expect(screen.queryByTestId('avatar-image')).not.toBeInTheDocument()
     })
 
