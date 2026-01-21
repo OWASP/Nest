@@ -40,7 +40,7 @@ export async function generateMetadata({
         keywords: ['owasp', 'repository', repositoryKey, repository.name],
         title: repository.name,
       })
-    : null
+    : {}
 }
 
 export default async function RepositoryDetailsLayout({

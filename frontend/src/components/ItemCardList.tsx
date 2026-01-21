@@ -42,7 +42,7 @@ const ItemCardList = ({
   showSingleColumn = true,
 }: {
   title: React.ReactNode
-  data: (Issue | Milestone | PullRequest | Release)[]
+  data?: (Issue | Milestone | PullRequest | Release)[] | null
   icon?: IconType
   showAvatar?: boolean
   showSingleColumn?: boolean
@@ -84,7 +84,7 @@ const ItemCardList = ({
                   )}
                   <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                     {cardItem?.url ? (
-                      <Link href={cardItem.url} target="_blank">
+                      <Link href={cardItem.url} target="_blank" rel="noopener noreferrer">
                         <TruncatedText text={cardItem.title || cardItem.name || ''} />
                       </Link>
                     ) : (
