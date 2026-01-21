@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useState } from 'react'
+import { FaFolderOpen } from 'react-icons/fa'
 import { HiUserGroup } from 'react-icons/hi'
 import { ExtendedSession } from 'types/auth'
 import type { Contributor } from 'types/contributor'
@@ -111,7 +112,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
     <div className="flex flex-col gap-4 rounded-lg bg-gray-100 p-6 dark:bg-gray-800">
       <div className="flex items-center justify-between">
         <div className="flex cursor-pointer items-center gap-2">
-          <HiUserGroup className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+          <FaFolderOpen className="h-5 w-5 text-gray-500 dark:text-gray-300" />
           <Link href={`${pathname}/modules/${module.key}`} className="flex-1">
             <h2 className="max-w-full text-2xl font-semibold break-words text-blue-400 transition-colors duration-300 hover:text-blue-600 sm:break-normal">
               {module.name}
@@ -136,12 +137,12 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
         ))}
       </div>
 
-      {/* Mentors - inline without nested shadows */}
+      {/* Mentors */}
       {renderContributors(module.mentors, displayMentors, 'Mentors', showAllMentors, () =>
         setShowAllMentors(!showAllMentors)
       )}
 
-      {/* Mentees - inline without nested shadows */}
+      {/* Mentees */}
       {renderContributors(
         module.mentees,
         displayMentees,
