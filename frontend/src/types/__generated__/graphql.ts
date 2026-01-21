@@ -685,7 +685,7 @@ export type Query = {
   committee?: Maybe<CommitteeNode>;
   getMenteeDetails?: Maybe<MenteeNode>;
   getMenteeModuleIssues: Array<IssueNode>;
-  getModule?: Maybe<ModuleNode>;
+  getModule: ModuleNode;
   getProgram?: Maybe<ProgramNode>;
   getProgramModules: Array<ModuleNode>;
   getProjectModules: Array<ModuleNode>;

@@ -92,11 +92,7 @@ class ModuleQuery:
         )
 
     @strawberry.field
-<<<<<<< HEAD
-    def get_module(self, module_key: str, program_key: str) -> ModuleNode:
-=======
     def get_module(self, info: strawberry.Info, module_key: str, program_key: str) -> ModuleNode:
->>>>>>> 7a2e367c (add role-aware caching for programs)
         """Get a single module by its key within a specific program."""
         try:
             program = Program.objects.prefetch_related("admins", "modules__mentors").get(
@@ -130,4 +126,4 @@ class ModuleQuery:
         except Module.DoesNotExist as err:
             msg = f"Module with key '{module_key}' under program '{program_key}' not found."
             logger.warning(msg, exc_info=True)
-            return None
+            raise ObjectDoesNotExist(msg) from err

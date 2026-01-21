@@ -3,6 +3,7 @@
 import logging
 
 import strawberry
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
@@ -31,6 +32,14 @@ class ProgramQuery:
 
             user = getattr(info.context.request, "user", None)
             if user and user.is_authenticated:
+                if not user.github_user:
+                    msg = f"Program with key '{program_key}' not found."
+                    logger.warning(
+                        "Attempted public access to unpublished program '%s' (status: %s)",
+                        program_key,
+                        program.status,
+                    )
+                    raise ObjectDoesNotExist(msg)
                 try:
                     mentor = Mentor.objects.get(github_user=user.github_user)
                     if program.admins.filter(id=mentor.id).exists():
