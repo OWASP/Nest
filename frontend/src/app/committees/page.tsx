@@ -38,6 +38,7 @@ const CommitteesPage = () => {
     return (
       <Card
         key={committee.objectID}
+        cardKey={committee.objectID}
         title={committee.name}
         url={`/committees/${committee.key}`}
         summary={committee.summary}

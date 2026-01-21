@@ -25,7 +25,7 @@ jest.mock('app/global-error', () => ({
 
 // Mock components
 jest.mock('components/LabelList', () => ({
-  LabelList: ({ labels }: { labels: string[] }) => (
+  LabelList: ({ labels, entityKey: _entityKey }: { labels: string[]; entityKey: string }) => (
     <div data-testid="label-list">{labels.join(', ')}</div>
   ),
 }))

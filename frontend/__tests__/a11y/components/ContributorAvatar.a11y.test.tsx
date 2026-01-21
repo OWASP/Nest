@@ -36,6 +36,7 @@ jest.mock('next/link', () => {
 })
 
 const mockGitHubContributor: Contributor = {
+  id: 'contributor-jane-doe',
   login: 'jane-doe',
   name: 'Jane Doe',
   avatarUrl: 'https://avatars.githubusercontent.com/u/12345',
