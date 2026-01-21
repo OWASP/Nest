@@ -28,6 +28,7 @@ jest.mock('next/link', () => {
 
 const mockContributors: Contributor[] = [
   {
+    id: 'contributor-developer1-a11y',
     avatarUrl: 'https://github.com/developer1.avatar',
     login: 'developer1',
     name: 'Alex Developer',
@@ -35,6 +36,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 50,
   },
   {
+    id: 'contributor-contributor2-a11y',
     avatarUrl: 'https://github.com/contributor2.avatar',
     login: 'contributor2',
     name: 'Jane Developer',
@@ -42,6 +44,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 30,
   },
   {
+    id: 'contributor-user3-a11y',
     avatarUrl: 'https://github.com/user3.avatar',
     login: 'user3',
     name: '',
