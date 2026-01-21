@@ -36,7 +36,6 @@ const MenteeContributorsList = ({
   if (contributors.length === 0) {
     return null
   }
-
   const getMenteeUrl = (login: string) =>
     `/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${login}`
 
@@ -50,9 +49,9 @@ const MenteeContributorsList = ({
       }
     >
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
-        {displayContributors.map((item, index) => (
+        {displayContributors.map((item) => (
           <div
-            key={`contributor-${index}`}
+            key={`contributor-${item.id}`}
             className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
           >
             <div className="flex w-full items-center gap-2">

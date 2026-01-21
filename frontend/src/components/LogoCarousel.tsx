@@ -27,7 +27,8 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
         >
           {sponsors.map((sponsor, index) => (
             <div
-              key={`${sponsor.name}-${index}`}
+              // eslint-disable-next-line react/no-array-index-key
+              key={`logo-carousel-${sponsor.id}-${index}`}
               className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
             >
               <Link

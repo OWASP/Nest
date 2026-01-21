@@ -11,6 +11,7 @@ import { ErrorDisplay } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
+import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
@@ -93,9 +94,6 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
-  const labelButtonClassName =
-    'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700'
-
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
   }
@@ -105,8 +103,6 @@ const ModuleIssueDetailsPage = () => {
 
   const assignees = issue.assignees || []
   const labels = issue.labels || []
-  const visibleLabels = labels.slice(0, 5)
-  const remainingLabels = labels.length - visibleLabels.length
   const canEditDeadline = assignees.length > 0
 
   let issueStatusClass: string
@@ -273,16 +269,7 @@ const ModuleIssueDetailsPage = () => {
               <span>Labels</span>
             </div>
           </h2>
-          <div className="flex flex-wrap gap-2">
-            {visibleLabels.map((label, index) => (
-              <span key={`${label}-${index}`} className={labelButtonClassName}>
-                {label}
-              </span>
-            ))}
-            {remainingLabels > 0 && (
-              <span className={labelButtonClassName}>+{remainingLabels} more</span>
-            )}
-          </div>
+          <LabelList entityKey={`issue-${issueId}`} labels={labels} maxVisible={5} />
         </div>
 
         {assignees.length > 0 && (

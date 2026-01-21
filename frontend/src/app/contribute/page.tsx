@@ -44,6 +44,7 @@ const ContributePage = () => {
       <React.Fragment key={issue.objectID}>
         <Card
           key={issue.objectID}
+          cardKey={issue.objectID}
           title={issue.title}
           url={issue.url}
           projectName={issue.projectName}
