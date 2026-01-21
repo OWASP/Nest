@@ -52,7 +52,7 @@ const showStatistics = (type: CardType): boolean =>
   ['committee', 'organization', 'project', 'repository', 'user'].includes(type)
 
 const showIssuesAndMilestones = (type: CardType): boolean =>
-  ['organization', 'project', 'repository', 'user'].includes(type)
+  ['organization', 'program', 'project', 'repository', 'user'].includes(type)
 
 const showPullRequestsAndReleases = (type: CardType): boolean =>
   ['organization', 'project', 'repository', 'user'].includes(type)
@@ -326,10 +326,24 @@ const DetailsCard = ({
           />
         )}
         {showIssuesAndMilestones(type) && (
-          <div className="grid-cols-2 gap-4 lg:grid">
-            <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            <Milestones data={recentMilestones} showAvatar={showAvatar} />
-          </div>
+          <>
+            {type === 'program' ? (
+              recentMilestones && (
+                <div className="[&_.grid]:!grid-cols-1 md:[&_.grid]:!grid-cols-2">
+                  <Milestones
+                    data={recentMilestones}
+                    showAvatar={showAvatar}
+                    showSingleColumn={false}
+                  />
+                </div>
+              )
+            ) : (
+              <div className="grid-cols-2 gap-4 lg:grid">
+                <RecentIssues data={recentIssues} showAvatar={showAvatar} />
+                <Milestones data={recentMilestones} showAvatar={showAvatar} />
+              </div>
+            )}
+          </>
         )}
         {showPullRequestsAndReleases(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
