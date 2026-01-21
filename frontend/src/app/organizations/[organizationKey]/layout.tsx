@@ -17,12 +17,12 @@ export async function generateMetadata({
   params: Promise<{ organizationKey: string }>
 }): Promise<Metadata> {
   const { organizationKey } = await params
-  const { data } = (await apolloClient.query<GetOrganizationMetadataQuery>({
+  const { data } = await apolloClient.query<GetOrganizationMetadataQuery>({
     query: GetOrganizationMetadataDocument,
     variables: {
       login: organizationKey,
     },
-  })) as { data: GetOrganizationMetadataQuery }
+  })
   const organization = data?.organization
   const title = organization?.name ?? organization?.login
 
@@ -38,12 +38,12 @@ export async function generateMetadata({
 async function generateOrganizationStructuredData(organizationKey: string) {
   // https://developers.google.com/search/docs/appearance/structured-data/organization#structured-data-type-definitions
 
-  const { data } = (await apolloClient.query<GetOrganizationDataQuery>({
+  const { data } = await apolloClient.query<GetOrganizationDataQuery>({
     query: GetOrganizationDataDocument,
     variables: {
       login: organizationKey,
     },
-  })) as { data: GetOrganizationDataQuery }
+  })
 
   const organization = data?.organization
   if (!organization) return null
@@ -103,10 +103,10 @@ export default async function OrganizationDetailsLayout({
   const structuredData = await generateOrganizationStructuredData(organizationKey)
 
   // Fetch organization name for breadcrumb
-  const { data } = (await apolloClient.query<GetOrganizationMetadataQuery>({
+  const { data } = await apolloClient.query<GetOrganizationMetadataQuery>({
     query: GetOrganizationMetadataDocument,
     variables: { login: organizationKey },
-  })) as { data: GetOrganizationMetadataQuery }
+  })
   const orgName = data?.organization?.name || data?.organization?.login || organizationKey
 
   return (

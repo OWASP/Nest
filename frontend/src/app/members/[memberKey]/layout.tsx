@@ -18,12 +18,12 @@ export async function generateMetadata({
   params: Promise<{ memberKey: string }>
 }): Promise<Metadata> {
   const { memberKey } = await params
-  const { data } = (await apolloClient.query<GetUserMetadataQuery>({
+  const { data } = await apolloClient.query<GetUserMetadataQuery>({
     query: GetUserMetadataDocument,
     variables: {
       key: memberKey,
     },
-  })) as { data: GetUserMetadataQuery }
+  })
   const user = data?.user
   const title = user?.name || user?.login
 
@@ -40,18 +40,18 @@ export async function generateMetadata({
 export default async function UserDetailsLayout({
   children,
   params,
-}: {
+}: Readonly<{
   children: React.ReactNode
   params: Promise<{ memberKey: string }>
-}) {
+}>) {
   const { memberKey } = await params
 
-  const { data } = (await apolloClient.query<GetUserDataQuery>({
+  const { data } = await apolloClient.query<GetUserDataQuery>({
     query: GetUserDataDocument,
     variables: {
       key: memberKey,
     },
-  })) as { data: GetUserDataQuery }
+  })
 
   if (!data?.user?.login) {
     return children

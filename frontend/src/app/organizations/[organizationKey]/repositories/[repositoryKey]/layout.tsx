@@ -11,10 +11,10 @@ import PageLayout from 'components/PageLayout'
 
 const getRepositoryMetadata = cache(async (organizationKey: string, repositoryKey: string) => {
   try {
-    const { data } = (await apolloClient.query<GetRepositoryMetadataQuery>({
+    const { data } = await apolloClient.query<GetRepositoryMetadataQuery>({
       query: GetRepositoryMetadataDocument,
       variables: { organizationKey, repositoryKey },
-    })) as { data: GetRepositoryMetadataQuery }
+    })
     return data
   } catch {
     return null

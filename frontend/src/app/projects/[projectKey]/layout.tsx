@@ -16,8 +16,8 @@ const getProjectMetadata = cache(
         variables: { key: projectKey },
       })
 
-      if (data && typeof data === 'object' && 'project' in data && data.project) {
-        return data as GetProjectMetadataQuery
+      if (data?.project) {
+        return data
       }
 
       return null

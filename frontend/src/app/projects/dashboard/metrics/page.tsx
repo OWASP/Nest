@@ -197,25 +197,23 @@ const MetricsPage: FC = () => {
     const nextFilters = getFiltersFromParams(searchParams.get('health'), searchParams.get('level'))
 
     setFilters((prevFilters) => {
-      const prevKeys = Object.keys(prevFilters)
-      const nextKeys = Object.keys(nextFilters)
-
-      if (prevKeys.length !== nextKeys.length) return nextFilters
-
-      const hasChanged = nextKeys.some(
-        (key) =>
-          prevFilters[key as keyof typeof prevFilters] !==
-          nextFilters[key as keyof typeof nextFilters]
-      )
-
-      return hasChanged ? nextFilters : prevFilters
+      // Use JSON.stringify for deep comparison of nested objects
+      if (JSON.stringify(prevFilters) === JSON.stringify(nextFilters)) {
+        return prevFilters
+      }
+      return nextFilters
     })
 
     const nextActiveFilters = [searchParams.get('health'), searchParams.get('level')].filter(
       (k): k is string => !!k
     )
 
-    setActiveFilters(nextActiveFilters)
+    setActiveFilters((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(nextActiveFilters)) {
+        return prev
+      }
+      return nextActiveFilters
+    })
   }, [searchParams])
 
   useEffect(() => {

@@ -17,7 +17,7 @@ function AppInitializer(): React.ReactElement | null {
   return null
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <Suspense>
       <SessionProvider>

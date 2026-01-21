@@ -17,7 +17,7 @@ export async function generateMetadata({
     query: GetSnapshotDetailsMetadataDocument,
     variables: { key: snapshotKey },
   })
-  const snapshot = (data as GetSnapshotDetailsMetadataQuery)?.snapshot
+  const snapshot = data?.snapshot
 
   if (!snapshot) {
     return {}

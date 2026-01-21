@@ -113,7 +113,6 @@ const DetailsCard = ({
     (contributionData && Object.keys(contributionData).length > 0)
 
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
-  const userLogin = session?.user?.login
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -132,7 +131,7 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some((admin) => admin.login === userLogin) && (
+                admins?.some((admin) => admin.login === session?.user?.login) && (
                   <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
                 )}
               {!isActive && <StatusBadge status="inactive" size="md" />}

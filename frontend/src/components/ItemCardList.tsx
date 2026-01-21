@@ -76,7 +76,7 @@ const ItemCardList = ({
                           height={24}
                           width={24}
                           src={cardItem?.author?.avatarUrl || '/images/default-avatar.png'}
-                          alt="avatar"
+                          alt={`${cardItem?.author?.name || cardItem?.author?.login || 'Author'}'s avatar`}
                           className="mr-2 rounded-full"
                         />
                       </Link>

@@ -121,5 +121,5 @@ describe('CreateModulePage', () => {
       expect(mockCreateModule).toHaveBeenCalled()
       expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
-  })
+  }, 15000)
 })

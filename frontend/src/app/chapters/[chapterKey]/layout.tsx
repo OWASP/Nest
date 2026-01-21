@@ -11,12 +11,12 @@ import PageLayout from 'components/PageLayout'
 const getChapterMetadata = cache(
   async (chapterKey: string): Promise<GetChapterMetadataQuery | null> => {
     try {
-      const { data } = await apolloClient.query({
+      const { data } = await apolloClient.query<GetChapterMetadataQuery>({
         query: GetChapterMetadataDocument,
         variables: { key: chapterKey },
       })
-      if (data && typeof data === 'object' && 'chapter' in data && data.chapter) {
-        return data as GetChapterMetadataQuery
+      if (data?.chapter) {
+        return data
       }
 
       return null

@@ -11,12 +11,12 @@ import PageLayout from 'components/PageLayout'
 const getCommitteeMetadata = cache(
   async (committeeKey: string): Promise<GetCommitteeMetadataQuery | null> => {
     try {
-      const { data } = await apolloClient.query({
+      const { data } = await apolloClient.query<GetCommitteeMetadataQuery>({
         query: GetCommitteeMetadataDocument,
         variables: { key: committeeKey },
       })
-      if (data && typeof data === 'object' && 'committee' in data && data.committee) {
-        return data as GetCommitteeMetadataQuery
+      if (data?.committee) {
+        return data
       }
 
       return null
