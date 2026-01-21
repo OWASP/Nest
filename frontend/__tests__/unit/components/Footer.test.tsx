@@ -4,24 +4,7 @@
  */
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { ReactNode } from 'react'
-import { footerSections, footerIcons } from 'utils/constants'
-import Footer from 'components/Footer'
-
-// Define proper types for mock props
-interface MockLinkProps {
-  children: ReactNode
-  href: string
-  target?: string
-  rel?: string
-  className?: string
-  'aria-label'?: string
-}
-
-interface MockFontAwesomeIconProps {
-  icon: unknown
-  className?: string
-}
+import React, { ReactNode } from 'react'
 
 interface MockButtonProps {
   children: ReactNode
@@ -31,24 +14,6 @@ interface MockButtonProps {
   'aria-expanded'?: boolean
   'aria-controls'?: string
 }
-
-jest.mock('next/link', () => {
-  return function MockedLink({ children, href, ...props }: MockLinkProps) {
-    return (
-      <a href={href} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
-    <span data-testid="font-awesome-icon" className={className}>
-      {typeof icon === 'string' ? icon : JSON.stringify(icon)}
-    </span>
-  ),
-}))
 
 jest.mock('@heroui/button', () => ({
   Button: ({ children, onPress, className, disableAnimation, ...props }: MockButtonProps) => (
@@ -60,6 +25,17 @@ jest.mock('@heroui/button', () => ({
     >
       {children}
     </button>
+  ),
+}))
+
+jest.mock('react-icons/fa6', () => ({
+  FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="github-icon" {...props} />,
+  FaSlack: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="slack-icon" {...props} />,
+  FaChevronDown: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-down" {...props} />
+  ),
+  FaChevronUp: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-up" {...props} />
   ),
 }))
 
@@ -83,12 +59,12 @@ jest.mock('utils/constants', () => ({
   ],
   footerIcons: [
     {
-      icon: 'faGithub',
+      icon: 'FA_GITHUB_PLACEHOLDER',
       href: 'https://github.com/owasp/nest',
       label: 'GitHub',
     },
     {
-      icon: 'faSlack',
+      icon: 'FA_SLACK_PLACEHOLDER',
       href: 'https://owasp.slack.com/archives/project-nest',
       label: 'Slack',
     },
@@ -99,6 +75,12 @@ jest.mock('utils/env.client', () => ({
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
 }))
+
+import { FaGithub, FaSlack } from 'react-icons/fa6'
+import { footerSections, footerIcons } from 'utils/constants'
+import Footer from 'components/Footer'
+;(footerIcons as unknown)[0].icon = FaGithub
+;(footerIcons as unknown)[1].icon = FaSlack
 
 describe('Footer', () => {
   // Use the imported mocked constants
@@ -165,6 +147,23 @@ describe('Footer', () => {
     test('renders social media icons with correct attributes', () => {
       renderFooter()
 
+      // Test GitHub icon
+      const githubLink = screen.getByLabelText('OWASP Nest GitHub')
+      expect(githubLink).toBeInTheDocument()
+      expect(githubLink).toHaveAttribute('href', 'https://github.com/owasp/nest')
+      expect(githubLink).toHaveAttribute('target', '_blank')
+      expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(githubLink.querySelector('[data-testid="github-icon"]')).toBeInTheDocument()
+
+      // Test Slack icon
+      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      expect(slackLink).toBeInTheDocument()
+      expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/project-nest')
+      expect(slackLink).toHaveAttribute('target', '_blank')
+      expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(slackLink.querySelector('[data-testid="slack-icon"]')).toBeInTheDocument()
+
+      // Test that all icons have basic attributes
       for (const icon of mockFooterIcons) {
         const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
         expect(link).toBeInTheDocument()
@@ -172,7 +171,7 @@ describe('Footer', () => {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
 
-        const iconElement = link.querySelector('[data-testid="font-awesome-icon"]')
+        const iconElement = link.querySelector('svg')
         expect(iconElement).toBeInTheDocument()
       }
     })
@@ -219,12 +218,22 @@ describe('Footer', () => {
       const firstSection = mockFooterSections[0]
       const button = screen.getByRole('button', { name: new RegExp(firstSection.title) })
 
-      let chevronIcons = button.querySelectorAll('[data-testid="font-awesome-icon"]')
-      expect(chevronIcons).toHaveLength(1)
+      // Initial state - should show chevron down (collapsed)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+      expect(button.querySelector('[data-testid="chevron-down"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-up"]')).not.toBeInTheDocument()
 
+      // Click to expand - should show chevron up
       fireEvent.click(button)
-      chevronIcons = button.querySelectorAll('[data-testid="font-awesome-icon"]')
-      expect(chevronIcons).toHaveLength(1)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
+      expect(button.querySelector('[data-testid="chevron-up"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-down"]')).not.toBeInTheDocument()
+
+      // Click to collapse - should show chevron down again
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+      expect(button.querySelector('[data-testid="chevron-down"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-up"]')).not.toBeInTheDocument()
     })
 
     test('handles multiple section toggles independently', () => {
@@ -327,7 +336,7 @@ describe('Footer', () => {
       renderFooter()
 
       const footer = screen.getByRole('contentinfo')
-      const gridContainer = footer.querySelector('.grid.w-full.sm\\:grid-cols-2')
+      const gridContainer = footer.querySelector(String.raw`.grid.w-full.sm\:grid-cols-2`)
       expect(gridContainer).toBeInTheDocument()
     })
 
@@ -376,8 +385,13 @@ describe('Footer', () => {
       const links = screen.getAllByRole('link')
       expect(links.length).toBeGreaterThan(0)
 
-      const icons = screen.getAllByTestId('font-awesome-icon')
-      expect(icons.length).toBeGreaterThan(0)
+      const socialLinks = screen.getByLabelText('OWASP Nest GitHub')
+      const svgIcon = socialLinks.querySelector('svg')
+      expect(svgIcon).toBeInTheDocument()
+
+      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      const slackSvg = slackLink.querySelector('svg')
+      expect(slackSvg).toBeInTheDocument()
 
       const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBeGreaterThan(0)

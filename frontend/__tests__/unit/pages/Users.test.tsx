@@ -1,5 +1,5 @@
+import { mockUserData } from '@mockData/mockUserData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockUserData } from '@unit/data/mockUserData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import UsersPage from 'app/members/page'
@@ -27,11 +27,6 @@ jest.mock('components/Pagination', () =>
     </div>
   ))
 )
-
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
 
 describe('UsersPage Component', () => {
   let mockRouter: { push: jest.Mock }

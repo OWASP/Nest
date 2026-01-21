@@ -1,14 +1,12 @@
 'use client'
 
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import Image from 'next/image'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
-import { ExtendedSession } from 'types/auth'
+import { FaGithub } from 'react-icons/fa'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -20,7 +18,7 @@ export default function UserMenu({
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
-  const isProjectLeader = (session as ExtendedSession)?.user?.isLeader
+  const isProjectLeader = session?.user?.isLeader
   const isOwaspStaff = session?.user?.isOwaspStaff
 
   useEffect(() => {
@@ -50,7 +48,7 @@ export default function UserMenu({
         onClick={() => signIn('github', { callbackUrl: '/', prompt: 'login' })}
         className="group relative flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md bg-[#87a1bc] p-4 text-sm font-medium text-black hover:ring-1 hover:ring-[#b0c7de] dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]"
       >
-        <FontAwesomeIcon icon={faGithub} />
+        <FaGithub className="h-4 w-4" />
         Sign In
       </button>
     )

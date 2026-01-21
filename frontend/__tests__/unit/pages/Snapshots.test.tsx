@@ -54,6 +54,7 @@ describe('SnapshotsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
+      loading: true,
     })
 
     render(<SnapshotsPage />)

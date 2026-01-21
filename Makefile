@@ -50,9 +50,13 @@ prune:
 	@docker volume prune -f
 
 run:
-	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
-	docker compose -f docker-compose/local.yaml --project-name nest-local build && \
-	docker compose -f docker-compose/local.yaml --project-name nest-local up --remove-orphans
+	@DOCKER_BUILDKIT=1 \
+	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
+	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
+
+scan-images: \
+	scan-backend-image \
+	scan-frontend-image
 
 test: \
 	test-nest-app

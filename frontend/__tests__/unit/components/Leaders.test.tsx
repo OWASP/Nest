@@ -1,5 +1,5 @@
+import { mockProjectDetailsData } from '@mockData/mockProjectDetailsData'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { useRouter } from 'next/navigation'
 import Leaders from 'components/Leaders'
 
@@ -12,9 +12,14 @@ jest.mock('components/AnchorTitle', () => ({
   default: ({ title }: { title: string }) => <span>{title}</span>,
 }))
 
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <i className="fa" />,
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({ icon: IconComponent, className, ...props }) => {
+    return IconComponent ? (
+      <IconComponent className={className} data-testid="icon" {...props} />
+    ) : (
+      <i className="icon" />
+    )
+  },
 }))
 
 describe('Leaders Component', () => {

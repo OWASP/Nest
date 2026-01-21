@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { useParams } from 'next/navigation'
+import React from 'react'
 import { handleAppError } from 'app/global-error'
 import MenteeProfilePage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/mentees/[menteeKey]/page'
 
@@ -12,6 +13,9 @@ jest.mock('@apollo/client/react', () => ({
 
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
 }))
 
 jest.mock('app/global-error', () => ({
@@ -21,7 +25,7 @@ jest.mock('app/global-error', () => ({
 
 // Mock components
 jest.mock('components/LabelList', () => ({
-  LabelList: ({ labels }: { labels: string[] }) => (
+  LabelList: ({ labels, entityKey: _entityKey }: { labels: string[]; entityKey: string }) => (
     <div data-testid="label-list">{labels.join(', ')}</div>
   ),
 }))
@@ -33,6 +37,106 @@ jest.mock('next/image', () => ({
     return <img {...props} alt={(props.alt as string) || ''} />
   },
 }))
+
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({
+    children,
+    content,
+    isDisabled,
+  }: {
+    children: React.ReactNode
+    content: string
+    isDisabled?: boolean
+  }) => {
+    if (isDisabled) {
+      return <>{children}</>
+    }
+    return (
+      <div data-testid="tooltip" data-content={content}>
+        {children}
+      </div>
+    )
+  },
+}))
+
+jest.mock('@heroui/select', () => {
+  return {
+    Select: ({
+      children,
+      selectedKeys,
+      onSelectionChange,
+      'aria-label': ariaLabel,
+      classNames: _classNames,
+      size: _size,
+      ...props
+    }: {
+      children: React.ReactNode
+      selectedKeys: Set<string>
+      onSelectionChange?: (keys: Set<string>) => void
+      'aria-label'?: string
+      classNames?: Record<string, string>
+      size?: string
+    }) => {
+      const [isOpen, setIsOpen] = React.useState(false)
+      const selectedKey = Array.from(selectedKeys)[0] || 'all'
+
+      const handleItemClick = (key: string) => {
+        if (onSelectionChange) {
+          onSelectionChange(new Set([key]))
+        }
+        setIsOpen(false)
+      }
+
+      return (
+        <div data-testid="select-wrapper" {...props}>
+          <button
+            type="button"
+            aria-label={ariaLabel}
+            aria-expanded={isOpen}
+            aria-controls="select-popover"
+            onClick={() => setIsOpen(!isOpen)}
+            data-testid="select-trigger"
+          >
+            {selectedKey}
+          </button>
+          {isOpen && (
+            <div id="select-popover" data-testid="select-popover" aria-label="Options">
+              {React.Children.map(children, (child: React.ReactElement) => {
+                const itemKey = String(child.key ?? '')
+                return React.cloneElement(child, {
+                  'data-key': itemKey,
+                  onClick: () => handleItemClick(itemKey),
+                } as Partial<unknown>)
+              })}
+            </div>
+          )}
+        </div>
+      )
+    },
+    SelectItem: ({
+      children,
+      onClick,
+      'data-key': dataKey,
+      classNames: _classNames,
+      ...props
+    }: {
+      children: React.ReactNode
+      onClick?: () => void
+      'data-key'?: string
+      classNames?: Record<string, string>
+    }) => (
+      <button
+        type="button"
+        data-testid="select-item"
+        data-key={dataKey}
+        onClick={onClick}
+        {...props}
+      >
+        {children}
+      </button>
+    ),
+  }
+})
 
 const mockUseQuery = useQuery as unknown as jest.Mock
 const mockUseParams = useParams as jest.Mock
@@ -118,50 +222,54 @@ describe('MenteeProfilePage', () => {
     expect(screen.getByText('@test-mentee')).toBeInTheDocument()
     expect(screen.getByText('A test bio.')).toBeInTheDocument()
 
-    // Check stats
-    expect(screen.getByText('Total Issues')).toBeInTheDocument()
-    expect(screen.getByText('3')).toBeInTheDocument()
-    expect(screen.getByText('Open Issues')).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
-    expect(screen.getByText('Closed Issues')).toBeInTheDocument()
-    expect(screen.getByText('1')).toBeInTheDocument()
-
     // Check domains and skills
     const domainsHeading = screen.getByRole('heading', { name: /Domains/i })
     const domainsContainer = domainsHeading.parentElement
-    expect(domainsContainer).not.toBeNull()
-    expect(within(domainsContainer as HTMLElement).getByTestId('label-list')).toHaveTextContent(
+    if (!domainsContainer) {
+      throw new Error('Domains container not found')
+    }
+    expect(within(domainsContainer).getByTestId('label-list')).toHaveTextContent(
       'frontend, backend'
     )
 
     const skillsHeading = screen.getByRole('heading', { name: /Skills & Technologies/i })
     const skillsContainer = skillsHeading.parentElement
-    expect(skillsContainer).not.toBeNull()
-    expect(within(skillsContainer as HTMLElement).getByTestId('label-list')).toHaveTextContent(
-      'react, nodejs'
-    )
+    if (!skillsContainer) {
+      throw new Error('Skills container not found')
+    }
+    expect(within(skillsContainer).getByTestId('label-list')).toHaveTextContent('react, nodejs')
 
-    // Check issues
-    expect(screen.getByText('Open Issue 1')).toBeInTheDocument()
-    expect(screen.getByText('Closed Issue 1')).toBeInTheDocument()
-    expect(screen.getByText('Open Issue 2')).toBeInTheDocument()
+    // Check issues (appear in both desktop and mobile views)
+    const openIssue1Elements = screen.getAllByText('Open Issue 1')
+    const closedIssue1Elements = screen.getAllByText('Closed Issue 1')
+    const openIssue2Elements = screen.getAllByText('Open Issue 2')
+    expect(openIssue1Elements.length).toBeGreaterThan(0)
+    expect(closedIssue1Elements.length).toBeGreaterThan(0)
+    expect(openIssue2Elements.length).toBeGreaterThan(0)
   })
 
   it('filters issues correctly when the dropdown is used', () => {
     mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
     render(<MenteeProfilePage />)
 
-    const filterSelect = screen.getByRole('combobox')
+    const filterSelect = screen.getByTestId('select-trigger')
 
     // Filter for open issues
-    fireEvent.change(filterSelect, { target: { value: 'open' } })
-    expect(screen.getByText('Open Issue 1')).toBeInTheDocument()
-    expect(screen.getByText('Open Issue 2')).toBeInTheDocument()
+    fireEvent.click(filterSelect)
+    const openOption = screen.getByText('Open (2)')
+    fireEvent.click(openOption)
+    const openIssue1Elements = screen.getAllByText('Open Issue 1')
+    const openIssue2Elements = screen.getAllByText('Open Issue 2')
+    expect(openIssue1Elements.length).toBeGreaterThan(0)
+    expect(openIssue2Elements.length).toBeGreaterThan(0)
     expect(screen.queryByText('Closed Issue 1')).not.toBeInTheDocument()
 
     // Filter for closed issues
-    fireEvent.change(filterSelect, { target: { value: 'closed' } })
-    expect(screen.getByText('Closed Issue 1')).toBeInTheDocument()
+    fireEvent.click(filterSelect)
+    const closedOption = screen.getByText('Closed (1)')
+    fireEvent.click(closedOption)
+    const closedIssue1Elements = screen.getAllByText('Closed Issue 1')
+    expect(closedIssue1Elements.length).toBeGreaterThan(0)
     expect(screen.queryByText('Open Issue 1')).not.toBeInTheDocument()
     expect(screen.queryByText('Open Issue 2')).not.toBeInTheDocument()
   })
@@ -173,6 +281,7 @@ describe('MenteeProfilePage', () => {
     }
     mockUseQuery.mockReturnValue({ data: noIssuesData, loading: false, error: undefined })
     render(<MenteeProfilePage />)
-    expect(screen.getByText('No issues assigned to this mentee in this module')).toBeInTheDocument()
+    const emptyMessages = screen.getAllByText('No issues found for the selected filter.')
+    expect(emptyMessages.length).toBeGreaterThan(0)
   })
 })

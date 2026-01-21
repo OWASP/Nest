@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaRightToBracket } from 'react-icons/fa6'
 import { GetCommunitySnapshotsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Snapshot } from 'types/snapshot'
 import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
@@ -11,14 +11,16 @@ import SnapshotCard from 'components/SnapshotCard'
 
 const SnapshotsPage: React.FC = () => {
   const [snapshots, setSnapshots] = useState<Snapshot[] | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetCommunitySnapshotsDocument)
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetCommunitySnapshotsDocument)
 
   useEffect(() => {
     if (graphQLData) {
       setSnapshots(graphQLData.snapshots)
-      setIsLoading(false)
     }
     if (graphQLRequestError) {
       addToast({
@@ -29,7 +31,6 @@ const SnapshotsPage: React.FC = () => {
         color: 'danger',
         variant: 'solid',
       })
-      setIsLoading(false)
     }
   }, [graphQLData, graphQLRequestError])
 
@@ -41,8 +42,8 @@ const SnapshotsPage: React.FC = () => {
 
   const renderSnapshotCard = (snapshot: Snapshot) => {
     const SubmitButton = {
-      label: 'View Snapshot',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      label: 'View Details',
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: () => handleButtonClick(snapshot),
     }
 

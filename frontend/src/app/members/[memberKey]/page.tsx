@@ -1,88 +1,70 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
-import {
-  faCodeMerge,
-  faFolderOpen,
-  faPersonWalkingArrowRight,
-  faUserPlus,
-} from '@fortawesome/free-solid-svg-icons'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import React, { useState, useEffect, useRef } from 'react'
+import { FaCodeMerge, FaFolderOpen, FaPersonWalkingArrowRight, FaUserPlus } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 import { Badge } from 'types/badge'
-import type { Issue } from 'types/issue'
-import type { Milestone } from 'types/milestone'
-import type { RepositoryCardProps } from 'types/project'
-import type { PullRequest } from 'types/pullRequest'
-import type { Release } from 'types/release'
-import type { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [user, setUser] = useState<User | null>()
-  const [issues, setIssues] = useState<Issue[]>([])
-  const [topRepositories, setTopRepositories] = useState<RepositoryCardProps[]>([])
-  const [milestones, setMilestones] = useState<Milestone[]>([])
-  const [pullRequests, setPullRequests] = useState<PullRequest[]>([])
-  const [releases, setReleases] = useState<Release[]>([])
   const [data, setData] = useState<HeatmapData>({} as HeatmapData)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [username, setUsername] = useState('')
   const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetUserDataDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetUserDataDocument, {
     variables: { key: memberKey },
   })
 
+  const user = graphQLData?.user
+  const issues = graphQLData?.recentIssues || []
+  const topRepositories = graphQLData?.topContributedRepositories || []
+  const milestones = graphQLData?.recentMilestones || []
+  const pullRequests = graphQLData?.recentPullRequests || []
+  const releases = graphQLData?.recentReleases || []
+
   useEffect(() => {
-    if (graphQLData) {
-      setUser(graphQLData.user)
-      setIssues(graphQLData.recentIssues)
-      setMilestones(graphQLData.recentMilestones)
-      setPullRequests(graphQLData.recentPullRequests)
-      setReleases(graphQLData.recentReleases)
-      setTopRepositories(graphQLData.topContributedRepositories)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, memberKey])
+  }, [graphQLRequestError, memberKey])
 
   useEffect(() => {
     const fetchData = async () => {
-      const result = await fetchHeatmapData(memberKey as string)
+      const result = await fetchHeatmapData(memberKey)
       if (!result) {
         setIsPrivateContributor(true)
         return
       }
       if (result?.contributions) {
-        setUsername(memberKey as string)
+        setUsername(memberKey)
         setData(result as HeatmapData)
       }
     }
     fetchData()
   }, [memberKey, user])
 
-  const formattedBio = user?.bio?.split(' ').map((word, index) => {
-    // Regex to match GitHub usernames, but if last character is not a word character or @, it's a punctuation
+  const formattedBio = user?.bio?.split(' ').map((word) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
     if (mentionMatch && mentionMatch.length > 1) {
       const username = mentionMatch[1]
       const punctuation = mentionMatch[2] || ''
       return (
-        <React.Fragment key={`mention-${username}-${index}`}>
+        <React.Fragment key={`mention-${user.login}-${username}`}>
           <Link
             href={`https://github.com/${username}`}
             target="_blank"
@@ -96,14 +78,28 @@ const UserDetailsPage: React.FC = () => {
         </React.Fragment>
       )
     }
-    return <span key={`word-${word}-${index}`}>{word} </span>
+    return <span key={`${user.login}-${word}`}>{word} </span>
   })
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <output>
+        <MemberDetailsPageSkeleton />
+      </output>
+    )
   }
 
-  if (!isLoading && user == null) {
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading user"
+        message="An error occurred while loading the user data"
+      />
+    )
+  }
+
+  if (!graphQLData || !user) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -121,15 +117,15 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   const userStats = [
-    { icon: faPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
-    { icon: faUserPlus, value: user?.followingCount || 0, unit: 'Following' },
+    { icon: FaPersonWalkingArrowRight, value: user?.followersCount || 0, unit: 'Follower' },
+    { icon: FaUserPlus, value: user?.followingCount || 0, unit: 'Following' },
     {
-      icon: faFolderOpen,
+      icon: FaFolderOpen,
       pluralizedName: 'Repositories',
       unit: 'Repository',
       value: user?.publicRepositoriesCount ?? 0,
     },
-    { icon: faCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
+    { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
   const Heatmap = () => {
@@ -155,7 +151,7 @@ const UserDetailsPage: React.FC = () => {
     return (
       <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
         <div className="relative">
-          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+          <canvas ref={canvasRef} style={{ display: 'none' }} tabIndex={-1}></canvas>
           {imgSrc ? (
             <div className="h-32">
               <Image
@@ -211,7 +207,7 @@ const UserDetailsPage: React.FC = () => {
                   <React.Fragment key={badge.id}>
                     <Badges
                       name={badge.name}
-                      cssClass={badge.cssClass || 'fa-medal'}
+                      cssClass={badge.cssClass || 'medal'}
                       showTooltip={true}
                     />
                   </React.Fragment>

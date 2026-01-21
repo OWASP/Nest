@@ -1,27 +1,9 @@
-import { faCode, faTags } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, cleanup } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
+import { FaCode, FaTags } from 'react-icons/fa6'
 import type { DetailsCardProps } from 'types/card'
-import CardDetailsPage from 'components/CardDetailsPage'
-
-jest.mock('next/link', () => {
-  const MockLink = ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  )
-  MockLink.displayName = 'MockLink'
-  return MockLink
-})
+import CardDetailsPage, { type CardType } from 'components/CardDetailsPage'
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -56,31 +38,16 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
-}))
-
 jest.mock('utils/env.client', () => ({
   IS_PROJECT_HEALTH_ENABLED: true,
 }))
 
 jest.mock('utils/urlIconMappings', () => ({
   getSocialIcon: (url: string) => {
-    if (url?.includes('github')) {
-      return { iconName: 'github' }
+    const safe = encodeURIComponent(url)
+    return function MockSocialIcon(props: { className?: string }) {
+      return <span data-testid={`mock-social-icon-${safe}`} className={props.className} />
     }
-    if (url?.includes('twitter')) {
-      return { iconName: 'twitter' }
-    }
-    return { iconName: 'link' }
   },
 }))
 
@@ -107,11 +74,13 @@ jest.mock('components/ChapterMapWrapper', () => ({
     geoLocData: _geoLocData,
     showLocal,
     style,
+    showLocationSharing: _showLocationSharing,
     ...otherProps
   }: {
     geoLocData?: unknown
     showLocal: boolean
     style: React.CSSProperties
+    showLocationSharing?: boolean
     [key: string]: unknown
   }) => {
     return (
@@ -131,9 +100,54 @@ jest.mock('components/HealthMetrics', () => ({
   ),
 }))
 
+jest.mock('components/ContributionHeatmap', () => ({
+  __esModule: true,
+  default: ({
+    contributionData,
+    startDate,
+    endDate,
+    ...props
+  }: {
+    contributionData: Record<string, number>
+    startDate: string
+    endDate: string
+    [key: string]: unknown
+  }) => (
+    <div data-testid="mock-heatmap-chart" {...props}>
+      Heatmap: {Object.keys(contributionData).length} days from {startDate} to {endDate}
+    </div>
+  ),
+}))
+
+jest.mock('components/ContributionStats', () => ({
+  __esModule: true,
+  default: ({
+    title,
+    stats,
+    ...props
+  }: {
+    title: string
+    stats?: { commits: number; pullRequests: number; issues: number; total: number }
+    [key: string]: unknown
+  }) => (
+    <div data-testid="contribution-stats" {...props}>
+      <h2>{title}</h2>
+      {stats && (
+        <>
+          <p>{stats.commits}</p>
+          <p>{stats.pullRequests}</p>
+          <p>{stats.issues}</p>
+          <p>{stats.total}</p>
+        </>
+      )}
+    </div>
+  ),
+}))
+
 jest.mock('components/InfoBlock', () => ({
   __esModule: true,
   default: ({
+    icon: _icon,
     pluralizedName,
     unit,
     value,
@@ -155,7 +169,15 @@ jest.mock('components/InfoBlock', () => ({
 
 jest.mock('components/LeadersList', () => ({
   __esModule: true,
-  default: ({ leaders, ...props }: { leaders: string; [key: string]: unknown }) => (
+  default: ({
+    leaders,
+    entityKey: _entityKey,
+    ...props
+  }: {
+    leaders: string
+    entityKey: string
+    [key: string]: unknown
+  }) => (
     <span data-testid="leaders-list" {...props}>
       {leaders}
     </span>
@@ -174,11 +196,16 @@ jest.mock('components/MetricsScoreCircle', () => ({
     clickable?: boolean
     onClick?: () => void
     [key: string]: unknown
-  }) => (
-    <div data-testid="metrics-score-circle" role={clickable ? 'button' : undefined} {...props}>
-      Score: {score}
-    </div>
-  ),
+  }) =>
+    clickable ? (
+      <button data-testid="metrics-score-circle" onClick={_onClick} {...props}>
+        Score: {score}
+      </button>
+    ) : (
+      <div data-testid="metrics-score-circle" {...props}>
+        Score: {score}
+      </div>
+    ),
 }))
 
 jest.mock('components/Milestones', () => ({
@@ -276,9 +303,10 @@ jest.mock('components/SecondaryCard', () => ({
     title,
     children,
     className,
+    icon: _icon,
     ...props
   }: {
-    _icon: unknown
+    _icon?: unknown
     title: React.ReactNode
     children: React.ReactNode
     className?: string
@@ -314,12 +342,15 @@ jest.mock('components/ToggleableList', () => ({
   __esModule: true,
   default: ({
     items,
+    icon: _icon,
     label,
+    entityKey: _entityKey,
     ...props
   }: {
     items: string[]
     _icon: unknown
     label: React.ReactNode
+    entityKey: string
     [key: string]: unknown
   }) => (
     <div data-testid="toggleable-list" {...props}>
@@ -328,25 +359,27 @@ jest.mock('components/ToggleableList', () => ({
   ),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ContributorsList', () => ({
   __esModule: true,
   default: ({
     contributors,
     maxInitialDisplay,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon,
+    label = 'Contributors',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    label,
+    getUrl,
     ...props
   }: {
     contributors: unknown[]
     icon?: unknown
     label?: string
     maxInitialDisplay: number
+    getUrl: (login: string) => string
     [key: string]: unknown
   }) => (
-    <div data-testid="top-contributors-list" {...props}>
-      Top Contributors ({contributors.length} items, max display: {maxInitialDisplay})
+    <div data-testid="contributors-list" {...props}>
+      {label} ({contributors.length} items, max display: {maxInitialDisplay})
     </div>
   ),
 }))
@@ -412,13 +445,13 @@ describe('CardDetailsPage', () => {
 
   const mockStats = [
     {
-      icon: faCode,
+      icon: FaCode,
       pluralizedName: 'repositories',
       unit: '',
       value: 10,
     },
     {
-      icon: faTags,
+      icon: FaTags,
       pluralizedName: 'stars',
       unit: '',
       value: 100,
@@ -433,6 +466,7 @@ describe('CardDetailsPage', () => {
 
   const mockContributors = [
     {
+      id: 'contributor-1',
       avatarUrl: 'https://example.com/avatar1.jpg',
       login: 'john_doe',
       name: 'John Doe',
@@ -440,6 +474,7 @@ describe('CardDetailsPage', () => {
       contributionsCount: 50,
     },
     {
+      id: 'contributor-2',
       avatarUrl: 'https://example.com/avatar2.jpg',
       login: 'jane_smith',
       name: 'Jane Smith',
@@ -531,6 +566,7 @@ describe('CardDetailsPage', () => {
 
   const mockRecentReleases = [
     {
+      id: 'release-1',
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
@@ -700,7 +736,13 @@ describe('CardDetailsPage', () => {
       expect(detailsCard).toHaveClass('md:col-span-5')
     })
 
-    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes: CardType[] = [
+      'project',
+      'repository',
+      'committee',
+      'user',
+      'organization',
+    ]
 
     test.each(supportedTypes)('renders statistics section for %s type', (entityType) => {
       render(<CardDetailsPage {...defaultProps} type={entityType} />)
@@ -924,7 +966,7 @@ describe('CardDetailsPage', () => {
     it('passes correct props to child components', () => {
       render(<CardDetailsPage {...defaultProps} topContributors={mockContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (2 items, max display: 12)'
       )
     })
@@ -956,7 +998,14 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('recent-releases')).toBeInTheDocument()
     })
 
-    const entityTypes = ['project', 'repository', 'user', 'organization', 'committee', 'chapter']
+    const entityTypes: CardType[] = [
+      'project',
+      'repository',
+      'user',
+      'organization',
+      'committee',
+      'chapter',
+    ]
 
     test.each(entityTypes)('renders all expected sections for %s type', (entityType) => {
       render(
@@ -975,7 +1024,13 @@ describe('CardDetailsPage', () => {
       ).toBeInTheDocument()
     })
 
-    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes: CardType[] = [
+      'project',
+      'repository',
+      'committee',
+      'user',
+      'organization',
+    ]
 
     test.each(supportedTypes)('renders statistics section for supported %s type', (entityType) => {
       render(<CardDetailsPage {...defaultProps} type={entityType} />)
@@ -1001,9 +1056,7 @@ describe('CardDetailsPage', () => {
       )
 
       expect(screen.getByTestId('health-metrics')).toHaveTextContent('Health Metrics (1 items)')
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
-        'Top Contributors (2 items'
-      )
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent('Top Contributors (2 items')
       expect(screen.getByTestId('repositories-card')).toHaveTextContent('Repositories (2 items)')
     })
 
@@ -1112,7 +1165,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributorsList} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (50 items, max display: 12)'
       )
     })
@@ -1158,8 +1211,8 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles unsupported entity types gracefully', () => {
-      render(<CardDetailsPage {...defaultProps} type="unsupported-type" />)
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render(<CardDetailsPage {...defaultProps} type={'unsupported-type' as any} />)
       expect(screen.getByText('Unsupported-type Details')).toBeInTheDocument()
     })
 
@@ -1172,7 +1225,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (1000 items, max display: 12)'
       )
     })
@@ -1200,7 +1253,7 @@ describe('CardDetailsPage', () => {
 
     it('validates required vs optional props correctly', () => {
       const minimalValidProps: DetailsCardProps = {
-        type: 'project',
+        type: 'project' as const,
         stats: [],
         healthMetricsData: [],
         languages: [],
@@ -1253,15 +1306,15 @@ describe('CardDetailsPage', () => {
 
   describe('Advanced Integration Tests', () => {
     it('handles multiple rapid prop changes', () => {
-      const { rerender } = render(<CardDetailsPage {...defaultProps} type="project" />)
+      const { rerender } = render(<CardDetailsPage {...defaultProps} type={'project' as const} />)
 
-      rerender(<CardDetailsPage {...defaultProps} type="chapter" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'chapter' as const} />)
       expect(screen.getByText('Chapter Details')).toBeInTheDocument()
 
-      rerender(<CardDetailsPage {...defaultProps} type="user" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'user' as const} />)
       expect(screen.getByText('User Details')).toBeInTheDocument()
 
-      rerender(<CardDetailsPage {...defaultProps} type="organization" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'organization' as const} />)
       expect(screen.getByText('Organization Details')).toBeInTheDocument()
     })
 
@@ -1299,9 +1352,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('renders correctly with all optional sections enabled', () => {
-      const fullPropsAllSections = {
+      const fullPropsAllSections: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         summary: 'Project summary text',
         userSummary: <div>User summary content</div>,
         socialLinks: ['https://github.com/test', 'https://twitter.com/test'],
@@ -1322,16 +1375,16 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Project summary text')).toBeInTheDocument()
       expect(screen.getByText('User summary content')).toBeInTheDocument()
       expect(screen.getByTestId('health-metrics')).toBeInTheDocument()
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
+      expect(screen.getByTestId('contributors-list')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
       expect(screen.getByTestId('sponsor-card')).toBeInTheDocument()
     })
 
     it('handles zero and negative values in stats', () => {
       const statsWithZeroValues = [
-        { icon: faCode, value: 0, unit: 'Star' },
-        { icon: faTags, value: invalidValues.negativeNumber, unit: 'Issue' },
-        { icon: faCode, value: invalidValues.nullValue, unit: 'Fork' },
+        { icon: FaCode, value: 0, unit: 'Star' },
+        { icon: FaTags, value: -10, unit: 'Issue' },
+        { icon: FaCode, value: null, unit: 'Fork' },
       ]
 
       expect(() =>
@@ -1402,9 +1455,9 @@ describe('CardDetailsPage', () => {
 
   describe('Archived Badge Functionality', () => {
     it('displays archived badge for archived repository', () => {
-      const archivedProps = {
+      const archivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
       }
 
@@ -1414,9 +1467,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not display archived badge for non-archived repository', () => {
-      const activeProps = {
+      const activeProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: false,
       }
 
@@ -1426,9 +1479,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not display archived badge when isArchived is undefined', () => {
-      const undefinedProps = {
+      const undefinedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
       }
 
       render(<CardDetailsPage {...undefinedProps} />)
@@ -1437,9 +1490,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('does not display archived badge for non-repository types', () => {
-      const projectProps = {
+      const projectProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         isArchived: true,
       }
 
@@ -1449,9 +1502,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('displays archived badge alongside inactive badge', () => {
-      const bothBadgesProps = {
+      const bothBadgesProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
         isActive: false,
       }
@@ -1463,9 +1516,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('displays archived badge independently of active status', () => {
-      const archivedAndActiveProps = {
+      const archivedAndActiveProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
         isActive: true,
       }
@@ -1477,9 +1530,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('archived badge has correct positioning with flex container', () => {
-      const archivedProps = {
+      const archivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
       }
 
@@ -1491,9 +1544,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('archived badge renders with medium size', () => {
-      const archivedProps = {
+      const archivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: true,
       }
 
@@ -1504,15 +1557,148 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles null isArchived gracefully', () => {
-      const nullArchivedProps = {
+      const nullArchivedProps: DetailsCardProps = {
         ...defaultProps,
-        type: 'repository',
+        type: 'repository' as const,
         isArchived: null,
       }
 
       render(<CardDetailsPage {...nullArchivedProps} />)
 
       expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Contribution Stats and Heatmap', () => {
+    const contributionData = {
+      '2024-01-01': 5,
+      '2024-01-02': 10,
+      '2024-01-03': 3,
+    }
+
+    const contributionStats = {
+      commits: 100,
+      pullRequests: 50,
+      issues: 25,
+      total: 175,
+    }
+
+    it('renders contribution stats and heatmap when data is provided', () => {
+      const propsWithContributions: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData,
+        contributionStats,
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...propsWithContributions} />)
+
+      expect(screen.getByText('Project Contribution Activity')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+      expect(screen.getByText('50')).toBeInTheDocument()
+      expect(screen.getByText('25')).toBeInTheDocument()
+      expect(screen.getByText('175')).toBeInTheDocument()
+    })
+
+    it('uses correct title for chapter type', () => {
+      const chapterPropsWithContributions: DetailsCardProps = {
+        ...defaultProps,
+        type: 'chapter' as const,
+        contributionStats,
+      }
+
+      render(<CardDetailsPage {...chapterPropsWithContributions} />)
+
+      expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
+    })
+
+    it('does not render contribution section when no data is provided', () => {
+      render(<CardDetailsPage {...defaultProps} type={'project' as const} />)
+
+      expect(screen.queryByText('Project Contribution Activity')).not.toBeInTheDocument()
+      expect(screen.queryByText('Chapter Contribution Activity')).not.toBeInTheDocument()
+    })
+
+    it('renders only stats when contributionData is missing', () => {
+      const statsOnlyProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionStats,
+      }
+
+      render(<CardDetailsPage {...statsOnlyProps} />)
+
+      expect(screen.getByText('Project Contribution Activity')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+    })
+
+    it('renders heatmap when contributionData and dates are provided', () => {
+      const heatmapProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData,
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...heatmapProps} />)
+
+      // Heatmap should be rendered (mocked in jest setup)
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('does not render heatmap when dates are missing', () => {
+      const noDateProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData,
+      }
+
+      render(<CardDetailsPage {...noDateProps} />)
+
+      expect(screen.queryByTestId('mock-heatmap-chart')).not.toBeInTheDocument()
+    })
+
+    it('does not render heatmap when contributionData is empty', () => {
+      const emptyDataProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData: {},
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...emptyDataProps} />)
+
+      expect(screen.queryByTestId('mock-heatmap-chart')).not.toBeInTheDocument()
+    })
+
+    it('renders contribution section before top contributors', () => {
+      const fullProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionStats,
+        topContributors: [
+          {
+            id: 'contributor-user1',
+            login: 'user1',
+            name: 'User One',
+            avatarUrl: 'https://example.com/avatar1.png',
+          },
+        ],
+      }
+
+      render(<CardDetailsPage {...fullProps} />)
+
+      const contributionSection = screen.getByText('Project Contribution Activity')
+      const contributorsSection = screen.getByText(/Top Contributors/i)
+
+      // Check that contribution section appears before contributors
+      expect(contributionSection.compareDocumentPosition(contributorsSection)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      )
     })
   })
 })

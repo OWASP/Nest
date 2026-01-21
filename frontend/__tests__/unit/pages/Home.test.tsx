@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockAlgoliaData, mockGraphQLData } from '@mockData/mockHomeData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
@@ -15,11 +15,6 @@ jest.mock('@apollo/client/react', () => ({
 
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
-}))
-
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('@heroui/toast', () => ({
@@ -48,7 +43,7 @@ jest.mock('components/Modal', () => {
   const ModalMock = jest.fn(({ isOpen, onClose, title, summary, button, description }) => {
     if (!isOpen) return null
     return (
-      <div role="dialog">
+      <dialog open>
         <h2>{title}</h2>
         <p>{summary}</p>
         <p>{description}</p>
@@ -56,14 +51,10 @@ jest.mock('components/Modal', () => {
           Close
         </button>
         <a href={button.url}>{button.label}</a>
-      </div>
+      </dialog>
     )
   })
   return ModalMock
-})
-
-jest.mock('next/link', () => {
-  return ({ children }) => children
 })
 
 describe('Home', () => {
@@ -181,17 +172,6 @@ describe('Home', () => {
     })
   })
 
-  test('renders AnimatedCounter components', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Active Projects')).toBeInTheDocument()
-      expect(screen.getByText('Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Local Chapters')).toBeInTheDocument()
-      expect(screen.getByText('Countries')).toBeInTheDocument()
-    })
-  })
-
   test('handles missing data gracefully', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
@@ -271,18 +251,21 @@ describe('Home', () => {
     ]
     const stats = mockGraphQLData.statsOverview
 
-    await waitFor(() => {
-      for (const header of headers) {
-        expect(screen.getByText(header)).toBeInTheDocument()
-      }
-    })
+    const statTexts = [
+      millify(stats.activeProjectsStats) + '+',
+      millify(stats.activeChaptersStats) + '+',
+      millify(stats.contributorsStats) + '+',
+      millify(stats.countriesStats) + '+',
+      millify(stats.slackWorkspaceStats) + '+',
+    ]
 
-    // Wait for animated counters to complete (2 seconds animation)
-    // Note: The "+" is rendered separately from the number, so we check for the number only
     await waitFor(
       () => {
-        for (const value of Object.values(stats)) {
-          expect(screen.getByText(millify(value), { exact: false })).toBeInTheDocument()
+        for (const stat of statTexts) {
+          expect(screen.getByText(stat)).toBeInTheDocument()
+        }
+        for (const header of headers) {
+          expect(screen.getByText(header)).toBeInTheDocument()
         }
       },
       { timeout: 3000 }

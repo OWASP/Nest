@@ -15,7 +15,7 @@ If you want to be assigned on any available issue, comment on it and wait for co
 
 ## Proposed change
 
-<!-- Don't forget to link your PR to an existing issue if any.-->
+<!-- Don't forget to link your PR to an existing issue.-->
 Resolves #(put the issue number here)
 
 <!-- Describe the big picture of your changes.-->
@@ -23,6 +23,7 @@ Add the PR description here.
 
 ## Checklist
 
-- [ ] I read and followed the [contributing guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
-- [ ] I ran `make check-test` locally and all tests passed
-- [ ] I used AI for code, documentation, or tests in this PR
+- [ ] **Required:** I followed the [contributing workflow](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md#contributing-workflow)
+- [ ] **Required:** I verified that my code works as intended and resolves the issue as described
+- [ ] **Required:** I ran `make check-test` locally: all warnings addressed, tests passed
+- [ ] I used AI for code, documentation, tests, or communication related to this PR

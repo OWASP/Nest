@@ -20,31 +20,17 @@ jest.mock('next/image', () => ({
   },
 }))
 
-// Mock next/link
-jest.mock('next/link', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function MockLink({ href, children, onClick, className, ...props }: any) {
-    return (
-      <a href={href} onClick={onClick} className={className} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
-
-// Mock FontAwesome components with proper icon mapping
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  FontAwesomeIcon: ({ icon, className }: any) => {
-    // Map icon names to test IDs based on the actual icons used
-    const iconMap: { [key: string]: string } = {
-      bars: 'icon-bars',
-      xmark: 'icon-xmark',
-      times: 'icon-times',
-    }
-    const testId = iconMap[icon.iconName] || `icon-${icon.iconName}`
-    return <span className={className} data-testid={testId} />
-  },
+jest.mock('react-icons/fa', () => ({
+  FaBars: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-bars" {...props} />,
+  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-xmark" {...props} />,
+  FaRegHeart: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-heart" {...props} />,
+  FaRegStar: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-star" {...props} />,
+  FaHeart: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-solid-heart" {...props} />
+  ),
+  FaStar: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-solid-star" {...props} />
+  ),
 }))
 
 // Mock HeroUI Button
@@ -106,30 +92,25 @@ jest.mock('components/UserMenu', () => {
 })
 
 // Mock constants
-jest.mock('utils/constants', () => ({
-  desktopViewMinWidth: 768,
-  headerLinks: [
-    {
-      text: 'Home',
-      href: '/',
-    },
-    {
-      text: 'About',
-      href: '/about',
-    },
-    {
-      text: 'Services',
-      submenu: [
-        { text: 'Web Development', href: '/services/web' },
-        { text: 'Mobile Development', href: '/services/mobile' },
-      ],
-    },
-    {
-      text: 'Contact',
-      href: '/contact',
-    },
-  ],
-}))
+jest.mock('utils/constants', () => {
+  const actual = jest.requireActual('utils/constants')
+  return {
+    ...actual,
+    desktopViewMinWidth: 768,
+    headerLinks: [
+      { text: 'Home', href: '/' },
+      { text: 'About', href: '/about' },
+      {
+        text: 'Services',
+        submenu: [
+          { text: 'Web Development', href: '/services/web' },
+          { text: 'Mobile Development', href: '/services/mobile' },
+        ],
+      },
+      { text: 'Contact', href: '/contact' },
+    ],
+  }
+})
 
 // Mock utility function
 jest.mock('utils/utility', () => ({
@@ -225,8 +206,9 @@ describe('Header Component', () => {
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2) // One in desktop header, one in mobile menu
 
-      const userMenu = screen.getByTestId('user-menu')
-      expect(userMenu).toHaveAttribute('data-github-auth', 'true')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('renders successfully with GitHub auth disabled', () => {
@@ -240,8 +222,9 @@ describe('Header Component', () => {
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2)
 
-      const userMenu = screen.getByTestId('user-menu')
-      expect(userMenu).toHaveAttribute('data-github-auth', 'false')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'false')
     })
   })
 
@@ -455,7 +438,9 @@ describe('Header Component', () => {
     it('renders UserMenu component', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(screen.getByTestId('user-menu')).toBeInTheDocument()
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toBeInTheDocument()
     })
 
     it('renders ModeToggle component', () => {
@@ -595,13 +580,17 @@ describe('Header Component', () => {
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when true', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'true')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when false', () => {
       renderWithSession(<Header isGitHubAuthEnabled={false} />)
 
-      expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'false')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'false')
     })
   })
 

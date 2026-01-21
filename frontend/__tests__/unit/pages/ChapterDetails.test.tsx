@@ -1,16 +1,12 @@
 import { useQuery } from '@apollo/client/react'
+import { mockChapterDetailsData } from '@mockData/mockChapterDetailsData'
 import { screen, waitFor } from '@testing-library/react'
-import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { render } from 'wrappers/testUtil'
 import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('react-router-dom', () => ({
@@ -47,6 +43,7 @@ describe('chapterDetailsPage Component', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
+      loading: true,
     })
     render(<ChapterDetailsPage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
@@ -69,10 +66,23 @@ describe('chapterDetailsPage Component', () => {
     expect(screen.getByText('This is a test chapter summary.')).toBeInTheDocument()
   })
 
-  test('displays "No chapters found" when there are no chapters', async () => {
+  test('displays error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { chapter: null },
-      error: true,
+      data: null,
+      error: { message: 'GraphQL error' },
+      loading: false,
+    })
+    render(<ChapterDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Error loading chapter')).toBeInTheDocument()
+    })
+  })
+
+  test('displays "Chapter not found" when data is null', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      error: null,
+      loading: false,
     })
     render(<ChapterDetailsPage />)
     await waitFor(() => {

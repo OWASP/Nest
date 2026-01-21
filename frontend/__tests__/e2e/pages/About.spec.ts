@@ -1,6 +1,6 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { mockAboutData } from '@mockData/mockAboutData'
 import { test, expect } from '@playwright/test'
-import { mockAboutData } from '@unit/data/mockAboutData'
 
 test.describe('About Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -71,13 +71,24 @@ test.describe('About Page', () => {
 
   test('loads roadmap items correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
+
+    await expect(page.getByText('Contribution Hub title')).toBeVisible()
+
+    const roadmapSection = page
+      .locator('div')
+      .filter({ has: page.getByRole('heading', { name: 'Roadmap' }) })
+      .filter({ has: page.getByRole('button', { name: 'Show more' }) })
+      .last()
+
+    await roadmapSection.getByRole('button', { name: 'Show more' }).click()
+
     for (const milestone of mockAboutData.project.recentMilestones) {
-      await expect(page.getByText(milestone.title)).toBeVisible()
+      await expect(page.getByText(milestone.title, { exact: true })).toBeVisible()
       await expect(page.getByText(milestone.body)).toBeVisible()
     }
   })
 
-  test('displays animated counters with correct values', async ({ page }) => {
+  test('displays project statistics with correct values', async ({ page }) => {
     await expect(page.getByText('1.2K+Contributors')).toBeVisible()
     await expect(page.getByText('40+Open Issues')).toBeVisible()
     await expect(page.getByText('60+Forks')).toBeVisible()
@@ -99,7 +110,18 @@ test.describe('About Page', () => {
   })
 
   test('renders project history timeline section', async ({ page }) => {
-    await expect(page.getByText('Project Timeline')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project Timeline' })).toBeVisible()
+
+    await expect(page.getByText('OWASP Nest Logo Introduction')).toBeVisible()
+
+    const timelineSection = page
+      .locator('div')
+      .filter({ has: page.getByRole('heading', { name: 'Project Timeline' }) })
+      .filter({ has: page.getByRole('button', { name: 'Show more' }) })
+      .last()
+
+    await timelineSection.getByRole('button', { name: 'Show more' }).click()
+
     await expect(page.getByText('Project Inception')).toBeVisible()
   })
 })

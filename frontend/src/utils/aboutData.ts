@@ -2,7 +2,7 @@ import type { KeyFeature, ProjectTimeline, GetInvolved, MissionContent } from 't
 
 export const missionContent: MissionContent = {
   mission:
-    'OWASP Nest is a comprehensive platform built to enhance collaboration and streamline contributions across the OWASP community. Acting as a central hub, it helps users discover chapters and projects, find contribution opportunities, and connect with like-minded individuals based on their interests and expertise.',
+    'OWASP Nest is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. Acting as a central hub, it helps users discover chapters and projects, find contribution opportunities, and connect with like-minded individuals based on their interests and expertise.',
   whoItsFor:
     "OWASP Nest is designed for developers, designers, technical writers, students, security professionals, and contributors of all backgrounds. Whether you're just starting out or a seasoned OSS veteran, OWASP Nest provides intuitive tools to help you engage meaningfully in the OWASP ecosystem.",
 } as const
@@ -120,8 +120,20 @@ export const projectTimeline: ProjectTimeline[] = [
   {
     title: 'Lab Level Promotion',
     description:
-      "OWASP Nest promoted to Lab level, marking a significant milestone in the project's growth and maturity within the OWASP ecosystem",
+      "OWASP Nest promoted to Lab level, marking a significant milestone in the project's growth and maturity within the OWASP ecosystem.",
     year: 'October 2025',
+  },
+  {
+    title: 'OWASP Nest API Hackathon',
+    description:
+      'We hosted a successful hackathon to encourage adoption and hands-on use of the OWASP Nest REST API.',
+    year: 'November 2025',
+  },
+  {
+    title: 'OWASP Nest Logo Introduction',
+    description:
+      "Introduced the official OWASP Nest logo as part of the project's branding and visual identity.",
+    year: 'December 2025',
   },
 ]
 

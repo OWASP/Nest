@@ -1,8 +1,8 @@
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { Tooltip } from '@heroui/tooltip'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
+import type { IconType } from 'react-icons'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { PullRequest } from 'types/pullRequest'
@@ -20,7 +20,7 @@ const ItemCardList = ({
 }: {
   title: React.ReactNode
   data: Issue[] | Milestone[] | PullRequest[] | Release[]
-  icon?: IconProp
+  icon?: IconType
   showAvatar?: boolean
   showSingleColumn?: boolean
   renderDetails: (item: {

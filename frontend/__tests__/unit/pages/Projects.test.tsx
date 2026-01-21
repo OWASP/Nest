@@ -1,5 +1,5 @@
+import mockProjectData from '@mockData/mockProjectData'
 import { waitFor, screen, fireEvent } from '@testing-library/react'
-import mockProjectData from '@unit/data/mockProjectData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ProjectsPage from 'app/projects/page'
@@ -27,10 +27,6 @@ jest.mock('components/Pagination', () =>
     </div>
   ))
 )
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
 
 jest.mock('@/components/MarkdownWrapper', () => {
   return ({ content, className }: { content: string; className?: string }) => (

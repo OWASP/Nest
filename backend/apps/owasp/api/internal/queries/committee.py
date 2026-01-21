@@ -1,6 +1,7 @@
 """OWASP committee GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
 from apps.owasp.models.committee import Committee
@@ -10,7 +11,7 @@ from apps.owasp.models.committee import Committee
 class CommitteeQuery:
     """Committee queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def committee(self, key: str) -> CommitteeNode | None:
         """Resolve committee by key.
 

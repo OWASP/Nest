@@ -1,18 +1,19 @@
 'use client'
 
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { capitalize } from 'lodash'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
+import { HiUserGroup } from 'react-icons/hi'
 import { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
+import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
+import ContributorsList from 'components/ContributorsList'
 import EntityActions from 'components/EntityActions'
+import Markdown from 'components/MarkdownWrapper'
 import { getSimpleDuration } from 'components/ModuleCard'
-import TopContributorsList from 'components/TopContributorsList'
 
 interface SingleModuleCardProps {
   module: Module
@@ -28,7 +29,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
   const isAdmin =
     accessLevel === 'admin' &&
-    admins?.some((admin) => admin.login === ((data as ExtendedSession)?.user?.login as string))
+    admins?.some((admin) => admin.login === (data as ExtendedSession)?.user?.login)
 
   // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
   const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
@@ -44,7 +45,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
     <div className="flex flex-col gap-4 rounded-xl border border-gray-200 p-5 shadow-md dark:border-gray-700">
       <div className="flex items-center justify-between">
         <div className="flex cursor-pointer items-center gap-2">
-          <FontAwesomeIcon icon={faUsers} className="text-gray-500 dark:text-gray-300" />
+          <HiUserGroup className="text-gray-500 dark:text-gray-300" />
           <Link
             href={`${pathname}/modules/${module.key}`}
             target="_blank"
@@ -67,7 +68,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
       {/* Description */}
       <div>
-        <p>{module.description}</p>
+        <Markdown content={module.description || 'No description available.'} />
       </div>
 
       {/* Details */}
@@ -81,13 +82,32 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
       {/* Mentors */}
       {module.mentors?.length > 0 && (
-        <TopContributorsList
-          icon={faUsers}
+        <ContributorsList
+          icon={HiUserGroup}
           contributors={module.mentors}
           maxInitialDisplay={6}
           label="Mentors"
+          getUrl={getMemberUrl}
         />
       )}
+      {module.mentees?.length > 0 &&
+        (pathname?.startsWith('/my/mentorship') ? (
+          <ContributorsList
+            icon={HiUserGroup}
+            contributors={module.mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+            getUrl={(login) => getMenteeUrl(programKey, module.key, login)}
+          />
+        ) : (
+          <ContributorsList
+            icon={HiUserGroup}
+            contributors={module.mentees}
+            maxInitialDisplay={6}
+            label="Mentees"
+            getUrl={getMemberUrl}
+          />
+        ))}
     </div>
   )
 }

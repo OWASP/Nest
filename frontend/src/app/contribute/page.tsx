@@ -1,12 +1,9 @@
 'use client'
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { useSearchPage } from 'hooks/useSearchPage'
 import React, { useState } from 'react'
-
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaGithub, FaWandMagicSparkles } from 'react-icons/fa6'
 import type { Issue } from 'types/issue'
 import { getFilteredIcons } from 'utils/utility'
-
 import Card from 'components/Card'
 import DialogComp from 'components/Modal'
 import SearchPageLayout from 'components/SearchPageLayout'
@@ -33,13 +30,13 @@ const ContributePage = () => {
 
     const SubmitButton = {
       label: 'Read More',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-wand-magic-sparkles" />,
+      icon: <FaWandMagicSparkles className="h-4 w-4" />,
       onclick: () => setModalOpenIndex(index),
     }
 
     const viewIssueButton = {
       label: 'View Issue',
-      icon: <FontAwesomeIconWrapper icon={faGithub} />,
+      icon: <FaGithub className="h-4 w-4" />,
       url: issue.url,
     }
 
@@ -47,6 +44,7 @@ const ContributePage = () => {
       <React.Fragment key={issue.objectID}>
         <Card
           key={issue.objectID}
+          cardKey={issue.objectID}
           title={issue.title}
           url={issue.url}
           projectName={issue.projectName}
@@ -54,9 +52,10 @@ const ContributePage = () => {
           summary={issue.summary}
           icons={filteredIcons}
           button={SubmitButton}
+          labels={issue.labels}
         />
         <DialogComp
-          key={`modal-${index}`}
+          key={`modal-${issue.objectID}`}
           isOpen={modalOpenIndex === index}
           onClose={() => setModalOpenIndex(null)}
           title={issue.title}

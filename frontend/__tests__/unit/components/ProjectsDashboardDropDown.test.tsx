@@ -1,17 +1,32 @@
-import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
+import { FaFilter, FaSort } from 'react-icons/fa6'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
-// Mock FontAwesome components
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    ...props
-  }: {
-    icon?: { iconName?: string }
-    [key: string]: unknown
-  }) => <span data-testid="font-awesome-icon" data-icon={icon?.iconName || 'default'} {...props} />,
+jest.mock('react-icons/fa6', () => ({
+  FaArrowDownWideShort: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="font-awesome-icon" data-icon="arrow-down-wide-short" {...props} />
+  ),
+  FaArrowUpShortWide: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="font-awesome-icon" data-icon="arrow-up-short-wide" {...props} />
+  ),
+  FaFilter: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="font-awesome-icon" data-icon="filter" {...props} />
+  ),
+  FaSort: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="font-awesome-icon" data-icon="sort" {...props} />
+  ),
+}))
+
+// Mock IconWrapper to handle react-icons properly
+jest.mock('wrappers/IconWrapper', () => ({
+  IconWrapper: ({ icon: IconComponent }: { icon?: React.ComponentType }) => {
+    return IconComponent ? (
+      <IconComponent />
+    ) : (
+      <svg data-testid="font-awesome-icon" data-icon="arrow-down-wide-short" />
+    )
+  },
 }))
 
 // Mock HeroUI components
@@ -60,20 +75,14 @@ jest.mock('@heroui/react', () => ({
     </div>
   ),
   DropdownSection: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <div
-      data-testid="dropdown-section"
-      data-title={title}
-      role="group"
-      aria-labelledby={`section-${title}`}
-    >
-      <div id={`section-${title}`} className="section-title">
+    <fieldset data-testid="dropdown-section" data-title={title}>
+      <legend id={`section-${title}`} className="section-title">
         {title}
-      </div>
+      </legend>
       {children}
-    </div>
+    </fieldset>
   ),
   DropdownItem: (props: { children: React.ReactNode }) => {
-    // Since key is not accessible in props, we'll use the children text as identifier
     const itemText = typeof props.children === 'string' ? props.children : 'item'
 
     return (
@@ -115,7 +124,7 @@ describe('ProjectsDashboardDropDown Component', () => {
     buttonDisplayName: 'Filter',
     onAction: jest.fn(),
     selectedKeys: ['Active'],
-    selectedLabels: ['Selected Item'], // Changed from 'Active' to avoid conflicts
+    selectedLabels: ['Selected Item'],
     selectionMode: 'single' as 'single' | 'multiple',
     sections: [
       {
@@ -133,7 +142,7 @@ describe('ProjectsDashboardDropDown Component', () => {
         ],
       },
     ],
-    icon: faFilter,
+    icon: FaFilter,
     isOrdering: false,
   }
 
@@ -143,7 +152,6 @@ describe('ProjectsDashboardDropDown Component', () => {
     mockOnAction = jest.fn()
     jest.clearAllMocks()
 
-    // Suppress React warnings that are not relevant to our tests
     jest.spyOn(console, 'error').mockImplementation((...args) => {
       const message = typeof args[0] === 'string' ? args[0] : String(args[0] || '')
       if (
@@ -153,8 +161,6 @@ describe('ProjectsDashboardDropDown Component', () => {
       ) {
         return
       }
-      // For test environment, we can ignore other console errors
-      return
     })
   })
 
@@ -175,7 +181,7 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('renders with icon when provided', () => {
       render(
-        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} icon={faFilter} />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} icon={FaFilter} />
       )
 
       expect(screen.getByTestId('font-awesome-icon')).toBeInTheDocument()
@@ -187,7 +193,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       )
 
       const icon = screen.getByTestId('font-awesome-icon')
-      expect(icon).toHaveAttribute('data-icon', 'default')
+      expect(icon).toHaveAttribute('data-icon', 'arrow-down-wide-short') // Default fallback
     })
   })
 
@@ -212,7 +218,7 @@ describe('ProjectsDashboardDropDown Component', () => {
           {...defaultProps}
           onAction={mockOnAction}
           isOrdering={false}
-          icon={faSort}
+          icon={FaSort}
         />
       )
 
@@ -241,7 +247,6 @@ describe('ProjectsDashboardDropDown Component', () => {
         />
       )
 
-      // Check that selected labels are not rendered when undefined
       expect(screen.queryByText('Selected Item')).not.toBeInTheDocument()
     })
   })
@@ -289,20 +294,15 @@ describe('ProjectsDashboardDropDown Component', () => {
   describe('Event handling', () => {
     it('calls onAction when dropdown item is clicked', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]} // Remove selected labels to avoid duplicate text
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')
       const activeItem = items.find((item) => item.textContent === 'Active')
 
-      // Use non-conditional expect
       expect(activeItem).toBeDefined()
 
-      fireEvent.click(activeItem!)
+      fireEvent.click(activeItem)
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
@@ -316,17 +316,13 @@ describe('ProjectsDashboardDropDown Component', () => {
 
       expect(activeItem).toBeDefined()
 
-      fireEvent.keyDown(activeItem!, { key: 'Enter' })
+      fireEvent.keyDown(activeItem, { key: 'Enter' })
       expect(mockOnAction).toHaveBeenCalledWith('Active')
     })
 
     it('handles multiple clicks correctly', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]} // Remove selected labels to avoid duplicate text
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')
@@ -336,9 +332,8 @@ describe('ProjectsDashboardDropDown Component', () => {
       expect(activeItem).toBeDefined()
       expect(inactiveItem).toBeDefined()
 
-      fireEvent.click(activeItem!)
-
-      fireEvent.click(inactiveItem!)
+      fireEvent.click(activeItem)
+      fireEvent.click(inactiveItem)
 
       expect(mockOnAction).toHaveBeenCalledTimes(2)
       expect(mockOnAction).toHaveBeenCalledWith('Active')
@@ -411,7 +406,6 @@ describe('ProjectsDashboardDropDown Component', () => {
         />
       )
 
-      // Should not render selected labels when array is empty
       const labelsContainer = screen.queryByText(/,/)
       expect(labelsContainer).not.toBeInTheDocument()
     })
@@ -427,17 +421,12 @@ describe('ProjectsDashboardDropDown Component', () => {
 
     it('renders all dropdown items correctly', () => {
       render(
-        <ProjectsDashboardDropDown
-          {...defaultProps}
-          onAction={mockOnAction}
-          selectedLabels={[]} // Remove to avoid duplicate text
-        />
+        <ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} selectedLabels={[]} />
       )
 
       const items = screen.getAllByTestId('dropdown-item')
       expect(items).toHaveLength(4)
 
-      // Check by getting text content from dropdown items specifically
       const itemTexts = items.map((item) => item.textContent)
       expect(itemTexts).toContain('Active')
       expect(itemTexts).toContain('Inactive')
@@ -528,7 +517,6 @@ describe('ProjectsDashboardDropDown Component', () => {
         />
       )
 
-      // Check that both main text and subtitle are present for screen readers
       expect(screen.getByText('Filter')).toBeInTheDocument()
       expect(screen.getByText('Selected')).toBeInTheDocument()
     })
@@ -572,7 +560,6 @@ describe('ProjectsDashboardDropDown Component', () => {
       const items = screen.getAllByTestId('dropdown-item')
       expect(items).toHaveLength(4)
 
-      // Check content without ambiguity
       const itemTexts = items.map((item) => item.textContent)
       expect(itemTexts).toContain('Active')
       expect(itemTexts).toContain('Inactive')
@@ -611,7 +598,6 @@ describe('ProjectsDashboardDropDown Component', () => {
         />
       )
 
-      // Check that the flex column structure exists
       const flexContainer = screen.getByText('Filter').parentElement
       expect(flexContainer).toHaveClass('flex', 'flex-col', 'items-center')
     })

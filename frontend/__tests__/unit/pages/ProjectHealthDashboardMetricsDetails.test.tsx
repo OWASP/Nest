@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
+import { mockProjectsDashboardMetricsDetailsData } from '@mockData/mockProjectsDashboardMetricsDetailsData'
 import { render, screen, waitFor } from '@testing-library/react'
-import { mockProjectsDashboardMetricsDetailsData } from '@unit/data/mockProjectsDashboardMetricsDetailsData'
 import ProjectHealthMetricsDetails from 'app/projects/dashboard/metrics/[projectKey]/page'
 
 jest.mock('react-apexcharts', () => {
@@ -25,10 +25,6 @@ jest.mock('hooks/useDjangoSession', () => ({
   useDjangoSession: () => ({
     isSyncing: false,
   }),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon"></span>,
 }))
 
 const mockError = {

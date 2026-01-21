@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { useQuery, useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockApiKeys, mockCreateApiKeyResult } from '@mockData/mockApiKeysData'
 import { screen, waitFor, fireEvent, within } from '@testing-library/react'
-import { mockApiKeys, mockCreateApiKeyResult } from '@unit/data/mockApiKeysData'
 import { format, addDays } from 'date-fns'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
@@ -22,7 +22,7 @@ jest.mock('@heroui/modal', () => {
   const Stub = ({ children }: { children: React.ReactNode }) => <>{children}</>
   return {
     Modal: ({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) =>
-      isOpen ? <div role="dialog">{children}</div> : null,
+      isOpen ? <dialog open>{children}</dialog> : null,
     ModalContent: Stub,
     ModalHeader: Stub,
     ModalBody: Stub,
@@ -32,10 +32,6 @@ jest.mock('@heroui/modal', () => {
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('next/navigation', () => ({

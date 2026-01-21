@@ -1,17 +1,13 @@
 import { useQuery } from '@apollo/client/react'
 
+import { mockCommitteeDetailsData } from '@mockData/mockCommitteeDetailsData'
 import { screen, waitFor } from '@testing-library/react'
-import { mockCommitteeDetailsData } from '@unit/data/mockCommitteeDetailsData'
 import { render } from 'wrappers/testUtil'
 import CommitteeDetailsPage from 'app/committees/[committeeKey]/page'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
 const mockRouter = {
@@ -61,10 +57,11 @@ describe('CommitteeDetailsPage Component', () => {
     expect(screen.getByText('https://owasp.org/test-committee')).toBeInTheDocument()
   })
 
-  test('displays "Committee not found" when there is no committee', async () => {
+  test('displays "Committee not found" when data is null without error', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
-      error: { message: 'Committee not found' },
+      error: null,
+      loading: false,
     })
     render(<CommitteeDetailsPage />)
     await waitFor(() => {
@@ -120,7 +117,7 @@ describe('CommitteeDetailsPage Component', () => {
     render(<CommitteeDetailsPage />)
 
     await waitFor(() => {
-      expect(screen.getByText('Committee not found')).toBeInTheDocument()
+      expect(screen.getByText('Error loading committee')).toBeInTheDocument()
     })
   })
 

@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.core.utils.index import deep_camelize
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.models.chapter import Chapter
 
@@ -18,6 +19,7 @@ class GeoLocationType:
 @strawberry_django.type(
     Chapter,
     fields=[
+        "contribution_data",
         "country",
         "is_active",
         "meetup_group",
@@ -31,26 +33,31 @@ class GeoLocationType:
 class ChapterNode(GenericEntityNode):
     """Chapter node."""
 
-    @strawberry.field
-    def created_at(self) -> float:
-        """Resolve created at."""
-        return self.idx_created_at
+    @strawberry_django.field
+    def contribution_stats(self, root: Chapter) -> strawberry.scalars.JSON | None:
+        """Resolve contribution stats with camelCase keys."""
+        return deep_camelize(root.contribution_stats)
 
-    @strawberry.field
-    def geo_location(self) -> GeoLocationType | None:
+    @strawberry_django.field
+    def created_at(self, root: Chapter) -> float:
+        """Resolve created at."""
+        return root.idx_created_at
+
+    @strawberry_django.field
+    def geo_location(self, root: Chapter) -> GeoLocationType | None:
         """Resolve geographic location."""
         return (
-            GeoLocationType(lat=self.latitude, lng=self.longitude)
-            if self.latitude is not None and self.longitude is not None
+            GeoLocationType(lat=root.latitude, lng=root.longitude)
+            if root.latitude is not None and root.longitude is not None
             else None
         )
 
-    @strawberry.field
-    def key(self) -> str:
+    @strawberry_django.field
+    def key(self, root: Chapter) -> str:
         """Resolve key."""
-        return self.idx_key
+        return root.idx_key
 
-    @strawberry.field
-    def suggested_location(self) -> str | None:
+    @strawberry_django.field
+    def suggested_location(self, root: Chapter) -> str | None:
         """Resolve suggested location."""
-        return self.idx_suggested_location
+        return root.idx_suggested_location

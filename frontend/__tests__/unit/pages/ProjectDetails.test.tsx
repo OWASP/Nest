@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockProjectDetailsData } from '@mockData/mockProjectDetailsData'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { render } from 'wrappers/testUtil'
 import ProjectDetailsPage from 'app/projects/[projectKey]/page'
 
@@ -12,10 +12,6 @@ jest.mock('@apollo/client/react', () => ({
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('react-apexcharts', () => {
@@ -62,6 +58,7 @@ describe('ProjectDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
+      loading: true,
     })
 
     render(<ProjectDetailsPage />)
@@ -91,15 +88,15 @@ describe('ProjectDetailsPage', () => {
 
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { project: null },
+      data: null,
       error: mockError,
       loading: false,
     })
 
     render(<ProjectDetailsPage />)
 
-    await waitFor(() => screen.getByText('Project not found'))
-    expect(screen.getByText('Project not found')).toBeInTheDocument()
+    await waitFor(() => screen.getByText('Error loading project'))
+    expect(screen.getByText('Error loading project')).toBeInTheDocument()
     expect(addToast).toHaveBeenCalledWith({
       description: 'An unexpected server error occurred.',
       title: 'Server Error',

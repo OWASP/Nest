@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
+import { mockProjectsDashboardOverviewData } from '@mockData/mockProjectsDashboardOverviewData'
 import { render, screen, waitFor } from '@testing-library/react'
-import { mockProjectsDashboardOverviewData } from '@unit/data/mockProjectsDashboardOverviewData'
 import millify from 'millify'
 import ProjectsDashboardPage from 'app/projects/dashboard/page'
 
@@ -11,10 +11,6 @@ jest.mock('@apollo/client/react', () => ({
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
-}))
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('hooks/useDjangoSession', () => ({

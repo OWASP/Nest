@@ -2,7 +2,7 @@
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaRightToBracket } from 'react-icons/fa6'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
@@ -57,13 +57,14 @@ const ChaptersPage = () => {
 
     const submitButton = {
       label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket " />,
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: handleButtonClick,
     }
 
     return (
       <Card
         key={chapter.objectID}
+        cardKey={chapter.objectID}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
         summary={chapter.summary}
