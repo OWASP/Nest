@@ -59,13 +59,13 @@ const UserDetailsPage: React.FC = () => {
 
   const hasContributionData = Object.keys(contributionData).length > 0
 
-  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+  const formattedBio = user?.bio?.split(' ').map((word) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
     if (mentionMatch && mentionMatch.length > 1) {
       const username = mentionMatch[1]
       const punctuation = mentionMatch[2] || ''
       return (
-        <React.Fragment key={`mention-${username}-${index}`}>
+        <React.Fragment key={`mention-${user.login}-${username}`}>
           <Link
             href={`https://github.com/${username}`}
             target="_blank"
@@ -79,7 +79,7 @@ const UserDetailsPage: React.FC = () => {
         </React.Fragment>
       )
     }
-    return <span key={`word-${word}-${index}`}>{word} </span>
+    return <span key={`${user.login}-${word}`}>{word} </span>
   })
 
   if (isLoading) {
