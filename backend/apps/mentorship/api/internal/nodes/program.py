@@ -35,13 +35,19 @@ class ProgramNode:
         return self.admins.all()
 
     @strawberry.field
-    def recent_milestones(self) -> list["MilestoneNode"] | None:
+    def recent_milestones(self, limit: int = 5) -> list["MilestoneNode"]:
         """Get the list of recent milestones for the program."""
         from apps.github.models.milestone import Milestone
 
         project_ids = self.modules.values_list("project_id", flat=True)
 
-        return Milestone.open_milestones.filter(repository__project__in=project_ids).distinct()
+        return (
+            Milestone.open_milestones.filter(repository__project__in=project_ids)
+            .select_related("repository__organization", "author")
+            .prefetch_related("labels")
+            .order_by("-created_at")
+            .distinct()[:limit]
+        )
 
 
 @strawberry.type

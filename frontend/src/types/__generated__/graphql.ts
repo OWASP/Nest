@@ -530,11 +530,16 @@ export type ProgramNode = {
   key: Scalars['String']['output'];
   menteesLimit?: Maybe<Scalars['Int']['output']>;
   name: Scalars['String']['output'];
-  recentMilestones?: Maybe<Array<MilestoneNode>>;
+  recentMilestones: Array<MilestoneNode>;
   startedAt: Scalars['DateTime']['output'];
   status: ProgramStatusEnum;
   tags?: Maybe<Array<Scalars['String']['output']>>;
   userRole?: Maybe<Scalars['String']['output']>;
+};
+
+
+export type ProgramNodeRecentMilestonesArgs = {
+  limit?: Scalars['Int']['input'];
 };
 
 export enum ProgramStatusEnum {
