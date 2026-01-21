@@ -1,0 +1,113 @@
+services:
+  backend:
+    container_name: e2e-nest-backend
+    command: >
+      sh -c '
+        python manage.py migrate &&
+        gunicorn wsgi:application --bind 0.0.0.0:9000
+      '
+    build:
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    env_file: ../../backend/.env.e2e.example
+    networks:
+      - e2e-nest-network
+    ports:
+      - 9000:9000
+    healthcheck:
+      interval: 10s
+      retries: 10
+      test: >
+        sh -c '
+          wget --spider http://backend:9000/a/
+        '
+      timeout: 10s
+      start_period: 5s
+
+  data-loader:
+    container_name: e2e-nest-data-loader
+    image: pgvector/pgvector:pg16
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
+      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
+      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
+    volumes:
+      - ../../backend/data:/data:ro
+    networks:
+      - e2e-nest-network
+    command: >
+      sh -c '
+        echo "Loading data from dump..." &&
+        pg_restore -h db -U $$POSTGRES_USER -d $$POSTGRES_DB /data/nest.dump &&
+        echo "Data loading completed."
+      '
+  db:
+    container_name: e2e-nest-db
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${DJANGO_DB_NAME:-nest_db_e2e}
+      POSTGRES_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_e2e_password}
+      POSTGRES_USER: ${DJANGO_DB_USER:-nest_user_e2e}
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD-SHELL, pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost -p 5432]
+      timeout: 5s
+    networks:
+      - e2e-nest-network
+    volumes:
+      - e2e-db-data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+
+  cache:
+    command: >
+      sh -c '
+        redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
+      '
+    container_name: e2e-nest-cache
+    image: redis:8.0.5-alpine3.21
+    environment:
+      REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-e2e-password}
+    healthcheck:
+      interval: 5s
+      retries: 5
+      test: [CMD, redis-cli, -a, $$REDIS_PASSWORD, ping]
+      timeout: 5s
+    networks:
+      - e2e-nest-network
+    volumes:
+      - e2e-cache-data:/data
+
+  e2e-tests:
+    container_name: e2e-nest-tests
+    build:
+      context: ../../frontend
+      dockerfile: ../docker/frontend/Dockerfile.e2e.test
+    command: >
+      sh -c '
+        pnpm run test:e2e
+      '
+    depends_on:
+      backend:
+        condition: service_healthy
+    env_file: ../../frontend/.env.e2e.example
+    networks:
+      - e2e-nest-network
+
+networks:
+  e2e-nest-network:
+
+volumes:
+  e2e-cache-data:
+  e2e-db-data:

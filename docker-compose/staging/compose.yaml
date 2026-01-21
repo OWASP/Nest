@@ -1,6 +1,7 @@
 services:
   staging-nest-backend:
     container_name: staging-nest-backend
+    entrypoint: /home/owasp/entrypoint.sh
     image: owasp/nest:backend-staging
     env_file: .env.backend
     depends_on:
