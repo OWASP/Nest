@@ -157,6 +157,7 @@ jest.mock('react-icons/fa6', () => ({
 
 const mockContributors: Contributor[] = [
   {
+    id: 'contributor-developer1',
     avatarUrl: 'https://github.com/developer1.avatar',
     login: 'developer1',
     name: 'Alex Developer',
@@ -164,6 +165,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 50,
   },
   {
+    id: 'contributor-contributor2',
     avatarUrl: 'https://github.com/contributor2.avatar',
     login: 'contributor2',
     name: 'Jane Developer',
@@ -171,6 +173,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 30,
   },
   {
+    id: 'contributor-user3',
     avatarUrl: 'https://github.com/user3.avatar',
     login: 'user3',
     name: '',
@@ -274,12 +277,14 @@ describe('ContributorsList Component', () => {
     it('renders contributor name when available, falls back to login', () => {
       const contributorsWithMissingNames: Contributor[] = [
         {
+          id: 'contributor-dev1',
           avatarUrl: 'https://github.com/developer1.avatar',
           login: 'developer1',
           name: 'Alex Developer',
           projectKey: 'project1',
         },
         {
+          id: 'contributor-contrib2',
           avatarUrl: 'https://github.com/contributor2.avatar',
           login: 'contributor2',
           name: '',
@@ -482,6 +487,7 @@ describe('ContributorsList Component', () => {
     it('falls back to login when name is empty or missing', () => {
       const contributorWithoutName: Contributor[] = [
         {
+          id: 'contributor-testuser',
           avatarUrl: 'https://github.com/user1.avatar',
           login: 'testuser',
           name: '',
@@ -497,6 +503,7 @@ describe('ContributorsList Component', () => {
     it('handles missing avatar URL gracefully', () => {
       const contributorWithEmptyAvatar: Contributor[] = [
         {
+          id: 'contributor-dev1-empty-avatar',
           avatarUrl: '',
           login: 'developer1',
           name: 'Alex Developer',
@@ -555,12 +562,14 @@ describe('ContributorsList Component', () => {
     it('handles contributors with missing required fields', () => {
       const incompleteContributors: Contributor[] = [
         {
+          id: 'contributor-incomplete1',
           avatarUrl: 'https://github.com/user1.avatar',
           login: '',
           name: '',
           projectKey: 'project1',
         },
         {
+          id: 'contributor-incomplete2',
           avatarUrl: '',
           login: 'user2',
           name: 'User 2',

@@ -1,6 +1,5 @@
 """Event API."""
 
-from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
@@ -11,7 +10,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
-from apps.api.rest.v0.common import LocationFilter
+from apps.api.rest.v0.common import LocationFilter, ValidationErrorSchema
 from apps.owasp.models.event import Event as EventModel
 
 router = RouterPaginated(tags=["Events"])
@@ -20,13 +19,23 @@ router = RouterPaginated(tags=["Events"])
 class EventBase(Schema):
     """Base schema for Event (used in list endpoints)."""
 
-    end_date: datetime | None = None
+    end_date: str | None = None
     key: str
     latitude: float | None = None
     longitude: float | None = None
     name: str
-    start_date: datetime
+    start_date: str
     url: str | None = None
+
+    @staticmethod
+    def resolve_end_date(event: EventModel) -> str | None:
+        """Resolve end date."""
+        return event.end_date.isoformat() if event.end_date else None
+
+    @staticmethod
+    def resolve_start_date(event: EventModel) -> str:
+        """Resolve start date."""
+        return event.start_date.isoformat()
 
 
 class Event(EventBase):
@@ -90,6 +99,7 @@ def list_events(
     description="Retrieve an event details.",
     operation_id="get_event",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: EventError,
         HTTPStatus.OK: EventDetail,
     },

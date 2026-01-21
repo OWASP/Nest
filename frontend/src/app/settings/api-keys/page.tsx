@@ -16,7 +16,7 @@ import {
 import type { ApiKey } from 'types/apiKey'
 import LoadingSpinner from 'components/LoadingSpinner'
 import SecondaryCard from 'components/SecondaryCard'
-import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkelton'
+import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkeleton'
 
 const MAX_ACTIVE_KEYS = 3
 

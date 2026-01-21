@@ -163,7 +163,7 @@ export default function Home() {
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: Event, index: number) => (
-              <div key={`card-${event.name}`} className="overflow-hidden">
+              <div key={`card-${event.id}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <button
@@ -249,7 +249,10 @@ export default function Home() {
                   {chapter.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
-                      <LeadersList leaders={String(chapter.leaders)} />
+                      <LeadersList
+                        entityKey={`${chapter.key}-leaders`}
+                        leaders={String(chapter.leaders)}
+                      />
                     </div>
                   )}
                 </div>
@@ -289,7 +292,10 @@ export default function Home() {
                   {project.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
-                      <LeadersList leaders={String(project.leaders)} />
+                      <LeadersList
+                        entityKey={`${project.key}-leaders`}
+                        leaders={String(project.leaders)}
+                      />
                     </div>
                   )}
                 </div>
@@ -362,7 +368,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-1 items-center overflow-hidden">
                     <FaUser className="mr-2 h-4 w-4 shrink-0" />
-                    <LeadersList leaders={post.authorName} />
+                    <LeadersList entityKey={`${post.title}-leaders`} leaders={post.authorName} />
                   </div>
                 </div>
               </div>

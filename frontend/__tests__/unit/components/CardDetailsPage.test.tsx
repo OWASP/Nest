@@ -169,7 +169,15 @@ jest.mock('components/InfoBlock', () => ({
 
 jest.mock('components/LeadersList', () => ({
   __esModule: true,
-  default: ({ leaders, ...props }: { leaders: string; [key: string]: unknown }) => (
+  default: ({
+    leaders,
+    entityKey: _entityKey,
+    ...props
+  }: {
+    leaders: string
+    entityKey: string
+    [key: string]: unknown
+  }) => (
     <span data-testid="leaders-list" {...props}>
       {leaders}
     </span>
@@ -336,11 +344,13 @@ jest.mock('components/ToggleableList', () => ({
     items,
     icon: _icon,
     label,
+    entityKey: _entityKey,
     ...props
   }: {
     items: string[]
     _icon: unknown
     label: React.ReactNode
+    entityKey: string
     [key: string]: unknown
   }) => (
     <div data-testid="toggleable-list" {...props}>
@@ -456,6 +466,7 @@ describe('CardDetailsPage', () => {
 
   const mockContributors = [
     {
+      id: 'contributor-1',
       avatarUrl: 'https://example.com/avatar1.jpg',
       login: 'john_doe',
       name: 'John Doe',
@@ -463,6 +474,7 @@ describe('CardDetailsPage', () => {
       contributionsCount: 50,
     },
     {
+      id: 'contributor-2',
       avatarUrl: 'https://example.com/avatar2.jpg',
       login: 'jane_smith',
       name: 'Jane Smith',
@@ -554,6 +566,7 @@ describe('CardDetailsPage', () => {
 
   const mockRecentReleases = [
     {
+      id: 'release-1',
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
@@ -1669,6 +1682,7 @@ describe('CardDetailsPage', () => {
         contributionStats,
         topContributors: [
           {
+            id: 'contributor-user1',
             login: 'user1',
             name: 'User One',
             avatarUrl: 'https://example.com/avatar1.png',

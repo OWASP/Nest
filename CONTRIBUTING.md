@@ -275,6 +275,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Load Initial Data**:
 
+   - Make sure you have `gzip` installed on your machine.
+
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
    ```bash
@@ -403,6 +405,60 @@ make test
 
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
+
+### Running e2e Tests
+
+Run the frontend e2e tests with the following command:
+
+```bash
+make test-frontend-e2e
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the e2e tests
+- Cleans up containers when done
+
+For debugging, you can run the e2e backend separately:
+
+```bash
+make run-backend-e2e
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-e2e
+```
+
+### Running Fuzz Tests
+
+Run the fuzz tests with the following command:
+
+```bash
+make test-fuzz
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the fuzz tests
+- Cleans up containers when done
+
+For debugging, you can run the fuzz backend separately:
+
+```bash
+make run-backend-fuzz
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-fuzz
+```
 
 ### Test Coverage
 

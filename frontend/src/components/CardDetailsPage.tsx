@@ -164,7 +164,10 @@ const DetailsCard = ({
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value == null ? 'Unknown' : String(detail.value)} />
+                  <LeadersList
+                    entityKey={`${entityKey}-${detail.label}`}
+                    leaders={detail?.value == null ? 'Unknown' : String(detail.value)}
+                  />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
@@ -218,13 +221,19 @@ const DetailsCard = ({
           >
             {languages.length !== 0 && (
               <ToggleableList
+                entityKey={`${entityKey}-languages`}
                 items={languages}
                 icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList
+                entityKey={`${entityKey}-topics`}
+                items={topics}
+                icon={FaTags}
+                label={<AnchorTitle title="Topics" />}
+              />
             )}
           </div>
         )}
@@ -236,6 +245,7 @@ const DetailsCard = ({
               >
                 {tags?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-tags`}
                     items={tags}
                     icon={FaTags}
                     label={<AnchorTitle title="Tags" />}
@@ -244,6 +254,7 @@ const DetailsCard = ({
                 )}
                 {domains?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-domains`}
                     items={domains}
                     icon={FaChartPie}
                     label={<AnchorTitle title="Domains" />}
@@ -255,6 +266,7 @@ const DetailsCard = ({
             {labels?.length > 0 && (
               <div className="mb-8">
                 <ToggleableList
+                  entityKey={`${entityKey}-labels`}
                   items={labels}
                   icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
