@@ -4,22 +4,25 @@ import Link from 'next/link'
 import { useState } from 'react'
 import type { IconType } from 'react-icons'
 import type { Contributor } from 'types/contributor'
-import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 import ShowMoreButton from 'components/ShowMoreButton'
 
-const TopContributorsList = ({
-  contributors,
-  label = 'Top Contributors',
-  maxInitialDisplay = 12,
-  icon,
-}: {
+interface ContributorsListProps {
   contributors: Contributor[]
   label?: string
   maxInitialDisplay?: number
   icon?: IconType
-}) => {
+  getUrl: (login: string) => string
+}
+
+const ContributorsList = ({
+  contributors,
+  label = 'Contributors',
+  maxInitialDisplay = 12,
+  icon,
+  getUrl,
+}: ContributorsListProps) => {
   const [showAllContributors, setShowAllContributors] = useState(false)
 
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
@@ -29,7 +32,7 @@ const TopContributorsList = ({
     : contributors.slice(0, maxInitialDisplay)
 
   if (contributors.length === 0) {
-    return
+    return null
   }
 
   return (
@@ -52,13 +55,13 @@ const TopContributorsList = ({
                 alt={item?.name ? `${item.name}'s avatar` : 'Contributor avatar'}
                 className="rounded-full"
                 height={24}
-                src={`${item?.avatarUrl}&s=60`}
+                src={`${item?.avatarUrl}${item?.avatarUrl?.includes('?') ? '&' : '?'}s=60`}
                 title={item?.name || item?.login}
                 width={24}
               />
               <Link
                 className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
-                href={getMemberUrl(item?.login)}
+                href={getUrl(item?.login)}
                 title={item?.name || item?.login}
               >
                 {upperFirst(item.name) || upperFirst(item.login)}
@@ -72,4 +75,4 @@ const TopContributorsList = ({
   )
 }
 
-export default TopContributorsList
+export default ContributorsList

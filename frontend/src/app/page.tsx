@@ -27,9 +27,11 @@ import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import CalendarButton from 'components/CalendarButton'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ContributorsList from 'components/ContributorsList'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
@@ -40,7 +42,6 @@ import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
@@ -320,10 +321,12 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributorsList
+        <ContributorsList
           contributors={data?.topContributors}
           icon={HiUserGroup}
           maxInitialDisplay={20}
+          label="Top Contributors"
+          getUrl={getMemberUrl}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
           <RecentIssues data={data?.recentIssues} />

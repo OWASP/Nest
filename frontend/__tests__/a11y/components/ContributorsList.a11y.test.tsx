@@ -2,7 +2,8 @@ import { render } from '@testing-library/react'
 import { axe, toHaveNoViolations } from 'jest-axe'
 import { ReactNode } from 'react'
 import { Contributor } from 'types/contributor'
-import TopContributorsList from 'components/TopContributorsList'
+import { getMemberUrl } from 'utils/urlFormatter'
+import ContributorsList from 'components/ContributorsList'
 
 expect.extend(toHaveNoViolations)
 
@@ -53,9 +54,11 @@ const mockContributors: Contributor[] = [
   },
 ]
 
-describe('TopContributorsList Accessibility', () => {
+describe('ContributorsList Accessibility', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<TopContributorsList contributors={mockContributors} />)
+    const { container } = render(
+      <ContributorsList contributors={mockContributors} getUrl={getMemberUrl} />
+    )
 
     const results = await axe(container)
 
