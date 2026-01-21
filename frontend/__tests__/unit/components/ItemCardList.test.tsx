@@ -167,6 +167,7 @@ const mockPullRequest: PullRequest = {
 }
 
 const mockRelease: Release = {
+  id: 'release-item-card',
   author: {
     ...mockUser,
     login: 'author4',

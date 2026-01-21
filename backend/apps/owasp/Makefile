@@ -2,6 +2,11 @@ owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
 
+owasp-aggregate-contributions:
+	@echo "Aggregating OWASP contributions"
+	@CMD="python manage.py owasp_aggregate_contributions --entity-type chapter" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_aggregate_contributions --entity-type project" $(MAKE) exec-backend-command
+
 owasp-create-project-metadata-file:
 	@echo "Generating metadata"
 	@CMD="python manage.py owasp_create_project_metadata_file $(entity_key)" $(MAKE) exec-backend-command
@@ -21,6 +26,22 @@ owasp-enrich-events:
 owasp-enrich-projects:
 	@echo "Enriching OWASP projects"
 	@CMD="python manage.py owasp_enrich_projects" $(MAKE) exec-backend-command
+
+owasp-generate-community-snapshot-video:
+	@docker build \
+		-f docker/backend/Dockerfile backend/ \
+		-t nest-backend:base
+	@docker build \
+		-f docker/backend/Dockerfile.video backend/ \
+		-t nest-snapshot-video
+	@mkdir -p backend/generated_videos
+	@docker run \
+		--env-file backend/.env \
+		--mount type=bind,src="$(PWD)/backend/generated_videos",dst=/home/owasp/generated_videos \
+		--network nest-local_nest-network \
+		--rm \
+		nest-snapshot-video \
+		python manage.py owasp_generate_community_snapshot_video $(snapshot_key) /home/owasp/generated_videos
 
 owasp-process-snapshots:
 	@echo "Processing OWASP snapshots"

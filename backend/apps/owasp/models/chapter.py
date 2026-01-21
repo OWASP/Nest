@@ -8,7 +8,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.geocoding import get_location_coordinates
-from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import get_absolute_url, join_values
@@ -64,6 +63,19 @@ class Chapter(
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
 
+    contribution_data = models.JSONField(
+        verbose_name="Contribution Data",
+        default=dict,
+        blank=True,
+        help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
+    )
+    contribution_stats = models.JSONField(
+        verbose_name="Contribution Statistics",
+        default=dict,
+        blank=True,
+        help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
+    )
+
     # GRs.
     members = GenericRelation("owasp.EntityMember")
 
@@ -85,7 +97,12 @@ class Chapter(
     @lru_cache
     def active_chapters_count():
         """Return active chapters count."""
-        return IndexBase.get_total_count("chapters", search_filters="idx_is_active:true")
+        return Chapter.objects.filter(
+            is_active=True,
+            latitude__isnull=False,
+            longitude__isnull=False,
+            owasp_repository__is_empty=False,
+        ).count()
 
     def from_github(self, repository) -> None:
         """Update instance based on GitHub repository data.
