@@ -12,7 +12,7 @@ SEMGREP_CONFIGS := --config p/owasp-top-ten \
                    --config p/sql-injection \
                    --config p/secrets \
                    --timeout 10 \
-                   --timeout-threshold 3 \
+                   --timeout-threshold 3
 
 build:
 	@docker compose build
