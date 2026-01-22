@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
+import DOMPurify from 'dompurify'
 import { apolloClient } from 'server/apolloClient'
 import {
   GetOrganizationDataDocument,
@@ -114,7 +115,7 @@ export default async function OrganizationDetailsLayout({
           id="organization-structured-data"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData, null, 2),
+            __html: DOMPurify.sanitize(JSON.stringify(structuredData, null, 2)),
           }}
         />
       )}

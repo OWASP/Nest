@@ -1,4 +1,5 @@
 import React from 'react'
+import DOMPurify from 'dompurify'
 import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 
 interface StructuredDataScriptProps {
@@ -12,7 +13,7 @@ const StructuredDataScript: React.FC<StructuredDataScriptProps> = ({ data }) => 
       id="profile-structured-data"
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(data, null, 2), // include everything with 2 spaces indentation
+        __html: DOMPurify.sanitize(JSON.stringify(data, null, 2)), // include everything with 2 spaces indentation
       }}
     />
   )

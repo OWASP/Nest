@@ -94,8 +94,8 @@ repos:
       - id: semgrep
         name: Semgrep Security Scan
         args:
-          - --config 
+          - --config
           - p/security-audit
-          - --config 
+          - --config
           - p/secrets
           - --error

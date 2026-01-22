@@ -94,4 +94,3 @@ semgrep-scan:
 	  -w /home/owasp \
 	  semgrep/semgrep:1.148.0 \
 	  $(SEMGREP_CMD) .
-

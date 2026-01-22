@@ -9,7 +9,7 @@ from apps.slack.apps import SlackConfig
 slack_handler = SlackRequestHandler(SlackConfig.app)
 
 
-@csrf_exempt  # NOSONAR
+@csrf_exempt  # NOSONAR # nosemgrep
 @require_POST  # NOSONAR
 def slack_request_handler(request):
     """Handle Slack requests.

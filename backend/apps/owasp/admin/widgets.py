@@ -1,7 +1,7 @@
 """Custom widgets for OWASP admin."""
 
 from django import forms
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 
 class ChannelIdWidget(forms.TextInput):
@@ -21,4 +21,4 @@ class ChannelIdWidget(forms.TextInput):
             f"id='lookup_id_{name}' title='Look up related objects'></a>"
         )
 
-        return mark_safe(f"{widget_html}{search_button}")  # noqa: S308
+        return format_html("{}{}", widget_html, search_button)

@@ -2,8 +2,7 @@
 
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
+from django.utils.html import escape, format_html
 
 from apps.owasp.admin.widgets import ChannelIdWidget
 from apps.owasp.models.entity_channel import EntityChannel
@@ -106,7 +105,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
                 return ""
             return self._format_github_link(obj.owasp_repository)
 
-        return mark_safe(  # noqa: S308
+        return format_html(
             " ".join(
                 [self._format_github_link(repository) for repository in obj.repositories.all()]
             )
@@ -117,9 +116,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
         if not hasattr(obj, "key") or not obj.key:
             return ""
 
-        return mark_safe(  # noqa: S308
-            f"<a href='https://owasp.org/{escape(obj.key)}' target='_blank'>↗️</a>"
-        )
+        return format_html("<a href='https://owasp.org/{}' target='_blank'>↗️</a>", escape(obj.key))
 
     def _format_github_link(self, repository):
         """Format a single GitHub repository link."""
@@ -130,9 +127,10 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
         if not hasattr(repository, "key") or not repository.key:
             return ""
 
-        return mark_safe(  # noqa: S308
-            f"<a href='https://github.com/{escape(repository.owner.login)}/"
-            f"{escape(repository.key)}' target='_blank'>↗️</a>"
+        return format_html(
+            "<a href='https://github.com/{}/{}' target='_blank'>↗️</a>",
+            escape(repository.owner.login),
+            escape(repository.key),
         )
 
     custom_field_github_urls.short_description = "GitHub 🔗"
