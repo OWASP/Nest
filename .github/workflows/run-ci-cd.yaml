@@ -219,6 +219,7 @@ jobs:
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
           fail_ci_if_error: false
+          files: backend/coverage.xml
           flags: backend
           use_oidc: true
           working-directory: backend
@@ -269,6 +270,7 @@ jobs:
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
           fail_ci_if_error: false
+          files: frontend/coverage/lcov.info
           flags: frontend
           use_oidc: true
           working-directory: frontend

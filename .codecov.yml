@@ -40,6 +40,10 @@ coverage:
         target: auto
         threshold: 0%
 
+fixes:
+  - /app/::frontend/
+  - /home/owasp/::backend/
+
 flags:
   backend:
     paths:
