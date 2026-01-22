@@ -53,6 +53,7 @@ askowasp
 attisdropped
 bangbang
 bsky
+carryforward
 certbot
 collectstatic
 coraza
@@ -136,6 +137,7 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+quasis
 relativedelta
 repositorycontributor
 requirepass
