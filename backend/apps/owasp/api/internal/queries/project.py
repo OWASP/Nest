@@ -8,10 +8,10 @@ from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
 
-MAX_RECENT_PROJECTS_LIMIT = 1000
+MAX_RECENT_PROJECTS_LIMIT = 100
 MAX_SEARCH_QUERY_LENGTH = 100
 MIN_SEARCH_QUERY_LENGTH = 3
-SEARCH_PROJECTS_LIMIT = 3
+SEARCH_PROJECTS_LIMIT = 100
 
 
 @strawberry.type

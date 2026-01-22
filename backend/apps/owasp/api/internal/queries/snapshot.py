@@ -6,7 +6,7 @@ import strawberry_django
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
 from apps.owasp.models.snapshot import Snapshot
 
-MAX_LIMIT = 100
+MAX_LIMIT = 10
 
 
 @strawberry.type
