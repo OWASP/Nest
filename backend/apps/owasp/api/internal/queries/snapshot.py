@@ -30,7 +30,9 @@ class SnapshotQuery:
         return (
             Snapshot.objects.filter(
                 status=Snapshot.Status.COMPLETED,
-            ).order_by(
+            )
+            .only("id", "key", "title", "created_at")
+            .order_by(
                 "-created_at",
             )[:limit]
             if (limit := min(limit, MAX_LIMIT)) > 0

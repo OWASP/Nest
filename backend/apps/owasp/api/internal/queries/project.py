@@ -12,6 +12,7 @@ MAX_RECENT_PROJECTS_LIMIT = 100
 MAX_SEARCH_QUERY_LENGTH = 100
 MIN_SEARCH_QUERY_LENGTH = 3
 SEARCH_PROJECTS_LIMIT = 100
+MAX_PROJECT_KEY_LENGTH = 50
 
 
 @strawberry.type
@@ -29,8 +30,13 @@ class ProjectQuery:
             ProjectNode | None: The project node if found, otherwise None.
 
         """
+        normalized_key = key.strip()
+
+        if not normalized_key or len(normalized_key) > MAX_PROJECT_KEY_LENGTH:
+            return None
+
         try:
-            return Project.objects.get(key=f"www-project-{key}")
+            return Project.objects.get(key=f"www-project-{normalized_key}")
         except Project.DoesNotExist:
             return None
 
