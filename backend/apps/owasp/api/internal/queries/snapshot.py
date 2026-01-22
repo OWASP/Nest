@@ -30,7 +30,7 @@ class SnapshotQuery:
         if limit <= 0:
             return []
 
-        limit = min(limit, MAX_LIMIT)
+        limit = min(max(limit, 1), MAX_LIMIT)
 
         return list(
             Snapshot.objects.filter(
