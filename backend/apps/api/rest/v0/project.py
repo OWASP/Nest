@@ -12,7 +12,7 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Leader, ValidationErrorSchema
-from apps.common.utils import apply_structured_search
+from apps.api.rest.v0.structured_search import apply_structured_search
 from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project import Project as ProjectModel
 
@@ -20,6 +20,7 @@ PROJECT_SEARCH_FIELDS = {
     "name": "string",
     "is_active": "boolean",
     "stars_count": "number",
+    "stars": "number",
 }
 
 router = RouterPaginated(tags=["Projects"])
