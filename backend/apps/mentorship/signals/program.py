@@ -13,9 +13,6 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Program)
 def program_post_save_clear_algolia_cache(_sender, instance, **_kwargs):
-    """Signal handler to clear Algolia cache for the Program index.
-
-    The sender, instance, and kwargs arguments are provided by the post_save signal.
-    """
+    """Signal handler to clear Algolia cache for the Program index."""
     logger.info("Signal received for program '%s'. Clearing 'programs' index.", instance.name)
     clear_index_cache("programs")
