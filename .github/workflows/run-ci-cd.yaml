@@ -221,7 +221,6 @@ jobs:
           fail_ci_if_error: false
           flags: backend
           use_oidc: true
-          verbose: true
           working-directory: backend
     timeout-minutes: 5
 
@@ -272,7 +271,6 @@ jobs:
           fail_ci_if_error: false
           flags: frontend
           use_oidc: true
-          verbose: false
           working-directory: frontend
     timeout-minutes: 5
 
