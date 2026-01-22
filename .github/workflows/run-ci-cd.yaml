@@ -81,6 +81,14 @@ jobs:
       - name: Run Security CI Scan
         run: make security-scan-ci
 
+      - name: Archive Semgrep Project Report
+        if: always()
+        uses: actions/upload-artifact@65c86da0a1521edc3c1e951b1f8689674005d036
+        with:
+          name: semgrep-results-run-${{ github.run_number }}
+          path: semgrep-security-report.txt
+          retention-days: 14
+
   check-frontend:
     name: Run frontend checks
     permissions:

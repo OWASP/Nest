@@ -69,8 +69,8 @@ scan-images: \
 
 security-scan:
 	@echo "🛡️  Running Centralized Security Scan..."
-	semgrep $(SEMGREP_CONFIGS) --error --output findings.txt .
-	@echo "✅ Scan Complete. Detailed findings saved to findings.txt"
+	semgrep $(SEMGREP_CONFIGS) --error --output semgrep-security-report.txt .
+	@echo "✅ Scan Complete. Results saved to semgrep-security-report.txt"
 
 security-scan-ci:
 	@echo "🛡️  Running CI Security Scan..."
