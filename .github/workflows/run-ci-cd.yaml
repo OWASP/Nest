@@ -215,6 +215,18 @@ jobs:
           docker rm $CONTAINER_ID >/dev/null 2>&1
           exit $EXIT_CODE
 
+      - name: Verify coverage file
+        run: |
+          if [ -f backend/coverage.xml ]; then
+            echo "Coverage file exists: $(ls -lh backend/coverage.xml)"
+            echo "File size: $(wc -c < backend/coverage.xml) bytes"
+            head -20 backend/coverage.xml
+          else
+            echo "ERROR: coverage.xml not found!"
+            ls -la backend/ || echo "backend directory contents:"
+            exit 1
+          fi
+
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
@@ -222,7 +234,7 @@ jobs:
           files: backend/coverage.xml
           flags: backend
           use_oidc: true
-          working-directory: backend
+          verbose: true
     timeout-minutes: 5
 
   run-frontend-unit-tests:
@@ -266,6 +278,18 @@ jobs:
           docker rm $CONTAINER_ID >/dev/null 2>&1
           exit $EXIT_CODE
 
+      - name: Verify coverage file
+        run: |
+          if [ -f frontend/coverage/lcov.info ]; then
+            echo "Coverage file exists: $(ls -lh frontend/coverage/lcov.info)"
+            echo "File size: $(wc -c < frontend/coverage/lcov.info) bytes"
+            head -20 frontend/coverage/lcov.info
+          else
+            echo "ERROR: lcov.info not found!"
+            ls -la frontend/coverage/ || echo "coverage directory contents:"
+            exit 1
+          fi
+
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
@@ -273,7 +297,7 @@ jobs:
           files: frontend/coverage/lcov.info
           flags: frontend
           use_oidc: true
-          working-directory: frontend
+          verbose: true
     timeout-minutes: 5
 
   run-frontend-e2e-tests:
