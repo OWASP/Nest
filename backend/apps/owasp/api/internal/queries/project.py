@@ -56,7 +56,7 @@ class ProjectQuery:
         if limit <= 0:
             return []
 
-        limit = min(limit, MAX_RECENT_PROJECTS_LIMIT)
+        limit = min(max(limit, 1), MAX_RECENT_PROJECTS_LIMIT)
 
         return list(
             Project.objects.filter(is_active=True)
