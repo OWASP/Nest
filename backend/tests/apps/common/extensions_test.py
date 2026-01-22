@@ -5,44 +5,39 @@ from unittest.mock import MagicMock, patch
 import pytest
 from strawberry.permission import PermissionExtension
 
-from apps.common.extensions import CacheExtension, get_protected_fields
+from apps.common.extensions import CacheExtension, generate_key, get_protected_fields
 
 
 class TestGenerateKey:
     """Test cases for the generate_key method."""
 
-    @pytest.fixture
-    def extension(self):
-        """Return a CacheExtension instance."""
-        return CacheExtension()
-
-    def test_creates_deterministic_hash(self, extension):
+    def test_creates_deterministic_hash(self):
         """Test that generate_key creates a deterministic hash key."""
-        key1 = extension.generate_key("chapter", {"key": "germany"})
-        key2 = extension.generate_key("chapter", {"key": "germany"})
+        key1 = generate_key("chapter", {"key": "germany"})
+        key2 = generate_key("chapter", {"key": "germany"})
 
         assert key1 == key2
         assert key1.startswith("graphql-")
         assert len(key1.split("-")[-1]) == 64  # SHA256 hex digest length
 
-    def test_differs_for_different_field_names(self, extension):
+    def test_differs_for_different_field_names(self):
         """Test that different field names produce different keys."""
-        key1 = extension.generate_key("chapter", {"key": "germany"})
-        key2 = extension.generate_key("project", {"key": "germany"})
+        key1 = generate_key("chapter", {"key": "germany"})
+        key2 = generate_key("project", {"key": "germany"})
 
         assert key1 != key2
 
-    def test_differs_for_different_args(self, extension):
+    def test_differs_for_different_args(self):
         """Test that different arguments produce different keys."""
-        key1 = extension.generate_key("chapter", {"key": "germany"})
-        key2 = extension.generate_key("chapter", {"key": "canada"})
+        key1 = generate_key("chapter", {"key": "germany"})
+        key2 = generate_key("chapter", {"key": "canada"})
 
         assert key1 != key2
 
-    def test_sorts_args_for_consistency(self, extension):
+    def test_sorts_args_for_consistency(self):
         """Test that argument order doesn't affect the key."""
-        key1 = extension.generate_key("chapter", {"a": "1", "b": "2"})
-        key2 = extension.generate_key("chapter", {"b": "2", "a": "1"})
+        key1 = generate_key("chapter", {"a": "1", "b": "2"})
+        key2 = generate_key("chapter", {"b": "2", "a": "1"})
 
         assert key1 == key2
 
