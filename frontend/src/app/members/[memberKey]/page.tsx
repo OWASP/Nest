@@ -58,13 +58,13 @@ const UserDetailsPage: React.FC = () => {
     fetchData()
   }, [memberKey, user])
 
-  const formattedBio = user?.bio?.split(' ').map((word, index) => {
+  const formattedBio = user?.bio?.split(' ').map((word) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
     if (mentionMatch && mentionMatch.length > 1) {
       const username = mentionMatch[1]
       const punctuation = mentionMatch[2] || ''
       return (
-        <React.Fragment key={`mention-${username}-${index}`}>
+        <React.Fragment key={`mention-${user.login}-${username}`}>
           <Link
             href={`https://github.com/${username}`}
             target="_blank"
@@ -78,7 +78,7 @@ const UserDetailsPage: React.FC = () => {
         </React.Fragment>
       )
     }
-    return <span key={`word-${word}-${index}`}>{word} </span>
+    return <span key={`${user.login}-${word}`}>{word} </span>
   })
 
   if (isLoading) {
@@ -151,7 +151,7 @@ const UserDetailsPage: React.FC = () => {
     return (
       <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
         <div className="relative">
-          <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true"></canvas>
+          <canvas ref={canvasRef} style={{ display: 'none' }} tabIndex={-1}></canvas>
           {imgSrc ? (
             <div className="h-32">
               <Image

@@ -4,6 +4,7 @@ import { FaBug, FaCheckCircle, FaClock } from 'react-icons/fa'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import type { Issue } from 'types/issue'
 import { formatDate } from 'utils/dateFormatter'
+import { LabelList } from 'components/LabelList'
 import SecondaryCard from 'components/SecondaryCard'
 
 interface MenteeIssuesProps {
@@ -71,20 +72,12 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
                 </div>
 
                 {issue.labels && issue.labels.length > 0 && (
-                  <div className="mb-2 flex flex-wrap gap-1">
-                    {issue.labels.slice(0, 3).map((label, index) => (
-                      <span
-                        key={index}
-                        className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800"
-                      >
-                        {label}
-                      </span>
-                    ))}
-                    {issue.labels.length > 3 && (
-                      <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-600">
-                        +{issue.labels.length - 3} more
-                      </span>
-                    )}
+                  <div className="mb-2">
+                    <LabelList
+                      entityKey={`${issue.objectID}-labels`}
+                      labels={issue.labels}
+                      maxVisible={3}
+                    />
                   </div>
                 )}
 
