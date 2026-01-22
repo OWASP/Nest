@@ -15,16 +15,13 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
-RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
-    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
-
-&& --mount=type=cache,target=${APK_CACHE_DIR} \
-    && apk update && apk upgrade && \
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \
+    apk update && apk upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
-    chown -R owasp:owasp /home/owasp\
-
-&& --mount=type=cache,target=${PIP_CACHE_DIR} \
+    chown -R owasp:owasp /home/owasp && \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
 WORKDIR /home/owasp

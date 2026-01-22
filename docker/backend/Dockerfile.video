@@ -11,18 +11,16 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk-backend-video" \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
-RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
-    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
-
-&& --mount=type=cache,target=${PIP_CACHE_DIR} \
+RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+    mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
+    --mount=type=cache,target=${APK_CACHE_DIR} \
     poetry install --no-root --without dev --without test && \
-    python -m pip uninstall -y poetry
-
-&& --mount=type=cache,target=${APK_CACHE_DIR} \
+    python -m pip uninstall -y poetry && \
     apk update && apk upgrade && \
     apk add ffmpeg \
     # WeasyPrint dependencies: https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
