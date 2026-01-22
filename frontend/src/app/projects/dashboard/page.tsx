@@ -53,32 +53,25 @@ const ProjectsDashboardPage: FC = () => {
     )
   }
 
-  const projectsCardsItems: {
-    type: 'healthy' | 'needsAttention' | 'unhealthy'
-    count: number
-    icon: IconType
-  }[] = [
+  const projectsCardsItems = [
     {
-      type: 'healthy',
+      type: 'healthy' as const,
       count: stats.projectsCountHealthy,
       icon: FaCheck,
     },
     {
-      type: 'needsAttention',
+      type: 'needsAttention' as const,
       count: stats.projectsCountNeedAttention,
       icon: FaTriangleExclamation,
     },
     {
-      type: 'unhealthy',
+      type: 'unhealthy' as const,
       count: stats.projectsCountUnhealthy,
       icon: FaRectangleXmark,
     },
   ]
-  const dashboardCardsItems: {
-    title: string
-    icon: IconType
-    stats?: string
-  }[] = [
+
+  const dashboardCardsItems = [
     {
       title: 'Average Score',
       icon: FaChartLine,
@@ -100,12 +93,17 @@ const ProjectsDashboardPage: FC = () => {
       stats: millify(stats.totalStars),
     },
   ]
+
   return (
-    <>
-      <div className="mb-4 flex items-center justify-start">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="mb-4 flex items-center justify-start gap-2">
         <h1 className="font-semibold">Project Health Dashboard Overview</h1>
-        <MetricsPDFButton path="overview/pdf" fileName="owasp-project-health-metrics-overview" />
+        <MetricsPDFButton
+          path="overview/pdf"
+          fileName="owasp-project-health-metrics-overview"
+        />
       </div>
+
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
         {projectsCardsItems.map((item) => (
           <ProjectTypeDashboardCard
@@ -116,37 +114,50 @@ const ProjectsDashboardPage: FC = () => {
           />
         ))}
       </div>
+
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
         {dashboardCardsItems.map((item) => (
-          <DashboardCard key={item.title} title={item.title} icon={item.icon} stats={item.stats} />
+          <DashboardCard
+            key={item.title}
+            title={item.title}
+            icon={item.icon}
+            stats={item.stats}
+          />
         ))}
       </div>
+
+      {/* Charts section */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[2fr_1fr]">
-        <LineChart
-          title="Overall Project Health Monthly Trend"
-          icon={FaChartColumn}
-          series={[
-            {
-              name: 'Project Health Score',
-              data: stats.monthlyOverallScores,
-            },
-          ]}
-          labels={stats.monthlyOverallScoresMonths.map((month) => {
-            const date = new Date(2025, month - 1, 1)
-            return date.toLocaleString('default', { month: 'short' })
-          })}
-        />
-        <DonutBarChart
-          title="Project Health Distribution"
-          icon={FaHeart}
-          series={[
-            stats.projectsPercentageHealthy,
-            stats.projectsPercentageNeedAttention,
-            stats.projectsPercentageUnhealthy,
-          ]}
-        />
+        <div className="w-full overflow-x-auto">
+          <LineChart
+            title="Overall Project Health Monthly Trend"
+            icon={FaChartColumn}
+            series={[
+              {
+                name: 'Project Health Score',
+                data: stats.monthlyOverallScores,
+              },
+            ]}
+            labels={stats.monthlyOverallScoresMonths.map((month) => {
+              const date = new Date(2025, month - 1, 1)
+              return date.toLocaleString('default', { month: 'short' })
+            })}
+          />
+        </div>
+
+        <div className="w-full overflow-x-auto">
+          <DonutBarChart
+            title="Project Health Distribution"
+            icon={FaHeart}
+            series={[
+              stats.projectsPercentageHealthy,
+              stats.projectsPercentageNeedAttention,
+              stats.projectsPercentageUnhealthy,
+            ]}
+          />
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 
