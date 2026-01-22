@@ -58,19 +58,21 @@ const ProjectHealthMetricsDetails: FC = () => {
         day: 'numeric',
       })
     ) || []
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="w-full max-w-full overflow-x-hidden">
       {metricsList && metricsLatest ? (
-        <>
-          <div className="flex items-center justify-between">
-            <div className="flex justify-start">
+        <div className="flex flex-col gap-4">
+          {/* Header */}
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
               <MetricsPDFButton
                 path={`${projectKey}/pdf`}
                 fileName={`${projectKey}-health-metrics`}
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <MetricsScoreCircle score={metricsLatest.score} clickable={false} />
               <GeneralCompliantComponent
                 title={
@@ -92,129 +94,154 @@ const ProjectHealthMetricsDetails: FC = () => {
               />
             </div>
           </div>
+
+          {/* Charts */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <LineChart
-              title="Stars"
-              icon={FaStar}
-              series={[
-                {
-                  name: 'Stars',
-                  data: metricsList.map((m) => m.starsCount),
-                },
+            <div className="w-full overflow-x-auto">
+              <LineChart
+                title="Stars"
+                icon={FaStar}
+                series={[
+                  {
+                    name: 'Stars',
+                    data: metricsList.map((m) => m.starsCount),
+                  },
+                ]}
+                labels={labels}
+                round
+              />
+            </div>
+
+            <div className="w-full overflow-x-auto">
+              <LineChart
+                title="Forks"
+                icon={FaCodeFork}
+                series={[
+                  {
+                    name: 'Forks',
+                    data: metricsList.map((m) => m.forksCount),
+                  },
+                ]}
+                labels={labels}
+                round
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="w-full overflow-x-auto">
+              <LineChart
+                title="Issues"
+                icon={FaExclamationCircle}
+                series={[
+                  {
+                    name: 'Open Issues',
+                    data: metricsList.map((m) => m.openIssuesCount),
+                  },
+                  {
+                    name: 'Unassigned Issues',
+                    data: metricsList.map((m) => m.unassignedIssuesCount),
+                  },
+                  {
+                    name: 'Unanswered Issues',
+                    data: metricsList.map((m) => m.unansweredIssuesCount),
+                  },
+                  {
+                    name: 'Total Issues',
+                    data: metricsList.map((m) => m.totalIssuesCount),
+                  },
+                ]}
+                labels={labels}
+                round
+              />
+            </div>
+
+            <div className="w-full overflow-x-auto">
+              <LineChart
+                title="Open Pull Requests"
+                icon={FaCodePullRequest}
+                series={[
+                  {
+                    name: 'Open Pull Requests',
+                    data: metricsList.map((m) => m.openPullRequestsCount),
+                  },
+                ]}
+                labels={labels}
+                round
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="w-full overflow-x-auto">
+              <LineChart
+                title="Releases"
+                icon={FaTags}
+                series={[
+                  {
+                    name: 'Recent Releases',
+                    data: metricsList.map((m) => m.recentReleasesCount),
+                  },
+                  {
+                    name: 'Total Releases',
+                    data: metricsList.map((m) => m.totalReleasesCount),
+                  },
+                ]}
+                labels={labels}
+                round
+              />
+            </div>
+
+            <div className="w-full overflow-x-auto">
+              <LineChart
+                title="Contributors"
+                icon={FaPeopleGroup}
+                series={[
+                  {
+                    name: 'Contributors',
+                    data: metricsList.map((m) => m.contributorsCount),
+                  },
+                ]}
+                labels={labels}
+                round
+              />
+            </div>
+          </div>
+
+          {/* Bar chart */}
+          <div className="w-full overflow-x-auto">
+            <BarChart
+              title="Days Metrics"
+              icon={FaChartArea}
+              labels={[
+                'Project Age',
+                'Days Since Last Commit',
+                'Days Since Last Release',
+                'Days Since Last Pull Request',
+                'Days Since OWASP Page Last Update',
               ]}
-              labels={labels}
-              round
-            />
-            <LineChart
-              title="Forks"
-              icon={FaCodeFork}
-              series={[
-                {
-                  name: 'Forks',
-                  data: metricsList.map((m) => m.forksCount),
-                },
+              days={[
+                metricsLatest.ageDays,
+                metricsLatest.lastCommitDays,
+                metricsLatest.lastReleaseDays,
+                metricsLatest.lastPullRequestDays,
+                metricsLatest.owaspPageLastUpdateDays,
               ]}
-              labels={labels}
-              round
+              requirements={[
+                metricsLatest.ageDaysRequirement,
+                metricsLatest.lastCommitDaysRequirement,
+                metricsLatest.lastReleaseDaysRequirement,
+                metricsLatest.lastPullRequestDaysRequirement,
+                metricsLatest.owaspPageLastUpdateDaysRequirement,
+              ]}
+              reverseColors={[true, false, false, false, false]}
             />
           </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <LineChart
-              title="Issues"
-              icon={FaExclamationCircle}
-              series={[
-                {
-                  name: 'Open Issues',
-                  data: metricsList.map((m) => m.openIssuesCount),
-                },
-                {
-                  name: 'Unassigned Issues',
-                  data: metricsList.map((m) => m.unassignedIssuesCount),
-                },
-                {
-                  name: 'Unanswered Issues',
-                  data: metricsList.map((m) => m.unansweredIssuesCount),
-                },
-                {
-                  name: 'Total Issues',
-                  data: metricsList.map((m) => m.totalIssuesCount),
-                },
-              ]}
-              labels={labels}
-              round
-            />
-            <LineChart
-              title="Open Pull Requests"
-              icon={FaCodePullRequest}
-              series={[
-                {
-                  name: 'Open Pull Requests',
-                  data: metricsList.map((m) => m.openPullRequestsCount),
-                },
-              ]}
-              labels={labels}
-              round
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <LineChart
-              title="Releases"
-              icon={FaTags}
-              series={[
-                {
-                  name: 'Recent Releases',
-                  data: metricsList.map((m) => m.recentReleasesCount),
-                },
-                {
-                  name: 'Total Releases',
-                  data: metricsList.map((m) => m.totalReleasesCount),
-                },
-              ]}
-              labels={labels}
-              round
-            />
-            <LineChart
-              title="Contributors"
-              icon={FaPeopleGroup}
-              series={[
-                {
-                  name: 'Contributors',
-                  data: metricsList.map((m) => m.contributorsCount),
-                },
-              ]}
-              labels={labels}
-              round
-            />
-          </div>
-          <BarChart
-            title="Days Metrics"
-            icon={FaChartArea}
-            labels={[
-              'Project Age',
-              'Days Since Last Commit',
-              'Days Since Last Release',
-              'Days Since Last Pull Request',
-              'Days Since OWASP Page Last Update',
-            ]}
-            days={[
-              metricsLatest.ageDays,
-              metricsLatest.lastCommitDays,
-              metricsLatest.lastReleaseDays,
-              metricsLatest.lastPullRequestDays,
-              metricsLatest.owaspPageLastUpdateDays,
-            ]}
-            requirements={[
-              metricsLatest.ageDaysRequirement,
-              metricsLatest.lastCommitDaysRequirement,
-              metricsLatest.lastReleaseDaysRequirement,
-              metricsLatest.lastPullRequestDaysRequirement,
-              metricsLatest.owaspPageLastUpdateDaysRequirement,
-            ]}
-            reverseColors={[true, false, false, false, false]}
-          />
-        </>
+        </div>
       ) : (
-        <div className="text-center text-gray-500">No metrics data available for this project.</div>
+        <div className="text-center text-gray-500">
+          No metrics data available for this project.
+        </div>
       )}
     </div>
   )
