@@ -404,8 +404,8 @@ class ModuleMutation:
 
         module.program.save(update_fields=["experience_levels"])
 
-        invalidate_module_cache(module.program.key, old_module_key)
+        invalidate_module_cache(old_module_key, module.program.key)
         if module.key != old_module_key:
-            invalidate_module_cache(module.program.key, module.key)
+            invalidate_module_cache(module.key, module.program.key)
 
         return module
