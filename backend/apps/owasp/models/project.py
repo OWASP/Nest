@@ -14,7 +14,6 @@ from django.utils import timezone
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
-from apps.github.models.issue import Issue
 from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
@@ -152,6 +151,11 @@ class Project(
         verbose_name="Repositories",
         blank=True,
     )
+    issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Issues",
+        blank=True,
+    )
 
     def __str__(self) -> str:
         """Project human readable representation."""
@@ -195,25 +199,6 @@ class Project(
         return self.type == ProjectType.TOOL
 
     @property
-    def issues(self):
-        """Return issues."""
-        return (
-            Issue.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "level",
-                "milestone",
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-            )
-        )
-
-    @property
     def issues_count(self) -> int:
         """Return count of issues."""
         return self.issues.count()
@@ -241,10 +226,15 @@ class Project(
     @property
     def open_issues(self):
         """Return open issues."""
-        return Issue.open_issues.filter(
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "repository",
+        return (
+            self.issues.filter(
+                created_at__gte=timezone.now() - datetime.timedelta(days=90),
+                state="open",
+            )
+            .select_related(
+                "repository",
+            )
+            .prefetch_related("assignees")
         )
 
     @property

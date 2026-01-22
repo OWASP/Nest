@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from apps.github.models.issue import Issue
 from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
 
 
@@ -33,8 +34,11 @@ class TestOwaspAggregateProjects:
         ],
     )
     @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Issue, "objects")
     @mock.patch.object(Project, "bulk_save", autospec=True)
-    def test_handle(self, mock_bulk_save, command, mock_project, offset, projects):
+    def test_handle(
+        self, mock_bulk_save, mock_issue_objects, command, mock_project, offset, projects
+    ):
         mock_organization = mock.Mock()
         mock_repository = mock.Mock()
         mock_repository.organization = mock_organization
@@ -62,6 +66,7 @@ class TestOwaspAggregateProjects:
                 return bool(self)
 
         mock_project.repositories.filter.return_value = QS([mock_repository])
+        mock_issue_objects.filter.return_value = []
         mock_projects_list = [mock_project] * projects
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)

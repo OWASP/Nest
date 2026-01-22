@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
+from apps.github.models.issue import Issue
 from apps.owasp.models.project import Project
 
 
@@ -109,6 +110,8 @@ class Command(BaseCommand):
                 is_fork=False,
                 is_template=False,
             ).exists()
+
+            project.issues.set(Issue.objects.filter(repository__in=project.repositories.all()))
 
             projects.append(project)
 
