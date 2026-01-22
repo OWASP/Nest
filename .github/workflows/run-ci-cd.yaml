@@ -618,13 +618,13 @@ jobs:
       - name: Prepare terraform backend
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
-          TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
-          TF_STATE_DYNAMODB_TABLE: ${{ secrets.TF_STATE_DYNAMODB_TABLE }}
+          TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_DYNAMODB_TABLE_NAME: ${{ secrets.TF_STATE_DYNAMODB_TABLE_NAME }}
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfbackend <<-EOF
-          bucket="$TF_STATE_BUCKET"
-          dynamodb_table="$TF_STATE_DYNAMODB_TABLE"
+          bucket="$TF_STATE_BUCKET_NAME"
+          dynamodb_table="$TF_STATE_DYNAMODB_TABLE_NAME"
           region="$AWS_REGION"
           EOF
 
@@ -718,13 +718,13 @@ jobs:
       - name: Prepare terraform backend
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
-          TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
-          TF_STATE_DYNAMODB_TABLE: ${{ secrets.TF_STATE_DYNAMODB_TABLE }}
+          TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_DYNAMODB_TABLE_NAME: ${{ secrets.TF_STATE_DYNAMODB_TABLE_NAME }}
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfbackend <<-EOF
-          bucket="$TF_STATE_BUCKET"
-          dynamodb_table="$TF_STATE_DYNAMODB_TABLE"
+          bucket="$TF_STATE_BUCKET_NAME"
+          dynamodb_table="$TF_STATE_DYNAMODB_TABLE_NAME"
           region="$AWS_REGION"
           EOF
 
