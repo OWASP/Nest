@@ -209,3 +209,42 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("is_archived", RepositoryNode)
         assert field is not None
         assert field.type is bool
+
+    def test_recent_milestones_negative_limit(self):
+        """Test that negative limit returns empty list."""
+        mock_repository = Mock()
+        mock_milestones = Mock()
+        mock_repository.recent_milestones = mock_milestones
+
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(None, mock_repository, limit=-5)
+
+        assert result == []
+        mock_milestones.order_by.assert_not_called()
+
+    def test_recent_milestones_zero_limit(self):
+        """Test that zero limit returns empty list."""
+        mock_repository = Mock()
+        mock_milestones = Mock()
+        mock_repository.recent_milestones = mock_milestones
+
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
+        resolver = field.base_resolver.wrapped_func
+        result = resolver(None, mock_repository, limit=0)
+
+        assert result == []
+        mock_milestones.order_by.assert_not_called()
+
+    def test_recent_milestones_exceeds_max_limit(self):
+        """Test that limit exceeding MAX_LIMIT is clamped."""
+        mock_repository = Mock()
+        mock_milestones = Mock()
+        mock_milestones.order_by.return_value.__getitem__ = Mock(return_value=[])
+        mock_repository.recent_milestones = mock_milestones
+
+        field = self._get_field_by_name("recent_milestones", RepositoryNode)
+        resolver = field.base_resolver.wrapped_func
+        resolver(None, mock_repository, limit=5000)
+
+        mock_milestones.order_by.return_value.__getitem__.assert_called_with(slice(None, 1000))
