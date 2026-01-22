@@ -33,7 +33,7 @@ class Command(BaseCommand):
             if project.owasp_repository.is_archived:
                 project.is_active = False
 
-                project.created_at = project.owasp_repository.created_at
+            project.created_at = project.owasp_repository.created_at
 
             pushed_at = []
             released_at = []
