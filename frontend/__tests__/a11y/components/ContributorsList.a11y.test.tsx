@@ -2,7 +2,8 @@ import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import { Contributor } from 'types/contributor'
-import TopContributorsList from 'components/TopContributorsList'
+import { getMemberUrl } from 'utils/urlFormatter'
+import ContributorsList from 'components/ContributorsList'
 
 jest.mock('next/link', () => {
   return function MockLink({
@@ -26,6 +27,7 @@ jest.mock('next/link', () => {
 
 const mockContributors: Contributor[] = [
   {
+    id: 'contributor-developer1-a11y',
     avatarUrl: 'https://github.com/developer1.avatar',
     login: 'developer1',
     name: 'Alex Developer',
@@ -33,6 +35,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 50,
   },
   {
+    id: 'contributor-contributor2-a11y',
     avatarUrl: 'https://github.com/contributor2.avatar',
     login: 'contributor2',
     name: 'Jane Developer',
@@ -40,6 +43,7 @@ const mockContributors: Contributor[] = [
     contributionsCount: 30,
   },
   {
+    id: 'contributor-user3-a11y',
     avatarUrl: 'https://github.com/user3.avatar',
     login: 'user3',
     name: '',
@@ -48,9 +52,11 @@ const mockContributors: Contributor[] = [
   },
 ]
 
-describe('TopContributorsList Accessibility', () => {
+describe('ContributorsList Accessibility', () => {
   it('should not have any accessibility violations', async () => {
-    const { container } = render(<TopContributorsList contributors={mockContributors} />)
+    const { container } = render(
+      <ContributorsList contributors={mockContributors} getUrl={getMemberUrl} />
+    )
 
     const results = await axe(container)
 

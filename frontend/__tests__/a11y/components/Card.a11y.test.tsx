@@ -28,6 +28,7 @@ jest.mock('next/link', () => {
 })
 
 const baseProps = {
+  cardKey: 'test-card-1',
   title: 'Test Project',
   url: 'https://github.com/test/project',
   summary: 'This is a test project summary',
@@ -50,7 +51,11 @@ describe('Card Accessibility', () => {
 
   it('should not have any accessibility violations when level is provided', async () => {
     const { container } = render(
-      <Card {...baseProps} level={{ level: 'Expert', color: '#9C27B0', icon: FaCrown }} />
+      <Card
+        {...baseProps}
+        cardKey="test-card-2"
+        level={{ level: 'Expert', color: '#9C27B0', icon: FaCrown }}
+      />
     )
 
     const results = await axe(container)
@@ -59,7 +64,9 @@ describe('Card Accessibility', () => {
   })
 
   it('should not have any accessibility violations when project name is provided', async () => {
-    const { container } = render(<Card {...baseProps} projectName="Test Organization" />)
+    const { container } = render(
+      <Card {...baseProps} cardKey="test-card-3" projectName="Test Organization" />
+    )
 
     const results = await axe(container)
 
@@ -70,6 +77,7 @@ describe('Card Accessibility', () => {
     const { container } = render(
       <Card
         {...baseProps}
+        cardKey="test-card-4"
         social={[{ title: 'GitHub', url: 'https://github.com/test', icon: FaCrown }]}
       />
     )

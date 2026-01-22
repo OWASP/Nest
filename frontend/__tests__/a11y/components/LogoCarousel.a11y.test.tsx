@@ -28,18 +28,21 @@ jest.mock('next/link', () => {
 
 const mockSponsors: Sponsor[] = [
   {
+    id: 'sponsor-1-a11y',
     name: 'Test Sponsor 1',
     imageUrl: 'https://example.com/logo1.png',
     url: 'https://sponsor1.com',
     sponsorType: 'Gold',
   },
   {
+    id: 'sponsor-2-a11y',
     name: 'Test Sponsor 2',
     imageUrl: 'https://example.com/logo2.png',
     url: 'https://sponsor2.com',
     sponsorType: 'Silver',
   },
   {
+    id: 'sponsor-3-a11y',
     name: 'Test Sponsor 3',
     imageUrl: '',
     url: 'https://sponsor3.com',

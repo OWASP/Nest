@@ -69,7 +69,7 @@ elevenlabs = "^2.27.0"
 ffmpeg-python = "^0.2.0"
 pillow = "^12.1.0"
 pypdfium2 = "^5.2.0"
-weasyprint = "^67.0"
+weasyprint = "^68.0"
 
 [tool.ruff]
 target-version = "py313"
@@ -144,6 +144,7 @@ addopts = [
   "--cov-fail-under=80",
   "--cov-precision=2",
   "--cov-report=term-missing",
+  "--cov-report=xml",
   "--cov=.",
   "--dist=loadscope",
   "--durations-min=1",

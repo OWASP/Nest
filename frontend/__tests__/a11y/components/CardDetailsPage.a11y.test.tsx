@@ -180,6 +180,7 @@ describe('CardDetailsPage a11y', () => {
             endedAt: '2025-03-01',
             mentors: [
               {
+                id: 'mentor-mentor1',
                 login: 'mentor1',
                 avatarUrl: 'https://avatars.githubusercontent.com/u/12345',
                 name: 'Mentor One',
