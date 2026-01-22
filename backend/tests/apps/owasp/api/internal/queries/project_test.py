@@ -47,7 +47,7 @@ class TestProjectResolution:
 
     def test_resolve_project_existing(self, mock_project, mock_info):
         """Test resolving an existing project."""
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_only:
+        with patch("apps.owasp.models.project.Project.objects.only") as mock_only:
             mock_qs = Mock()
             mock_qs.get.return_value = mock_project
             mock_only.return_value = mock_qs
@@ -60,7 +60,7 @@ class TestProjectResolution:
 
     def test_resolve_project_not_found(self, mock_info):
         """Test resolving a non-existent project."""
-        with patch("apps.owasp.models.project.Project.objects.get") as mock_only:
+        with patch("apps.owasp.models.project.Project.objects.only") as mock_only:
             mock_qs = Mock()
             mock_qs.get.side_effect = Project.DoesNotExist
             mock_only.return_value = mock_qs
