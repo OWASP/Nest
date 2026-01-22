@@ -190,7 +190,13 @@ jobs:
 
       - name: Run Semgrep scan
         run: |
-          make semgrep-scan-ci
+          semgrep scan \
+          --config p/security-audit \
+          --config p/secrets \
+          --text \
+          --text-output=semgrep-report.txt \
+          --error \
+          --timeout 300
       - name: Upload semgrep report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
