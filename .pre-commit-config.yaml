@@ -87,3 +87,15 @@ repos:
     rev: v2.11.1
     hooks:
       - id: pyproject-fmt
+
+  - repo: https://github.com/semgrep/semgrep
+    rev: v1.148.0
+    hooks:
+      - id: semgrep
+        name: Semgrep Security Scan
+        args:
+          - --config 
+          - p/security-audit
+          - --config 
+          - p/secrets
+          - --error

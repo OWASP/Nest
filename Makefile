@@ -4,6 +4,13 @@ include docs/Makefile
 include frontend/Makefile
 
 MAKEFLAGS += --no-print-directory
+SEMGREP_CMD = semgrep scan \
+	--config p/security-audit \
+	--config p/secrets \
+	--text \
+	--text-output=semgrep-report.txt \
+	--error \
+	--timeout 300
 
 build:
 	@docker compose build
@@ -78,3 +85,13 @@ update-nest-app-dependencies: \
 
 update-pre-commit:
 	@pre-commit autoupdate
+
+semgrep-scan-ci:
+	$(SEMGREP_CMD) .
+semgrep-scan:
+	docker run --rm \
+	  -v "$$(pwd):/home/owasp" \
+	  -w /home/owasp \
+	  semgrep/semgrep:1.148.0 \
+	  $(SEMGREP_CMD) .
+
