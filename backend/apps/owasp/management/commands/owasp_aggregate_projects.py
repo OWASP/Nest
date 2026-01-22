@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
+from apps.github.models.pull_request import PullRequest
 from apps.owasp.models.project import Project
 
 
@@ -32,7 +33,7 @@ class Command(BaseCommand):
             if project.owasp_repository.is_archived:
                 project.is_active = False
 
-            project.created_at = project.owasp_repository.created_at
+                project.created_at = project.owasp_repository.created_at
 
             pushed_at = []
             released_at = []
@@ -111,6 +112,10 @@ class Command(BaseCommand):
             ).exists()
 
             projects.append(project)
+
+            project.pull_requests.set(
+                PullRequest.objects.filter(repository__in=project.repositories.all())
+            )
 
         # Bulk save data.
         Project.bulk_save(projects)
