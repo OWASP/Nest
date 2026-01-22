@@ -27,14 +27,15 @@ class SnapshotQuery:
     @strawberry_django.field
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
-        return (
+        if limit <= 0:
+            return []
+
+        limit = min(limit, MAX_LIMIT)
+
+        return list(
             Snapshot.objects.filter(
                 status=Snapshot.Status.COMPLETED,
             )
             .only("id", "key", "title", "created_at")
-            .order_by(
-                "-created_at",
-            )[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
+            .order_by("-created_at")[:limit]
         )

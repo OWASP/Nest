@@ -36,7 +36,9 @@ class ProjectQuery:
             return None
 
         try:
-            return Project.objects.get(key=f"www-project-{normalized_key}")
+            return Project.objects.only("id", "key", "name", "is_active", "created_at").get(
+                key=f"www-project-{normalized_key}"
+            )
         except Project.DoesNotExist:
             return None
 
@@ -51,10 +53,15 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
-        return (
-            Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_RECENT_PROJECTS_LIMIT)) > 0
-            else []
+        if limit <= 0:
+            return []
+
+        limit = min(limit, MAX_RECENT_PROJECTS_LIMIT)
+
+        return list(
+            Project.objects.filter(is_active=True)
+            .only("id", "key", "name", "created_at", "is_active")
+            .order_by("-created_at")[:limit]
         )
 
     @strawberry_django.field
@@ -67,14 +74,21 @@ class ProjectQuery:
         ):
             return []
 
-        return Project.objects.filter(
-            is_active=True,
-            name__icontains=cleaned_query,
-        ).order_by("name")[:SEARCH_PROJECTS_LIMIT]
+        return list(
+            Project.objects.filter(
+                is_active=True,
+                name__icontains=cleaned_query,
+            )
+            .only("id", "key", "name", "is_active")
+            .order_by("name")[:SEARCH_PROJECTS_LIMIT]
+        )
 
     @strawberry_django.field
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:
         """Check if a GitHub login or name is listed as a project leader."""
+        if not login or not login.strip():
+            return False
+
         try:
             github_user = GithubUser.objects.get(login=login)
         except GithubUser.DoesNotExist:
