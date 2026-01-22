@@ -86,8 +86,6 @@ update-nest-app-dependencies: \
 update-pre-commit:
 	@pre-commit autoupdate
 
-semgrep-scan-ci:
-	$(SEMGREP_CMD) .
 semgrep-scan:
 	docker run --rm \
 	  -v "$$(pwd):/home/owasp" \
