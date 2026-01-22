@@ -15,21 +15,14 @@ class ProgramPostSaveHandler:
     """Handles post_save signal for Program model to clear Algolia and GraphQL cache."""
 
     @receiver(post_save, sender=Program)
-    def program_post_save_clear_algolia_cache(sender, instance, **kwargs):  # noqa: N805
-        """Signal handler to clear Algolia cache for the Program index.
-
-        The sender, instance, and kwargs arguments are provided by the post_save signal.
-        """
+    def program_post_save_clear_algolia_cache(_sender, instance, **_kwargs):
+        """Signal handler to clear Algolia cache for the Program index."""
         logger.info("Signal received for program '%s'. Clearing 'programs' index.", instance.name)
         clear_index_cache("programs")
 
     @receiver(post_save, sender=Program)
     def program_post_save_clear_graphql_cache(sender, instance, **kwargs):  # noqa: N805
-        """Signal handler to clear GraphQL cache for the program.
-
-        This ensures that when a program's status changes (e.g. from published to draft),
-        the cached GraphQL response is cleared immediately.
-        """
+        """Signal handler to clear GraphQL cache for the program."""
         logger.info(
             "Signal received for program '%s' (status: %s). Clearing GraphQL cache.",
             instance.name,

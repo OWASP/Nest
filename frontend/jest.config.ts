@@ -23,7 +23,7 @@ const config: Config = {
     '!src/wrappers/**',
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  coverageReporters: ['cobertura', 'lcov', 'text'],
   coverageThreshold: {
     global: {
       branches: 80,

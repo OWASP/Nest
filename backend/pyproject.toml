@@ -144,6 +144,7 @@ addopts = [
   "--cov-fail-under=80",
   "--cov-precision=2",
   "--cov-report=term-missing",
+  "--cov-report=xml",
   "--cov=.",
   "--dist=loadscope",
   "--durations-min=1",
