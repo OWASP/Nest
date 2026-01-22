@@ -120,7 +120,8 @@ class ModuleMutation:
         mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
 
-        invalidate_program_cache(program.key)
+        program_key = program.key
+        transaction.on_commit(lambda: invalidate_program_cache(program_key))
 
         return module
 
@@ -404,8 +405,13 @@ class ModuleMutation:
 
         module.program.save(update_fields=["experience_levels"])
 
-        invalidate_module_cache(old_module_key, module.program.key)
-        if module.key != old_module_key:
-            invalidate_module_cache(module.key, module.program.key)
+        program_key = module.program.key
+
+        def _invalidate():
+            invalidate_module_cache(old_module_key, program_key)
+            if module.key != old_module_key:
+                invalidate_module_cache(module.key, program_key)
+
+        transaction.on_commit(_invalidate)
 
         return module

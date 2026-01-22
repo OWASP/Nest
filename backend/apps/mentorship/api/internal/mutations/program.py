@@ -135,9 +135,12 @@ class ProgramMutation:
             admins_to_set = resolve_mentors_from_logins(input_data.admin_logins)
             program.admins.set(admins_to_set)
 
-        invalidate_program_cache(old_key)
-        if program.key != old_key:
-            invalidate_program_cache(program.key)
+        def _invalidate():
+            invalidate_program_cache(old_key)
+            if program.key != old_key:
+                invalidate_program_cache(program.key)
+
+        transaction.on_commit(_invalidate)
 
         return program
 
@@ -167,7 +170,8 @@ class ProgramMutation:
         program.status = input_data.status.value
         program.save()
 
-        invalidate_program_cache(program.key)
+        program_key = program.key
+        transaction.on_commit(lambda: invalidate_program_cache(program_key))
 
         logger.info("Updated status of program '%s' to '%s'", program.key, program.status)
 
