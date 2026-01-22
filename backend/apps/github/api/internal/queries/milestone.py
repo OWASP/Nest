@@ -76,8 +76,14 @@ class MilestoneQuery:
                 id__in=Subquery(latest_milestone_per_author),
             )
 
-        return (
-            milestones.order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        try:
+            limit = int(limit)
+        except (TypeError, ValueError):
+            return []
+
+        if limit <= 0:
+            return []
+
+        limit = min(limit, MAX_LIMIT)
+
+        return milestones.order_by("-created_at")[:limit]

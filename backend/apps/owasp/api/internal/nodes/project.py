@@ -53,11 +53,17 @@ class ProjectNode(GenericEntityNode):
         self, root: Project, limit: int = 30
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
-        return (
-            root.health_metrics.order_by("nest_created_at")[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        try:
+            limit = int(limit)
+        except (TypeError, ValueError):
+            return []
+
+        if limit <= 0:
+            return []
+
+        limit = min(limit, MAX_LIMIT)
+
+        return root.health_metrics.order_by("nest_created_at")[:limit]
 
     @strawberry_django.field(prefetch_related=["health_metrics"])
     def health_metrics_latest(self, root: Project) -> ProjectHealthMetricsNode | None:
@@ -87,6 +93,16 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
+        try:
+            limit = int(limit)
+        except (TypeError, ValueError):
+            return []
+
+        if limit <= 0:
+            return []
+
+        limit = min(limit, MAX_LIMIT)
+
         return (
             Milestone.objects.filter(
                 repository__in=root.repositories.all(),
@@ -95,12 +111,8 @@ class ProjectNode(GenericEntityNode):
                 "repository__organization",
                 "author__owasp_profile",
             )
-            .prefetch_related(
-                "labels",
-            )
+            .prefetch_related("labels")
             .order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
         )
 
     @strawberry_django.field
