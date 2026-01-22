@@ -152,6 +152,11 @@ class Project(
         verbose_name="Repositories",
         blank=True,
     )
+    recent_milestones = models.ManyToManyField(
+        "github.Milestone",
+        verbose_name="Recent milestones",
+        blank=True,
+    )
 
     def __str__(self) -> str:
         """Project human readable representation."""
@@ -301,21 +306,6 @@ class Project(
             "repository__organization",
         )
 
-    @property
-    def recent_milestones(self):
-        """Return recent milestones."""
-        return (
-            Milestone.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "repository",
-            )
-            .prefetch_related(
-                "labels",
-            )
-        )
 
     @property
     def recent_releases_count(self) -> int:
