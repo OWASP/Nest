@@ -1,0 +1,51 @@
+codecov:
+  require_ci_to_pass: true
+
+comment:
+  layout: reach, diff, flags, files, footer
+  behavior: default
+  require_changes: false
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        base: auto
+      backend:
+        flags:
+          - backend
+        target: 80%
+        threshold: 1%
+        base: auto
+      frontend:
+        flags:
+          - frontend
+        target: 80%
+        threshold: 1%
+        base: auto
+    patch:
+      default:
+        target: auto
+        threshold: 0%
+      backend:
+        flags:
+          - backend
+        target: auto
+        threshold: 0%
+      frontend:
+        flags:
+          - frontend
+        target: auto
+        threshold: 0%
+
+flags:
+  backend:
+    paths:
+      - backend/
+    carryforward: true
+  frontend:
+    paths:
+      - frontend/
+    carryforward: true
