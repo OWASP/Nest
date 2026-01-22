@@ -180,6 +180,7 @@ jobs:
       - scan-ci-dependencies
     permissions:
       contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -204,7 +205,24 @@ jobs:
 
       - name: Run backend tests
         run: |
-          docker run -e DJANGO_SETTINGS_MODULE=settings.test --env-file backend/.env.example owasp/nest:test-backend-latest pytest
+          CONTAINER_ID=$(docker create \
+            -e DJANGO_SETTINGS_MODULE=settings.test \
+            --env-file backend/.env.example \
+            owasp/nest:test-backend-latest pytest)
+          docker start -a $CONTAINER_ID
+          EXIT_CODE=$?
+          docker cp $CONTAINER_ID:/home/owasp/coverage.xml backend/coverage.xml 2>/dev/null || true
+          docker rm $CONTAINER_ID >/dev/null 2>&1
+          exit $EXIT_CODE
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        with:
+          fail_ci_if_error: false
+          flags: backend
+          use_oidc: true
+          verbose: true
+          working-directory: backend
     timeout-minutes: 5
 
   run-frontend-unit-tests:
@@ -214,6 +232,7 @@ jobs:
       - scan-ci-dependencies
     permissions:
       contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -238,7 +257,23 @@ jobs:
 
       - name: Run frontend unit tests
         run: |
-          docker run --env-file frontend/.env.example owasp/nest:test-frontend-unit-latest pnpm run test:unit
+          CONTAINER_ID=$(docker create \
+            --env-file frontend/.env.example \
+            owasp/nest:test-frontend-unit-latest pnpm run test:unit)
+          docker start -a $CONTAINER_ID
+          EXIT_CODE=$?
+          docker cp $CONTAINER_ID:/app/coverage frontend/coverage 2>/dev/null || true
+          docker rm $CONTAINER_ID >/dev/null 2>&1
+          exit $EXIT_CODE
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        with:
+          fail_ci_if_error: false
+          flags: frontend
+          use_oidc: true
+          verbose: false
+          working-directory: frontend
     timeout-minutes: 5
 
   run-frontend-e2e-tests:
