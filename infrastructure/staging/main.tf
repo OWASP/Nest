@@ -15,6 +15,8 @@ locals {
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
+  fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-fixtures")
+  zappa_bucket_name    = coalesce(var.zappa_bucket_name, "${var.project_name}-zappa-deployments")
 }
 
 module "alb" {
@@ -165,7 +167,7 @@ module "storage" {
 
   common_tags          = local.common_tags
   environment          = var.environment
-  fixtures_bucket_name = var.fixtures_bucket_name
+  fixtures_bucket_name = local.fixtures_bucket_name
   project_name         = var.project_name
-  zappa_bucket_name    = var.zappa_bucket_name
+  zappa_bucket_name    = local.zappa_bucket_name
 }

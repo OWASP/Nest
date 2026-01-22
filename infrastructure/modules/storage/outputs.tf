@@ -13,9 +13,9 @@ output "fixtures_s3_bucket_name" {
   value       = module.fixtures_bucket.bucket.id
 }
 
-output "zappa_s3_bucket" {
+output "zappa_s3_bucket_name" {
   description = "The name of the S3 bucket for Zappa deployments."
-  value       = module.zappa_bucket.bucket
+  value       = module.zappa_bucket.bucket.id
 }
 
 output "zappa_s3_bucket_arn" {

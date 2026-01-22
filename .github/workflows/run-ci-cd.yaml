@@ -475,7 +475,7 @@ jobs:
           push: true
           tags: |
             owasp/nest:backend-staging
-            ${{ secrets.AWS_ECR_BACKEND_REPOSITORY_URL }}:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
 
       - name: Prepare frontend public environment
         env:
@@ -528,7 +528,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             owasp/nest:frontend-staging
-            ${{ secrets.AWS_ECR_FRONTEND_REPOSITORY_URL }}:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
 
       - name: Get frontend image size
         id: frontend-size
@@ -742,6 +742,21 @@ jobs:
         working-directory: infrastructure/staging
         run: terraform apply -auto-approve tfplan
 
+      - name: Capture terraform outputs
+        id: tf-outputs
+        working-directory: infrastructure/staging
+        run: |
+          echo "ecs_security_group_id=$(terraform output -raw ecs_security_group_id)" >> $GITHUB_OUTPUT
+          echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
+          echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
+          echo "lambda_security_group_id=$(terraform output -raw lambda_security_group_id)" >> $GITHUB_OUTPUT
+          echo "private_subnet_a=$(terraform output -json private_subnet_ids | jq -r '.[0]')" >> $GITHUB_OUTPUT
+          echo "private_subnet_b=$(terraform output -json private_subnet_ids | jq -r '.[1]')" >> $GITHUB_OUTPUT
+          echo "private_subnet_c=$(terraform output -json private_subnet_ids | jq -r '.[2]')" >> $GITHUB_OUTPUT
+          echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
+          echo "zappa_s3_bucket=$(terraform output -raw zappa_s3_bucket_name)" >> $GITHUB_OUTPUT
+
       - name: Install Poetry
         run: pipx install poetry
 
@@ -759,12 +774,12 @@ jobs:
       - name: Prepare Zappa settings
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_PRIVATE_SUBNET_A: ${{ secrets.AWS_PRIVATE_SUBNET_A }}
-          AWS_PRIVATE_SUBNET_B: ${{ secrets.AWS_PRIVATE_SUBNET_B }}
-          AWS_PRIVATE_SUBNET_C: ${{ secrets.AWS_PRIVATE_SUBNET_C }}
+          AWS_PRIVATE_SUBNET_A: ${{ steps.tf-outputs.outputs.private_subnet_a }}
+          AWS_PRIVATE_SUBNET_B: ${{ steps.tf-outputs.outputs.private_subnet_b }}
+          AWS_PRIVATE_SUBNET_C: ${{ steps.tf-outputs.outputs.private_subnet_c }}
           AWS_REGION: ${{ vars.AWS_REGION }}
-          ZAPPA_S3_BUCKET: ${{ secrets.ZAPPA_S3_BUCKET }}
-          ZAPPA_VPC_SECURITY_GROUP_ID: ${{ secrets.ZAPPA_VPC_SECURITY_GROUP_ID }}
+          ZAPPA_S3_BUCKET: ${{ steps.tf-outputs.outputs.zappa_s3_bucket }}
+          ZAPPA_VPC_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.lambda_security_group_id }}
         run: envsubst < backend/zappa_settings.template.json > backend/zappa_settings.json
 
       - name: Update Zappa deployment
@@ -774,25 +789,23 @@ jobs:
       - name: Run ECS migrate task
         id: migrate-task
         env:
-          CLUSTER_NAME: nest-staging-tasks-cluster
-          ECS_SECURITY_GROUP_ID: ${{ secrets.AWS_ECS_SECURITY_GROUP_ID }}
-          PRIVATE_SUBNET_A: ${{ secrets.AWS_PRIVATE_SUBNET_A }}
-          PRIVATE_SUBNET_B: ${{ secrets.AWS_PRIVATE_SUBNET_B }}
-          PRIVATE_SUBNET_C: ${{ secrets.AWS_PRIVATE_SUBNET_C }}
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          ECS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.ecs_security_group_id }}
+          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
           TASK_DEFINITION: nest-staging-migrate
         run: |
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_A,$PRIVATE_SUBNET_B,$PRIVATE_SUBNET_C],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
 
       - name: Wait for migrate task
         env:
-          CLUSTER_NAME: nest-staging-tasks-cluster
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
         run: |
           aws ecs wait tasks-stopped \
             --cluster "$CLUSTER_NAME" \
@@ -800,7 +813,7 @@ jobs:
 
       - name: Check migrate task exit code
         env:
-          CLUSTER_NAME: nest-staging-tasks-cluster
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
         run: |
           EXIT_CODE=$(aws ecs describe-tasks \
             --cluster "$CLUSTER_NAME" \
@@ -816,24 +829,22 @@ jobs:
 
       - name: Run ECS index-data task
         env:
-          CLUSTER_NAME: nest-staging-tasks-cluster
-          ECS_SECURITY_GROUP_ID: ${{ secrets.AWS_ECS_SECURITY_GROUP_ID }}
-          PRIVATE_SUBNET_A: ${{ secrets.AWS_PRIVATE_SUBNET_A }}
-          PRIVATE_SUBNET_B: ${{ secrets.AWS_PRIVATE_SUBNET_B }}
-          PRIVATE_SUBNET_C: ${{ secrets.AWS_PRIVATE_SUBNET_C }}
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          ECS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.ecs_security_group_id }}
+          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
           TASK_DEFINITION: nest-staging-index-data
         run: |
           aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_A,$PRIVATE_SUBNET_B,$PRIVATE_SUBNET_C],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
           echo "Index-data task started (runs async, ~30 min)"
 
       - name: Force new frontend deployment
         env:
-          CLUSTER_NAME: nest-staging-frontend-cluster
-          SERVICE_NAME: nest-staging-frontend-service
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
           aws ecs update-service \
             --cluster "$CLUSTER_NAME" \
@@ -842,8 +853,8 @@ jobs:
 
       - name: Wait for frontend service stability
         env:
-          CLUSTER_NAME: nest-staging-frontend-cluster
-          SERVICE_NAME: nest-staging-frontend-service
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
