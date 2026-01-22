@@ -2,7 +2,7 @@
 
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
-from django.utils.html import escape, format_html
+from django.utils.html import format_html
 
 from apps.owasp.admin.widgets import ChannelIdWidget
 from apps.owasp.models.entity_channel import EntityChannel
@@ -116,7 +116,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
         if not hasattr(obj, "key") or not obj.key:
             return ""
 
-        return format_html("<a href='https://owasp.org/{}' target='_blank'>↗️</a>", escape(obj.key))
+        return format_html("<a href='https://owasp.org/{}' target='_blank'>↗️</a>", obj.key)
 
     def _format_github_link(self, repository):
         """Format a single GitHub repository link."""
@@ -129,8 +129,8 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
 
         return format_html(
             "<a href='https://github.com/{}/{}' target='_blank'>↗️</a>",
-            escape(repository.owner.login),
-            escape(repository.key),
+            repository.owner.login,
+            repository.key,
         )
 
     custom_field_github_urls.short_description = "GitHub 🔗"

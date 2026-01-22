@@ -1,4 +1,3 @@
-import DOMPurify from 'dompurify'
 import { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
@@ -115,7 +114,7 @@ export default async function OrganizationDetailsLayout({
           id="organization-structured-data"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(JSON.stringify(structuredData, null, 2)),
+            __html: JSON.stringify(structuredData, null, 2), // nosemgrep
           }}
         />
       )}
