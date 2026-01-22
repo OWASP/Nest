@@ -1,5 +1,5 @@
-import React from 'react'
 import DOMPurify from 'dompurify'
+import React from 'react'
 import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 
 interface StructuredDataScriptProps {

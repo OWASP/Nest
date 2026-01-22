@@ -1,7 +1,7 @@
+import DOMPurify from 'dompurify'
 import { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
-import DOMPurify from 'dompurify'
 import { apolloClient } from 'server/apolloClient'
 import {
   GetOrganizationDataDocument,
