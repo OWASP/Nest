@@ -377,7 +377,7 @@ const DetailsCard = ({
                   >
                     <div className="flex w-full flex-col justify-between">
                       <div className="flex w-full items-center">
-                        {showAvatar && (
+                        {showAvatar && milestone?.author?.login && milestone?.author?.avatarUrl && (
                           <Tooltip
                             closeDelay={100}
                             content={milestone?.author?.name || milestone?.author?.login}
@@ -396,7 +396,7 @@ const DetailsCard = ({
                                 src={milestone?.author?.avatarUrl}
                                 alt={
                                   milestone.author &&
-                                  (milestone.author.name || milestone.author.login)
+                                    (milestone.author.name || milestone.author.login)
                                     ? `${milestone.author.name || milestone.author.login}'s avatar`
                                     : "Author's avatar"
                                 }
@@ -406,13 +406,17 @@ const DetailsCard = ({
                           </Tooltip>
                         )}
                         <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
-                          <Link
-                            className="text-blue-400 hover:underline"
-                            href={milestone?.url || ''}
-                            target="_blank"
-                          >
+                          {milestone?.url ? (
+                            <Link
+                              className="text-blue-400 hover:underline"
+                              href={milestone?.url}
+                              target="_blank"
+                            >
+                              <TruncatedText text={milestone.title} />
+                            </Link>
+                          ) : (
                             <TruncatedText text={milestone.title} />
-                          </Link>
+                          )}
                         </h3>
                       </div>
                       <div className="ml-0.5 w-full">
