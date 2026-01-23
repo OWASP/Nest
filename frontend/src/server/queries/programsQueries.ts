@@ -96,6 +96,8 @@ export const GET_PROGRAM_ADMIN_DETAILS = gql`
       id
       key
       name
+      startedAt
+      endedAt
       admins {
         id
         login

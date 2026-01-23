@@ -63,7 +63,7 @@ const CommitteesPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      {committees && committees.map(renderCommitteeCard)}
+      {committees?.map(renderCommitteeCard)}
     </SearchPageLayout>
   )
 }
