@@ -412,7 +412,7 @@ const DetailsCard = ({
                                 src={milestone?.author?.avatarUrl}
                                 alt={
                                   milestone.author &&
-                                    (milestone.author.name || milestone.author.login)
+                                  (milestone.author.name || milestone.author.login)
                                     ? `${milestone.author.name || milestone.author.login}'s avatar`
                                     : "Author's avatar"
                                 }
@@ -427,6 +427,7 @@ const DetailsCard = ({
                               className="text-blue-400 hover:underline"
                               href={milestone?.url}
                               target="_blank"
+                              rel="noopener noreferrer"
                             >
                               <TruncatedText text={milestone.title} />
                             </Link>
