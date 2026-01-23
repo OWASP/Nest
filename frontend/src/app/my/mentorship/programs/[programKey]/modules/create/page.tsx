@@ -118,8 +118,8 @@ const CreateModulePage = () => {
                 },
               })
             }
-          } catch (_err) {
-            handleAppError(_err)
+          } catch (error) {
+            handleAppError(error)
             return
           }
         },
@@ -134,10 +134,10 @@ const CreateModulePage = () => {
       })
 
       router.push(`/my/mentorship/programs/${programKey}`)
-    } catch (err) {
+    } catch (error) {
       addToast({
         title: 'Creation Failed',
-        description: err.message || 'Something went wrong while creating the module.',
+        description: error.message || 'Something went wrong while creating the module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,
