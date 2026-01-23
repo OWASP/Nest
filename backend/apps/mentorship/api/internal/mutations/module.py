@@ -84,7 +84,7 @@ class ModuleMutation:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
 
-        if not program.admins.filter(id=user.id).exists():
+        if not program.admins.filter(nest_user=user).exists():
             raise PermissionDenied
 
         started_at, ended_at = _validate_module_dates(
@@ -316,7 +316,7 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
 
-        is_admin = module.program.admins.filter(id=user.id).exists()
+        is_admin = module.program.admins.filter(nest_user=user).exists()
         is_mentor = Mentor.objects.filter(nest_user=user, modules=module).exists()
         if not (is_admin or is_mentor):
             raise PermissionDenied(

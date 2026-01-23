@@ -14,6 +14,7 @@ class LinkedUser(models.Model):
         "github.User",
         on_delete=models.CASCADE,
         verbose_name="GitHub user",
+        related_name="%(class)s_github_user",
     )
 
     nest_user = models.OneToOneField(
@@ -22,4 +23,5 @@ class LinkedUser(models.Model):
         null=True,
         on_delete=models.CASCADE,
         verbose_name="Nest user",
+        related_name="%(class)s_nest_user",
     )
