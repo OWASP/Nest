@@ -41,6 +41,8 @@ interface ModuleFormProps {
   isEdit?: boolean
   title: string
   submitText?: string
+  minDate?: string
+  maxDate?: string
 }
 
 const EXPERIENCE_LEVELS = [
@@ -58,6 +60,8 @@ const ModuleForm = ({
   title,
   isEdit,
   submitText = 'Save',
+  minDate,
+  maxDate,
 }: ModuleFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
@@ -213,6 +217,8 @@ const ModuleForm = ({
                   error={errors.startedAt}
                   touched={touched.startedAt}
                   required
+                  min={minDate}
+                  max={maxDate}
                 />
                 <FormDateInput
                   id="module-end-date"
@@ -225,7 +231,8 @@ const ModuleForm = ({
                   error={errors.endedAt}
                   touched={touched.endedAt}
                   required
-                  min={formData.startedAt || undefined}
+                  min={formData.startedAt || minDate || undefined}
+                  max={maxDate}
                 />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <Select

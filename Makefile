@@ -58,6 +58,30 @@ scan-images: \
 	scan-backend-image \
 	scan-frontend-image
 
+security-scan:
+	@echo "Running Security Scan..."
+	@docker run --rm \
+		-v "$(PWD):/src" \
+		-w /src \
+		$$(grep -E '^FROM semgrep/semgrep:' docker/semgrep/Dockerfile | sed 's/^FROM //') \
+		semgrep \
+			--config p/ci \
+			--config p/javascript \
+			--config p/nginx \
+			--config p/owasp-top-ten \
+			--config p/python \
+			--config p/secrets \
+			--config p/security-audit \
+			--config p/sql-injection \
+			--config p/typescript \
+			--error \
+			--skip-unknown-extensions \
+			--timeout 10 \
+			--timeout-threshold 3 \
+			--text \
+			--text-output=semgrep-security-report.txt \
+			.
+
 test: \
 	test-nest-app
 
@@ -78,3 +102,5 @@ update-nest-app-dependencies: \
 
 update-pre-commit:
 	@pre-commit autoupdate
+
+.PHONY: build clean check pre-commit prune run scan-images security-scan test update
