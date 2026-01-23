@@ -415,9 +415,9 @@ jobs:
       - name: Run Security CI Scan
         run: make security-scan
 
-      - name: Archive Semgrep Project Report
+      - name: Upload security scan report
         if: always()
-        uses: actions/upload-artifact@65c86da0a1521edc3c1e951b1f8689674005d036
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: semgrep-results-run-${{ github.run_number }}
           path: semgrep-security-report.txt
