@@ -1,4 +1,5 @@
 export type Contributor = {
+  id: string
   avatarUrl: string
   contributionsCount?: number
   login: string

@@ -13,18 +13,19 @@ import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
+import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import ContributionStats from 'components/ContributionStats'
+import ContributorsList from 'components/ContributorsList'
 import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import Markdown from 'components/MarkdownWrapper'
-import MenteeContributorsList from 'components/MenteeContributorsList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
@@ -36,7 +37,6 @@ import SecondaryCard from 'components/SecondaryCard'
 import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
-import TopContributorsList from 'components/TopContributorsList'
 
 export type CardType =
   | 'chapter'
@@ -226,13 +226,19 @@ const DetailsCard = ({
           >
             {languages.length !== 0 && (
               <ToggleableList
+                entityKey={`${entityKey}-languages`}
                 items={languages}
                 icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList
+                entityKey={`${entityKey}-topics`}
+                items={topics}
+                icon={FaTags}
+                label={<AnchorTitle title="Topics" />}
+              />
             )}
           </div>
         )}
@@ -244,6 +250,7 @@ const DetailsCard = ({
               >
                 {tags?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-tags`}
                     items={tags}
                     icon={FaTags}
                     label={<AnchorTitle title="Tags" />}
@@ -252,6 +259,7 @@ const DetailsCard = ({
                 )}
                 {domains?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-domains`}
                     items={domains}
                     icon={FaChartPie}
                     label={<AnchorTitle title="Domains" />}
@@ -263,6 +271,7 @@ const DetailsCard = ({
             {labels?.length > 0 && (
               <div className="mb-8">
                 <ToggleableList
+                  entityKey={`${entityKey}-labels`}
                   items={labels}
                   icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
@@ -301,36 +310,39 @@ const DetailsCard = ({
           </div>
         )}
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
             icon={HiUserGroup}
             maxInitialDisplay={12}
+            label="Top Contributors"
+            getUrl={getMemberUrl}
           />
         )}
         {admins && admins.length > 0 && type === 'program' && (
-          <TopContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
+            getUrl={getMemberUrl}
           />
         )}
         {mentors && mentors.length > 0 && (
-          <TopContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
+            getUrl={getMemberUrl}
           />
         )}
         {mentees && mentees.length > 0 && (
-          <MenteeContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={mentees}
             maxInitialDisplay={6}
             label="Mentees"
-            programKey={programKey || ''}
-            moduleKey={entityKey || ''}
+            getUrl={(login) => getMenteeUrl(programKey || '', entityKey || '', login)}
           />
         )}
         {showIssuesAndMilestones(type) && (
