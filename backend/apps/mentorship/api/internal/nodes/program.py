@@ -5,6 +5,7 @@ from datetime import datetime
 import strawberry
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode  # noqa: TC001
+from apps.github.models.milestone import Milestone
 from apps.mentorship.api.internal.nodes.enum import (
     ExperienceLevelEnum,
     ProgramStatusEnum,
@@ -35,10 +36,8 @@ class ProgramNode:
         return self.admins.all()
 
     @strawberry.field
-    def recent_milestones(self, limit: int = 5) -> list["MilestoneNode"]:
+    def recent_milestones(self) -> list["MilestoneNode"]:
         """Get the list of recent milestones for the program."""
-        from apps.github.models.milestone import Milestone
-
         project_ids = self.modules.values_list("project_id", flat=True)
 
         return (
@@ -46,7 +45,7 @@ class ProgramNode:
             .select_related("repository__organization", "author")
             .prefetch_related("labels")
             .order_by("-created_at")
-            .distinct()[:limit]
+            .distinct()
         )
 
 

@@ -537,11 +537,6 @@ export type ProgramNode = {
   userRole?: Maybe<Scalars['String']['output']>;
 };
 
-
-export type ProgramNodeRecentMilestonesArgs = {
-  limit?: Scalars['Int']['input'];
-};
-
 export enum ProgramStatusEnum {
   Completed = 'COMPLETED',
   Draft = 'DRAFT',
