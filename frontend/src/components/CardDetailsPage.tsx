@@ -47,6 +47,7 @@ import ShowMoreButton from 'components/ShowMoreButton'
 import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
+
 import { TruncatedText } from 'components/TruncatedText'
 
 export type CardType =
@@ -411,7 +412,7 @@ const DetailsCard = ({
                                 src={milestone?.author?.avatarUrl}
                                 alt={
                                   milestone.author &&
-                                  (milestone.author.name || milestone.author.login)
+                                    (milestone.author.name || milestone.author.login)
                                     ? `${milestone.author.name || milestone.author.login}'s avatar`
                                     : "Author's avatar"
                                 }
