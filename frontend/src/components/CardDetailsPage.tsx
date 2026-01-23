@@ -22,18 +22,19 @@ import type { DetailsCardProps } from 'types/card'
 import { formatDate } from 'utils/dateFormatter'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
+import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import ContributionStats from 'components/ContributionStats'
+import ContributorsList from 'components/ContributorsList'
 import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import Markdown from 'components/MarkdownWrapper'
-import MenteeContributorsList from 'components/MenteeContributorsList'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
@@ -46,7 +47,6 @@ import ShowMoreButton from 'components/ShowMoreButton'
 import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
-import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export type CardType =
@@ -63,7 +63,7 @@ const showStatistics = (type: CardType): boolean =>
   ['committee', 'organization', 'project', 'repository', 'user'].includes(type)
 
 const showIssuesAndMilestones = (type: CardType): boolean =>
-  ['organization', 'program', 'project', 'repository', 'user'].includes(type)
+  ['organization', 'project', 'repository', 'user'].includes(type)
 
 const showPullRequestsAndReleases = (type: CardType): boolean =>
   ['organization', 'project', 'repository', 'user'].includes(type)
@@ -178,7 +178,10 @@ const DetailsCard = ({
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value == null ? 'Unknown' : String(detail.value)} />
+                  <LeadersList
+                    entityKey={`${entityKey}-${detail.label}`}
+                    leaders={detail?.value == null ? 'Unknown' : String(detail.value)}
+                  />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
@@ -232,13 +235,19 @@ const DetailsCard = ({
           >
             {languages.length !== 0 && (
               <ToggleableList
+                entityKey={`${entityKey}-languages`}
                 items={languages}
                 icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList
+                entityKey={`${entityKey}-topics`}
+                items={topics}
+                icon={FaTags}
+                label={<AnchorTitle title="Topics" />}
+              />
             )}
           </div>
         )}
@@ -250,6 +259,7 @@ const DetailsCard = ({
               >
                 {tags?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-tags`}
                     items={tags}
                     icon={FaTags}
                     label={<AnchorTitle title="Tags" />}
@@ -258,6 +268,7 @@ const DetailsCard = ({
                 )}
                 {domains?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-domains`}
                     items={domains}
                     icon={FaChartPie}
                     label={<AnchorTitle title="Domains" />}
@@ -269,6 +280,7 @@ const DetailsCard = ({
             {labels?.length > 0 && (
               <div className="mb-8">
                 <ToggleableList
+                  entityKey={`${entityKey}-labels`}
                   items={labels}
                   icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
@@ -307,39 +319,42 @@ const DetailsCard = ({
           </div>
         )}
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
             icon={HiUserGroup}
             maxInitialDisplay={12}
+            label="Top Contributors"
+            getUrl={getMemberUrl}
           />
         )}
         {admins && admins.length > 0 && type === 'program' && (
-          <TopContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
+            getUrl={getMemberUrl}
           />
         )}
         {mentors && mentors.length > 0 && (
-          <TopContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
+            getUrl={getMemberUrl}
           />
         )}
         {mentees && mentees.length > 0 && (
-          <MenteeContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={mentees}
             maxInitialDisplay={6}
             label="Mentees"
-            programKey={programKey || ''}
-            moduleKey={entityKey || ''}
+            getUrl={(login) => getMenteeUrl(programKey || '', entityKey || '', login)}
           />
         )}
-        {showIssuesAndMilestones(type) && type !== 'program' && (
+        {showIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
             <Milestones data={recentMilestones} showAvatar={showAvatar} />
@@ -372,7 +387,7 @@ const DetailsCard = ({
                 .slice(0, showAllMilestones ? recentMilestones.length : MILESTONE_LIMIT)
                 .map((milestone, index) => (
                   <div
-                    key={milestone.url || milestone.title}
+                    key={milestone.url || `${milestone.title}-${index}`}
                     className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
                   >
                     <div className="flex w-full flex-col justify-between">
@@ -396,7 +411,7 @@ const DetailsCard = ({
                                 src={milestone?.author?.avatarUrl}
                                 alt={
                                   milestone.author &&
-                                    (milestone.author.name || milestone.author.login)
+                                  (milestone.author.name || milestone.author.login)
                                     ? `${milestone.author.name || milestone.author.login}'s avatar`
                                     : "Author's avatar"
                                 }
@@ -433,11 +448,11 @@ const DetailsCard = ({
                             <FaCircleExclamation className="mr-2 h-4 w-4" />
                             <span>{milestone.openIssuesCount} open</span>
                           </div>
-                          {milestone?.repositoryName && (
+                          {milestone?.repositoryName && milestone?.organizationName && (
                             <div className="flex flex-1 items-center overflow-hidden">
                               <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
                               <Link
-                                href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName || ''}`}
+                                href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName}`}
                                 className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                               >
                                 <TruncatedText text={milestone.repositoryName} />

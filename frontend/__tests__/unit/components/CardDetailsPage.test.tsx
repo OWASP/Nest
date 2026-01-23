@@ -169,7 +169,15 @@ jest.mock('components/InfoBlock', () => ({
 
 jest.mock('components/LeadersList', () => ({
   __esModule: true,
-  default: ({ leaders, ...props }: { leaders: string; [key: string]: unknown }) => (
+  default: ({
+    leaders,
+    entityKey: _entityKey,
+    ...props
+  }: {
+    leaders: string
+    entityKey: string
+    [key: string]: unknown
+  }) => (
     <span data-testid="leaders-list" {...props}>
       {leaders}
     </span>
@@ -336,11 +344,13 @@ jest.mock('components/ToggleableList', () => ({
     items,
     icon: _icon,
     label,
+    entityKey: _entityKey,
     ...props
   }: {
     items: string[]
     _icon: unknown
     label: React.ReactNode
+    entityKey: string
     [key: string]: unknown
   }) => (
     <div data-testid="toggleable-list" {...props}>
@@ -349,25 +359,27 @@ jest.mock('components/ToggleableList', () => ({
   ),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ContributorsList', () => ({
   __esModule: true,
   default: ({
     contributors,
     maxInitialDisplay,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon,
+    label = 'Contributors',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    label,
+    getUrl,
     ...props
   }: {
     contributors: unknown[]
     icon?: unknown
     label?: string
     maxInitialDisplay: number
+    getUrl: (login: string) => string
     [key: string]: unknown
   }) => (
-    <div data-testid="top-contributors-list" {...props}>
-      Top Contributors ({contributors.length} items, max display: {maxInitialDisplay})
+    <div data-testid="contributors-list" {...props}>
+      {label} ({contributors.length} items, max display: {maxInitialDisplay})
     </div>
   ),
 }))
@@ -454,6 +466,7 @@ describe('CardDetailsPage', () => {
 
   const mockContributors = [
     {
+      id: 'contributor-1',
       avatarUrl: 'https://example.com/avatar1.jpg',
       login: 'john_doe',
       name: 'John Doe',
@@ -461,6 +474,7 @@ describe('CardDetailsPage', () => {
       contributionsCount: 50,
     },
     {
+      id: 'contributor-2',
       avatarUrl: 'https://example.com/avatar2.jpg',
       login: 'jane_smith',
       name: 'Jane Smith',
@@ -552,6 +566,7 @@ describe('CardDetailsPage', () => {
 
   const mockRecentReleases = [
     {
+      id: 'release-1',
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
@@ -951,7 +966,7 @@ describe('CardDetailsPage', () => {
     it('passes correct props to child components', () => {
       render(<CardDetailsPage {...defaultProps} topContributors={mockContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (2 items, max display: 12)'
       )
     })
@@ -1041,9 +1056,7 @@ describe('CardDetailsPage', () => {
       )
 
       expect(screen.getByTestId('health-metrics')).toHaveTextContent('Health Metrics (1 items)')
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
-        'Top Contributors (2 items'
-      )
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent('Top Contributors (2 items')
       expect(screen.getByTestId('repositories-card')).toHaveTextContent('Repositories (2 items)')
     })
 
@@ -1152,7 +1165,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributorsList} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (50 items, max display: 12)'
       )
     })
@@ -1212,7 +1225,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (1000 items, max display: 12)'
       )
     })
@@ -1362,7 +1375,7 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Project summary text')).toBeInTheDocument()
       expect(screen.getByText('User summary content')).toBeInTheDocument()
       expect(screen.getByTestId('health-metrics')).toBeInTheDocument()
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
+      expect(screen.getByTestId('contributors-list')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
       expect(screen.getByTestId('sponsor-card')).toBeInTheDocument()
     })
@@ -1669,6 +1682,7 @@ describe('CardDetailsPage', () => {
         contributionStats,
         topContributors: [
           {
+            id: 'contributor-user1',
             login: 'user1',
             name: 'User One',
             avatarUrl: 'https://example.com/avatar1.png',
