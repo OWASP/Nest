@@ -13,19 +13,20 @@ import { LabelList } from 'components/LabelList'
 import Markdown from 'components/MarkdownWrapper'
 
 const Card = ({
-  title,
-  url,
-  summary,
-  level,
-  icons,
-  topContributors,
   button,
-  projectName,
-  projectLink,
-  social,
-  tooltipLabel,
-  timeline,
+  cardKey,
+  icons,
   labels,
+  level,
+  projectLink,
+  projectName,
+  social,
+  summary,
+  timeline,
+  title,
+  tooltipLabel,
+  topContributors,
+  url,
 }: CardProps) => {
   return (
     <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
@@ -66,10 +67,10 @@ const Card = ({
         {/* Icons associated with the project */}
         {icons && Object.keys(ICONS).some((key) => icons[key]) && (
           <div className="mt-3 flex flex-wrap">
-            {Object.keys(ICONS).map((key, index) =>
+            {Object.keys(ICONS).map((key) =>
               icons[key] ? (
                 <DisplayIcon
-                  key={`${key}-${index}`}
+                  key={key}
                   item={key}
                   icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))}
                 />
@@ -133,7 +134,7 @@ const Card = ({
           {/* Labels Section */}
           {labels && labels.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              <LabelList labels={labels} maxVisible={5} />
+              <LabelList entityKey={`${cardKey}-labels`} labels={labels} maxVisible={5} />
             </div>
           )}
           {/* Contributors section */}

@@ -9,11 +9,11 @@ import { HiUserGroup } from 'react-icons/hi'
 import { ExtendedSession } from 'types/auth'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
+import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
+import ContributorsList from 'components/ContributorsList'
 import EntityActions from 'components/EntityActions'
 import Markdown from 'components/MarkdownWrapper'
-import MenteeContributorsList from 'components/MenteeContributorsList'
 import { getSimpleDuration } from 'components/ModuleCard'
-import TopContributorsList from 'components/TopContributorsList'
 
 interface SingleModuleCardProps {
   module: Module
@@ -82,29 +82,30 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
       {/* Mentors */}
       {module.mentors?.length > 0 && (
-        <TopContributorsList
+        <ContributorsList
           icon={HiUserGroup}
           contributors={module.mentors}
           maxInitialDisplay={6}
           label="Mentors"
+          getUrl={getMemberUrl}
         />
       )}
       {module.mentees?.length > 0 &&
         (pathname?.startsWith('/my/mentorship') ? (
-          <MenteeContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={module.mentees}
             maxInitialDisplay={6}
             label="Mentees"
-            programKey={programKey}
-            moduleKey={module.key}
+            getUrl={(login) => getMenteeUrl(programKey, module.key, login)}
           />
         ) : (
-          <TopContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={module.mentees}
             maxInitialDisplay={6}
             label="Mentees"
+            getUrl={getMemberUrl}
           />
         ))}
     </div>

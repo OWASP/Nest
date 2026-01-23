@@ -64,6 +64,7 @@ const ChaptersPage = () => {
     return (
       <Card
         key={chapter.objectID}
+        cardKey={chapter.objectID}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
         summary={chapter.summary}
@@ -101,7 +102,7 @@ const ChaptersPage = () => {
           }}
         />
       )}
-      {chapters && chapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
+      {chapters?.filter((chapter) => chapter.isActive).map(renderChapterCard)}
     </SearchPageLayout>
   )
 }
