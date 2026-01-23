@@ -46,7 +46,7 @@ const ProgramsPage = () => {
       totalPages={totalPages}
     >
       <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-        {programs 
+        {programs
             ?.filter((p) => p.status?.toUpperCase() === ProgramStatusEnum.Published)
             ?.map(renderProgramCard)}
       </div>
