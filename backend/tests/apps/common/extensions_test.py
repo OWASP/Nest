@@ -5,11 +5,17 @@ from unittest.mock import MagicMock, patch
 import pytest
 from strawberry.permission import PermissionExtension
 
-from apps.common.extensions import CacheExtension, generate_key, get_protected_fields
+from apps.common.extensions import (
+    CacheExtension,
+    generate_key,
+    get_protected_fields,
+    invalidate_module_cache,
+    invalidate_program_cache,
+)
 
 
 class TestGenerateKey:
-    """Test cases for the generate_key method."""
+    """Test cases for the generate_key function."""
 
     def test_creates_deterministic_hash(self):
         """Test that generate_key creates a deterministic hash key."""
@@ -156,3 +162,41 @@ class TestResolve:
 
         mock_next.assert_called_once()
         mock_cache.get_or_set.assert_called_once()
+
+
+class TestInvalidationHelpers:
+    """Test cases for invalidation helper functions."""
+
+    @patch("apps.common.extensions.cache")
+    @patch("apps.common.extensions.generate_key")
+    def test_invalidate_program_cache_uses_camel_case_keys(self, mock_generate_key, mock_cache):
+        """Test that invalidate_program_cache uses correct camelCase keys."""
+        mock_generate_key.side_effect = lambda name, _args: f"{name}-hashed"
+
+        invalidate_program_cache("my-program")
+
+        # Verify calls to generate_key use camelCase 'programKey'
+        assert mock_generate_key.call_count == 2
+        mock_generate_key.assert_any_call("getProgram", {"programKey": "my-program"})
+        mock_generate_key.assert_any_call("getProgramModules", {"programKey": "my-program"})
+
+        assert mock_cache.delete.call_count == 2
+        mock_cache.delete.assert_any_call("getProgram-hashed")
+        mock_cache.delete.assert_any_call("getProgramModules-hashed")
+
+    @patch("apps.common.extensions.cache")
+    @patch("apps.common.extensions.generate_key")
+    def test_invalidate_module_cache_uses_camel_case_keys(self, mock_generate_key, mock_cache):
+        """Test that invalidate_module_cache uses correct camelCase keys."""
+        mock_generate_key.side_effect = lambda name, _args: f"{name}-hashed"
+
+        invalidate_module_cache("module-1", "program-1")
+
+        assert mock_generate_key.call_count == 3
+        mock_generate_key.assert_any_call(
+            "getModule", {"moduleKey": "module-1", "programKey": "program-1"}
+        )
+        mock_generate_key.assert_any_call("getProgram", {"programKey": "program-1"})
+        mock_generate_key.assert_any_call("getProgramModules", {"programKey": "program-1"})
+
+        assert mock_cache.delete.call_count == 3
