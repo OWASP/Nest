@@ -114,6 +114,7 @@ const mockModule: Module = {
 const mockModuleWithManyMentors: Module = {
   ...mockModule,
   mentors: Array.from({ length: 10 }, (_, i) => ({
+    id: `mentor-${i + 1}`,
     name: `mentor${i + 1}`,
     login: `mentor${i + 1}`,
     avatarUrl: `https://example.com/avatar${i + 1}.jpg`,
@@ -230,6 +231,7 @@ describe('SingleModuleCard', () => {
         ...mockModule,
         mentees: [
           {
+            id: 'mentee-1',
             name: 'mentee1',
             login: 'mentee1',
             avatarUrl: 'https://example.com/mentee1.jpg',
@@ -256,6 +258,7 @@ describe('SingleModuleCard', () => {
         mentors: [],
         mentees: [
           {
+            id: 'mentee-1',
             name: 'mentee1',
             login: 'mentee1',
             avatarUrl: 'https://example.com/mentee1.jpg',
