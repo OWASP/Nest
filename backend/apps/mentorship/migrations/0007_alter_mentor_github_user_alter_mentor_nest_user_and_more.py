@@ -62,55 +62,147 @@ def migrate_program_admins_to_admin_model(apps, _schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0040_merge_20251117_0136'),
-        ('mentorship', '0006_alter_menteemodule_ended_at'),
+        ("github", "0040_merge_20251117_0136"),
+        ("mentorship", "0006_alter_menteemodule_ended_at"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mentor',
-            name='github_user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_github_user', to='github.user', verbose_name='GitHub user'),
+            model_name="mentor",
+            name="github_user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_github_user",
+                to="github.user",
+                verbose_name="GitHub user",
+            ),
         ),
         migrations.AlterField(
-            model_name='mentor',
-            name='nest_user',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_nest_user', to=settings.AUTH_USER_MODEL, verbose_name='Nest user'),
+            model_name="mentor",
+            name="nest_user",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_nest_user",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Nest user",
+            ),
         ),
         migrations.CreateModel(
-            name='Admin',
+            name="Admin",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('experience_level', models.CharField(choices=[('beginner', 'Beginner'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced'), ('expert', 'Expert')], default='beginner', max_length=12, verbose_name='Experience level')),
-                ('domains', models.JSONField(blank=True, default=list, help_text='Domain expertise (e.g., Application Security, Threat Modeling, etc)', verbose_name='Domains')),
-                ('tags', models.JSONField(blank=True, default=list, help_text='Technologies, languages, frameworks, etc', verbose_name='Tags')),
-                ('github_user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_github_user', to='github.user', verbose_name='GitHub user')),
-                ('nest_user', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_nest_user', to=settings.AUTH_USER_MODEL, verbose_name='Nest user')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "experience_level",
+                    models.CharField(
+                        choices=[
+                            ("beginner", "Beginner"),
+                            ("intermediate", "Intermediate"),
+                            ("advanced", "Advanced"),
+                            ("expert", "Expert"),
+                        ],
+                        default="beginner",
+                        max_length=12,
+                        verbose_name="Experience level",
+                    ),
+                ),
+                (
+                    "domains",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text="Domain expertise (e.g., Application Security, Threat Modeling, etc)",
+                        verbose_name="Domains",
+                    ),
+                ),
+                (
+                    "tags",
+                    models.JSONField(
+                        blank=True,
+                        default=list,
+                        help_text="Technologies, languages, frameworks, etc",
+                        verbose_name="Tags",
+                    ),
+                ),
+                (
+                    "github_user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_github_user",
+                        to="github.user",
+                        verbose_name="GitHub user",
+                    ),
+                ),
+                (
+                    "nest_user",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_nest_user",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Nest user",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Admins',
-                'db_table': 'mentorship_admins',
+                "verbose_name_plural": "Admins",
+                "db_table": "mentorship_admins",
             },
         ),
         migrations.CreateModel(
-            name='ProgramAdmin',
+            name="ProgramAdmin",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('role', models.CharField(choices=[('owner', 'Owner')], default='owner', max_length=20, verbose_name='Role')),
-                ('admin', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='program_admin_roles', to='mentorship.admin', verbose_name='Admin')),
-                ('program', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='program_admins', to='mentorship.program', verbose_name='Program')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[("owner", "Owner")],
+                        default="owner",
+                        max_length=20,
+                        verbose_name="Role",
+                    ),
+                ),
+                (
+                    "admin",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="program_admin_roles",
+                        to="mentorship.admin",
+                        verbose_name="Admin",
+                    ),
+                ),
+                (
+                    "program",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="program_admins",
+                        to="mentorship.program",
+                        verbose_name="Program",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Program admins',
-                'db_table': 'mentorship_program_admins',
-                'unique_together': {('program', 'admin')},
+                "verbose_name_plural": "Program admins",
+                "db_table": "mentorship_program_admins",
+                "unique_together": {("program", "admin")},
             },
         ),
         migrations.RunPython(
