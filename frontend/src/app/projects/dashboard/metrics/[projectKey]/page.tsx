@@ -62,15 +62,17 @@ const ProjectHealthMetricsDetails: FC = () => {
     <div className="flex flex-col gap-4">
       {metricsList && metricsLatest ? (
         <>
-          <div className="flex items-center justify-between">
-            <div className="flex justify-start">
-              <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <h1 className="max-w-[70vw] text-lg font-bold sm:max-w-none sm:text-2xl">
+                {metricsLatest.projectName}
+              </h1>
               <MetricsPDFButton
                 path={`${projectKey}/pdf`}
                 fileName={`${projectKey}-health-metrics`}
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1 sm:w-auto sm:w-full sm:overflow-visible">
               <MetricsScoreCircle score={metricsLatest.score} clickable={false} />
               <GeneralCompliantComponent
                 title={
