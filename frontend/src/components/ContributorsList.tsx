@@ -8,23 +8,21 @@ import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 import ShowMoreButton from 'components/ShowMoreButton'
 
-interface MenteeContributorsListProps {
+interface ContributorsListProps {
   contributors: Contributor[]
   label?: string
   maxInitialDisplay?: number
   icon?: IconType
-  programKey: string
-  moduleKey: string
+  getUrl: (login: string) => string
 }
 
-const MenteeContributorsList = ({
+const ContributorsList = ({
   contributors,
-  label = 'Mentees',
+  label = 'Contributors',
   maxInitialDisplay = 12,
   icon,
-  programKey,
-  moduleKey,
-}: MenteeContributorsListProps) => {
+  getUrl,
+}: ContributorsListProps) => {
   const [showAllContributors, setShowAllContributors] = useState(false)
 
   const toggleContributors = () => setShowAllContributors(!showAllContributors)
@@ -37,9 +35,6 @@ const MenteeContributorsList = ({
     return null
   }
 
-  const getMenteeUrl = (login: string) =>
-    `/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${login}`
-
   return (
     <SecondaryCard
       icon={icon}
@@ -50,20 +45,23 @@ const MenteeContributorsList = ({
       }
     >
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
-        {displayContributors.map((item, index) => (
-          <div key={index} className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+        {displayContributors.map((item) => (
+          <div
+            key={item.login}
+            className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+          >
             <div className="flex w-full items-center gap-2">
               <Image
-                alt={item?.name || ''}
+                alt={item?.name ? `${item.name}'s avatar` : 'Contributor avatar'}
                 className="rounded-full"
                 height={24}
-                src={`${item?.avatarUrl}&s=60`}
+                src={`${item?.avatarUrl}${item?.avatarUrl?.includes('?') ? '&' : '?'}s=60`}
                 title={item?.name || item?.login}
                 width={24}
               />
               <Link
                 className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
-                href={getMenteeUrl(item?.login)}
+                href={getUrl(item?.login)}
                 title={item?.name || item?.login}
               >
                 {upperFirst(item.name) || upperFirst(item.login)}
@@ -77,4 +75,4 @@ const MenteeContributorsList = ({
   )
 }
 
-export default MenteeContributorsList
+export default ContributorsList
