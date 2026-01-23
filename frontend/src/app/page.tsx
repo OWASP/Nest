@@ -25,12 +25,13 @@ import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generat
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
-import type { MainPageData } from 'types/home'
 
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import CalendarButton from 'components/CalendarButton'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ContributorsList from 'components/ContributorsList'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
@@ -41,24 +42,22 @@ import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetMainPageDataDocument, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetMainPageDataDocument, {
     variables: { distinct: true },
   })
 
+  const data = graphQLData
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    if (graphQLData) {
-      setData(graphQLData)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       addToast({
         description: 'Unable to complete the requested operation.',
@@ -68,9 +67,8 @@ export default function Home() {
         color: 'danger',
         variant: 'solid',
       })
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError])
+  }, [graphQLRequestError])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,7 +163,7 @@ export default function Home() {
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {data.upcomingEvents.map((event: Event, index: number) => (
-              <div key={`card-${event.name}`} className="overflow-hidden">
+              <div key={`card-${event.id}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <button
@@ -251,7 +249,10 @@ export default function Home() {
                   {chapter.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
-                      <LeadersList leaders={String(chapter.leaders)} />
+                      <LeadersList
+                        entityKey={`${chapter.key}-leaders`}
+                        leaders={String(chapter.leaders)}
+                      />
                     </div>
                   )}
                 </div>
@@ -291,7 +292,10 @@ export default function Home() {
                   {project.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
-                      <LeadersList leaders={String(project.leaders)} />
+                      <LeadersList
+                        entityKey={`${project.key}-leaders`}
+                        leaders={String(project.leaders)}
+                      />
                     </div>
                   )}
                 </div>
@@ -317,10 +321,12 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributorsList
+        <ContributorsList
           contributors={data?.topContributors}
           icon={HiUserGroup}
           maxInitialDisplay={20}
+          label="Top Contributors"
+          getUrl={getMemberUrl}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
           <RecentIssues data={data?.recentIssues} />
@@ -362,7 +368,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-1 items-center overflow-hidden">
                     <FaUser className="mr-2 h-4 w-4 shrink-0" />
-                    <LeadersList leaders={post.authorName} />
+                    <LeadersList entityKey={`${post.title}-leaders`} leaders={post.authorName} />
                   </div>
                 </div>
               </div>

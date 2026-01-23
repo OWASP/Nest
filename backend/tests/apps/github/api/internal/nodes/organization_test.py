@@ -6,9 +6,10 @@ from apps.github.api.internal.nodes.organization import (
     OrganizationNode,
     OrganizationStatsNode,
 )
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestOrganizationNode:
+class TestOrganizationNode(GraphQLNodeBaseTest):
     def test_organization_node_inheritance(self):
         assert hasattr(OrganizationNode, "__strawberry_definition__")
 
@@ -70,7 +71,8 @@ class TestOrganizationNode:
         mock_organization = Mock()
 
         # Call stats method
-        result = OrganizationNode.stats(mock_organization)
+        field = self._get_field_by_name("stats", OrganizationNode)
+        result = field.base_resolver.wrapped_func(None, mock_organization)
 
         # Verify result
         assert isinstance(result, OrganizationStatsNode)
@@ -105,7 +107,8 @@ class TestOrganizationNode:
         mock_organization = Mock()
 
         # Call stats method
-        result = OrganizationNode.stats(mock_organization)
+        field = self._get_field_by_name("stats", OrganizationNode)
+        result = field.base_resolver.wrapped_func(None, mock_organization)
 
         # Verify result with default values
         assert isinstance(result, OrganizationStatsNode)
@@ -120,11 +123,12 @@ class TestOrganizationNode:
         mock_organization = Mock()
         mock_organization.url = "https://github.com/test-org"
 
-        result = OrganizationNode.url(mock_organization)
+        field = self._get_field_by_name("url", OrganizationNode)
+        result = field.base_resolver.wrapped_func(None, mock_organization)
         assert result == "https://github.com/test-org"
 
 
-class TestOrganizationStatsNode:
+class TestOrganizationStatsNode(GraphQLNodeBaseTest):
     def test_organization_stats_node(self):
         expected_fields = {
             "total_contributors",

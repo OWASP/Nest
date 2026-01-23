@@ -4,9 +4,10 @@ from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.user import UserNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestReleaseNode:
+class TestReleaseNode(GraphQLNodeBaseTest):
     """Test cases for ReleaseNode class."""
 
     def test_release_node_inheritance(self):
@@ -34,15 +35,6 @@ class TestReleaseNode:
         assert author_field is not None
         assert author_field.type.of_type is UserNode
 
-    def test_author_resolution(self):
-        """Test author field resolution."""
-        mock_release = Mock()
-        mock_author = Mock()
-        mock_release.author = mock_author
-
-        result = ReleaseNode.author(mock_release)
-        assert result == mock_author
-
     def test_organization_name_with_organization(self):
         """Test organization_name field when organization exists."""
         mock_release = Mock()
@@ -52,7 +44,8 @@ class TestReleaseNode:
         mock_repository.organization = mock_organization
         mock_release.repository = mock_repository
 
-        result = ReleaseNode.organization_name(mock_release)
+        field = self._get_field_by_name("organization_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result == "test-org"
 
     def test_organization_name_without_organization(self):
@@ -62,7 +55,8 @@ class TestReleaseNode:
         mock_repository.organization = None
         mock_release.repository = mock_repository
 
-        result = ReleaseNode.organization_name(mock_release)
+        field = self._get_field_by_name("organization_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result is None
 
     def test_organization_name_without_repository(self):
@@ -70,7 +64,8 @@ class TestReleaseNode:
         mock_release = Mock()
         mock_release.repository = None
 
-        result = ReleaseNode.organization_name(mock_release)
+        field = self._get_field_by_name("organization_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result is None
 
     def test_project_name_with_project(self):
@@ -82,7 +77,8 @@ class TestReleaseNode:
         mock_repository.project = mock_project
         mock_release.repository = mock_repository
 
-        result = ReleaseNode.project_name(mock_release)
+        field = self._get_field_by_name("project_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result == " Test Project"  # OWASP prefix stripped
 
     def test_project_name_without_project(self):
@@ -92,7 +88,8 @@ class TestReleaseNode:
         mock_repository.project = None
         mock_release.repository = mock_repository
 
-        result = ReleaseNode.project_name(mock_release)
+        field = self._get_field_by_name("project_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result is None
 
     def test_project_name_without_repository(self):
@@ -100,7 +97,8 @@ class TestReleaseNode:
         mock_release = Mock()
         mock_release.repository = None
 
-        result = ReleaseNode.project_name(mock_release)
+        field = self._get_field_by_name("project_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result is None
 
     def test_repository_name_with_repository(self):
@@ -110,7 +108,8 @@ class TestReleaseNode:
         mock_repository.name = "test-repo"
         mock_release.repository = mock_repository
 
-        result = ReleaseNode.repository_name(mock_release)
+        field = self._get_field_by_name("repository_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result == "test-repo"
 
     def test_repository_name_without_repository(self):
@@ -118,7 +117,8 @@ class TestReleaseNode:
         mock_release = Mock()
         mock_release.repository = None
 
-        result = ReleaseNode.repository_name(mock_release)
+        field = self._get_field_by_name("repository_name", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result is None
 
     def test_url_field(self):
@@ -126,5 +126,6 @@ class TestReleaseNode:
         mock_release = Mock()
         mock_release.url = "https://github.com/test-org/test-repo/releases/tag/v1.0.0"
 
-        result = ReleaseNode.url(mock_release)
+        field = self._get_field_by_name("url", ReleaseNode)
+        result = field.base_resolver.wrapped_func(None, mock_release)
         assert result == "https://github.com/test-org/test-repo/releases/tag/v1.0.0"

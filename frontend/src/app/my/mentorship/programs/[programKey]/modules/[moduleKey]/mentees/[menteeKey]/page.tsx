@@ -31,11 +31,14 @@ const MenteeProfilePage = () => {
     GetModuleMenteeDetailsQuery['getMenteeModuleIssues']
   >([])
 
-  const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
 
-  const { data, error } = useQuery(GetModuleMenteeDetailsDocument, {
+  const {
+    data,
+    error,
+    loading: isLoading,
+  } = useQuery(GetModuleMenteeDetailsDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -52,9 +55,6 @@ const MenteeProfilePage = () => {
     }
     if (error) {
       handleAppError(error)
-    }
-    if (data || error) {
-      setIsLoading(false)
     }
   }, [data, error])
 
@@ -157,13 +157,21 @@ const MenteeProfilePage = () => {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {menteeDetails.domains && menteeDetails.domains.length > 0 && (
               <SecondaryCard title="Domains">
-                <LabelList labels={menteeDetails.domains} maxVisible={5} />
+                <LabelList
+                  entityKey={`${menteeDetails.login}-domains`}
+                  labels={menteeDetails.domains}
+                  maxVisible={5}
+                />
               </SecondaryCard>
             )}
 
             {menteeDetails.tags && menteeDetails.tags.length > 0 && (
               <SecondaryCard title="Skills & Technologies">
-                <LabelList labels={menteeDetails.tags} maxVisible={5} />
+                <LabelList
+                  entityKey={`${menteeDetails.login}-tags`}
+                  labels={menteeDetails.tags}
+                  maxVisible={5}
+                />
               </SecondaryCard>
             )}
           </div>

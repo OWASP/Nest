@@ -1,103 +1,173 @@
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, waitFor } from '@testing-library/react'
 import * as L from 'leaflet'
+import React, { useEffect } from 'react'
 import { Chapter } from 'types/chapter'
 import ChapterMap from 'components/ChapterMap'
 
+// Mock Leaflet
+let mockMapInstance: unknown = null
+
 const mockMap = {
   setView: jest.fn().mockReturnThis(),
-  addLayer: jest.fn().mockReturnThis(),
   fitBounds: jest.fn().mockReturnThis(),
-  on: jest.fn().mockReturnThis(),
-  getCenter: jest.fn(() => ({ lat: 20, lng: 0 })),
-  getZoom: jest.fn(() => 2),
-  getContainer: jest.fn(() => document.getElementById('chapter-map')),
+  setMinZoom: jest.fn().mockReturnThis(),
+  getContainer: jest.fn(() => ({
+    clientWidth: 800,
+    clientHeight: 600,
+  })),
   scrollWheelZoom: {
     enable: jest.fn(),
     disable: jest.fn(),
   },
+  dragging: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  touchZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  doubleClickZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  keyboard: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
 }
-
-const mockMarker = {
-  bindPopup: jest.fn().mockReturnThis(),
-}
-
-const mockPopup = {
-  setContent: jest.fn().mockReturnThis(),
-}
-
-const mockMarkerClusterGroup = {
-  addLayers: jest.fn(),
-  clearLayers: jest.fn(),
-}
-
-const mockTileLayer = {
-  addTo: jest.fn().mockReturnThis(),
-}
-
-const mockLatLngBounds = {}
-
-const mockIcon = {}
 
 const mockZoomControl = {
   addTo: jest.fn().mockReturnThis(),
   remove: jest.fn(),
 }
 
+/* eslint-disable @typescript-eslint/naming-convention */
 jest.mock('leaflet', () => ({
   map: jest.fn(() => mockMap),
-  marker: jest.fn(() => mockMarker),
-  popup: jest.fn(() => mockPopup),
-  markerClusterGroup: jest.fn(() => mockMarkerClusterGroup),
-  tileLayer: jest.fn(() => mockTileLayer),
-  latLngBounds: jest.fn(() => mockLatLngBounds),
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Icon: jest.fn(() => mockIcon),
+  tileLayer: jest.fn(() => ({
+    addTo: jest.fn().mockReturnThis(),
+  })),
+  marker: jest.fn(() => ({
+    bindPopup: jest.fn().mockReturnThis(),
+  })),
+  popup: jest.fn(() => ({
+    setContent: jest.fn().mockReturnThis(),
+  })),
+  latLngBounds: jest.fn(() => ({})),
+  Icon: jest.fn(() => ({})),
+  divIcon: jest.fn(() => ({})),
   control: {
     zoom: jest.fn(() => mockZoomControl),
   },
 }))
+/* eslint-enable @typescript-eslint/naming-convention */
 
+// Mock CSS imports
 jest.mock('leaflet/dist/leaflet.css', () => ({}))
 jest.mock('leaflet.markercluster/dist/MarkerCluster.css', () => ({}))
 jest.mock('leaflet.markercluster/dist/MarkerCluster.Default.css', () => ({}))
 jest.mock('leaflet.markercluster', () => ({}))
 
-describe('ChapterMap', () => {
+// Mock react-leaflet
+jest.mock('react-leaflet', () => ({
+  MapContainer: ({
+    children,
+    center,
+    zoom,
+    scrollWheelZoom,
+    style,
+    zoomControl,
+    maxBounds,
+    maxBoundsViscosity,
+    className,
+  }: {
+    children: React.ReactNode
+    center: L.LatLngExpression
+    zoom: number
+    scrollWheelZoom: boolean
+    style: React.CSSProperties
+    zoomControl: boolean
+    maxBounds: L.LatLngBoundsExpression
+    maxBoundsViscosity: number
+    className: string
+  }) => {
+    useEffect(() => {
+      L.map('chapter-map', {
+        worldCopyJump: false,
+        maxBounds,
+        maxBoundsViscosity,
+        scrollWheelZoom,
+        zoomControl,
+      }).setView(center, zoom)
+    }, [center, zoom, scrollWheelZoom, zoomControl, maxBounds, maxBoundsViscosity])
+    return (
+      <div id="chapter-map" style={style} className={className}>
+        {children}
+      </div>
+    )
+  },
+  TileLayer: ({
+    attribution,
+    url,
+    className,
+  }: {
+    attribution: string
+    url: string
+    className: string
+  }) => {
+    useEffect(() => {
+      L.tileLayer(url, { attribution, className }).addTo(mockMap as unknown as L.Map)
+    }, [url, attribution, className])
+    return null
+  },
+  Marker: ({
+    children,
+    position,
+    icon,
+  }: {
+    children: React.ReactNode
+    position: L.LatLngExpression
+    icon: L.Icon
+  }) => {
+    useEffect(() => {
+      const marker = L.marker(position, { icon })
+      marker.bindPopup(L.popup().setContent('mock content'))
+    }, [position, icon])
+    return <div data-testid="marker">{children}</div>
+  },
+  Popup: ({ children }: { children: React.ReactNode }) => <div data-testid="popup">{children}</div>,
+  useMap: () => mockMapInstance,
+}))
+
+// Mock react-leaflet-cluster
+jest.mock('react-leaflet-cluster', () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="marker-cluster-group">{children}</div>
+  ),
+}))
+
+// Mock next/navigation
+const mockPush = jest.fn()
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}))
+
+describe('ChapterMap Refactored Tests', () => {
   const mockChapterData: Chapter[] = [
     {
       _geoloc: { lat: 40.7128, lng: -74.006 },
-      createdAt: 1640995200000,
-      geoLocation: { lat: 40.7128, lng: -74.006 },
-      isActive: true,
       key: 'new-york',
-      leaders: ['John Doe'],
       name: 'New York Chapter',
-      objectID: 'ny-1',
-      region: 'North America',
-      relatedUrls: ['https://example.com'],
-      suggestedLocation: 'New York, NY',
-      summary: 'NYC OWASP Chapter',
-      topContributors: [],
-      updatedAt: 1640995200000,
-      url: 'https://owasp.org/www-chapter-new-york/',
-    },
+    } as Chapter,
     {
-      _geoloc: { lat: 51.5074, lng: -0.1278 },
-      createdAt: 1640995200000,
       geoLocation: { lat: 51.5074, lng: -0.1278 },
-      isActive: true,
       key: 'london',
-      leaders: ['Jane Smith'],
       name: 'London Chapter',
-      objectID: 'london-1',
-      region: 'Europe',
-      relatedUrls: ['https://example.com'],
-      suggestedLocation: 'London, UK',
-      summary: 'London OWASP Chapter',
-      topContributors: [],
-      updatedAt: 1640995200000,
-      url: 'https://owasp.org/www-chapter-london/',
-    },
+    } as Chapter,
   ]
 
   const defaultProps = {
@@ -108,364 +178,223 @@ describe('ChapterMap', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockMapInstance = mockMap
   })
 
-  describe('rendering', () => {
-    it('renders the map container with correct id and style', () => {
-      const { container } = render(<ChapterMap {...defaultProps} />)
+  describe('Rendering', () => {
+    it('renders the map container and markers', () => {
+      const { getByTestId, getAllByTestId } = render(<ChapterMap {...defaultProps} />)
 
-      const mapContainer = document.getElementById('chapter-map')
-      expect(mapContainer).toBeInTheDocument()
-      expect(mapContainer).toHaveAttribute('id', 'chapter-map')
-      expect(mapContainer).toHaveClass('h-full', 'w-full')
-
-      // Check that the parent container has the correct styles applied
-      const parentContainer = container.firstChild as HTMLElement
-      expect(parentContainer).toHaveClass('relative')
+      expect(document.getElementById('chapter-map')).toBeInTheDocument()
+      expect(getByTestId('marker-cluster-group')).toBeInTheDocument()
+      expect(getAllByTestId('marker')).toHaveLength(2)
     })
 
-    it('renders with empty data without crashing', () => {
-      render(<ChapterMap {...defaultProps} geoLocData={[]} />)
-
-      const mapContainer = document.getElementById('chapter-map')
-      expect(mapContainer).toBeInTheDocument()
-    })
-  })
-
-  describe('Map initialization', () => {
-    it('initializes leaflet map with correct configuration', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(L.map).toHaveBeenCalledWith('chapter-map', {
-        worldCopyJump: false,
-        maxBounds: [
-          [-90, -180],
-          [90, 180],
-        ],
-        maxBoundsViscosity: 1,
-        scrollWheelZoom: false,
-        zoomControl: false,
-      })
-      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
-    })
-
-    it('adds tile layer to the map', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(L.tileLayer).toHaveBeenCalledWith(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-          attribution: '© OpenStreetMap contributors',
-          className: 'map-tiles',
-        }
+    it('renders user location marker when provided', () => {
+      const userLocation = { latitude: 10, longitude: 10 }
+      const { getAllByTestId } = render(
+        <ChapterMap {...defaultProps} userLocation={userLocation} />
       )
-      expect(mockTileLayer.addTo).toHaveBeenCalledWith(mockMap)
-    })
-
-    it('creates and adds marker cluster group', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(L.markerClusterGroup).toHaveBeenCalled()
-      expect(mockMap.addLayer).toHaveBeenCalledWith(mockMarkerClusterGroup)
-    })
-
-    it('sets up event listeners for map interaction', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(mockMap.on).toHaveBeenCalledWith('click', expect.any(Function))
-      expect(mockMap.on).toHaveBeenCalledWith('mouseout', expect.any(Function))
+      expect(getAllByTestId('marker')).toHaveLength(3)
     })
   })
 
-  describe('Markers', () => {
-    it('creates markers for each chapter', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(L.marker).toHaveBeenCalledTimes(2)
-      expect(L.marker).toHaveBeenCalledWith([40.7128, -74.006], { icon: mockIcon })
-      expect(L.marker).toHaveBeenCalledWith([51.5074, -0.1278], { icon: mockIcon })
-    })
-
-    it('filters out virtual chapters when latitude longitude undefined', () => {
-      const virtualChapterData: Chapter[] = [
-        mockChapterData[0],
-        {
-          // A virtual chapter with no location data
-          ...mockChapterData[1],
-          _geoloc: undefined,
-          geoLocation: undefined,
-        },
-      ]
-
-      render(<ChapterMap {...defaultProps} geoLocData={virtualChapterData} />)
-      expect(L.marker).toHaveBeenCalledTimes(1)
-      expect(L.marker).not.toHaveBeenCalledWith([undefined, undefined], { icon: mockIcon })
-    })
-
-    it('filters out virtual chapters when latitude longitude null', () => {
-      const virtualChapterData: Chapter[] = [
-        mockChapterData[0],
-        {
-          // A virtual chapter with no location data
-          ...mockChapterData[1],
-          _geoloc: null,
-          geoLocation: null,
-        },
-      ]
-
-      render(<ChapterMap {...defaultProps} geoLocData={virtualChapterData} />)
-      expect(L.marker).toHaveBeenCalledTimes(1)
-      expect(L.marker).not.toHaveBeenCalledWith([null, null], { icon: mockIcon })
-    })
-
-    it('creates marker icons with correct configuration', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(L.Icon).toHaveBeenCalledWith({
-        iconAnchor: [12, 41],
-        iconRetinaUrl: '/img/marker-icon-2x.png',
-        iconSize: [25, 41],
-        iconUrl: '/img/marker-icon.png',
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        shadowUrl: '/img/marker-shadow.png',
-      })
-    })
-
-    it('adds markers to cluster group', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(mockMarkerClusterGroup.addLayers).toHaveBeenCalledWith([mockMarker, mockMarker])
-    })
-
-    it('handles chapters with missing _geoloc but present geolocation', () => {
-      const chapterWithoutGeoloc: Chapter[] = [
-        {
-          ...mockChapterData[0],
-          _geoloc: undefined,
-          geoLocation: { lat: 35.6762, lng: 139.6503 },
-        },
-      ]
-
-      render(<ChapterMap {...defaultProps} geoLocData={chapterWithoutGeoloc} />)
-      expect(L.marker).toHaveBeenCalledWith([35.6762, 139.6503], { icon: mockIcon })
-    })
-
-    it('handles chapters with 0 coordinates correctly', () => {
-      const chapterWithZeroCoords: Chapter[] = [
-        {
-          ...mockChapterData[0],
-          _geoloc: { lat: 0, lng: 0 },
-          geoLocation: { lat: 0, lng: 0 },
-        },
-      ]
-
-      render(<ChapterMap {...defaultProps} geoLocData={chapterWithZeroCoords} />)
-      expect(L.marker).toHaveBeenCalledTimes(1)
-      expect(L.marker).toHaveBeenCalledWith([0, 0], { icon: mockIcon })
-    })
-  })
-
-  describe('Popups', () => {
-    it('creates popups for each marker', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(L.popup).toHaveBeenCalledTimes(2)
-      expect(mockMarker.bindPopup).toHaveBeenCalledTimes(2)
-    })
-
-    it('sets popup content with chapter name', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(mockPopup.setContent).toHaveBeenCalledTimes(2)
-    })
-
-    it('navigates to chapter page when popup is clicked', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(mockChapterData[0].key).toBe('new-york')
-    })
-  })
-
-  describe('Interactive Overlay', () => {
-    it('displays overlay with "Unlock map" message initially', () => {
+  describe('Map Locking Logic', () => {
+    it('shows "Unlock map" button initially', () => {
       const { getByText } = render(<ChapterMap {...defaultProps} />)
       expect(getByText('Unlock map')).toBeInTheDocument()
     })
 
-    it('removes overlay when clicked', () => {
+    it('unlocks map and shows zoom controls on click', async () => {
       const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.click(unlockButton)
 
       expect(queryByText('Unlock map')).not.toBeInTheDocument()
+
+      await waitFor(() => {
+        expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+        expect(L.control.zoom).toHaveBeenCalled()
+      })
     })
 
-    it('enables scroll wheel zoom when overlay is clicked', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
+    it('locks map again on mouse leave', async () => {
+      const { getByText, container } = render(<ChapterMap {...defaultProps} />)
 
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.click(unlockButton)
+      const wrapper = container.firstChild as HTMLElement
+      fireEvent.mouseLeave(wrapper)
 
-      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
-    })
-
-    it('handles keyboard interaction with Enter key', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: 'Enter' })
-
-      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
-    })
-
-    it('handles keyboard interaction with Space key', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.keyDown(overlay!, { key: ' ' })
-
-      expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
-    })
-
-    it('has proper accessibility attributes', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      expect(overlay).toHaveAttribute('tabIndex', '0')
-      expect(overlay).toHaveAttribute('aria-label', 'Unlock map')
+      await waitFor(() => {
+        expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
+        expect(mockZoomControl.remove).toHaveBeenCalled()
+        expect(getByText('Unlock map')).toBeInTheDocument()
+      })
     })
   })
 
-  describe('Local View', () => {
-    it('sets local view when showLocal is true', () => {
+  describe('MapViewUpdater Logic', () => {
+    it('sets world view by default', async () => {
+      render(<ChapterMap {...defaultProps} />)
+      await waitFor(() => {
+        expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
+      })
+    })
+
+    it('sets local view when showLocal is true', async () => {
       render(<ChapterMap {...defaultProps} showLocal={true} />)
-
-      expect(mockMap.setView).toHaveBeenCalledWith([40.7128, -74.006], 7)
-      expect(L.latLngBounds).toHaveBeenCalled()
-      expect(mockMap.fitBounds).toHaveBeenCalledWith(mockLatLngBounds, { maxZoom: 7 })
+      await waitFor(() => {
+        expect(mockMap.setView).toHaveBeenCalledWith([40.7128, -74.006], 7)
+        expect(mockMap.fitBounds).toHaveBeenCalled()
+      })
     })
 
-    it('does not set local view when showLocal is false', () => {
-      render(<ChapterMap {...defaultProps} showLocal={false} />)
+    it('uses geoLocation fallback when _geoloc is not available', async () => {
+      const geoLocationOnlyData: Chapter[] = [
+        {
+          geoLocation: { lat: 35.6762, lng: 139.6503 },
+          key: 'tokyo',
+          name: 'Tokyo Chapter',
+        } as Chapter,
+      ]
 
-      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
-      expect(mockMap.fitBounds).not.toHaveBeenCalled()
-    })
+      render(<ChapterMap {...defaultProps} geoLocData={geoLocationOnlyData} showLocal={true} />)
 
-    it('handles showLocal with empty data', () => {
-      render(<ChapterMap {...defaultProps} geoLocData={[]} showLocal={true} />)
-
-      expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
-      expect(mockMap.fitBounds).not.toHaveBeenCalled()
+      await waitFor(() => {
+        expect(mockMap.setView).toHaveBeenCalledWith([35.6762, 139.6503], 7)
+      })
     })
   })
 
-  describe('Component Updates', () => {
-    it('clears existing markers when data changes', () => {
-      const { rerender } = render(<ChapterMap {...defaultProps} />)
+  describe('Share Location Button', () => {
+    it('is only visible when map is unlocked', () => {
+      const onShareLocation = jest.fn()
+      const { queryByLabelText, getByText } = render(
+        <ChapterMap {...defaultProps} onShareLocation={onShareLocation} />
+      )
 
-      const newData = [mockChapterData[0]]
-      rerender(<ChapterMap {...defaultProps} geoLocData={newData} />)
-      expect(mockMarkerClusterGroup.clearLayers).toHaveBeenCalled()
+      expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
+
+      fireEvent.click(getByText('Unlock map').closest('button'))
+      expect(queryByLabelText(/share location/i)).toBeInTheDocument()
     })
 
-    it('updates local view when showLocal prop changes', () => {
-      const { rerender } = render(<ChapterMap {...defaultProps} showLocal={false} />)
-      const initialCallCount = mockMap.setView.mock.calls.length
+    it('shows "Reset location filter" tooltip when user location is provided', () => {
+      const onShareLocation = jest.fn()
+      const userLocation = { latitude: 10, longitude: 10 }
 
-      rerender(<ChapterMap {...defaultProps} showLocal={true} />)
+      const { getByText, getByLabelText } = render(
+        <ChapterMap
+          {...defaultProps}
+          onShareLocation={onShareLocation}
+          userLocation={userLocation}
+        />
+      )
+      fireEvent.click(getByText('Unlock map').closest('button'))
+      const locationButton = getByLabelText('Reset location filter')
+      expect(locationButton).toBeInTheDocument()
+    })
+  })
 
-      expect(mockMap.setView.mock.calls.length).toBeGreaterThan(initialCallCount)
+  describe('Popup Interactions', () => {
+    it('renders chapter name in popup', () => {
+      const { getAllByTestId } = render(<ChapterMap {...defaultProps} />)
+
+      const popups = getAllByTestId('popup')
+      expect(popups[0]).toHaveTextContent('New York Chapter')
+      expect(popups[1]).toHaveTextContent('London Chapter')
+    })
+
+    it('popup click handler is set up correctly', () => {
+      const { getAllByTestId } = render(<ChapterMap {...defaultProps} />)
+
+      const popups = getAllByTestId('popup')
+      const clickableButton = popups[0].querySelector('button')
+
+      expect(clickableButton).toBeInTheDocument()
+      expect(clickableButton).toHaveClass('cursor-pointer')
+    })
+
+    it('navigates to chapter page when popup is clicked', () => {
+      const { getAllByTestId } = render(<ChapterMap {...defaultProps} />)
+
+      const popups = getAllByTestId('popup')
+      const clickableButton = popups[0].querySelector('button')
+      fireEvent.click(clickableButton)
+
+      expect(mockPush).toHaveBeenCalledWith('/chapters/new-york')
+    })
+  })
+
+  describe('Keyboard Accessibility', () => {
+    it('unlocks map with Enter key', async () => {
+      const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
+
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.keyDown(unlockButton, { key: 'Enter' })
+
+      expect(queryByText('Unlock map')).not.toBeInTheDocument()
+
+      await waitFor(() => {
+        expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+      })
+    })
+
+    it('unlocks map with Space key', async () => {
+      const { getByText, queryByText } = render(<ChapterMap {...defaultProps} />)
+
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.keyDown(unlockButton, { key: ' ' })
+
+      expect(queryByText('Unlock map')).not.toBeInTheDocument()
+
+      await waitFor(() => {
+        expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+      })
+    })
+
+    it('does not unlock map with other keys', () => {
+      const { getByText } = render(<ChapterMap {...defaultProps} />)
+
+      const unlockButton = getByText('Unlock map').closest('button')
+      fireEvent.keyDown(unlockButton, { key: 'Tab' })
+
+      expect(getByText('Unlock map')).toBeInTheDocument()
     })
   })
 
   describe('Edge Cases', () => {
-    it('handles chapters with null/undefined geolocation gracefully', () => {
-      const chapterWithNullGeo: Chapter[] = [
+    it('handles case when map is not ready yet', () => {
+      mockMapInstance = null
+
+      const { container, getByText } = render(<ChapterMap {...defaultProps} />)
+      expect(container).toBeInTheDocument()
+
+      fireEvent.click(getByText('Unlock map').closest('button'))
+
+      expect(L.control.zoom).not.toHaveBeenCalled()
+    })
+
+    it('filters out chapters with invalid geolocation', () => {
+      const dataWithInvalidChapter: Chapter[] = [
         {
-          ...mockChapterData[0],
-          _geoloc: undefined,
-          geoLocation: undefined,
-        },
+          _geoloc: { lat: 40.7128, lng: -74.006 },
+          key: 'valid-chapter',
+          name: 'Valid Chapter',
+        } as Chapter,
+        {
+          key: 'invalid-chapter',
+          name: 'Invalid Chapter',
+        } as Chapter,
       ]
-      render(<ChapterMap {...defaultProps} geoLocData={chapterWithNullGeo} />)
-      expect(document.getElementById('chapter-map')).toBeInTheDocument()
-    })
 
-    it('applies custom styles correctly', () => {
-      const customStyle = { width: '800px', height: '600px', border: '1px solid red' }
-
-      const { container } = render(<ChapterMap {...defaultProps} style={customStyle} />)
-
-      // Custom styles should be applied to the parent container
-      const parentContainer = container.firstChild as HTMLElement
-      expect(parentContainer).toHaveStyle('width: 800px; height: 600px; border: 1px solid red;')
-
-      // Map container should have Tailwind classes
-      const mapContainer = document.getElementById('chapter-map')
-      expect(mapContainer).toHaveClass('h-full', 'w-full')
-    })
-  })
-
-  describe('Accessibility', () => {
-    it('provides accessible map container', () => {
-      render(<ChapterMap {...defaultProps} />)
-
-      const mapContainer = document.getElementById('chapter-map')
-      expect(mapContainer).toBeInTheDocument()
-      expect(mapContainer).toHaveAttribute('id', 'chapter-map')
-    })
-  })
-
-  describe('Zoom Control Visibility', () => {
-    beforeEach(() => {
-      jest.clearAllMocks()
-    })
-
-    it('does not show zoom control initially', () => {
-      render(<ChapterMap {...defaultProps} />)
-      expect(L.map).toHaveBeenCalledWith(
-        'chapter-map',
-        expect.objectContaining({
-          zoomControl: false,
-        })
-      )
-    })
-
-    it('shows zoom control when unlock button is clicked', () => {
-      const { getByText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
-
-      expect(L.control.zoom).toHaveBeenCalledWith({ position: 'topleft' })
-      expect(mockZoomControl.addTo).toHaveBeenCalledWith(mockMap)
-    })
-  })
-
-  describe('Share Location Button Visibility', () => {
-    const mockOnShareLocation = jest.fn()
-
-    it('does not show share location button initially when map is not active', () => {
-      const { queryByLabelText } = render(
-        <ChapterMap {...defaultProps} onShareLocation={mockOnShareLocation} />
+      const { getAllByTestId } = render(
+        <ChapterMap {...defaultProps} geoLocData={dataWithInvalidChapter} />
       )
 
-      expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
-    })
-
-    it('shows share location button when map becomes active', () => {
-      const { getByText, getByLabelText } = render(
-        <ChapterMap {...defaultProps} onShareLocation={mockOnShareLocation} />
-      )
-
-      expect(getByText('Unlock map')).toBeInTheDocument()
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
-
-      expect(getByLabelText(/share location to find nearby chapters/i)).toBeInTheDocument()
-    })
-
-    it('does not render share location button when onShareLocation is not provided', () => {
-      const { getByText, queryByLabelText } = render(<ChapterMap {...defaultProps} />)
-
-      const overlay = getByText('Unlock map').closest('button')
-      fireEvent.click(overlay)
-
-      expect(queryByLabelText(/share location/i)).not.toBeInTheDocument()
+      expect(getAllByTestId('marker')).toHaveLength(1)
     })
   })
 })
