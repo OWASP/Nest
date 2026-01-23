@@ -173,9 +173,34 @@ jobs:
           trivy-config: trivy.yaml
     timeout-minutes: 5
 
+  run-security-scan:
+    name: Run security scan
+    needs:
+      - scan-code
+      - scan-ci-dependencies
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Run Security CI Scan
+        run: make security-scan
+
+      - name: Upload security scan report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: semgrep-results-run-${{ github.run_number }}
+          path: semgrep-security-report.txt
+          retention-days: 14
+    timeout-minutes: 5
+
   run-backend-tests:
     name: Run backend tests
     needs:
+      - run-security-scan
       - scan-code
       - scan-ci-dependencies
     permissions:
@@ -227,6 +252,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
+      - run-security-scan
       - scan-code
       - scan-ci-dependencies
     permissions:
@@ -277,6 +303,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
+      - run-security-scan
       - scan-code
       - scan-ci-dependencies
     permissions:
@@ -369,6 +396,7 @@ jobs:
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
+      - run-security-scan
       - scan-code
       - scan-ci-dependencies
     permissions:
@@ -400,30 +428,6 @@ jobs:
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-a11y-latest pnpm run test:a11y
     timeout-minutes: 5
 
-  run-security-scan:
-    name: Run security scan
-    needs:
-      - scan-code
-      - scan-ci-dependencies
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Run Security CI Scan
-        run: make security-scan
-
-      - name: Upload security scan report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: semgrep-results-run-${{ github.run_number }}
-          path: semgrep-security-report.txt
-          retention-days: 14
-    timeout-minutes: 15
-
   set-release-version:
     name: Set release version
     outputs:
@@ -444,6 +448,7 @@ jobs:
   run-graphql-fuzz-tests:
     name: Run GraphQL fuzz tests
     needs:
+      - run-security-scan
       - scan-code
       - scan-ci-dependencies
     uses: ./.github/workflows/run-fuzz-tests.yaml
@@ -474,7 +479,6 @@ jobs:
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
-      - run-security-scan
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -845,7 +849,6 @@ jobs:
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
       - set-release-version
-      - run-security-scan
     permissions:
       contents: read
     runs-on: ubuntu-latest
