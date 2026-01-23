@@ -36,6 +36,8 @@ design/
 frontend/blob-report/
 frontend/coverage
 frontend/dist
+frontend/.next
+frontend/out
 frontend/npm-debug.log*
 frontend/playwright-report/
 frontend/playwright/.cache/

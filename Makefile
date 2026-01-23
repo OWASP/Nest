@@ -5,15 +5,6 @@ include frontend/Makefile
 
 MAKEFLAGS += --no-print-directory
 
-SEMGREP_CONFIGS := --config p/owasp-top-ten \
-                   --config p/python \
-                   --config p/javascript \
-                   --config p/typescript \
-                   --config p/sql-injection \
-                   --config p/secrets \
-                   --timeout 10 \
-                   --timeout-threshold 3
-
 build:
 	@docker compose build
 
@@ -68,13 +59,28 @@ scan-images: \
 	scan-frontend-image
 
 security-scan:
-	@echo "🛡️  Running Centralized Security Scan..."
-	semgrep $(SEMGREP_CONFIGS) --error --output semgrep-security-report.txt .
-	@echo "✅ Scan Complete. Results saved to semgrep-security-report.txt"
-
-security-scan-ci:
-	@echo "🛡️  Running CI Security Scan..."
-	semgrep $(SEMGREP_CONFIGS) --error .
+	@echo "Running Security Scan..."
+	@docker run --rm \
+		-v "$(PWD):/src" \
+		-w /src \
+		$$(grep -E '^FROM semgrep/semgrep:' docker/semgrep/Dockerfile | sed 's/^FROM //') \
+		semgrep \
+			--config p/ci \
+			--config p/javascript \
+			--config p/nginx \
+			--config p/owasp-top-ten \
+			--config p/python \
+			--config p/secrets \
+			--config p/security-audit \
+			--config p/sql-injection \
+			--config p/typescript \
+			--error \
+			--skip-unknown-extensions \
+			--timeout 10 \
+			--timeout-threshold 3 \
+			--text \
+			--text-output=semgrep-security-report.txt \
+			.
 
 test: \
 	test-nest-app
@@ -97,4 +103,4 @@ update-nest-app-dependencies: \
 update-pre-commit:
 	@pre-commit autoupdate
 
-.PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-ci test update
+.PHONY: build clean check pre-commit prune run scan-images security-scan test update
