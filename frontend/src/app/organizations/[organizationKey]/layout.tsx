@@ -1,3 +1,4 @@
+import DOMPurify from 'isomorphic-dompurify'
 import { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
@@ -98,7 +99,19 @@ export default async function OrganizationDetailsLayout({
   params: Promise<{ organizationKey: string }>
 }>) {
   const { organizationKey } = await params
+
+  if (!/^[a-zA-Z0-9._-]+$/.test(organizationKey)) {
+    return (
+      <PageLayout title="Invalid Organization" path="/organizations">
+        <div>Invalid Organization Key</div>
+      </PageLayout>
+    )
+  }
   const structuredData = await generateOrganizationStructuredData(organizationKey)
+
+  const jsonLdString = structuredData
+    ? DOMPurify.sanitize(JSON.stringify(structuredData, null, 2))
+    : null
 
   // Fetch organization name for breadcrumb
   const { data } = await apolloClient.query({
@@ -109,12 +122,12 @@ export default async function OrganizationDetailsLayout({
 
   return (
     <PageLayout title={orgName} path={`/organizations/${organizationKey}`}>
-      {structuredData && (
+      {jsonLdString && (
         <Script
           id="organization-structured-data"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData, null, 2),
+            __html: jsonLdString,
           }}
         />
       )}
