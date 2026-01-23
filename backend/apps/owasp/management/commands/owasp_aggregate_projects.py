@@ -111,10 +111,11 @@ class Command(BaseCommand):
                 is_template=False,
             ).exists()
 
+            projects.append(project)
+
             project.recent_milestones.set(
                 Milestone.objects.filter(repository__in=project.repositories.all())
             )
-            projects.append(project)
 
         # Bulk save data.
         Project.bulk_save(projects)
