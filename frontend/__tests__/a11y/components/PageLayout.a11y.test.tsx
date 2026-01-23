@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import PageLayout from 'components/PageLayout'
-
-expect.extend(toHaveNoViolations)
 
 describe('PageLayout a11y', () => {
   it('should not have any accessibility violations', async () => {
