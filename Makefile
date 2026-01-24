@@ -84,11 +84,21 @@ security-scan:
 
 security-scan-deps:
 	@echo "Running Trivy Filesystem Scan..."
-	@docker run --rm -v "$(PWD):/src" aquasec/trivy fs /src
+	@docker run --rm \
+		-v "$(PWD):/src" \
+		-w /src \
+		aquasec/trivy fs \
+			--config trivy.yaml \
+			.
 
 security-scan-repo:
 	@echo "Running Trivy Repository Scan..."
-	@docker run --rm -v "$(PWD):/src" aquasec/trivy repo /src
+	@docker run --rm \
+		-v "$(PWD):/src" \
+		-w /src \
+		aquasec/trivy repo \
+			--config trivy.yaml \
+			.
 
 test: \
 	test-nest-app
