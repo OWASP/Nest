@@ -1,4 +1,4 @@
-"""Strawberry extensions."""
+"""Strawberry cache extension."""
 
 import hashlib
 import json
@@ -49,25 +49,6 @@ def generate_key(field_name: str, field_args: dict) -> str:
     return f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
 
 
-class CacheExtension(SchemaExtension):
-    """CacheExtension class."""
-
-    def resolve(self, _next, root, info, *args, **kwargs):
-        """Wrap the resolver to provide caching."""
-        if (
-            info.field_name.startswith("__")
-            or info.parent_type.name != "Query"
-            or info.field_name in get_protected_fields(self.execution_context.schema)
-        ):
-            return _next(root, info, *args, **kwargs)
-
-        return cache.get_or_set(
-            generate_key(info.field_name, kwargs),
-            lambda: _next(root, info, *args, **kwargs),
-            settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS,
-        )
-
-
 def invalidate_cache(field_name: str, field_args: dict) -> bool:
     """Invalidate a specific GraphQL query from the resolver cache.
 
@@ -103,3 +84,22 @@ def invalidate_module_cache(module_key: str, program_key: str) -> None:
     """
     invalidate_cache("getModule", {"moduleKey": module_key, "programKey": program_key})
     invalidate_program_cache(program_key)
+
+
+class CacheExtension(SchemaExtension):
+    """Cache extension."""
+
+    def resolve(self, _next, root, info, *args, **kwargs):
+        """Wrap the resolver to provide caching."""
+        if (
+            info.field_name.startswith("__")
+            or info.parent_type.name != "Query"
+            or info.field_name in get_protected_fields(self.execution_context.schema)
+        ):
+            return _next(root, info, *args, **kwargs)
+
+        return cache.get_or_set(
+            generate_key(info.field_name, kwargs),
+            lambda: _next(root, info, *args, **kwargs),
+            settings.GRAPHQL_RESOLVER_CACHE_TIME_SECONDS,
+        )

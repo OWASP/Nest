@@ -121,8 +121,7 @@ class ModuleMutation:
         mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
 
-        program_key = program.key
-        transaction.on_commit(lambda: invalidate_program_cache(program_key))
+        transaction.on_commit(lambda: invalidate_program_cache(program.key))
 
         return module
 

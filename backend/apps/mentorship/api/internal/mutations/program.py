@@ -170,8 +170,7 @@ class ProgramMutation:
         program.status = input_data.status.value
         program.save()
 
-        program_key = program.key
-        transaction.on_commit(lambda: invalidate_program_cache(program_key))
+        transaction.on_commit(lambda: invalidate_program_cache(program.key))
 
         logger.info("Updated status of program '%s' to '%s'", program.key, program.status)
 
