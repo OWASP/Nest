@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import AutoScrollToTop from 'components/AutoScrollToTop'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/navigation', () => ({
   usePathname: () => '/test-path',
