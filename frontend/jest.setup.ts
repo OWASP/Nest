@@ -171,3 +171,5 @@ jest.mock('@apollo/client/react', () => {
     useMutation: mockUseMutation,
   }
 })
+
+expect.extend(toHaveNoViolations)
