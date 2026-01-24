@@ -336,7 +336,7 @@ class ModuleMutation:
             )
             old_module_key = module.key
         except Module.DoesNotExist as e:
-            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
+            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
