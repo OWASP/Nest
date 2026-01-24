@@ -160,7 +160,7 @@ variable "environment" {
 variable "fixtures_bucket_name" {
   description = "The name of the S3 bucket for fixtures."
   type        = string
-  default     = "owasp-nest-fixtures"
+  default     = null
 }
 
 variable "frontend_desired_count" {
@@ -285,5 +285,5 @@ variable "vpc_cidr" {
 variable "zappa_bucket_name" {
   description = "The name of the S3 bucket for Zappa deployments."
   type        = string
-  default     = "owasp-nest-zappa-deployments"
+  default     = null
 }

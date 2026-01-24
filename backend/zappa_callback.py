@@ -58,8 +58,13 @@ def update_alias(zappa):
         print("No published versions found, skipping alias update")
         return
 
-    client.update_alias(FunctionName=zappa.lambda_name, Name="live", FunctionVersion=published[-1])
-    print(f"Alias 'live' now points to version {published[-1]}")
+    try:
+        client.update_alias(
+            FunctionName=zappa.lambda_name, Name="live", FunctionVersion=published[-1]
+        )
+        print(f"Alias 'live' now points to version {published[-1]}")
+    except client.exceptions.ResourceNotFoundException:
+        print("Alias 'live' not found, skipping alias update")
 
 
 def cleanup_versions(zappa, keep=5):
