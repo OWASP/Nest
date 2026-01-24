@@ -1,8 +1,6 @@
 import { Breadcrumbs } from '@heroui/react'
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
-
-expect.extend(toHaveNoViolations)
+import { axe } from 'jest-axe'
 
 describe('Breadcrumbs a11y', () => {
   it('should not have any accessibility violations', async () => {

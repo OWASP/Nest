@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { IconType } from 'react-icons'
 import { FaCertificate } from 'react-icons/fa6'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
-
-expect.extend(toHaveNoViolations)
 
 type GeneralCompliantComponentProps = {
   compliant: boolean
