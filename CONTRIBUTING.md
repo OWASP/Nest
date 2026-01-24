@@ -428,7 +428,7 @@ docker run --rm -v "$(pwd):/src" aquasec/trivy repo /src
 
 These commands automatically:
 - Analyze the project using the standards defined in trivy.yaml
-- Identifie critical and high vulnerabilities that block CI/CD
+- Identify critical and high vulnerabilities that block CI/CD
 - Output findings to the terminal for immediate review
 
 ### Running Security Scan
