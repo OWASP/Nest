@@ -264,12 +264,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => {
                     const loginName = 'login' in hit ? (hit.login as string) : ''
-                    const urlPath = 'url' in hit ? (hit.url as string) : ''
-                    const uniqueKey = hit.key || loginName || urlPath || subIndex
 
                     return (
                       <li
-                        key={`${uniqueKey}-${subIndex}`}
+                        key={`multi-search-${suggestion.indexName}-${hit.key || hit.login || hit.url}`}
                         className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
                           highlightedIndex?.index === index &&
                           highlightedIndex?.subIndex === subIndex
