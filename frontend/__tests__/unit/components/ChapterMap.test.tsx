@@ -10,7 +10,28 @@ let mockMapInstance: unknown = null
 const mockMap = {
   setView: jest.fn().mockReturnThis(),
   fitBounds: jest.fn().mockReturnThis(),
+  setMinZoom: jest.fn().mockReturnThis(),
+  getContainer: jest.fn(() => ({
+    clientWidth: 800,
+    clientHeight: 600,
+  })),
   scrollWheelZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  dragging: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  touchZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  doubleClickZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  keyboard: {
     enable: jest.fn(),
     disable: jest.fn(),
   },

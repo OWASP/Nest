@@ -1,11 +1,9 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import * as L from 'leaflet'
 import React, { useEffect } from 'react'
 import ChapterMap from 'components/ChapterMap'
-
-expect.extend(toHaveNoViolations)
 
 const mockMap = {
   setView: jest.fn().mockReturnThis(),
@@ -14,6 +12,27 @@ const mockMap = {
     enable: jest.fn(),
     disable: jest.fn(),
   },
+  dragging: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  touchZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  doubleClickZoom: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  keyboard: {
+    enable: jest.fn(),
+    disable: jest.fn(),
+  },
+  getContainer: jest.fn(() => ({
+    clientWidth: 800,
+    clientHeight: 400,
+  })),
+  setMinZoom: jest.fn(),
 }
 
 const mockZoomControl = {

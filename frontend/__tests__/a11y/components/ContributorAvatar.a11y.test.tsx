@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import { Contributor } from 'types/contributor'
 import ContributorAvatar from 'components/ContributorAvatar'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children, content, id }: { children: ReactNode; content: string; id: string }) => (
@@ -36,6 +34,7 @@ jest.mock('next/link', () => {
 })
 
 const mockGitHubContributor: Contributor = {
+  id: 'contributor-jane-doe',
   login: 'jane-doe',
   name: 'Jane Doe',
   avatarUrl: 'https://avatars.githubusercontent.com/u/12345',

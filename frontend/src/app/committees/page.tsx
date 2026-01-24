@@ -38,6 +38,7 @@ const CommitteesPage = () => {
     return (
       <Card
         key={committee.objectID}
+        cardKey={committee.objectID}
         title={committee.name}
         url={`/committees/${committee.key}`}
         summary={committee.summary}
@@ -62,7 +63,7 @@ const CommitteesPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      {committees && committees.map(renderCommitteeCard)}
+      {committees?.map(renderCommitteeCard)}
     </SearchPageLayout>
   )
 }

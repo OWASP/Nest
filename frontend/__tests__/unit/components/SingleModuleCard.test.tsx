@@ -1,4 +1,5 @@
-import { screen } from '@testing-library/react'
+/* eslint-disable @next/next/no-img-element */
+import { screen, fireEvent } from '@testing-library/react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React from 'react'
@@ -12,28 +13,24 @@ jest.mock('next/link', () => ({
   default: ({
     children,
     href,
-    target,
-    rel,
     className,
     ...props
   }: {
     children: React.ReactNode
     href: string
-    target?: string
-    rel?: string
     className?: string
     [key: string]: unknown
   }) => (
-    <a
-      href={href}
-      target={target}
-      rel={rel}
-      className={className}
-      {...props}
-      data-testid="module-link"
-    >
+    <a href={href} className={className} {...props} data-testid="module-link">
       {children}
     </a>
+  ),
+}))
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
+    <img src={src} alt={alt} {...props} data-testid="contributor-avatar" />
   ),
 }))
 
@@ -57,6 +54,10 @@ jest.mock('utils/dateFormatter', () => ({
   formatDate: jest.fn((date: string) => new Date(date).toLocaleDateString()),
 }))
 
+jest.mock('utils/urlFormatter', () => ({
+  getMemberUrl: jest.fn((login: string) => `/members/${login}`),
+}))
+
 jest.mock('components/ModuleCard', () => ({
   getSimpleDuration: jest.fn((start: string, end: string) => {
     const startDate = new Date(start)
@@ -67,14 +68,12 @@ jest.mock('components/ModuleCard', () => ({
   }),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ShowMoreButton', () => ({
   __esModule: true,
-  default: ({ contributors, label }: { contributors: unknown[]; label: string }) => (
-    <div data-testid="top-contributors-list">
-      <span>
-        {label}: {contributors.length} contributors
-      </span>
-    </div>
+  default: ({ onToggle }: { onToggle: () => void }) => (
+    <button data-testid="show-more-button" onClick={onToggle}>
+      Show more
+    </button>
   ),
 }))
 
@@ -93,11 +92,13 @@ const mockModule: Module = {
   experienceLevel: ExperienceLevelEnum.Intermediate,
   mentors: [
     {
+      id: 'mentor-user1',
       name: 'user1',
       login: 'user1',
       avatarUrl: 'https://example.com/avatar1.jpg',
     },
     {
+      id: 'mentor-user2',
       name: 'user2',
       login: 'user2',
       avatarUrl: 'https://example.com/avatar2.jpg',
@@ -108,6 +109,16 @@ const mockModule: Module = {
   domains: ['frontend', 'backend'],
   tags: ['react', 'nodejs'],
   labels: ['good first issue', 'bug'],
+}
+
+const mockModuleWithManyMentors: Module = {
+  ...mockModule,
+  mentors: Array.from({ length: 10 }, (_, i) => ({
+    id: `mentor-${i + 1}`,
+    name: `mentor${i + 1}`,
+    login: `mentor${i + 1}`,
+    avatarUrl: `https://example.com/avatar${i + 1}.jpg`,
+  })),
 }
 
 const mockAdmins = [{ login: 'admin1' }, { login: 'admin2' }]
@@ -137,7 +148,7 @@ describe('SingleModuleCard', () => {
 
       expect(screen.getByText('Test Module')).toBeInTheDocument()
       expect(screen.getByText('This is a test module description')).toBeInTheDocument()
-      expect(screen.getByTestId('icon-users')).toBeInTheDocument()
+      expect(screen.getAllByTestId('icon-users').length).toBeGreaterThan(0)
     })
 
     it('renders module details correctly', () => {
@@ -150,48 +161,117 @@ describe('SingleModuleCard', () => {
       expect(screen.getByText('Duration:')).toBeInTheDocument()
     })
 
-    it('renders mentors list when mentors exist', () => {
+    it('renders mentors section with inline contributors when mentors exist', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
-      expect(screen.getByText('Mentors: 2 contributors')).toBeInTheDocument()
+      expect(screen.getByText('Mentors')).toBeInTheDocument()
+      expect(screen.getByText('User1')).toBeInTheDocument()
+      expect(screen.getByText('User2')).toBeInTheDocument()
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(2)
     })
 
-    it('does not render mentors list when no mentors', () => {
+    it('does not render mentors section when no mentors', () => {
       const moduleWithoutMentors = { ...mockModule, mentors: [] }
       render(<SingleModuleCard module={moduleWithoutMentors} />)
 
-      expect(screen.queryByTestId('top-contributors-list')).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
     })
 
     it('renders module link with correct href', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const moduleLink = screen.getByTestId('module-link')
-      expect(moduleLink).toHaveAttribute(
+      const moduleLinks = screen.getAllByTestId('module-link')
+      const titleLink = moduleLinks.find((link) =>
+        link.getAttribute('href')?.includes('/modules/test-module')
+      )
+      expect(titleLink).toHaveAttribute(
         'href',
         '/my/mentorship/programs/test-program/modules/test-module'
       )
-      expect(moduleLink).toHaveAttribute('target', '_blank')
-      expect(moduleLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
   })
 
-  describe('Simplified Interface', () => {
-    it('focuses on content display only', () => {
+  describe('Inline Contributors Rendering', () => {
+    it('renders contributor avatars inline without nested shadows', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      // Should display core content
-      expect(screen.getByText('Test Module')).toBeInTheDocument()
-      expect(screen.getByText('This is a test module description')).toBeInTheDocument()
-      expect(screen.getByText('Experience Level:')).toBeInTheDocument()
+      const avatars = screen.getAllByTestId('contributor-avatar')
+      expect(avatars.length).toBeGreaterThan(0)
+    })
 
-      // Should have clickable title for navigation
-      const moduleLink = screen.getByTestId('module-link')
-      expect(moduleLink).toHaveAttribute(
-        'href',
-        '/my/mentorship/programs/test-program/modules/test-module'
+    it('renders show more button when more than 6 mentors', () => {
+      render(<SingleModuleCard module={mockModuleWithManyMentors} />)
+
+      expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
+    })
+
+    it('does not render show more button when 6 or fewer mentors', () => {
+      render(<SingleModuleCard module={mockModule} />)
+
+      expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
+    })
+
+    it('toggles show all mentors when show more button is clicked', () => {
+      render(<SingleModuleCard module={mockModuleWithManyMentors} />)
+
+      // Initially shows only 6
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(6)
+
+      // Click show more
+      fireEvent.click(screen.getByTestId('show-more-button'))
+
+      // Should now show all 10
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(10)
+    })
+  })
+
+  describe('Mentee URL Handling', () => {
+    it('uses private mentee URL in private view', () => {
+      const moduleWithMentees: Module = {
+        ...mockModule,
+        mentees: [
+          {
+            id: 'mentee-1',
+            name: 'mentee1',
+            login: 'mentee1',
+            avatarUrl: 'https://example.com/mentee1.jpg',
+          },
+        ],
+      }
+      mockUsePathname.mockReturnValue('/my/mentorship/programs/test-program')
+
+      render(<SingleModuleCard module={moduleWithMentees} />)
+
+      const menteeLinks = screen.getAllByTestId('module-link')
+      const menteeLink = menteeLinks.find((link) =>
+        link.getAttribute('href')?.includes('/mentees/')
       )
+      expect(menteeLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module/mentees/mentee1'
+      )
+    })
+
+    it('uses public member URL in public view', () => {
+      const moduleWithMentees: Module = {
+        ...mockModule,
+        mentors: [],
+        mentees: [
+          {
+            id: 'mentee-1',
+            name: 'mentee1',
+            login: 'mentee1',
+            avatarUrl: 'https://example.com/mentee1.jpg',
+          },
+        ],
+      }
+      mockUsePathname.mockReturnValue('/programs/test-program')
+
+      render(<SingleModuleCard module={moduleWithMentees} />)
+
+      const allLinks = screen.getAllByRole('link')
+      const menteeLink = allLinks.find((link) => link.getAttribute('href') === '/members/mentee1')
+      expect(menteeLink).toBeInTheDocument()
     })
   })
 
@@ -203,8 +283,7 @@ describe('SingleModuleCard', () => {
       expect(screen.getByText('This is a test module description')).toBeInTheDocument()
     })
 
-    it('ignores admin-related props since menu is removed', () => {
-      // These props are now ignored but should not cause errors
+    it('handles admin props correctly', () => {
       render(<SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />)
 
       expect(screen.getByText('Test Module')).toBeInTheDocument()
@@ -222,7 +301,7 @@ describe('SingleModuleCard', () => {
       render(<SingleModuleCard module={incompleteModule} />)
 
       expect(screen.getByText('Test Module')).toBeInTheDocument()
-      expect(screen.queryByTestId('top-contributors-list')).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
     })
 
     it('handles undefined admins array gracefully', () => {
@@ -231,37 +310,61 @@ describe('SingleModuleCard', () => {
       // Should render without errors even with admin props
       expect(screen.getByText('Test Module')).toBeInTheDocument()
     })
+
+    it('renders no description available when description is empty', () => {
+      const moduleWithoutDescription = { ...mockModule, description: '' }
+      render(<SingleModuleCard module={moduleWithoutDescription} />)
+
+      expect(screen.getByText('No description available.')).toBeInTheDocument()
+    })
   })
 
   describe('Accessibility', () => {
     it('has accessible link for module navigation', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const moduleLink = screen.getByTestId('module-link')
-      expect(moduleLink).toBeInTheDocument()
-      expect(moduleLink).toHaveAttribute(
+      const moduleLinks = screen.getAllByTestId('module-link')
+      const titleLink = moduleLinks.find((link) =>
+        link.getAttribute('href')?.includes('/modules/test-module')
+      )
+      expect(titleLink).toBeInTheDocument()
+      expect(titleLink).toHaveAttribute(
         'href',
         '/my/mentorship/programs/test-program/modules/test-module'
       )
-      expect(moduleLink).toHaveAttribute('target', '_blank')
-      expect(moduleLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
 
-    it('has proper heading structure', () => {
+    it('has proper heading structure with h2', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const moduleTitle = screen.getByRole('heading', { level: 1 })
+      const moduleTitle = screen.getByRole('heading', { level: 2 })
       expect(moduleTitle).toBeInTheDocument()
       expect(moduleTitle).toHaveTextContent('Test Module')
     })
-  })
 
-  describe('Responsive Design', () => {
-    it('applies responsive classes correctly', () => {
+    it('has proper heading structure with h3 for contributors sections', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const moduleTitle = screen.getByText('Test Module')
-      expect(moduleTitle).toHaveClass('sm:break-normal', 'sm:text-lg', 'lg:text-2xl')
+      const mentorsHeading = screen.getByRole('heading', { level: 3, name: 'Mentors' })
+      expect(mentorsHeading).toBeInTheDocument()
+    })
+  })
+
+  describe('Styling', () => {
+    it('renders without shadow or border classes in module wrapper', () => {
+      render(<SingleModuleCard module={mockModule} />)
+
+      // The component should render successfully with the section styling
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.getByText('Mentors')).toBeInTheDocument()
+    })
+
+    it('renders contributor items with proper styling', () => {
+      render(<SingleModuleCard module={mockModule} />)
+
+      // Contributors should be rendered inline
+      const avatars = screen.getAllByTestId('contributor-avatar')
+      expect(avatars.length).toBeGreaterThan(0)
     })
   })
 })

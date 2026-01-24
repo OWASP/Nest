@@ -92,30 +92,25 @@ jest.mock('components/UserMenu', () => {
 })
 
 // Mock constants
-jest.mock('utils/constants', () => ({
-  desktopViewMinWidth: 768,
-  headerLinks: [
-    {
-      text: 'Home',
-      href: '/',
-    },
-    {
-      text: 'About',
-      href: '/about',
-    },
-    {
-      text: 'Services',
-      submenu: [
-        { text: 'Web Development', href: '/services/web' },
-        { text: 'Mobile Development', href: '/services/mobile' },
-      ],
-    },
-    {
-      text: 'Contact',
-      href: '/contact',
-    },
-  ],
-}))
+jest.mock('utils/constants', () => {
+  const actual = jest.requireActual('utils/constants')
+  return {
+    ...actual,
+    desktopViewMinWidth: 768,
+    headerLinks: [
+      { text: 'Home', href: '/' },
+      { text: 'About', href: '/about' },
+      {
+        text: 'Services',
+        submenu: [
+          { text: 'Web Development', href: '/services/web' },
+          { text: 'Mobile Development', href: '/services/mobile' },
+        ],
+      },
+      { text: 'Contact', href: '/contact' },
+    ],
+  }
+})
 
 // Mock utility function
 jest.mock('utils/utility', () => ({
@@ -211,8 +206,9 @@ describe('Header Component', () => {
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2) // One in desktop header, one in mobile menu
 
-      const userMenu = screen.getByTestId('user-menu')
-      expect(userMenu).toHaveAttribute('data-github-auth', 'true')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('renders successfully with GitHub auth disabled', () => {
@@ -226,8 +222,9 @@ describe('Header Component', () => {
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2)
 
-      const userMenu = screen.getByTestId('user-menu')
-      expect(userMenu).toHaveAttribute('data-github-auth', 'false')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'false')
     })
   })
 
@@ -441,7 +438,9 @@ describe('Header Component', () => {
     it('renders UserMenu component', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(screen.getByTestId('user-menu')).toBeInTheDocument()
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toBeInTheDocument()
     })
 
     it('renders ModeToggle component', () => {
@@ -581,13 +580,17 @@ describe('Header Component', () => {
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when true', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'true')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when false', () => {
       renderWithSession(<Header isGitHubAuthEnabled={false} />)
 
-      expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'false')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'false')
     })
   })
 

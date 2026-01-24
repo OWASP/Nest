@@ -1,6 +1,7 @@
 services:
   production-nest-backend:
     container_name: production-nest-backend
+    entrypoint: /home/owasp/entrypoint.sh
     image: owasp/nest:backend-production
     env_file: .env.backend
     depends_on:

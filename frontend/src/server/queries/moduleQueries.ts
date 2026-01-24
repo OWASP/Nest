@@ -59,6 +59,8 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
   query GetProgramAdminsAndModules($programKey: String!, $moduleKey: String!) {
     getProgram(programKey: $programKey) {
       id
+      startedAt
+      endedAt
       admins {
         id
         login
