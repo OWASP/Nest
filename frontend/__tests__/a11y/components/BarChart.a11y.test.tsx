@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import BarChart from 'components/BarChart'
 
@@ -69,8 +69,6 @@ jest.mock('components/SecondaryCard', () => {
     )
   }
 })
-
-expect.extend(toHaveNoViolations)
 
 describe('BarChart Accessibility', () => {
   it('should not have any accessibility violations', async () => {

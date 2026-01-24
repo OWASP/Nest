@@ -4,13 +4,12 @@ import { addToast } from '@heroui/toast'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import type { Module, Program } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -22,9 +21,6 @@ const ProgramDetailsPage = () => {
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
-
   const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
@@ -32,10 +28,13 @@ const ProgramDetailsPage = () => {
   const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
+    fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   })
 
   const isLoading = isQueryLoading
+  const program = data?.getProgram ?? null
+  const modules = data?.getProgramModules ?? []
 
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
@@ -82,14 +81,7 @@ const ProgramDetailsPage = () => {
     }
   }
 
-  useEffect(() => {
-    if (data?.getProgram) {
-      setProgram(data.getProgram)
-      setModules(data.getProgramModules || [])
-    }
-  }, [data])
-
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (!program && !isLoading) {
     return (

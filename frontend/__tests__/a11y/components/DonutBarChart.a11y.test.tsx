@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaChartPie } from 'react-icons/fa'
 import DonutBarChart from 'components/DonutBarChart'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/dynamic', () => {
   return jest.fn(() => {

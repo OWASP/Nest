@@ -53,6 +53,7 @@ askowasp
 attisdropped
 bangbang
 bsky
+carryforward
 certbot
 collectstatic
 coraza
@@ -116,6 +117,7 @@ navlink
 nestbot
 ngx
 noinput
+nosemgrep
 nosniff
 nspname
 numfmt
@@ -136,6 +138,7 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+quasis
 relativedelta
 repositorycontributor
 requirepass
@@ -145,6 +148,7 @@ saft
 sakanashi
 samm
 schemathesis
+semgrep
 seo
 skillstruck
 slackbot
