@@ -25,5 +25,5 @@ variable "noncurrent_version_expiration_days" {
 variable "project_name" {
   description = "The name of the project."
   type        = string
-  default     = "owasp-nest"
+  default     = "nest"
 }

@@ -5,7 +5,11 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
+ifeq ($(EXEC_MODE),direct)
+SHELL := /bin/sh
+else
 SHELL := /bin/bash
+endif
 
 .PHONY: sbom-backend-image
 

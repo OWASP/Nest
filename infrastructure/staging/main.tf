@@ -15,6 +15,8 @@ locals {
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
+  fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-fixtures")
+  zappa_bucket_name    = coalesce(var.zappa_bucket_name, "${var.project_name}-zappa-deployments")
 }
 
 module "alb" {
@@ -142,6 +144,8 @@ module "parameters" {
   project_name       = var.project_name
   redis_host         = module.cache.redis_primary_endpoint
   redis_password_arn = module.cache.redis_password_arn
+  server_csrf_url    = var.domain_name != null ? "https://${var.domain_name}/csrf/" : "http://${module.alb.alb_dns_name}/csrf/"
+  server_graphql_url = var.domain_name != null ? "https://${var.domain_name}/graphql/" : "http://${module.alb.alb_dns_name}/graphql/"
 }
 
 module "security" {
@@ -163,7 +167,7 @@ module "storage" {
 
   common_tags          = local.common_tags
   environment          = var.environment
-  fixtures_bucket_name = var.fixtures_bucket_name
+  fixtures_bucket_name = local.fixtures_bucket_name
   project_name         = var.project_name
-  zappa_bucket_name    = var.zappa_bucket_name
+  zappa_bucket_name    = local.zappa_bucket_name
 }
