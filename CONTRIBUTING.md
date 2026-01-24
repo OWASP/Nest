@@ -410,7 +410,7 @@ This command runs tests and checks that coverage threshold requirements are sati
 
 Trivy is an open-source security scanner that identifies vulnerabilities, misconfigurations, and hardcoded secrets across repositories and file systems. You can replicate the CI/CD security checks locally using following commands:
 
-**Filesystem Scan**
+#### Filesystem Scan
 
 Check local dependencies and configurations for vulnerabilities:
 
@@ -418,7 +418,7 @@ Check local dependencies and configurations for vulnerabilities:
 make security-scan-deps
 ```
 
-**Repository Scan**
+#### Repository Scan
 
 Scan the Git history for sensitive information and secrets:
 
