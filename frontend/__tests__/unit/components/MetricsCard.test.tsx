@@ -44,7 +44,7 @@ describe('MetricsCard component', () => {
     expect(screen.getAllByText('13')[0]).toBeInTheDocument()
     expect(screen.getAllByText('5')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Mar 25, 2023')[0]).toBeInTheDocument()
-    expect(screen.getAllByText('80')[0]).toBeInTheDocument()
+    expect(screen.getByText(/Score:/)).toBeInTheDocument()
 
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', '/projects/dashboard/metrics/test-project')
@@ -58,25 +58,27 @@ describe('MetricsCard component', () => {
 
   it('applies correct styling class depending on score thresholds', () => {
     const cases: Array<[number, string]> = [
-      [90, 'text-green-900'],
-      [75, 'text-green-900'],
-      [60, 'text-orange-900'],
-      [50, 'text-orange-900'],
-      [30, 'text-red-900'],
+      [90, 'bg-green-500'],
+      [75, 'bg-green-500'],
+      [60, 'bg-orange-500'],
+      [50, 'bg-orange-500'],
+      [30, 'bg-red-500'],
     ]
 
     for (const [score, expectedClass] of cases) {
       const metric = makeMetric({ score })
-      render(<MetricsCard metric={metric} />)
-      const scoreEl = screen.getByText(score.toString()).closest('div')
+      const { unmount } = render(<MetricsCard metric={metric} />)
+      const scoreText = screen.getByText(/Score:/)
+      const scoreEl = scoreText.closest('div')
       expect(scoreEl).toHaveClass(expectedClass)
+      unmount()
     }
   })
 
   it('updates displayed values and link when metric props change via rerender', () => {
     const { rerender } = render(<MetricsCard metric={makeMetric()} />)
     expect(screen.getAllByText('Test Project')[0]).toBeInTheDocument()
-    expect(screen.getAllByText('80')[0]).toBeInTheDocument()
+    expect(screen.getByText(/Score:/).textContent).toContain('80')
 
     const updated = makeMetric({
       projectKey: 'another',
@@ -94,7 +96,7 @@ describe('MetricsCard component', () => {
     expect(screen.getAllByText('20')[0]).toBeInTheDocument()
     expect(screen.getAllByText('7')[0]).toBeInTheDocument()
     expect(screen.getAllByText('Jan 1, 2024')[0]).toBeInTheDocument()
-    expect(screen.getAllByText('55')[0]).toBeInTheDocument()
+    expect(screen.getByText(/Score:/).textContent).toContain('55')
     expect(screen.getByRole('link')).toHaveAttribute('href', '/projects/dashboard/metrics/another')
   })
 })

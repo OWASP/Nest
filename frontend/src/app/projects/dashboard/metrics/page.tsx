@@ -3,16 +3,7 @@ import { useQuery } from '@apollo/client/react'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
-import type { IconType } from 'react-icons'
-import {
-  FaFilter,
-  FaSort,
-  FaSortUp,
-  FaSortDown,
-  FaArrowDownWideShort,
-  FaArrowUpWideShort,
-} from 'react-icons/fa6'
-import { IconWrapper } from 'wrappers/IconWrapper'
+import { FaFilter, FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
 import { Ordering } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
@@ -25,9 +16,7 @@ import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 const PAGINATION_LIMIT = 10
 
-type OrderKey = 'score' | 'stars' | 'forks' | 'contributors' | 'createdAt'
-
-const MOBILE_ORDERING_MAP = {
+const ORDERING_MAP = {
   scoreDesc: { field: 'score', direction: Ordering.Desc },
   scoreAsc: { field: 'score', direction: Ordering.Asc },
   starsDesc: { field: 'starsCount', direction: Ordering.Desc },
@@ -40,9 +29,9 @@ const MOBILE_ORDERING_MAP = {
   createdAtAsc: { field: 'createdAt', direction: Ordering.Asc },
 } as const
 
-type MobileOrderingKey = keyof typeof MOBILE_ORDERING_MAP
+type OrderingKey = keyof typeof ORDERING_MAP
 
-const MOBILE_SORT_FIELDS = [
+const SORT_FIELDS = [
   { label: 'Score (High → Low)', key: 'scoreDesc' },
   { label: 'Score (Low → High)', key: 'scoreAsc' },
   { label: 'Stars (High → Low)', key: 'starsDesc' },
@@ -56,11 +45,11 @@ const MOBILE_SORT_FIELDS = [
 ] as const
 
 const parseOrderParam = (orderParam: string | null) => {
-  if (!orderParam || !Object.hasOwn(MOBILE_ORDERING_MAP, orderParam)) {
+  if (!orderParam || !Object.hasOwn(ORDERING_MAP, orderParam)) {
     return { field: 'score', direction: Ordering.Desc, urlKey: 'scoreDesc' }
   }
 
-  const { field, direction } = MOBILE_ORDERING_MAP[orderParam as MobileOrderingKey]
+  const { field, direction } = ORDERING_MAP[orderParam as OrderingKey]
 
   return { field, direction, urlKey: orderParam }
 }
@@ -78,75 +67,6 @@ const buildOrderingWithTieBreaker = (primaryOrdering: Record<string, Ordering>) 
     project_Name: Ordering.Asc,
   },
 ]
-
-const SortableColumnHeader: FC<{
-  label: string
-  fieldKey: OrderKey
-  currentOrderKey: string
-  onSort: (orderKey: string | null) => void
-  align?: 'left' | 'center' | 'right'
-}> = ({ label, fieldKey, currentOrderKey, onSort, align = 'left' }) => {
-  const descOrderKey = `${fieldKey}Desc` as MobileOrderingKey
-  const ascOrderKey = `${fieldKey}Asc` as MobileOrderingKey
-
-  const isActiveSortDesc = currentOrderKey === descOrderKey
-  const isActiveSortAsc = currentOrderKey === ascOrderKey
-  const isActive = isActiveSortDesc || isActiveSortAsc
-
-  const handleClick = () => {
-    if (!isActive) {
-      onSort(descOrderKey)
-    } else if (isActiveSortDesc) {
-      onSort(ascOrderKey)
-    } else {
-      onSort(null)
-    }
-  }
-
-  const justifyMap = {
-    left: 'justify-start',
-    center: 'justify-center',
-    right: 'justify-end',
-  }
-
-  const alignmentClass = justifyMap[align] || justifyMap.left
-
-  const textAlignMap = {
-    left: 'text-left',
-    center: 'text-center',
-    right: 'text-right',
-  }
-
-  const textAlignClass = textAlignMap[align] || textAlignMap.left
-
-  let iconType: IconType
-  if (isActiveSortDesc) {
-    iconType = FaSortDown
-  } else if (isActiveSortAsc) {
-    iconType = FaSortUp
-  } else {
-    iconType = FaSort
-  }
-
-  return (
-    <div className={`flex items-center gap-1 ${alignmentClass}`}>
-      <button
-        type="button"
-        onClick={handleClick}
-        className={`flex items-center gap-1 font-semibold transition-colors hover:text-blue-600 ${textAlignClass}`}
-        title={`Sort by ${label}`}
-        aria-label={`Sort by ${label}`}
-        aria-pressed={isActive}
-      >
-        <span className="truncate">{label}</span>
-        <IconWrapper
-          icon={iconType}
-          className={`h-3 w-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`}
-        />
-      </button>
-    </div>
-  )
-}
 
 const MetricsPage: FC = () => {
   const searchParams = useSearchParams()
@@ -295,15 +215,14 @@ const MetricsPage: FC = () => {
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="mb-2 text-2xl font-bold">Project Health Metrics</h1>
         <div className="flex flex-row items-center gap-2 self-end">
-          {/* Mobile Sort */}
-          <div className="sm:hidden">
+          <div>
             <ProjectsDashboardDropDown
               buttonDisplayName="Sort By"
               icon={urlKey?.endsWith('Desc') ? FaArrowDownWideShort : FaArrowUpWideShort}
               sections={[
                 {
                   title: 'Sort by',
-                  items: MOBILE_SORT_FIELDS.map((field) => ({
+                  items: SORT_FIELDS.map((field) => ({
                     label: field.label,
                     key: field.key,
                   })),
@@ -316,7 +235,7 @@ const MetricsPage: FC = () => {
               selectionMode="single"
               selectedKeys={urlKey ? [urlKey] : []}
               selectedLabels={
-                urlKey ? [MOBILE_SORT_FIELDS.find((f) => f.key === urlKey)?.label || ''] : []
+                urlKey ? [SORT_FIELDS.find((f) => f.key === urlKey)?.label || ''] : []
               }
               onAction={(key: string) => {
                 if (key === 'reset-sort') {
@@ -364,44 +283,6 @@ const MetricsPage: FC = () => {
             }}
           />
         </div>
-      </div>
-      <div className="hidden grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] gap-2 border-b border-gray-200 p-4 sm:grid dark:border-gray-700">
-        <div className="truncate font-semibold">Project Name</div>
-        <SortableColumnHeader
-          label="Stars"
-          fieldKey="stars"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Forks"
-          fieldKey="forks"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Contributors"
-          fieldKey="contributors"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Health Checked At"
-          fieldKey="createdAt"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Score"
-          fieldKey="score"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
       </div>
       {loading ? (
         <LoadingSpinner />

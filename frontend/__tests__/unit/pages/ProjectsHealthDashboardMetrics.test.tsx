@@ -91,15 +91,6 @@ describe('MetricsPage', () => {
     })
   }
 
-  const expectAllHeadersVisible = async () => {
-    const headers = ['Project Name', 'Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
-    await waitFor(() => {
-      for (const header of headers) {
-        expect(screen.getAllByText(header).length).toBeGreaterThan(0)
-      }
-    })
-  }
-
   const testFilterOptions = async () => {
     const filterOptions = [
       'Incubator',
@@ -116,14 +107,6 @@ describe('MetricsPage', () => {
       const button = screen.getByRole('button', { name: option })
       fireEvent.click(button)
       expect(button).toBeInTheDocument()
-    }
-  }
-
-  const testSortableColumns = async () => {
-    const sortableColumns = ['Stars', 'Forks', 'Contributors', 'Health Checked At', 'Score']
-    for (const column of sortableColumns) {
-      const sortButton = screen.getByTitle(`Sort by ${column}`)
-      expect(sortButton).toBeInTheDocument()
     }
   }
 
@@ -165,82 +148,16 @@ describe('MetricsPage', () => {
     expect(true).toBe(true)
   })
 
-  test('renders metrics table headers', async () => {
-    render(<MetricsPage />)
-    await expectAllHeadersVisible()
-
-    expect(true).toBe(true)
-  })
-
-  test('renders filter dropdown and sortable column headers', async () => {
+  test('renders filter dropdown', async () => {
     render(<MetricsPage />)
     await waitFor(async () => {
       await testFilterSections()
       await testFilterOptions()
-      await testSortableColumns()
     })
 
     expect(true).toBe(true)
   })
 
-  test('SortableColumnHeader applies correct alignment classes', async () => {
-    render(<MetricsPage />)
-    const sortButton = await screen.findByTitle('Sort by Stars')
-    const wrapperDiv = sortButton.closest('div')
-    expect(wrapperDiv).not.toBeNull()
-    expect(wrapperDiv).toHaveClass('justify-center')
-    expect(sortButton).toHaveClass('text-center')
-  })
-
-  test('handles sorting state and URL updates', async () => {
-    const mockReplace = jest.fn()
-    const { useRouter, useSearchParams } = jest.requireMock('next/navigation')
-    ;(useRouter as jest.Mock).mockReturnValue({
-      push: jest.fn(),
-      replace: mockReplace,
-    })
-
-    // Test unsorted -> descending
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams())
-    const { rerender } = render(<MetricsPage />)
-
-    const sortButton = screen.getByTitle('Sort by Stars')
-    fireEvent.click(sortButton)
-
-    await waitFor(() => {
-      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
-      const url = new URL(lastCall, 'http://localhost')
-      expect(url.searchParams.get('order')).toBe('starsDesc')
-    })
-
-    // Test descending -> ascending
-    mockReplace.mockClear()
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=starsDesc'))
-    rerender(<MetricsPage />)
-
-    const sortButtonDesc = screen.getByTitle('Sort by Stars')
-    fireEvent.click(sortButtonDesc)
-
-    await waitFor(() => {
-      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
-      const url = new URL(lastCall, 'http://localhost')
-      expect(url.searchParams.get('order')).toBe('starsAsc')
-    })
-
-    // Test ascending -> unsorted (removes order param, defaults to scoreDesc)
-    mockReplace.mockClear()
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=starsAsc'))
-    rerender(<MetricsPage />)
-
-    const sortButtonAsc = screen.getByTitle('Sort by Stars')
-    fireEvent.click(sortButtonAsc)
-
-    await waitFor(() => {
-      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
-      const url = new URL(lastCall, 'http://localhost')
-      expect(url.searchParams.get('order')).toBeNull()
-    })
-  })
   const testMetricsDataDisplay = async () => {
     const metrics = mockHealthMetricsData.projectHealthMetrics
     for (const metric of metrics) {
@@ -257,7 +174,7 @@ describe('MetricsPage', () => {
           })
         )[0]
       ).toBeInTheDocument()
-      expect(screen.getAllByText(metric.score.toString())[0]).toBeInTheDocument()
+      expect(screen.getByText(new RegExp(`Score:.*${metric.score}`))).toBeInTheDocument()
     }
   }
 
