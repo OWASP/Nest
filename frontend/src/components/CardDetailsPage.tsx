@@ -1,5 +1,9 @@
+import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 import {
   FaCircleInfo,
   FaChartPie,
@@ -7,10 +11,15 @@ import {
   FaCode,
   FaTags,
   FaRectangleList,
+  FaCalendar,
+  FaCircleCheck,
+  FaCircleExclamation,
+  FaSignsPost,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
+import { formatDate } from 'utils/dateFormatter'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
 import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
@@ -34,9 +43,12 @@ import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
+
+import { TruncatedText } from 'components/TruncatedText'
 
 export type CardType =
   | 'chapter'
@@ -56,6 +68,8 @@ const showIssuesAndMilestones = (type: CardType): boolean =>
 
 const showPullRequestsAndReleases = (type: CardType): boolean =>
   ['organization', 'project', 'repository', 'user'].includes(type)
+
+const MILESTONE_LIMIT = 4
 
 const DetailsCard = ({
   description,
@@ -100,6 +114,7 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
+  const [showAllMilestones, setShowAllMilestones] = useState(false)
 
   // compute styles based on type prop
   const typeStylesMap = {
@@ -359,11 +374,105 @@ const DetailsCard = ({
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (
-          <SecondaryCard
-            icon={FaFolderOpen}
-            title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
-          >
-            <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+          <>
+            {modules.length === 1 ? (
+              <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+            ) : (
+              <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
+                <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              </SecondaryCard>
+            )}
+          </>
+        )}
+        {type === 'program' && recentMilestones && recentMilestones.length > 0 && (
+          <SecondaryCard icon={FaSignsPost} title={<AnchorTitle title="Recent Milestones" />}>
+            <div className="grid gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2">
+              {recentMilestones
+                .slice(0, showAllMilestones ? recentMilestones.length : MILESTONE_LIMIT)
+                .map((milestone, index) => (
+                  <div
+                    key={milestone.url || `${milestone.title}-${index}`}
+                    className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                  >
+                    <div className="flex w-full flex-col justify-between">
+                      <div className="flex w-full items-center">
+                        {showAvatar && milestone?.author?.login && milestone?.author?.avatarUrl && (
+                          <Tooltip
+                            closeDelay={100}
+                            content={milestone?.author?.name || milestone?.author?.login}
+                            id={`avatar-tooltip-${index}`}
+                            delay={100}
+                            placement="bottom"
+                            showArrow
+                          >
+                            <Link
+                              className="shrink-0 text-blue-400 hover:underline"
+                              href={`/members/${milestone?.author?.login}`}
+                            >
+                              <Image
+                                height={24}
+                                width={24}
+                                src={milestone?.author?.avatarUrl}
+                                alt={
+                                  milestone.author &&
+                                  (milestone.author.name || milestone.author.login)
+                                    ? `${milestone.author.name || milestone.author.login}'s avatar`
+                                    : "Author's avatar"
+                                }
+                                className="mr-2 rounded-full"
+                              />
+                            </Link>
+                          </Tooltip>
+                        )}
+                        <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                          {milestone?.url ? (
+                            <Link
+                              className="text-blue-400 hover:underline"
+                              href={milestone?.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TruncatedText text={milestone.title} />
+                            </Link>
+                          ) : (
+                            <TruncatedText text={milestone.title} />
+                          )}
+                        </h3>
+                      </div>
+                      <div className="ml-0.5 w-full">
+                        <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                          <div className="mr-4 flex items-center">
+                            <FaCalendar className="mr-2 h-4 w-4" />
+                            <span>{formatDate(milestone.createdAt)}</span>
+                          </div>
+                          <div className="mr-4 flex items-center">
+                            <FaCircleCheck className="mr-2 h-4 w-4" />
+                            <span>{milestone.closedIssuesCount} closed</span>
+                          </div>
+                          <div className="mr-4 flex items-center">
+                            <FaCircleExclamation className="mr-2 h-4 w-4" />
+                            <span>{milestone.openIssuesCount} open</span>
+                          </div>
+                          {milestone?.repositoryName && milestone?.organizationName && (
+                            <div className="flex flex-1 items-center overflow-hidden">
+                              <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
+                              <Link
+                                href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName}`}
+                                className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+                              >
+                                <TruncatedText text={milestone.repositoryName} />
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            {recentMilestones.length > MILESTONE_LIMIT && (
+              <ShowMoreButton onToggle={() => setShowAllMilestones(!showAllMilestones)} />
+            )}
           </SecondaryCard>
         )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
@@ -398,6 +507,7 @@ export const SocialLinks = ({ urls }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+              aria-label={`Link to ${url}`}
             >
               <SocialIcon className="h-5 w-5" />
             </a>
