@@ -8,7 +8,7 @@ interface LabelProps {
 const Label: React.FC<LabelProps> = ({ label, className = '' }) => {
   return (
     <span
-      className={`inline-block rounded-lg border border-gray-400 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-200 dark:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700 ${className}`}
+      className={`flex items-center justify-center gap-2 rounded-md border border-zinc-800 bg-transparent px-3 py-2 text-xs text-zinc-800 transition-all hover:bg-zinc-500 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black ${className}`}
     >
       {label}
     </span>
