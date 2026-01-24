@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React from 'react'
 import '@testing-library/jest-dom'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
-import userEvent from '@testing-library/user-event'
 
 // Mock the Tooltip component from @heroui/tooltip
 jest.mock('@heroui/tooltip', () => ({
@@ -310,16 +310,16 @@ describe('MetricsScoreCircle', () => {
       expect(clickableElement).not.toBeInTheDocument()
     })
 
-    it('handles keyboard navigation when clickable', async() => {
+    it('handles keyboard navigation when clickable', async () => {
       const mockOnClick = jest.fn()
       render(<MetricsScoreCircle score={75} clickable={true} onClick={mockOnClick} />)
 
       const buttonElement = screen.getByRole('button')
-      const user= userEvent.setup()
+      const user = userEvent.setup()
 
       // Test Enter key
       buttonElement.focus()
-      await user.keyboard('{Enter}')  
+      await user.keyboard('{Enter}')
       expect(mockOnClick).toHaveBeenCalledTimes(1)
 
       // Test Space key

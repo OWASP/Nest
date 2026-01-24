@@ -23,7 +23,7 @@ const MetricsScoreCircle: FC<MetricsScoreCircleProps> = ({ score, onClick, click
   return (
     <Tooltip content={'Current Project Health Score'} placement="top">
       {clickable ? (
-        <button className={finalClasses} onClick={onClick} type="button">
+        <button className={finalClasses} onClick={onClick} tabIndex={0} type="button">
           <div className="absolute inset-0 rounded-full bg-linear-to-br from-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
 
           <div className="relative z-10 flex flex-col items-center text-center">
