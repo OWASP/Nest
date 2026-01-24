@@ -127,7 +127,6 @@ const EditModulePage = () => {
         input.mentorLogins = parseCommaSeparated(formData.mentorLogins)
       }
 
-      const result = await updateModule({ variables: { input } })
       const result = await updateModule({
         awaitRefetchQueries: true,
         refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
