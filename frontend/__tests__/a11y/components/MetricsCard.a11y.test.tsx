@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import MetricsCard from 'components/MetricsCard'
-
-expect.extend(toHaveNoViolations)
 
 const makeMetric = (overrides: Partial<HealthMetricsProps> = {}): HealthMetricsProps => ({
   projectKey: 'test-project',

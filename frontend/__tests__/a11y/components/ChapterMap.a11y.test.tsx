@@ -1,11 +1,9 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import * as L from 'leaflet'
 import React, { useEffect } from 'react'
 import ChapterMap from 'components/ChapterMap'
-
-expect.extend(toHaveNoViolations)
 
 const mockMap = {
   setView: jest.fn().mockReturnThis(),

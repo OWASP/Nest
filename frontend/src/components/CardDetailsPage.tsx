@@ -359,12 +359,15 @@ const DetailsCard = ({
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (
-          <SecondaryCard
-            icon={FaFolderOpen}
-            title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
-          >
-            <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
-          </SecondaryCard>
+          <>
+            {modules.length === 1 ? (
+              <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+            ) : (
+              <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
+                <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              </SecondaryCard>
+            )}
+          </>
         )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
           <HealthMetrics data={healthMetricsData} />
@@ -398,6 +401,7 @@ export const SocialLinks = ({ urls }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+              aria-label={`Link to ${url}`}
             >
               <SocialIcon className="h-5 w-5" />
             </a>

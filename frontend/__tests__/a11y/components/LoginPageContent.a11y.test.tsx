@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { useSession } from 'next-auth/react'
 import { userAuthStatus } from 'utils/constants'
 import LoginPageContent from 'components/LoginPageContent'
-
-expect.extend(toHaveNoViolations)
 
 // mock dependency
 jest.mock('next-auth/react', () => ({
