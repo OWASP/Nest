@@ -537,10 +537,12 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const titleLinks = screen.getAllByTestId('link')
-      const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
-
-      expect(titleLink).toHaveAttribute('href', '')
+      // When url is empty, the component renders TruncatedText without a Link wrapper
+      expect(screen.getByTestId('truncated-text')).toHaveTextContent('Test Issue Title')
+      // No external link should be rendered for the title
+      const links = screen.queryAllByTestId('link')
+      const titleLink = links.find((link) => link.textContent?.includes('Test Issue Title'))
+      expect(titleLink).toBeUndefined()
     })
   })
 
@@ -559,20 +561,20 @@ describe('ItemCardList Component', () => {
 
     it('renders custom renderDetails content', () => {
       const customRenderDetails = (item: {
-        createdAt: string
-        commentsCount: number
-        organizationName: string
-        publishedAt: string
-        repositoryName: string
-        tagName: string
-        openIssuesCount: number
-        closedIssuesCount: number
+        createdAt?: string | number
+        commentsCount?: number
+        organizationName?: string | null
+        publishedAt?: string | number
+        repositoryName?: string
+        tagName?: string
+        openIssuesCount?: number
+        closedIssuesCount?: number
         title?: string
         name?: string
-        author: {
+        author?: {
           avatarUrl: string
           login: string
-          name: string
+          name?: string
         }
       }) => (
         <div data-testid="custom-details">
@@ -715,7 +717,7 @@ describe('ItemCardList Component', () => {
       expect(avatarImage).toHaveAttribute('alt', `${issueWithoutAuthor.author.login}'s avatar`)
     })
 
-    it('uses generic fallback alt text when author is missing', () => {
+    it('does not render avatar when author is missing', () => {
       const issueWithoutAuthor = {
         ...mockIssue,
         author: null,
@@ -730,8 +732,8 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
+      // When author is null, no avatar is rendered
+      expect(screen.queryByTestId('avatar-image')).not.toBeInTheDocument()
     })
 
     it('uses generic fallback alt text when author name and login are missing', () => {

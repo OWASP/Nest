@@ -117,7 +117,7 @@ const DetailsCard = ({
   const [showAllMilestones, setShowAllMilestones] = useState(false)
 
   // compute styles based on type prop
-  const typeStylesMap = {
+  const typeStylesMap: Partial<Record<CardType, string>> = {
     chapter: 'gap-2 md:col-span-3',
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
@@ -175,21 +175,26 @@ const DetailsCard = ({
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
             className={secondaryCardStyles}
           >
-            {details?.map((detail) =>
-              detail?.label === 'Leaders' ? (
+            {details?.map((detail) => {
+              const isLeaders = detail?.label === 'Leaders'
+
+              const leadersValue =
+                detail?.value === null ||
+                detail?.value === undefined ||
+                typeof detail.value !== 'string'
+                  ? 'Unknown'
+                  : detail.value
+
+              return isLeaders ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
-                  <strong>{detail.label}:</strong>{' '}
-                  <LeadersList
-                    entityKey={`${entityKey}-${detail.label}`}
-                    leaders={detail?.value == null ? 'Unknown' : String(detail.value)}
-                  />
+                  <strong>{detail.label}:</strong> <LeadersList leaders={leadersValue} />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
                   <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
                 </div>
               )
-            )}
+            })}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
               <SocialLinks urls={socialLinks || []} />
             )}
@@ -492,7 +497,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

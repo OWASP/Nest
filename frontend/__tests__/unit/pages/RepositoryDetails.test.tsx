@@ -60,6 +60,7 @@ describe('RepositoryDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockRepositoryData,
       error: null,
+      loading: false,
     })
 
     render(<RepositoryDetailsPage />)

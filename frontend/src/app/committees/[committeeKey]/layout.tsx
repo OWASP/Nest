@@ -1,21 +1,30 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
 import { apolloClient } from 'server/apolloClient'
-import { GetCommitteeMetadataDocument } from 'types/__generated__/committeeQueries.generated'
+import {
+  GetCommitteeMetadataDocument,
+  GetCommitteeMetadataQuery,
+} from 'types/__generated__/committeeQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
 
-const getCommitteeMetadata = cache(async (committeeKey: string) => {
-  try {
-    const { data } = await apolloClient.query({
-      query: GetCommitteeMetadataDocument,
-      variables: { key: committeeKey },
-    })
-    return data
-  } catch {
-    return null
+const getCommitteeMetadata = cache(
+  async (committeeKey: string): Promise<GetCommitteeMetadataQuery | null> => {
+    try {
+      const { data } = await apolloClient.query<GetCommitteeMetadataQuery>({
+        query: GetCommitteeMetadataDocument,
+        variables: { key: committeeKey },
+      })
+      if (data?.committee) {
+        return data
+      }
+
+      return null
+    } catch {
+      return null
+    }
   }
-})
+)
 
 export async function generateMetadata({
   params,
@@ -33,7 +42,7 @@ export async function generateMetadata({
         keywords: ['owasp', 'security', 'committee', committeeKey, committee.name],
         title: committee.name,
       })
-    : null
+    : {}
 }
 
 export default async function CommitteeDetailsLayout({

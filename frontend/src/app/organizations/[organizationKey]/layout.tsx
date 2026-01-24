@@ -5,7 +5,9 @@ import React from 'react'
 import { apolloClient } from 'server/apolloClient'
 import {
   GetOrganizationDataDocument,
+  GetOrganizationDataQuery,
   GetOrganizationMetadataDocument,
+  GetOrganizationMetadataQuery,
 } from 'types/__generated__/organizationQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'
@@ -16,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ organizationKey: string }>
 }): Promise<Metadata> {
   const { organizationKey } = await params
-  const { data } = await apolloClient.query({
+  const { data } = await apolloClient.query<GetOrganizationMetadataQuery>({
     query: GetOrganizationMetadataDocument,
     variables: {
       login: organizationKey,
@@ -31,13 +33,13 @@ export async function generateMetadata({
         description: organization?.description ?? `${title} organization details`,
         title: title,
       })
-    : null
+    : {}
 }
 
 async function generateOrganizationStructuredData(organizationKey: string) {
   // https://developers.google.com/search/docs/appearance/structured-data/organization#structured-data-type-definitions
 
-  const { data } = await apolloClient.query({
+  const { data } = await apolloClient.query<GetOrganizationDataQuery>({
     query: GetOrganizationDataDocument,
     variables: {
       login: organizationKey,
@@ -114,7 +116,7 @@ export default async function OrganizationDetailsLayout({
     : null
 
   // Fetch organization name for breadcrumb
-  const { data } = await apolloClient.query({
+  const { data } = await apolloClient.query<GetOrganizationMetadataQuery>({
     query: GetOrganizationMetadataDocument,
     variables: { login: organizationKey },
   })

@@ -7,7 +7,7 @@ import type { IconType } from 'react-icons'
 import { FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { handleAppError } from 'app/global-error'
-import { Ordering } from 'types/__generated__/graphql'
+import { Ordering, ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 import { HealthMetricsProps } from 'types/healthMetrics'
@@ -15,6 +15,20 @@ import { getKeysLabels } from 'utils/getKeysLabels'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
+
+interface HealthFilterStructure {
+  score: {
+    gte?: number
+    lt?: number
+  }
+}
+
+interface LevelFilterStructure {
+  level: ProjectLevel
+}
+
+type OrderKey = keyof typeof FIELD_MAPPING
+type FilterParams = Partial<HealthFilterStructure & { level: ProjectLevel }>
 
 const PAGINATION_LIMIT = 10
 
@@ -26,7 +40,30 @@ const FIELD_MAPPING = {
   stars: 'starsCount',
 } as const
 
-type OrderKey = keyof typeof FIELD_MAPPING
+const healthFiltersMapping: Record<string, HealthFilterStructure> = {
+  healthy: { score: { gte: 75 } },
+  needsAttention: { score: { gte: 50, lt: 75 } },
+  unhealthy: { score: { lt: 50 } },
+} as const
+
+const levelFiltersMapping: Record<string, LevelFilterStructure> = {
+  incubator: { level: ProjectLevel.Incubator },
+  lab: { level: ProjectLevel.Lab },
+  production: { level: ProjectLevel.Production },
+  flagship: { level: ProjectLevel.Flagship },
+} as const
+
+const getFiltersFromParams = (health: string | null, level: string | null): FilterParams => {
+  let filters: FilterParams = {}
+
+  if (health && health in healthFiltersMapping) {
+    filters = { ...filters, ...healthFiltersMapping[health] }
+  }
+  if (level && level in levelFiltersMapping) {
+    filters = { ...filters, ...levelFiltersMapping[level] }
+  }
+  return filters
+}
 
 const parseOrderParam = (orderParam: string | null) => {
   if (!orderParam) {
@@ -126,60 +163,16 @@ const SortableColumnHeader: FC<{
 const MetricsPage: FC = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const healthFiltersMapping = {
-    healthy: {
-      score: {
-        gte: 75,
-      },
-    },
-    needsAttention: {
-      score: {
-        gte: 50,
-        lt: 75,
-      },
-    },
-    unhealthy: {
-      score: {
-        lt: 50,
-      },
-    },
-  }
-  const levelFiltersMapping = {
-    incubator: {
-      level: 'incubator',
-    },
-    lab: {
-      level: 'lab',
-    },
-    production: {
-      level: 'production',
-    },
-    flagship: {
-      level: 'flagship',
-    },
-  }
 
-  let currentFilters = {}
   const orderingParam = searchParams.get('order')
   const { field, direction, urlKey } = parseOrderParam(orderingParam)
   const currentOrdering = buildGraphQLOrdering(field, direction)
 
-  const healthFilter = searchParams.get('health')
-  const levelFilter = searchParams.get('level')
-  const currentFilterKeys = []
-  if (healthFilter) {
-    currentFilters = {
-      ...healthFiltersMapping[healthFilter],
-    }
-    currentFilterKeys.push(healthFilter)
-  }
-  if (levelFilter) {
-    currentFilters = {
-      ...currentFilters,
-      ...levelFiltersMapping[levelFilter],
-    }
-    currentFilterKeys.push(levelFilter)
-  }
+  const healthParam = searchParams.get('health')
+  const levelParam = searchParams.get('level')
+
+  const currentFilters = getFiltersFromParams(healthParam, levelParam)
+  const currentFilterKeys = [healthParam, levelParam].filter((k): k is string => !!k)
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
@@ -199,6 +192,29 @@ const MetricsPage: FC = () => {
       ordering: buildOrderingWithTieBreaker(ordering),
     },
   })
+
+  useEffect(() => {
+    const nextFilters = getFiltersFromParams(searchParams.get('health'), searchParams.get('level'))
+
+    setFilters((prevFilters) => {
+      // Use JSON.stringify for deep comparison of nested objects
+      if (JSON.stringify(prevFilters) === JSON.stringify(nextFilters)) {
+        return prevFilters
+      }
+      return nextFilters
+    })
+
+    const nextActiveFilters = [searchParams.get('health'), searchParams.get('level')].filter(
+      (k): k is string => !!k
+    )
+
+    setActiveFilters((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(nextActiveFilters)) {
+        return prev
+      }
+      return nextActiveFilters
+    })
+  }, [searchParams])
 
   useEffect(() => {
     const { field: f, direction: d } = parseOrderParam(searchParams.get('order'))
@@ -280,27 +296,25 @@ const MetricsPage: FC = () => {
             onAction={(key: string) => {
               // Because how apollo caches pagination, we need to reset the pagination.
               setPagination({ offset: 0, limit: PAGINATION_LIMIT })
-              let newFilters = { ...currentFilters }
               const newParams = new URLSearchParams(searchParams.toString())
-              if (key in healthFiltersMapping) {
-                newParams.set('health', key)
-                newFilters = { ...newFilters, ...healthFiltersMapping[key] }
-              } else if (key in levelFiltersMapping) {
-                newParams.set('level', key)
-                newFilters = { ...newFilters, ...levelFiltersMapping[key] }
-              } else {
+
+              if (key === 'reset') {
                 newParams.delete('health')
                 newParams.delete('level')
-                newFilters = {}
+              } else if (key in healthFiltersMapping) {
+                newParams.set('health', key)
+              } else if (key in levelFiltersMapping) {
+                newParams.set('level', key)
               }
-              setFilters(newFilters)
+
+              const nextFilters = getFiltersFromParams(
+                newParams.get('health'),
+                newParams.get('level')
+              )
+
+              setFilters(nextFilters)
               setActiveFilters(
-                Array.from(
-                  newParams
-                    .entries()
-                    .filter(([key]) => key != 'order')
-                    .map(([, value]) => value)
-                )
+                [newParams.get('health'), newParams.get('level')].filter((k): k is string => !!k)
               )
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
