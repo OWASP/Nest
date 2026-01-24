@@ -1,8 +1,11 @@
 """Tests for CacheExtension."""
 
+import datetime
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import pytest
+from django.conf import settings
 from strawberry.permission import PermissionExtension
 
 from apps.api.internal.extensions.cache import (
@@ -46,6 +49,18 @@ class TestGenerateKey:
         key2 = generate_key("chapter", {"b": "2", "a": "1"})
 
         assert key1 == key2
+
+    def test_serializes_datetime_and_uuid_args(self):
+        """Test that generate_key handles datetime and UUID in args without error."""
+        dt = datetime.datetime(2025, 1, 15, 12, 0, 0, tzinfo=datetime.UTC)
+        uid = UUID("550e8400-e29b-41d4-a716-446655440000")
+        field_args = {"at": dt, "id": uid}
+
+        key1 = generate_key("someField", field_args)
+        key2 = generate_key("someField", field_args)
+
+        assert key1 == key2
+        assert key1.startswith(f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-")
 
 
 class TestGetProtectedFields:

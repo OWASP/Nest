@@ -6,6 +6,7 @@ from functools import lru_cache
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
 from strawberry.extensions import SchemaExtension
 from strawberry.permission import PermissionExtension
 from strawberry.schema import Schema
@@ -45,7 +46,7 @@ def generate_key(field_name: str, field_args: dict) -> str:
         str: The unique cache key.
 
     """
-    key = f"{field_name}:{json.dumps(field_args, sort_keys=True)}"
+    key = f"{field_name}:{json.dumps(field_args, cls=DjangoJSONEncoder, sort_keys=True)}"
     return f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-{hashlib.sha256(key.encode()).hexdigest()}"
 
 
