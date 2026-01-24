@@ -1,5 +1,5 @@
-import pytest
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
+
 from apps.mentorship.api.internal.nodes.program import ProgramNode
 from apps.mentorship.models.program import Program
 
