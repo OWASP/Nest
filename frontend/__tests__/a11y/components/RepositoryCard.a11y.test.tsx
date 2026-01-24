@@ -45,7 +45,7 @@ describe('RepositoryCard a11y', () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
     const { container } = render(<RepositoryCard repositories={repositories} />)
 
-    const showMoreButton = screen.getByTestId('show-more-button')
+    const showMoreButton = screen.getByRole('button', { name: /show more/i })
     fireEvent.click(showMoreButton)
 
     const results = await axe(container)

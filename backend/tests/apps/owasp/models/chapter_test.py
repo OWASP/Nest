@@ -113,10 +113,15 @@ class TestChapterModel:
         ],
     )
     def test_active_chapters_count(self, value):
-        with patch("apps.common.index.IndexBase.get_total_count") as mock_count:
-            mock_count.return_value = value
+        with patch.object(Chapter.objects, "filter") as mock_filter:
+            mock_filter.return_value.count.return_value = value
             assert Chapter.active_chapters_count() == value
-            mock_count.assert_called_once_with("chapters", search_filters="idx_is_active:true")
+            mock_filter.assert_called_once_with(
+                is_active=True,
+                latitude__isnull=False,
+                longitude__isnull=False,
+                owasp_repository__is_empty=False,
+            )
 
     @pytest.mark.parametrize(
         ("has_suggested_location", "has_coordinates"),

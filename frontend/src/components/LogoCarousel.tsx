@@ -4,10 +4,10 @@ import { useEffect, useRef } from 'react'
 import type { Sponsor } from 'types/home'
 
 interface MovingLogosProps {
-  sponsors: Sponsor[]
+  readonly sponsors: Sponsor[]
 }
 
-export default function MovingLogos({ sponsors }: MovingLogosProps) {
+export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
   const scrollerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -27,7 +27,8 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
         >
           {sponsors.map((sponsor, index) => (
             <div
-              key={`${sponsor.name}-${index}`}
+              // eslint-disable-next-line react/no-array-index-key
+              key={`logo-carousel-${sponsor.id}-${index}`}
               className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
             >
               <Link

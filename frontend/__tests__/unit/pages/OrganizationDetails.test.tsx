@@ -55,7 +55,7 @@ describe('OrganizationDetailsPage', () => {
 
     // Use semantic role query instead of CSS selectors for better stability
     await waitFor(() => {
-      expect(screen.getByTestId('org-loading-skeleton')).toBeInTheDocument()
+      expect(screen.getByRole('status')).toBeInTheDocument()
     })
   })
 

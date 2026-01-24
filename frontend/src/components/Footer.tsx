@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { useState, useCallback } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
-import { footerIcons } from 'utils/constants'
-import { footerSections } from 'utils/constants'
+import { footerIcons, footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
@@ -31,7 +30,6 @@ export default function Footer() {
                 className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:ring-slate-400 focus:outline-hidden lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
-                data-testid={`footer-section-button-${section.title}`}
               >
                 <h3>{section.title}</h3>
                 <div className="transition-transform duration-200 lg:hidden">
