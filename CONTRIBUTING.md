@@ -408,7 +408,7 @@ This command runs tests and checks that coverage threshold requirements are sati
 
 ### Running Dependency Scans
 
-Trivy is an open-source security scanner that identifies vulnerabilities, misconfigurations, and hardcoded secrets across repositories and file systems. You can replicate the CI/CD security checks locally using Docker:
+Trivy is an open-source security scanner that identifies vulnerabilities, misconfigurations, and hardcoded secrets across repositories and file systems. You can replicate the CI/CD security checks locally using following commands:
 
 **Filesystem Scan**
 
