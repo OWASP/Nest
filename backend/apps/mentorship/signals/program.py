@@ -5,7 +5,8 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from apps.core.utils.index import clear_index_cache, invalidate_program_graphql_cache
+from apps.api.internal.extensions.cache import invalidate_program_cache
+from apps.core.utils.index import clear_index_cache
 from apps.mentorship.models import Program
 
 logger = logging.getLogger(__name__)
@@ -26,4 +27,4 @@ def program_post_save_clear_graphql_cache(sender, instance, **kwargs):  # noqa: 
         instance.name,
         instance.status,
     )
-    invalidate_program_graphql_cache(instance.key)
+    invalidate_program_cache(instance.key)
