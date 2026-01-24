@@ -418,7 +418,7 @@ This command automatically:
 
 - Performs a local Docker-based scan without requiring a Semgrep account or login
 - Outputs findings to the terminal for immediate review
-- Generates a persistent semgrep-security-report.txt file
+- Generates a persistent semgrep-security-report.txt file in the project root
 
 For addressing findings:
 
@@ -440,7 +440,7 @@ make security-scan-deps
 
 #### Repository Scan
 
-Scan the Git history for sensitive information and secrets:
+Scan the repository for sensitive information and secrets:
 
 ```bash
 make security-scan-repo
