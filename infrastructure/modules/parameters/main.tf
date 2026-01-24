@@ -188,11 +188,7 @@ resource "aws_ssm_parameter" "next_server_csrf_url" {
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_CSRF_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = "to-be-set-in-aws-console"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
+  value       = var.server_csrf_url
 }
 
 resource "aws_ssm_parameter" "next_server_disable_ssr" {
@@ -236,11 +232,7 @@ resource "aws_ssm_parameter" "next_server_graphql_url" {
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_GRAPHQL_URL"
   tags        = var.common_tags
   type        = "String"
-  value       = "to-be-set-in-aws-console"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
+  value       = var.server_graphql_url
 }
 
 resource "aws_ssm_parameter" "nextauth_secret" {

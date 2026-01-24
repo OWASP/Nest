@@ -132,7 +132,7 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
   - Copy the contents from the template file into your new local environment file:
 
     ```bash
-    cat zappa_settings.example.json > zappa_settings.json
+    cat zappa_settings.template.json > zappa_settings.json
     ```
 
 4. **Populate Settings File**:

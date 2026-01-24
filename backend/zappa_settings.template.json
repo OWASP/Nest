@@ -3,7 +3,7 @@
     "apigateway_enabled": false,
     "app_function": "wsgi.application",
     "aws_environment_variables": {
-      "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/owasp-nest/staging"
+      "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/nest/staging"
     },
     "callbacks": {
       "post": "zappa_callback.post",
@@ -18,8 +18,8 @@
           "ssm:GetParameter"
         ],
         "Resource": [
-          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/owasp-nest/staging",
-          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/owasp-nest/staging/*"
+          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/nest/staging",
+          "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT_ID}:parameter/nest/staging/*"
         ]
       }
     ],
@@ -32,6 +32,7 @@
       "/botocore/",
       "/botocore-",
       "/data/",
+      "/generated_videos/",
       "/pip/",
       "/pip-",
       "/setuptools/",
@@ -42,10 +43,12 @@
     "runtime": "python3.13",
     "s3_bucket": "${ZAPPA_S3_BUCKET}",
     "slim_handler": true,
-    "snap_start": "PublishedVersions",
+    "snap_start": "None",
     "timeout_seconds": 60,
     "vpc_config": {
-      "SecurityGroupIds": ["${AWS_LAMBDA_VPC_SECURITY_GROUP_ID}"],
+      "SecurityGroupIds": [
+        "${ZAPPA_VPC_SECURITY_GROUP_ID}"
+      ],
       "SubnetIds": [
         "${AWS_PRIVATE_SUBNET_A}",
         "${AWS_PRIVATE_SUBNET_B}",

@@ -72,6 +72,16 @@ variable "redis_password_arn" {
   sensitive   = true
 }
 
+variable "server_csrf_url" {
+  description = "The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/)."
+  type        = string
+}
+
+variable "server_graphql_url" {
+  description = "The server-side GraphQL URL for Next.js SSR (e.g., https://nest.owasp.dev/graphql/)."
+  type        = string
+}
+
 variable "settings_module" {
   description = "The location of the Django settings module to use (e.g., settings.staging, settings.production)."
   type        = string
