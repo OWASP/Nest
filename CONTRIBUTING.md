@@ -406,6 +406,26 @@ make test
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
 
+### Running Security Scan
+
+Run the Semgrep security scan for vulnerabilities and anti-patterns with the following command:
+
+```bash
+make security-scan
+```
+
+This command automatically:
+
+- Performs a local Docker-based scan without requiring a Semgrep account or login
+- Outputs findings to the terminal for immediate review
+- Generates a persistent semgrep-security-report.txt file
+
+For addressing findings:
+
+- Review the report file for specific file paths and line numbers
+- Follow the documentation links provided in the output for remediation guidance
+- Use # nosemgrep comments to suppress confirmed false positives
+
 ### Running Dependency Scans
 
 Trivy is an open-source security scanner that identifies vulnerabilities, misconfigurations, and hardcoded secrets across repositories and file systems. You can replicate the CI/CD security checks locally using following commands:
@@ -430,26 +450,6 @@ These commands automatically:
 - Analyze the project using the standards defined in trivy.yaml
 - Identify critical and high vulnerabilities that block CI/CD
 - Output findings to the terminal for immediate review
-
-### Running Security Scan
-
-Run the Semgrep security scan for vulnerabilities and anti-patterns with the following command:
-
-```bash
-make security-scan
-```
-
-This command automatically:
-
-- Performs a local Docker-based scan without requiring a Semgrep account or login
-- Outputs findings to the terminal for immediate review
-- Generates a persistent semgrep-security-report.txt file
-
-For addressing findings:
-
-- Review the report file for specific file paths and line numbers
-- Follow the documentation links provided in the output for remediation guidance
-- Use # nosemgrep comments to suppress confirmed false positives
 
 ### Running e2e Tests
 
