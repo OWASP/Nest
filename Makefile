@@ -82,6 +82,14 @@ security-scan:
 			--text-output=semgrep-security-report.txt \
 			.
 
+security-scan-deps:
+	@echo "Running Trivy Filesystem Scan..."
+	@docker run --rm -v "$(PWD):/src" aquasec/trivy fs /src
+
+security-scan-repo:
+	@echo "Running Trivy Repository Scan..."
+	@docker run --rm -v "$(PWD):/src" aquasec/trivy repo /src
+
 test: \
 	test-nest-app
 
@@ -103,4 +111,4 @@ update-nest-app-dependencies: \
 update-pre-commit:
 	@pre-commit autoupdate
 
-.PHONY: build clean check pre-commit prune run scan-images security-scan test update
+.PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-deps security-scan-repo test update

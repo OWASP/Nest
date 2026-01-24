@@ -415,7 +415,7 @@ Trivy is an open-source security scanner that identifies vulnerabilities, miscon
 Check local dependencies and configurations for vulnerabilities:
 
 ```bash
-docker run --rm -v "$(pwd):/src" aquasec/trivy fs /src
+make security-scan-deps
 ```
 
 **Repository Scan**
@@ -423,7 +423,7 @@ docker run --rm -v "$(pwd):/src" aquasec/trivy fs /src
 Scan the Git history for sensitive information and secrets:
 
 ```bash
-docker run --rm -v "$(pwd):/src" aquasec/trivy repo /src
+make security-scan-repo
 ```
 
 These commands automatically:
