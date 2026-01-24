@@ -3,6 +3,7 @@ import React from 'react'
 import '@testing-library/jest-dom'
 import { FaCode, FaTags } from 'react-icons/fa6'
 import type { DetailsCardProps } from 'types/card'
+import type { PullRequest } from 'types/pullRequest'
 import CardDetailsPage, { type CardType } from 'components/CardDetailsPage'
 
 jest.mock('next/navigation', () => ({
@@ -255,6 +256,15 @@ jest.mock('components/RecentPullRequests', () => ({
   }) => (
     <div data-testid="recent-pull-requests" {...props}>
       Recent Pull Requests ({data?.length || 0} items) {showAvatar ? 'with avatars' : 'no avatars'}
+    </div>
+  ),
+}))
+
+jest.mock('components/PullRequestList', () => ({
+  __esModule: true,
+  default: ({ pullRequests, ...props }: { pullRequests: unknown[]; [key: string]: unknown }) => (
+    <div data-testid="pull-request-list" {...props}>
+      PullRequestList ({pullRequests?.length || 0} items)
     </div>
   ),
 }))
@@ -768,6 +778,19 @@ describe('CardDetailsPage', () => {
 
       expect(screen.getByText('Repositories')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
+    })
+
+    it('renders PullRequestList when type is module and PRs are provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+        />
+      )
+
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+      expect(screen.getByTestId('pull-request-list')).toBeInTheDocument()
     })
   })
 

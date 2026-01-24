@@ -15,6 +15,7 @@ import {
   FaCircleCheck,
   FaCircleExclamation,
   FaSignsPost,
+  FaCodeBranch,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
@@ -38,6 +39,7 @@ import Markdown from 'components/MarkdownWrapper'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
+import PullRequestList from 'components/PullRequestList'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -366,6 +368,11 @@ const DetailsCard = ({
             <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
+        )}
+        {type === 'module' && pullRequests && pullRequests.length > 0 && (
+          <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
+            <PullRequestList pullRequests={pullRequests} />
+          </SecondaryCard>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (

@@ -14,8 +14,8 @@ import AnchorTitle from 'components/AnchorTitle'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
+import PullRequestList from 'components/PullRequestList'
 import SecondaryCard from 'components/SecondaryCard'
-import { TruncatedText } from 'components/TruncatedText'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
@@ -116,22 +116,6 @@ const ModuleIssueDetailsPage = () => {
   } else {
     issueStatusClass = 'bg-[#DA3633] text-white'
     issueStatusLabel = 'Closed'
-  }
-
-  const getPRStatus = (pr: Exclude<typeof issue.pullRequests, undefined>[0]) => {
-    let backgroundColor: string
-    let label: string
-    if (pr.state === 'closed' && pr.mergedAt) {
-      backgroundColor = '#8657E5'
-      label = 'Merged'
-    } else if (pr.state === 'closed') {
-      backgroundColor = '#DA3633'
-      label = 'Closed'
-    } else {
-      backgroundColor = '#238636'
-      label = 'Open'
-    }
-    return { backgroundColor, label }
   }
 
   const getAssignButtonTitle = (assigning: boolean) => {
@@ -332,62 +316,7 @@ const ModuleIssueDetailsPage = () => {
         )}
 
         <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
-          <div className="grid grid-cols-1 gap-3">
-            {issue.pullRequests?.length ? (
-              issue.pullRequests.map((pr) => (
-                <div
-                  key={pr.id}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                >
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    {pr.author?.avatarUrl ? (
-                      <Image
-                        src={pr.author.avatarUrl}
-                        alt={pr.author?.login || 'Unknown'}
-                        width={32}
-                        height={32}
-                        className="flex-shrink-0 rounded-full"
-                      />
-                    ) : (
-                      <div
-                        className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-400"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={pr.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        <TruncatedText text={pr.title} />
-                      </Link>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        by {pr.author?.login || 'Unknown'} •{' '}
-                        {new Date(pr.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {(() => {
-                      const { backgroundColor, label } = getPRStatus(pr)
-                      return (
-                        <span
-                          className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                          style={{ backgroundColor }}
-                        >
-                          {label}
-                        </span>
-                      )
-                    })()}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <span className="text-sm text-gray-400">No linked pull requests.</span>
-            )}
-          </div>
+          <PullRequestList pullRequests={issue.pullRequests || []} />
         </SecondaryCard>
 
         <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">
