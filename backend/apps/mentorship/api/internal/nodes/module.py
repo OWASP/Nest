@@ -204,6 +204,15 @@ class CreateModuleInput:
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
 
+    def __post_init__(self):
+        """Validate input."""
+        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
+
+        if self.tags:
+            validate_tags(self.tags)
+        if self.domains:
+            validate_domains(self.domains)
+
 
 @strawberry.input
 class UpdateModuleInput:
@@ -222,3 +231,12 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+
+    def __post_init__(self):
+        """Validate input."""
+        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
+
+        if self.tags:
+            validate_tags(self.tags)
+        if self.domains:
+            validate_domains(self.domains)
