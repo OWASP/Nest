@@ -176,8 +176,9 @@ jobs:
   run-security-scan:
     name: Run security scan
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - check-frontend
+      - pre-commit
+      - spellcheck
     permissions:
       contents: read
     runs-on: ubuntu-latest
