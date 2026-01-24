@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import SkeletonBase from 'components/SkeletonsBase'
-
-expect.extend(toHaveNoViolations)
 
 const defaultProps = {
   loadingImageUrl: 'https://example.com/loading.gif',

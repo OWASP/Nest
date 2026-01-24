@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import MultiSearchBar from 'components/MultiSearch'
-
-expect.extend(toHaveNoViolations)
 
 const defaultProps = {
   isLoaded: true,

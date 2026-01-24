@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
-
-expect.extend(toHaveNoViolations)
 
 describe('MetricsScoreCircle a11y', () => {
   it('should not have any accessibility violations', async () => {

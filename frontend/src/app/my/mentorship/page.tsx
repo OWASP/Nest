@@ -20,8 +20,10 @@ import SearchPageLayout from 'components/SearchPageLayout'
 const MyMentorshipPage: React.FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
+
   const { data: session } = useSession()
-  const username = (session as ExtendedSession)?.user?.login
+  const extendedSession = session as ExtendedSession | null
+  const userName = extendedSession?.user?.login
 
   const initialQuery = searchParams.get('q') || ''
   const initialPage = Number.parseInt(searchParams.get('page') || '1', 10)
@@ -58,7 +60,7 @@ const MyMentorshipPage: React.FC = () => {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
+  const isProjectLeader = extendedSession?.user?.isLeader
 
   useEffect(() => {
     if (programData?.myPrograms) {
@@ -81,7 +83,7 @@ const MyMentorshipPage: React.FC = () => {
 
   const handleCreate = () => router.push('/my/mentorship/programs/create')
 
-  if (!username) {
+  if (!userName) {
     return <LoadingSpinner />
   }
 

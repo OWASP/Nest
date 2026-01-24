@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaCalendarAlt } from 'react-icons/fa'
 import CalendarButton from 'components/CalendarButton'
-
-expect.extend(toHaveNoViolations)
 
 const mockEvent = {
   title: 'Test Event',

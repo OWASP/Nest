@@ -1,10 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { Organization } from 'types/organization'
 import { RepositoryCardProps } from 'types/project'
 import RepositoryCard from 'components/RepositoryCard'
-
-expect.extend(toHaveNoViolations)
 
 const createMockRepository = (index: number): RepositoryCardProps => ({
   contributorsCount: 10 + index,

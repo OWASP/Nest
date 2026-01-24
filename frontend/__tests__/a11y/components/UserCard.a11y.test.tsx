@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { UserCardProps } from 'types/card'
 import UserCard from 'components/UserCard'
-
-expect.extend(toHaveNoViolations)
 
 const defaultProps: UserCardProps = {
   name: 'John Doe',

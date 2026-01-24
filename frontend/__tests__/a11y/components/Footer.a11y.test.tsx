@@ -1,8 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import Footer from 'components/Footer'
-
-expect.extend(toHaveNoViolations)
 
 describe('Footer a11y', () => {
   it('should not have any accessibility violations', async () => {

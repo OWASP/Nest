@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaFilter } from 'react-icons/fa6'
 import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
-
-expect.extend(toHaveNoViolations)
 
 const defaultProps = {
   buttonDisplayName: 'Filter',

@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import Pagination from 'components/Pagination'
-
-expect.extend(toHaveNoViolations)
 
 const props = {
   currentPage: 6,

@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaUser } from 'react-icons/fa'
 import DashboardCard from 'components/DashboardCard'
-
-expect.extend(toHaveNoViolations)
 
 const baseProps = {
   title: 'Test Card',

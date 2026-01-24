@@ -1,13 +1,11 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import Badges from 'components/Badges'
 
 const defaultProps = {
   name: 'Test Badge',
   cssClass: 'medal',
 }
-
-expect.extend(toHaveNoViolations)
 
 describe('Badges Accessibility', () => {
   it('should not have any accessibility violations when tooltip is enabled', async () => {

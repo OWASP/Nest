@@ -14,7 +14,7 @@ const ProjectsHealthDashboardLayout: React.FC<{ readonly children: React.ReactNo
   return (
     <FontLoaderWrapper>
       <DashboardWrapper>
-        <div className="flex flex-col md:flex-row">
+        <div className="flex flex-col lg:flex-row">
           <ProjectsDashboardNavBar />
           <main className="flex-1 p-4">{children}</main>
         </div>

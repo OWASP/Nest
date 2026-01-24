@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import React from 'react'
 import RecentPullRequests from 'components/RecentPullRequests'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({

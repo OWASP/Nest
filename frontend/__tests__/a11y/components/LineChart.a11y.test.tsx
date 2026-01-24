@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ApexLineChartSeries } from 'types/healthMetrics'
 import LineChart from 'components/LineChart'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/dynamic', () => {
   return jest.fn().mockImplementation(() => {

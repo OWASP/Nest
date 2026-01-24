@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import React from 'react'
 import { Sponsor } from 'types/home'
 import LogoCarousel from 'components/LogoCarousel'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/link', () => {
   return function MockLink({

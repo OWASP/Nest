@@ -1,11 +1,9 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaHome } from 'react-icons/fa'
 import { FaUser } from 'react-icons/fa6'
 import { NavButtonProps } from 'types/button'
 import NavButton from 'components/NavButton'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/link', () => ({ children, href }) => <a href={href}>{children}</a>)
 

@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import SnapshotCard from 'components/SnapshotCard'
-expect.extend(toHaveNoViolations)
 
 const defaultProps = {
   key: 'test-snapshot-1',

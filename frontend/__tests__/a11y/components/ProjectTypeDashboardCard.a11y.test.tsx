@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaHeartPulse } from 'react-icons/fa6'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
-
-expect.extend(toHaveNoViolations)
 
 const baseProps = {
   type: 'healthy' as const,

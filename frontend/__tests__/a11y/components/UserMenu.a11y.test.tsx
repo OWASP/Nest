@@ -1,11 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import UserMenu from 'components/UserMenu'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('hooks/useDjangoSession', () => ({
   useDjangoSession: jest.fn(),

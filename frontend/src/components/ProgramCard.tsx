@@ -63,9 +63,9 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               placement="bottom"
               isDisabled={program.name.length <= 50}
             >
-              <h3 className="mr-1 line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
+              <h2 className="mr-1 line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
                 {program.name}
-              </h3>
+              </h2>
             </Tooltip>
             {accessLevel === 'admin' && isAdmin && (
               <div role="none" onMouseDown={(e) => e.stopPropagation()}>

@@ -1,50 +1,66 @@
 """Tests for CacheExtension."""
 
+import datetime
 from unittest.mock import MagicMock, patch
+from uuid import UUID
 
 import pytest
+from django.conf import settings
 from strawberry.permission import PermissionExtension
 
-from apps.common.extensions import CacheExtension, get_protected_fields
+from apps.api.internal.extensions.cache import (
+    CacheExtension,
+    generate_key,
+    get_protected_fields,
+    invalidate_module_cache,
+    invalidate_program_cache,
+)
 
 
 class TestGenerateKey:
-    """Test cases for the generate_key method."""
+    """Test cases for the generate_key function."""
 
-    @pytest.fixture
-    def extension(self):
-        """Return a CacheExtension instance."""
-        return CacheExtension()
-
-    def test_creates_deterministic_hash(self, extension):
+    def test_creates_deterministic_hash(self):
         """Test that generate_key creates a deterministic hash key."""
-        key1 = extension.generate_key("chapter", {"key": "germany"})
-        key2 = extension.generate_key("chapter", {"key": "germany"})
+        key1 = generate_key("chapter", {"key": "germany"})
+        key2 = generate_key("chapter", {"key": "germany"})
 
         assert key1 == key2
         assert key1.startswith("graphql-")
         assert len(key1.split("-")[-1]) == 64  # SHA256 hex digest length
 
-    def test_differs_for_different_field_names(self, extension):
+    def test_differs_for_different_field_names(self):
         """Test that different field names produce different keys."""
-        key1 = extension.generate_key("chapter", {"key": "germany"})
-        key2 = extension.generate_key("project", {"key": "germany"})
+        key1 = generate_key("chapter", {"key": "germany"})
+        key2 = generate_key("project", {"key": "germany"})
 
         assert key1 != key2
 
-    def test_differs_for_different_args(self, extension):
+    def test_differs_for_different_args(self):
         """Test that different arguments produce different keys."""
-        key1 = extension.generate_key("chapter", {"key": "germany"})
-        key2 = extension.generate_key("chapter", {"key": "canada"})
+        key1 = generate_key("chapter", {"key": "germany"})
+        key2 = generate_key("chapter", {"key": "canada"})
 
         assert key1 != key2
 
-    def test_sorts_args_for_consistency(self, extension):
+    def test_sorts_args_for_consistency(self):
         """Test that argument order doesn't affect the key."""
-        key1 = extension.generate_key("chapter", {"a": "1", "b": "2"})
-        key2 = extension.generate_key("chapter", {"b": "2", "a": "1"})
+        key1 = generate_key("chapter", {"a": "1", "b": "2"})
+        key2 = generate_key("chapter", {"b": "2", "a": "1"})
 
         assert key1 == key2
+
+    def test_serializes_datetime_and_uuid_args(self):
+        """Test that generate_key handles datetime and UUID in args without error."""
+        dt = datetime.datetime(2025, 1, 15, 12, 0, 0, tzinfo=datetime.UTC)
+        uid = UUID("550e8400-e29b-41d4-a716-446655440000")
+        field_args = {"at": dt, "id": uid}
+
+        key1 = generate_key("someField", field_args)
+        key2 = generate_key("someField", field_args)
+
+        assert key1 == key2
+        assert key1.startswith(f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-")
 
 
 class TestGetProtectedFields:
@@ -90,7 +106,9 @@ class TestResolve:
     @pytest.fixture(autouse=True)
     def mock_protected_fields(self):
         """Patch get_protected_fields for all tests."""
-        with patch("apps.common.extensions.get_protected_fields", return_value=("apiKeys",)):
+        with patch(
+            "apps.api.internal.extensions.cache.get_protected_fields", return_value=("apiKeys",)
+        ):
             yield
 
     @pytest.fixture
@@ -140,7 +158,7 @@ class TestResolve:
         mock_next.assert_called_once()
         assert result == mock_next.return_value
 
-    @patch("apps.common.extensions.cache")
+    @patch("apps.api.internal.extensions.cache.cache")
     def test_returns_cached_result_on_hit(self, mock_cache, extension, mock_info, mock_next):
         """Test that cached result is returned on cache hit."""
         cached_result = {"name": "Cached OWASP"}
@@ -149,18 +167,14 @@ class TestResolve:
         result = extension.resolve(mock_next, None, mock_info, key="germany")
 
         assert result == cached_result
-        mock_cache.get.assert_called_once()
+        mock_cache.get_or_set.assert_called_once()
         mock_next.assert_not_called()
 
-    @patch("apps.common.extensions.CACHE_MISS", new_callable=lambda: object())
-    @patch("apps.common.extensions.cache")
-    def test_caches_result_on_miss(
-        self, mock_cache, mock_cache_miss, extension, mock_info, mock_next
-    ):
+    @patch("apps.api.internal.extensions.cache.cache")
+    def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
         """Test that result is cached on cache miss."""
-        mock_cache.get.return_value = mock_cache_miss
+        mock_cache.get_or_set.side_effect = lambda _key, default, _timeout: default()
 
         extension.resolve(mock_next, None, mock_info, key="germany")
 
         mock_next.assert_called_once()
-        mock_cache.set.assert_called_once()

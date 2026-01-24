@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import SearchPageLayout from 'components/SearchPageLayout'
-
-expect.extend(toHaveNoViolations)
 
 const baseProps = {
   currentPage: 1,

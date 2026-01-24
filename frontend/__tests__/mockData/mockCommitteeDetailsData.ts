@@ -1,11 +1,16 @@
 export const mockCommitteeDetailsData = {
   committee: {
-    name: 'Test Committee',
-    updatedAt: 1734103212,
+    contributorsCount: 10,
+    forksCount: 5,
+    issuesCount: 3,
     leaders: ['Leader 1', 'Leader 2'],
-    url: 'https://owasp.org/test-committee',
-    summary: 'This is a test committee summary.',
+    name: 'Test Committee',
     relatedUrls: ['https://twitter.com/testcommittee', 'https://github.com/testcommittee'],
+    repositoriesCount: 12,
+    starsCount: 20,
+    summary: 'This is a test committee summary.',
+    updatedAt: 1734103212,
+    url: 'https://owasp.org/test-committee',
   },
   topContributors: [
     {

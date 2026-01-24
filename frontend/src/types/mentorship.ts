@@ -1,5 +1,6 @@
 import type { Contributor } from 'types/contributor'
 import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
 // eslint-disable-next-line no-restricted-imports
 import { ExperienceLevelEnum, ProgramStatusEnum } from './__generated__/graphql'
 
@@ -19,6 +20,7 @@ export type Program = {
   userRole?: string
   admins?: Contributor[]
   modules?: Module[]
+  recentMilestones?: Milestone[]
 }
 
 export type ProgramList = {

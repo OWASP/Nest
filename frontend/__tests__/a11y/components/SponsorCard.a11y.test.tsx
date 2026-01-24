@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import SponsorCard from 'components/SponsorCard'
-
-expect.extend(toHaveNoViolations)
 
 const defaultProps = {
   target: 'test-target',

@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import type { Release as ReleaseType } from 'types/release'
 import Release from 'components/Release'
-
-expect.extend(toHaveNoViolations)
 
 const release: ReleaseType = {
   name: 'v1.0 The First Release',

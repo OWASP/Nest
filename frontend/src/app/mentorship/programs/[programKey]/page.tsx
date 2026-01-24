@@ -18,8 +18,9 @@ const ProgramDetailsPage = () => {
     error: graphQLRequestError,
     loading: isLoading,
   } = useQuery(GetProgramAndModulesDocument, {
-    variables: { programKey },
+    fetchPolicy: 'cache-and-network',
     skip: !programKey,
+    variables: { programKey },
   })
 
   const program = data?.getProgram
@@ -29,9 +30,9 @@ const ProgramDetailsPage = () => {
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [graphQLRequestError, programKey])
+  }, [graphQLRequestError])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (graphQLRequestError) {
     return (
@@ -66,9 +67,11 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
+      admins={program.admins}
       details={programDetails}
       domains={program.domains}
       modules={modules}
+      recentMilestones={program.recentMilestones}
       summary={program.description}
       tags={program.tags}
       title={program.name}

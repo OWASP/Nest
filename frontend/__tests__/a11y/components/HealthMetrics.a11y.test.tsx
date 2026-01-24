@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { IconType } from 'react-icons'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('components/BarChart', () => (props: { title: string; icon?: IconType }) => (
   <div

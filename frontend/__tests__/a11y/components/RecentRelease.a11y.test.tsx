@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { Release } from 'types/release'
 import RecentReleases from 'components/RecentReleases'
-
-expect.extend(toHaveNoViolations)
 
 const mockReleases: Release[] = [
   {
