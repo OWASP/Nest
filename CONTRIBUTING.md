@@ -426,12 +426,12 @@ Scan the Git history for sensitive information and secrets:
 docker run --rm -v "$(pwd):/src" aquasec/trivy repo /src
 ```
 
-This command automatically:
+These commands automatically:
 - Analyzes the project using the standards defined in trivy.yaml
 - Identifies critical and high vulnerabilities that block CI/CD
 - Outputs findings to the terminal for immediate review
 
-### Running Security Scans
+### Running Security Scan
 
 Run the Semgrep security scan for vulnerabilities and anti-patterns with the following command:
 
