@@ -100,7 +100,7 @@ class ModuleMutation:
             raise PermissionDenied(msg)
 
         if not program.admins.filter(id=creator_as_mentor.id).exists():
-            raise PermissionDenied
+            raise PermissionDenied("Only program admins can create modules.")
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -538,8 +538,7 @@ class ModuleMutation:
 
         def _invalidate():
             invalidate_module_cache(module_key, program_key)
-
-        invalidate_program_cache(program_key)
+            invalidate_program_cache(program_key)
 
         transaction.on_commit(_invalidate)
 
