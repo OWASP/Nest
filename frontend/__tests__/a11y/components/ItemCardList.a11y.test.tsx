@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import { Issue } from 'types/issue'
 import ItemCardList from 'components/ItemCardList'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/link', () => ({
   __esModule: true,

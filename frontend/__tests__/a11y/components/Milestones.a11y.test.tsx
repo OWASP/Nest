@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { Milestone } from 'types/milestone'
 import { User } from 'types/user'
 import Milestones from 'components/Milestones'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),

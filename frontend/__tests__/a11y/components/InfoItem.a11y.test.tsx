@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaUser } from 'react-icons/fa6'
 import InfoItem from 'components/InfoItem'
-
-expect.extend(toHaveNoViolations)
 
 describe('InfoItem a11y', () => {
   it('should not have any accessibility violations', async () => {
