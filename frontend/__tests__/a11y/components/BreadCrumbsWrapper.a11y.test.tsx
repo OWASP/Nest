@@ -1,10 +1,8 @@
 import { render } from '@testing-library/react'
 import { useBreadcrumbs } from 'hooks/useBreadcrumbs'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { usePathname } from 'next/navigation'
 import BreadCrumbsWrapper from 'components/BreadCrumbsWrapper'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),

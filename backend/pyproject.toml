@@ -23,7 +23,7 @@ django-rq = "^3.1"
 django-storages = { extras = [ "s3" ], version = "^1.14.4" }
 emoji = "^2.14.1"
 geopy = "^2.4.1"
-gunicorn = "^23.0.0"
+gunicorn = "^24.0.0"
 humanize = "^4.11.0"
 jinja2 = "^3.1.6"
 langchain = "^0.3.26"
@@ -69,7 +69,7 @@ elevenlabs = "^2.27.0"
 ffmpeg-python = "^0.2.0"
 pillow = "^12.1.0"
 pypdfium2 = "^5.2.0"
-weasyprint = "^67.0"
+weasyprint = "^68.0"
 
 [tool.ruff]
 target-version = "py313"
@@ -144,6 +144,7 @@ addopts = [
   "--cov-fail-under=80",
   "--cov-precision=2",
   "--cov-report=term-missing",
+  "--cov-report=xml",
   "--cov=.",
   "--dist=loadscope",
   "--durations-min=1",
