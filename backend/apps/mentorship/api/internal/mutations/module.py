@@ -532,6 +532,13 @@ class ModuleMutation:
 
         # Delete the module
         module.delete()
+        
+        def _invalidate():
+           invalidate_module_cache(module_key, program_key)
+        
+        invalidate_program_cache(program_key)
+
+        transaction.on_commit(_invalidate)
 
         logger.info(
             "User '%s' deleted module '%s' from program '%s'.",
