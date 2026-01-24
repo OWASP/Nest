@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import SortBy from 'components/SortBy'
-
-expect.extend(toHaveNoViolations)
 
 const defaultProps = {
   sortOptions: [

@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaStar } from 'react-icons/fa6'
 import InfoBlock from 'components/InfoBlock'
-
-expect.extend(toHaveNoViolations)
 
 const baseProps = {
   icon: FaStar,
