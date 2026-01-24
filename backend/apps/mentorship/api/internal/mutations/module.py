@@ -358,6 +358,11 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
+        # Check if user is a program admin or module mentor
+        is_program_admin = False
+        is_module_mentor = False
+
+        # Try to find the Mentor object for this user
         editor_as_mentor = None
         with contextlib.suppress(Mentor.DoesNotExist):
             editor_as_mentor = Mentor.objects.get(nest_user=user)
@@ -366,12 +371,10 @@ class ModuleMutation:
             with contextlib.suppress(Mentor.DoesNotExist):
                 editor_as_mentor = Mentor.objects.get(github_user=user.github_user)
 
-        if editor_as_mentor is None:
-            msg = "Only mentors can edit modules."
-            raise PermissionDenied(msg)
-
-        is_program_admin = module.program.admins.filter(id=editor_as_mentor.id).exists()
-        is_module_mentor = module.mentors.filter(id=editor_as_mentor.id).exists()
+        # Check permissions if we found a Mentor object
+        if editor_as_mentor is not None:
+            is_program_admin = module.program.admins.filter(id=editor_as_mentor.id).exists()
+            is_module_mentor = module.mentors.filter(id=editor_as_mentor.id).exists()
 
         if not (is_program_admin or is_module_mentor):
             msg = (
@@ -532,10 +535,10 @@ class ModuleMutation:
 
         # Delete the module
         module.delete()
-        
+
         def _invalidate():
-           invalidate_module_cache(module_key, program_key)
-        
+            invalidate_module_cache(module_key, program_key)
+
         invalidate_program_cache(program_key)
 
         transaction.on_commit(_invalidate)
