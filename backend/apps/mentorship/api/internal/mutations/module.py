@@ -207,7 +207,7 @@ class ModuleMutation:
         issue_number: int,
         deadline_at: datetime,
     ) -> ModuleNode:
-        """Set a deadline for a task. User must be a mentor and an admin of the program."""
+        """Set a deadline for a task. The user must be a mentor of the module."""
         user = info.context.request.user
 
         module = (
@@ -266,7 +266,7 @@ class ModuleMutation:
         program_key: str,
         issue_number: int,
     ) -> ModuleNode:
-        """Clear the deadline for a task. User must be a mentor and an admin of the program."""
+        """Clear the deadline for a task. The user must be a mentor of the module."""
         user = info.context.request.user
 
         module = (
