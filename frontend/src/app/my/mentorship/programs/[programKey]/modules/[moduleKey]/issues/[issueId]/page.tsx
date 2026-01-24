@@ -295,7 +295,7 @@ const ModuleIssueDetailsPage = () => {
                     {a.avatarUrl ? (
                       <Image
                         src={a.avatarUrl}
-                        alt={a.login}
+                        alt=""
                         width={32}
                         height={32}
                         className="rounded-full"
@@ -409,7 +409,7 @@ const ModuleIssueDetailsPage = () => {
                   {u.avatarUrl ? (
                     <Image
                       src={u.avatarUrl}
-                      alt={u.login}
+                      alt=""
                       width={32}
                       height={32}
                       className="rounded-full"

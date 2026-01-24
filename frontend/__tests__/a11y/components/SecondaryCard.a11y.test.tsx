@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaUser } from 'react-icons/fa6'
 import SecondaryCard from 'components/SecondaryCard'
-
-expect.extend(toHaveNoViolations)
 
 const baseProps = {
   title: 'Test Title',

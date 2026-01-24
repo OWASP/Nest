@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { FaCheck } from 'react-icons/fa6'
 import Modal from 'components/Modal'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('@/components/MarkdownWrapper', () => {
   return ({ content, className }: { content: string; className?: string }) => (

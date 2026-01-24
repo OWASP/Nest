@@ -1,11 +1,9 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import React from 'react'
 import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Module } from 'types/mentorship'
 import SingleModuleCard from 'components/SingleModuleCard'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('next/link', () => ({
   __esModule: true,
