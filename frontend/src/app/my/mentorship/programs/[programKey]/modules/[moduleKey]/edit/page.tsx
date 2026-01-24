@@ -113,9 +113,9 @@ const EditModulePage = () => {
       }
 
       const result = await updateModule({
-        variables: { input },
-        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
         awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        variables: { input },
       })
       const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 

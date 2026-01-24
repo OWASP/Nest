@@ -63,9 +63,9 @@ const CreateProgramPage = () => {
       }
 
       await createProgram({
-        variables: { input },
-        refetchQueries: [{ query: GetMyProgramsDocument }],
         awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetMyProgramsDocument }],
+        variables: { input },
       })
 
       addToast({

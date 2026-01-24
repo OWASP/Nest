@@ -6,7 +6,7 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 
-from apps.common.extensions import invalidate_program_cache
+from apps.api.internal.extensions.cache import invalidate_program_cache
 from apps.mentorship.api.internal.mutations.module import resolve_mentors_from_logins
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (

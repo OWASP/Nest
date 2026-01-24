@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import transaction
 from django.utils import timezone
 
-from apps.common.extensions import invalidate_module_cache, invalidate_program_cache
+from apps.api.internal.extensions.cache import invalidate_module_cache, invalidate_program_cache
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -39,6 +39,7 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
             msg = f"GitHub user '{login}' not found."
             logger.warning(msg, exc_info=True)
             raise ValueError(msg) from e
+
     return mentors
 
 

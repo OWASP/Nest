@@ -19,11 +19,11 @@ const ModuleDetailsPage = () => {
     error,
     loading: isLoading,
   } = useQuery(GetProgramAdminsAndModulesDocument, {
+    fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
       moduleKey,
     },
-    fetchPolicy: 'cache-and-network',
   })
 
   const programModule = data?.getModule

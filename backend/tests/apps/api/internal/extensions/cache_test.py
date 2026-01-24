@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from strawberry.permission import PermissionExtension
 
-from apps.common.extensions import (
+from apps.api.internal.extensions.cache import (
     CacheExtension,
     generate_key,
     get_protected_fields,
@@ -91,7 +91,9 @@ class TestResolve:
     @pytest.fixture(autouse=True)
     def mock_protected_fields(self):
         """Patch get_protected_fields for all tests."""
-        with patch("apps.common.extensions.get_protected_fields", return_value=("apiKeys",)):
+        with patch(
+            "apps.api.internal.extensions.cache.get_protected_fields", return_value=("apiKeys",)
+        ):
             yield
 
     @pytest.fixture
@@ -141,7 +143,7 @@ class TestResolve:
         mock_next.assert_called_once()
         assert result == mock_next.return_value
 
-    @patch("apps.common.extensions.cache")
+    @patch("apps.api.internal.extensions.cache.cache")
     def test_returns_cached_result_on_hit(self, mock_cache, extension, mock_info, mock_next):
         """Test that cached result is returned on cache hit."""
         cached_result = {"name": "Cached OWASP"}
@@ -153,7 +155,7 @@ class TestResolve:
         mock_cache.get_or_set.assert_called_once()
         mock_next.assert_not_called()
 
-    @patch("apps.common.extensions.cache")
+    @patch("apps.api.internal.extensions.cache.cache")
     def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
         """Test that result is cached on cache miss."""
         mock_cache.get_or_set.side_effect = lambda _key, default, _timeout: default()
@@ -167,8 +169,8 @@ class TestResolve:
 class TestInvalidationHelpers:
     """Test cases for invalidation helper functions."""
 
-    @patch("apps.common.extensions.cache")
-    @patch("apps.common.extensions.generate_key")
+    @patch("apps.api.internal.extensions.cache.cache")
+    @patch("apps.api.internal.extensions.cache.generate_key")
     def test_invalidate_program_cache_uses_camel_case_keys(self, mock_generate_key, mock_cache):
         """Test that invalidate_program_cache uses correct camelCase keys."""
         mock_generate_key.side_effect = lambda name, _args: f"{name}-hashed"
@@ -184,8 +186,8 @@ class TestInvalidationHelpers:
         mock_cache.delete.assert_any_call("getProgram-hashed")
         mock_cache.delete.assert_any_call("getProgramModules-hashed")
 
-    @patch("apps.common.extensions.cache")
-    @patch("apps.common.extensions.generate_key")
+    @patch("apps.api.internal.extensions.cache.cache")
+    @patch("apps.api.internal.extensions.cache.generate_key")
     def test_invalidate_module_cache_uses_camel_case_keys(self, mock_generate_key, mock_cache):
         """Test that invalidate_module_cache uses correct camelCase keys."""
         mock_generate_key.side_effect = lambda name, _args: f"{name}-hashed"

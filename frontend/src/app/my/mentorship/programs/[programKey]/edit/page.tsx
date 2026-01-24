@@ -18,6 +18,7 @@ import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
+
 const EditProgramPage = () => {
   const router = useRouter()
   const { programKey } = useParams<{ programKey: string }>()
@@ -108,9 +109,9 @@ const EditProgramPage = () => {
       }
 
       const result = await updateProgram({
-        variables: { input },
-        refetchQueries: [{ query: GetMyProgramsDocument }],
         awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetMyProgramsDocument }],
+        variables: { input },
       })
       const updatedProgramKey = result.data?.updateProgram?.key || programKey
 

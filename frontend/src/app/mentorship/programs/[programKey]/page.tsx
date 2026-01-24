@@ -18,9 +18,9 @@ const ProgramDetailsPage = () => {
     error: graphQLRequestError,
     loading: isLoading,
   } = useQuery(GetProgramAndModulesDocument, {
-    variables: { programKey },
-    skip: !programKey,
     fetchPolicy: 'cache-and-network',
+    skip: !programKey,
+    variables: { programKey },
   })
 
   const program = data?.getProgram

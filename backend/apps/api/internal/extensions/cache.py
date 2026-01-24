@@ -23,11 +23,13 @@ def get_protected_fields(schema: Schema) -> tuple[str, ...]:
         tuple[str, ...]: Tuple of protected field names in camelCase.
 
     """
-    query_type = schema.schema_converter.type_map.get("Query")
-    fields = getattr(getattr(query_type, "definition", None), "fields", ())
     return tuple(
         to_camel_case(field.name)
-        for field in fields
+        for field in getattr(
+            getattr(schema.schema_converter.type_map.get("Query"), "definition", None),
+            "fields",
+            (),
+        )
         if any(isinstance(ext, PermissionExtension) for ext in field.extensions)
     )
 
@@ -77,8 +79,7 @@ def invalidate_cache(field_name: str, field_args: dict) -> bool:
         True if cache was invalidated, False if key didn't exist.
 
     """
-    cache_key = generate_key(field_name, field_args)
-    return cache.delete(cache_key)
+    return cache.delete(generate_key(field_name, field_args))
 
 
 def invalidate_program_cache(program_key: str) -> None:
