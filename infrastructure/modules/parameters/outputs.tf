@@ -1,5 +1,6 @@
 output "django_ssm_parameter_arns" {
   description = "Map of environment variable names to the ARNs of all SSM parameters (Required by Django)."
+  sensitive   = true
   value = {
     "DJANGO_ALGOLIA_APPLICATION_ID" = aws_ssm_parameter.django_algolia_application_id.arn
     "DJANGO_ALGOLIA_WRITE_API_KEY"  = aws_ssm_parameter.django_algolia_write_api_key.arn
@@ -24,6 +25,7 @@ output "django_ssm_parameter_arns" {
 
 output "frontend_ssm_parameter_arns" {
   description = "Map of frontend environment variable names to the ARNs of all SSM parameters."
+  sensitive   = true
   value = {
     "NEXT_SERVER_CSRF_URL"             = aws_ssm_parameter.next_server_csrf_url.arn
     "NEXT_SERVER_DISABLE_SSR"          = aws_ssm_parameter.next_server_disable_ssr.arn
