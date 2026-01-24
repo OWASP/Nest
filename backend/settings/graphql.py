@@ -1,6 +1,8 @@
 """GraphQL schema."""
 
 import strawberry
+from strawberry.extensions import QueryDepthLimiter
+from strawberry_django.optimizer import DjangoOptimizerExtension
 
 from apps.api.internal.extensions.cache import CacheExtension
 from apps.api.internal.mutations import ApiMutations
@@ -41,4 +43,8 @@ class Query(
     """Schema queries."""
 
 
-schema = strawberry.Schema(mutation=Mutation, query=Query, extensions=[CacheExtension])
+schema = strawberry.Schema(
+    mutation=Mutation,
+    query=Query,
+    extensions=[CacheExtension, QueryDepthLimiter(max_depth=5), DjangoOptimizerExtension()],
+)

@@ -155,6 +155,10 @@ const EditModulePage = () => {
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      minDate={
+        data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
+      }
+      maxDate={data?.getProgram?.endedAt ? formatDateForInput(data.getProgram.endedAt) : undefined}
     />
   )
 }

@@ -64,6 +64,7 @@ jest.mock('next/image', () => {
 })
 
 const mockAlgoliaContributor: Contributor = {
+  id: 'contributor-johndoe',
   login: 'johndoe',
   name: 'John Doe',
   avatarUrl: 'https://github.com/johndoe.png',
@@ -72,6 +73,7 @@ const mockAlgoliaContributor: Contributor = {
 }
 
 const mockGitHubContributor: Contributor = {
+  id: 'contributor-jane-doe',
   login: 'jane-doe',
   name: 'Jane Doe',
   avatarUrl: 'https://avatars.githubusercontent.com/u/12345',
@@ -130,6 +132,7 @@ describe('ContributorAvatar', () => {
 
   it('shows only name when no contributions count', () => {
     const contributorWithoutContributions = {
+      id: 'contributor-newbie',
       login: 'newbie',
       name: 'New Contributor',
       avatarUrl: 'https://github.com/newbie.png',
@@ -147,6 +150,7 @@ describe('ContributorAvatar', () => {
 
   it('handles contributor with zero contributions', () => {
     const contributorWithZeroContributions: Contributor = {
+      id: 'contributor-newcomer',
       login: 'newcomer',
       name: 'Brand New User',
       avatarUrl: 'https://github.com/newcomer.png',
@@ -165,6 +169,7 @@ describe('ContributorAvatar', () => {
 
   it('handles empty string values gracefully', () => {
     const contributorWithEmptyStrings: Contributor = {
+      id: 'contributor-empty-strings',
       login: '',
       name: '',
       avatarUrl: 'https://github.com/default.png',
@@ -182,6 +187,7 @@ describe('ContributorAvatar', () => {
 
   it('handles very long names and contributions', () => {
     const contributorWithLongData: Contributor = {
+      id: 'contributor-long-data',
       login: 'very-long-username-that-might-break-layouts',
       name: 'Someone With A Really Really Long Name That Might Cause Issues',
       avatarUrl: 'https://github.com/very-long-username-that-might-break-layouts.png',

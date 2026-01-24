@@ -12,6 +12,7 @@ import {
   GetProgramAndModulesDocument,
 } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
+import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -99,9 +100,9 @@ const CreateModulePage = () => {
       }
 
       await createModule({
-        variables: { input },
-        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
         awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        variables: { input },
       })
 
       addToast({
@@ -113,10 +114,10 @@ const CreateModulePage = () => {
       })
 
       router.push(`/my/mentorship/programs/${programKey}`)
-    } catch (err) {
+    } catch (error) {
       addToast({
         title: 'Creation Failed',
-        description: err.message || 'Something went wrong while creating the module.',
+        description: error.message || 'Something went wrong while creating the module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,
@@ -147,6 +148,16 @@ const CreateModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       isEdit={false}
+      minDate={
+        programData?.getProgram?.startedAt
+          ? formatDateForInput(programData.getProgram.startedAt)
+          : undefined
+      }
+      maxDate={
+        programData?.getProgram?.endedAt
+          ? formatDateForInput(programData.getProgram.endedAt)
+          : undefined
+      }
     />
   )
 }

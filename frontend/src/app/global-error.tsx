@@ -102,7 +102,7 @@ export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children
   )
 }
 
-export default function GlobalError({ error }: { error: Error }) {
+export default function GlobalError({ error }: Readonly<{ error: Error }>) {
   Sentry.captureException(error)
   const errorConfig = ERROR_CONFIGS['500']
   return <ErrorDisplay {...errorConfig} />
