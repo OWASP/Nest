@@ -73,9 +73,7 @@ class ProgramQuery:
 
         results = []
         for program in paginated_programs:
-            is_admin = any(
-                admin.nest_user_id == user.id for admin in program.admins.all()
-            )
+            is_admin = any(admin.nest_user_id == user.id for admin in program.admins.all())
             program.user_role = "admin" if is_admin else "mentor"
             results.append(program)
 
