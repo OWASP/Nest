@@ -66,9 +66,11 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
+      admins={program.admins}
       details={programDetails}
       domains={program.domains}
       modules={modules}
+      recentMilestones={program.recentMilestones}
       summary={program.description}
       tags={program.tags}
       title={program.name}
