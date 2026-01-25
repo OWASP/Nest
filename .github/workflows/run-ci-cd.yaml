@@ -121,6 +121,128 @@ jobs:
         run: |
           make check-spelling
 
+  generate-backend-model-graphs:
+    name: Generate Backend Model Graphs
+    permissions:
+      contents: read
+    continue-on-error: true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          cache: "poetry"
+          cache-dependency-path: backend/poetry.lock
+          python-version: "3.13"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          pip install poetry
+          poetry install --no-interaction --no-root
+          poetry run pip install django-extensions
+
+      - name: Prepare output directories
+        working-directory: backend
+        run: |
+          mkdir -p model-graphs/apps
+          mkdir -p model-graphs/inter-app
+
+      - name: Create CI settings wrapper (inject django_extensions)
+        working-directory: backend
+        run: |
+          mkdir -p settings
+          cat > settings/ci_graphs.py <<'PY'
+          from .local import *  # noqa
+
+          if "django_extensions" not in INSTALLED_APPS:
+              INSTALLED_APPS = list(INSTALLED_APPS) + ["django_extensions"]
+          PY
+
+      - name: Set backend environment variables
+        run: |
+          echo "DJANGO_SETTINGS_MODULE=settings.ci_graphs" >> $GITHUB_ENV
+          echo "DJANGO_CONFIGURATION=Local" >> $GITHUB_ENV
+          echo "DJANGO_SECRET_KEY=dummy" >> $GITHUB_ENV
+          echo "DJANGO_ALGOLIA_APPLICATION_ID=None" >> $GITHUB_ENV
+          echo "DJANGO_ALGOLIA_WRITE_API_KEY=None" >> $GITHUB_ENV
+          echo "DJANGO_REDIS_HOST=None" >> $GITHUB_ENV
+          echo "DJANGO_REDIS_PASSWORD=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_NAME=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_USER=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_PASSWORD=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_HOST=None" >> $GITHUB_ENV
+          echo "DJANGO_DB_PORT=None" >> $GITHUB_ENV
+          echo "DJANGO_OPEN_AI_SECRET_KEY=None" >> $GITHUB_ENV
+          echo "DJANGO_SLACK_BOT_TOKEN=None" >> $GITHUB_ENV
+          echo "DJANGO_SLACK_SIGNING_SECRET=None" >> $GITHUB_ENV
+
+      - name: Generate per-app model graphs
+        working-directory: backend
+        run: |
+          set -e
+
+          APPS=$(poetry run python - <<'PY'
+          import django
+          from django.conf import settings
+          django.setup()
+
+          apps = [
+              a for a in settings.INSTALLED_APPS
+              if not a.startswith("django.")
+              and not a.startswith("django.contrib.")
+              and a != "django_extensions"
+          ]
+
+          for a in apps:
+              print(a)
+          PY
+          )
+
+          for app in $APPS; do
+            poetry run python manage.py graph_models "$app" \
+              --output "model-graphs/apps/${app}_inheritance.svg" \
+              --format svg || true
+
+            poetry run python manage.py graph_models "$app" \
+              --disable-inheritance \
+              --output "model-graphs/apps/${app}_relations.svg" \
+              --format svg || true
+          done
+
+      - name: Generate inter-app model graphs
+        working-directory: backend
+        run: |
+          set +e
+
+          poetry run python manage.py graph_models \
+            --all-applications \
+            --output "model-graphs/inter-app/backend_inheritance.svg" \
+            --format svg || true
+
+          poetry run python manage.py graph_models \
+            --all-applications \
+            --disable-inheritance \
+            --output "model-graphs/inter-app/backend_relations.svg" \
+            --format svg || true
+
+          set -e
+
+      - name: Upload model graphs as artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: backend-model-graphs
+          path: backend/model-graphs
+
   scan-code:
     name: Run Code Scan
     needs:
