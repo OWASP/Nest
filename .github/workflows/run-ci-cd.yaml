@@ -195,6 +195,9 @@ jobs:
           set -e
 
           APPS=$(poetry run python - <<'PY'
+          from configurations import importer
+          importer.install()
+
           import django
           django.setup()
 
@@ -203,7 +206,7 @@ jobs:
           for app in apps.get_app_configs():
               if app.name.startswith("django.") or app.name.startswith("django.contrib."):
                   continue
-              if app.name == "django_extensions":
+              if app.label == "django_extensions":
                   continue
 
               print(app.label)
