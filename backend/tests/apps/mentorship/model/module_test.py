@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import django.utils.timezone
+from datetime import timezone
 
 from apps.mentorship.models import Module, Program
 from apps.owasp.models import Project
@@ -14,10 +15,10 @@ class TestModulePureMocks:
             key="test-program",
             status=Program.ProgramStatus.PUBLISHED,
             started_at=django.utils.timezone.datetime(
-                2023, 1, 1, 9, 0, 0, tzinfo=django.utils.timezone.UTC
+                2023, 1, 1, 9, 0, 0, tzinfo=timezone.UTC
             ),
             ended_at=django.utils.timezone.datetime(
-                2023, 12, 31, 18, 0, 0, tzinfo=django.utils.timezone.UTC
+                2023, 12, 31, 18, 0, 0, tzinfo=timezone.UTC
             ),
         )
         self.project = MagicMock(spec=Project, name="Test Project", key="test-project")
@@ -36,9 +37,9 @@ class TestModulePureMocks:
             name="Program With Dates",
             key="program-with-dates",
             started_at=django.utils.timezone.datetime(
-                2024, 2, 1, tzinfo=django.utils.timezone.UTC
+                2024, 2, 1, tzinfo=timezone.UTC
             ),
-            ended_at=django.utils.timezone.datetime(2024, 2, 28, tzinfo=django.utils.timezone.UTC),
+            ended_at=django.utils.timezone.datetime(2024, 2, 28, tzinfo=timezone.UTC),
         )
 
         mock_module = MagicMock(spec=Module)
@@ -65,17 +66,17 @@ class TestModulePureMocks:
 
         assert module.key == "date-module"
         assert module.started_at == django.utils.timezone.datetime(
-            2024, 2, 1, tzinfo=django.utils.timezone.UTC
+            2024, 2, 1, tzinfo=timezone.UTC
         )
         assert module.ended_at == django.utils.timezone.datetime(
-            2024, 2, 28, tzinfo=django.utils.timezone.UTC
+            2024, 2, 28, tzinfo=timezone.UTC
         )
 
         explicit_start = django.utils.timezone.datetime(
-            2024, 3, 1, tzinfo=django.utils.timezone.UTC
+            2024, 3, 1, tzinfo=timezone.UTC
         )
         explicit_end = django.utils.timezone.datetime(
-            2024, 3, 31, tzinfo=django.utils.timezone.UTC
+            2024, 3, 31, tzinfo=timezone.UTC
         )
 
         mock_module.started_at = explicit_start
