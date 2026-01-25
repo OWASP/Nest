@@ -5,6 +5,7 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useState } from 'react'
 import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay } from 'app/global-error'
@@ -14,11 +15,13 @@ import AnchorTitle from 'components/AnchorTitle'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
-import PullRequestList from 'components/PullRequestList'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
+  const [showAllPRs, setShowAllPRs] = useState(false)
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
@@ -316,7 +319,17 @@ const ModuleIssueDetailsPage = () => {
         )}
 
         <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
-          <PullRequestList pullRequests={issue.pullRequests || []} />
+          <div className="grid grid-cols-1 gap-3">
+            {(issue.pullRequests || []).slice(0, showAllPRs ? undefined : 4).map((pr) => (
+              <MentorshipPullRequest key={pr.id} pr={pr} />
+            ))}
+            {(!issue.pullRequests || issue.pullRequests.length === 0) && (
+              <span className="text-sm text-gray-400">No linked pull requests.</span>
+            )}
+            {issue.pullRequests && issue.pullRequests.length > 4 && (
+              <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
+            )}
+          </div>
         </SecondaryCard>
 
         <div className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800">

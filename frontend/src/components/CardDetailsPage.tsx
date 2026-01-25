@@ -36,10 +36,10 @@ import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import Markdown from 'components/MarkdownWrapper'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
-import PullRequestList from 'components/PullRequestList'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -116,6 +116,7 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
+  const [showAllPRs, setShowAllPRs] = useState(false)
   const [showAllMilestones, setShowAllMilestones] = useState(false)
 
   // compute styles based on type prop
@@ -371,7 +372,14 @@ const DetailsCard = ({
         )}
         {type === 'module' && pullRequests && pullRequests.length > 0 && (
           <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
-            <PullRequestList pullRequests={pullRequests} />
+            <div className="grid grid-cols-1 gap-3">
+              {pullRequests.slice(0, showAllPRs ? undefined : 4).map((pr) => (
+                <MentorshipPullRequest key={pr.id} pr={pr} />
+              ))}
+              {pullRequests.length > 4 && (
+                <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
+              )}
+            </div>
           </SecondaryCard>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&

@@ -260,11 +260,11 @@ jest.mock('components/RecentPullRequests', () => ({
   ),
 }))
 
-jest.mock('components/PullRequestList', () => ({
+jest.mock('components/MentorshipPullRequest', () => ({
   __esModule: true,
-  default: ({ pullRequests, ...props }: { pullRequests: unknown[]; [key: string]: unknown }) => (
-    <div data-testid="pull-request-list" {...props}>
-      PullRequestList ({pullRequests?.length || 0} items)
+  default: ({ pr, ...props }: { pr: PullRequest; [key: string]: unknown }) => (
+    <div data-testid="pull-request-item" {...props}>
+      MentorshipPullRequest: {pr.title}
     </div>
   ),
 }))
@@ -780,7 +780,7 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
     })
 
-    it('renders PullRequestList when type is module and PRs are provided', () => {
+    it('renders MentorshipPullRequest when type is module and PRs are provided', () => {
       render(
         <CardDetailsPage
           {...defaultProps}
@@ -790,7 +790,7 @@ describe('CardDetailsPage', () => {
       )
 
       expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
-      expect(screen.getByTestId('pull-request-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('pull-request-item').length).toBeGreaterThan(0)
     })
   })
 
@@ -1820,6 +1820,101 @@ describe('CardDetailsPage', () => {
 
       expect(screen.getByText('Milestone 1')).toBeInTheDocument()
       expect(screen.getByText('Milestone 4')).toBeInTheDocument()
+      expect(screen.queryByText(/Show more/i)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Module Pull Requests Display', () => {
+    const createPullRequests = (count: number) => {
+      const pullRequests = []
+      for (let i = 0; i < count; i++) {
+        pullRequests.push({
+          id: `pr-${i}`,
+          author: mockUser,
+          createdAt: new Date().toISOString(),
+          organizationName: 'test-org',
+          title: `Pull Request ${i + 1}`,
+          url: `https://github.com/test/project/pull/${i + 1}`,
+          state: 'OPEN',
+          number: i + 1,
+          mergedAt: null,
+          repositoryName: 'test-repo',
+        })
+      }
+      return pullRequests
+    }
+
+    it('renders only first 4 PRs initially for module type', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+
+      expect(screen.getByText(/Pull Request 1/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 4/)).toBeInTheDocument()
+
+      expect(screen.queryByText(/Pull Request 5/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Pull Request 6/)).not.toBeInTheDocument()
+
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('expands to show all PRs when "Show more" is clicked', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      const showMoreBtn = screen.getByText(/Show more/i)
+      fireEvent.click(showMoreBtn)
+
+      expect(screen.getByText(/Pull Request 5/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 6/)).toBeInTheDocument()
+
+      expect(screen.getByText(/Show less/i)).toBeInTheDocument()
+    })
+
+    it('collapses back to 4 PRs when "Show less" is clicked', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      fireEvent.click(screen.getByText(/Show more/i))
+      expect(screen.getByText(/Pull Request 5/)).toBeInTheDocument()
+
+      fireEvent.click(screen.getByText(/Show less/i))
+
+      expect(screen.queryByText(/Pull Request 5/)).not.toBeInTheDocument()
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('does not show toggle button if PRs <= 4', () => {
+      const fewPRs = createPullRequests(4)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: fewPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByText(/Pull Request 1/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 4/)).toBeInTheDocument()
       expect(screen.queryByText(/Show more/i)).not.toBeInTheDocument()
     })
   })
