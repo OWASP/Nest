@@ -67,7 +67,7 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     def issues_count(self, root: Project) -> int:
         """Resolve issues count."""
-        return root.idx_issues_count
+        return root.issues_count
 
     @strawberry_django.field
     def key(self, root: Project) -> str:

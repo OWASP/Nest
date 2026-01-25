@@ -93,22 +93,11 @@ class Command(BaseCommand):
                 is_fork=False,
                 is_template=False,
             ).values_list("id", flat=True)
-            issues = (
-                Issue.objects.filter(
-                    repository_id__in=repository_ids,
-                )
-                .select_related(
-                    "author",
-                    "level",
-                    "milestone",
-                    "repository",
-                )
-                .prefetch_related(
-                    "assignees",
-                    "labels",
-                )
+            issues = Issue.objects.filter(
+                repository_id__in=repository_ids,
             )
             project.issues.set(issues)
+            project.issues_count = issues.count()
 
             project.pushed_at = max(pushed_at)
             if released_at:

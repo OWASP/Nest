@@ -91,6 +91,7 @@ class Project(
     commits_count = models.PositiveIntegerField(verbose_name="Commits", default=0)
     contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
     forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
+    issues_count = models.PositiveIntegerField(verbose_name="Issues", default=0)
     open_issues_count = models.PositiveIntegerField(verbose_name="Open issues", default=0)
     releases_count = models.PositiveIntegerField(verbose_name="Releases", default=0)
     stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)

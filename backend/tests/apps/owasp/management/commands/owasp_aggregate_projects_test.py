@@ -72,26 +72,33 @@ class TestOwaspAggregateProjects:
                 return self
 
         mock_project.repositories.filter.return_value = QS([mock_repository])
-        mock_projects_list = [mock_project] * projects
-        mock_active_projects = mock.MagicMock()
-        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
-        mock_active_projects.count.return_value = len(mock_projects_list)
-        mock_active_projects.__getitem__.side_effect = (
-            lambda idx: mock_projects_list[idx.start : idx.stop]
-            if isinstance(idx, slice)
-            else mock_projects_list[idx]
-        )
-        mock_active_projects.order_by.return_value = mock_active_projects
+        
+        mock_issues = mock.Mock()
+        mock_issues.count.return_value = 5  
+        
+        with mock.patch("apps.owasp.management.commands.owasp_aggregate_projects.Issue") as mock_issue_class:
+            mock_issue_class.objects.filter.return_value = mock_issues
+            
+            mock_projects_list = [mock_project] * projects
+            mock_active_projects = mock.MagicMock()
+            mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+            mock_active_projects.count.return_value = len(mock_projects_list)
+            mock_active_projects.__getitem__.side_effect = (
+                lambda idx: mock_projects_list[idx.start : idx.stop]
+                if isinstance(idx, slice)
+                else mock_projects_list[idx]
+            )
+            mock_active_projects.order_by.return_value = mock_active_projects
 
-        with (
-            mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print") as mock_print,
-        ):
-            command.handle(offset=offset)
+            with (
+                mock.patch.object(Project, "active_projects", mock_active_projects),
+                mock.patch("builtins.print") as mock_print,
+            ):
+                command.handle(offset=offset)
 
-        assert mock_bulk_save.called
-        assert mock_print.call_count == projects - offset
+            assert mock_bulk_save.called
+            assert mock_print.call_count == projects - offset
 
-        for call in mock_print.call_args_list:
-            args, _ = call
-            assert "https://owasp.org/www-project-test" in args[0]
+            for call in mock_print.call_args_list:
+                args, _ = call
+                assert "https://owasp.org/www-project-test" in args[0]
