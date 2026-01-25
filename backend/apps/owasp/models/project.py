@@ -152,6 +152,11 @@ class Project(
         verbose_name="Repositories",
         blank=True,
     )
+    issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Issues",
+        blank=True,
+    )
 
     def __str__(self) -> str:
         """Project human readable representation."""
@@ -193,30 +198,6 @@ class Project(
     def is_tool_type(self) -> bool:
         """Indicate whether project has TOOL type."""
         return self.type == ProjectType.TOOL
-
-    @property
-    def issues(self):
-        """Return issues."""
-        return (
-            Issue.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "level",
-                "milestone",
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-            )
-        )
-
-    @property
-    def issues_count(self) -> int:
-        """Return count of issues."""
-        return self.issues.count()
 
     @property
     def last_health_metrics(self) -> ProjectHealthMetrics | None:

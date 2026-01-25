@@ -21,6 +21,7 @@ class TestOwaspAggregateProjects:
         project.owasp_repository = mock.Mock()
         project.owasp_repository.is_archived = False
         project.owasp_repository.created_at = "2024-01-01T00:00:00Z"
+        project.issues = mock.Mock()
         return project
 
     @pytest.mark.parametrize(
@@ -37,6 +38,7 @@ class TestOwaspAggregateProjects:
     def test_handle(self, mock_bulk_save, command, mock_project, offset, projects):
         mock_organization = mock.Mock()
         mock_repository = mock.Mock()
+        mock_repository.id = 1
         mock_repository.organization = mock_organization
         mock_repository.owner = mock.Mock()
         mock_repository.is_archived = False
@@ -60,6 +62,14 @@ class TestOwaspAggregateProjects:
         class QS(list):
             def exists(self):
                 return bool(self)
+
+            def values_list(self, *args, **kwargs):
+                # Extract values from list items based on field names
+                flat = kwargs.get("flat", False)
+                field_name = args[0] if args else None
+                if flat and field_name:
+                    return [getattr(item, field_name) for item in self]
+                return self
 
         mock_project.repositories.filter.return_value = QS([mock_repository])
         mock_projects_list = [mock_project] * projects

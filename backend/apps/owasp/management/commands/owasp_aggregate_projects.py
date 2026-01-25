@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
+from apps.github.models.issue import Issue
 from apps.owasp.models.project import Project
 
 
@@ -52,6 +53,7 @@ class Command(BaseCommand):
 
             project.organizations.clear()
             project.owners.clear()
+            project.issues.clear()
             for repository in project.repositories.filter(
                 is_empty=False,
                 is_fork=False,
@@ -84,6 +86,29 @@ class Command(BaseCommand):
                     licenses.add(repository.license)
                 if repository.topics:
                     topics.update(repository.topics)
+
+            # Populate issues from all repositories.
+            repository_ids = project.repositories.filter(
+                is_empty=False,
+                is_fork=False,
+                is_template=False,
+            ).values_list("id", flat=True)
+            issues = (
+                Issue.objects.filter(
+                    repository_id__in=repository_ids,
+                )
+                .select_related(
+                    "author",
+                    "level",
+                    "milestone",
+                    "repository",
+                )
+                .prefetch_related(
+                    "assignees",
+                    "labels",
+                )
+            )
+            project.issues.set(issues)
 
             project.pushed_at = max(pushed_at)
             if released_at:

@@ -79,7 +79,16 @@ class ProjectNode(GenericEntityNode):
         """Resolve languages."""
         return root.idx_languages
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        prefetch_related=[
+            "issues__author",
+            "issues__level",
+            "issues__milestone",
+            "issues__repository",
+            "issues__assignees",
+            "issues__labels",
+        ]
+    )
     def recent_issues(self, root: Project) -> list[IssueNode]:
         """Resolve recent issues."""
         return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
