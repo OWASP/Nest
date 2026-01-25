@@ -5,7 +5,7 @@ export const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // check whether the browser supports matchMedia API
+    // Check whether the browser supports matchMedia API.
     if (typeof globalThis.matchMedia !== 'function') return
 
     const mediaQuery = globalThis.matchMedia(`(max-width: ${desktopViewMinWidth - 1}px)`)
