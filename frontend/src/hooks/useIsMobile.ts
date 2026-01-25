@@ -15,14 +15,10 @@ export const useIsMobile = () => {
     }
 
     handleChange(mediaQuery)
-
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
-    } else {
-      // Safari browser < 14 fallback
-      mediaQuery.addListener(handleChange)
-      return () => mediaQuery.removeListener(handleChange)
+    
+    mediaQuery.addEventListener('change', handleChange)
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange)
     }
   }, [])
 
