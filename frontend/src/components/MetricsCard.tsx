@@ -64,7 +64,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
               Health Checked
             </p>
             <p className="text-sm text-gray-800 lg:text-lg dark:text-gray-200">
-              {new Date(metric.createdAt).toLocaleString('default', {
+              {new Date(metric.createdAt).toLocaleString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric',
