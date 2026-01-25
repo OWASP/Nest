@@ -2,7 +2,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms
@@ -53,8 +52,8 @@ class TestGetProgram:
         """Test when the program does not exist."""
         mock_program_prefetch_related.return_value.get.side_effect = Program.DoesNotExist
 
-        result=api_program_queries.get_program(program_key="nonexistent")
-        
+        result = api_program_queries.get_program(program_key="nonexistent")
+
         assert result is None
         mock_program_prefetch_related.assert_called_once_with("admins__github_user")
         mock_program_prefetch_related.return_value.get.assert_called_once_with(key="nonexistent")

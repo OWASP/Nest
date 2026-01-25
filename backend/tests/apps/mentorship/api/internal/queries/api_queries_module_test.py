@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.exceptions import ObjectDoesNotExist
 
 from apps.mentorship.api.internal.queries.module import ModuleQuery
 from apps.mentorship.models import Module
@@ -100,8 +99,7 @@ class TestModuleQuery:
             Module.DoesNotExist
         )
 
-        
-        result=api_module_queries.get_module(module_key="nonexistent", program_key="program1")
+        result = api_module_queries.get_module(module_key="nonexistent", program_key="program1")
         assert result is None
         mock_module_select_related.assert_called_once_with("program", "project")
         mock_module_select_related.return_value.prefetch_related.return_value.get.assert_called_once_with(
