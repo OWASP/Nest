@@ -15,7 +15,6 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
-from apps.github.models.milestone import Milestone
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
@@ -150,6 +149,11 @@ class Project(
     repositories = models.ManyToManyField(
         "github.Repository",
         verbose_name="Repositories",
+        blank=True,
+    )
+    recent_milestones = models.ManyToManyField(
+        "github.Milestone",
+        verbose_name="Recent milestones",
         blank=True,
     )
 
@@ -299,22 +303,6 @@ class Project(
             "author",
             "repository",
             "repository__organization",
-        )
-
-    @property
-    def recent_milestones(self):
-        """Return recent milestones."""
-        return (
-            Milestone.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "repository",
-            )
-            .prefetch_related(
-                "labels",
-            )
         )
 
     @property

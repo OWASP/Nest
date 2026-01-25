@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
+from apps.owasp.management.commands.owasp_aggregate_projects import Command, Milestone, Project
 
 
 class TestOwaspAggregateProjects:
@@ -21,6 +21,7 @@ class TestOwaspAggregateProjects:
         project.owasp_repository = mock.Mock()
         project.owasp_repository.is_archived = False
         project.owasp_repository.created_at = "2024-01-01T00:00:00Z"
+        project.recent_milestones = mock.Mock()
         return project
 
     @pytest.mark.parametrize(
@@ -33,8 +34,11 @@ class TestOwaspAggregateProjects:
         ],
     )
     @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Milestone, "objects")
     @mock.patch.object(Project, "bulk_save", autospec=True)
-    def test_handle(self, mock_bulk_save, command, mock_project, offset, projects):
+    def test_handle(
+        self, mock_bulk_save, mock_milestone_objects, command, mock_project, offset, projects
+    ):
         mock_organization = mock.Mock()
         mock_repository = mock.Mock()
         mock_repository.organization = mock_organization
@@ -79,6 +83,7 @@ class TestOwaspAggregateProjects:
         ):
             command.handle(offset=offset)
 
+        assert mock_project.recent_milestones.set.called
         assert mock_bulk_save.called
         assert mock_print.call_count == projects - offset
 
