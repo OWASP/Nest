@@ -205,13 +205,12 @@ jobs:
 
           for app in $APPS; do
             poetry run python manage.py graph_models "$app" \
-              --output "model-graphs/apps/${app}_inheritance.svg" \
-              --format svg || true
+              --inheritance \
+              --output "model-graphs/apps/${app}_inheritance.svg" || true
 
             poetry run python manage.py graph_models "$app" \
-              --disable-inheritance \
-              --output "model-graphs/apps/${app}_relations.svg" \
-              --format svg || true
+              --no-inheritance \
+              --output "model-graphs/apps/${app}_relations.svg" || true
           done
 
       - name: Generate inter-app model graphs
@@ -221,14 +220,13 @@ jobs:
 
           poetry run python manage.py graph_models \
             --all-applications \
-            --output "model-graphs/inter-app/backend_inheritance.svg" \
-            --format svg || true
+            --inheritance \
+            --output "model-graphs/inter-app/backend_inheritance.svg" || true
 
           poetry run python manage.py graph_models \
             --all-applications \
-            --disable-inheritance \
-            --output "model-graphs/inter-app/backend_relations.svg" \
-            --format svg || true
+            --no-inheritance \
+            --output "model-graphs/inter-app/backend_relations.svg" || true
 
           set -e
 
