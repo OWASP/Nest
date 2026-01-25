@@ -152,7 +152,7 @@ jobs:
         run: |
           pip install poetry
           poetry install --no-interaction --no-root
-          poetry run pip install django-extensions
+          poetry run pip install django-extensions pydotplus pydot
 
       - name: Prepare output directories
         working-directory: backend
