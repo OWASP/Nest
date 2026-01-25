@@ -103,7 +103,18 @@ class ProjectNode(GenericEntityNode):
             else []
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        select_related=[
+            "pull_requests__author",
+            "pull_requests__milestone",
+            "pull_requests__repository__organization",
+            "pull_requests__repository",
+        ],
+        prefetch_related=[
+            "pull_requests__assignees",
+            "pull_requests__labels",
+        ],
+    )
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
         return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]

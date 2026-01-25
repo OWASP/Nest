@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
+from apps.github.models.pull_request import PullRequest
 from apps.owasp.models.project import Project
 
 
@@ -52,6 +53,7 @@ class Command(BaseCommand):
 
             project.organizations.clear()
             project.owners.clear()
+            project.pull_requests.clear()
             for repository in project.repositories.filter(
                 is_empty=False,
                 is_fork=False,
@@ -109,6 +111,23 @@ class Command(BaseCommand):
                 is_fork=False,
                 is_template=False,
             ).exists()
+
+            pull_requests = (
+                PullRequest.objects.filter(
+                    repository__in=project.repositories.all(),
+                )
+                .select_related(
+                    "author",
+                    "milestone",
+                    "repository__organization",
+                    "repository",
+                )
+                .prefetch_related(
+                    "assignees",
+                    "labels",
+                )
+            )
+            project.pull_requests.set(pull_requests)
 
             projects.append(project)
 
