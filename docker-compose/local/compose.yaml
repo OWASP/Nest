@@ -4,6 +4,7 @@ services:
     command: >
       sh -c '
         python manage.py migrate &&
+        python manage.py clear_cache &&
         python manage.py runserver 0.0.0.0:8000
       '
     image: nest-local-backend

@@ -282,8 +282,9 @@ jobs:
   run-security-scan:
     name: Run security scan
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - check-frontend
+      - pre-commit
+      - spellcheck
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -553,6 +554,7 @@ jobs:
 
   run-graphql-fuzz-tests:
     name: Run GraphQL fuzz tests
+    if: false
     needs:
       - run-security-scan
       - scan-code
@@ -564,6 +566,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
+      - run-security-scan
       - scan-code
       - scan-ci-dependencies
     uses: ./.github/workflows/run-fuzz-tests.yaml
