@@ -100,12 +100,9 @@ class TestModuleQuery:
             Module.DoesNotExist
         )
 
-        with pytest.raises(
-            ObjectDoesNotExist,
-            match=r"Module with key 'nonexistent' under program 'program1' not found\.",
-        ):
-            api_module_queries.get_module(module_key="nonexistent", program_key="program1")
-
+        
+        result=api_module_queries.get_module(module_key="nonexistent", program_key="program1")
+        assert result is None
         mock_module_select_related.assert_called_once_with("program", "project")
         mock_module_select_related.return_value.prefetch_related.return_value.get.assert_called_once_with(
             key="nonexistent", program__key="program1"

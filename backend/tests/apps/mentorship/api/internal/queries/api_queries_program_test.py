@@ -53,11 +53,9 @@ class TestGetProgram:
         """Test when the program does not exist."""
         mock_program_prefetch_related.return_value.get.side_effect = Program.DoesNotExist
 
-        with pytest.raises(
-            ObjectDoesNotExist, match=r"Program with key 'nonexistent' not found\."
-        ):
-            api_program_queries.get_program(program_key="nonexistent")
-
+        result=api_program_queries.get_program(program_key="nonexistent")
+        
+        assert result is None
         mock_program_prefetch_related.assert_called_once_with("admins__github_user")
         mock_program_prefetch_related.return_value.get.assert_called_once_with(key="nonexistent")
 

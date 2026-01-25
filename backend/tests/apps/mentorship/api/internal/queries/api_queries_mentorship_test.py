@@ -147,10 +147,10 @@ class TestGetMenteeDetails:
         mock_module_only.return_value.get.side_effect = Module.DoesNotExist
 
         get_mentee_details = api_mentorship_queries.get_mentee_details
-        with pytest.raises(ObjectDoesNotExist, match="Mentee details not found: "):
-            get_mentee_details(
+        result=get_mentee_details(
                 program_key="program", module_key="nonexistent", mentee_key="test_mentee"
             )
+        assert result is None
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
@@ -162,10 +162,10 @@ class TestGetMenteeDetails:
         mock_github_user_only.return_value.get.side_effect = GithubUser.DoesNotExist
 
         get_mentee_details = api_mentorship_queries.get_mentee_details
-        with pytest.raises(ObjectDoesNotExist, match="Mentee details not found: "):
-            get_mentee_details(
+        result=get_mentee_details(
                 program_key="program", module_key="module", mentee_key="nonexistent"
-            )
+        )
+        assert result is None
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
@@ -185,10 +185,10 @@ class TestGetMenteeDetails:
         mock_mentee_only.return_value.get.side_effect = Mentee.DoesNotExist
 
         get_mentee_details = api_mentorship_queries.get_mentee_details
-        with pytest.raises(ObjectDoesNotExist, match="Mentee details not found: "):
-            get_mentee_details(
+        result=get_mentee_details(
                 program_key="program", module_key="module", mentee_key="test_mentee"
             )
+        assert result is None
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
@@ -211,12 +211,10 @@ class TestGetMenteeDetails:
         mock_mentee_module_filter.return_value.exists.return_value = False
 
         get_mentee_details = api_mentorship_queries.get_mentee_details
-        with pytest.raises(
-            ObjectDoesNotExist, match="Mentee test_mentee is not enrolled in module module"
-        ):
-            get_mentee_details(
+        result=get_mentee_details(
                 program_key="program", module_key="module", mentee_key="test_mentee"
-            )
+        )
+        assert result is None
 
 
 class TestGetMenteeModuleIssues:
@@ -292,10 +290,10 @@ class TestGetMenteeModuleIssues:
         mock_module_only.return_value.get.side_effect = Module.DoesNotExist
 
         get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
-        with pytest.raises(ObjectDoesNotExist, match="Mentee issues not found: "):
-            get_mentee_module_issues(
+        result=get_mentee_module_issues(
                 program_key="program", module_key="nonexistent", mentee_key="test_mentee"
-            )
+        )
+        assert result==[]
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
@@ -307,10 +305,11 @@ class TestGetMenteeModuleIssues:
         mock_github_user_only.return_value.get.side_effect = GithubUser.DoesNotExist
 
         get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
-        with pytest.raises(ObjectDoesNotExist, match="Mentee issues not found: "):
-            get_mentee_module_issues(
-                program_key="program", module_key="module", mentee_key="nonexistent"
-            )
+        result=get_mentee_module_issues(
+            program_key="program", module_key="module", mentee_key="nonexistent"
+        )
+        assert result==[]
+        
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
@@ -330,10 +329,10 @@ class TestGetMenteeModuleIssues:
         mock_mentee_only.return_value.get.side_effect = Mentee.DoesNotExist
 
         get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
-        with pytest.raises(ObjectDoesNotExist, match="Mentee issues not found: "):
-            get_mentee_module_issues(
-                program_key="program", module_key="module", mentee_key="test_mentee"
-            )
+        result=get_mentee_module_issues(
+            program_key="program", module_key="module", mentee_key="nonexistent"
+        )
+        assert result==[]
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
     @patch("apps.mentorship.api.internal.queries.mentorship.GithubUser.objects.only")
@@ -356,12 +355,10 @@ class TestGetMenteeModuleIssues:
         mock_mentee_module_filter.return_value.exists.return_value = False
 
         get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
-        with pytest.raises(
-            ObjectDoesNotExist, match="Mentee test_mentee is not enrolled in module module"
-        ):
-            get_mentee_module_issues(
-                program_key="program", module_key="module", mentee_key="test_mentee"
-            )
+        result=get_mentee_module_issues(
+            program_key="program", module_key="module", mentee_key="nonexistent"
+        )
+        assert result==[]
 
     @patch("apps.mentorship.api.internal.queries.mentorship.Prefetch")
     @patch("apps.mentorship.api.internal.queries.mentorship.Module.objects.only")
