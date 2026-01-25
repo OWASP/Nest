@@ -8,7 +8,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
       href={`/projects/dashboard/metrics/${metric.projectKey}`}
       className="text-gray-800 no-underline dark:text-gray-200"
     >
-      <div className="space-y-4 rounded-lg bg-white p-4 transition-colors duration-200 hover:bg-gray-100 lg:p-8 dark:bg-gray-800 dark:hover:bg-gray-700">
+      <div className="space-y-4 rounded-lg bg-white p-4 transition-colors duration-200 hover:bg-gray-100 lg:px-8 lg:py-4 dark:bg-gray-800 dark:hover:bg-gray-700">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 truncate">
             <p
@@ -22,7 +22,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
           </div>
           <div
             className={clsx(
-              'flex-shrink-0 rounded px-3 py-2 text-center text-white lg:px-4 lg:py-3 dark:text-gray-900',
+              'flex-shrink-0 rounded px-3 py-1.5 text-center text-white lg:px-4 lg:py-2 dark:text-gray-900',
               {
                 'bg-green-500': metric.score >= 75,
                 'bg-orange-500': metric.score >= 50 && metric.score < 75,
@@ -33,7 +33,8 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
             <p className="text-sm font-semibold lg:text-base">Score: {metric.score}</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 pt-2">
+        <hr className="my-4 border-0 border-t border-gray-200 dark:border-gray-600" />
+        <div className="grid grid-cols-3 gap-4 md:grid-cols-4">
           <div>
             <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
               Stars
@@ -58,18 +59,18 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
               {metric.contributorsCount}
             </p>
           </div>
-        </div>
-        <div>
-          <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
-            Health Checked
-          </p>
-          <p className="text-sm text-gray-800 lg:text-lg dark:text-gray-200">
-            {new Date(metric.createdAt).toLocaleString('default', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
+          <div>
+            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+              Health Checked
+            </p>
+            <p className="text-sm text-gray-800 lg:text-lg dark:text-gray-200">
+              {new Date(metric.createdAt).toLocaleString('default', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </p>
+          </div>
         </div>
       </div>
     </Link>
