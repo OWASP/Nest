@@ -1,5 +1,6 @@
 """OWASP Nest production configuration."""
 
+import posthog
 import sentry_sdk
 from configurations import values
 
@@ -16,6 +17,10 @@ class Production(Base):
         release=Base.RELEASE_VERSION,
         traces_sample_rate=0.5,
     )
+
+    if Base.POSTHOG_KEY:
+        posthog.api_key = Base.POSTHOG_KEY
+        posthog.host = Base.POSTHOG_HOST
 
     AWS_ACCESS_KEY_ID = values.SecretValue()
     AWS_SECRET_ACCESS_KEY = values.SecretValue()
