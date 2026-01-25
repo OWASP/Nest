@@ -15,7 +15,7 @@ export const useIsMobile = () => {
     }
 
     handleChange(mediaQuery)
-    
+
     mediaQuery.addEventListener('change', handleChange)
     return () => {
       mediaQuery.removeEventListener('change', handleChange)
