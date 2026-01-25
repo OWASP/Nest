@@ -160,15 +160,15 @@ jobs:
           mkdir -p model-graphs/apps
           mkdir -p model-graphs/inter-app
 
-      - name: Create CI settings wrapper (inject django_extensions)
+      - name: Create CI settings wrapper
         working-directory: backend
         run: |
           mkdir -p settings
           cat > settings/ci_graphs.py <<'PY'
           from .local import *  # noqa
 
-          if "django_extensions" not in INSTALLED_APPS:
-              INSTALLED_APPS = list(INSTALLED_APPS) + ["django_extensions"]
+          if "django_extensions" not in Local.INSTALLED_APPS:
+              Local.INSTALLED_APPS = list(Local.INSTALLED_APPS) + ["django_extensions"]
           PY
 
       - name: Set backend environment variables
