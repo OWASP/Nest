@@ -194,22 +194,14 @@ jobs:
         run: |
           set -e
 
-          APPS=$(poetry run python - <<'PY'
-          import django
+          APPS=$(poetry run python manage.py shell -c "
           from django.conf import settings
-          django.setup()
-
-          apps = [
-              a for a in settings.INSTALLED_APPS
-              if not a.startswith("django.")
-              and not a.startswith("django.contrib.")
-              and a != "django_extensions"
-          ]
-
-          for a in apps:
-              print(a)
-          PY
-          )
+          apps=[a for a in settings.INSTALLED_APPS
+                if not a.startswith('django.')
+                and not a.startswith('django.contrib.')
+                and a != 'django_extensions']
+          print('\n'.join(apps))
+          ")
 
           for app in $APPS; do
             poetry run python manage.py graph_models "$app" \
