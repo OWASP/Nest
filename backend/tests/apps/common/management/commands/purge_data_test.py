@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from psycopg2 import sql
 
 from apps.common.management.commands.purge_data import Command
 
@@ -48,5 +49,8 @@ class TestPurgeDataCommand:
         for app_name in nest_apps:
             for model_name in mock_models[app_name]:
                 table_name = f"{app_name.lower()}_{model_name.lower()}"
-                cursor_instance.execute.assert_any_call(f"TRUNCATE TABLE {table_name} CASCADE")
+                expected_query = sql.SQL("TRUNCATE TABLE {} CASCADE").format(
+                    sql.Identifier(table_name)
+                )
+                cursor_instance.execute.assert_any_call(expected_query)
                 mock_print.assert_any_call(f"Purged {app_name}.{model_name}")

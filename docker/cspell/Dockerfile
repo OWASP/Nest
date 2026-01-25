@@ -17,8 +17,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
 WORKDIR /nest
-# Reason: This is a dev-tool linter, not a production service. Root access is required for IO operations.
-# nosemgrep: dockerfile.security.missing-user-entrypoint.missing-user-entrypoint
-ENTRYPOINT ["/opt/node/node_modules/.bin/cspell"]
 
 USER node
+
+ENTRYPOINT ["/opt/node/node_modules/.bin/cspell"]

@@ -18,6 +18,7 @@ Héllo
 Kateryna
 NETTACKER
 NOASSERTION
+NOSEMGREP
 NOSONAR
 Nadu
 Nominatim
@@ -117,7 +118,6 @@ navlink
 nestbot
 ngx
 noinput
-nosemgrep
 nosniff
 nspname
 numfmt
