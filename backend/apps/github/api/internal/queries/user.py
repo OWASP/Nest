@@ -58,4 +58,8 @@ class UserQuery:
         ):
             return user
 
-        return User.objects.filter(has_public_member_page=True, login=login).first()
+        return User.objects.filter(
+            has_public_member_page=True,
+            login=login,
+            owasp_profile__isnull=True,
+        ).first()
