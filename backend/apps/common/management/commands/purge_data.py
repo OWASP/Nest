@@ -1,10 +1,9 @@
 """A command to purge OWASP Nest data."""
 
-# ruff: noqa: SLF001 https://docs.astral.sh/ruff/rules/private-member-access/
-
 from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db import connection
+from psycopg2 import sql
 
 
 class Command(BaseCommand):
@@ -24,5 +23,10 @@ class Command(BaseCommand):
                     apps.get_app_config(nest_app).get_models(),
                     key=lambda m: m.__name__,
                 ):
-                    cursor.execute(f"TRUNCATE TABLE {model._meta.db_table} CASCADE")  # NOSONAR
+                    # Suppress false positive sqlalchemy warning.
+                    cursor.execute(  # NOSEMGREP: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query  # noqa: E501
+                        sql.SQL("TRUNCATE TABLE {} CASCADE").format(
+                            sql.Identifier(model._meta.db_table)
+                        )
+                    )
                     print(f"Purged {nest_app}.{model.__name__}")

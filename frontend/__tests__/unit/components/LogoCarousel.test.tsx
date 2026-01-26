@@ -3,23 +3,6 @@ import React from 'react'
 import { Sponsor } from 'types/home'
 import MovingLogos from 'components/LogoCarousel'
 
-jest.mock('next/image', () => {
-  return function MockImage({
-    src,
-    alt,
-    style,
-    fill,
-  }: {
-    src: string
-    alt: string
-    style?: React.CSSProperties
-    fill?: boolean
-  }) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} style={style} data-testid="sponsor-image" data-fill={fill} />
-  }
-})
-
 jest.mock('next/link', () => {
   return function MockLink({
     href,
@@ -41,20 +24,41 @@ jest.mock('next/link', () => {
     )
   }
 })
+
+jest.mock('next/image', () => {
+  return function MockImage({
+    src,
+    alt,
+    style,
+    fill,
+  }: {
+    src: string
+    alt: string
+    style?: React.CSSProperties
+    fill?: boolean
+  }) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={alt} style={style} data-testid="sponsor-image" data-fill={fill} />
+  }
+})
+
 const mockSponsors: Sponsor[] = [
   {
+    id: 'sponsor-1',
     name: 'Test Sponsor 1',
     imageUrl: 'https://example.com/logo1.png',
     url: 'https://sponsor1.com',
     sponsorType: 'Gold',
   },
   {
+    id: 'sponsor-2',
     name: 'Test Sponsor 2',
     imageUrl: 'https://example.com/logo2.png',
     url: 'https://sponsor2.com',
     sponsorType: 'Silver',
   },
   {
+    id: 'sponsor-3',
     name: 'Test Sponsor 3',
     imageUrl: '',
     url: 'https://sponsor3.com',
@@ -64,6 +68,7 @@ const mockSponsors: Sponsor[] = [
 
 const mockSponsorsWithoutImages: Sponsor[] = [
   {
+    id: 'sponsor-no-image',
     name: 'No Image Sponsor',
     imageUrl: '',
     url: 'https://noimage.com',
@@ -128,6 +133,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('renders different sponsors based on props', () => {
       const customSponsors: Sponsor[] = [
         {
+          id: 'sponsor-custom',
           name: 'Custom Sponsor',
           imageUrl: 'https://custom.com/logo.png',
           url: 'https://custom.com',
@@ -229,7 +235,13 @@ describe('MovingLogos (LogoCarousel)', () => {
 
       const newSponsors = [
         ...mockSponsors,
-        { name: 'New Sponsor', imageUrl: '', url: 'https://new.com', sponsorType: 'Bronze' },
+        {
+          id: 'sponsor-new',
+          name: 'New Sponsor',
+          imageUrl: '',
+          url: 'https://new.com',
+          sponsorType: 'Bronze',
+        },
       ]
       rerender(<MovingLogos sponsors={newSponsors} />)
 
@@ -280,6 +292,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('uses generic fallback alt text when sponsor name is missing', () => {
       const sponsorWithoutName: Sponsor[] = [
         {
+          id: 'sponsor-no-name',
           name: '',
           imageUrl: 'https://example.com/logo.png',
           url: 'https://example.com',
@@ -337,6 +350,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('handles sponsors with very long names', () => {
       const longNameSponsors: Sponsor[] = [
         {
+          id: 'sponsor-long-name',
           name: 'A'.repeat(1000),
           imageUrl: 'https://example.com/logo.png',
           url: 'https://example.com',
@@ -354,6 +368,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('handles sponsors with special characters in names', () => {
       const specialCharSponsors: Sponsor[] = [
         {
+          id: 'sponsor-special-chars',
           name: 'Sponsor & Co. (Ltd.) - "Special" <Characters>',
           imageUrl: 'https://example.com/logo.png',
           url: 'https://example.com',
@@ -377,6 +392,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('handles invalid URLs gracefully', () => {
       const invalidUrlSponsors: Sponsor[] = [
         {
+          id: 'sponsor-invalid-url',
           name: 'Invalid URL Sponsor',
           imageUrl: 'not-a-valid-url',
           url: 'also-not-valid',
@@ -397,6 +413,7 @@ describe('MovingLogos (LogoCarousel)', () => {
 
     it('handles very large number of sponsors', () => {
       const manySponsors: Sponsor[] = Array.from({ length: 100 }, (_, i) => ({
+        id: `sponsor-${i}`,
         name: `Sponsor ${i}`,
         imageUrl: `https://example.com/logo${i}.png`,
         url: `https://sponsor${i}.com`,

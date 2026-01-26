@@ -52,7 +52,9 @@ const ProjectsDashboardDropDown: FC<{
           <div className="flex flex-col items-center">
             <span className="text-md">{buttonDisplayName}</span>
             {selectedLabels && selectedLabels.length > 0 && (
-              <span className="text-xs text-gray-500">{selectedLabels.join(', ')}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {selectedLabels.join(', ')}
+              </span>
             )}
           </div>
         </Button>

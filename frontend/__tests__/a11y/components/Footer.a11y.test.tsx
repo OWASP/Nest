@@ -1,0 +1,24 @@
+import { fireEvent, render, screen } from '@testing-library/react'
+import { axe } from 'jest-axe'
+import Footer from 'components/Footer'
+
+describe('Footer a11y', () => {
+  it('should not have any accessibility violations', async () => {
+    const { container } = render(<Footer />)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
+
+  it('should not have any accessibility violations when section is opened', async () => {
+    const { container } = render(<Footer />)
+
+    const button = screen.getByRole('button', { name: /Resources/ })
+    fireEvent.click(button)
+
+    const results = await axe(container)
+
+    expect(results).toHaveNoViolations()
+  })
+})

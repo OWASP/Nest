@@ -5,19 +5,23 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useState } from 'react'
 import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
+import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import SecondaryCard from 'components/SecondaryCard'
-import { TruncatedText } from 'components/TruncatedText'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
+  const [showAllPRs, setShowAllPRs] = useState(false)
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
@@ -36,21 +40,29 @@ const ModuleIssueDetailsPage = () => {
     const isOverdue = deadlineUTC < todayUTC
     const daysLeft = Math.ceil((deadlineUTC.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24))
 
-    const statusText = isOverdue
-      ? '(overdue)'
-      : daysLeft === 0
-        ? '(today)'
-        : `(${daysLeft} days left)`
+    let statusText: string
+    if (isOverdue) {
+      statusText = '(overdue)'
+    } else if (daysLeft === 0) {
+      statusText = '(today)'
+    } else {
+      statusText = `(${daysLeft} days left)`
+    }
 
     const displayDate = deadlineDate.toLocaleDateString()
 
+    let color: string
+    if (isOverdue) {
+      color = 'text-[#DA3633]'
+    } else if (daysLeft <= 3) {
+      color = 'text-[#F59E0B]'
+    } else {
+      color = 'text-gray-600 dark:text-gray-300'
+    }
+
     return {
       text: `${displayDate} ${statusText}`,
-      color: isOverdue
-        ? 'text-[#DA3633]'
-        : daysLeft <= 3
-          ? 'text-[#F59E0B]'
-          : 'text-gray-600 dark:text-gray-300',
+      color,
     }
   }
   const { data, loading, error } = useQuery(GetModuleIssueViewDocument, {
@@ -85,9 +97,6 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
-  const labelButtonClassName =
-    'rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700'
-
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
   }
@@ -97,9 +106,32 @@ const ModuleIssueDetailsPage = () => {
 
   const assignees = issue.assignees || []
   const labels = issue.labels || []
-  const visibleLabels = labels.slice(0, 5)
-  const remainingLabels = labels.length - visibleLabels.length
   const canEditDeadline = assignees.length > 0
+
+  let issueStatusClass: string
+  let issueStatusLabel: string
+  if (issue.state === 'open') {
+    issueStatusClass = 'bg-[#238636] text-white'
+    issueStatusLabel = 'Open'
+  } else if (issue.isMerged) {
+    issueStatusClass = 'bg-[#8657E5] text-white'
+    issueStatusLabel = 'Merged'
+  } else {
+    issueStatusClass = 'bg-[#DA3633] text-white'
+    issueStatusLabel = 'Closed'
+  }
+
+  const getAssignButtonTitle = (assigning: boolean) => {
+    let title: string
+    if (!issueId) {
+      title = 'Loading issue…'
+    } else if (assigning) {
+      title = 'Assigning…'
+    } else {
+      title = 'Assign to this user'
+    }
+    return title
+  }
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-700 dark:bg-[#212529] dark:text-gray-300">
@@ -114,15 +146,9 @@ const ModuleIssueDetailsPage = () => {
                 {issue.organizationName}/{issue.repositoryName} • #{issue.number}
               </span>
               <span
-                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${
-                  issue.state === 'open'
-                    ? 'bg-[#238636] text-white'
-                    : issue.isMerged
-                      ? 'bg-[#8657E5] text-white'
-                      : 'bg-[#DA3633] text-white'
-                }`}
+                className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${issueStatusClass}`}
               >
-                {issue.state === 'open' ? 'Open' : issue.isMerged ? 'Merged' : 'Closed'}
+                {issueStatusLabel}
               </span>
             </div>
           </div>
@@ -230,16 +256,7 @@ const ModuleIssueDetailsPage = () => {
               <span>Labels</span>
             </div>
           </h2>
-          <div className="flex flex-wrap gap-2">
-            {visibleLabels.map((label, index) => (
-              <span key={index} className={labelButtonClassName}>
-                {label}
-              </span>
-            ))}
-            {remainingLabels > 0 && (
-              <span className={labelButtonClassName}>+{remainingLabels} more</span>
-            )}
-          </div>
+          <LabelList entityKey={`issue-${issueId}`} labels={labels} maxVisible={5} />
         </div>
 
         {assignees.length > 0 && (
@@ -265,7 +282,7 @@ const ModuleIssueDetailsPage = () => {
                     {a.avatarUrl ? (
                       <Image
                         src={a.avatarUrl}
-                        alt={a.login}
+                        alt=""
                         width={32}
                         height={32}
                         className="rounded-full"
@@ -303,70 +320,14 @@ const ModuleIssueDetailsPage = () => {
 
         <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
           <div className="grid grid-cols-1 gap-3">
-            {issue.pullRequests?.length ? (
-              issue.pullRequests.map((pr) => (
-                <div
-                  key={pr.id}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                >
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    {pr.author?.avatarUrl ? (
-                      <Image
-                        src={pr.author.avatarUrl}
-                        alt={pr.author?.login || 'Unknown'}
-                        width={32}
-                        height={32}
-                        className="flex-shrink-0 rounded-full"
-                      />
-                    ) : (
-                      <div
-                        className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-400"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={pr.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        <TruncatedText text={pr.title} />
-                      </Link>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        by {pr.author?.login || 'Unknown'} •{' '}
-                        {new Date(pr.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {pr.state === 'closed' && pr.mergedAt ? (
-                      <span
-                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#8657E5' }}
-                      >
-                        Merged
-                      </span>
-                    ) : pr.state === 'closed' ? (
-                      <span
-                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#DA3633' }}
-                      >
-                        Closed
-                      </span>
-                    ) : (
-                      <span
-                        className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                        style={{ backgroundColor: '#238636' }}
-                      >
-                        Open
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
+            {(issue.pullRequests || []).slice(0, showAllPRs ? undefined : 4).map((pr) => (
+              <MentorshipPullRequest key={pr.id} pr={pr} />
+            ))}
+            {(!issue.pullRequests || issue.pullRequests.length === 0) && (
               <span className="text-sm text-gray-400">No linked pull requests.</span>
+            )}
+            {issue.pullRequests && issue.pullRequests.length > 4 && (
+              <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
             )}
           </div>
         </SecondaryCard>
@@ -390,7 +351,7 @@ const ModuleIssueDetailsPage = () => {
                   {u.avatarUrl ? (
                     <Image
                       src={u.avatarUrl}
-                      alt={u.login}
+                      alt=""
                       width={32}
                       height={32}
                       className="rounded-full"
@@ -415,9 +376,7 @@ const ModuleIssueDetailsPage = () => {
                     })
                   }}
                   className={`${getButtonClassName(!issueId || assigning)} px-3 py-1`}
-                  title={
-                    !issueId ? 'Loading issue…' : assigning ? 'Assigning…' : 'Assign to this user'
-                  }
+                  title={getAssignButtonTitle(assigning)}
                 >
                   <FaPlus className="text-gray-500" />
                   <span>Assign</span>

@@ -12,6 +12,7 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.chapter import Chapter
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.api.rest.v0.issue import Issue
 from apps.api.rest.v0.member import Member
 from apps.api.rest.v0.project import Project
@@ -22,6 +23,8 @@ from apps.github.models.user import User as UserModel
 from apps.owasp.models.chapter import Chapter as ChapterModel
 from apps.owasp.models.project import Project as ProjectModel
 from apps.owasp.models.snapshot import Snapshot as SnapshotModel
+
+ORDERING_FIELD_DESCRIPTION = "Ordering field"
 
 router = RouterPaginated(tags=["Community"])
 
@@ -114,7 +117,7 @@ def list_snapshots(
     ]
     | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Snapshot]:
     """Get all snapshots."""
@@ -128,6 +131,7 @@ def list_snapshots(
     description="Retrieve snapshot details.",
     operation_id="get_snapshot",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: SnapshotError,
         HTTPStatus.OK: SnapshotDetail,
     },
@@ -160,7 +164,7 @@ def list_snapshot_chapters(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Chapter]:
     """Get new chapters in snapshot."""
@@ -185,7 +189,7 @@ def list_snapshot_issues(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[SnapshotIssue]:
     """Get new issues in snapshot."""
@@ -212,7 +216,7 @@ def list_snapshot_members(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Member]:
     """Get new members in snapshot."""
@@ -237,7 +241,7 @@ def list_snapshot_projects(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[Project]:
     """Get new projects in snapshot."""
@@ -262,7 +266,7 @@ def list_snapshot_releases(
     snapshot_id: str = Path(example="2025-02"),
     ordering: Literal["created_at", "-created_at", "published_at", "-published_at"] | None = Query(
         None,
-        description="Ordering field",
+        description=ORDERING_FIELD_DESCRIPTION,
     ),
 ) -> list[SnapshotRelease]:
     """Get new releases in snapshot."""

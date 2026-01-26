@@ -4,12 +4,13 @@ services:
     command: >
       sh -c '
         python manage.py migrate &&
+        python manage.py clear_cache &&
         python manage.py runserver 0.0.0.0:8000
       '
     image: nest-local-backend
     build:
       context: ../../backend
-      dockerfile: docker/Dockerfile.local
+      dockerfile: ../docker/backend/Dockerfile.local
     depends_on:
       cache:
         condition: service_healthy
@@ -23,7 +24,7 @@ services:
       DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
       DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
-      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_HOST:-nest-cache-password}
+      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
     networks:
       - nest-network
     ports:
@@ -76,7 +77,7 @@ services:
       '
     build:
       context: ../../
-      dockerfile: docs/docker/Dockerfile.local
+      dockerfile: docker/docs/Dockerfile.local
     networks:
       - nest-network
     ports:
@@ -93,7 +94,7 @@ services:
       '
     build:
       context: ../../frontend
-      dockerfile: docker/Dockerfile.local
+      dockerfile: ../docker/frontend/Dockerfile.local
     depends_on:
       - backend
     environment:

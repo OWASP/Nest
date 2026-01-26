@@ -1,158 +1,86 @@
 'use client'
 import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
-import L, { MarkerClusterGroup } from 'leaflet'
-import React, { useEffect, useRef, useState } from 'react'
+import L from 'leaflet'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { FaUnlock } from 'react-icons/fa'
 import { FaLocationDot } from 'react-icons/fa6'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import type { Chapter } from 'types/chapter'
 import type { UserLocation } from 'utils/geolocationUtils'
-import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
-import 'leaflet.markercluster'
 
-const ChapterMap = ({
-  geoLocData,
-  showLocal,
-  style,
-  userLocation,
-  onShareLocation,
-}: {
-  geoLocData: Chapter[]
-  showLocal: boolean
-  style: React.CSSProperties
-  userLocation?: UserLocation | null
-  onShareLocation?: () => void
-}) => {
-  const mapRef = useRef<L.Map | null>(null)
-  const markerClusterRef = useRef<MarkerClusterGroup | null>(null)
-  const userMarkerRef = useRef<L.Marker | null>(null)
+const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
+  const map = useMap()
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
-  const initialViewRef = useRef<{ center: L.LatLngExpression; zoom: number } | null>(null)
-  const [isMapActive, setIsMapActive] = useState(false)
+  useEffect(() => {
+    if (!map) return
+    if (isMapActive) {
+      map.scrollWheelZoom.enable()
+      map.dragging.enable()
+      map.touchZoom.enable()
+      map.doubleClickZoom.enable()
+      map.keyboard.enable()
+
+      if (!zoomControlRef.current) {
+        zoomControlRef.current = L.control.zoom({ position: 'topleft' })
+        zoomControlRef.current.addTo(map)
+      }
+    } else {
+      map.scrollWheelZoom.disable()
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.keyboard.disable()
+
+      if (zoomControlRef.current) {
+        zoomControlRef.current.remove()
+        zoomControlRef.current = null
+      }
+    }
+  }, [isMapActive, map])
 
   useEffect(() => {
-    if (!mapRef.current) {
-      mapRef.current = L.map('chapter-map', {
-        worldCopyJump: false,
-        maxBounds: [
-          [-90, -180],
-          [90, 180],
-        ],
-        maxBoundsViscosity: 1.0,
-        scrollWheelZoom: false,
-        zoomControl: false,
-      }).setView([20, 0], 2)
-
-      initialViewRef.current = {
-        center: mapRef.current.getCenter(),
-        zoom: mapRef.current.getZoom(),
+    return () => {
+      if (!map) return
+      map.scrollWheelZoom.disable()
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.keyboard.disable()
+      if (zoomControlRef.current) {
+        zoomControlRef.current.remove()
+        zoomControlRef.current = null
       }
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        className: 'map-tiles',
-      }).addTo(mapRef.current)
-
-      mapRef.current.on('click', () => {
-        mapRef.current?.scrollWheelZoom.enable()
-        setIsMapActive(true)
-      })
-
-      mapRef.current.on('mouseout', (e: L.LeafletMouseEvent) => {
-        const originalEvent = e.originalEvent as MouseEvent
-        const relatedTarget = originalEvent.relatedTarget as Node | null
-        const container = mapRef.current?.getContainer()
-        const mapParent = container?.parentElement
-        if (
-          relatedTarget &&
-          (container?.contains(relatedTarget) || mapParent?.contains(relatedTarget))
-        )
-          return
-
-        mapRef.current?.scrollWheelZoom.disable()
-        setIsMapActive(false)
-      })
     }
+  }, [map])
+  return null
+}
 
-    const map = mapRef.current
+const MapViewUpdater = ({
+  validGeoLocData,
+  userLocation,
+  showLocal,
+}: {
+  validGeoLocData: Chapter[]
+  userLocation?: UserLocation | null
+  showLocal: boolean
+}) => {
+  const map = useMap()
 
-    if (!markerClusterRef.current) {
-      markerClusterRef.current = L.markerClusterGroup()
-      map.addLayer(markerClusterRef.current)
-    } else {
-      markerClusterRef.current.clearLayers()
-    }
+  useEffect(() => {
+    if (!map) return
+    const container = map.getContainer()
+    const width = container.clientWidth
+    const height = container.clientHeight
+    const aspectRatio = height > 0 ? width / height : 1
 
-    const markerClusterGroup = markerClusterRef.current
-
-    const validGeoLocData = geoLocData.filter((chapter) => {
-      const lat = chapter._geoloc?.lat ?? chapter.geoLocation?.lat
-      const lng = chapter._geoloc?.lng ?? chapter.geoLocation?.lng
-      return typeof lat === 'number' && typeof lng === 'number'
-    })
-
-    const markers = validGeoLocData.map((chapter) => {
-      const markerIcon = new L.Icon({
-        iconAnchor: [12, 41],
-        iconRetinaUrl: '/img/marker-icon-2x.png',
-        iconSize: [25, 41],
-        iconUrl: '/img/marker-icon.png',
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        shadowUrl: '/img/marker-shadow.png',
-      })
-
-      const marker = L.marker(
-        [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
-        ],
-        { icon: markerIcon }
-      )
-      const popup = L.popup()
-      const popupContent = document.createElement('div')
-      popupContent.className = 'popup-content'
-      popupContent.textContent = chapter.name
-      popupContent.addEventListener('click', () => {
-        globalThis.location.href = `/chapters/${chapter.key}`
-      })
-      popup.setContent(popupContent)
-      marker.bindPopup(popup)
-      return marker
-    })
-
-    markerClusterGroup.addLayers(markers)
-
-    if (userMarkerRef.current) {
-      userMarkerRef.current.remove()
-      userMarkerRef.current = null
-    }
-
-    if (userLocation && map) {
-      const iconHtml =
-        '<img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="User location" />'
-      const userMarkerIcon = L.divIcon({
-        html: iconHtml,
-        className: 'user-location-marker',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-      })
-
-      const userMarker = L.marker([userLocation.latitude, userLocation.longitude], {
-        icon: userMarkerIcon,
-      })
-      const userPopup = L.popup()
-      const userPopupContent = document.createElement('div')
-      userPopupContent.textContent = 'Your Location'
-      userPopup.setContent(userPopupContent)
-      userMarker.bindPopup(userPopup)
-      userMarker.addTo(map)
-      userMarkerRef.current = userMarker
-    }
+    const dynamicMinZoom = aspectRatio > 2 ? 1 : 2
+    map.setMinZoom(dynamicMinZoom)
 
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
@@ -169,7 +97,8 @@ const ChapterMap = ({
       ]
       const localBounds = L.latLngBounds(locationsForBounds)
       const maxZoom = 12
-      map.fitBounds(localBounds, { maxZoom: maxZoom })
+      const padding = 50
+      map.fitBounds(localBounds, { maxZoom: maxZoom, padding: [padding, padding] })
     } else if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
@@ -180,6 +109,7 @@ const ChapterMap = ({
         ])
       )
       const maxZoom = 7
+      const padding = 50
       const nearestChapter = validGeoLocData[0]
       map.setView(
         [
@@ -188,60 +118,158 @@ const ChapterMap = ({
         ],
         maxZoom
       )
-      map.fitBounds(localBounds, { maxZoom: maxZoom })
-    } else if (initialViewRef.current) {
-      map.setView(initialViewRef.current.center, initialViewRef.current.zoom)
+      map.fitBounds(localBounds, { maxZoom: maxZoom, padding: [padding, padding] })
+    } else {
+      map.setView([20, 0], Math.max(dynamicMinZoom, 2))
     }
-  }, [geoLocData, showLocal, userLocation])
+  }, [userLocation, showLocal, validGeoLocData, map])
 
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
+  return null
+}
 
-    if (isMapActive) {
-      if (!zoomControlRef.current) {
-        zoomControlRef.current = L.control.zoom({ position: 'topleft' })
-        zoomControlRef.current.addTo(map)
-      }
-    } else if (zoomControlRef.current) {
-      zoomControlRef.current.remove()
-      zoomControlRef.current = null
-    }
+const ChapterMap = ({
+  geoLocData,
+  showLocal,
+  style,
+  userLocation,
+  onShareLocation,
+}: {
+  geoLocData: Chapter[]
+  showLocal: boolean
+  style: React.CSSProperties
+  userLocation?: UserLocation | null
+  onShareLocation?: () => void
+}) => {
+  const router = useRouter()
+  const [isMapActive, setIsMapActive] = useState(false)
+  const validGeoLocData = useMemo(() => {
+    return geoLocData.filter((chapter) => {
+      const lat = chapter._geoloc?.lat ?? chapter.geoLocation?.lat
+      const lng = chapter._geoloc?.lng ?? chapter.geoLocation?.lng
+      return typeof lat === 'number' && typeof lng === 'number'
+    })
+  }, [geoLocData])
 
-    return () => {
-      if (zoomControlRef.current) {
-        zoomControlRef.current.remove()
-        zoomControlRef.current = null
-      }
-    }
-  }, [isMapActive])
+  const chapterIcon = useMemo(
+    () =>
+      new L.Icon({
+        iconAnchor: [12, 41],
+        iconRetinaUrl: '/img/marker-icon-2x.png',
+        iconSize: [25, 41],
+        iconUrl: '/img/marker-icon.png',
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+        shadowUrl: '/img/marker-shadow.png',
+      }),
+
+    []
+  )
+
+  const userIcon = useMemo(
+    () =>
+      L.divIcon({
+        html: ' <div aria-label="User location" role="img"><img src="/img/marker-icon.png" style="filter: hue-rotate(150deg) saturate(1.5) brightness(0.9); width: 25px; height: 41px;" alt="" aria-hidden="true" />  </div> ',
+        className: 'user-location-marker',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+      }),
+    []
+  )
 
   return (
-    <div className="relative" style={style}>
-      <div id="chapter-map" className="h-full w-full" />
+    <section
+      aria-label="Chapter Map"
+      className="relative"
+      style={style}
+      onMouseLeave={() => setIsMapActive(false)}
+    >
+      <MapContainer
+        center={[20, 0]}
+        zoom={2}
+        scrollWheelZoom={isMapActive}
+        style={{ height: '100%', width: '100%' }}
+        zoomControl={false}
+        minZoom={1}
+        maxZoom={18}
+        worldCopyJump={true}
+        maxBounds={[
+          [-85, -180],
+          [85, 180],
+        ]}
+        maxBoundsViscosity={0.5}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          className="map-tiles"
+        />
+        <MapViewUpdater
+          validGeoLocData={validGeoLocData}
+          userLocation={userLocation}
+          showLocal={showLocal}
+        />
+
+        <MapZoomControl isMapActive={isMapActive} />
+
+        <MarkerClusterGroup chunkedLoading>
+          {useMemo(
+            () =>
+              validGeoLocData.map((chapter) => (
+                <Marker
+                  key={chapter.key}
+                  position={[
+                    chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
+                    chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+                  ]}
+                  icon={chapterIcon}
+                >
+                  <Popup>
+                    <button
+                      type="button"
+                      className="cursor-pointer font-medium hover:text-blue-600"
+                      onClick={() => router.push(`/chapters/${chapter.key}`)}
+                    >
+                      {chapter.name}
+                    </button>
+                  </Popup>
+                </Marker>
+              )),
+            [validGeoLocData, chapterIcon, router]
+          )}
+        </MarkerClusterGroup>
+
+        {userLocation && (
+          <Marker
+            position={[userLocation.latitude, userLocation.longitude]}
+            icon={userIcon}
+            title="Your location"
+          >
+            <Popup>Your Location</Popup>
+          </Marker>
+        )}
+      </MapContainer>
       {!isMapActive && (
-        <button
-          type="button"
-          tabIndex={0}
-          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
-          onClick={() => {
-            mapRef.current?.scrollWheelZoom.enable()
-            setIsMapActive(true)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              mapRef.current?.scrollWheelZoom.enable()
+        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-black/10">
+          <button
+            type="button"
+            tabIndex={0}
+            className="pointer-events-auto flex cursor-pointer items-center justify-center rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+            onClick={() => {
               setIsMapActive(true)
-            }
-          }}
-          aria-label="Unlock map"
-        >
-          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
-            <FaUnlock aria-hidden="true" />
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setIsMapActive(true)
+              }
+            }}
+            aria-label="Unlock map"
+          >
+            <FaUnlock aria-hidden="true" className="mr-2" />
             Unlock map
-          </p>
-        </button>
+          </button>
+        </div>
       )}
       {isMapActive && (
         <div className="absolute top-20 left-3 z-[999] w-fit">
@@ -269,7 +297,7 @@ const ChapterMap = ({
           )}
         </div>
       )}
-    </div>
+    </section>
   )
 }
 export default ChapterMap

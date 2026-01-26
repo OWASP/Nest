@@ -4,16 +4,20 @@ import { useEffect, useRef } from 'react'
 import type { Sponsor } from 'types/home'
 
 interface MovingLogosProps {
-  sponsors: Sponsor[]
+  readonly sponsors: Sponsor[]
 }
 
-export default function MovingLogos({ sponsors }: MovingLogosProps) {
+export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
   const scrollerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (scrollerRef.current) {
       const scrollContainer = scrollerRef.current
-      scrollContainer.innerHTML += scrollContainer.innerHTML
+      // Clone and append children for infinite scroll effect.
+      const children = Array.from(scrollContainer.children)
+      children.forEach((child) => {
+        scrollContainer.appendChild(child.cloneNode(true))
+      })
     }
   }, [sponsors])
 
@@ -27,7 +31,8 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
         >
           {sponsors.map((sponsor, index) => (
             <div
-              key={`${sponsor.name}-${index}`}
+              // eslint-disable-next-line react/no-array-index-key
+              key={`logo-carousel-${sponsor.id}-${index}`}
               className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
             >
               <Link
@@ -45,7 +50,7 @@ export default function MovingLogos({ sponsors }: MovingLogosProps) {
                       style={{ objectFit: 'contain' }}
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center"></div>
+                    <span className="sr-only">{sponsor.name}</span>
                   )}
                 </div>
               </Link>

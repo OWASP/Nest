@@ -1,5 +1,4 @@
-import { screen } from '@testing-library/react'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { useTheme } from 'next-themes'
 import { FaChartPie, FaChartBar, FaChartLine, FaTachometerAlt, FaHeart } from 'react-icons/fa'
 import DonutBarChart from 'components/DonutBarChart'
@@ -337,7 +336,7 @@ describe('DonutBarChart Component Test Suite', () => {
       const chartSeries = JSON.parse(chart.dataset.series || '[]')
 
       // Should be rounded to 1 decimal place
-      expect(chartSeries).toEqual([1000000.0, 1000000.0, 2000000.5])
+      expect(chartSeries).toEqual([1000000, 1000000, 2000000.5])
     })
 
     it('handles negative values', () => {

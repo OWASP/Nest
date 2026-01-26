@@ -1,5 +1,9 @@
+import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { useState } from 'react'
 import {
   FaCircleInfo,
   FaChartPie,
@@ -7,22 +11,32 @@ import {
   FaCode,
   FaTags,
   FaRectangleList,
+  FaCalendar,
+  FaCircleCheck,
+  FaCircleExclamation,
+  FaSignsPost,
+  FaCodeBranch,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
+import { formatDate } from 'utils/dateFormatter'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
+import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ContributionHeatmap from 'components/ContributionHeatmap'
+import ContributionStats from 'components/ContributionStats'
+import ContributorsList from 'components/ContributorsList'
 import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import Markdown from 'components/MarkdownWrapper'
-import MenteeContributorsList from 'components/MenteeContributorsList'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
@@ -31,15 +45,42 @@ import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
-import TopContributorsList from 'components/TopContributorsList'
+
+import { TruncatedText } from 'components/TruncatedText'
+
+export type CardType =
+  | 'chapter'
+  | 'committee'
+  | 'module'
+  | 'organization'
+  | 'program'
+  | 'project'
+  | 'repository'
+  | 'user'
+
+const showStatistics = (type: CardType): boolean =>
+  ['committee', 'organization', 'project', 'repository', 'user'].includes(type)
+
+const showIssuesAndMilestones = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
+
+const showPullRequestsAndReleases = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
+
+const MILESTONE_LIMIT = 4
 
 const DetailsCard = ({
   description,
   details,
   accessLevel,
+  contributionData,
+  contributionStats,
+  endDate,
+  startDate,
   status,
   setStatus,
   canUpdateStatus,
@@ -74,7 +115,9 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const { data } = useSession()
+  const { data: session } = useSession() as { data: ExtendedSession | null }
+  const [showAllPRs, setShowAllPRs] = useState(false)
+  const [showAllMilestones, setShowAllMilestones] = useState(false)
 
   // compute styles based on type prop
   const typeStylesMap = {
@@ -82,6 +125,11 @@ const DetailsCard = ({
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
   }
+
+  const hasContributions =
+    (contributionStats && contributionStats.total > 0) ||
+    (contributionData && Object.keys(contributionData).length > 0)
+
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
   return (
@@ -101,9 +149,9 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 accessLevel === 'admin' &&
-                admins?.some(
-                  (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-                ) && <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />}
+                admins?.some((admin) => admin.login === session?.user?.login) && (
+                  <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
+                )}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
@@ -134,7 +182,10 @@ const DetailsCard = ({
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
+                  <LeadersList
+                    entityKey={`${entityKey}-${detail.label}`}
+                    leaders={detail?.value == null ? 'Unknown' : String(detail.value)}
+                  />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
@@ -146,11 +197,7 @@ const DetailsCard = ({
               <SocialLinks urls={socialLinks || []} />
             )}
           </SecondaryCard>
-          {(type === 'project' ||
-            type === 'repository' ||
-            type === 'committee' ||
-            type === 'user' ||
-            type === 'organization') && (
+          {showStatistics(type) && (
             <SecondaryCard
               icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
@@ -192,13 +239,19 @@ const DetailsCard = ({
           >
             {languages.length !== 0 && (
               <ToggleableList
+                entityKey={`${entityKey}-languages`}
                 items={languages}
                 icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
             {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={FaTags} label={<AnchorTitle title="Topics" />} />
+              <ToggleableList
+                entityKey={`${entityKey}-topics`}
+                items={topics}
+                icon={FaTags}
+                label={<AnchorTitle title="Topics" />}
+              />
             )}
           </div>
         )}
@@ -210,6 +263,7 @@ const DetailsCard = ({
               >
                 {tags?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-tags`}
                     items={tags}
                     icon={FaTags}
                     label={<AnchorTitle title="Tags" />}
@@ -218,6 +272,7 @@ const DetailsCard = ({
                 )}
                 {domains?.length > 0 && (
                   <ToggleableList
+                    entityKey={`${entityKey}-domains`}
                     items={domains}
                     icon={FaChartPie}
                     label={<AnchorTitle title="Domains" />}
@@ -229,6 +284,7 @@ const DetailsCard = ({
             {labels?.length > 0 && (
               <div className="mb-8">
                 <ToggleableList
+                  entityKey={`${entityKey}-labels`}
                   items={labels}
                   icon={FaTags}
                   label={<AnchorTitle title="Labels" />}
@@ -239,67 +295,92 @@ const DetailsCard = ({
           </>
         )}
         {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
+        {(type === 'project' || type === 'chapter') && hasContributions && (
+          <div className="mb-8">
+            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
+              {contributionStats && (
+                <ContributionStats
+                  title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
+                  stats={contributionStats}
+                />
+              )}
+              {contributionData &&
+                Object.keys(contributionData).length > 0 &&
+                startDate &&
+                endDate && (
+                  <div className="flex w-full items-center justify-center">
+                    <div className="w-full">
+                      <ContributionHeatmap
+                        contributionData={contributionData}
+                        startDate={startDate}
+                        endDate={endDate}
+                        unit="contribution"
+                      />
+                    </div>
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
             icon={HiUserGroup}
             maxInitialDisplay={12}
+            label="Top Contributors"
+            getUrl={getMemberUrl}
           />
         )}
         {admins && admins.length > 0 && type === 'program' && (
-          <TopContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
             label="Admins"
+            getUrl={getMemberUrl}
           />
         )}
         {mentors && mentors.length > 0 && (
-          <TopContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
             label="Mentors"
+            getUrl={getMemberUrl}
           />
         )}
         {mentees && mentees.length > 0 && (
-          <MenteeContributorsList
+          <ContributorsList
             icon={HiUserGroup}
             contributors={mentees}
             maxInitialDisplay={6}
             label="Mentees"
-            programKey={programKey || ''}
-            moduleKey={entityKey || ''}
+            getUrl={(login) => getMenteeUrl(programKey || '', entityKey || '', login)}
           />
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'user' ||
-          type === 'organization') && (
+        {showIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ||
-            type === 'organization' ||
-            type === 'repository' ||
-            type === 'project' ? (
-              <Milestones data={recentMilestones} showAvatar={showAvatar} />
-            ) : (
-              <RecentReleases
-                data={recentReleases}
-                showAvatar={showAvatar}
-                showSingleColumn={true}
-              />
-            )}
+            <Milestones data={recentMilestones} showAvatar={showAvatar} />
           </div>
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'organization' ||
-          type === 'user') && (
+        {showPullRequestsAndReleases(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
+        )}
+        {type === 'module' && pullRequests && pullRequests.length > 0 && (
+          <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
+            <div className="grid grid-cols-1 gap-3">
+              {pullRequests.slice(0, showAllPRs ? undefined : 4).map((pr) => (
+                <MentorshipPullRequest key={pr.id} pr={pr} />
+              ))}
+              {pullRequests.length > 4 && (
+                <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
+              )}
+            </div>
+          </SecondaryCard>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
@@ -308,11 +389,107 @@ const DetailsCard = ({
             </SecondaryCard>
           )}
         {type === 'program' && modules.length > 0 && (
-          <SecondaryCard
-            icon={FaFolderOpen}
-            title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
-          >
-            <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+          <>
+            {modules.length === 1 ? (
+              <div className="mb-8">
+                <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              </div>
+            ) : (
+              <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
+                <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              </SecondaryCard>
+            )}
+          </>
+        )}
+        {type === 'program' && recentMilestones && recentMilestones.length > 0 && (
+          <SecondaryCard icon={FaSignsPost} title={<AnchorTitle title="Recent Milestones" />}>
+            <div className="grid gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2">
+              {recentMilestones
+                .slice(0, showAllMilestones ? recentMilestones.length : MILESTONE_LIMIT)
+                .map((milestone, index) => (
+                  <div
+                    key={milestone.url || `${milestone.title}-${index}`}
+                    className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                  >
+                    <div className="flex w-full flex-col justify-between">
+                      <div className="flex w-full items-center">
+                        {showAvatar && milestone?.author?.login && milestone?.author?.avatarUrl && (
+                          <Tooltip
+                            closeDelay={100}
+                            content={milestone?.author?.name || milestone?.author?.login}
+                            id={`avatar-tooltip-${index}`}
+                            delay={100}
+                            placement="bottom"
+                            showArrow
+                          >
+                            <Link
+                              className="shrink-0 text-blue-400 hover:underline"
+                              href={`/members/${milestone?.author?.login}`}
+                            >
+                              <Image
+                                height={24}
+                                width={24}
+                                src={milestone?.author?.avatarUrl}
+                                alt={
+                                  milestone.author &&
+                                  (milestone.author.name || milestone.author.login)
+                                    ? `${milestone.author.name || milestone.author.login}'s avatar`
+                                    : "Author's avatar"
+                                }
+                                className="mr-2 rounded-full"
+                              />
+                            </Link>
+                          </Tooltip>
+                        )}
+                        <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                          {milestone?.url ? (
+                            <Link
+                              className="text-blue-400 hover:underline"
+                              href={milestone?.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TruncatedText text={milestone.title} />
+                            </Link>
+                          ) : (
+                            <TruncatedText text={milestone.title} />
+                          )}
+                        </h3>
+                      </div>
+                      <div className="ml-0.5 w-full">
+                        <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                          <div className="mr-4 flex items-center">
+                            <FaCalendar className="mr-2 h-4 w-4" />
+                            <span>{formatDate(milestone.createdAt)}</span>
+                          </div>
+                          <div className="mr-4 flex items-center">
+                            <FaCircleCheck className="mr-2 h-4 w-4" />
+                            <span>{milestone.closedIssuesCount} closed</span>
+                          </div>
+                          <div className="mr-4 flex items-center">
+                            <FaCircleExclamation className="mr-2 h-4 w-4" />
+                            <span>{milestone.openIssuesCount} open</span>
+                          </div>
+                          {milestone?.repositoryName && milestone?.organizationName && (
+                            <div className="flex flex-1 items-center overflow-hidden">
+                              <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
+                              <Link
+                                href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName}`}
+                                className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+                              >
+                                <TruncatedText text={milestone.repositoryName} />
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            {recentMilestones.length > MILESTONE_LIMIT && (
+              <ShowMoreButton onToggle={() => setShowAllMilestones(!showAllMilestones)} />
+            )}
           </SecondaryCard>
         )}
         {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
@@ -347,6 +524,7 @@ export const SocialLinks = ({ urls }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+              aria-label={`Link to ${url}`}
             >
               <SocialIcon className="h-5 w-5" />
             </a>

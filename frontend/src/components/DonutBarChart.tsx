@@ -23,7 +23,7 @@ const DonutBarChart: React.FC<{
 
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
-      <div>
+      <div aria-label="Donut chart depicting health statuses">
         <Chart
           key={theme}
           options={{

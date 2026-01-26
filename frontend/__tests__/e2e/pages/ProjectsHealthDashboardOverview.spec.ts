@@ -1,6 +1,6 @@
 import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
+import { mockProjectsDashboardOverviewData } from '@mockData/mockProjectsDashboardOverviewData'
 import { test, expect } from '@playwright/test'
-import { mockProjectsDashboardOverviewData } from '@unit/data/mockProjectsDashboardOverviewData'
 import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {
@@ -8,7 +8,7 @@ test.describe('Projects Health Dashboard Overview', () => {
     await mockDashboardCookies(page, mockProjectsDashboardOverviewData, false)
     await page.goto('/projects/dashboard')
     await expect(page.getByText('404')).toBeVisible()
-    await expect(page.getByText('This page could not be found.')).toBeVisible()
+    await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
   })
 
   test('renders project health stats', async ({ page }) => {

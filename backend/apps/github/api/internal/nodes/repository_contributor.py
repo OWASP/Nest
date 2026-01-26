@@ -12,5 +12,5 @@ class RepositoryContributorNode:
     id: strawberry.ID
     login: str
     name: str
-    project_key: str
-    project_name: str
+    project_key: str | None = None
+    project_name: str | None = None

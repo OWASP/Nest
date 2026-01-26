@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type React from 'react'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import { Program } from 'types/mentorship'
+import { formatDate } from 'utils/dateFormatter'
 import EntityActions from 'components/EntityActions'
 import Markdown from 'components/MarkdownWrapper'
 
@@ -15,14 +16,6 @@ interface ProgramCardProps {
 }
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, isAdmin }) => {
-  const formatDate = (d: string | number) => {
-    const date = typeof d === 'number' ? new Date(d * 1000) : new Date(d)
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  }
   const { updateProgramStatus } = useUpdateProgramStatus({
     programKey: program.key,
     programName: program.name,
@@ -70,9 +63,9 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               placement="bottom"
               isDisabled={program.name.length <= 50}
             >
-              <h3 className="mr-1 line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
+              <h2 className="mr-1 line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
                 {program.name}
-              </h3>
+              </h2>
             </Tooltip>
             {accessLevel === 'admin' && isAdmin && (
               <div role="none" onMouseDown={(e) => e.stopPropagation()}>

@@ -4,7 +4,6 @@ import { Tooltip } from '@heroui/tooltip'
 import clsx from 'clsx'
 import { FC } from 'react'
 import type { IconType } from 'react-icons'
-import { FaCertificate } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 
 const GeneralCompliantComponent: FC<{
@@ -14,24 +13,16 @@ const GeneralCompliantComponent: FC<{
 }> = ({ icon, compliant, title }) => {
   return (
     <Tooltip content={title} placement="top">
-      <div className="group pointer-events-auto relative inline-block transition-all duration-300 ease-in-out hover:scale-105">
-        <IconWrapper
-          icon={FaCertificate}
-          className={clsx(
-            'h-14 w-14 drop-shadow-md filter transition-all group-hover:drop-shadow-lg',
-            {
-              'text-green-400/80': compliant,
-              'text-red-400/80': !compliant,
-            }
-          )}
-        />
-        <IconWrapper
-          icon={icon}
-          className={clsx('absolute top-1/2 left-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2', {
-            'text-green-900/90': compliant,
-            'text-red-900/90': !compliant,
-          })}
-        />
+      <div
+        className={clsx(
+          'group relative flex h-10 w-10 cursor-default items-center justify-center rounded-full shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg sm:h-14 sm:w-14',
+          {
+            'bg-green-400/80 text-green-900/90': compliant,
+            'bg-red-400/80 text-red-900/90': !compliant,
+          }
+        )}
+      >
+        <IconWrapper icon={icon} className="h-5 w-5 sm:h-7 sm:w-7" />
       </div>
     </Tooltip>
   )

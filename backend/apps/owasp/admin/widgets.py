@@ -21,4 +21,7 @@ class ChannelIdWidget(forms.TextInput):
             f"id='lookup_id_{name}' title='Look up related objects'></a>"
         )
 
-        return mark_safe(f"{widget_html}{search_button}")  # noqa: S308
+        # Use mark_safe since both widget_html and search_button are already HTML
+        return mark_safe(  # noqa: S308  # NOSEMGREP: python.django.security.audit.avoid-mark-safe.avoid-mark-safe
+            f"{widget_html} {search_button}"
+        )

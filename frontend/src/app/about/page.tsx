@@ -5,7 +5,7 @@ import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
@@ -16,8 +16,6 @@ import {
   GetTopContributorsDocument,
 } from 'types/__generated__/projectQueries.generated'
 import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
 import {
   technologies,
   missionContent,
@@ -26,18 +24,23 @@ import {
   projectTimeline,
   projectStory,
 } from 'utils/aboutData'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
+import ContributorsList from 'components/ContributorsList'
 import Leaders from 'components/Leaders'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
-import TopContributorsList from 'components/TopContributorsList'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
 }
+
+const PROJECT_LIMIT = 6
+const MILESTONE_LIMIT = 3
 
 const projectKey = 'nest'
 
@@ -62,56 +65,49 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
-  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
-    GetProjectMetadataDocument,
-    {
-      variables: { key: projectKey },
-    }
-  )
+  const {
+    data: projectMetadataResponse,
+    loading: projectMetadataLoading,
+    error: projectMetadataRequestError,
+  } = useQuery(GetProjectMetadataDocument, {
+    variables: { key: projectKey },
+  })
 
-  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
-    GetTopContributorsDocument,
-    {
-      variables: {
-        excludedUsernames: Object.keys(leaders),
-        hasFullName: true,
-        key: projectKey,
-        limit: 24,
-      },
-    }
-  )
+  const {
+    data: topContributorsResponse,
+    loading: topContributorsLoading,
+    error: topContributorsRequestError,
+  } = useQuery(GetTopContributorsDocument, {
+    variables: {
+      excludedUsernames: Object.keys(leaders),
+      hasFullName: true,
+      key: projectKey,
+      limit: 24,
+    },
+  })
 
   const { leadersData, isLoading: leadersLoading } = useLeadersData()
 
-  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
+  // Derive data directly from response to prevent race conditions.
+  const projectMetadata = projectMetadataResponse?.project
+  const topContributors = topContributorsResponse?.topContributors
+
+  const [showAllRoadmap, setShowAllRoadmap] = useState(false)
+  const [showAllTimeline, setShowAllTimeline] = useState(false)
 
   useEffect(() => {
-    if (projectMetadataResponse?.project) {
-      setProjectMetadata(projectMetadataResponse.project)
-    }
-
     if (projectMetadataRequestError) {
       handleAppError(projectMetadataRequestError)
     }
-  }, [projectMetadataResponse, projectMetadataRequestError])
+  }, [projectMetadataRequestError])
 
   useEffect(() => {
-    if (topContributorsResponse?.topContributors) {
-      setTopContributors(topContributorsResponse.topContributors)
-    }
-
     if (topContributorsRequestError) {
       handleAppError(topContributorsRequestError)
     }
-  }, [topContributorsResponse, topContributorsRequestError])
+  }, [topContributorsRequestError])
 
-  const isLoading =
-    !projectMetadataResponse ||
-    !topContributorsResponse ||
-    (projectMetadataRequestError && !projectMetadata) ||
-    (topContributorsRequestError && !topContributors) ||
-    leadersLoading
+  const isLoading = leadersLoading || projectMetadataLoading || topContributorsLoading
 
   if (isLoading) {
     return <AboutSkeleton />
@@ -155,11 +151,12 @@ const About = () => {
         <Leaders users={leadersData} />
 
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
             icon={HiUserGroup}
             label="Wall of Fame"
             maxInitialDisplay={12}
+            getUrl={getMemberUrl}
           />
         )}
 
@@ -210,45 +207,56 @@ const About = () => {
 
         {projectMetadata.recentMilestones.length > 0 && (
           <SecondaryCard icon={FaMapSigns} title={<AnchorTitle title="Roadmap" />}>
-            <div className="grid gap-4">
-              {[...projectMetadata.recentMilestones]
+            {(() => {
+              const filteredMilestones = [...projectMetadata.recentMilestones]
                 .filter((milestone) => milestone.state !== 'closed')
                 .sort((a, b) => (a.title > b.title ? 1 : -1))
-                .map((milestone, index) => (
-                  <div
-                    key={milestone.url || milestone.title || index}
-                    className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
-                  >
-                    <div className="flex-1">
-                      <div className="relative">
-                        <Link
-                          href={milestone.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
+              return (
+                <>
+                  <div className="grid gap-4">
+                    {filteredMilestones
+                      .slice(0, showAllRoadmap ? filteredMilestones.length : MILESTONE_LIMIT)
+                      .map((milestone, index) => (
+                        <div
+                          key={milestone.url || milestone.title || index}
+                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
                         >
-                          <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
-                            {milestone.title}
-                          </h3>
-                        </Link>
-                        <Tooltip
-                          closeDelay={100}
-                          content={getMilestoneStatus(milestone.progress)}
-                          id={`tooltip-state-${index}`}
-                          delay={100}
-                          placement="top"
-                          showArrow
-                        >
-                          <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
-                          </span>
-                        </Tooltip>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
-                    </div>
+                          <div className="flex-1">
+                            <div className="relative">
+                              <Link
+                                href={milestone.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
+                                  {milestone.title}
+                                </h3>
+                              </Link>
+                              <Tooltip
+                                closeDelay={100}
+                                content={getMilestoneStatus(milestone.progress)}
+                                id={`tooltip-state-${index}`}
+                                delay={100}
+                                placement="top"
+                                showArrow
+                              >
+                                <span className="absolute top-0 right-0 text-xl text-gray-400">
+                                  <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
+                                </span>
+                              </Tooltip>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                          </div>
+                        </div>
+                      ))}
                   </div>
-                ))}
-            </div>
+                  {filteredMilestones.length > MILESTONE_LIMIT && (
+                    <ShowMoreButton onToggle={() => setShowAllRoadmap(!showAllRoadmap)} />
+                  )}
+                </>
+              )
+            })()}
           </SecondaryCard>
         )}
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
@@ -262,23 +270,31 @@ const About = () => {
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
-            {[...projectTimeline].reverse().map((milestone, index) => (
-              <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                {index !== projectTimeline.length - 1 && (
-                  <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                )}
-                <div
-                  aria-hidden="true"
-                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                ></div>
-                <div>
-                  <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                  <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                  <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+            {(() => {
+              const visibleTimeline = [...projectTimeline]
+                .reverse()
+                .slice(0, showAllTimeline ? projectTimeline.length : PROJECT_LIMIT)
+              return visibleTimeline.map((milestone, index) => (
+                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
+                  {index !== visibleTimeline.length - 1 && (
+                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
+                  )}
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
+                  ></div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
+                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            })()}
           </div>
+          {projectTimeline.length > PROJECT_LIMIT && (
+            <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
+          )}
         </SecondaryCard>
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
