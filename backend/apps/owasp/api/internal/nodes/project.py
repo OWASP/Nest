@@ -104,13 +104,11 @@ class ProjectNode(GenericEntityNode):
         )
 
     @strawberry_django.field(
-        select_related=[
+        prefetch_related=[
             "pull_requests__author",
             "pull_requests__milestone",
             "pull_requests__repository__organization",
             "pull_requests__repository",
-        ],
-        prefetch_related=[
             "pull_requests__assignees",
             "pull_requests__labels",
         ],

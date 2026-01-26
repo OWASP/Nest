@@ -112,20 +112,8 @@ class Command(BaseCommand):
                 is_template=False,
             ).exists()
 
-            pull_requests = (
-                PullRequest.objects.filter(
-                    repository__in=project.repositories.all(),
-                )
-                .select_related(
-                    "author",
-                    "milestone",
-                    "repository__organization",
-                    "repository",
-                )
-                .prefetch_related(
-                    "assignees",
-                    "labels",
-                )
+            pull_requests = PullRequest.objects.filter(
+                repository__in=project.repositories.all(),
             )
             project.pull_requests.set(pull_requests)
 
