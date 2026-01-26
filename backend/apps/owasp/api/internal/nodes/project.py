@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.core.utils.index import deep_camelize
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -9,6 +10,7 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.models.issue import Issue
 from apps.github.models.milestone import Milestone
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
@@ -79,10 +81,19 @@ class ProjectNode(GenericEntityNode):
         """Resolve languages."""
         return root.idx_languages
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        prefetch_related=[
+            Prefetch(
+                "issues",
+                queryset=Issue.objects.select_related("author", "repository", "level", "milestone")
+                .prefetch_related("labels", "assignees")
+                .order_by("-created_at"),
+            )
+        ]
+    )
     def recent_issues(self, root: Project) -> list[IssueNode]:
         """Resolve recent issues."""
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        return list(root.issues.all())[:RECENT_ISSUES_LIMIT]
 
     @strawberry_django.field
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
