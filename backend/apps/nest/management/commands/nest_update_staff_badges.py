@@ -1,6 +1,6 @@
 """Sync OWASP Staff badges."""
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 
 from apps.github.models.user import User
 from apps.nest.management.commands.base_badge_command import BaseBadgeCommand
@@ -15,4 +15,6 @@ class Command(BaseBadgeCommand):
     badge_weight = 100
 
     def get_eligible_users(self) -> QuerySet[User]:
-        return User.objects.filter(is_owasp_staff=True)
+        return User.objects.select_related("owasp_profile").filter(
+            Q(owasp_profile__is_owasp_staff=True) | Q(is_owasp_staff=True)
+        )

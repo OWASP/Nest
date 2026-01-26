@@ -12,6 +12,9 @@ class TestMemberProfileAdmin:
 
         expected_fields = (
             "github_user",
+            "is_owasp_staff",
+            "has_public_member_page",
+            "contributions_count",
             "owasp_slack_id",
             "first_contribution_at",
             "is_owasp_board_member",

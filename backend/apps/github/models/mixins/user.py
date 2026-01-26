@@ -211,6 +211,8 @@ class UserIndexMixin:
             int: Aggregate contributions count across repositories.
 
         """
+        if hasattr(self, "owasp_profile") and self.owasp_profile.contributions_count:
+            return self.owasp_profile.contributions_count
         return self.contributions_count
 
     @property

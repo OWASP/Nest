@@ -11,7 +11,15 @@ def has_dashboard_permission(request):
     return (
         True
         if settings.IS_E2E_ENVIRONMENT or settings.IS_FUZZ_ENVIRONMENT
-        else (user := request.user) and user.is_authenticated and user.github_user.is_owasp_staff
+        else (
+            (user := request.user)
+            and user.is_authenticated
+            and (
+                user.github_user.owasp_profile.is_owasp_staff
+                if hasattr(user.github_user, "owasp_profile")
+                else user.github_user.is_owasp_staff
+            )
+        )
     )
 
 

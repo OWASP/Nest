@@ -12,12 +12,10 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
         "avatar_url",
         "bio",
         "company",
-        "contributions_count",
         "email",
         "followers_count",
         "following_count",
         "id",
-        "is_owasp_staff",
         "location",
         "login",
         "name",
@@ -26,6 +24,20 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 )
 class UserNode:
     """GitHub user node."""
+
+    @strawberry_django.field(select_related=["owasp_profile"])
+    def contributions_count(self, root: User) -> int:
+        """Resolve contributions count."""
+        if hasattr(root, "owasp_profile") and root.owasp_profile:
+            return root.owasp_profile.contributions_count
+        return root.contributions_count
+
+    @strawberry_django.field(select_related=["owasp_profile"])
+    def is_owasp_staff(self, root: User) -> bool:
+        """Resolve if the user is an OWASP staff member."""
+        if hasattr(root, "owasp_profile") and root.owasp_profile:
+            return root.owasp_profile.is_owasp_staff
+        return root.is_owasp_staff
 
     @strawberry_django.field(prefetch_related=["user_badges"])
     def badge_count(self, root: User) -> int:

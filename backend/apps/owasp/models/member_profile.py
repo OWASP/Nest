@@ -70,6 +70,19 @@ class MemberProfile(TimestampedModel):
         verbose_name="LinkedIn Page ID",
         help_text="LinkedIn username or custom URL ID (e.g., 'john-doe-123')",
     )
+    has_public_member_page = models.BooleanField(
+        default=True,
+        verbose_name="Has Public Member Page",
+        help_text="Whether the member's profile is publicly visible on the OWASP website",
+    )
+    is_owasp_staff = models.BooleanField(
+        default=False,
+        verbose_name="Is OWASP Staff",
+        help_text="Indicates if the user is OWASP Foundation staff.",
+    )
+    contributions_count = models.PositiveIntegerField(
+        verbose_name="Contributions count", default=0
+    )
 
     def __str__(self) -> str:
         """Return human-readable representation."""
