@@ -51,7 +51,7 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
     @property
     def idx_issues_count(self) -> int:
         """Return issues count for indexing."""
-        return self.open_issues.count()
+        return self.active_issues_count
 
     @property
     def idx_key(self) -> str:
