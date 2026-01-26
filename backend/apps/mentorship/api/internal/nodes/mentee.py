@@ -1,30 +1,43 @@
 """GraphQL node for Mentee model."""
 
 import strawberry
+import strawberry_django
 
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
+from apps.mentorship.models.mentee import Mentee
 
 
-@strawberry.type
-class MenteeNode:
+@strawberry_django.type(Mentee)
+class MenteeNode(strawberry.relay.Node):
     """A GraphQL node representing a mentorship mentee."""
 
-    # TODO (@arkid15r): migrate to decorator for consistency.
-    id: str
-    login: str
-    name: str
-    avatar_url: str
-    bio: str | None = None
     experience_level: ExperienceLevelEnum
-    domains: list[str] | None = None
-    tags: list[str] | None = None
+    domains: list[str] | None
+    tags: list[str] | None
 
-    @strawberry.field(name="avatarUrl")
-    def resolve_avatar_url(self) -> str:
+    @strawberry_django.field
+    def avatar_url(self, root: Mentee) -> str:
         """Get the GitHub avatar URL of the mentee."""
-        return self.avatar_url
+        return root.github_user.avatar_url
 
-    @strawberry.field(name="experienceLevel")
-    def resolve_experience_level(self) -> str:
-        """Get the experience level of the mentee."""
-        return self.experience_level if self.experience_level else "beginner"
+    @strawberry_django.field
+    def bio(self, root: Mentee) -> str | None:
+        """Resolve bio."""
+        return root.github_user.bio
+
+    @strawberry_django.field
+    def login(self, root: Mentee) -> str:
+        """Resolve login."""
+        return root.github_user.login
+
+    @strawberry_django.field
+    def name(self, root: Mentee) -> str:
+        """Resolve name."""
+        return root.github_user.name or root.github_user.login
+
+    # Explicitly map camelCase to snake_case resolvers if needed,
+    # but strawberry auto-converts field names to camelCase in schema.
+    # The previous implementation had @strawberry.field(name="avatarUrl")
+    # strawberry default is camelCase so `avatar_url` -> `avatarUrl`.
+    # Previous implementation: `resolve_avatar_url` decorated with name="avatarUrl".
+    # My new implementation: `avatar_url` field. Strawberry will make it `avatarUrl`.
