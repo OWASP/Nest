@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=${NPM_CACHE} \
 
 WORKDIR /app
 
-RUN pnpm add @playwright/test
+RUN pnpm add @playwright/test millify
 
 COPY .pnpmrc next.config.ts postcss.config.js playwright.config.ts tailwind.config.mjs tsconfig.json ./
 COPY src/utils src/utils
