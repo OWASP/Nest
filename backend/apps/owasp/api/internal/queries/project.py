@@ -46,10 +46,13 @@ class ProjectQuery:
 
         """
         return (
-            Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_RECENT_PROJECTS_LIMIT)) > 0
-            else []
+
+
+            Project.objects.filter(is_active=True)
+            .prefetch_related("published_releases")
+            .order_by("-created_at")[:limit]
         )
+
 
     @strawberry_django.field
     def search_projects(self, query: str) -> list[ProjectNode]:
