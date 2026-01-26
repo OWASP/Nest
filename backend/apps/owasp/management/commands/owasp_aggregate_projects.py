@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
+from apps.github.models.pull_request import PullRequest
 from apps.owasp.models.project import Project
 
 
@@ -111,6 +112,10 @@ class Command(BaseCommand):
             ).exists()
 
             projects.append(project)
+
+            project.pull_requests.set(
+                PullRequest.objects.filter(repository__in=project.repositories.all())
+            )
 
         # Bulk save data.
         Project.bulk_save(projects)
