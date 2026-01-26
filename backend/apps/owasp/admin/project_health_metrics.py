@@ -29,7 +29,15 @@ class ProjectHealthMetricsAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
     search_fields = ("project__name",)
 
     def project(self, obj):
-        """Display project name."""
+        """Display project name in admin list view.
+
+        Args:
+            obj: The ProjectHealthMetrics instance.
+
+        Returns:
+            str: The project name or 'N/A' if no project is associated.
+
+        """
         return obj.project.name if obj.project else "N/A"
 
 
