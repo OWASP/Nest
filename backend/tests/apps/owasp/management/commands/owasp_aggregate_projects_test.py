@@ -21,6 +21,12 @@ class TestOwaspAggregateProjects:
         project.owasp_repository = mock.Mock()
         project.owasp_repository.is_archived = False
         project.owasp_repository.created_at = "2024-01-01T00:00:00Z"
+
+        # Ensure M2M and FK mocks exist for assignment
+        project.issues = mock.Mock()
+        project.organizations = mock.Mock()
+        project.owners = mock.Mock()
+
         return project
 
     @pytest.mark.parametrize(
@@ -76,6 +82,8 @@ class TestOwaspAggregateProjects:
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch("builtins.print") as mock_print,
+            # [FIX] Patch Issue to prevent Django ORM from crashing on Mocks
+            mock.patch("apps.owasp.management.commands.owasp_aggregate_projects.Issue"),
         ):
             command.handle(offset=offset)
 
@@ -85,3 +93,68 @@ class TestOwaspAggregateProjects:
         for call in mock_print.call_args_list:
             args, _ = call
             assert "https://owasp.org/www-project-test" in args[0]
+
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_projects.Issue")
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    def test_handle_updates_issues_and_m2m(
+        self, mock_bulk_save, mock_issue_model, command, mock_project
+    ):
+        """Test that issue counts are calculated and M2M fields are updated."""
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.order_by.return_value = mock_active_projects
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+
+        mock_all_issues_qs = mock.Mock()
+        mock_all_issues_qs.count.return_value = 100
+
+        mock_all_issues_qs.filter.return_value.count.side_effect = [
+            20,
+            10,
+        ]
+
+        mock_issue_model.objects.filter.return_value = mock_all_issues_qs
+
+        mock_open_issues_qs = mock.Mock()
+        mock_open_issues_qs.filter.return_value.count.return_value = 5
+
+        mock_issue_model.open_issues = mock_open_issues_qs
+
+        mock_repository = mock.Mock()
+        mock_repository.organization = None
+        mock_repository.latest_release = None
+
+        mock_repository.commits_count = 10
+        mock_repository.contributors_count = 5
+        mock_repository.forks_count = 2
+        mock_repository.open_issues_count = 4
+        mock_repository.releases.count.return_value = 1
+        mock_repository.stars_count = 50
+        mock_repository.subscribers_count = 3
+        mock_repository.watchers_count = 7
+        mock_repository.top_languages = []
+        mock_repository.topics = []
+
+        class QS(list):
+            def exists(self):
+                return bool(self)
+
+        mock_project.repositories.filter.return_value = QS([mock_repository])
+
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("builtins.print"),
+        ):
+            command.handle(offset=0)
+
+        mock_project.issues.clear.assert_called_once()
+        mock_project.issues.set.assert_called_once_with(mock_all_issues_qs)
+
+        assert mock_project.issues_count == 100
+        assert mock_project.unanswered_issues_count == 20
+        assert mock_project.unassigned_issues_count == 10
+        assert mock_project.active_issues_count == 5
+
+        assert mock_bulk_save.called

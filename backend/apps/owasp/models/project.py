@@ -96,6 +96,16 @@ class Project(
     stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)
     subscribers_count = models.PositiveIntegerField(verbose_name="Subscribers", default=0)
     watchers_count = models.PositiveIntegerField(verbose_name="Watchers", default=0)
+    issues_count = models.PositiveIntegerField(verbose_name="Issues", default=0)
+    unanswered_issues_count = models.PositiveIntegerField(
+        verbose_name="Unanswered Issues", default=0
+    )
+    unassigned_issues_count = models.PositiveIntegerField(
+        verbose_name="Unassigned Issues", default=0
+    )
+    active_issues_count = models.PositiveIntegerField(
+        verbose_name="Open Issues Past 90 Days", default=0
+    )
 
     languages = models.JSONField(verbose_name="Languages", default=list, blank=True, null=True)
     licenses = models.JSONField(verbose_name="Licenses", default=list, blank=True, null=True)
@@ -150,6 +160,11 @@ class Project(
     repositories = models.ManyToManyField(
         "github.Repository",
         verbose_name="Repositories",
+        blank=True,
+    )
+    issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Issues",
         blank=True,
     )
 
@@ -228,40 +243,6 @@ class Project(
 
         """
         return self.type == ProjectType.TOOL
-
-    @property
-    def issues(self):
-        """Get issues across the project's repositories.
-
-        Returns:
-            QuerySet[Issue]: A queryset of issues with related entities prefetched.
-
-        """
-        return (
-            Issue.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "level",
-                "milestone",
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-            )
-        )
-
-    @property
-    def issues_count(self) -> int:
-        """Get the total number of issues.
-
-        Returns:
-            int: Count of issues across the project's repositories.
-
-        """
-        return self.issues.count()
 
     @property
     def last_health_metrics(self) -> ProjectHealthMetrics | None:
@@ -444,26 +425,6 @@ class Project(
 
         """
         return self.repositories.count()
-
-    @property
-    def unanswered_issues_count(self) -> int:
-        """Get the number of issues with no comments.
-
-        Returns:
-            int: Count of issues where `comments_count` equals zero.
-
-        """
-        return self.issues.filter(comments_count=0).count()
-
-    @property
-    def unassigned_issues_count(self) -> int:
-        """Get the number of issues with no assignees.
-
-        Returns:
-            int: Count of issues where no user is assigned.
-
-        """
-        return self.issues.filter(assignees__isnull=True).count()
 
     def deactivate(self) -> None:
         """Deactivate project."""
