@@ -64,12 +64,22 @@ variable "max_count" {
   description = "The maximum number of tasks for auto scaling."
   type        = number
   default     = 6
+
+  validation {
+    condition     = !var.enable_auto_scaling || var.desired_count <= var.max_count
+    error_message = "When auto scaling is enabled, desired_count must be <= max_count."
+  }
 }
 
 variable "min_count" {
   description = "The minimum number of tasks for auto scaling."
   type        = number
   default     = 2
+
+  validation {
+    condition     = !var.enable_auto_scaling || var.min_count <= var.desired_count
+    error_message = "When auto scaling is enabled, min_count must be <= desired_count."
+  }
 }
 
 variable "private_subnet_ids" {
