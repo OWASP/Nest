@@ -85,6 +85,25 @@ class Command(BaseCommand):
                 if repository.topics:
                     topics.update(repository.topics)
 
+            # Sync pull requests (M2M)
+            project.pull_requests.clear()
+
+            prs = []
+            for repository in project.repositories.filter(
+                is_empty=False,
+                is_fork=False,
+                is_template=False,
+            ):
+                try:
+                    repo_prs = list(repository.pull_requests.all())
+                except TypeError:
+                    repo_prs = []
+
+                prs.extend(repo_prs)
+
+            if prs:
+                project.pull_requests.add(*prs)
+
             project.pushed_at = max(pushed_at)
             if released_at:
                 project.released_at = max(released_at)

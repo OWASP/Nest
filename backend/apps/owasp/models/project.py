@@ -16,7 +16,6 @@ from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
 from apps.github.models.milestone import Milestone
-from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.enums.project import (
@@ -152,6 +151,11 @@ class Project(
         verbose_name="Repositories",
         blank=True,
     )
+    pull_requests = models.ManyToManyField(
+        "github.PullRequest",
+        verbose_name="Pull Requests",
+        blank=True,
+    )
 
     def __str__(self) -> str:
         """Project human readable representation."""
@@ -256,25 +260,6 @@ class Project(
     def owasp_page_last_updated_at(self) -> datetime.datetime | None:
         """Return the last updated date of the OWASP page."""
         return self.owasp_repository.updated_at if self.owasp_repository else None
-
-    @property
-    def pull_requests(self):
-        """Return pull requests."""
-        return (
-            PullRequest.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "milestone",
-                "repository__organization",
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-            )
-        )
 
     @property
     def pull_requests_count(self) -> int:
