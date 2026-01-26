@@ -343,30 +343,6 @@ class Project(
         return self.owasp_repository.updated_at if self.owasp_repository else None
 
     @property
-    def pull_requests(self):
-        """Get pull requests across the project's repositories.
-
-        Returns:
-            QuerySet[PullRequest]: A queryset of pull requests with related data.
-
-        """
-        return (
-            PullRequest.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "milestone",
-                "repository__organization",
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-            )
-        )
-
-    @property
     def pull_requests_count(self) -> int:
         """Get the total number of pull requests.
 
