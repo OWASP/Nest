@@ -111,7 +111,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
               className="relative block border-b border-gray-200 p-4 transition-colors hover:bg-gray-50 lg:table-row lg:border-b lg:p-0 dark:border-gray-700 dark:hover:bg-[#2a2e33]"
             >
               {/* Title */}
-              <td className="block pb-3 lg:table-cell lg:px-6 lg:py-4">
+              <td className="block pr-12 pb-3 lg:table-cell lg:px-6 lg:py-4">
                 <div className="flex items-start justify-between gap-3 lg:block">
                   <Tooltip
                     closeDelay={100}
@@ -124,7 +124,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                     <button
                       type="button"
                       onClick={() => handleIssueClick(issue.number)}
-                      className="flex-1 cursor-pointer truncate text-left text-sm font-medium text-blue-600 hover:underline lg:block lg:max-w-md dark:text-blue-400"
+                      className="line-clamp-2 h-12 cursor-pointer overflow-hidden text-left text-sm font-medium text-blue-600 hover:underline lg:max-w-md dark:text-blue-400"
                     >
                       {issue.title}
                     </button>
@@ -169,7 +169,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                         height={18}
                         width={18}
                         src={issue.assignees[0].avatarUrl}
-                        alt={issue.assignees[0].login}
+                        alt=""
                         className="rounded-full lg:h-6 lg:w-6"
                       />
                       <span className="max-w-[80px] truncate sm:max-w-[100px] md:max-w-[120px] lg:max-w-[150px]">

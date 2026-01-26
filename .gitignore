@@ -47,6 +47,8 @@ design/
 frontend/blob-report/
 frontend/coverage
 frontend/dist
+frontend/.next
+frontend/out
 frontend/npm-debug.log*
 frontend/playwright-report/
 frontend/playwright/.cache/
@@ -61,3 +63,4 @@ venv/
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .cursor/rules/snyk_rules.mdc
+semgrep-security-report.txt

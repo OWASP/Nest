@@ -1,8 +1,9 @@
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { FaCode, FaTags } from 'react-icons/fa6'
 import type { DetailsCardProps } from 'types/card'
+import type { PullRequest } from 'types/pullRequest'
 import CardDetailsPage, { type CardType } from 'components/CardDetailsPage'
 
 jest.mock('next/navigation', () => ({
@@ -169,7 +170,15 @@ jest.mock('components/InfoBlock', () => ({
 
 jest.mock('components/LeadersList', () => ({
   __esModule: true,
-  default: ({ leaders, ...props }: { leaders: string; [key: string]: unknown }) => (
+  default: ({
+    leaders,
+    entityKey: _entityKey,
+    ...props
+  }: {
+    leaders: string
+    entityKey: string
+    [key: string]: unknown
+  }) => (
     <span data-testid="leaders-list" {...props}>
       {leaders}
     </span>
@@ -247,6 +256,15 @@ jest.mock('components/RecentPullRequests', () => ({
   }) => (
     <div data-testid="recent-pull-requests" {...props}>
       Recent Pull Requests ({data?.length || 0} items) {showAvatar ? 'with avatars' : 'no avatars'}
+    </div>
+  ),
+}))
+
+jest.mock('components/MentorshipPullRequest', () => ({
+  __esModule: true,
+  default: ({ pr, ...props }: { pr: PullRequest; [key: string]: unknown }) => (
+    <div data-testid="pull-request-item" {...props}>
+      MentorshipPullRequest: {pr.title}
     </div>
   ),
 }))
@@ -336,11 +354,13 @@ jest.mock('components/ToggleableList', () => ({
     items,
     icon: _icon,
     label,
+    entityKey: _entityKey,
     ...props
   }: {
     items: string[]
     _icon: unknown
     label: React.ReactNode
+    entityKey: string
     [key: string]: unknown
   }) => (
     <div data-testid="toggleable-list" {...props}>
@@ -349,25 +369,27 @@ jest.mock('components/ToggleableList', () => ({
   ),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ContributorsList', () => ({
   __esModule: true,
   default: ({
     contributors,
     maxInitialDisplay,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon,
+    label = 'Contributors',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    label,
+    getUrl,
     ...props
   }: {
     contributors: unknown[]
     icon?: unknown
     label?: string
     maxInitialDisplay: number
+    getUrl: (login: string) => string
     [key: string]: unknown
   }) => (
-    <div data-testid="top-contributors-list" {...props}>
-      Top Contributors ({contributors.length} items, max display: {maxInitialDisplay})
+    <div data-testid="contributors-list" {...props}>
+      {label} ({contributors.length} items, max display: {maxInitialDisplay})
     </div>
   ),
 }))
@@ -454,6 +476,7 @@ describe('CardDetailsPage', () => {
 
   const mockContributors = [
     {
+      id: 'contributor-1',
       avatarUrl: 'https://example.com/avatar1.jpg',
       login: 'john_doe',
       name: 'John Doe',
@@ -461,6 +484,7 @@ describe('CardDetailsPage', () => {
       contributionsCount: 50,
     },
     {
+      id: 'contributor-2',
       avatarUrl: 'https://example.com/avatar2.jpg',
       login: 'jane_smith',
       name: 'Jane Smith',
@@ -552,6 +576,7 @@ describe('CardDetailsPage', () => {
 
   const mockRecentReleases = [
     {
+      id: 'release-1',
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
@@ -754,6 +779,19 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Repositories')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
     })
+
+    it('renders MentorshipPullRequest when type is module and PRs are provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+        />
+      )
+
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+      expect(screen.getAllByTestId('pull-request-item').length).toBeGreaterThan(0)
+    })
   })
 
   describe('Event Handling', () => {
@@ -951,7 +989,7 @@ describe('CardDetailsPage', () => {
     it('passes correct props to child components', () => {
       render(<CardDetailsPage {...defaultProps} topContributors={mockContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (2 items, max display: 12)'
       )
     })
@@ -1041,9 +1079,7 @@ describe('CardDetailsPage', () => {
       )
 
       expect(screen.getByTestId('health-metrics')).toHaveTextContent('Health Metrics (1 items)')
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
-        'Top Contributors (2 items'
-      )
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent('Top Contributors (2 items')
       expect(screen.getByTestId('repositories-card')).toHaveTextContent('Repositories (2 items)')
     })
 
@@ -1152,7 +1188,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributorsList} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (50 items, max display: 12)'
       )
     })
@@ -1212,7 +1248,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (1000 items, max display: 12)'
       )
     })
@@ -1362,7 +1398,7 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Project summary text')).toBeInTheDocument()
       expect(screen.getByText('User summary content')).toBeInTheDocument()
       expect(screen.getByTestId('health-metrics')).toBeInTheDocument()
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
+      expect(screen.getByTestId('contributors-list')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
       expect(screen.getByTestId('sponsor-card')).toBeInTheDocument()
     })
@@ -1669,6 +1705,7 @@ describe('CardDetailsPage', () => {
         contributionStats,
         topContributors: [
           {
+            id: 'contributor-user1',
             login: 'user1',
             name: 'User One',
             avatarUrl: 'https://example.com/avatar1.png',
@@ -1685,6 +1722,200 @@ describe('CardDetailsPage', () => {
       expect(contributionSection.compareDocumentPosition(contributorsSection)).toBe(
         Node.DOCUMENT_POSITION_FOLLOWING
       )
+    })
+  })
+
+  describe('Program Milestones Display', () => {
+    const createMilestones = (count: number) => {
+      const milestones = []
+      for (let i = 0; i < count; i++) {
+        milestones.push({
+          author: mockUser,
+          body: `Milestone description ${i + 1}`,
+          closedIssuesCount: 5,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 2,
+          repositoryName: `test-repo-${i}`,
+          organizationName: 'test-org',
+          state: 'open',
+          title: `Milestone ${i + 1}`,
+          url: `https://github.com/test/project/milestone/${i + 1}`,
+        })
+      }
+      return milestones
+    }
+
+    it('renders only first 4 milestones initially for program type', () => {
+      const manyMilestones = createMilestones(6)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: manyMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
+
+      expect(screen.getByText('Milestone 1')).toBeInTheDocument()
+      expect(screen.getByText('Milestone 4')).toBeInTheDocument()
+
+      expect(screen.queryByText('Milestone 5')).not.toBeInTheDocument()
+      expect(screen.queryByText('Milestone 6')).not.toBeInTheDocument()
+
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('expands to show all milestones when "Show more" is clicked', () => {
+      const manyMilestones = createMilestones(6)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: manyMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      const showMoreBtn = screen.getByText(/Show more/i)
+      fireEvent.click(showMoreBtn)
+
+      expect(screen.getByText('Milestone 5')).toBeInTheDocument()
+      expect(screen.getByText('Milestone 6')).toBeInTheDocument()
+
+      expect(screen.getByText(/Show less/i)).toBeInTheDocument()
+    })
+
+    it('collapses back to 4 milestones when "Show less" is clicked', () => {
+      const manyMilestones = createMilestones(6)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: manyMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      fireEvent.click(screen.getByText(/Show more/i))
+      expect(screen.getByText('Milestone 5')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByText(/Show less/i))
+
+      expect(screen.queryByText('Milestone 5')).not.toBeInTheDocument()
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('does not show toggle button if milestones <= 4', () => {
+      const fewMilestones = createMilestones(4)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: fewMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Milestone 1')).toBeInTheDocument()
+      expect(screen.getByText('Milestone 4')).toBeInTheDocument()
+      expect(screen.queryByText(/Show more/i)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Module Pull Requests Display', () => {
+    const createPullRequests = (count: number) => {
+      const pullRequests = []
+      for (let i = 0; i < count; i++) {
+        pullRequests.push({
+          id: `pr-${i}`,
+          author: mockUser,
+          createdAt: new Date().toISOString(),
+          organizationName: 'test-org',
+          title: `Pull Request ${i + 1}`,
+          url: `https://github.com/test/project/pull/${i + 1}`,
+          state: 'OPEN',
+          number: i + 1,
+          mergedAt: null,
+          repositoryName: 'test-repo',
+        })
+      }
+      return pullRequests
+    }
+
+    it('renders only first 4 PRs initially for module type', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+
+      expect(screen.getByText(/Pull Request 1/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 4/)).toBeInTheDocument()
+
+      expect(screen.queryByText(/Pull Request 5/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Pull Request 6/)).not.toBeInTheDocument()
+
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('expands to show all PRs when "Show more" is clicked', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      const showMoreBtn = screen.getByText(/Show more/i)
+      fireEvent.click(showMoreBtn)
+
+      expect(screen.getByText(/Pull Request 5/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 6/)).toBeInTheDocument()
+
+      expect(screen.getByText(/Show less/i)).toBeInTheDocument()
+    })
+
+    it('collapses back to 4 PRs when "Show less" is clicked', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      fireEvent.click(screen.getByText(/Show more/i))
+      expect(screen.getByText(/Pull Request 5/)).toBeInTheDocument()
+
+      fireEvent.click(screen.getByText(/Show less/i))
+
+      expect(screen.queryByText(/Pull Request 5/)).not.toBeInTheDocument()
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('does not show toggle button if PRs <= 4', () => {
+      const fewPRs = createPullRequests(4)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: fewPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByText(/Pull Request 1/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 4/)).toBeInTheDocument()
+      expect(screen.queryByText(/Show more/i)).not.toBeInTheDocument()
     })
   })
 })
