@@ -215,9 +215,10 @@ describe('<IssuesTable />', () => {
 
     it('renders assignee avatar and name', () => {
       render(<IssuesTable issues={[mockIssues[0]]} />)
-      const assigneeImages = screen.getAllByAltText('user1')
+      const userContainer = screen.getByText('user1').closest('div')
+      const avatar = within(userContainer).getByRole('presentation', { hidden: true })
       const user1Texts = screen.getAllByText('user1')
-      expect(assigneeImages.length).toBeGreaterThan(0)
+      expect(avatar).toBeInTheDocument()
       expect(user1Texts.length).toBeGreaterThan(0)
     })
 

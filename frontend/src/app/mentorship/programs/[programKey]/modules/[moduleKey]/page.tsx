@@ -19,6 +19,7 @@ const ModuleDetailsPage = () => {
     error,
     loading: isLoading,
   } = useQuery(GetProgramAdminsAndModulesDocument, {
+    fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
       moduleKey,
@@ -34,7 +35,7 @@ const ModuleDetailsPage = () => {
     }
   }, [error])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (error) {
     return (
@@ -72,6 +73,7 @@ const ModuleDetailsPage = () => {
       details={moduleDetails}
       domains={programModule.domains}
       mentors={programModule.mentors}
+      pullRequests={programModule.recentPullRequests || []}
       summary={programModule.description}
       tags={programModule.tags}
       title={programModule.name}

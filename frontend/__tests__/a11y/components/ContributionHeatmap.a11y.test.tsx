@@ -1,9 +1,7 @@
 import { render, screen } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import ContributionHeatmap from 'components/ContributionHeatmap'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('react-apexcharts', () => {
   return function MockChart(props: {
