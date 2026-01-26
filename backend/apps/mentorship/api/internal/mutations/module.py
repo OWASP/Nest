@@ -22,6 +22,7 @@ from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
+ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
 
@@ -164,8 +165,7 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            msg = "Assignee not found."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
@@ -207,8 +207,7 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            msg = "Assignee not found."
-            raise ObjectDoesNotExist(msg)
+            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
