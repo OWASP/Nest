@@ -33,6 +33,16 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   transpilePackages: ['@react-leaflet/core', 'leaflet', 'react-leaflet', 'react-leaflet-cluster'],
+  rewrites: async () => [
+    {
+      source: '/csrf',
+      destination: 'http://backend:9000/csrf/',
+    },
+    {
+      source: '/graphql',
+      destination: 'http://backend:9000/graphql/',
+    },
+  ],
   ...(isLocal ? {} : { output: 'standalone' }),
 }
 
