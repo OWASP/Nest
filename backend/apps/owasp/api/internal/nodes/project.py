@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.core.utils.index import deep_camelize
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -9,6 +10,7 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.models.milestone import Milestone
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
@@ -83,19 +85,23 @@ class ProjectNode(GenericEntityNode):
         """Resolve recent issues."""
         return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry_django.field(prefetch_related=["recent_milestones"])
+    @strawberry_django.field(
+        prefetch_related=[
+            Prefetch(
+                "recent_milestones",
+                queryset=Milestone.objects.select_related(
+                    "repository__organization",
+                    "author__owasp_profile",
+                )
+                .prefetch_related("labels")
+                .order_by("-created_at"),
+            )
+        ]
+    )
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         return (
-            root.recent_milestones.all()
-            .select_related(
-                "repository__organization",
-                "author__owasp_profile",
-            )
-            .prefetch_related(
-                "labels",
-            )
-            .order_by("-created_at")[:limit]
+            list(root.recent_milestones.all())[:limit]
             if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )
