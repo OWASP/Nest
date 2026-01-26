@@ -5,9 +5,11 @@ import pytest
 from apps.github.models.mixins.repository import RepositoryIndexMixin
 from apps.github.models.release import Release
 
+COMMITS_COUNT = 100
 CONTRIBUTORS_COUNT = 5
 FORKS_COUNT = 5
 OPEN_ISSUES_COUNT = 5
+REPOSITORY_SIZE = 1024
 STARS_COUNT = 5
 SUBSCRIBERS_COUNT = 10
 
@@ -15,7 +17,7 @@ SUBSCRIBERS_COUNT = 10
 @pytest.fixture
 def repository_index_mixin_instance():
     instance = RepositoryIndexMixin()
-    instance.commits_count = 100
+    instance.commits_count = COMMITS_COUNT
     instance.contributors_count = CONTRIBUTORS_COUNT
     instance.created_at = datetime(2020, 1, 1, tzinfo=UTC)
     instance.description = "Description"
@@ -28,7 +30,7 @@ def repository_index_mixin_instance():
     instance.open_issues_count = OPEN_ISSUES_COUNT
     instance.project = None
     instance.pushed_at = datetime(2021, 1, 1, tzinfo=UTC)
-    instance.size = 1024
+    instance.size = REPOSITORY_SIZE
     instance.stars_count = STARS_COUNT
     instance.subscribers_count = SUBSCRIBERS_COUNT
     instance.topics = ["Topic1", "Topic2"]
