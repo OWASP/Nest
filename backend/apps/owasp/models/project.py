@@ -384,7 +384,7 @@ class Project(
         )["created_at__max"]
 
     @property
-    def published_releases(self):
+    def published_releases(self) -> models.QuerySet[Release]:
         """Get published releases across the project's repositories.
 
         Returns:
@@ -402,7 +402,7 @@ class Project(
         )
 
     @property
-    def recent_milestones(self):
+    def recent_milestones(self) -> models.QuerySet[Milestone]:
         """Get milestones across the project's repositories.
 
         Returns:

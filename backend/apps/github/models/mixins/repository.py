@@ -200,7 +200,7 @@ class RepositoryIndexMixin:
         return RepositoryContributor.get_top_contributors(repository=self.key)
 
     @property
-    def idx_topics(self):
+    def idx_topics(self) -> list[str]:
         """Get the topics associated with this repository for indexing.
 
         Returns:

@@ -159,7 +159,7 @@ class UserIndexMixin:
         """Get the user's profile title or headline for indexing.
 
         Returns:
-            str: The title or headline associated with the user, if any.
+            str: The title or headline associated with the user.
 
         """
         return self.title
