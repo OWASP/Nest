@@ -231,7 +231,7 @@ class Project(
 
     @property
     def issues(self):
-        """Get all issues across the project's repositories.
+        """Get issues across the project's repositories.
 
         Returns:
             QuerySet[Issue]: A queryset of issues with related entities prefetched.
@@ -305,7 +305,7 @@ class Project(
 
     @property
     def open_issues(self):
-        """Get all open issues across the project's repositories.
+        """Get open issues across the project's repositories.
 
         Returns:
             QuerySet[Issue]: A queryset of open issues with repository related data.
@@ -339,7 +339,7 @@ class Project(
 
     @property
     def pull_requests(self):
-        """Get all pull requests across the project's repositories.
+        """Get pull requests across the project's repositories.
 
         Returns:
             QuerySet[PullRequest]: A queryset of pull requests with related data.
@@ -424,10 +424,10 @@ class Project(
 
     @property
     def recent_releases_count(self) -> int:
-        """Get the number of releases published in the last 60 days.
+        """Get the number of recent releases.
 
         Returns:
-            int: Count of releases published within the recent 60-day period.
+            int: Count of releases published recently.
 
         """
         recent_period = timezone.now() - datetime.timedelta(days=60)

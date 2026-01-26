@@ -16,9 +16,6 @@ class RepositoryIndexMixin:
     def is_indexable(self) -> bool:
         """Determine if the repository should be indexed.
 
-        Returns True if the repository is not archived, not empty, not a template,
-        and is associated with at least one project.
-
         Returns:
             bool: True if repository meets all indexing criteria, False otherwise.
 
@@ -55,7 +52,7 @@ class RepositoryIndexMixin:
         """Get the repository creation timestamp for indexing.
 
         Returns:
-            float: Unix timestamp (seconds since epoch) when the repository was created.
+            float: Unix timestamp when the repository was created.
 
         """
         return self.created_at.timestamp()
@@ -115,7 +112,7 @@ class RepositoryIndexMixin:
         """Get the repository's license identifier for indexing.
 
         Returns:
-            str: The SPDX license identifier or name, if available.
+            str: The license identifier.
 
         """
         return self.license
@@ -135,7 +132,7 @@ class RepositoryIndexMixin:
         """Get the total number of open issues in this repository for indexing.
 
         Returns:
-            int: The count of currently open issues and pull requests.
+            int: The count of currently open issues.
 
         """
         return self.open_issues_count
@@ -156,7 +153,7 @@ class RepositoryIndexMixin:
         """Get the timestamp of the last push to this repository for indexing.
 
         Returns:
-            float: Unix timestamp (seconds since epoch) of the most recent push.
+            float: Unix timestamp of the most recent push.
 
         """
         return self.pushed_at.timestamp()
@@ -173,23 +170,23 @@ class RepositoryIndexMixin:
 
     @property
     def idx_stars_count(self) -> int:
-        """Get the total number of stars (likes) this repository has received for indexing.
+        """Get the total number of stars this repository has received for indexing.
 
         Returns:
-            int: The total count of stars/favorites on the repository.
+            int: The total count of stars on the repository.
 
         """
         return self.stars_count
 
     @property
     def idx_subscribers_count(self) -> int:
-        """Get the total number of watchers/subscribers for this repository for indexing.
+        """Get the total number of subscribers for this repository for indexing.
 
         Returns:
             int: The count of users watching this repository.
 
         """
-        return self.stars_count
+        return self.subscribers_count
 
     @property
     def idx_top_contributors(self) -> list[dict[str, Any]]:
@@ -204,10 +201,10 @@ class RepositoryIndexMixin:
 
     @property
     def idx_topics(self):
-        """Get the topics/tags associated with this repository for indexing.
+        """Get the topics associated with this repository for indexing.
 
         Returns:
-            list: A list of topic tags that categorize this repository.
+            list: A list of topics that categorize this repository.
 
         """
         return self.topics
