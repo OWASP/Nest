@@ -16,6 +16,8 @@ import {
   FaCircleExclamation,
   FaSignsPost,
   FaCodeBranch,
+  FaChevronDown,
+  FaChevronUp,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
@@ -98,6 +100,8 @@ const DetailsCard = ({
   isActive = true,
   isArchived = false,
   languages,
+  onLoadMorePullRequests,
+  onResetPullRequests,
   programKey,
   projectName,
   pullRequests,
@@ -370,13 +374,46 @@ const DetailsCard = ({
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
         )}
+
         {type === 'module' && pullRequests && pullRequests.length > 0 && (
           <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
             <div className="grid grid-cols-1 gap-3">
-              {pullRequests.slice(0, showAllPRs ? undefined : 4).map((pr) => (
-                <MentorshipPullRequest key={pr.id} pr={pr} />
-              ))}
-              {pullRequests.length > 4 && (
+              {pullRequests
+                .slice(
+                  0,
+                  onLoadMorePullRequests || onResetPullRequests
+                    ? undefined
+                    : showAllPRs
+                      ? undefined
+                      : 4
+                )
+                .map((pr) => (
+                  <MentorshipPullRequest key={pr.id} pr={pr} />
+                ))}
+
+              {onLoadMorePullRequests && (
+                <div className="mt-4 flex justify-start gap-4">
+                  <button
+                    onClick={onLoadMorePullRequests}
+                    className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                  >
+                    Show more <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                  </button>
+                </div>
+              )}
+
+              {onResetPullRequests && !onLoadMorePullRequests && (
+                <div className="mt-4 flex justify-start gap-4">
+                  <button
+                    onClick={onResetPullRequests}
+                    className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                  >
+                    Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                  </button>
+                </div>
+              )}
+
+              {!onLoadMorePullRequests && !onResetPullRequests && pullRequests.length > 4 && (
                 <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
               )}
             </div>

@@ -24,7 +24,11 @@ class IssueNode(strawberry.relay.Node):
 
     assignees: list[UserNode] = strawberry_django.field()
     author: UserNode | None = strawberry_django.field()
-    pull_requests: list[PullRequestNode] = strawberry_django.field()
+
+    @strawberry.field
+    def pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
+        """Return pull requests linked to this issue."""
+        return list(self.pull_requests.all().order_by("-created_at")[offset : offset + limit])
 
     @strawberry_django.field(select_related=["repository__organization", "repository"])
     def organization_name(self, root: Issue) -> str | None:

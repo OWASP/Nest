@@ -161,14 +161,14 @@ class ModuleNode:
         )
 
     @strawberry.field
-    def recent_pull_requests(self, limit: int = 5) -> list[PullRequestNode]:
+    def recent_pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
         """Return recent pull requests linked to issues in this module."""
         issue_ids = self.issues.values_list("id", flat=True)
         return list(
             PullRequest.objects.filter(related_issues__id__in=issue_ids)
             .select_related("author")
             .distinct()
-            .order_by("-created_at")[:limit]
+            .order_by("-created_at")[offset : offset + limit]
         )
 
 
