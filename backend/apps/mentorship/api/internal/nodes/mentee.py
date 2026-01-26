@@ -34,10 +34,3 @@ class MenteeNode(strawberry.relay.Node):
     def name(self, root: Mentee) -> str:
         """Resolve name."""
         return root.github_user.name or root.github_user.login
-
-    # Explicitly map camelCase to snake_case resolvers if needed,
-    # but strawberry auto-converts field names to camelCase in schema.
-    # The previous implementation had @strawberry.field(name="avatarUrl")
-    # strawberry default is camelCase so `avatar_url` -> `avatarUrl`.
-    # Previous implementation: `resolve_avatar_url` decorated with name="avatarUrl".
-    # My new implementation: `avatar_url` field. Strawberry will make it `avatarUrl`.

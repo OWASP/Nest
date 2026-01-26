@@ -57,7 +57,6 @@ class MentorshipQuery:
         try:
             module = Module.objects.only("id").get(key=module_key, program__key=program_key)
 
-            # Optimized query to fetch mentee and related github_user in one go
             mentee = (
                 Mentee.objects.select_related("github_user")
                 .only(
