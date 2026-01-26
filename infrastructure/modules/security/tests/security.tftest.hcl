@@ -425,3 +425,88 @@ run "test_redis_from_lambda_rule_type" {
     error_message = "Redis ingress from Lambda must be of type ingress."
   }
 }
+
+
+run "test_ecs_to_vpc_endpoints_rule_port" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.ecs_to_vpc_endpoints[0].from_port == 443
+    error_message = "ECS to VPC endpoints rule must use port 443."
+  }
+  assert {
+    condition     = aws_security_group_rule.ecs_to_vpc_endpoints[0].to_port == 443
+    error_message = "ECS to VPC endpoints rule must use port 443."
+  }
+}
+
+run "test_ecs_to_vpc_endpoints_rule_type" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.ecs_to_vpc_endpoints[0].type == "egress"
+    error_message = "ECS to VPC endpoints rule must be of type egress."
+  }
+}
+
+run "test_frontend_to_vpc_endpoints_rule_port" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.frontend_to_vpc_endpoints[0].from_port == 443
+    error_message = "Frontend to VPC endpoints rule must use port 443."
+  }
+  assert {
+    condition     = aws_security_group_rule.frontend_to_vpc_endpoints[0].to_port == 443
+    error_message = "Frontend to VPC endpoints rule must use port 443."
+  }
+}
+
+run "test_frontend_to_vpc_endpoints_rule_type" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.frontend_to_vpc_endpoints[0].type == "egress"
+    error_message = "Frontend to VPC endpoints rule must be of type egress."
+  }
+}
+
+run "test_lambda_to_vpc_endpoints_rule_port" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.lambda_to_vpc_endpoints[0].from_port == 443
+    error_message = "Lambda to VPC endpoints rule must use port 443."
+  }
+  assert {
+    condition     = aws_security_group_rule.lambda_to_vpc_endpoints[0].to_port == 443
+    error_message = "Lambda to VPC endpoints rule must use port 443."
+  }
+}
+
+run "test_lambda_to_vpc_endpoints_rule_type" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.lambda_to_vpc_endpoints[0].type == "egress"
+    error_message = "Lambda to VPC endpoints rule must be of type egress."
+  }
+}
