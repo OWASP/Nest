@@ -11,10 +11,18 @@ from apps.github.models import Label
 from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
+from apps.mentorship.api.internal.nodes.export_types import ExportFormatEnum, ExportResult
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
+from apps.mentorship.utils.export import (
+    MAX_EXPORT_LIMIT,
+    ExportFormat,
+    generate_export_filename,
+    serialize_issues_to_csv,
+    serialize_issues_to_json,
+)
 
 
 @strawberry.type
@@ -169,6 +177,55 @@ class ModuleNode:
             .select_related("author")
             .distinct()
             .order_by("-created_at")[:limit]
+        )
+
+    @strawberry.field
+    def export_issues(
+        self,
+        format: ExportFormatEnum,
+        label: str | None = None,
+        limit: int = MAX_EXPORT_LIMIT,
+    ) -> ExportResult:
+        """Export issues in CSV or JSON format.
+
+        Args:
+            format: Export format (CSV or JSON).
+            label: Optional label filter.
+            limit: Maximum number of issues to export (default: 1000).
+
+        Returns:
+            ExportResult with content, filename, and MIME type.
+        """
+        # Enforce maximum limit
+        effective_limit = min(limit, MAX_EXPORT_LIMIT)
+
+        # Reuse existing issue query logic
+        queryset = self.issues.select_related("repository", "author").prefetch_related(
+            "assignees", "labels"
+        )
+
+        if label and label != "all":
+            queryset = queryset.filter(labels__name=label)
+
+        issues = list(queryset.order_by("-updated_at")[:effective_limit])
+
+        # Serialize based on format
+        if format == ExportFormatEnum.CSV:
+            content = serialize_issues_to_csv(issues)
+            mime_type = "text/csv; charset=utf-8"
+            export_format = ExportFormat.CSV
+        else:
+            content = serialize_issues_to_json(issues, self.key)
+            mime_type = "application/json; charset=utf-8"
+            export_format = ExportFormat.JSON
+
+        filename = generate_export_filename(self.key, export_format)
+
+        return ExportResult(
+            content=content,
+            filename=filename,
+            mime_type=mime_type,
+            count=len(issues),
         )
 
 

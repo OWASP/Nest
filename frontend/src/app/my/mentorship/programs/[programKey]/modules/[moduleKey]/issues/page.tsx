@@ -1,14 +1,22 @@
 'use client'
 
-import { useQuery } from '@apollo/client/react'
+import { useLazyQuery, useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
+import { addToast } from '@heroui/toast'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
+import ExportButton, { type ExportFormat } from 'components/ExportButton'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
+import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
+import {
+  buildExportQuery,
+  downloadFile,
+  getExportErrorMessage,
+  parseExportResponse,
+} from 'utils/exportUtils'
 
 const ITEMS_PER_PAGE = 20
 const LABEL_ALL = 'all'
@@ -59,9 +67,9 @@ const IssuesPage = () => {
     }
 
     const labels = new Set<string>()
-    ;(moduleData?.issues || []).forEach((i) =>
-      (i.labels || []).forEach((l: string) => labels.add(l))
-    )
+      ; (moduleData?.issues || []).forEach((i) =>
+        (i.labels || []).forEach((l: string) => labels.add(l))
+      )
     return Array.from(labels).sort((a, b) => a.localeCompare(b))
   }, [moduleData])
 
@@ -88,6 +96,59 @@ const IssuesPage = () => {
       )
     },
     [router, programKey, moduleKey]
+  )
+
+  const handleExport = useCallback(
+    async (format: ExportFormat) => {
+      try {
+        const query = buildExportQuery({
+          programKey,
+          moduleKey,
+          format,
+          label: selectedLabel !== LABEL_ALL ? selectedLabel : null,
+        })
+
+        const response = await fetch('/api/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ query }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Export request failed')
+        }
+
+        const result = await response.json()
+
+        if (result.errors?.length) {
+          throw new Error(result.errors[0]?.message || 'Export failed')
+        }
+
+        const exportResult = parseExportResponse(result.data)
+
+        if (!exportResult) {
+          throw new Error('Invalid export response')
+        }
+
+        downloadFile(exportResult.content, exportResult.filename, exportResult.mimeType)
+
+        addToast({
+          title: 'Export Complete',
+          description: `Successfully exported ${exportResult.count} issues as ${format}`,
+          color: 'success',
+        })
+      } catch (error) {
+        const message = getExportErrorMessage(error)
+        addToast({
+          title: 'Export Failed',
+          description: message,
+          color: 'danger',
+        })
+        console.error('Export failed:', error)
+      }
+    },
+    [programKey, moduleKey, selectedLabel]
   )
 
   if (loading) return <LoadingSpinner />
@@ -129,23 +190,27 @@ const IssuesPage = () => {
               ))}
             </Select>
           </div>
+          <ExportButton
+            onExport={handleExport}
+            isDisabled={loading || moduleIssues.length === 0}
+            className="ml-3"
+          />
         </div>
-
-        <IssuesTable
-          issues={moduleIssues}
-          showAssignee={true}
-          onIssueClick={handleIssueClick}
-          emptyMessage="No issues found for the selected filter."
-        />
-
-        {/* Pagination Controls */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          isLoaded={!loading}
-        />
       </div>
+
+      <IssuesTable
+        issues={moduleIssues}
+        showAssignee={true}
+        onIssueClick={handleIssueClick}
+        emptyMessage="No issues found for the selected filter."
+      />
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        isLoaded={!loading}
+      />
     </div>
   )
 }

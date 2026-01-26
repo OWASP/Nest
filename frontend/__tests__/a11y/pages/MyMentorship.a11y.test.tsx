@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client/react'
+import { waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { render } from 'wrappers/testUtil'
 import MyMentorshipPage from 'app/my/mentorship/page'
@@ -33,14 +34,17 @@ jest.mock('hooks/useUpdateProgramStatus', () => ({
 
 describe('MyMentorshipPage', () => {
   it('should have no accessibility violations', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProgramData,
       loading: false,
       error: null,
     })
 
     const { container } = render(<MyMentorshipPage />)
-    const results = await axe(container)
-    expect(results).toHaveNoViolations()
+
+    await waitFor(async () => {
+      const results = await axe(container)
+      expect(results).toHaveNoViolations()
+    })
   })
 })
