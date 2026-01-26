@@ -9,12 +9,16 @@ import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { UpdateProgramDocument } from 'types/__generated__/programsMutations.generated'
-import { GetProgramDetailsDocument } from 'types/__generated__/programsQueries.generated'
+import {
+  GetMyProgramsDocument,
+  GetProgramDetailsDocument,
+} from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
+
 const EditProgramPage = () => {
   const router = useRouter()
   const { programKey } = useParams<{ programKey: string }>()
@@ -104,7 +108,11 @@ const EditProgramPage = () => {
         status: formData.status,
       }
 
-      const result = await updateProgram({ variables: { input } })
+      const result = await updateProgram({
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetMyProgramsDocument }],
+        variables: { input },
+      })
       const updatedProgramKey = result.data?.updateProgram?.key || programKey
 
       addToast({

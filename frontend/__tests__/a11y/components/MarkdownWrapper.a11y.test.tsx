@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import MarkdownWrapper from 'components/MarkdownWrapper'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('markdown-it', () => {
   return jest.fn().mockImplementation(() => ({

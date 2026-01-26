@@ -19,6 +19,7 @@ Héllo
 Kateryna
 NETTACKER
 NOASSERTION
+NOSEMGREP
 NOSONAR
 Nadu
 Nominatim
@@ -55,6 +56,7 @@ askowasp
 attisdropped
 bangbang
 bsky
+carryforward
 certbot
 collectstatic
 coraza
@@ -141,6 +143,7 @@ pygoat
 pymdownx
 pypoetry
 pyyaml
+quasis
 rediss
 relativedelta
 repositorycontributor
@@ -151,6 +154,7 @@ saft
 sakanashi
 samm
 schemathesis
+semgrep
 seo
 skillstruck
 slackbot
