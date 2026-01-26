@@ -42,7 +42,8 @@ def generate_ai_reply_if_unanswered(message_id: int):
         logger.exception("Error checking for replies for message")
 
     channel_id = message.conversation.slack_channel_id
-    ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)
+    query_text = message.text_with_images if message.text_with_images else message.text
+    ai_response_text = process_ai_query(query=query_text, channel_id=channel_id)
     if not ai_response_text:
         # Add shrugging reaction when no answer can be generated
         try:
