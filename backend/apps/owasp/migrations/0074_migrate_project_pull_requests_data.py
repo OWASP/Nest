@@ -3,23 +3,25 @@
 from django.db import migrations
 
 
-def migrate_project_pull_requests(apps, schema_editor):
+def migrate_project_pull_requests(apps, _schema_editor):
+    """Backfill project.pull_requests M2M field.
+
+    Copies existing pull requests from related repositories
+    into the new Project.pull_requests relationship.
+    """
     Project = apps.get_model("owasp", "Project")
     PullRequest = apps.get_model("github", "PullRequest")
 
     for project in Project.objects.all().iterator():
         repositories = project.repositories.all()
 
-        prs = PullRequest.objects.filter(
-            repository__in=repositories
-        )
+        prs = PullRequest.objects.filter(repository__in=repositories)
 
         if prs.exists():
             project.pull_requests.add(*prs)
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("owasp", "0073_project_pull_requests_m2m"),
     ]

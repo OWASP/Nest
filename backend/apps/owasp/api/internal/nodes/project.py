@@ -103,9 +103,12 @@ class ProjectNode(GenericEntityNode):
             else []
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["pull_requests"])
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
-        """Resolve recent pull requests."""
+        """Resolve recent pull requests for the project.
+
+        Uses the preloaded M2M relationship to avoid N+1 queries.
+        """
         return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
 
     @strawberry_django.field

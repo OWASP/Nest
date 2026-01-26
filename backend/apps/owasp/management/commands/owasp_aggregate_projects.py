@@ -18,7 +18,11 @@ class Command(BaseCommand):
         parser.add_argument("--offset", default=0, required=False, type=int)
 
     def handle(self, *_args, **options) -> None:
-        """Handle the command execution."""
+        """Aggregate and update OWASP project data.
+
+        This command recalculates project statistics, syncs related entities,
+        and populates the pull_requests M2M field to avoid N+1 queries.
+        """
         active_projects = Project.active_projects.order_by("-created_at")
         active_projects_count = active_projects.count()
 

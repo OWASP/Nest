@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("github", "0041_milestone_github_milestone_created_at_and_more"),
         ("owasp", "0072_project_project_name_gin_idx_and_more"),
