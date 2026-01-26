@@ -24,7 +24,7 @@ services:
       DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
       DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
-      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_HOST:-nest-cache-password}
+      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
     networks:
       - nest-network
     ports:

@@ -5,8 +5,10 @@ from datetime import datetime
 import strawberry
 
 from apps.github.api.internal.nodes.issue import IssueNode
+from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models import Label
+from apps.github.models.pull_request import PullRequest
 from apps.github.models.user import User
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
@@ -156,6 +158,17 @@ class ModuleNode:
             .order_by("-assigned_at")
             .values_list("assigned_at", flat=True)
             .first()
+        )
+
+    @strawberry.field
+    def recent_pull_requests(self, limit: int = 5) -> list[PullRequestNode]:
+        """Return recent pull requests linked to issues in this module."""
+        issue_ids = self.issues.values_list("id", flat=True)
+        return list(
+            PullRequest.objects.filter(related_issues__id__in=issue_ids)
+            .select_related("author")
+            .distinct()
+            .order_by("-created_at")[:limit]
         )
 
 

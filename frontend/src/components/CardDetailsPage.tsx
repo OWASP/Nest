@@ -15,6 +15,7 @@ import {
   FaCircleCheck,
   FaCircleExclamation,
   FaSignsPost,
+  FaCodeBranch,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
@@ -35,6 +36,7 @@ import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import Markdown from 'components/MarkdownWrapper'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
@@ -114,6 +116,7 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
+  const [showAllPRs, setShowAllPRs] = useState(false)
   const [showAllMilestones, setShowAllMilestones] = useState(false)
 
   // compute styles based on type prop
@@ -367,6 +370,18 @@ const DetailsCard = ({
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
         )}
+        {type === 'module' && pullRequests && pullRequests.length > 0 && (
+          <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
+            <div className="grid grid-cols-1 gap-3">
+              {pullRequests.slice(0, showAllPRs ? undefined : 4).map((pr) => (
+                <MentorshipPullRequest key={pr.id} pr={pr} />
+              ))}
+              {pullRequests.length > 4 && (
+                <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
+              )}
+            </div>
+          </SecondaryCard>
+        )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
@@ -376,7 +391,9 @@ const DetailsCard = ({
         {type === 'program' && modules.length > 0 && (
           <>
             {modules.length === 1 ? (
-              <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              <div className="mb-8">
+                <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              </div>
             ) : (
               <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
                 <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
