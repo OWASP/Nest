@@ -56,14 +56,14 @@ class Command(BaseCommand):
             project.issues.clear()
 
             issues = Issue.objects.filter(repository__in=project.repositories.all())
-            active_issues_past_90_days_count = Issue.open_issues.filter(
+            active_issues = Issue.open_issues.filter(
                 repository__in=project.repositories.all(),
             ).count()
             project.issues.set(issues)
             project.issues_count = issues.count()
             project.unanswered_issues_count = issues.filter(comments_count=0).count()
             project.unassigned_issues_count = issues.filter(assignees__isnull=True).count()
-            project.active_issues_count = active_issues_past_90_days_count
+            project.active_issues_count = active_issues
 
             for repository in project.repositories.filter(
                 is_empty=False,
