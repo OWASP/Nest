@@ -106,7 +106,19 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field(prefetch_related=["pull_requests"])
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
-        return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
+        return (
+            root.pull_requests.select_related(
+                "author",
+                "milestone",
+                "repository__organization",
+                "repository",
+            )
+            .prefetch_related(
+                "assignees",
+                "labels",
+            )
+            .order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
+        )
 
     @strawberry_django.field
     def recent_releases(self, root: Project) -> list[ReleaseNode]:
