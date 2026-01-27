@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import { toHaveNoViolations } from 'jest-axe'
 import React from 'react'
 
 globalThis.React = React
@@ -157,3 +158,5 @@ jest.mock('ics', () => {
     createEvent: jest.fn(),
   }
 })
+
+expect.extend(toHaveNoViolations)
