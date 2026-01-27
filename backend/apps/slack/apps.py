@@ -21,16 +21,25 @@ class SlackConfig(AppConfig):
             signing_secret=settings.SLACK_SIGNING_SECRET,
             token=settings.SLACK_BOT_TOKEN,
         )
-        if settings.SLACK_BOT_TOKEN != "None" and settings.SLACK_SIGNING_SECRET != "None"  # noqa: S105
+        if (
+            not getattr(settings, "IS_TEST_ENVIRONMENT", False)
+            and settings.SLACK_BOT_TOKEN != "None"
+            and settings.SLACK_SIGNING_SECRET != "None"
+        )
         else None
     )
 
     def ready(self):
         """Configure Slack events when the app is ready."""
         super().ready()
-        from apps.slack.events import configure_slack_events
 
+        # ✅ Skip Slack setup entirely during tests
+        if getattr(settings, "IS_TEST_ENVIRONMENT", False):
+            return
+
+        from apps.slack.events import configure_slack_events
         configure_slack_events()
+
 
 
 if SlackConfig.app:
