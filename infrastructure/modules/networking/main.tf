@@ -73,6 +73,7 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_cloudwatch_log_group" "flow_logs" {
+  kms_key_id        = var.kms_key_arn
   name              = "/aws/vpc-flow-logs/${var.project_name}-${var.environment}"
   retention_in_days = var.log_retention_in_days
   tags              = var.common_tags

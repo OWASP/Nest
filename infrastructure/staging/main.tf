@@ -39,6 +39,7 @@ module "cache" {
 
   common_tags           = local.common_tags
   environment           = var.environment
+  kms_key_arn           = module.kms.key_arn
   project_name          = var.project_name
   redis_engine_version  = var.redis_engine_version
   redis_node_type       = var.redis_node_type
@@ -65,6 +66,7 @@ module "database" {
   db_subnet_ids                  = module.networking.private_subnet_ids
   db_user                        = var.db_user
   environment                    = var.environment
+  kms_key_arn                    = module.kms.key_arn
   project_name                   = var.project_name
   proxy_security_group_ids       = [module.security.rds_proxy_sg_id]
   secret_recovery_window_in_days = var.secret_recovery_window_in_days
@@ -82,6 +84,7 @@ module "ecs" {
   environment                   = var.environment
   fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
+  kms_key_arn                   = module.kms.key_arn
   project_name                  = var.project_name
   subnet_ids                    = var.ecs_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
   use_fargate_spot              = var.ecs_use_fargate_spot
@@ -97,12 +100,21 @@ module "frontend" {
   environment              = var.environment
   frontend_parameters_arns = module.parameters.frontend_ssm_parameter_arns
   frontend_sg_id           = module.security.frontend_sg_id
+  kms_key_arn              = module.kms.key_arn
   max_count                = var.frontend_max_count
   min_count                = var.frontend_min_count
   private_subnet_ids       = module.networking.private_subnet_ids
   project_name             = var.project_name
   target_group_arn         = module.alb.frontend_target_group_arn
   use_fargate_spot         = var.frontend_use_fargate_spot
+}
+
+module "kms" {
+  source = "../modules/kms"
+
+  common_tags  = local.common_tags
+  environment  = var.environment
+  project_name = var.project_name
 }
 
 module "networking" {
@@ -118,6 +130,7 @@ module "networking" {
   create_vpc_secretsmanager_endpoint  = var.create_vpc_secretsmanager_endpoint
   create_vpc_ssm_endpoint             = var.create_vpc_ssm_endpoint
   environment                         = var.environment
+  kms_key_arn                         = module.kms.key_arn
   private_subnet_cidrs                = var.private_subnet_cidrs
   project_name                        = var.project_name
   public_subnet_cidrs                 = var.public_subnet_cidrs

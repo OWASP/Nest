@@ -62,6 +62,7 @@ resource "aws_db_instance" "main" {
 
 resource "aws_secretsmanager_secret" "db_credentials" {
   description             = "Stores the credentials for the RDS database"
+  kms_key_id              = var.kms_key_arn
   name                    = "${var.project_name}-${var.environment}-db-credentials"
   recovery_window_in_days = var.secret_recovery_window_in_days
   tags = merge(var.common_tags, {

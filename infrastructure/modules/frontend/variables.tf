@@ -54,6 +54,11 @@ variable "image_tag" {
   default     = "latest"
 }
 
+variable "kms_key_arn" {
+  description = "The ARN of the KMS key."
+  type        = string
+}
+
 variable "log_retention_in_days" {
   description = "The CloudWatch log retention in days."
   type        = number

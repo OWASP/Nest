@@ -234,6 +234,7 @@ module "sync_data_task" {
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
   memory                       = var.sync_data_task_memory
   project_name                 = var.project_name
   schedule_expression          = "cron(17 05 * * ? *)"
@@ -265,6 +266,7 @@ module "owasp_update_project_health_metrics_task" {
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_metrics_task_memory
   project_name                 = var.project_name
   schedule_expression          = "cron(17 17 * * ? *)"
@@ -288,6 +290,7 @@ module "owasp_update_project_health_scores_task" {
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_scores_task_memory
   project_name                 = var.project_name
   schedule_expression          = "cron(22 17 * * ? *)"
@@ -310,6 +313,7 @@ module "migrate_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
   memory                       = var.migrate_task_memory
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
@@ -343,6 +347,7 @@ module "load_data_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
   memory                       = var.load_data_task_memory
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]
@@ -365,6 +370,7 @@ module "index_data_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
   memory                       = var.index_data_task_memory
   project_name                 = var.project_name
   security_group_ids           = [var.ecs_sg_id]

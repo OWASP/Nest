@@ -58,6 +58,14 @@ data "aws_iam_policy_document" "state_https_only" {
   }
 }
 
+module "kms" {
+  source = "../modules/kms"
+
+  common_tags  = local.common_tags
+  environment  = "backend"
+  project_name = var.project_name
+}
+
 resource "random_id" "suffix" {
   byte_length = 4
 }
@@ -79,6 +87,10 @@ resource "aws_dynamodb_table" "state_lock" {
   }
   point_in_time_recovery {
     enabled = true
+  }
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = module.kms.key_arn
   }
 }
 
