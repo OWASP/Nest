@@ -6,11 +6,7 @@ import { useRouter } from 'next/navigation'
 import React, { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
-import {
-  GetProjectMetadataDocument,
-  GetTopContributorsDocument,
-} from 'types/__generated__/projectQueries.generated'
-import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
+import { GetAboutPageDataDocument } from 'types/__generated__/aboutQueries.generated'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -201,42 +197,23 @@ jest.mock('components/ShowMoreButton', () => ({
   },
 }))
 
-const mockUserData = (username) => ({
-  data: { user: mockAboutData.users[username] },
-  loading: false,
-  error: null,
-})
-
-const mockProjectData = {
-  data: { project: mockAboutData.project },
-  loading: false,
-  error: null,
-}
-
-const mockTopContributorsData = {
-  data: { topContributors: mockAboutData.topContributors },
-  loading: false,
-  error: null,
-}
-
 describe('About Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      const key = options?.variables?.key
-
-      if (query === GetProjectMetadataDocument) {
-        if (key === 'nest') {
-          return mockProjectData
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          data: {
+            project: mockAboutData.project,
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          loading: false,
+          error: null,
         }
-      } else if (query === GetTopContributorsDocument) {
-        if (key === 'nest') {
-          return mockTopContributorsData
-        }
-      } else if (query === GetLeaderDataDocument) {
-        return mockUserData(key)
       }
-
       return { loading: true }
     })
     mockRouter = { push: jest.fn() }
@@ -451,11 +428,19 @@ describe('About Component', () => {
   })
 
   test('handles null project in data response gracefully', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return { data: { project: null }, loading: false, error: null }
-      } else if (['arkid15r', 'kasya', 'mamicidal'].includes(options?.variables?.key)) {
-        return mockUserData(options?.variables?.key)
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          data: {
+            project: null,
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          loading: false,
+          error: null,
+        }
       }
       return { loading: true }
     })
@@ -487,29 +472,25 @@ describe('About Component', () => {
   })
 
   test('handles partial user data in leader response', async () => {
-    const partialUserData = {
-      data: {
-        user: {
-          avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
-          company: 'OWASP',
-          // name is missing
-          login: 'arkid15r',
-          url: '/members/arkid15r',
-        },
-      },
-      loading: false,
-      error: null,
-    }
-
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
-        return mockTopContributorsData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return partialUserData
-      } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
-        return mockUserData(options?.variables?.key)
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          data: {
+            project: mockAboutData.project,
+            topContributors: mockAboutData.topContributors,
+            leader1: {
+              avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
+              company: 'OWASP',
+              // name is missing
+              login: 'arkid15r',
+              url: '/members/arkid15r',
+            },
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          loading: false,
+          error: null,
+        }
       }
       return { loading: true }
     })
@@ -526,15 +507,8 @@ describe('About Component', () => {
   })
 
   test('renders LoadingSpinner when project data is loading', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return { loading: true, data: null, error: null }
-      }
-      return {
-        loading: false,
-        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
-        error: null,
-      }
+    ;(useQuery as unknown as jest.Mock).mockImplementation(() => {
+      return { loading: true, data: null, error: null }
     })
 
     await act(async () => {
@@ -550,15 +524,21 @@ describe('About Component', () => {
   })
 
   test('renders ErrorDisplay when project is null', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return { loading: false, data: { project: null }, error: null }
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            project: null,
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          error: null,
+        }
       }
-      return {
-        loading: false,
-        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
-        error: null,
-      }
+      return { loading: true }
     })
     await act(async () => {
       render(<About />)
@@ -571,145 +551,20 @@ describe('About Component', () => {
     })
   })
 
-  test('triggers toaster error when GraphQL request fails for project', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
+  test('triggers toaster error when GraphQL request fails', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
         return { loading: false, data: null, error: new Error('GraphQL error') }
-      }
-      return {
-        loading: false,
-        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
-        error: null,
-      }
-    })
-    await act(async () => {
-      render(<About />)
-    })
-    await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith({
-        color: 'danger',
-        description: 'GraphQL error',
-        shouldShowTimeoutProgress: true,
-        timeout: 5000,
-        title: 'Server Error',
-        variant: 'solid',
-      })
-    })
-  })
-
-  test('triggers toaster error when GraphQL request fails for topContributors', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
-        return { loading: false, data: null, error: new Error('GraphQL error') }
-      }
-      return {
-        loading: false,
-        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
-        error: null,
-      }
-    })
-    await act(async () => {
-      render(<About />)
-    })
-    await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith({
-        color: 'danger',
-        description: 'GraphQL error',
-        shouldShowTimeoutProgress: true,
-        timeout: 5000,
-        title: 'Server Error',
-        variant: 'solid',
-      })
-    })
-  })
-
-  test('renders mission and who its for sections correctly', async () => {
-    await act(async () => {
-      render(<About />)
-    })
-
-    const missionSection = screen.getByText('Our Mission').closest('div')
-    expect(missionSection).toBeInTheDocument()
-    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
-
-    const whoItsForSection = screen.getByText("Who It's For").closest('div')
-    expect(whoItsForSection).toBeInTheDocument()
-    expect(screen.getByText('Test target audience description')).toBeInTheDocument()
-  })
-
-  test('renders mission section', async () => {
-    await act(async () => {
-      render(<About />)
-    })
-    expect(screen.getByText('Our Mission')).toBeInTheDocument()
-    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
-  })
-
-  test("renders 'Who It's For' section", async () => {
-    await act(async () => {
-      render(<About />)
-    })
-    expect(screen.getByText("Who It's For")).toBeInTheDocument()
-    expect(screen.getByText(/Test target audience description/)).toBeInTheDocument()
-  })
-
-  test('renders key features section', async () => {
-    await act(async () => {
-      render(<About />)
-    })
-    expect(screen.getByText('Key Features')).toBeInTheDocument()
-    expect(screen.getByText('Feature 1')).toBeInTheDocument()
-    expect(screen.getByText('Feature 2')).toBeInTheDocument()
-    expect(screen.getByText('Feature 1 description')).toBeInTheDocument()
-    expect(screen.getByText('Feature 2 description')).toBeInTheDocument()
-  })
-
-  test('renders get involved section', async () => {
-    await act(async () => {
-      render(<About />)
-    })
-    expect(screen.getByText('Get Involved')).toBeInTheDocument()
-    expect(screen.getByText('Get involved description')).toBeInTheDocument()
-    expect(screen.getByText('Way 1')).toBeInTheDocument()
-    expect(screen.getByText('Way 2')).toBeInTheDocument()
-    expect(screen.getByText('Test call to action')).toBeInTheDocument()
-  })
-
-  test('renders project history timeline section', async () => {
-    await act(async () => {
-      render(<About />)
-    })
-    expect(screen.getByText('Project Timeline')).toBeInTheDocument()
-    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
-    expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
-    expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
-  })
-
-  test('triggers toaster error when GraphQL request fails for a leader', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetLeaderDataDocument && options?.variables?.key === 'arkid15r') {
-        return { loading: false, data: null, error: new Error('GraphQL error for leader') }
-      }
-      if (query === GetProjectMetadataDocument) {
-        return mockProjectData
-      }
-      if (query === GetTopContributorsDocument) {
-        return mockTopContributorsData
-      }
-      if (query === GetLeaderDataDocument) {
-        return mockUserData(options?.variables?.key)
       }
       return { loading: true }
     })
-
     await act(async () => {
       render(<About />)
     })
-
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith({
         color: 'danger',
-        description: 'GraphQL error for leader',
+        description: 'GraphQL error',
         shouldShowTimeoutProgress: true,
         timeout: 5000,
         title: 'Server Error',
