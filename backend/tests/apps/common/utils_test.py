@@ -195,6 +195,8 @@ class TestUtils:
             ("http:// ", False),  # Only space
             ("http://-", False),  # Only hyphen
             ("https://...", False),  # Only dots
+            ("http://:80", False),  # Port only
+            ("http://user@-", False),  # Userinfo with invalid host
         ],
     )
     def test_validate_url(self, url, expected):

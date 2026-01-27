@@ -235,6 +235,6 @@ def validate_url(url: str | None) -> bool:
 
     return (
         parsed.scheme in {"http", "https"}
-        and bool(parsed.netloc)
-        and any(c.isalnum() for c in parsed.netloc)
+        and bool(parsed.hostname)
+        and any(c.isalnum() for c in parsed.hostname)
     )
