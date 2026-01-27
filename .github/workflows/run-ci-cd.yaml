@@ -135,7 +135,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Run Semgrep security scan
-        run: make security-scan-semgrep
+        run: make security-scan-code-semgrep
 
       - name: Upload Semgrep report
         if: always()
