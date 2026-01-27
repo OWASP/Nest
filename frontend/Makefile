@@ -87,11 +87,11 @@ test-frontend-a11y:
 
 test-frontend-e2e: init-e2e-db
 	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend e2e-tests
+	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend frontend e2e-tests
 
 test-frontend-e2e-ui: init-e2e-db
 	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="npx playwright test --ui-host=0.0.0.0 --ui-port=3800" \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend e2e-tests
+	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend frontend e2e-tests
 
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
