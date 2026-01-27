@@ -169,7 +169,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                         height={18}
                         width={18}
                         src={issue.assignees[0].avatarUrl}
-                        alt={issue.assignees[0].login}
+                        alt=""
                         className="rounded-full lg:h-6 lg:w-6"
                       />
                       <span className="max-w-[80px] truncate sm:max-w-[100px] md:max-w-[120px] lg:max-w-[150px]">

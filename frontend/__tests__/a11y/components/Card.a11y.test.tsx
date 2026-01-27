@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import { ReactNode } from 'react'
 import { FaCrown } from 'react-icons/fa6'
 import Card from 'components/Card'
@@ -39,8 +39,6 @@ const baseProps = {
     onclick: jest.fn(),
   },
 }
-
-expect.extend(toHaveNoViolations)
 
 describe('Card Accessibility', () => {
   it('should not have any accessibility violations with minimal props', async () => {
