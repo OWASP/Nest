@@ -39,6 +39,7 @@ const EditModulePage = () => {
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
+      // Wait for session + module/program query before deciding access
       return
     }
 
@@ -86,7 +87,9 @@ const EditModulePage = () => {
         tags: (m.tags || []).join(', '),
         labels: (m.labels || []).join(', '),
         projectId: m.projectId || '',
-        mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
+        mentorLogins: (m.mentors || [])
+          .map((mentor: { login: string }) => mentor.login)
+          .join(', '),
       })
     }
   }, [accessStatus, data])
@@ -132,7 +135,18 @@ const EditModulePage = () => {
     }
   }
 
-  if (accessStatus === 'checking' || !formData) {
+  // Single page-level loading state for the Module Edit page:
+  // - session loading
+  // - module/program query loading
+  // - access checks in progress
+  // - form not initialized yet
+  const isPageLoading =
+    sessionStatus === 'loading' ||
+    queryLoading ||
+    accessStatus === 'checking' ||
+    formData === null
+
+  if (isPageLoading) {
     return <LoadingSpinner />
   }
 

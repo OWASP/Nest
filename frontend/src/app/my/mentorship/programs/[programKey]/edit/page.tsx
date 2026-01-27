@@ -23,7 +23,9 @@ const EditProgramPage = () => {
   const router = useRouter()
   const { programKey } = useParams<{ programKey: string }>()
   const { data: session, status: sessionStatus } = useSession()
+
   const [updateProgram, { loading: mutationLoading }] = useMutation(UpdateProgramDocument)
+
   const {
     data,
     error,
@@ -33,6 +35,7 @@ const EditProgramPage = () => {
     skip: !programKey,
     fetchPolicy: 'network-only',
   })
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -44,18 +47,24 @@ const EditProgramPage = () => {
     adminLogins: '',
     status: ProgramStatusEnum.Draft,
   })
-  const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+
+  const [accessStatus, setAccessStatus] =
+    useState<'checking' | 'allowed' | 'denied'>('checking')
+
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
+      // wait until session + program query are resolved
       return
     }
+
     if (!data?.getProgram || sessionStatus === 'unauthenticated') {
       setAccessStatus('denied')
       return
     }
 
     const isAdmin = data.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === (session as ExtendedSession)?.user?.login
+      (admin: { login: string }) =>
+        admin.login === (session as ExtendedSession)?.user?.login,
     )
 
     if (isAdmin) {
@@ -72,6 +81,7 @@ const EditProgramPage = () => {
       setTimeout(() => router.replace('/my/mentorship/programs'), 1500)
     }
   }, [sessionStatus, session, data, queryLoading, router])
+
   useEffect(() => {
     if (accessStatus === 'allowed' && data?.getProgram) {
       const { getProgram: program } = data
@@ -92,6 +102,7 @@ const EditProgramPage = () => {
       handleAppError(error)
     }
   }, [accessStatus, data, error])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -113,6 +124,7 @@ const EditProgramPage = () => {
         refetchQueries: [{ query: GetMyProgramsDocument }],
         variables: { input },
       })
+
       const updatedProgramKey = result.data?.updateProgram?.key || programKey
 
       addToast({
@@ -135,9 +147,20 @@ const EditProgramPage = () => {
       handleAppError(err)
     }
   }
-  if (accessStatus === 'checking') {
+
+  // Single page-level loading state for this page:
+  // - session loading
+  // - program query loading
+  // - access checking in progress
+  const isPageLoading =
+    sessionStatus === 'loading' ||
+    queryLoading ||
+    accessStatus === 'checking'
+
+  if (isPageLoading) {
     return <LoadingSpinner />
   }
+
   if (accessStatus === 'denied') {
     return (
       <ErrorDisplay
@@ -147,6 +170,7 @@ const EditProgramPage = () => {
       />
     )
   }
+
   return (
     <ProgramForm
       formData={formData}
@@ -160,4 +184,5 @@ const EditProgramPage = () => {
     />
   )
 }
+
 export default EditProgramPage
