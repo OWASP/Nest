@@ -56,7 +56,7 @@ generate-graphql-types:
 	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run graphql-codegen))
 
-scan-frontend-image: build-frontend-local-image
+security-scan-frontend-image: build-frontend-local-image
 	@trivy image \
 		--config trivy.yaml \
 		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
