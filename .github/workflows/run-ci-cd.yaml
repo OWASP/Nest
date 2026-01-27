@@ -319,7 +319,7 @@ jobs:
         run: |
           timeout 5m bash -c '
             until wget --spider http://localhost:9000/a; do
-              echo "Waiting for backend..."
+              echo "Waiting for the backend..."
               sleep 5
             done
           '
@@ -349,13 +349,13 @@ jobs:
           --network host \
           --env-file frontend/.env.e2e.example \
           -p 3000:3000 \
-          owasp/nest:frontend-e2e-latest pnpm run build && pnpm run start
+          owasp/nest:frontend-e2e-latest sh -c "pnpm run build && pnpm run start"
 
       - name: Wait for frontend to be ready
         run: |
           timeout 5m bash -c '
             until wget --spider http://localhost:3000/; do
-              echo "Waiting for frontend..."
+              echo "Waiting for the frontend..."
               sleep 5
             done
           '

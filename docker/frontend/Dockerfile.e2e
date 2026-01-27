@@ -1,7 +1,5 @@
 FROM node:24-alpine AS builder
 
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine
-# to understand why libc6-compat might be needed.
 ENV APK_CACHE_DIR="/app/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     FORCE_COLOR=1 \
@@ -14,7 +12,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && apk upgrade && apk add libc6-compat
+    apk update && apk upgrade && apk add libc6-compat && \
+    chown -R node:node /app
 
 WORKDIR /app
 
@@ -31,4 +30,6 @@ COPY --chmod=555 public public
 COPY --chmod=555 src src
 
 ENV NEXT_TELEMETRY_DISABLED=1
+
+USER node
 EXPOSE 3000
