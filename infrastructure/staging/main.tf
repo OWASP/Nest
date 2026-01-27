@@ -25,7 +25,6 @@ module "alb" {
   alb_sg_id                  = module.security.alb_sg_id
   common_tags                = local.common_tags
   domain_name                = var.domain_name
-  enable_https               = var.domain_name != null
   environment                = var.environment
   frontend_health_check_path = "/"
   frontend_port              = 3000
@@ -129,10 +128,10 @@ module "parameters" {
   source = "../modules/parameters"
 
   allowed_hosts = join(",", [
-    var.domain_name != null ? var.domain_name : module.alb.alb_dns_name,
+    var.domain_name,
     "zappa",
   ])
-  allowed_origins    = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
+  allowed_origins    = "https://${var.domain_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
   db_name            = var.db_name
@@ -140,12 +139,12 @@ module "parameters" {
   db_port            = var.db_port
   db_user            = var.db_user
   environment        = var.environment
-  nextauth_url       = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
+  nextauth_url       = "https://${var.domain_name}"
   project_name       = var.project_name
   redis_host         = module.cache.redis_primary_endpoint
   redis_password_arn = module.cache.redis_password_arn
-  server_csrf_url    = var.domain_name != null ? "https://${var.domain_name}/csrf/" : "http://${module.alb.alb_dns_name}/csrf/"
-  server_graphql_url = var.domain_name != null ? "https://${var.domain_name}/graphql/" : "http://${module.alb.alb_dns_name}/graphql/"
+  server_csrf_url    = "https://${var.domain_name}/csrf/"
+  server_graphql_url = "https://${var.domain_name}/graphql/"
 }
 
 module "security" {

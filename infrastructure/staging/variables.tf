@@ -132,7 +132,6 @@ variable "db_user" {
 variable "domain_name" {
   description = "The domain name for the site."
   type        = string
-  default     = null
 }
 
 variable "ecs_use_fargate_spot" {

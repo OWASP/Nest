@@ -1,16 +1,16 @@
 output "acm_certificate_arn" {
   description = "The ARN of the ACM certificate."
-  value       = var.enable_https && var.domain_name != null ? aws_acm_certificate.main[0].arn : null
+  value       = aws_acm_certificate.main.arn
 }
 
 output "acm_certificate_domain_validation_options" {
   description = "The domain validation options for ACM certificate DNS validation."
-  value       = var.enable_https && var.domain_name != null ? aws_acm_certificate.main[0].domain_validation_options : []
+  value       = aws_acm_certificate.main.domain_validation_options
 }
 
 output "acm_certificate_status" {
   description = "The status of the ACM certificate."
-  value       = var.enable_https && var.domain_name != null ? aws_acm_certificate.main[0].status : null
+  value       = aws_acm_certificate.main.status
 }
 
 output "alb_arn" {
@@ -35,10 +35,10 @@ output "frontend_target_group_arn" {
 
 output "http_listener_arn" {
   description = "The ARN of the HTTP listener."
-  value       = var.enable_https ? aws_lb_listener.http_redirect[0].arn : aws_lb_listener.http[0].arn
+  value       = aws_lb_listener.http_redirect.arn
 }
 
 output "https_listener_arn" {
   description = "The ARN of the HTTPS listener (null if HTTPS disabled)."
-  value       = var.enable_https ? aws_lb_listener.https[0].arn : null
+  value       = aws_lb_listener.https.arn
 }
