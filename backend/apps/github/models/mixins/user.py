@@ -14,10 +14,6 @@ class UserIndexMixin:
     def is_indexable(self):
         """Determine if the user should be indexed.
 
-        A user is considered indexable if they are not a bot, their login does not
-        end with common bot suffixes ("Bot" or "-bot"), and their login is not
-        present in the non-indexable logins list.
-
         Returns:
             bool: True if the user meets all indexing criteria, False otherwise.
 
@@ -73,7 +69,7 @@ class UserIndexMixin:
         """Get the account creation timestamp for indexing.
 
         Returns:
-            float: Unix timestamp (seconds since epoch) when the account was created.
+            float: Unix timestamp when the account was created.
 
         """
         return self.created_at.timestamp()
@@ -163,7 +159,7 @@ class UserIndexMixin:
         """Get the user's profile title or headline for indexing.
 
         Returns:
-            str: The title or headline associated with the user, if any.
+            str: The title or headline associated with the user.
 
         """
         return self.title
@@ -256,7 +252,7 @@ class UserIndexMixin:
 
     @property
     def idx_releases(self) -> list[dict]:
-        """Get recent releases associated with the user for indexing.
+        """Get releases associated with the user for indexing.
 
         Returns:
             list[dict]: A list of release summaries including pre-release flag,
