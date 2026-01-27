@@ -121,8 +121,8 @@ jobs:
         run: |
           make check-spelling
 
-  scan-code:
-    name: Run Code Scan
+  run-security-scan-code:
+    name: Run code security scan
     needs:
       - check-frontend
       - pre-commit
@@ -134,38 +134,23 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
-        with:
-          cache: true
+      - name: Run Semgrep security scan
+        run: make security-scan-semgrep
 
-      - name: Run Trivy Repository Scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+      - name: Upload Semgrep report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          scan-type: repo
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-    timeout-minutes: 5
-
-  scan-ci-dependencies:
-    name: Run CI Dependencies Scan
-    needs:
-      - check-frontend
-      - pre-commit
-      - spellcheck
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+          name: semgrep-results-run-${{ github.run_number }}
+          path: semgrep-security-report.txt
+          retention-days: 14
 
       - name: Setup Trivy
         uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
         with:
           cache: true
 
-      - name: Run Trivy Filesystem Scan
+      - name: Run Trivy security scan
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
         with:
           scan-type: fs
@@ -173,37 +158,10 @@ jobs:
           trivy-config: trivy.yaml
     timeout-minutes: 5
 
-  run-security-scan:
-    name: Run security scan
-    needs:
-      - check-frontend
-      - pre-commit
-      - spellcheck
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Run Security CI Scan
-        run: make security-scan
-
-      - name: Upload security scan report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: semgrep-results-run-${{ github.run_number }}
-          path: semgrep-security-report.txt
-          retention-days: 14
-    timeout-minutes: 5
-
   run-backend-tests:
     name: Run backend tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
       id-token: write
@@ -253,9 +211,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
       id-token: write
@@ -304,9 +260,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -397,9 +351,7 @@ jobs:
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -450,9 +402,7 @@ jobs:
     name: Run GraphQL fuzz tests
     if: false
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
@@ -460,9 +410,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: rest_test.py
