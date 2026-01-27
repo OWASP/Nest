@@ -25,10 +25,7 @@ export default defineConfig({
   testDir: './__tests__/e2e',
   timeout: 120_000,
   use: {
-    launchOptions: {
-      args: ['--disable-features=IsolateOrigins,site-per-process'],
-    },
-    baseURL: 'http://frontend:3000',
+    baseURL: process.env.FRONTEND_URL,
     headless: true,
     trace: 'off',
   },

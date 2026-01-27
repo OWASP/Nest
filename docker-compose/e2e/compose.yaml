@@ -131,6 +131,8 @@ services:
       frontend:
         condition: service_healthy
     command: ${E2E_TEST_COMMAND:-sh -c "npx playwright test"}
+    environment:
+      - FRONTEND_URL=http://frontend:3000
     ports:
       - 3800:3800
     networks:

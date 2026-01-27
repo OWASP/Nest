@@ -40,9 +40,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
-          cache: 'poetry'
+          cache: "poetry"
           cache-dependency-path: backend/poetry.lock
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Set up pre-commit cache
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version: 24
-          cache: 'pnpm'
+          cache: "pnpm"
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Run pnpm format
@@ -331,12 +331,39 @@ jobs:
         run: |
           pg_restore -h localhost -U nest_user_e2e -d nest_db_e2e < backend/data/nest.dump
 
-      - name: Build frontend end-to-end testing image
+      - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
           cache-from: |
             type=gha
-            type=registry,ref=owasp/nest:test-frontend-e2e-cache
+            type=registry,ref=owasp/nest:frontend-e2e-cache
+          context: frontend
+          file: docker/frontend/Dockerfile.e2e
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:frontend-e2e-latest
+
+      - name: Run frontend in the background
+        run: |
+          docker run -d --name e2e-nest-frontend \
+          --network host \
+          --env-file frontend/.env.e2e.example \
+          -p 3000:3000 \
+          owasp/nest:frontend-e2e-latest pnpm run build && pnpm run start
+
+      - name: Wait for frontend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:3000/; do
+              echo "Waiting for frontend..."
+              sleep 5
+            done
+          '
+          echo "Frontend is up!"
+
+      - name: Build e2e testing image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        with:
           context: frontend
           file: docker/frontend/Dockerfile.e2e.test
           load: true
@@ -345,7 +372,9 @@ jobs:
 
       - name: Run frontend end-to-end tests
         run: |
-          docker run --env-file frontend/.env.e2e.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+          docker run --network host \
+            -e FRONTEND_URL=http://localhost:3000 \
+            owasp/nest:test-frontend-e2e-latest npx playwright test
     timeout-minutes: 15
 
   run-frontend-a11y-tests:
@@ -751,12 +780,12 @@ jobs:
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           cache-dependency-path: frontend/pnpm-lock.yaml
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: 24
 
       - name: Run lighthouse-ci
         env:
-          LHCI_BASE_URL: 'https://nest.owasp.dev'
+          LHCI_BASE_URL: "https://nest.owasp.dev"
         run: |
           pnpm run lighthouse-ci
         working-directory: frontend
@@ -777,10 +806,10 @@ jobs:
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'https://nest.owasp.dev'
+          target: "https://nest.owasp.dev"
           allow_issue_writing: false
           fail_action: true
-          cmd_options: '-a -c .zapconfig -r report_html.html'
+          cmd_options: "-a -c .zapconfig -r report_html.html"
 
       - name: Upload report
         if: always()
@@ -1126,10 +1155,10 @@ jobs:
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'https://nest.owasp.org'
+          target: "https://nest.owasp.org"
           allow_issue_writing: false
           fail_action: true
-          cmd_options: '-a -c .zapconfig -r report_html.html'
+          cmd_options: "-a -c .zapconfig -r report_html.html"
 
       - name: Upload report
         if: always()
