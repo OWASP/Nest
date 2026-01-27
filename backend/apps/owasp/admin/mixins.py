@@ -27,8 +27,8 @@ class BaseOwaspAdminMixin:
 
     def get_base_list_display(self, *additional_fields):
         """Get base list display with additional fields."""
-        return tuple(
-            ("name",) if hasattr(self.model, "name") else (),
+        return (
+            *(("name",) if hasattr(self.model, "name") else ()),
             *additional_fields,
             *self.list_display_field_names,
         )
