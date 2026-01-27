@@ -37,6 +37,8 @@ class ProgramQuery:
         search: str = "",
         page: int = 1,
         limit: int = 24,
+        sort_by: str = "default",
+        order: str = "desc",
     ) -> PaginatedPrograms:
         """Get paginated programs where the current user is admin or mentor."""
         user = info.context.request.user
@@ -63,7 +65,15 @@ class ProgramQuery:
         page = max(1, min(page, total_pages))
         offset = (page - 1) * limit
 
-        paginated_programs = queryset.order_by("-nest_created_at")[offset : offset + limit]
+        sort_field_map = {
+            "name": "name",
+            "started_at": "started_at",
+            "ended_at": "ended_at",
+            "default": "nest_created_at",
+        }
+        sort_field = sort_field_map.get(sort_by, "nest_created_at")
+        order_prefix = "" if order == "asc" else "-"
+        paginated_programs = queryset.order_by(f"{order_prefix}{sort_field}")[offset : offset + limit]
 
         results = []
         mentor_id = mentor.id

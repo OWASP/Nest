@@ -7,3 +7,11 @@ export const sortOptionsProject = [
   { label: 'Name', key: 'name' },
   { label: 'Stars', key: 'stars_count' },
 ]
+
+export const sortOptionsMentorshipPrograms = [
+  { label: 'Newest', key: 'default' },
+  { label: 'Name', key: 'name' },
+  { label: 'Start Date', key: 'started_at' },
+  { label: 'End Date', key: 'ended_at' },
+]
+

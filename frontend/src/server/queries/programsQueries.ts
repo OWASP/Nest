@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 export const GET_MY_PROGRAMS = gql`
-  query GetMyPrograms($search: String, $page: Int, $limit: Int) {
-    myPrograms(search: $search, page: $page, limit: $limit) {
+  query GetMyPrograms($search: String, $page: Int, $limit: Int, $sortBy: String, $order: String) {
+    myPrograms(search: $search, page: $page, limit: $limit, sortBy: $sortBy, order: $order) {
       currentPage
       totalPages
       programs {

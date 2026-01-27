@@ -12,10 +12,12 @@ import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.gener
 import type { ExtendedSession } from 'types/auth'
 
 import type { Program } from 'types/mentorship'
+import { sortOptionsMentorshipPrograms } from 'utils/sortingOptions'
 import ActionButton from 'components/ActionButton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramCard from 'components/ProgramCard'
 import SearchPageLayout from 'components/SearchPageLayout'
+import SortBy from 'components/SortBy'
 
 const MyMentorshipPage: React.FC = () => {
   const router = useRouter()
@@ -27,12 +29,16 @@ const MyMentorshipPage: React.FC = () => {
 
   const initialQuery = searchParams.get('q') || ''
   const initialPage = Number.parseInt(searchParams.get('page') || '1', 10)
+  const initialSortBy = searchParams.get('sortBy') || 'default'
+  const initialOrder = searchParams.get('order') || 'desc'
 
   const [searchQuery, setSearchQuery] = useState(initialQuery)
   const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
   const [page, setPage] = useState(initialPage)
   const [programs, setPrograms] = useState<Program[]>([])
   const [totalPages, setTotalPages] = useState(1)
+  const [sortBy, setSortBy] = useState(initialSortBy)
+  const [order, setOrder] = useState(initialOrder)
 
   const debounceSearch = useMemo(() => debounce((q) => setDebouncedQuery(q), 400), [])
 
@@ -45,18 +51,20 @@ const MyMentorshipPage: React.FC = () => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
     if (page > 1) params.set('page', String(page))
+    if (sortBy && sortBy !== 'default') params.set('sortBy', sortBy)
+    if (order && order !== 'desc') params.set('order', order)
     const nextUrl = params.toString() ? `?${params}` : globalThis.location.pathname
     if (globalThis.location.search !== `?${params}`) {
       router.push(nextUrl, { scroll: false })
     }
-  }, [searchQuery, page, router])
+  }, [searchQuery, page, sortBy, order, router])
 
   const {
     data: programData,
     loading: loadingPrograms,
     error,
   } = useQuery(GetMyProgramsDocument, {
-    variables: { search: debouncedQuery, page, limit: 24 },
+    variables: { search: debouncedQuery, page, limit: 24, sortBy, order },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
@@ -82,6 +90,16 @@ const MyMentorshipPage: React.FC = () => {
   }, [error])
 
   const handleCreate = () => router.push('/my/mentorship/programs/create')
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
+    setPage(1)
+  }
+
+  const handleOrderChange = (value: string) => {
+    setOrder(value)
+    setPage(1)
+  }
 
   if (!userName) {
     return <LoadingSpinner />
@@ -127,6 +145,15 @@ const MyMentorshipPage: React.FC = () => {
         searchQuery={searchQuery}
         searchPlaceholder="Search your programs"
         indexName="my-programs"
+        sortChildren={
+          <SortBy
+            onOrderChange={handleOrderChange}
+            onSortChange={handleSortChange}
+            selectedOrder={order}
+            selectedSortOption={sortBy}
+            sortOptions={sortOptionsMentorshipPrograms}
+          />
+        }
       >
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {programs.length === 0 ? (

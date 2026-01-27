@@ -44,7 +44,7 @@ const mockAddToast = addToast as jest.Mock
 
 beforeEach(() => {
   jest.clearAllMocks()
-  ;(useRouterMock as jest.Mock).mockReturnValue({ push: mockPush })
+    ; (useRouterMock as jest.Mock).mockReturnValue({ push: mockPush })
 })
 
 const mockProgramData = {
@@ -69,7 +69,7 @@ const mockProgramData = {
 
 describe('MyMentorshipPage', () => {
   it('shows loading while checking access', () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
+    ; (mockUseSession as jest.Mock).mockReturnValue({
       data: null,
       status: 'loading',
     })
@@ -80,7 +80,7 @@ describe('MyMentorshipPage', () => {
   })
 
   it('shows access denied if user is not project leader', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
+    ; (mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
           name: 'user 1',
@@ -100,7 +100,7 @@ describe('MyMentorshipPage', () => {
   })
 
   it('renders mentorship programs if user is leader', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
+    ; (mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
           name: 'User',
@@ -124,8 +124,32 @@ describe('MyMentorshipPage', () => {
     expect(await screen.findByText('Test Program')).toBeInTheDocument()
   })
 
+  it('renders SortBy component with sort options', async () => {
+    ; (mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'User',
+          email: 'leader@example.com',
+          login: 'user',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: mockProgramData,
+      loading: false,
+      error: undefined,
+    })
+
+    render(<MyMentorshipPage />)
+    expect(await screen.findByText('Sort By :')).toBeInTheDocument()
+  })
+
   it('shows empty state when no programs found', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
+    ; (mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
           name: 'User',
@@ -149,7 +173,7 @@ describe('MyMentorshipPage', () => {
   })
 
   it('navigates to create page on clicking create button', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
+    ; (mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
           name: 'User',
@@ -179,7 +203,7 @@ describe('MyMentorshipPage', () => {
   })
 
   it('shows an error toast when GraphQL query fails', async () => {
-    ;(mockUseSession as jest.Mock).mockReturnValue({
+    ; (mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
           name: 'User',
