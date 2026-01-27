@@ -35,11 +35,8 @@ class BaseOwaspAdminMixin:
             tuple: Base display fields (name, timestamps) plus additional fields.
 
         """
-        return tuple(
-            ("name",) if hasattr(self.model, "name") else (),
-            *additional_fields,
-            *self.list_display_field_names,
-        )
+        base_fields = ("name",) if hasattr(self.model, "name") else ()
+        return base_fields + tuple(additional_fields) + self.list_display_field_names
 
     def get_base_search_fields(self, *additional_fields):
         """Build base search fields tuple with additional fields.
