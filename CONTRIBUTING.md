@@ -408,7 +408,7 @@ This command runs tests and checks that coverage threshold requirements are sati
 
 ### Running Security Scan
 
-Run the Semgrep security scan for vulnerabilities and anti-patterns with the following command:
+Run the security scans for vulnerabilities and anti-patterns with the following command:
 
 ```bash
 make security-scan
