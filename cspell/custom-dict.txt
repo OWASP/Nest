@@ -18,6 +18,7 @@ GRC
 GSOC
 GTM
 Golovanova
+Hackbright
 Héllo
 Kateryna
 Kerlyn

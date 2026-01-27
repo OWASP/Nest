@@ -6,25 +6,25 @@ This document tracks mentors participating in various coding events year by year
 
 #### Arkadii Yakovets
 
-Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest project leader
+Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
-[GitHub](https://github.com/arkid15r) • [LinkedIn](https://www.linkedin.com/in/arkadii-yakovets) • [Slack](https://owasp.slack.com/team/arkid15r)
+[GitHub](https://github.com/arkid15r/) • [LinkedIn](https://www.linkedin.com/in/arkid15r/) • [Slack](https://owasp.slack.com/team/U060W3NKLTF) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
-*This section is reserved for the mentor to add their own description.*
+Arkadii is an OWASP Nest founder and current leader focusing on project strategic goals as well as day-to-day contribution and maintenance making sure the project aligns with OWASP community needs.
 
-#### Kateryna Golovanova
+#### Kate Golovanova
 
-Senior Software Engineer at Skill Struck, CC | OWASP Nest project leader
+Senior Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
 
-[GitHub](https://github.com/kasya) • [LinkedIn](https://www.linkedin.com/in/kateryna-golovanova) • [Slack](https://owasp.slack.com/team/Kate)
+[GitHub](https://github.com/kasya/) • [LinkedIn](https://www.linkedin.com/in/kate-golovanova/) • [Slack](https://owasp.slack.com/team/U07PWB1JZ6Z) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
-*This section is reserved for the mentor to add their own description.*
+Kateryna is OWASP Nest Project Leader who enjoys mentoring open source contributions focused on full-stack features implementation. She wrote the initial OWASP Nest frontend that was later migrated to Next.js and React.
 
 #### Kerlyn Manyi
 
 Cybersecurity Engineer | GSoC'23 contributor at Mifos Initiative
 
-[GitHub](https://github.com/kerlyn-manyi) • [LinkedIn](https://www.linkedin.com/in/kerlyn-manyi) • [Slack](https://owasp.slack.com/team/Kerlyn%20Manyi)
+[GitHub](https://github.com/kerlynNkep) • [LinkedIn](https://www.linkedin.com/in/kerlyn-manyi-a80201123/) • [Slack](https://owasp.slack.com/team/U06M01ARG3V) • Country (Timezone)
 
 *This section is reserved for the mentor to add their own description.*
 
@@ -32,7 +32,7 @@ Cybersecurity Engineer | GSoC'23 contributor at Mifos Initiative
 
 Senior Security Engineer at LinkedIn
 
-[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik) • [Slack](https://owasp.slack.com/team/Keshav%20Malik)
+[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik/) • [Slack](https://owasp.slack.com/team/U0AB7UGB1NV) • Country (Timezone)
 
 *This section is reserved for the mentor to add their own description.*
 
@@ -40,7 +40,7 @@ Senior Security Engineer at LinkedIn
 
 AI/ML enthusiast | GSoC'25 contributor at PSF
 
-[GitHub](https://github.com/kriti-birda) • [LinkedIn](https://www.linkedin.com/in/kriti-birda) • [Slack](https://owasp.slack.com/team/Kriti%20Birda)
+[GitHub](https://github.com/kritibirda) • [LinkedIn](https://www.linkedin.com/in/kritibirda/) • [Slack](https://owasp.slack.com/team/U08KZ9Z7MFX) • Country (Timezone)
 
 *This section is reserved for the mentor to add their own description.*
 
@@ -48,7 +48,7 @@ AI/ML enthusiast | GSoC'25 contributor at PSF
 
 Senior GRC & Technology Risk Leader, CISSP
 
-[GitHub](https://github.com/marie-wang) • [LinkedIn](https://www.linkedin.com/in/marie-wang) • [Slack](https://owasp.slack.com/team/Marie%20Wang)
+[GitHub](https://github.com/TheCyberLeader) • [LinkedIn](https://www.linkedin.com/in/mariezw/) • [Slack](https://owasp.slack.com/team/U0A23223B8B) • Country (Timezone)
 
 *This section is reserved for the mentor to add their own description.*
 
@@ -56,7 +56,7 @@ Senior GRC & Technology Risk Leader, CISSP
 
 Software Developer | GSoC'25 contributor at FOSSology
 
-[GitHub](https://github.com/muhammad-salman) • [LinkedIn](https://www.linkedin.com/in/muhammad-salman) • [Slack](https://owasp.slack.com/team/Muhammad%20Salman)
+[GitHub](https://github.com/SalmanDeveloperz/) • [LinkedIn](https://www.linkedin.com/in/msalman199/) • [Slack](https://owasp.slack.com/team/U0A7YV0SPNE) • Country (Timezone)
 
 *This section is reserved for the mentor to add their own description.*
 
@@ -64,7 +64,7 @@ Software Developer | GSoC'25 contributor at FOSSology
 
 Application Security Analyst at Bloomreach, CISSP
 
-[GitHub](https://github.com/noland-crane) • [LinkedIn](https://www.linkedin.com/in/noland-crane) • [Slack](https://owasp.slack.com/team/Noland%20Crane)
+[GitHub](https://github.com/noland-crane) • [LinkedIn](https://www.linkedin.com/in/nolandcrane/) • [Slack](https://owasp.slack.com/team/U0A4M7U056U) • Country (Timezone)
 
 *This section is reserved for the mentor to add their own description.*
 
@@ -72,17 +72,17 @@ Application Security Analyst at Bloomreach, CISSP
 
 Product Security Engineer at Splunk
 
-[GitHub](https://github.com/raja-nagori) • [LinkedIn](https://www.linkedin.com/in/raja-nagori) • [Slack](https://owasp.slack.com/team/Raja%20Nagori)
+[GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • Country (Timezone)
 
 *This section is reserved for the mentor to add their own description.*
 
 #### Tamara Lazerka
 
-QA Analyst at Cart.com | GSoC'25 mentor at OWASP
+QA Analyst at Cart\.com | GSoC'25 mentor at OWASP
 
-[GitHub](https://github.com/tamara-lazerka) • [LinkedIn](https://www.linkedin.com/in/tamara-lazerka) • [Slack](https://owasp.slack.com/team/Tamara)
+[GitHub](https://github.com/aramattamara/) • [LinkedIn](https://www.linkedin.com/in/aramattamara/) • [Slack](https://owasp.slack.com/team/U0881RRPBDY) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
-*This section is reserved for the mentor to add their own description.*
+Tamara is a Fullstack Engineer who builds web applications from scratch using Node.js (Express), React, Tailwind, and MySQL. She graduated from Hackbright Academy (April 2023), is a quick learner who enjoys challenges, and collaborates well in teams.
 
 ---
 
@@ -92,22 +92,22 @@ QA Analyst at Cart.com | GSoC'25 mentor at OWASP
 
 Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
-[GitHub](https://github.com/arkid15r) • [LinkedIn](https://www.linkedin.com/in/arkadii-yakovets) • [Slack](https://owasp.slack.com/team/arkid15r)
+[GitHub](https://github.com/arkid15r/) • [LinkedIn](https://www.linkedin.com/in/arkid15r/) • [Slack](https://owasp.slack.com/team/U060W3NKLTF) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
-*This section is reserved for the mentor to add their own description.*
+Arkadii is an OWASP Nest founder and current leader focusing on project strategic goals as well as day-to-day contribution and maintenance making sure the project aligns with OWASP community needs.
 
-#### Kateryna Golovanova
+#### Kate Golovanova
 
-Senior Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
+Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
 
-[GitHub](https://github.com/kasya) • [LinkedIn](https://www.linkedin.com/in/kateryna-golovanova) • [Slack](https://owasp.slack.com/team/Kate)
+[GitHub](https://github.com/kasya/) • [LinkedIn](https://www.linkedin.com/in/kate-golovanova/) • [Slack](https://owasp.slack.com/team/U07PWB1JZ6Z) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
-*This section is reserved for the mentor to add their own description.*
+Kateryna is OWASP Nest Project Leader who enjoys mentoring open source contributions focused on full-stack features implementation. She wrote the initial OWASP Nest frontend that was later migrated to Next.js and React.
 
 #### Tamara Lazerka
 
-QA Analyst at Cart.com | GSoC'25 mentor at OWASP
+Full-Stack Software Engineer
 
-[GitHub](https://github.com/tamara-lazerka) • [LinkedIn](https://www.linkedin.com/in/tamara-lazerka) • [Slack](https://owasp.slack.com/team/Tamara)
+[GitHub](https://github.com/aramattamara/) • [LinkedIn](https://www.linkedin.com/in/aramattamara/) • [Slack](https://owasp.slack.com/team/U0881RRPBDY) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
-*This section is reserved for the mentor to add their own description.*
+Tamara is a Fullstack Engineer who builds web applications from scratch using Node.js (Express), React, Tailwind, and MySQL. She graduated from Hackbright Academy (April 2023), is a quick learner who enjoys challenges, and collaborates well in teams.
