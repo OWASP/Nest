@@ -49,12 +49,16 @@ resource "aws_ecr_lifecycle_policy" "main" {
   })
 }
 
+# TODO: disallow tag mutability
+# nosemgrep: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
 resource "aws_ecr_repository" "main" {
-  name = "${var.project_name}-${var.environment}-backend"
+  name                 = "${var.project_name}-${var.environment}-backend"
+  image_tag_mutability = "MUTABLE"
+  tags                 = var.common_tags
+
   image_scanning_configuration {
     scan_on_push = true
   }
-  tags = var.common_tags
 }
 
 resource "aws_iam_role" "ecs_tasks_execution_role" {

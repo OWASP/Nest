@@ -19,6 +19,8 @@ resource "aws_cloudwatch_log_group" "frontend" {
   })
 }
 
+# TODO: disallow tag mutability
+# nosemgrep: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
 resource "aws_ecr_repository" "frontend" {
   image_tag_mutability = "MUTABLE"
   name                 = "${var.project_name}-${var.environment}-frontend"

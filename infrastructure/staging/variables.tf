@@ -134,14 +134,14 @@ variable "domain_name" {
   type        = string
 }
 
-variable "ecs_use_fargate_spot" {
-  description = "Whether to use Fargate Spot for backend ECS tasks."
+variable "ecs_assign_public_ip" {
+  description = "Whether to assign public IP to backend ECS tasks."
   type        = bool
-  default     = true
+  default     = false
 }
 
-variable "ecs_use_public_subnets" {
-  description = "Whether to run ECS tasks in public subnets (requires assign_public_ip)."
+variable "ecs_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend ECS tasks."
   type        = bool
   default     = true
 }

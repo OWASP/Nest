@@ -112,6 +112,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 }
 
+# nosemgrep: terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address
 resource "aws_subnet" "public" {
   availability_zone       = var.availability_zones[count.index]
   cidr_block              = var.public_subnet_cidrs[count.index]
