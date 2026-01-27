@@ -73,6 +73,7 @@ const ModuleDetailsPage = () => {
       details={moduleDetails}
       domains={programModule.domains}
       mentors={programModule.mentors}
+      pullRequests={programModule.recentPullRequests || []}
       summary={programModule.description}
       tags={programModule.tags}
       title={programModule.name}

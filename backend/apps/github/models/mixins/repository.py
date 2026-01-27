@@ -16,9 +16,6 @@ class RepositoryIndexMixin:
     def is_indexable(self) -> bool:
         """Determine if the repository should be indexed.
 
-        Returns True if the repository is not archived, not empty, not a template,
-        and is associated with at least one project.
-
         Returns:
             bool: True if repository meets all indexing criteria, False otherwise.
 
@@ -135,7 +132,7 @@ class RepositoryIndexMixin:
         """Get the total number of open issues in this repository for indexing.
 
         Returns:
-            int: The count of currently open issues and pull requests.
+            int: The count of currently open issues.
 
         """
         return self.open_issues_count
@@ -203,11 +200,11 @@ class RepositoryIndexMixin:
         return RepositoryContributor.get_top_contributors(repository=self.key)
 
     @property
-    def idx_topics(self):
-        """Get the topics/tags associated with this repository for indexing.
+    def idx_topics(self) -> list[str]:
+        """Get the topics associated with this repository for indexing.
 
         Returns:
-            list: A list of topic tags that categorize this repository.
+            list: A list of topics that categorize this repository.
 
         """
         return self.topics
