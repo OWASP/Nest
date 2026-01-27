@@ -18,7 +18,7 @@ The OWASP Nest backend is a Python-based API server built with the [Django](http
 
 The backend code lives in `backend/`. Key directories include:
 
-- `apps/` - Contains all Django applications (e.g., `owasp`, `github`, `api`).
+- `apps/` - Contains all Django applications (e.g., `owasp`, `GitHub`, `api`).
 - `settings/` - Django configuration files.
 - `tests/` - Automated tests.
 - `data/` - Database dumps and backup files.
@@ -45,7 +45,7 @@ See the root `Makefile` and `backend/Makefile` for more targets.
 
 ## Key APIs
 
-- **REST API (v0)**: Served at `/api/v0/`. See [backend/apps/api/rest/v0/README.md](../../backend/apps/api/rest/v0/README.md) for SDK-related constraints.
+- **REST API (v0)**: Served at `/api/v0/`. See [API v0 README](https://github.com/OWASP/Nest/blob/main/backend/apps/api/rest/v0/README.md) for SDK-related constraints.
 - **GraphQL API**: Served at `/graphql/`.
 
 ## Dependencies

@@ -36,6 +36,6 @@ The authentication class in `backend/apps/api/rest/v0/__init__.py` **must be nam
 
 ## Further Reading
 
-- [backend/apps/api/rest/v0/README.md](../../backend/apps/api/rest/v0/README.md) — API development guidelines.
+- [API v0 README](https://github.com/OWASP/Nest/blob/main/backend/apps/api/rest/v0/README.md) — API development guidelines.
 - [Speakeasy: Customize Methods](https://www.speakeasy.com/docs/customize/methods)
 - [Speakeasy: Customize Namespaces](https://www.speakeasy.com/docs/customize/structure/namespaces)
