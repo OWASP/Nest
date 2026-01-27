@@ -205,6 +205,8 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
     Version = "2012-10-17"
     Statement = [
       {
+        # https://docs.aws.amazon.com/AmazonECR/latest/public/public-repository-policies.html#repository-policy-vs-iam-policy
+        # nosemgrep: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
         Action   = "ecr:GetAuthorizationToken"
         Effect   = "Allow"
         Resource = "*" # NOSONAR

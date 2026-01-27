@@ -106,7 +106,9 @@ resource "aws_iam_policy" "ecs_tasks_execution_policy" {
     Version = "2012-10-17"
     Statement = [
       {
+        # nosemgrep: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
         Action = [
+          # https://docs.aws.amazon.com/AmazonECR/latest/public/public-repository-policies.html#repository-policy-vs-iam-policy
           "ecr:GetAuthorizationToken"
         ]
         Effect   = "Allow"
@@ -203,6 +205,8 @@ resource "aws_iam_policy" "event_bridge_ecs_policy" {
         Resource = "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${var.environment}-*:*"
       },
       {
+        # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/CWE_IAM_role.html
+        # nosemgrep: terraform.lang.security.iam.no-iam-resource-exposure.no-iam-resource-exposure
         Action = "iam:PassRole"
         Effect = "Allow"
         Resource = [
