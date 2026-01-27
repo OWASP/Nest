@@ -29,6 +29,7 @@ output "alb_zone_id" {
 }
 
 output "frontend_target_group_arn" {
+  depends_on  = [aws_lb_listener.https]
   description = "The ARN of the frontend target group."
   value       = aws_lb_target_group.frontend.arn
 }
@@ -39,6 +40,6 @@ output "http_listener_arn" {
 }
 
 output "https_listener_arn" {
-  description = "The ARN of the HTTPS listener (null if HTTPS disabled)."
+  description = "The ARN of the HTTPS listener."
   value       = aws_lb_listener.https.arn
 }

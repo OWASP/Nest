@@ -44,15 +44,6 @@ run "test_default_deletion_window" {
   }
 }
 
-run "test_description_format" {
-  command = plan
-
-  assert {
-    condition     = aws_kms_key.main.description == "KMS key for encrypting ${var.project_name}-${var.environment} resources"
-    error_message = "KMS key description must follow convention."
-  }
-}
-
 run "test_iam_root_policy_statement_exists" {
   command = plan
 

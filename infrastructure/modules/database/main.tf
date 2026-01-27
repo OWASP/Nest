@@ -115,6 +115,11 @@ resource "aws_iam_role_policy" "rds_proxy" {
     Version = "2012-10-17"
     Statement = [
       {
+        Action   = ["kms:Decrypt"]
+        Effect   = "Allow"
+        Resource = var.kms_key_arn
+      },
+      {
         Action   = ["secretsmanager:GetSecretValue"]
         Effect   = "Allow"
         Resource = aws_secretsmanager_secret.db_credentials.arn
