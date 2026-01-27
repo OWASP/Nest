@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('github', '0040_merge_20251117_0136'),
-        ('owasp', '0069_alter_project_contribution_data_and_more'),
+        ('owasp', "0072_project_project_name_gin_idx_and_more"),
     ]
 
     operations = [
