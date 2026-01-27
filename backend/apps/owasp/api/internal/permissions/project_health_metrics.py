@@ -17,6 +17,11 @@ class HasDashboardAccess(BasePermission):
             else (
                 (user := info.context.request.user)
                 and user.is_authenticated
-                and user.github_user.is_owasp_staff
+                and user.github_user
+                and (
+                    user.github_user.owasp_profile.is_owasp_staff
+                    if hasattr(user.github_user, "owasp_profile")
+                    else user.github_user.is_owasp_staff
+                )
             )
         )

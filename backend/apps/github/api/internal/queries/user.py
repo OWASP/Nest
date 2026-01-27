@@ -51,4 +51,15 @@ class UserQuery:
             User or None: The user object if found, otherwise None.
 
         """
-        return User.objects.filter(has_public_member_page=True, login=login).first()
+        if user := (
+            User.objects.select_related("owasp_profile")
+            .filter(owasp_profile__has_public_member_page=True, login=login)
+            .first()
+        ):
+            return user
+
+        return User.objects.filter(
+            has_public_member_page=True,
+            login=login,
+            owasp_profile__isnull=True,
+        ).first()

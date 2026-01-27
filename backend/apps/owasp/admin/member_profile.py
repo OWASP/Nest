@@ -11,6 +11,9 @@ class MemberProfileAdmin(admin.ModelAdmin):
     autocomplete_fields = ("github_user",)
     list_display = (
         "github_user",
+        "is_owasp_staff",
+        "has_public_member_page",
+        "contributions_count",
         "owasp_slack_id",
         "first_contribution_at",
         "is_owasp_board_member",
@@ -47,7 +50,14 @@ class MemberProfileAdmin(admin.ModelAdmin):
         ),
         (
             "Contribution Information",
-            {"fields": ("first_contribution_at",)},
+            {
+                "fields": (
+                    "first_contribution_at",
+                    "is_owasp_staff",
+                    "has_public_member_page",
+                    "contributions_count",
+                )
+            },
         ),
         (
             "Membership Flags",

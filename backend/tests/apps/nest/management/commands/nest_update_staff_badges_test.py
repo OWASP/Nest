@@ -34,7 +34,7 @@ class TestStaffBadgeCommand(SimpleTestCase):
 
     @patch("apps.nest.management.commands.base_badge_command.Badge")
     @patch(
-        "apps.nest.management.commands.nest_update_staff_badges.User.objects.filter",
+        "apps.nest.management.commands.nest_update_staff_badges.User.objects.select_related",
         side_effect=Exception("error"),
     )
     def test_handles_errors(self, mock_filter, mock_badge):
