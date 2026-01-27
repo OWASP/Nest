@@ -416,40 +416,30 @@ make security-scan
 
 This command automatically:
 
-- Performs a local Docker-based scan without requiring a Semgrep account or login
+- Performs local Semgrep and Trivy scans
 - Outputs findings to the terminal for immediate review
-- Generates a persistent semgrep-security-report.txt file in the project root
 
 For addressing findings:
 
-- Review the report file for specific file paths and line numbers
+- Review the output for specific file paths and line numbers
 - Follow the documentation links provided in the output for remediation guidance
-- Use # nosemgrep comments to suppress confirmed false positives
+- Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
 
-### Running Dependency Scans
+#### Running Code Scans Only
 
-Trivy is an open-source security scanner that identifies vulnerabilities, misconfigurations, and hardcoded secrets across repositories and file systems. You can replicate the CI/CD security checks locally using following commands:
-
-#### Filesystem Scan
-
-Check local dependencies and configurations for vulnerabilities:
+You can run code scan part separately via
 
 ```bash
-make security-scan-deps
+make security-scan-code
 ```
 
-#### Repository Scan
+#### Running Image Scans Only
 
-Scan the repository for sensitive information and secrets:
+You can run image scan part separately via
 
 ```bash
-make security-scan-repo
+make security-scan-images
 ```
-
-These commands automatically:
-- Analyze the project using the standards defined in trivy.yaml
-- Identify critical and high vulnerabilities that block CI/CD
-- Output findings to the terminal for immediate review
 
 ### Running e2e Tests
 

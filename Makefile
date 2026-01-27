@@ -56,12 +56,20 @@ run:
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 
-scan-images: \
-	scan-backend-image \
-	scan-frontend-image
+security-scan: \
+	security-scan-code \
+	security-scan-images
 
-security-scan:
-	@echo "Running Security Scan..."
+security-scan-code: \
+	security-scan-code-semgrep \
+	security-scan-code-trivy
+
+security-scan-images: \
+	security-scan-backend-image \
+	security-scan-frontend-image
+
+security-scan-code-semgrep:
+	@echo "Running Semgrep security scan..."
 	@docker run --rm \
 		-v "$(PWD):/src" \
 		-w /src \
@@ -98,21 +106,13 @@ security-scan:
 			--text-output=semgrep-security-report.txt \
 			.
 
-security-scan-deps:
-	@echo "Running Trivy Filesystem Scan..."
-	@docker run --rm \
+security-scan-code-trivy:
+	@echo "Running Trivy security scan..."
+	@docker run \
+		--rm \
 		-v "$(PWD):/src" \
 		-w /src \
 		aquasec/trivy fs \
-			--config trivy.yaml \
-			.
-
-security-scan-repo:
-	@echo "Running Trivy Repository Scan..."
-	@docker run --rm \
-		-v "$(PWD):/src" \
-		-w /src \
-		aquasec/trivy repo \
 			--config trivy.yaml \
 			.
 

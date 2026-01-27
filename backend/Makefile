@@ -157,7 +157,7 @@ save-backup:
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
 
-scan-backend-image: build-backend-local-image
+security-scan-backend-image: build-backend-local-image
 	@trivy image \
 		--config trivy.yaml \
 		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
