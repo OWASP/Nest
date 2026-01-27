@@ -12,7 +12,7 @@ class E2E(Base):
     SITE_URL = "http://localhost:9000"
 
     ALLOWED_ORIGINS = (
-        "http://frontend:3000",
+        "http://frontend:3000",  # NOSONAR
         "http://localhost:3000",
     )
 

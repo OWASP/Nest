@@ -36,11 +36,11 @@ const nextConfig: NextConfig = {
   rewrites: async () => [
     {
       source: '/csrf',
-      destination: 'http://backend:9000/csrf/',
+      destination: 'http://backend:9000/csrf/', // NOSONAR
     },
     {
       source: '/graphql',
-      destination: 'http://backend:9000/graphql/',
+      destination: 'http://backend:9000/graphql/', // NOSONAR
     },
   ],
   ...(isLocal ? {} : { output: 'standalone' }),
