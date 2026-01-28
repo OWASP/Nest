@@ -76,7 +76,7 @@ const About = () => {
 
   const projectMetadata = aboutPageDataResponse?.project
   const topContributors = aboutPageDataResponse?.topContributors
-  const leadersData = aboutPageDataResponse?.users?.filter(Boolean).map((leader) => ({
+  const leadersData = (aboutPageDataResponse?.users ?? []).filter(Boolean).map((leader) => ({
     description: leaders[leader.login],
     memberName: leader.name || leader.login,
     member: leader,

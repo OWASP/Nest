@@ -416,8 +416,9 @@ describe('About Component', () => {
 
   test('handles null project in data response gracefully', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      ...mockAboutData,
-      project: null,
+      data: { ...mockAboutData, project: null },
+      loading: false,
+      error: null,
     })
 
     await act(async () => {
