@@ -6,6 +6,7 @@ import strawberry
 import strawberry_django
 from django.db.models import OuterRef, Subquery
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone
@@ -76,14 +77,8 @@ class MilestoneQuery:
                 id__in=Subquery(latest_milestone_per_author),
             )
 
-        try:
-            limit = int(limit)
-        except (TypeError, ValueError):
+        validated_limit = normalize_limit(limit, MAX_LIMIT)
+        if validated_limit is None:
             return []
 
-        if limit <= 0:
-            return []
-
-        limit = min(limit, MAX_LIMIT)
-
-        return milestones.order_by("-created_at")[:limit]
+        return milestones.order_by("-created_at")[:validated_limit]

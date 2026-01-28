@@ -4,6 +4,7 @@ import strawberry
 import strawberry_django
 from django.db.models import Q
 
+from apps.common.utils import normalize_limit
 from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
@@ -45,17 +46,11 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
-        try:
-            limit = int(limit)
-        except (TypeError, ValueError):
+        validated_limit = normalize_limit(limit, MAX_RECENT_PROJECTS_LIMIT)
+        if validated_limit is None:
             return []
 
-        if limit <= 0:
-            return []
-
-        limit = min(limit, MAX_RECENT_PROJECTS_LIMIT)
-
-        return Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
+        return Project.objects.filter(is_active=True).order_by("-created_at")[:validated_limit]
 
     @strawberry_django.field
     def search_projects(self, query: str) -> list[ProjectNode]:
