@@ -9,27 +9,6 @@ terraform {
   }
 }
 
-data "aws_iam_policy_document" "flow_logs_assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["vpc-flow-logs.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "flow_logs_policy" {
-  statement {
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-      "logs:DescribeLogStreams",
-    ]
-    resources = ["${aws_cloudwatch_log_group.flow_logs.arn}:*"]
-  }
-}
-
 module "nacl" {
   source = "./modules/nacl"
 
@@ -90,15 +69,35 @@ resource "aws_flow_log" "main" {
 }
 
 resource "aws_iam_policy" "flow_logs" {
-  name   = "${var.project_name}-${var.environment}-flow-logs-policy"
-  policy = data.aws_iam_policy_document.flow_logs_policy.json
-  tags   = var.common_tags
+  name = "${var.project_name}-${var.environment}-flow-logs-policy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = [
+        "logs:CreateLogStream",
+        "logs:DescribeLogStreams",
+        "logs:PutLogEvents",
+      ]
+      Effect   = "Allow"
+      Resource = "${aws_cloudwatch_log_group.flow_logs.arn}:*"
+    }]
+  })
+  tags = var.common_tags
 }
 
 resource "aws_iam_role" "flow_logs" {
-  assume_role_policy = data.aws_iam_policy_document.flow_logs_assume_role.json
-  name               = "${var.project_name}-${var.environment}-flow-logs-role"
-  tags               = var.common_tags
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "vpc-flow-logs.amazonaws.com"
+      }
+    }]
+  })
+  name = "${var.project_name}-${var.environment}-flow-logs-role"
+  tags = var.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "flow_logs" {
