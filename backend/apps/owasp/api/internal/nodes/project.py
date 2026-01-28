@@ -83,17 +83,17 @@ class ProjectNode(GenericEntityNode):
 
     @strawberry_django.field(
         prefetch_related=[
-            Prefetch(
+            lambda info:Prefetch(
                 "issues",
                 queryset=Issue.objects.select_related("author", "repository", "level", "milestone")
                 .prefetch_related("labels", "assignees")
-                .order_by("-created_at"),
+                .order_by("-created_at")[:RECENT_ISSUES_LIMIT],
             )
         ]
     )
     def recent_issues(self, root: Project) -> list[IssueNode]:
         """Resolve recent issues."""
-        return list(root.issues.all())[:RECENT_ISSUES_LIMIT]
+        return list(root.issues.all())
 
     @strawberry_django.field
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
