@@ -83,7 +83,7 @@ class ProjectNode(GenericEntityNode):
 
     @strawberry_django.field(
         prefetch_related=[
-            lambda info:Prefetch(
+            lambda info: Prefetch(  # noqa: ARG005
                 "issues",
                 queryset=Issue.objects.select_related("author", "repository", "level", "milestone")
                 .prefetch_related("labels", "assignees")
