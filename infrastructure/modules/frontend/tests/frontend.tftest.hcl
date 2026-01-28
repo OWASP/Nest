@@ -7,11 +7,11 @@ variables {
   environment              = "test"
   frontend_parameters_arns = { "NEXT_PUBLIC_API_URL" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/NEXT_PUBLIC_API_URL" }
   frontend_sg_id           = "sg-frontend-12345"
-  kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+  kms_key_arn              = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days    = 7
   private_subnet_ids       = ["subnet-private-1", "subnet-private-2"]
   project_name             = "nest"
-  target_group_arn         = "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/nest-test-frontend-tg/1234567890123456"
+  target_group_arn         = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-frontend-tg/1234567890123456"
 }
 
 run "test_frontend_cloudwatch_log_group_name_format" {
