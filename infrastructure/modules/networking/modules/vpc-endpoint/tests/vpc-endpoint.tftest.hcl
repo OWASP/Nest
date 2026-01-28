@@ -2,10 +2,10 @@ variables {
   aws_region             = "us-east-1"
   common_tags            = { Environment = "test", Project = "nest" }
   environment            = "test"
-  private_route_table_id = "rtb-private-12345"
+  private_route_table_id = "route-table-private-12345"
   private_subnet_ids     = ["subnet-private-1", "subnet-private-2"]
   project_name           = "nest"
-  public_route_table_id  = "rtb-public-12345"
+  public_route_table_id  = "route-table-public-12345"
   vpc_cidr               = "10.0.0.0/16"
   vpc_id                 = "vpc-12345678"
 }

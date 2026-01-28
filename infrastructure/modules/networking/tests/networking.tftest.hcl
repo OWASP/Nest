@@ -57,7 +57,7 @@ run "test_public_subnet_name_format" {
   }
 }
 
-run "test_public_subnets_in_correct_azs" {
+run "test_public_subnets_in_correct_availability_zones" {
   command = plan
   assert {
     condition     = alltrue([for i, subnet in aws_subnet.public : subnet.availability_zone == var.availability_zones[i]])
@@ -89,7 +89,7 @@ run "test_private_subnet_name_format" {
   }
 }
 
-run "test_private_subnets_in_correct_azs" {
+run "test_private_subnets_in_correct_availability_zones" {
   command = plan
   assert {
     condition     = alltrue([for i, subnet in aws_subnet.private : subnet.availability_zone == var.availability_zones[i]])
