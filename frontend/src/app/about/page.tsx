@@ -98,7 +98,7 @@ const About = () => {
   ]
     .filter(Boolean)
     .map((user) => ({
-      description: leaders[user.login],
+      description: leaders[user.login as keyof typeof leaders],
       memberName: user.name || user.login,
       member: user,
     }))

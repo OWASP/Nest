@@ -200,7 +200,7 @@ jest.mock('components/ShowMoreButton', () => ({
 describe('About Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, _options) => {
       if (query === GetAboutPageDataDocument) {
         return {
           data: {
@@ -429,7 +429,7 @@ describe('About Component', () => {
   })
 
   test('handles null project in data response gracefully', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, _options) => {
       if (query === GetAboutPageDataDocument) {
         return { data: { project: null }, loading: false, error: null }
       }
@@ -481,7 +481,7 @@ describe('About Component', () => {
       error: null,
     }
 
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, _options) => {
       if (query === GetAboutPageDataDocument) {
         return partialUserData
       }
@@ -546,7 +546,7 @@ describe('About Component', () => {
   })
 
   test('triggers toaster error when GraphQL request fails for project', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, _options) => {
       if (query === GetAboutPageDataDocument) {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
@@ -568,7 +568,7 @@ describe('About Component', () => {
   })
 
   test('triggers toaster error when GraphQL request fails for topContributors', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, _options) => {
       if (query === GetAboutPageDataDocument) {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
@@ -652,7 +652,7 @@ describe('About Component', () => {
   })
 
   test('triggers toaster error when GraphQL request fails for a leader', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query, _options) => {
       if (query === GetAboutPageDataDocument) {
         return { loading: false, data: null, error: new Error('GraphQL error for leader') }
       }
