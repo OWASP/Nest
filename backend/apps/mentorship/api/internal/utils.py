@@ -2,8 +2,6 @@
 
 import re
 
-import strawberry
-
 
 def validate_tags(tags: list[str]) -> list[str]:
     """Validate tags for uniqueness and format.
@@ -22,12 +20,14 @@ def validate_tags(tags: list[str]) -> list[str]:
         return []
 
     if len(tags) != len(set(tags)):
-        raise ValueError("Tags must be unique.")
+        msg = "Tags must be unique."
+        raise ValueError(msg)
 
     pattern = re.compile(r"^[a-zA-Z0-9]+$")
     for tag in tags:
         if not pattern.match(tag):
-            raise ValueError(f"Tag '{tag}' must be alphanumeric.")
+            msg = f"Tag '{tag}' must be alphanumeric."
+            raise ValueError(msg)
 
     return tags
 
@@ -49,11 +49,13 @@ def validate_domains(domains: list[str]) -> list[str]:
         return []
 
     if len(domains) != len(set(domains)):
-        raise ValueError("Domains must be unique.")
+        msg = "Domains must be unique."
+        raise ValueError(msg)
 
     pattern = re.compile(r"^[a-zA-Z0-9 ]+$")
     for domain in domains:
         if not pattern.match(domain):
-            raise ValueError(f"Domain '{domain}' must be alphanumeric.")
+            msg = f"Domain '{domain}' must be alphanumeric."
+            raise ValueError(msg)
 
     return domains

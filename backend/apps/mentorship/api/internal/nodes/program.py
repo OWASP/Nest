@@ -11,6 +11,7 @@ from apps.mentorship.api.internal.nodes.enum import (
     ProgramStatusEnum,
 )
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
+from apps.mentorship.api.internal.utils import validate_domains, validate_tags
 
 
 @strawberry.type
@@ -72,8 +73,6 @@ class CreateProgramInput:
 
     def __post_init__(self):
         """Validate input."""
-        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
-
         if self.tags:
             validate_tags(self.tags)
         if self.domains:
@@ -97,8 +96,6 @@ class UpdateProgramInput:
 
     def __post_init__(self):
         """Validate input."""
-        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
-
         if self.tags:
             validate_tags(self.tags)
         if self.domains:
