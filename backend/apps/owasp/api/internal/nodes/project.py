@@ -113,20 +113,19 @@ class ProjectNode(GenericEntityNode):
                     "author",
                     "milestone",
                     "repository__organization",
-                    "repository",
                 )
                 .prefetch_related(
                     "assignees",
                     "labels",
                 )
-                .order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT],
+                .order_by("-created_at"),
                 to_attr="_recent_pull_requests",
             ),
         ],
     )
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
-        return getattr(root, "_recent_pull_requests", [])
+        return getattr(root, "_recent_pull_requests", [])[:RECENT_PULL_REQUESTS_LIMIT]
 
     @strawberry_django.field
     def recent_releases(self, root: Project) -> list[ReleaseNode]:
