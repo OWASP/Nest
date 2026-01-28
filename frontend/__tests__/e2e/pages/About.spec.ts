@@ -17,7 +17,7 @@ test.describe('About Page', () => {
           }),
           {}
         )
-        await route.fulfill({
+        return route.fulfill({
           status: 200,
           json: {
             data: {
@@ -28,6 +28,7 @@ test.describe('About Page', () => {
           },
         })
       }
+      return route.continue()
     })
 
     await page.context().addCookies([

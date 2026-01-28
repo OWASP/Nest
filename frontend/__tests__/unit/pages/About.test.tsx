@@ -224,6 +224,36 @@ describe('About Component', () => {
     jest.clearAllMocks()
   })
 
+  test('renders mission and who its for sections correctly', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const missionSection = screen.getByText('Our Mission').closest('div')
+    expect(missionSection).toBeInTheDocument()
+    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
+
+    const whoItsForSection = screen.getByText("Who It's For").closest('div')
+    expect(whoItsForSection).toBeInTheDocument()
+    expect(screen.getByText('Test target audience description')).toBeInTheDocument()
+  })
+
+  test('renders mission section', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText('Our Mission')).toBeInTheDocument()
+    expect(screen.getByText('Test mission statement')).toBeInTheDocument()
+  })
+
+  test("renders 'Who It's For' section", async () => {
+    await act(async () => {
+      render(<About />)
+    })
+    expect(screen.getByText("Who It's For")).toBeInTheDocument()
+    expect(screen.getByText(/Test target audience description/)).toBeInTheDocument()
+  })
+
   test('renders key features section correctly', async () => {
     await act(async () => {
       render(<About />)
