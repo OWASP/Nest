@@ -246,8 +246,8 @@ jobs:
           name: backend-model-graphs
           path: backend/model-graphs
 
-  scan-code:
-    name: Run Code Scan
+  run-security-scan-code:
+    name: Run code security scan
     needs:
       - check-frontend
       - pre-commit
