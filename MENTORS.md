@@ -56,9 +56,9 @@ Senior GRC & Technology Risk Leader, CISSP
 
 Software Developer | GSoC'25 contributor at FOSSology
 
-[GitHub](https://github.com/SalmanDeveloperz/) • [LinkedIn](https://www.linkedin.com/in/msalman199/) • [Slack](https://owasp.slack.com/team/U0A7YV0SPNE) • Country (Timezone)
+[GitHub](https://github.com/SalmanDeveloperz/) • [LinkedIn](https://www.linkedin.com/in/msalman199/) • [Slack](https://owasp.slack.com/team/U0A7YV0SPNE) • [Pakistan (Pakistan Standard Time)](https://time-time.net/time/islamabad-pakistan.php)
 
-*This section is reserved for the mentor to add their own description.*
+Muhammad Salman is a Linux-focused software engineer and GSoC'25 contributor at FOSSology (Linux Foundation). He works on infrastructure, backend reliability, and production debugging in cloud-native systems. For GSoC 2026, his focus is infrastructure reliability, observability, and operational best practices.
 
 #### Noland Crane
 
