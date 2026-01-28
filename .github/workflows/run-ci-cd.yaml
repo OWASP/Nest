@@ -351,7 +351,7 @@ jobs:
           --network host \
           --env-file frontend/.env.e2e.example \
           -p 3000:3000 \
-          owasp/nest:frontend-e2e-latest sh -c "pnpm run build && pnpm run start"
+          owasp/nest:frontend-e2e-latest
 
       - name: Wait for frontend to be ready
         run: |
