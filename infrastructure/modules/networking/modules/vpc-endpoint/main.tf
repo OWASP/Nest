@@ -24,8 +24,8 @@ resource "aws_security_group" "vpc_endpoints" {
 }
 
 resource "aws_security_group_rule" "vpc_endpoints_ingress_https" {
-  count             = local.any_interface_endpoint ? 1 : 0
   cidr_blocks       = [var.vpc_cidr]
+  count             = local.any_interface_endpoint ? 1 : 0
   description       = "Allow HTTPS from VPC"
   from_port         = 443
   protocol          = "tcp"
@@ -83,6 +83,18 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id            = var.vpc_id
 }
 
+resource "aws_vpc_endpoint_route_table_association" "s3_private" {
+  count           = var.create_s3 ? 1 : 0
+  route_table_id  = var.private_route_table_id
+  vpc_endpoint_id = aws_vpc_endpoint.s3[0].id
+}
+
+resource "aws_vpc_endpoint_route_table_association" "s3_public" {
+  count           = var.create_s3 ? 1 : 0
+  route_table_id  = var.public_route_table_id
+  vpc_endpoint_id = aws_vpc_endpoint.s3[0].id
+}
+
 resource "aws_vpc_endpoint" "secretsmanager" {
   count               = var.create_secretsmanager ? 1 : 0
   private_dns_enabled = true
@@ -107,16 +119,4 @@ resource "aws_vpc_endpoint" "ssm" {
   })
   vpc_endpoint_type = "Interface"
   vpc_id            = var.vpc_id
-}
-
-resource "aws_vpc_endpoint_route_table_association" "s3_private" {
-  count           = var.create_s3 ? 1 : 0
-  route_table_id  = var.private_route_table_id
-  vpc_endpoint_id = aws_vpc_endpoint.s3[0].id
-}
-
-resource "aws_vpc_endpoint_route_table_association" "s3_public" {
-  count           = var.create_s3 ? 1 : 0
-  route_table_id  = var.public_route_table_id
-  vpc_endpoint_id = aws_vpc_endpoint.s3[0].id
 }
