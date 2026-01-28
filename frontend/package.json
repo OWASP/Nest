@@ -43,7 +43,7 @@
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
     "eslint-plugin-import": "^2.32.0",
-    "framer-motion": "^12.29.0",
+    "framer-motion": "^12.29.2",
     "graphql": "^16.12.0",
     "ics": "^3.8.1",
     "isomorphic-dompurify": "^2.35.0",
@@ -90,8 +90,8 @@
     "@types/node": "^25.0.10",
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
-    "@typescript-eslint/eslint-plugin": "^8.53.1",
-    "@typescript-eslint/parser": "^8.53.1",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.4",
     "eslint-config-prettier": "^10.1.8",
@@ -115,7 +115,7 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.53.1",
+    "typescript-eslint": "^8.54.0",
     "util": "^0.12.5"
   },
   "engines": {
