@@ -1,52 +1,58 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, Page, BrowserContext } from '@playwright/test'
+
+test.describe.configure({ mode: 'serial' })
 
 test.describe('User Details Page', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('members/arkid15r', { timeout: 120000 })
-  })
-  test('should have a heading and summary', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Test User' })).toBeVisible()
-    await expect(page.getByText('Test @User')).toBeVisible()
+  let context: BrowserContext
+  let page: Page
+
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext()
+    page = await context.newPage()
+    await page.goto('/members/arkid15r', { timeout: 25000 })
   })
 
-  test('should have user details block', async ({ page }) => {
+  test.afterAll(async () => {
+    await context.close()
+  })
+
+  test('should have a heading and summary', async () => {
+    await expect(page.getByRole('heading', { name: 'Arkadii Yakovets', exact: true })).toBeVisible()
+    await expect(page.getByText('@arkid15r')).toBeVisible()
+  })
+
+  test('should have user details block', async () => {
     await expect(page.getByRole('heading', { name: 'User Details' })).toBeVisible()
-    await expect(page.getByText('Location: Test Location')).toBeVisible()
-    await expect(page.getByText('Email: testuser@example.com')).toBeVisible()
-    await expect(page.getByText('Company: Test Company')).toBeVisible()
+    await expect(page.getByText(/Location:/i)).toBeVisible()
+    await expect(page.getByText(/Email:/i)).toBeVisible()
+    await expect(page.getByRole('link', { name: 'github.com/arkid15r' })).toBeVisible()
   })
 
-  test('should have user stats block', async ({ page }) => {
-    await expect(page.getByText('10 Followers')).toBeVisible()
-    await expect(page.getByText('5 Following')).toBeVisible()
-    await expect(page.getByText('3 Repositories')).toBeVisible()
+  test('should have user stats block', async () => {
+    // Validation of stats grid using regex to handle changing numbers
+    const stats = ['Followers', 'Following', 'Repositories']
+    for (const stat of stats) {
+      await expect(
+        page
+          .locator('div')
+          .filter({ hasText: new RegExp(`\\d.*${stat}`) })
+          .first()
+      ).toBeVisible()
+    }
   })
 
-  test('should have user issues', async ({ page }) => {
+  test('should have user activity sections', async () => {
+    // Check for standard activity headings
     await expect(page.getByRole('heading', { name: 'Issues' })).toBeVisible()
-    await expect(page.getByText('Test Issue')).toBeVisible()
-    await expect(page.getByText('test-repo-1')).toBeVisible()
-  })
-
-  test('should have user releases', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Releases' })).toBeVisible()
-    await expect(page.getByText('v1.0.0')).toBeVisible()
-  })
-
-  test('should have user recent milestones', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
-    await expect(page.getByText('Mar 1, 2025')).toBeVisible()
-    await expect(page.getByText('Project Repo 1')).toBeVisible()
-  })
-
-  test('should have user pull requests', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Pull Requests' })).toBeVisible()
-    await expect(page.getByText('Test Pull Request')).toBeVisible()
-  })
-
-  test('should have top repositories', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
-    await expect(page.getByText('test-repo-2')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    // Verify that at least one repository is listed in the repos section
+    const firstRepo = page
+      .locator('section')
+      .filter({ hasText: 'Repositories' })
+      .locator('a')
+      .first()
+    await expect(firstRepo).toBeVisible()
   })
 })

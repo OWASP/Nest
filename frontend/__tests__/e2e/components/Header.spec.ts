@@ -1,23 +1,32 @@
-import { test, expect, devices } from '@playwright/test'
+import { test, expect, devices, BrowserContext, Page } from '@playwright/test'
 
 // Desktop tests
-test.describe('Header - Desktop (Chrome)', () => {
+test.describe.serial('Header - Desktop (Chrome)', () => {
+  let context: BrowserContext
+  let page: Page
+
   test.use({
     viewport: { width: 1280, height: 800 },
     isMobile: false,
   })
 
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/', { timeout: 120000 })
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext()
+    page = await context.newPage()
+    await page.goto('/', { timeout: 25000 })
   })
 
-  test('should have logo', async ({ page }) => {
+  test.afterAll(async () => {
+    await context.close()
+  })
+
+  test('should have logo', async () => {
     await expect(
       page.locator('#navbar-sticky').getByRole('link', { name: 'OWASP Logo Nest' })
     ).toBeVisible()
   })
 
-  test('should have buttons', async ({ page }) => {
+  test('should have buttons', async () => {
     await expect(
       page.locator('#navbar-sticky').getByRole('link', { name: 'Star', exact: true })
     ).toBeVisible()
@@ -26,7 +35,7 @@ test.describe('Header - Desktop (Chrome)', () => {
     ).toBeVisible()
   })
 
-  test('should have nav links including community dropdown', async ({ page }) => {
+  test('should have nav links including community dropdown', async () => {
     const navbar = page.locator('#navbar-sticky')
 
     // Check main nav links
@@ -44,7 +53,7 @@ test.describe('Header - Desktop (Chrome)', () => {
     await expect(navbar.getByRole('link', { name: 'Snapshots' })).toBeVisible()
   })
 
-  test('all dropdown triggers should use pointer cursor', async ({ page }) => {
+  test('all dropdown triggers should use pointer cursor', async () => {
     await page.goto('/')
 
     const dropdownButtons = page.locator('#navbar-sticky button')
@@ -66,27 +75,36 @@ test.use({
   isMobile: true,
 })
 
-test.describe('Header - Mobile (iPhone 13)', () => {
-  test.beforeEach(async ({ page }) => {
+test.describe.serial('Header - Mobile (iPhone 13)', () => {
+  let page: Page
+  let context: BrowserContext
+
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext()
+    page = await context.newPage()
     await page.goto('/')
   })
 
-  test('should have logo', async ({ page }) => {
+  test.afterAll(async () => {
+    await context.close()
+  })
+
+  test('should have logo', async () => {
     await expect(
       page.locator('#navbar-sticky').getByRole('link', { name: 'OWASP Logo Nest' })
     ).toBeVisible()
   })
 
-  test('should have mobile menu button', async ({ page }) => {
+  test('should have mobile menu button', async () => {
     await expect(page.getByRole('button', { name: /menu/i })).toBeVisible()
   })
-  test('should show button when menu clicked', async ({ page }) => {
+  test('should show button when menu clicked', async () => {
     const menuButton = page.getByRole('button', { name: /menu/i })
     await menuButton.click()
     await expect(page.getByRole('link', { name: 'Star On Github' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Sponsor Us' })).toBeVisible()
   })
-  test('should show navigation when menu clicked', async ({ page }) => {
+  test('should show navigation when menu clicked', async () => {
     const menuButton = page.getByRole('button', { name: /menu/i })
     await menuButton.click()
 
