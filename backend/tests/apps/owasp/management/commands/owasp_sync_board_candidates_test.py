@@ -83,7 +83,7 @@ Content"""
 
         mock_update_data = mocker.patch("apps.owasp.models.entity_member.EntityMember.update_data")
 
-        repo_files = [{"name": "jane-doe.md", "download_url": "http://github.com/jane-doe.md"}]
+        repo_files = [{"name": "jane-doe.md", "download_url": "https://github.com/jane-doe.md"}]
 
         file_content = "---\nname: Jane Doe\nemail: jane@example.com\n---\nBio"
 
