@@ -110,15 +110,9 @@ class ProjectNode(GenericEntityNode):
             lambda _info: Prefetch(
                 "pull_requests",
                 queryset=PullRequest.objects.select_related(
-                    "author",
-                    "milestone",
+                    "author__owasp_profile",
                     "repository__organization",
-                )
-                .prefetch_related(
-                    "assignees",
-                    "labels",
-                )
-                .order_by("-created_at"),
+                ).order_by("-created_at"),
                 to_attr="_recent_pull_requests",
             ),
         ],
