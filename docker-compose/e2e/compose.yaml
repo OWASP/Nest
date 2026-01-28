@@ -93,21 +93,17 @@ services:
     container_name: e2e-nest-frontend
     build:
       context: ../../frontend
-      dockerfile: ../docker/frontend/Dockerfile.e2e
-
-    command: >
-      sh -c '
-      pnpm run build && pnpm run start
-      '
+      dockerfile: ../docker/frontend/Dockerfile
+      args:
+        ENV_FILE: .env.e2e.example
+        NEXT_PUBLIC_API_URL: /
+        NEXT_PUBLIC_CSRF_URL: /csrf
+        NEXT_PUBLIC_GRAPHQL_URL: /graphql
+        NEXT_PUBLIC_IDX_URL: /idx
 
     depends_on:
       backend:
         condition: service_healthy
-    environment:
-      - NEXT_PUBLIC_API_URL=/
-      - NEXT_PUBLIC_CSRF_URL=/csrf
-      - NEXT_PUBLIC_GRAPHQL_URL=/graphql
-    env_file: ../../frontend/.env.e2e.example
     ports:
       - 3500:3000
     networks:
@@ -118,7 +114,7 @@ services:
       retries: 10
       test: >
         sh -c '
-          wget --spider http://localhost:3000/
+          wget --spider http://0.0.0.0:3000/
         '
       timeout: 5s
 

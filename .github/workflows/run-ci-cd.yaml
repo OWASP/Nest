@@ -338,7 +338,9 @@ jobs:
             type=gha
             type=registry,ref=owasp/nest:frontend-e2e-cache
           context: frontend
-          file: docker/frontend/Dockerfile.e2e
+          file: docker/frontend/Dockerfile
+          build-args: |
+            ENV_FILE=.env.e2e.example
           load: true
           platforms: linux/amd64
           tags: owasp/nest:frontend-e2e-latest
