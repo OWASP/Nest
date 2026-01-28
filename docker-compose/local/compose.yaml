@@ -67,7 +67,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data-pr-3298:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
