@@ -8,3 +8,5 @@ export const IS_PROJECT_HEALTH_ENABLED =
   process.env.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED === 'true'
 export const RELEASE_VERSION = process.env.NEXT_PUBLIC_RELEASE_VERSION
 export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
+export const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
+export const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST

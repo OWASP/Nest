@@ -231,3 +231,5 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
+    POSTHOG_KEY = values.Value(environ_name="POSTHOG_KEY")
+    POSTHOG_HOST = values.Value(environ_name="POSTHOG_HOST", default="https://us.i.posthog.com")
