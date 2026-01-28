@@ -52,3 +52,16 @@ class UserQuery:
 
         """
         return User.objects.filter(has_public_member_page=True, login=login).first()
+
+    @strawberry_django.field
+    def users(self, logins: list[str]) -> list[UserNode]:
+        """Resolve users by their logins.
+
+        Args:
+            logins (list[str]): List of user logins.
+
+        Returns:
+            list[User]: List of user objects.
+
+        """
+        return list(User.objects.filter(login__in=logins, has_public_member_page=True))

@@ -6,12 +6,6 @@ import { useRouter } from 'next/navigation'
 import React, { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
-import {
-  GetProjectMetadataDocument,
-  GetTopContributorsDocument,
-} from 'types/__generated__/projectQueries.generated'
-import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
-
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
@@ -201,43 +195,13 @@ jest.mock('components/ShowMoreButton', () => ({
   },
 }))
 
-const mockUserData = (username) => ({
-  data: { user: mockAboutData.users[username] },
-  loading: false,
-  error: null,
-})
-
-const mockProjectData = {
-  data: { project: mockAboutData.project },
-  loading: false,
-  error: null,
-}
-
-const mockTopContributorsData = {
-  data: { topContributors: mockAboutData.topContributors },
-  loading: false,
-  error: null,
-}
-
 describe('About Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      const key = options?.variables?.key
-
-      if (query === GetProjectMetadataDocument) {
-        if (key === 'nest') {
-          return mockProjectData
-        }
-      } else if (query === GetTopContributorsDocument) {
-        if (key === 'nest') {
-          return mockTopContributorsData
-        }
-      } else if (query === GetLeaderDataDocument) {
-        return mockUserData(key)
-      }
-
-      return { loading: true }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockAboutData,
+      loading: false,
+      error: null,
     })
     mockRouter = { push: jest.fn() }
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
@@ -451,13 +415,9 @@ describe('About Component', () => {
   })
 
   test('handles null project in data response gracefully', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
-        return { data: { project: null }, loading: false, error: null }
-      } else if (['arkid15r', 'kasya', 'mamicidal'].includes(options?.variables?.key)) {
-        return mockUserData(options?.variables?.key)
-      }
-      return { loading: true }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      ...mockAboutData,
+      project: null,
     })
 
     await act(async () => {
@@ -488,30 +448,22 @@ describe('About Component', () => {
 
   test('handles partial user data in leader response', async () => {
     const partialUserData = {
+      avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
+      company: 'OWASP',
+      // name is missing
+      login: 'arkid15r',
+      url: '/members/arkid15r',
+    }
+
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
-        user: {
-          avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
-          company: 'OWASP',
-          // name is missing
-          login: 'arkid15r',
-          url: '/members/arkid15r',
-        },
+        ...mockAboutData,
+        users: mockAboutData.users.map((user) =>
+          user.login === 'arkid15r' ? partialUserData : user
+        ),
       },
       loading: false,
       error: null,
-    }
-
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
-        return mockTopContributorsData
-      } else if (options?.variables?.key === 'arkid15r') {
-        return partialUserData
-      } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
-        return mockUserData(options?.variables?.key)
-      }
-      return { loading: true }
     })
 
     await act(async () => {
@@ -571,35 +523,9 @@ describe('About Component', () => {
     })
   })
 
-  test('triggers toaster error when GraphQL request fails for project', async () => {
+  test('triggers toaster error when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
-        return { loading: false, data: null, error: new Error('GraphQL error') }
-      }
-      return {
-        loading: false,
-        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
-        error: null,
-      }
-    })
-    await act(async () => {
-      render(<About />)
-    })
-    await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith({
-        color: 'danger',
-        description: 'GraphQL error',
-        shouldShowTimeoutProgress: true,
-        timeout: 5000,
-        title: 'Server Error',
-        variant: 'solid',
-      })
-    })
-  })
-
-  test('triggers toaster error when GraphQL request fails for topContributors', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
+      if (options?.variables?.key === 'nest') {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
       return {
@@ -683,38 +609,5 @@ describe('About Component', () => {
     expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
     expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
-  })
-
-  test('triggers toaster error when GraphQL request fails for a leader', async () => {
-    ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetLeaderDataDocument && options?.variables?.key === 'arkid15r') {
-        return { loading: false, data: null, error: new Error('GraphQL error for leader') }
-      }
-      if (query === GetProjectMetadataDocument) {
-        return mockProjectData
-      }
-      if (query === GetTopContributorsDocument) {
-        return mockTopContributorsData
-      }
-      if (query === GetLeaderDataDocument) {
-        return mockUserData(options?.variables?.key)
-      }
-      return { loading: true }
-    })
-
-    await act(async () => {
-      render(<About />)
-    })
-
-    await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith({
-        color: 'danger',
-        description: 'GraphQL error for leader',
-        shouldShowTimeoutProgress: true,
-        timeout: 5000,
-        title: 'Server Error',
-        variant: 'solid',
-      })
-    })
   })
 })

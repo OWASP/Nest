@@ -725,6 +725,7 @@ export type Query = {
   topContributors: Array<RepositoryContributorNode>;
   upcomingEvents: Array<EventNode>;
   user?: Maybe<UserNode>;
+  users: Array<UserNode>;
 };
 
 
@@ -937,6 +938,11 @@ export type QueryUpcomingEventsArgs = {
 
 export type QueryUserArgs = {
   login: Scalars['String']['input'];
+};
+
+
+export type QueryUsersArgs = {
+  logins: Array<Scalars['String']['input']>;
 };
 
 export type ReleaseNode = Node & {

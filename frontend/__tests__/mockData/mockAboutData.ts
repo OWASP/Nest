@@ -42,21 +42,21 @@ export const mockAboutData = {
     login: `contributor${i + 1}`,
     name: `Contributor ${i + 1}`,
   })),
-  users: {
-    arkid15r: {
+  users: [
+    {
       avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
       login: 'arkid15r',
       name: 'Arkadii Yakovets',
     },
-    kasya: {
+    {
       avatarUrl: 'https://avatars.githubusercontent.com/u/5873153?v=4',
       login: 'kasya',
       name: 'Kate Golovanova',
     },
-    mamicidal: {
+    {
       avatarUrl: 'https://avatars.githubusercontent.com/u/112129498?v=4',
       login: 'mamicidal',
       name: 'Starr Brown',
     },
-  },
+  ],
 }
