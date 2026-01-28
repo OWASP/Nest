@@ -10,7 +10,17 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
     NPM_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
-ENV PATH="$PNPM_HOME:$PATH"
+ARG ENV_FILE=.env
+ARG NEXT_PUBLIC_API_URL=/
+ARG NEXT_PUBLIC_CSRF_URL=/csrf
+ARG NEXT_PUBLIC_GRAPHQL_URL=/graphql
+ARG NEXT_PUBLIC_IDX_URL=/idx
+
+ENV PATH="$PNPM_HOME:$PATH" \
+    NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
+    NEXT_PUBLIC_CSRF_URL=${NEXT_PUBLIC_CSRF_URL} \
+    NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL} \
+    NEXT_PUBLIC_IDX_URL=${NEXT_PUBLIC_IDX_URL}
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
@@ -29,7 +39,8 @@ COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
-COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 ${ENV_FILE} ./.env
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 
