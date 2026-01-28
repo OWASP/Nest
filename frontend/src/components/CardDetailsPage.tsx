@@ -365,7 +365,7 @@ const DetailsCard = ({
             </p>
             <Link
               href={`/my/mentorship/programs/${programKey}/modules/${entityKey}/issues`}
-              className="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700 hover:underline dark:bg-gray-700 dark:text-blue-400"
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-5 py-3 font-semibold text-blue-400 transition-colors hover:bg-blue-700 hover:underline dark:bg-gray-700 dark:text-blue-400"
             >
               View All Issues
             </Link>
