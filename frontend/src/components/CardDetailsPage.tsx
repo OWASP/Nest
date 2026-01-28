@@ -358,6 +358,19 @@ const DetailsCard = ({
             getUrl={(login) => getMenteeUrl(programKey || '', entityKey || '', login)}
           />
         )}
+        {type === 'module' && programKey && entityKey && (
+          <SecondaryCard icon={FaCircleExclamation} title={<AnchorTitle title="Issues" />}>
+            <p className="mb-4 text-gray-600 dark:text-gray-400">
+              View and manage all issues assigned to this module.
+            </p>
+            <Link
+              href={`/my/mentorship/programs/${programKey}/modules/${entityKey}/issues`}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-5 py-3 font-semibold text-white transition-colors hover:bg-blue-700 hover:underline dark:bg-gray-700 dark:text-blue-400"
+            >
+              View All Issues
+            </Link>
+          </SecondaryCard>
+        )}
         {showIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
