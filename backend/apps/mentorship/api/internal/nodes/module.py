@@ -14,6 +14,7 @@ from apps.github.models.user import User
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
+from apps.mentorship.api.internal.utils import validate_domains, validate_tags
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
 
@@ -206,8 +207,6 @@ class CreateModuleInput:
 
     def __post_init__(self):
         """Validate input."""
-        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
-
         if self.tags:
             validate_tags(self.tags)
         if self.domains:
@@ -234,8 +233,6 @@ class UpdateModuleInput:
 
     def __post_init__(self):
         """Validate input."""
-        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
-
         if self.tags:
             validate_tags(self.tags)
         if self.domains:

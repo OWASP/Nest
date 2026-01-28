@@ -13,6 +13,7 @@ from apps.mentorship.api.internal.nodes.enum import (
     ExperienceLevelEnum,  # noqa: TC001
     ProgramStatusEnum,  # noqa: TC001
 )
+from apps.mentorship.api.internal.utils import validate_domains, validate_tags
 
 # TC001/TC003: These imports must stay at runtime. Strawberry GraphQL introspects
 # type annotations when building the schema; moving them under TYPE_CHECKING would
@@ -85,8 +86,6 @@ class CreateProgramInput:
 
     def __post_init__(self):
         """Validate input."""
-        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
-
         if self.tags:
             validate_tags(self.tags)
         if self.domains:
@@ -110,8 +109,6 @@ class UpdateProgramInput:
 
     def __post_init__(self):
         """Validate input."""
-        from apps.mentorship.api.internal.utils import validate_domains, validate_tags
-
         if self.tags:
             validate_tags(self.tags)
         if self.domains:
