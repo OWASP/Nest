@@ -23,7 +23,7 @@ django-rq = "^3.1"
 django-storages = { extras = [ "s3" ], version = "^1.14.4" }
 emoji = "^2.14.1"
 geopy = "^2.4.1"
-gunicorn = "^23.0.0"
+gunicorn = "^24.0.0"
 humanize = "^4.11.0"
 jinja2 = "^3.1.6"
 langchain = "^0.3.26"
@@ -46,7 +46,7 @@ requests = "^2.32.5"
 sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 slack-bolt = "^1.22.0"
 slack-sdk = "^3.37.0"
-strawberry-graphql = { extras = [ "django" ], version = "^0.289.0" }
+strawberry-graphql = { extras = [ "django" ], version = "^0.289.7" }
 strawberry-graphql-django = "^0.74.1"
 thefuzz = "^0.22.1"
 pyparsing = "^3.2.3"
