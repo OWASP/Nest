@@ -7,11 +7,10 @@ from django.db import migrations, models
 
 def migrate_program_admins_to_admin_model(apps, _schema_editor):
     """Migrate existing nest.User program admins to Admin model via ProgramAdmin."""
-    program_model = apps.get_model("mentorship", "Program")
     admin_model = apps.get_model("mentorship", "Admin")
     program_admin_model = apps.get_model("mentorship", "ProgramAdmin")
+    program_model = apps.get_model("mentorship", "Program")
 
-    admins_to_create = []
     program_admins_to_create = []
     all_github_user_ids = set()
 
@@ -20,43 +19,26 @@ def migrate_program_admins_to_admin_model(apps, _schema_editor):
     for program in programs:
         old_admins = program.admins.all()
 
-        for nest_user in old_admins:
-            if not nest_user.github_user_id:
+        for old_admin in old_admins:
+            github_user_id = old_admin.github_user_id
+            if not github_user_id:
                 continue
 
-            github_user_id = nest_user.github_user_id
             all_github_user_ids.add(github_user_id)
 
             try:
                 admin = admin_model.objects.get(github_user_id=github_user_id)
                 if not admin.nest_user_id:
-                    admin.nest_user_id = nest_user.id
+                    admin.nest_user_id = old_admin.nest_user_id
                     admin.save(update_fields=["nest_user"])
             except admin_model.DoesNotExist:
-                admins_to_create.append(
-                    admin_model(github_user_id=github_user_id, nest_user_id=nest_user.id)
+                admin = admin_model.objects.create(
+                    github_user_id=github_user_id, nest_user_id=old_admin.nest_user_id
                 )
 
-    if admins_to_create:
-        admin_model.objects.bulk_create(admins_to_create, ignore_conflicts=True)
-
-    admins_by_github_user = {
-        admin.github_user_id: admin
-        for admin in admin_model.objects.filter(github_user_id__in=all_github_user_ids)
-    }
-
-    for program in programs:
-        for nest_user in program.admins.all():
-            if not nest_user.github_user_id:
-                continue
-
-            github_user_id = nest_user.github_user_id
-            admin = admins_by_github_user.get(github_user_id)
-            if admin:
-                program_admins_to_create.append(
-                    program_admin_model(program=program, admin=admin, role="owner")
-                )
-
+            program_admins_to_create.append(
+                program_admin_model(program=program, admin=admin, role="owner")
+            )
     if program_admins_to_create:
         program_admin_model.objects.bulk_create(program_admins_to_create, ignore_conflicts=True)
 
