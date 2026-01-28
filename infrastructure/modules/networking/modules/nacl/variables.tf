@@ -26,6 +26,11 @@ variable "public_subnet_ids" {
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC."
   type        = string
+
+  validation {
+    condition     = can(cidrhost(var.vpc_cidr, 0))
+    error_message = "VPC CIDR must be a valid IPv4 CIDR block (e.g., 10.0.0.0/16)."
+  }
 }
 
 variable "vpc_id" {
