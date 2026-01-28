@@ -17,6 +17,14 @@ variables {
   vpc_cidr                               = "10.0.0.0/16"
 }
 
+run "test_vpc_name_format" {
+  command = plan
+  assert {
+    condition     = aws_vpc.main.tags["Name"] == "${var.project_name}-${var.environment}-vpc"
+    error_message = "VPC name must follow format: {project}-{environment}-vpc."
+  }
+}
+
 run "test_vpc_cidr_block" {
   command = plan
   assert {
@@ -38,6 +46,14 @@ run "test_vpc_dns_support_enabled" {
   assert {
     condition     = aws_vpc.main.enable_dns_support == true
     error_message = "VPC DNS support must be enabled."
+  }
+}
+
+run "test_public_subnet_name_format" {
+  command = plan
+  assert {
+    condition     = aws_subnet.public[0].tags["Name"] == "${var.project_name}-${var.environment}-public-${var.availability_zones[0]}"
+    error_message = "Public subnet names must follow format: {project}-{environment}-public-{az}."
   }
 }
 
@@ -65,6 +81,14 @@ run "test_public_subnets_map_public_ip" {
   }
 }
 
+run "test_private_subnet_name_format" {
+  command = plan
+  assert {
+    condition     = aws_subnet.private[0].tags["Name"] == "${var.project_name}-${var.environment}-private-${var.availability_zones[0]}"
+    error_message = "Private subnet names must follow format: {project}-{environment}-private-{az}."
+  }
+}
+
 run "test_private_subnets_in_correct_azs" {
   command = plan
   assert {
@@ -89,11 +113,43 @@ run "test_private_subnets_no_public_ip" {
   }
 }
 
+run "test_internet_gateway_name_format" {
+  command = plan
+  assert {
+    condition     = aws_internet_gateway.main.tags["Name"] == "${var.project_name}-${var.environment}-igw"
+    error_message = "Internet gateway name must follow format: {project}-{environment}-igw."
+  }
+}
+
+run "test_nat_eip_name_format" {
+  command = plan
+  assert {
+    condition     = aws_eip.nat.tags["Name"] == "${var.project_name}-${var.environment}-nat-eip"
+    error_message = "NAT EIP name must follow format: {project}-{environment}-nat-eip."
+  }
+}
+
+run "test_nat_gateway_name_format" {
+  command = plan
+  assert {
+    condition     = aws_nat_gateway.main.tags["Name"] == "${var.project_name}-${var.environment}-nat"
+    error_message = "NAT gateway name must follow format: {project}-{environment}-nat."
+  }
+}
+
 run "test_eip_domain_is_vpc" {
   command = plan
   assert {
     condition     = aws_eip.nat.domain == "vpc"
     error_message = "NAT EIP domain must be VPC."
+  }
+}
+
+run "test_public_route_table_name_format" {
+  command = plan
+  assert {
+    condition     = aws_route_table.public.tags["Name"] == "${var.project_name}-${var.environment}-public-rt"
+    error_message = "Public route table name must follow format: {project}-{environment}-public-rt."
   }
 }
 
@@ -105,11 +161,35 @@ run "test_public_route_table_associations_count" {
   }
 }
 
+run "test_private_route_table_name_format" {
+  command = plan
+  assert {
+    condition     = aws_route_table.private.tags["Name"] == "${var.project_name}-${var.environment}-private-rt"
+    error_message = "Private route table name must follow format: {project}-{environment}-private-rt."
+  }
+}
+
 run "test_private_route_table_associations_count" {
   command = plan
   assert {
     condition     = length(aws_route_table_association.private) == length(aws_subnet.private)
     error_message = "All private subnets must be associated with private route table."
+  }
+}
+
+run "test_cloudwatch_log_group_name_format" {
+  command = plan
+  assert {
+    condition     = aws_cloudwatch_log_group.flow_logs.name == "/aws/vpc-flow-logs/${var.project_name}-${var.environment}"
+    error_message = "CloudWatch log group name must follow format: /aws/vpc-flow-logs/{project}-{environment}."
+  }
+}
+
+run "test_flow_log_name_format" {
+  command = plan
+  assert {
+    condition     = aws_flow_log.main.tags["Name"] == "${var.project_name}-${var.environment}-vpc-flow-log"
+    error_message = "Flow log name must follow format: {project}-{environment}-vpc-flow-log."
   }
 }
 
