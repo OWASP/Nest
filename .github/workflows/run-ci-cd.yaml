@@ -700,7 +700,6 @@ jobs:
           CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           ECS_USE_FARGATE_SPOT: true
-          ECS_USE_PUBLIC_SUBNETS: false
           ENVIRONMENT: "staging"
           FRONTEND_USE_FARGATE_SPOT: true
           LAMBDA_FUNCTION_NAME: ${{ secrets.ZAPPA_LAMBDA_FUNCTION_NAME }}
@@ -713,7 +712,6 @@ jobs:
           create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
           ecs_use_fargate_spot=$ECS_USE_FARGATE_SPOT
-          ecs_use_public_subnets=$ECS_USE_PUBLIC_SUBNETS
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
           lambda_function_name="$LAMBDA_FUNCTION_NAME"

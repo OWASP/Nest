@@ -12,13 +12,6 @@ variable "common_tags" {
 variable "domain_name" {
   description = "The domain name for ACM certificate (e.g., nest.owasp.dev)."
   type        = string
-  default     = null
-}
-
-variable "enable_https" {
-  description = "Whether to enable the HTTPS listener."
-  type        = bool
-  default     = false
 }
 
 variable "environment" {

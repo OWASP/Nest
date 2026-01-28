@@ -11,35 +11,8 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_appautoscaling_policy" "frontend_cpu" {
-  count              = var.enable_auto_scaling ? 1 : 0
-  name               = "${var.project_name}-${var.environment}-frontend-cpu-scaling"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.frontend[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.frontend[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.frontend[0].service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 60
-    target_value       = 70.0
-
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
-    }
-  }
-}
-
-resource "aws_appautoscaling_target" "frontend" {
-  count              = var.enable_auto_scaling ? 1 : 0
-  max_capacity       = var.max_count
-  min_capacity       = var.min_count
-  resource_id        = "service/${aws_ecs_cluster.frontend.name}/${aws_ecs_service.frontend.name}"
-  scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace  = "ecs"
-}
-
 resource "aws_cloudwatch_log_group" "frontend" {
+  kms_key_id        = var.kms_key_arn
   name              = "/aws/ecs/${var.project_name}-${var.environment}-frontend"
   retention_in_days = var.log_retention_in_days
   tags = merge(var.common_tags, {
@@ -47,9 +20,21 @@ resource "aws_cloudwatch_log_group" "frontend" {
   })
 }
 
-resource "aws_ecr_lifecycle_policy" "frontend" {
-  repository = aws_ecr_repository.frontend.name
+# TODO: disallow tag mutability
+# nosemgrep: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
+resource "aws_ecr_repository" "frontend" {
+  image_tag_mutability = "MUTABLE"
+  name                 = "${var.project_name}-${var.environment}-frontend"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-frontend-ecr"
+  })
 
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_lifecycle_policy" "frontend" {
   policy = jsonencode({
     rules = [
       {
@@ -67,18 +52,7 @@ resource "aws_ecr_lifecycle_policy" "frontend" {
       }
     ]
   })
-}
-
-resource "aws_ecr_repository" "frontend" {
-  image_tag_mutability = "MUTABLE"
-  name                 = "${var.project_name}-${var.environment}-frontend"
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-ecr"
-  })
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
+  repository = aws_ecr_repository.frontend.name
 }
 
 resource "aws_ecs_cluster" "frontend" {
@@ -91,6 +65,45 @@ resource "aws_ecs_cluster" "frontend" {
     name  = "containerInsights"
     value = "enabled"
   }
+}
+
+resource "aws_ecs_task_definition" "frontend" {
+  container_definitions = jsonencode([
+    {
+      essential = true
+      image     = "${aws_ecr_repository.frontend.repository_url}:${var.image_tag}"
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.frontend.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+      name = "frontend"
+      portMappings = [
+        {
+          containerPort = 3000
+          hostPort      = 3000
+          protocol      = "tcp"
+        }
+      ]
+      secrets = [for name, valueFrom in var.frontend_parameters_arns : {
+        name      = name
+        valueFrom = valueFrom
+      }]
+    }
+  ])
+  cpu                      = var.container_cpu
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  family                   = "${var.project_name}-${var.environment}-frontend"
+  memory                   = var.container_memory
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-frontend-task-def"
+  })
+  task_role_arn = aws_iam_role.ecs_task_role.arn
 }
 
 resource "aws_ecs_service" "frontend" {
@@ -122,44 +135,66 @@ resource "aws_ecs_service" "frontend" {
   }
 }
 
-resource "aws_ecs_task_definition" "frontend" {
-  cpu                      = var.container_cpu
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  family                   = "${var.project_name}-${var.environment}-frontend"
-  memory                   = var.container_memory
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-task-def"
-  })
-  task_role_arn = aws_iam_role.ecs_task_role.arn
+resource "aws_appautoscaling_target" "frontend" {
+  count              = var.enable_auto_scaling ? 1 : 0
+  max_capacity       = var.max_count
+  min_capacity       = var.min_count
+  resource_id        = "service/${aws_ecs_cluster.frontend.name}/${aws_ecs_service.frontend.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
 
-  container_definitions = jsonencode([
-    {
-      essential = true
-      image     = "${aws_ecr_repository.frontend.repository_url}:${var.image_tag}"
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.frontend.name
-          "awslogs-region"        = var.aws_region
-          "awslogs-stream-prefix" = "ecs"
+resource "aws_appautoscaling_policy" "frontend_cpu" {
+  count              = var.enable_auto_scaling ? 1 : 0
+  name               = "${var.project_name}-${var.environment}-frontend-cpu-scaling"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.frontend[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.frontend[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.frontend[0].service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+    target_value       = 70.0
+
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+  }
+}
+
+resource "aws_iam_role" "ecs_task_role" {
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
         }
       }
-      name = "frontend"
-      portMappings = [
-        {
-          containerPort = 3000
-          hostPort      = 3000
-          protocol      = "tcp"
+    ]
+  })
+  name = "${var.project_name}-${var.environment}-frontend-task-role"
+  tags = var.common_tags
+}
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
         }
-      ]
-      secrets = [for name, valueFrom in var.frontend_parameters_arns : {
-        name      = name
-        valueFrom = valueFrom
-      }]
-    }
-  ])
+      }
+    ]
+  })
+  name = "${var.project_name}-${var.environment}-frontend-execution-role"
+  tags = var.common_tags
 }
 
 resource "aws_iam_policy" "ecs_task_execution_policy" {
@@ -170,6 +205,8 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
     Version = "2012-10-17"
     Statement = [
       {
+        # https://docs.aws.amazon.com/AmazonECR/latest/public/public-repository-policies.html#repository-policy-vs-iam-policy
+        # nosemgrep: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
         Action   = "ecr:GetAuthorizationToken"
         Effect   = "Allow"
         Resource = "*" # NOSONAR
@@ -209,42 +246,6 @@ resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
         ]
         Effect   = "Allow"
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.project_name}-${var.environment}-frontend-execution-role"
-  tags = var.common_tags
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.project_name}-${var.environment}-frontend-task-role"
-  tags = var.common_tags
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
       }
     ]
   })

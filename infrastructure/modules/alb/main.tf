@@ -56,7 +56,6 @@ data "aws_iam_policy_document" "alb_logs" {
 }
 
 resource "aws_acm_certificate" "main" {
-  count       = var.enable_https && var.domain_name != null ? 1 : 0
   domain_name = var.domain_name
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-alb-cert"
@@ -109,30 +108,9 @@ resource "aws_lb" "main" {
     enabled = true
     prefix  = "alb"
   }
-
-  lifecycle {
-    precondition {
-      condition     = var.enable_https ? var.domain_name != null : true
-      error_message = "domain_name must be provided when enable_https is true."
-    }
-  }
-}
-
-resource "aws_lb_listener" "http" {
-  count             = var.enable_https ? 0 : 1
-  load_balancer_arn = aws_lb.main.arn
-  port              = 80
-  protocol          = "HTTP" #NOSONAR
-  tags              = var.common_tags
-
-  default_action {
-    target_group_arn = aws_lb_target_group.frontend.arn
-    type             = "forward"
-  }
 }
 
 resource "aws_lb_listener" "http_redirect" {
-  count             = var.enable_https ? 1 : 0
   load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP" #NOSONAR
@@ -150,8 +128,7 @@ resource "aws_lb_listener" "http_redirect" {
 }
 
 resource "aws_lb_listener" "https" {
-  certificate_arn   = var.enable_https ? aws_acm_certificate.main[0].arn : null
-  count             = var.enable_https ? 1 : 0
+  certificate_arn   = aws_acm_certificate.main.arn
   load_balancer_arn = aws_lb.main.arn
   port              = 443
   protocol          = "HTTPS"
@@ -164,27 +141,9 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-resource "aws_lb_listener_rule" "backend_http" {
-  for_each     = var.lambda_function_name != null && !var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
-  listener_arn = aws_lb_listener.http[0].arn
-  priority     = 100 + each.key
-  tags         = var.common_tags
-
-  action {
-    target_group_arn = aws_lb_target_group.lambda[0].arn
-    type             = "forward"
-  }
-
-  condition {
-    path_pattern {
-      values = each.value
-    }
-  }
-}
-
 resource "aws_lb_listener_rule" "backend_https" {
-  for_each     = var.lambda_function_name != null && var.enable_https ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
-  listener_arn = aws_lb_listener.https[0].arn
+  for_each     = var.lambda_function_name != null ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  listener_arn = aws_lb_listener.https.arn
   priority     = 100 + each.key
   tags         = var.common_tags
 

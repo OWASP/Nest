@@ -59,6 +59,11 @@ variable "index_data_task_memory" {
   default     = "2048"
 }
 
+variable "kms_key_arn" {
+  description = "The ARN of the KMS key."
+  type        = string
+}
+
 variable "load_data_task_cpu" {
   description = "The CPU for the load-data task."
   type        = string

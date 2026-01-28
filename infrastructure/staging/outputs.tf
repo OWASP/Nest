@@ -40,7 +40,7 @@ output "frontend_service_name" {
 
 output "frontend_url" {
   description = "The URL to access the frontend."
-  value       = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
+  value       = "https://${var.domain_name}"
 }
 
 output "lambda_security_group_id" {
