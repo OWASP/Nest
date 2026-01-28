@@ -74,9 +74,7 @@ Product Security Engineer at Splunk
 
 [GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • [India (IST)](https://time-time.net/time/india-ist.php) • [About me](https://rajanagori.in/)
 
-Raja Nagori is a Product Security Engineer at Splunk with a strong focus on information security and continuous learning. He holds a Bachelor's degree in Computer Science and Engineering and has experience in penetration testing, threat modeling, and DevSecOps.
-
-Raja is an active member of the OWASP community and leads the Nightingale project, a Docker-based environment for penetration testers. Nightingale has received broad recognition and has been featured at several major events, including Black Hat Asia, Black Hat Europe, IWCON, and others.
+Raja Nagori is a Product Security Engineer at Splunk with a strong focus on information security and continuous learning. He holds a Bachelor's degree in Computer Science and Engineering and has experience in penetration testing, threat modeling, and DevSecOps. Raja is an active member of the OWASP community and leads the Nightingale project, a Docker-based environment for penetration testers.
 
 #### Tamara Lazerka
 
