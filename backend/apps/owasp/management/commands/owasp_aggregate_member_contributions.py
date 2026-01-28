@@ -56,28 +56,23 @@ class Command(BaseCommand):
         if user_login:
             users = User.objects.filter(login=user_login)
             if not users.exists():
-                self.stdout.write(self.style.ERROR(f"User '{user_login}' not found"))
+                self.stdout.write(self.style.ERROR(f"Member '{user_login}' not found"))
                 return
         else:
             users = User.objects.filter(contributions_count__gt=0)
 
         total_users = users.count()
-        self.stdout.write(f"Processing {total_users} users...")
+        self.stdout.write(f"Processing {total_users} members...")
 
-        processed = 0
+        updated_users = []
         for user in users.iterator(chunk_size=batch_size):
-            contribution_data = self._aggregate_user_contributions(user, start_date)
+            user.contribution_data = self._aggregate_user_contributions(user, start_date)
+            updated_users.append(user)
 
-            if contribution_data:
-                user.contribution_data = contribution_data
-                user.save(update_fields=["contribution_data"])
-                processed += 1
-
-                if processed % 100 == 0:
-                    self.stdout.write(f"Processed {processed}/{total_users} users...")
+        User.bulk_save(updated_users, fields=["contribution_data"])
 
         self.stdout.write(
-            self.style.SUCCESS(f"Successfully aggregated contributions for {processed} users")
+            self.style.SUCCESS(f"Successfully aggregated contributions for {total_users} members")
         )
 
     def _aggregate_user_contributions(self, user: User, start_date: datetime) -> dict[str, int]:

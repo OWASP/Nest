@@ -58,6 +58,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         verbose_name="Contribution heatmap data",
         default=dict,
         blank=True,
+        null=True,
         help_text="Aggregated contribution data as date -> count mapping",
     )
 

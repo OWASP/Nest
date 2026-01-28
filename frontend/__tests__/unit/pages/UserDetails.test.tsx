@@ -52,7 +52,6 @@ jest.mock('next/navigation', () => ({
   useParams: () => ({ memberKey: 'test-user' }),
 }))
 
-
 jest.mock('components/ContributionHeatmap', () => {
   const MockContributionHeatmap = () => <div data-testid="contribution-heatmap">Heatmap</div>
   MockContributionHeatmap.displayName = 'MockContributionHeatmap'
@@ -291,6 +290,7 @@ describe('UserDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: dataWithoutContributions,
       error: null,
+      loading: false,
     })
 
     render(<UserDetailsPage />)
@@ -305,6 +305,7 @@ describe('UserDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
+      loading: false,
     })
 
     render(<UserDetailsPage />)

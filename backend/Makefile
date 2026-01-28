@@ -211,7 +211,7 @@ update-data: \
 	github-update-users \
 	github-aggregate-user-contributions \
 	owasp-aggregate-projects \
-	owasp-aggregate-contributions \
+	owasp-aggregate-entity-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \

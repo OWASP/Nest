@@ -1,9 +1,9 @@
-"""Test cases for github_aggregate_user_contributions management command."""
+"""Tests for community member contributions aggregation command."""
 
 from datetime import UTC, datetime, timedelta
 from unittest import mock
 
-from apps.github.management.commands.github_aggregate_user_contributions import Command
+from apps.owasp.management.commands.owasp_aggregate_member_contributions import Command
 
 
 class MockQuerySet:
@@ -42,7 +42,7 @@ class MockQuerySet:
 
 
 class TestAggregateContributionsCommand:
-    """Test suite for github_aggregate_user_contributions management command."""
+    """Test suite for community member contributions aggregation command."""
 
     def test_aggregate_user_contributions_empty(self):
         """Test aggregation with no contributions."""
@@ -56,16 +56,16 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.Commit"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.Commit"
             ) as mock_commit,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.PullRequest"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.PullRequest"
             ) as mock_pr,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.Issue"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.Issue"
             ) as mock_issue,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.timezone.now"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.timezone.now"
             ) as mock_tz_now,
         ):
             mock_tz_now.return_value = fixed_now
@@ -89,16 +89,16 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.Commit"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.Commit"
             ) as mock_commit,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.PullRequest"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.PullRequest"
             ) as mock_pr,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.Issue"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.Issue"
             ) as mock_issue,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.timezone"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.timezone"
             ) as mock_tz,
         ):
             mock_tz.now.return_value = datetime(2024, 1, 5, tzinfo=UTC)
@@ -141,7 +141,7 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.User"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.User"
             ) as mock_user_model,
             mock.patch.object(
                 command, "_aggregate_user_contributions", return_value={"2024-01-01": 5}
@@ -149,11 +149,15 @@ class TestAggregateContributionsCommand:
         ):
             mock_queryset = MockQuerySet([mock_user])
             mock_user_model.objects.filter.return_value = mock_queryset
+            mock_user_model.bulk_save = mock.Mock()
 
             command.handle(user="testuser", days=365, batch_size=100)
 
             assert mock_user.contribution_data == {"2024-01-01": 5}
-            mock_user.save.assert_called_once_with(update_fields=["contribution_data"])
+            assert mock_user_model.bulk_save.called
+            call_args = mock_user_model.bulk_save.call_args
+            assert call_args[0][0] == [mock_user]
+            assert call_args[1]["fields"] == ["contribution_data"]
 
     def test_handle_with_specific_user_not_found(self):
         """Test handle method with specific user that doesn't exist."""
@@ -164,7 +168,7 @@ class TestAggregateContributionsCommand:
         command.style.SUCCESS = lambda x: x
 
         with mock.patch(
-            "apps.github.management.commands.github_aggregate_user_contributions.User"
+            "apps.owasp.management.commands.owasp_aggregate_member_contributions.User"
         ) as mock_user_model:
             mock_queryset = MockQuerySet([])
             mock_user_model.objects.filter.return_value = mock_queryset
@@ -192,7 +196,7 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.User"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.User"
             ) as mock_user_model,
             mock.patch.object(
                 command, "_aggregate_user_contributions", return_value={"2024-01-01": 5}
@@ -200,13 +204,18 @@ class TestAggregateContributionsCommand:
         ):
             mock_queryset = MockQuerySet([mock_user1, mock_user2])
             mock_user_model.objects.filter.return_value = mock_queryset
+            mock_user_model.bulk_save = mock.Mock()
 
             command.handle(user=None, days=365, batch_size=100)
 
-            assert mock_user1.save.call_count == 1
-            assert mock_user2.save.call_count == 1
             assert mock_user1.contribution_data == {"2024-01-01": 5}
             assert mock_user2.contribution_data == {"2024-01-01": 5}
+            assert mock_user_model.bulk_save.called
+            call_args = mock_user_model.bulk_save.call_args
+            assert len(call_args[0][0]) == 2
+            assert mock_user1 in call_args[0][0]
+            assert mock_user2 in call_args[0][0]
+            assert call_args[1]["fields"] == ["contribution_data"]
 
     def test_handle_custom_days_parameter(self):
         """Test handle method with custom days parameter."""
@@ -221,18 +230,19 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.User"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.User"
             ) as mock_user_model,
             mock.patch.object(
                 command, "_aggregate_user_contributions", return_value={}
             ) as mock_aggregate,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.timezone"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.timezone"
             ) as mock_tz,
         ):
             mock_tz.now.return_value = datetime(2024, 1, 31, tzinfo=UTC)
             mock_queryset = MockQuerySet([mock_user])
             mock_user_model.objects.filter.return_value = mock_queryset
+            mock_user_model.bulk_save = mock.Mock()
 
             command.handle(user=None, days=90, batch_size=100)
 
@@ -250,16 +260,16 @@ class TestAggregateContributionsCommand:
 
         with (
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.Commit"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.Commit"
             ) as mock_commit,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.PullRequest"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.PullRequest"
             ) as mock_pr,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.Issue"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.Issue"
             ) as mock_issue,
             mock.patch(
-                "apps.github.management.commands.github_aggregate_user_contributions.timezone"
+                "apps.owasp.management.commands.owasp_aggregate_member_contributions.timezone"
             ) as mock_tz,
         ):
             mock_tz.now.return_value = datetime(2024, 1, 3, tzinfo=UTC)
