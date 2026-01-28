@@ -40,7 +40,7 @@ const ModuleDetailsPage = () => {
     }
   }, [data, limit])
 
-  const programModule = data?.getModule as unknown as Module
+  const programModule = data?.getModule as Module
   const admins = data?.getProgram?.admins
 
   useEffect(() => {

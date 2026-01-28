@@ -52,6 +52,8 @@ export type Module = {
   status?: ProgramStatusEnum
   tags?: string[] | null
   recentPullRequests?: PullRequest[]
+  projectId?: string | null
+  projectName?: string | null
 }
 
 export type ModuleFormData = {
