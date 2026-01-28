@@ -468,6 +468,14 @@ Then load data manually in another terminal:
 make load-data-e2e
 ```
 
+For debugging the frontend e2e tests UI, run:
+
+```bash
+make test-frontend-e2e-ui
+```
+
+You can access the UI at [http://localhost:3800](http://localhost:3800).
+
 ### Running Fuzz Tests
 
 Run the fuzz tests with the following command:
