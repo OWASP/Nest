@@ -6,11 +6,7 @@ import { useRouter } from 'next/navigation'
 import React, { act } from 'react'
 import { render } from 'wrappers/testUtil'
 import About from 'app/about/page'
-import {
-  GetProjectMetadataDocument,
-  GetTopContributorsDocument,
-} from 'types/__generated__/projectQueries.generated'
-import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
+import { GetAboutPageDataDocument } from 'types/__generated__/projectQueries.generated'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -201,40 +197,22 @@ jest.mock('components/ShowMoreButton', () => ({
   },
 }))
 
-const mockUserData = (username) => ({
-  data: { user: mockAboutData.users[username] },
-  loading: false,
-  error: null,
-})
-
-const mockProjectData = {
-  data: { project: mockAboutData.project },
-  loading: false,
-  error: null,
-}
-
-const mockTopContributorsData = {
-  data: { topContributors: mockAboutData.topContributors },
-  loading: false,
-  error: null,
-}
-
 describe('About Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      const key = options?.variables?.key
-
-      if (query === GetProjectMetadataDocument) {
-        if (key === 'nest') {
-          return mockProjectData
+      if (query === GetAboutPageDataDocument) {
+        return {
+          data: {
+            project: mockAboutData.project,
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          loading: false,
+          error: null,
         }
-      } else if (query === GetTopContributorsDocument) {
-        if (key === 'nest') {
-          return mockTopContributorsData
-        }
-      } else if (query === GetLeaderDataDocument) {
-        return mockUserData(key)
       }
 
       return { loading: true }
@@ -452,10 +430,8 @@ describe('About Component', () => {
 
   test('handles null project in data response gracefully', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (options?.variables?.key === 'nest') {
+      if (query === GetAboutPageDataDocument) {
         return { data: { project: null }, loading: false, error: null }
-      } else if (['arkid15r', 'kasya', 'mamicidal'].includes(options?.variables?.key)) {
-        return mockUserData(options?.variables?.key)
       }
       return { loading: true }
     })
@@ -489,27 +465,25 @@ describe('About Component', () => {
   test('handles partial user data in leader response', async () => {
     const partialUserData = {
       data: {
-        user: {
+        project: mockAboutData.project,
+        topContributors: mockAboutData.topContributors,
+        leader1: {
           avatarUrl: 'https://avatars.githubusercontent.com/u/2201626?v=4',
           company: 'OWASP',
           // name is missing
           login: 'arkid15r',
           url: '/members/arkid15r',
         },
+        leader2: mockAboutData.users['kasya'],
+        leader3: mockAboutData.users['mamicidal'],
       },
       loading: false,
       error: null,
     }
 
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
-        return mockProjectData
-      } else if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
-        return mockTopContributorsData
-      } else if (options?.variables?.key === 'arkid15r') {
+      if (query === GetAboutPageDataDocument) {
         return partialUserData
-      } else if (options?.variables?.key === 'kasya' || options?.variables?.key === 'mamicidal') {
-        return mockUserData(options?.variables?.key)
       }
       return { loading: true }
     })
@@ -573,14 +547,10 @@ describe('About Component', () => {
 
   test('triggers toaster error when GraphQL request fails for project', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetProjectMetadataDocument && options?.variables?.key === 'nest') {
+      if (query === GetAboutPageDataDocument) {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
-      return {
-        loading: false,
-        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
-        error: null,
-      }
+      return { loading: true }
     })
     await act(async () => {
       render(<About />)
@@ -599,14 +569,10 @@ describe('About Component', () => {
 
   test('triggers toaster error when GraphQL request fails for topContributors', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetTopContributorsDocument && options?.variables?.key === 'nest') {
+      if (query === GetAboutPageDataDocument) {
         return { loading: false, data: null, error: new Error('GraphQL error') }
       }
-      return {
-        loading: false,
-        data: { user: { avatarUrl: '', company: '', name: 'Dummy', location: '' } },
-        error: null,
-      }
+      return { loading: true }
     })
     await act(async () => {
       render(<About />)
@@ -687,17 +653,8 @@ describe('About Component', () => {
 
   test('triggers toaster error when GraphQL request fails for a leader', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query, options) => {
-      if (query === GetLeaderDataDocument && options?.variables?.key === 'arkid15r') {
+      if (query === GetAboutPageDataDocument) {
         return { loading: false, data: null, error: new Error('GraphQL error for leader') }
-      }
-      if (query === GetProjectMetadataDocument) {
-        return mockProjectData
-      }
-      if (query === GetTopContributorsDocument) {
-        return mockTopContributorsData
-      }
-      if (query === GetLeaderDataDocument) {
-        return mockUserData(options?.variables?.key)
       }
       return { loading: true }
     })
