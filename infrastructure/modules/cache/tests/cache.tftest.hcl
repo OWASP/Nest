@@ -1,6 +1,7 @@
 variables {
   common_tags           = { Environment = "test", Project = "nest" }
   environment           = "test"
+  kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 30
   project_name          = "nest"
   redis_engine_version  = "7.0"

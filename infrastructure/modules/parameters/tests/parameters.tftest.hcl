@@ -13,6 +13,8 @@ variables {
   project_name       = "nest"
   redis_host         = "redis.example.com"
   redis_password_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_REDIS_PASSWORD"
+  server_csrf_url    = "https://nest.owasp.dev/csrf"
+  server_graphql_url = "https://nest.owasp.dev/graphql"
   settings_module    = "settings.staging"
 }
 

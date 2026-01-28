@@ -31,6 +31,7 @@ def clean_package(zappa):
         temp_path = Path(temp_dir)
         new_archive_path = temp_path / "new.tar.gz"
 
+        # nosemgrep: trailofbits.python.tarfile-extractall-traversal.tarfile-extractall-traversal # noqa: ERA001, E501
         with tarfile.open(full_path, "r:gz") as tf:  # NOSONAR archive is trusted
             tf.extractall(temp_path, filter="data")
 
