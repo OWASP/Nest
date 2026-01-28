@@ -49,7 +49,7 @@ run "test_private_nacl_associations_count" {
 
   assert {
     condition     = length(aws_network_acl_association.private) == 2
-    error_message = "Private NACL should have 3 subnet associations."
+    error_message = "Private NACL should have 2 subnet associations."
   }
 }
 
@@ -58,7 +58,7 @@ run "test_public_nacl_associations_count" {
 
   assert {
     condition     = length(aws_network_acl_association.public) == 2
-    error_message = "Public NACL should have 3 subnet associations."
+    error_message = "Public NACL should have 2 subnet associations."
   }
 }
 

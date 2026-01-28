@@ -75,7 +75,7 @@ variable "vpc_cidr" {
 
   validation {
     condition     = can(cidrhost(var.vpc_cidr, 0))
-    error_message = "The vpc_cidr must be a valid IPv4 CIDR block."
+    error_message = "The vpc_cidr must be a valid CIDR block."
   }
 }
 
