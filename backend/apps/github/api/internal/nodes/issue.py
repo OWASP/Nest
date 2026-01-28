@@ -28,6 +28,8 @@ class IssueNode(strawberry.relay.Node):
     @strawberry.field
     def pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
         """Return pull requests linked to this issue."""
+        limit = max(0, limit)
+        offset = max(0, offset)
         return list(self.pull_requests.all().order_by("-created_at")[offset : offset + limit])
 
     @strawberry_django.field(select_related=["repository__organization", "repository"])

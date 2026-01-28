@@ -33,13 +33,12 @@ const ModuleDetailsPage = () => {
   })
 
   useEffect(() => {
-    if (data?.getModule?.recentPullRequests) {
-      const prCount = data.getModule.recentPullRequests.length
-      if (prCount < limit) {
-        setHasMorePRs(false)
-      }
+    const prCount = data?.getModule?.recentPullRequests?.length
+    if (prCount == null) return
+    if (prCount <= limit) {
+      setHasMorePRs(prCount >= limit)
     }
-  }, [data])
+  }, [data, limit])
 
   const programModule = data?.getModule as unknown as Module
   const admins = data?.getProgram?.admins
@@ -125,8 +124,9 @@ const ModuleDetailsPage = () => {
           : undefined
       }
       onResetPullRequests={
-        !hasMorePRs
-          ? () => {
+        hasMorePRs
+          ? undefined
+          : () => {
               setHasMorePRs(true)
               fetchMore({
                 variables: {
@@ -147,7 +147,6 @@ const ModuleDetailsPage = () => {
                 },
               })
             }
-          : undefined
       }
     />
   )

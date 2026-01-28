@@ -136,6 +136,8 @@ const DetailsCard = ({
 
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
+  const prDisplayLimit = onLoadMorePullRequests || onResetPullRequests || showAllPRs ? undefined : 4
+
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
@@ -378,18 +380,9 @@ const DetailsCard = ({
         {type === 'module' && pullRequests && pullRequests.length > 0 && (
           <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
             <div className="grid grid-cols-1 gap-3">
-              {pullRequests
-                .slice(
-                  0,
-                  onLoadMorePullRequests || onResetPullRequests
-                    ? undefined
-                    : showAllPRs
-                      ? undefined
-                      : 4
-                )
-                .map((pr) => (
-                  <MentorshipPullRequest key={pr.id} pr={pr} />
-                ))}
+              {pullRequests.slice(0, prDisplayLimit).map((pr) => (
+                <MentorshipPullRequest key={pr.id} pr={pr} />
+              ))}
 
               {onLoadMorePullRequests && (
                 <div className="mt-4 flex justify-start gap-4">

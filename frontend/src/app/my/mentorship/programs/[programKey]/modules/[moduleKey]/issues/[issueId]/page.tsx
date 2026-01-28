@@ -86,13 +86,12 @@ const ModuleIssueDetailsPage = () => {
   })
 
   useEffect(() => {
-    if (data?.getModule?.issueByNumber?.pullRequests) {
-      const prCount = data.getModule.issueByNumber.pullRequests.length
-      if (prCount < limit) {
-        setHasMorePRs(false)
-      }
+    const prCount = data?.getModule?.issueByNumber?.pullRequests?.length
+    if (prCount == null) return
+    if (prCount <= limit) {
+      setHasMorePRs(prCount >= limit)
     }
-  }, [data])
+  }, [data, limit])
 
   const {
     assignIssue,
