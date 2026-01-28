@@ -209,9 +209,9 @@ update-data: \
 	github-add-related-repositories \
 	github-update-related-organizations \
 	github-update-users \
-	github-aggregate-user-contributions \
 	owasp-aggregate-projects \
 	owasp-aggregate-entity-contributions \
+	owasp-aggregate-member-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \
