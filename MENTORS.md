@@ -24,9 +24,9 @@ Kateryna is OWASP Nest Project Leader who enjoys mentoring open source contribut
 
 Cybersecurity Engineer | GSoC'23 contributor at Mifos Initiative
 
-[GitHub](https://github.com/kerlynNkep) • [LinkedIn](https://www.linkedin.com/in/kerlyn-manyi-a80201123/) • [Slack](https://owasp.slack.com/team/U06M01ARG3V) • Country (Timezone)
+[GitHub](https://github.com/kerlynNkep) • [LinkedIn](https://www.linkedin.com/in/kerlyn-manyi-a80201123/) • [Slack](https://owasp.slack.com/team/U06M01ARG3V) • [Cameroon (West African Time)](https://time-time.net/time/yaounde-cameroon.php)
 
-*This section is reserved for the mentor to add their own description.*
+Kerlyn is a cybersecurity practitioner with a strong focus on penetration testing and offensive security. She previously mentored GSoC'25 under the Mifos Initiative. She mentors open-source contributions focused on penetration testing, ML-driven threat detection, and secure architecture design. She helps contributors build real-world offensive security skills.
 
 #### Keshav Malik
 
@@ -72,9 +72,9 @@ Application Security Analyst at Bloomreach, CISSP
 
 Product Security Engineer at Splunk
 
-[GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • Country (Timezone)
+[GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • [India (IST)](https://time-time.net/time/india-ist.php) • [About me](https://rajanagori.in/)
 
-*This section is reserved for the mentor to add their own description.*
+Raja Nagori is a Product Security Engineer at Splunk with a strong focus on information security and continuous learning. He holds a Bachelor's degree in Computer Science and Engineering and has experience in penetration testing, threat modeling, and DevSecOps. Raja is an active member of the OWASP community and leads the Nightingale project, a Docker-based environment for penetration testers.
 
 #### Tamara Lazerka
 
