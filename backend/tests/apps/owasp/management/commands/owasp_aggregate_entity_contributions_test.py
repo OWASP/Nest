@@ -1,11 +1,11 @@
-"""Test cases for owasp_aggregate_contributions management command."""
+"""Test cases for owasp_aggregate_entity_contributions management command."""
 
 from datetime import UTC, datetime, timedelta
 from unittest import mock
 
 import pytest
 
-from apps.owasp.management.commands.owasp_aggregate_contributions import Command
+from apps.owasp.management.commands.owasp_aggregate_entity_contributions import Command
 from apps.owasp.models import Chapter, Project
 
 
@@ -120,10 +120,10 @@ class TestOwaspAggregateContributions:
             "2024-11-17": 1,
         }
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_aggregate_chapter_contributions(
         self,
         mock_release,
@@ -157,10 +157,10 @@ class TestOwaspAggregateContributions:
             "2024-11-17": 2,
         }
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_aggregate_project_contributions(
         self,
         mock_release,
@@ -215,11 +215,11 @@ class TestOwaspAggregateContributions:
 
         assert result == {}
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_handle_chapters_only(
         self,
         mock_release,
@@ -250,11 +250,11 @@ class TestOwaspAggregateContributions:
         assert mock_chapter.contribution_data == {"2024-11-16": 5}
         assert mock_chapter_model.bulk_save.called
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Project")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_handle_projects_only(
         self,
         mock_release,
@@ -287,12 +287,12 @@ class TestOwaspAggregateContributions:
         assert "commits" in mock_project.contribution_stats
         assert mock_project_model.bulk_save.called
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Project")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_handle_both_entities(
         self,
         mock_release,
@@ -328,11 +328,11 @@ class TestOwaspAggregateContributions:
         assert mock_chapter_model.bulk_save.called
         assert mock_project_model.bulk_save.called
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_handle_with_specific_key(
         self,
         mock_release,
@@ -363,11 +363,11 @@ class TestOwaspAggregateContributions:
         # Verify filter was called with the specific key.
         mock_chapter_model.objects.filter.assert_called()
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_handle_with_offset(
         self,
         mock_release,
@@ -403,11 +403,11 @@ class TestOwaspAggregateContributions:
         mock_aggregate.assert_called_once()
         mock_chapter_model.bulk_save.assert_called_once()
 
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Chapter")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Commit")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Issue")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.PullRequest")
-    @mock.patch("apps.owasp.management.commands.owasp_aggregate_contributions.Release")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
     def test_handle_custom_days(
         self,
         mock_release,

@@ -157,7 +157,7 @@ save-backup:
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
 
-scan-backend-image: build-backend-local-image
+security-scan-backend-image: build-backend-local-image
 	@trivy image \
 		--config trivy.yaml \
 		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
@@ -210,7 +210,8 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
-	owasp-aggregate-contributions \
+	owasp-aggregate-entity-contributions \
+	owasp-aggregate-member-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \

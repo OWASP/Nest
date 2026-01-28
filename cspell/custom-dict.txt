@@ -58,6 +58,7 @@ algoliasearch
 ansa
 apexcharts
 apk
+aquasec
 aquasecurity
 arithmatex
 arkid15r
