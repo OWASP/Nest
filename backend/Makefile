@@ -210,7 +210,8 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
-	owasp-aggregate-contributions \
+	owasp-aggregate-entity-contributions \
+	owasp-aggregate-member-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \

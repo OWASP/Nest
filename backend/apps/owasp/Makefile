@@ -2,10 +2,14 @@ owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
 
-owasp-aggregate-contributions:
+owasp-aggregate-entity-contributions:
 	@echo "Aggregating OWASP contributions"
-	@CMD="python manage.py owasp_aggregate_contributions --entity-type chapter" $(MAKE) exec-backend-command
-	@CMD="python manage.py owasp_aggregate_contributions --entity-type project" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_aggregate_entity_contributions --entity-type chapter" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_aggregate_entity_contributions --entity-type project" $(MAKE) exec-backend-command
+
+owasp-aggregate-member-contributions:
+	@echo "Aggregating OWASP community member contributions"
+	@CMD="python manage.py owasp_aggregate_member_contributions" $(MAKE) exec-backend-command
 
 owasp-create-project-metadata-file:
 	@echo "Generating metadata"
