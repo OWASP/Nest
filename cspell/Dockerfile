@@ -18,6 +18,6 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 
 WORKDIR /nest
 
-ENTRYPOINT ["/opt/node/node_modules/.bin/cspell"]
-
 USER node
+
+ENTRYPOINT ["/opt/node/node_modules/.bin/cspell"]

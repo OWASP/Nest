@@ -1,9 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import type { Link as LinkType } from 'types/link'
 import NavDropDown from 'components/NavDropDown'
-
-expect.extend(toHaveNoViolations)
 
 const mockLink: LinkType = {
   text: 'Documentation',

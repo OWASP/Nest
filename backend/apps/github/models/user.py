@@ -58,6 +58,14 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         verbose_name="Contributions count", default=0
     )
 
+    contribution_data = models.JSONField(
+        verbose_name="Contribution heatmap data",
+        default=dict,
+        blank=True,
+        null=True,
+        help_text="Aggregated contribution data as date -> count mapping",
+    )
+
     def __str__(self) -> str:
         """Return a human-readable representation of the user.
 

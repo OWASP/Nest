@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
@@ -13,14 +13,13 @@ import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
-  const [module, setModule] = useState<Module | null>(null)
-  const [admins, setAdmins] = useState(null)
 
   const {
     data,
     error,
     loading: isLoading,
   } = useQuery(GetProgramAdminsAndModulesDocument, {
+    fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
       moduleKey,
@@ -28,17 +27,17 @@ const ModuleDetailsPage = () => {
   })
 
   useEffect(() => {
-    if (data?.getModule) {
-      setModule(data.getModule)
-      setAdmins(data.getProgram.admins)
-    } else if (error) {
+    if (error) {
       handleAppError(error)
     }
-  }, [data, error])
+  }, [error])
 
-  if (isLoading) return <LoadingSpinner />
+  const mentorshipModule: Module | null | undefined = data?.getModule
+  const admins = data?.getProgram?.admins
 
-  if (!module) {
+  if (isLoading && !mentorshipModule) return <LoadingSpinner />
+
+  if (!mentorshipModule) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -49,12 +48,12 @@ const ModuleDetailsPage = () => {
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: capitalize(module.experienceLevel) },
-    { label: 'Start Date', value: formatDate(module.startedAt) },
-    { label: 'End Date', value: formatDate(module.endedAt) },
+    { label: 'Experience Level', value: capitalize(mentorshipModule.experienceLevel) },
+    { label: 'Start Date', value: formatDate(mentorshipModule.startedAt) },
+    { label: 'End Date', value: formatDate(mentorshipModule.endedAt) },
     {
       label: 'Duration',
-      value: getSimpleDuration(module.startedAt, module.endedAt),
+      value: getSimpleDuration(mentorshipModule.startedAt, mentorshipModule.endedAt),
     },
   ]
 
@@ -63,15 +62,15 @@ const ModuleDetailsPage = () => {
       accessLevel="admin"
       admins={admins}
       details={moduleDetails}
-      domains={module.domains}
+      domains={mentorshipModule.domains}
       entityKey={moduleKey}
-      labels={module.labels}
-      mentees={module.mentees}
-      mentors={module.mentors}
+      labels={mentorshipModule.labels}
+      mentees={mentorshipModule.mentees}
+      mentors={mentorshipModule.mentors}
       programKey={programKey}
-      summary={module.description}
-      tags={module.tags}
-      title={module.name}
+      summary={mentorshipModule.description}
+      tags={mentorshipModule.tags}
+      title={mentorshipModule.name}
       type="module"
     />
   )

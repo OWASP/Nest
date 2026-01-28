@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
 import { CreateProgramDocument } from 'types/__generated__/programsMutations.generated'
+import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import { ExtendedSession } from 'types/auth'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -61,7 +62,11 @@ const CreateProgramPage = () => {
         domains: parseCommaSeparated(formData.domains),
       }
 
-      await createProgram({ variables: { input } })
+      await createProgram({
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetMyProgramsDocument }],
+        variables: { input },
+      })
 
       addToast({
         description: 'Program created successfully!',
