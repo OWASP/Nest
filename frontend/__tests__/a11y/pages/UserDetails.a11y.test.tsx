@@ -44,6 +44,15 @@ jest.mock('utils/helpers/githubHeatmap', () => ({
   drawContributions: jest.fn(() => {}),
 }))
 
+jest.mock('components/ContributionHeatmap', () => {
+  const MockContributionHeatmap = () => <div data-testid="contribution-heatmap">Heatmap</div>
+  MockContributionHeatmap.displayName = 'MockContributionHeatmap'
+  return {
+    __esModule: true,
+    default: MockContributionHeatmap,
+  }
+})
+
 describe('UserDetailsPage Accessibility', () => {
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
