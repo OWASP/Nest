@@ -71,10 +71,10 @@ class RepositoryNode(strawberry.relay.Node):
     @strawberry_django.field(prefetch_related=["milestones"])
     def recent_milestones(self, root: Repository, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        if (validated_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return root.recent_milestones.order_by("-created_at")[:validated_limit]
+        return root.recent_milestones.order_by("-created_at")[:normalized_limit]
 
     @strawberry_django.field(prefetch_related=["releases"])
     def releases(self, root: Repository) -> list[ReleaseNode]:
