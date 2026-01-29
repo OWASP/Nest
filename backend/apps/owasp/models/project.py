@@ -16,7 +16,6 @@ from apps.common.utils import get_absolute_url
 from apps.core.models.prompt import Prompt
 from apps.github.models.issue import Issue
 from apps.github.models.milestone import Milestone
-from apps.github.models.pull_request import PullRequest
 from apps.github.models.release import Release
 from apps.owasp.models.common import RepositoryBasedEntityModel
 from apps.owasp.models.enums.project import (
@@ -150,6 +149,11 @@ class Project(
     repositories = models.ManyToManyField(
         "github.Repository",
         verbose_name="Repositories",
+        blank=True,
+    )
+    pull_requests = models.ManyToManyField(
+        "github.PullRequest",
+        verbose_name="Pull Requests",
         blank=True,
     )
 
@@ -338,30 +342,7 @@ class Project(
         return self.owasp_repository.updated_at if self.owasp_repository else None
 
     @property
-    def pull_requests(self):
-        """Get pull requests across the project's repositories.
 
-        Returns:
-            QuerySet[PullRequest]: A queryset of pull requests with related data.
-
-        """
-        return (
-            PullRequest.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "milestone",
-                "repository__organization",
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-            )
-        )
-
-    @property
     def pull_requests_count(self) -> int:
         """Get the total number of pull requests.
 

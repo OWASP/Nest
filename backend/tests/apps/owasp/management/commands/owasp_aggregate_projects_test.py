@@ -85,3 +85,74 @@ class TestOwaspAggregateProjects:
         for call in mock_print.call_args_list:
             args, _ = call
             assert "https://owasp.org/www-project-test" in args[0]
+
+    @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    def test_handle_populates_pull_requests(
+        self,
+        mock_bulk_save,
+        command,
+        mock_project,
+    ):
+        """Check that the aggregate command copies pull requests to project.pull_requests.
+
+        This is important because we no longer use the old
+        @property-based query and rely on the M2M field instead.
+        """
+        mock_pr1 = mock.Mock()
+        mock_pr2 = mock.Mock()
+
+        mock_repository = mock.Mock()
+        mock_repository.organization = None
+        mock_repository.owner = mock.Mock()
+        mock_repository.is_archived = False
+        mock_repository.pushed_at = "2024-12-28T00:00:00Z"
+        mock_repository.latest_release = None
+
+        mock_repository.commits_count = 1
+        mock_repository.contributors_count = 1
+        mock_repository.forks_count = 1
+        mock_repository.open_issues_count = 1
+        mock_repository.releases.count.return_value = 0
+        mock_repository.stars_count = 1
+        mock_repository.subscribers_count = 1
+        mock_repository.watchers_count = 1
+
+        mock_repository.top_languages = []
+        mock_repository.license = None
+        mock_repository.topics = []
+
+        mock_repository.pull_requests.all.return_value = [
+            mock_pr1,
+            mock_pr2,
+        ]
+
+        class QS(list):
+            """Small helper to mock queryset behavior."""
+
+            def exists(self):
+                return bool(self)
+
+        mock_project.repositories.all.return_value = [mock_repository]
+        mock_project.repositories.filter.return_value = QS([mock_repository])
+
+        mock_project.pull_requests = mock.Mock()
+
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter([mock_project])
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = [mock_project]
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("builtins.print"),
+        ):
+            command.handle(offset=0)
+
+        mock_project.pull_requests.clear.assert_called_once()
+
+        mock_project.pull_requests.add.assert_called_once_with(
+            mock_pr1,
+            mock_pr2,
+        )
