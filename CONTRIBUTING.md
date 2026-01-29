@@ -406,6 +406,41 @@ make test
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
 
+### Running Security Scan
+
+Run the security scans for vulnerabilities and anti-patterns with the following command:
+
+```bash
+make security-scan
+```
+
+This command automatically:
+
+- Performs local Semgrep and Trivy scans
+- Outputs findings to the terminal for immediate review
+
+For addressing findings:
+
+- Review the output for specific file paths and line numbers
+- Follow the documentation links provided in the output for remediation guidance
+- Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
+
+#### Running Code Scans Only
+
+You can run code scan part separately via
+
+```bash
+make security-scan-code
+```
+
+#### Running Image Scans Only
+
+You can run image scan part separately via
+
+```bash
+make security-scan-images
+```
+
 ### Running e2e Tests
 
 Run the frontend e2e tests with the following command:
