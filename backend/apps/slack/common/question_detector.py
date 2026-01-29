@@ -70,44 +70,55 @@ class QuestionDetector:
             - None: If the API call fails or the response is unexpected.
 
         """
+        from crewai import Agent, Crew, Task
+
         prompt = Prompt.get_slack_question_detector_prompt()
-
         if not prompt or not prompt.strip():
-            error_msg = "Prompt with key 'slack-question-detector-system-prompt' not found."
-            raise ObjectDoesNotExist(error_msg)
+            # Use a robust default if DB prompt is missing
+            prompt = (
+                "You are an expert OWASP assistant. Your task is to determine if a human question "
+                "is related to OWASP, its projects, chapters, events, or general web security. "
+                "Respond with 'YES' if it is related, and 'NO' otherwise. Be extremely concise."
+            )
 
-        formatted_context = (
-            self.format_context_chunks(context_chunks)
-            if context_chunks
-            else "No context available"
+        formatted_context = self.format_context_chunks(context_chunks)
+        task_description = (
+            f"{prompt}\n\n"
+            f"CONTEXT CHUNKS:\n{formatted_context}\n\n"
+            f"USER QUESTION: {text}\n\n"
+            "Respond ONLY with 'YES' or 'NO'."
         )
-        system_prompt = prompt
-        user_prompt = f'Question: "{text}"\n\n Context: {formatted_context}'
+
+        agent = Agent(
+            role="OWASP Question Detector",
+            goal="Identify if a question is related to OWASP or web security",
+            backstory="You are a specialized filter for OWASP-related inquiries.",
+            llm=self.llm,
+            allow_delegation=False,
+            verbose=True,
+        )
+
+        task = Task(
+            description=task_description,
+            agent=agent,
+            expected_output="'YES' or 'NO'",
+        )
+
+        crew = Crew(
+            agents=[agent],
+            tasks=[task],
+            verbose=True,
+        )
 
         try:
-            # Use CrewAI LLM abstraction instead of direct OpenAI client
-            response = self.llm.call(
-                [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-            )
-        except Exception:
-            logger.exception("LLM error during question detection")
-            return None
-        else:
-            answer = response
-            if not answer:
-                logger.error("LLM returned an empty response")
-                return None
-
-            clean_answer = answer.strip().upper()
-
-            if "YES" in clean_answer:
+            result = str(crew.kickoff()).strip().upper()
+            if "YES" in result:
                 return True
-            if "NO" in clean_answer:
+            if "NO" in result:
                 return False
-            logger.warning("Unexpected OpenAI response")
+            return None
+        except Exception:
+            logger.exception("Agent-based detection failed")
             return None
 
     def format_context_chunks(self, context_chunks: list[dict]) -> str:
