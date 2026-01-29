@@ -1,5 +1,6 @@
 """Admin configuration for the EntityChannel model."""
 
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.contenttypes.models import ContentType
 
@@ -8,7 +9,7 @@ from apps.slack.models import Conversation
 
 
 @admin.action(description="Mark selected EntityChannels as reviewed")
-def mark_as_reviewed(_modeladmin, request, queryset):
+def mark_as_reviewed(_modeladmin, request, queryset) -> None:
     """Admin action to mark selected EntityChannels as reviewed.
 
     Args:
@@ -68,7 +69,7 @@ class EntityChannelAdmin(admin.ModelAdmin):
         "channel_id",
     )
 
-    def channel_search_display(self, obj):
+    def channel_search_display(self, obj) -> str:
         """Display the channel name in the admin list view.
 
         Retrieves and displays the Conversation name if the channel_id
@@ -92,7 +93,7 @@ class EntityChannelAdmin(admin.ModelAdmin):
 
     channel_search_display.short_description = "Channel Name"
 
-    def get_form(self, request, obj=None, **kwargs):
+    def get_form(self, request, obj=None, **kwargs) -> forms.ModelForm:
         """Get the form for the EntityChannel model.
 
         Prepares the form with necessary metadata for channel selection

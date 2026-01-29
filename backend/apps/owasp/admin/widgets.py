@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 class ChannelIdWidget(forms.TextInput):
     """Custom widget for channel_id with search functionality."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """Initialize the ChannelIdWidget.
 
         Sets up custom CSS classes and placeholder text for the text input field.
@@ -20,7 +20,7 @@ class ChannelIdWidget(forms.TextInput):
         super().__init__(*args, **kwargs)
         self.attrs.update({"class": "vForeignKeyRawIdAdminField", "placeholder": "Channel ID"})
 
-    def render(self, name, value, attrs=None, renderer=None):
+    def render(self, name, value, attrs=None, renderer=None) -> str:
         """Render the widget with a search button.
 
         Displays the text input field alongside a lookup button for selecting

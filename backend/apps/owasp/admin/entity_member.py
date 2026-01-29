@@ -2,6 +2,7 @@
 
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.html import format_html
@@ -41,7 +42,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
     ordering = ("member__name", "order")
 
     @admin.action(description="Approve selected members")
-    def approve_members(self, request, queryset):
+    def approve_members(self, request, queryset) -> None:
         """Admin action to approve selected members.
 
         Sets is_active and is_reviewed flags for selected entity members.
@@ -57,7 +58,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
         )
 
     @admin.display(description="Entity", ordering="entity_type")
-    def entity(self, obj):
+    def entity(self, obj) -> str:
         """Display entity as a link in the admin list view.
 
         Args:
@@ -81,7 +82,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
         )
 
     @admin.display(description="OWASP URL", ordering="entity_type")
-    def owasp_url(self, obj):
+    def owasp_url(self, obj) -> str:
         """Display entity OWASP website link in admin list view.
 
         Args:
@@ -97,7 +98,7 @@ class EntityMemberAdmin(admin.ModelAdmin):
             else "-"
         )
 
-    def get_search_results(self, request, queryset, search_term):
+    def get_search_results(self, request, queryset, search_term) -> tuple[models.QuerySet, bool]:
         """Extend search results to include entity name or key matches.
 
         Searches across Project, Chapter, and Committee entities by name or key

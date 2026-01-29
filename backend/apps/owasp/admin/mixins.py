@@ -2,6 +2,7 @@
 
 from django.contrib.contenttypes.admin import GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -25,7 +26,7 @@ class BaseOwaspAdminMixin:
         "key",
     )
 
-    def get_base_list_display(self, *additional_fields):
+    def get_base_list_display(self, *additional_fields) -> tuple[str, ...]:
         """Build base list display tuple with additional fields.
 
         Args:
@@ -38,7 +39,7 @@ class BaseOwaspAdminMixin:
         base_fields = ("name",) if hasattr(self.model, "name") else ()
         return base_fields + tuple(additional_fields) + self.list_display_field_names
 
-    def get_base_search_fields(self, *additional_fields):
+    def get_base_search_fields(self, *additional_fields) -> tuple[str, ...]:
         """Build base search fields tuple with additional fields.
 
         Args:
@@ -121,7 +122,7 @@ class EntityChannelInline(GenericTabularInline):
 class GenericEntityAdminMixin(BaseOwaspAdminMixin):
     """Mixin for generic entity admin with common entity functionality."""
 
-    def get_queryset(self, request):
+    def get_queryset(self, request) -> models.QuerySet:
         """Retrieve optimized queryset with prefetched repositories.
 
         Args:
@@ -131,9 +132,9 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
             QuerySet: Queryset with prefetched repositories for efficient display.
 
         """
-        return super().get_queryset(request).prefetch_related("repositories")
+        return super().get_queryset(request).prefetch_related("repositories")  # type: ignore[misc]
 
-    def custom_field_github_urls(self, obj):
+    def custom_field_github_urls(self, obj) -> str:
         """Display entity GitHub repository links in admin list view.
 
         Args:
@@ -154,7 +155,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
             " ".join(links)
         )
 
-    def custom_field_owasp_url(self, obj):
+    def custom_field_owasp_url(self, obj) -> str:
         """Display entity OWASP website link in admin list view.
 
         Args:
@@ -169,7 +170,7 @@ class GenericEntityAdminMixin(BaseOwaspAdminMixin):
 
         return format_html("<a href='https://owasp.org/{}' target='_blank'>↗️</a>", obj.key)
 
-    def _format_github_link(self, repository):
+    def _format_github_link(self, repository) -> str:
         """Format a GitHub repository link as HTML.
 
         Args:
@@ -201,7 +202,7 @@ class StandardOwaspAdminMixin(BaseOwaspAdminMixin):
 
     def get_common_config(
         self, extra_list_display=None, extra_search_fields=None, extra_list_filters=None
-    ):
+    ) -> dict:
         """Build common admin configuration dictionary.
 
         Reduces boilerplate by merging base fields with custom additions.

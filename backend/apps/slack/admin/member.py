@@ -23,7 +23,7 @@ class MemberAdmin(admin.ModelAdmin):
         "user__login",
     )
 
-    def approve_suggested_users(self, request, queryset):
+    def approve_suggested_users(self, request, queryset) -> None:
         """Approve suggested users for selected Slack members.
 
         For each member in the selection, if exactly one suggested user exists,
