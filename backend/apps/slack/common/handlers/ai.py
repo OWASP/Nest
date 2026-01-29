@@ -30,10 +30,23 @@ def get_blocks(
     )
 
     if ai_response:
-        # Format the AI response for Slack (remove code blocks, fix markdown)
-        formatted_response = format_ai_response_for_slack(ai_response)
-        return [markdown(formatted_response)]
+        return format_blocks(ai_response)
     return get_error_blocks()
+
+
+def format_blocks(text: str) -> list[dict]:
+    """Format AI response text into Slack blocks.
+
+    Args:
+        text (str): The AI response text.
+
+    Returns:
+        list: A list of Slack blocks.
+
+    """
+    # Format the AI response for Slack (remove code blocks, fix markdown)
+    formatted_response = format_ai_response_for_slack(text)
+    return [markdown(formatted_response)]
 
 
 def process_ai_query(

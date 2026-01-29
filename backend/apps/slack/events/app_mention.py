@@ -49,44 +49,26 @@ class AppMention(EventBase):
         message_ts = event.get("ts")
 
         try:
-            result = client.reactions_add(
+            client.reactions_add(
                 channel=channel_id,
                 timestamp=message_ts,
                 name="eyes",
             )
-            if result.get("ok"):
-                logger.info("Successfully added 👀 reaction to message")
-            else:
-                error = result.get("error")
-                # Handle common errors gracefully
-                if error == "already_reacted":
-                    logger.debug("Reaction already exists on message")
-                else:
-                    logger.warning(
-                        "Failed to add reaction: %s",
-                        error,
-                        extra={
-                            "channel_id": channel_id,
-                            "message_ts": message_ts,
-                            "response": result,
-                        },
-                    )
+        except Exception:
+            logger.exception("Failed to add reaction to message")
 
-        except Exception as e:
-            logger.exception(
-                "Exception while adding reaction to message",
-                extra={
-                    "channel_id": channel_id,
-                    "message_ts": message_ts,
-                    "error": str(e),
-                },
-            )
+        # Process query in the background
+        import django_rq
 
-        # Get AI response and post it
-        reply_blocks = get_blocks(query=query, channel_id=channel_id, is_app_mention=True)
-        client.chat_postMessage(
-            channel=channel_id,
-            blocks=reply_blocks,
-            text=query,
+        from apps.slack.services.message_auto_reply import (
+            process_ai_query_async,
+        )
+
+        django_rq.get_queue("ai").enqueue(
+            process_ai_query_async,
+            query=query,
+            channel_id=channel_id,
+            message_ts=message_ts,
             thread_ts=thread_ts,
+            is_app_mention=True,
         )
