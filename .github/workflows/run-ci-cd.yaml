@@ -7,14 +7,12 @@ on:
       - feature/**
       - main
     paths-ignore:
-      - backend/data/nest.json.gz
       - backend/data/nest.dump
   push:
     branches:
       - feature/**
       - main
     paths-ignore:
-      - backend/data/nest.json.gz
       - backend/data/nest.dump
   release:
     types:
