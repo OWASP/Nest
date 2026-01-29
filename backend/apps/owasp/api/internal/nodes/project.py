@@ -110,9 +110,8 @@ class ProjectNode(GenericEntityNode):
             lambda _info: Prefetch(
                 "pull_requests",
                 queryset=PullRequest.objects.select_related(
-                    "author__owasp_profile",
-                    "repository__organization",
-                ).order_by("-created_at"),
+                    "repository__organization", "author__owasp_profile"
+                ).order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT],
                 to_attr="_recent_pull_requests",
             ),
         ],
@@ -122,7 +121,7 @@ class ProjectNode(GenericEntityNode):
         cached = getattr(root, "_recent_pull_requests", None)
         if cached is None:
             return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
-        return cached[:RECENT_PULL_REQUESTS_LIMIT]
+        return cached
 
     @strawberry_django.field
     def recent_releases(self, root: Project) -> list[ReleaseNode]:
