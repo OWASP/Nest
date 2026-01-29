@@ -6,7 +6,10 @@ from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
-from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.api.internal.nodes.repository import (
+    RECENT_MILESTONES_LIMIT,
+    RepositoryNode,
+)
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -139,8 +142,11 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
 
         field = self._get_field_by_name("recent_milestones", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
-        resolver(None, mock_repository, limit=3)
+        resolver(None, mock_repository)
         mock_milestones.order_by.assert_called_with("-created_at")
+        mock_milestones.order_by.return_value.__getitem__.assert_called_with(
+            slice(None, RECENT_MILESTONES_LIMIT)
+        )
 
     def test_releases_method(self):
         """Test releases method resolution."""
