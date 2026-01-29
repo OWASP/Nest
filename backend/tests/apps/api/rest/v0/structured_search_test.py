@@ -13,10 +13,6 @@ FIELD_SCHEMA = {
         "type": "number",
         "field": "stars_count",
     },
-    "stars": {
-        "type": "number",
-        "field": "stars_count",
-    },
 }
 
 
@@ -46,14 +42,6 @@ def test_number_search_applied():
     qs = make_queryset()
 
     apply_structured_search(qs, "stars_count>10", FIELD_SCHEMA)
-
-    qs.filter.assert_called_once()
-
-
-def test_stars_alias_maps_to_stars_count():
-    qs = make_queryset()
-
-    apply_structured_search(qs, "stars>10", FIELD_SCHEMA)
 
     qs.filter.assert_called_once()
 

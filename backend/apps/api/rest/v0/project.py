@@ -25,10 +25,6 @@ PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
         "type": "number",
         "field": "stars_count",
     },
-    "stars": {
-        "type": "number",
-        "field": "stars_count",
-    },
 }
 
 router = RouterPaginated(tags=["Projects"])
