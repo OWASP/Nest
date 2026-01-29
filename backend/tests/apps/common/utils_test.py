@@ -190,6 +190,13 @@ class TestUtils:
             ("https://192.168.1.1", True),  # Valid IP address
             ("https://[::1]", True),  # Valid IPv6 address
             ("https://example.com:99999", True),  # Valid port (urlparse accepts it)
+            # Malformed URLs that should be rejected
+            ("https://.", False),  # Only dot
+            ("https:// ", False),  # Only space
+            ("https://-", False),  # Only hyphen
+            ("https://...", False),  # Only dots
+            ("https://:80", False),  # Port only
+            ("https://user@-", False),  # Userinfo with invalid host
         ],
     )
     def test_validate_url(self, url, expected):
