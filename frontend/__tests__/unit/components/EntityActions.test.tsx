@@ -702,7 +702,7 @@ describe('EntityActions', () => {
     }).not.toThrow()
   })
 
-  it('handles Enter key when no item is focused', () => {
+  it('navigates to edit page when enter key is pressed', () => {
     render(<EntityActions type="program" programKey="test-program" />)
     const button = screen.getByRole('button', { name: /Program actions menu/ })
     fireEvent.click(button)
