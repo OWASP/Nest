@@ -57,7 +57,7 @@ describe('Contribute Component', () => {
   test('renders skeleton initially', async () => {
     render(<ContributePage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByRole('status')
+      const skeletonLoaders = screen.getAllByTestId('card-skeleton')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })

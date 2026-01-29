@@ -47,7 +47,7 @@ describe('UsersPage Component', () => {
   test('renders skeleton initially', async () => {
     render(<UsersPage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByRole('status')
+      const skeletonLoaders = screen.getAllByTestId('user-card-skeleton')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
@@ -57,7 +57,7 @@ describe('UsersPage Component', () => {
     render(<UsersPage />)
 
     // Check loading state
-    const skeletonLoaders = screen.getAllByRole('status')
+    const skeletonLoaders = screen.getAllByTestId('user-card-skeleton')
     await waitFor(() => {
       expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()

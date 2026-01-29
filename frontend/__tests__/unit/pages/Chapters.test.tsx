@@ -55,7 +55,7 @@ describe('ChaptersPage Component', () => {
   test('renders skeleton initially', async () => {
     render(<ChaptersPage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByRole('status')
+      const skeletonLoaders = screen.getAllByTestId('card-skeleton')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
@@ -103,7 +103,7 @@ describe('ChaptersPage Component', () => {
     })
     render(<ChaptersPage />)
 
-    const skeletonLoaders = screen.getAllByRole('status')
+    const skeletonLoaders = screen.getAllByTestId('card-skeleton')
     await waitFor(() => {
       expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
