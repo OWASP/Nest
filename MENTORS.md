@@ -64,9 +64,9 @@ Muhammad Salman is a Linux-focused software engineer and GSoC'25 contributor at 
 
 Application Security Analyst at Bloomreach, CISSP
 
-[GitHub](https://github.com/noland-crane) • [LinkedIn](https://www.linkedin.com/in/nolandcrane/) • [Slack](https://owasp.slack.com/team/U0A4M7U056U) • [United States (Central Time)](https://time-time.net/times/time-zones/usa-canada/current-central-time-cst.php)
+[GitHub](https://github.com/noland-crane) • [LinkedIn](https://www.linkedin.com/in/nolandcrane/) • [Slack](https://owasp.slack.com/team/U0ABF22MQ2Z) • [United States (Central Time)](https://time-time.net/times/time-zones/usa-canada/current-central-time-cst.php)
 
-Noland Crane is a Product Security Engineer at Bloomreach where he conducts pentesting, threat modeling, secure code reviews, and vulnerability) management. He holds a Bachelor's degree in Cyber Security along with several industry certifications. 
+Noland Crane is a Product Security Engineer at Bloomreach where he conducts pentesting, threat modeling, secure code reviews, and vulnerability) management. He holds a Bachelor's degree in Cyber Security along with several industry certifications.
 
 #### Raja Nagori
 
