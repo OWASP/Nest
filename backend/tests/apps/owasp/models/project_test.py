@@ -1,7 +1,10 @@
 from unittest.mock import Mock, patch
+import uuid
 
 import pytest
+from django.utils import timezone
 
+from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
 from apps.owasp.models.enums.project import ProjectLevel, ProjectType
@@ -90,7 +93,6 @@ class TestProjectModel:
         """
         mock_requests_get.return_value = mock_response
 
-        # Setup test data
         gh_repository_mock = Mock()
         gh_repository_mock.name = "new_repo"
         repository_mock = Repository()
@@ -112,9 +114,7 @@ class TestProjectModel:
         project = Project()
         project.owasp_repository = owasp_repository
 
-        with patch(
-            "apps.owasp.models.project.RepositoryBasedEntityModel.from_github"
-        ) as mock_from_github:
+        with patch("apps.owasp.models.project.RepositoryBasedEntityModel.from_github") as mock_from_github:
             mock_from_github.return_value = {"level": 3, "type": "tool"}
             project.from_github(owasp_repository)
 
@@ -131,3 +131,67 @@ class TestProjectModel:
         assert project.level == ProjectLevel.LAB
         assert project.type == ProjectType.TOOL
         assert project.updated_at == owasp_repository.updated_at
+
+    def test_project_has_published_releases_m2m_field(self):
+        """Ensure Project.published_releases is a real ManyToManyField (not a property)."""
+        m2m_fields = [f.name for f in Project._meta.many_to_many]
+        assert "published_releases" in m2m_fields
+
+    @pytest.mark.django_db
+    def test_recent_releases_count_uses_published_releases_m2m(self):
+        """Ensure recent_releases_count uses published_releases M2M relation."""
+        unique = uuid.uuid4().hex[:8]
+        now = timezone.now()
+
+        project = Project.objects.create(
+            key=f"test-project-{unique}",
+            name="Test Project",
+        )
+
+        # ✅ REQUIRED: Repository.path uses owner.login
+        owner = User.objects.create(
+            login=f"owasp-{unique}",
+            name="OWASP",
+            created_at=now,        # ✅ REQUIRED (NOT NULL)
+            updated_at=now,
+        )
+
+        repo = Repository.objects.create(
+            key=f"test-repo-{unique}",
+            name="Test Repo",
+            owner=owner,  # ✅ FIX
+            created_at=now,
+            updated_at=now,
+            pushed_at=now,
+        )
+
+        old_release = Release.objects.create(
+            node_id=f"release-old-{unique}",  # ✅ FIX (unique + not empty)
+            repository=repo,
+            name="Old Release",
+            tag_name="0.1.0",
+            description="",
+            is_draft=False,
+            is_pre_release=False,
+            sequence_id=1,
+            created_at=now,
+            published_at=now - timezone.timedelta(days=120),
+        )
+
+        recent_release = Release.objects.create(
+            node_id=f"release-recent-{unique}",  # ✅ FIX (unique + not empty)
+            repository=repo,
+            name="Recent Release",
+            tag_name="0.2.0",
+            description="",
+            is_draft=False,
+            is_pre_release=False,
+            sequence_id=2,
+            created_at=now,
+            published_at=now - timezone.timedelta(days=10),
+        )
+
+        project.published_releases.add(old_release, recent_release)
+
+        # ✅ FIX: recent_releases_count is a method
+        assert project.recent_releases_count == 1

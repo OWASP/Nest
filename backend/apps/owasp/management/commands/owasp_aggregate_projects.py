@@ -1,9 +1,13 @@
+
+
+
+
 """A command to update OWASP projects data."""
 
 from django.core.management.base import BaseCommand
 
 from apps.owasp.models.project import Project
-
+from apps.github.models.release import Release
 
 class Command(BaseCommand):
     help = "Aggregate OWASP projects data."
@@ -85,10 +89,16 @@ class Command(BaseCommand):
                 if repository.topics:
                     topics.update(repository.topics)
 
-            project.pushed_at = max(pushed_at)
+            # ✅ Safe timestamps (prevents crash when no active repos exist)
+            if pushed_at:
+                project.pushed_at = max(pushed_at)
+
             if released_at:
                 project.released_at = max(released_at)
-            project.updated_at = max(pushed_at + released_at)
+
+            timestamps = pushed_at + released_at
+            if timestamps:
+                project.updated_at = max(timestamps)
 
             project.commits_count = commits_count
             project.contributors_count = contributors_count
@@ -109,6 +119,15 @@ class Command(BaseCommand):
                 is_fork=False,
                 is_template=False,
             ).exists()
+            project.save()  
+            project.published_releases.set(
+                Release.objects.filter(
+                    is_draft=False,
+                    is_pre_release=False,
+                    published_at__isnull=False,
+                    repository__in=project.repositories.all(),
+                )
+            )
 
             projects.append(project)
 

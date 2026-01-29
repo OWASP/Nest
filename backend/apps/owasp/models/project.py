@@ -1,5 +1,6 @@
 """OWASP app project models."""
 
+
 from __future__ import annotations
 
 import datetime
@@ -126,7 +127,14 @@ class Project(
 
     # GKs.
     members = GenericRelation("owasp.EntityMember")
+    published_releases = models.ManyToManyField(
+        "github.Release",
+        blank=True,
+        related_name="published_in_projects",
+    )
 
+    
+ 
     # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository",
@@ -382,24 +390,6 @@ class Project(
         return self.pull_requests.aggregate(
             models.Max("created_at"),
         )["created_at__max"]
-
-    @property
-    def published_releases(self) -> models.QuerySet[Release]:
-        """Get published releases across the project's repositories.
-
-        Returns:
-            QuerySet[Release]: A queryset of non-draft releases with related data.
-
-        """
-        return Release.objects.filter(
-            is_draft=False,
-            published_at__isnull=False,
-            repository__in=self.repositories.all(),
-        ).select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        )
 
     @property
     def recent_milestones(self) -> models.QuerySet[Milestone]:

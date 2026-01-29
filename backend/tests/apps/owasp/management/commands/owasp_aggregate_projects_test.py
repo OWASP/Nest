@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from apps.github.models.release import Release
 from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
 
 
@@ -16,6 +17,10 @@ class TestOwaspAggregateProjects:
         project.owasp_url = "https://owasp.org/www-project-test"
         project.related_urls = {"https://github.com/OWASP/test-repo"}
         project.invalid_urls = set()
+
+        # ✅ published_releases is now a M2M field, so mock it properly
+        project.published_releases.set = mock.Mock()
+        project.published_releases.all.return_value = []
 
         project.repositories.all.return_value = []
         project.owasp_repository = mock.Mock()
@@ -34,7 +39,12 @@ class TestOwaspAggregateProjects:
     )
     @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Project, "bulk_save", autospec=True)
-    def test_handle(self, mock_bulk_save, command, mock_project, offset, projects):
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_projects.Release.objects.filter")
+
+    def test_handle(self, mock_release_filter, mock_bulk_save, command, mock_project, offset, projects):
+        # ✅ Prevent real DB filtering with mock repository objects
+        mock_release_filter.return_value = []
+
         mock_organization = mock.Mock()
         mock_repository = mock.Mock()
         mock_repository.organization = mock_organization
