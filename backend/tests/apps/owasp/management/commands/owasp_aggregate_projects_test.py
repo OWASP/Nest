@@ -94,6 +94,7 @@ class TestOwaspAggregateProjects:
             args, _ = call
             assert "https://owasp.org/www-project-test" in args[0]
 
+    @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_projects.Issue")
     @mock.patch.object(Project, "bulk_save", autospec=True)
     def test_handle_updates_issues_and_m2m(
