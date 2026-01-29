@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.7-alpine AS builder
+FROM python:3.13.11-alpine3.23 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -41,12 +41,13 @@ COPY settings settings
 COPY static static
 COPY templates templates
 
-FROM python:3.13.7-alpine
+FROM python:3.13.11-alpine3.23
 
 ARG OWASP_GID
 ARG OWASP_UID
 
 RUN apk update && \
+    apk add --no-cache postgresql16-client && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 

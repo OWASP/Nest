@@ -1,4 +1,4 @@
-FROM node:24-alpine AS builder
+FROM node:24.13-alpine3.23 AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -16,7 +16,7 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && \
-    apk add git && \
+    apk add --no-cache git && \
     mkdir -p /home/owasp && \
     chown -R node:node /home/owasp
 
@@ -29,7 +29,7 @@ COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --ignore-scripts
 
-FROM node:24-alpine
+FROM node:24.13-alpine3.23
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -43,7 +43,7 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && \
-    apk add git && \
+    apk add --no-cache git && \
     mkdir -p /home/owasp/.next && \
     chown -R node:node /home/owasp
 

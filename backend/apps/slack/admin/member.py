@@ -23,8 +23,21 @@ class MemberAdmin(admin.ModelAdmin):
         "user__login",
     )
 
-    def approve_suggested_users(self, request, queryset):
-        """Approve all suggested users for selected members, enforcing one-to-one constraints."""
+    def approve_suggested_users(self, request, queryset) -> None:
+        """Approve suggested users for selected Slack members.
+
+        For each member in the selection, if exactly one suggested user exists,
+        assign that user to the member. If multiple or no suggested users exist,
+        display appropriate warning or error messages.
+
+        Args:
+            request: The HTTP request object.
+            queryset: The queryset of Member instances to process.
+
+        Returns:
+            None: Displays messages to the user via Django's messages framework.
+
+        """
         for entity in queryset:
             suggestions = entity.suggested_users.all()
 
