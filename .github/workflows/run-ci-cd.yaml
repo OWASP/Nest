@@ -189,56 +189,9 @@ jobs:
           echo "DJANGO_SLACK_BOT_TOKEN=None" >> $GITHUB_ENV
           echo "DJANGO_SLACK_SIGNING_SECRET=None" >> $GITHUB_ENV
 
-      - name: Generate per-app model graphs
+      - name: Generate model graphs
         working-directory: backend
-        run: |
-          set -e
-
-          APPS=$(poetry run python - <<'PY'
-          from configurations import importer
-          importer.install()
-
-          import django
-          django.setup()
-
-          from django.apps import apps
-
-          for app in apps.get_app_configs():
-              if app.name.startswith("django.") or app.name.startswith("django.contrib."):
-                  continue
-              if app.label == "django_extensions":
-                  continue
-
-              print(app.label)
-          PY
-          )
-
-          for app in $APPS; do
-            poetry run python manage.py graph_models "$app" \
-              --inheritance \
-              --output "model-graphs/apps/${app}_inheritance.svg" || true
-
-            poetry run python manage.py graph_models "$app" \
-              --no-inheritance \
-              --output "model-graphs/apps/${app}_relations.svg" || true
-          done
-
-      - name: Generate inter-app model graphs
-        working-directory: backend
-        run: |
-          set +e
-
-          poetry run python manage.py graph_models \
-            --all-applications \
-            --inheritance \
-            --output "model-graphs/inter-app/backend_inheritance.svg" || true
-
-          poetry run python manage.py graph_models \
-            --all-applications \
-            --no-inheritance \
-            --output "model-graphs/inter-app/backend_relations.svg" || true
-
-          set -e
+        run: poetry run python manage.py generate_model_graphs
 
       - name: Upload model graphs as artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
