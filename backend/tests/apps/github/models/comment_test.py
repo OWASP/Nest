@@ -72,5 +72,6 @@ class TestComment:
         comment = Comment(body="A very long comment body that should be truncated", author=None)
         long_body = "A" * 60
         comment.body = long_body
+
         assert str(comment).startswith("None - AAAAA")
-        assert len(str(comment)) <= 60  # approx
+        assert len(str(comment)) <= 60
