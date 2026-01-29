@@ -84,34 +84,34 @@ const DetailsCard = ({
   status,
   setStatus,
   canUpdateStatus,
-  tags,
-  domains,
-  entityLeaders,
-  labels,
-  modules,
-  mentors,
-  mentees,
-  admins,
-  entityKey,
-  geolocationData = null,
-  healthMetricsData,
+  tags = [],
+  domains = [],
+  entityLeaders = [],
+  labels = [],
+  modules = [],
+  mentors = [],
+  mentees = [],
+  admins = [],
+  entityKey = '',
+  geolocationData = [],
+  healthMetricsData = [],
   isActive = true,
   isArchived = false,
-  languages,
-  programKey,
-  projectName,
-  pullRequests,
-  recentIssues,
-  recentMilestones,
-  recentReleases,
+  languages = [],
+  programKey = '',
+  projectName = '',
+  pullRequests = [],
+  recentIssues = [],
+  recentMilestones = [],
+  recentReleases = [],
   repositories = [],
   showAvatar = true,
-  socialLinks,
-  stats,
-  summary,
-  title,
-  topContributors,
-  topics,
+  socialLinks = [],
+  stats = [],
+  summary = '',
+  title = '',
+  topContributors = [],
+  topics = [],
   type,
   userSummary,
 }: DetailsCardProps) => {
@@ -120,7 +120,7 @@ const DetailsCard = ({
   const [showAllMilestones, setShowAllMilestones] = useState(false)
 
   // compute styles based on type prop
-  const typeStylesMap = {
+  const typeStylesMap: Partial<Record<CardType, string>> = {
     chapter: 'gap-2 md:col-span-3',
     module: 'gap-2 md:col-span-7',
     program: 'gap-2 md:col-span-7',
@@ -156,7 +156,7 @@ const DetailsCard = ({
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
                 <MetricsScoreCircle
-                  score={healthMetricsData[0].score}
+                  score={healthMetricsData[0].score || 0}
                   clickable={true}
                   onClick={() => scrollToAnchor('issues-trend')}
                 />
@@ -460,7 +460,7 @@ const DetailsCard = ({
                         <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                           <div className="mr-4 flex items-center">
                             <FaCalendar className="mr-2 h-4 w-4" />
-                            <span>{formatDate(milestone.createdAt)}</span>
+                            <span>{formatDate(milestone.createdAt || '')}</span>
                           </div>
                           <div className="mr-4 flex items-center">
                             <FaCircleCheck className="mr-2 h-4 w-4" />
@@ -509,7 +509,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }) => {
+export const SocialLinks = ({ urls }: { urls: string[] | null }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

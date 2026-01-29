@@ -33,7 +33,7 @@ type Candidate = {
     avatarUrl: string
     bio?: string
     createdAt?: number
-    firstOwaspContributionAt?: number
+    firstOwaspContributionAt?: number | null
     id: string
     isFormerOwaspStaff?: boolean
     isGsocMentor?: boolean
@@ -41,7 +41,7 @@ type Candidate = {
     linkedinPageId?: string
     login: string
     name: string
-  }
+  } | null
 }
 
 type MemberSnapshot = {
@@ -333,7 +333,7 @@ const BoardCandidatesPage = () => {
                     e.stopPropagation()
                     e.preventDefault()
                     window.open(
-                      `https://linkedin.com/in/${candidate.member.linkedinPageId}`,
+                      `https://linkedin.com/in/${candidate.member?.linkedinPageId}`,
                       '_blank',
                       'noopener,noreferrer'
                     )

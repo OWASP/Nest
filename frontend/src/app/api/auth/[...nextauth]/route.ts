@@ -45,10 +45,15 @@ async function checkIfMentor(login: string): Promise<boolean> {
 const providers = []
 
 if (IS_GITHUB_AUTH_ENABLED) {
+  const clientId = process.env.NEXT_SERVER_GITHUB_CLIENT_ID
+  const clientSecret = process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET
+  if (!clientId || !clientSecret) {
+    throw new Error('GitHub OAuth credentials are required when IS_GITHUB_AUTH_ENABLED is true')
+  }
   providers.push(
     GitHubProvider({
-      clientId: process.env.NEXT_SERVER_GITHUB_CLIENT_ID,
-      clientSecret: process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET,
+      clientId,
+      clientSecret,
       profile(profile) {
         return {
           email: profile.email,
@@ -88,7 +93,7 @@ const authOptions: AuthOptions = {
       }
 
       if (trigger === 'update' && session) {
-        token.isOwaspStaff = (session as ExtendedSession).user.isOwaspStaff || false
+        token.isOwaspStaff = (session as ExtendedSession).user?.isOwaspStaff || false
       }
       return token
     },
@@ -97,10 +102,13 @@ const authOptions: AuthOptions = {
       ;(session as ExtendedSession).accessToken = token.accessToken as string
 
       if (session.user) {
-        ;(session as ExtendedSession).user.login = token.login as string
-        ;(session as ExtendedSession).user.isMentor = token.isMentor as boolean
-        ;(session as ExtendedSession).user.isLeader = token.isLeader as boolean
-        ;(session as ExtendedSession).user.isOwaspStaff = token.isOwaspStaff as boolean
+        const extendedUser = (session as ExtendedSession).user
+        if (extendedUser) {
+           extendedUser.login = token.login as string
+           extendedUser.isMentor = token.isMentor as boolean
+           extendedUser.isLeader = token.isLeader as boolean
+           extendedUser.isOwaspStaff = token.isOwaspStaff as boolean
+        }
       }
       return session
     },

@@ -112,11 +112,31 @@ const ProjectDetailsPage = () => {
       healthMetricsData={project.healthMetricsList}
       isActive={project.isActive}
       languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
+      pullRequests={
+        project.recentPullRequests?.map((pr) => ({
+          ...pr,
+          author: pr.author || undefined,
+        })) || []
+      }
+      recentIssues={
+        project.recentIssues?.map((issue) => ({
+          ...issue,
+          author: issue.author || undefined,
+        })) || []
+      }
+      recentMilestones={project.recentMilestones || undefined}
+      recentReleases={
+        project.recentReleases?.map((release) => ({
+          ...release,
+          author: release.author || undefined,
+        })) || []
+      }
+      repositories={
+        project.repositories?.map((repo) => ({
+          ...repo,
+          organization: repo.organization || undefined,
+        })) || []
+      }
       startDate={startDate}
       stats={projectStats}
       summary={project.summary}

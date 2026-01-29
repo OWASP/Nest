@@ -351,9 +351,9 @@ const useLeadersData = () => {
   }, [error1, error2, error3])
 
   const leadersData = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
-    .filter(Boolean)
+    .filter((user): user is NonNullable<typeof user> => !!user)
     .map((user) => ({
-      description: leaders[user.login],
+      description: leaders[user.login as keyof typeof leaders],
       memberName: user.name || user.login,
       member: user,
     }))

@@ -34,7 +34,7 @@ const MyMentorshipPage: React.FC = () => {
   const [programs, setPrograms] = useState<Program[]>([])
   const [totalPages, setTotalPages] = useState(1)
 
-  const debounceSearch = useMemo(() => debounce((q) => setDebouncedQuery(q), 400), [])
+  const debounceSearch = useMemo(() => debounce((q: string) => setDebouncedQuery(q), 400), [])
 
   useEffect(() => {
     debounceSearch(searchQuery)
@@ -64,7 +64,12 @@ const MyMentorshipPage: React.FC = () => {
 
   useEffect(() => {
     if (programData?.myPrograms) {
-      setPrograms(programData.myPrograms.programs)
+      setPrograms(
+        programData.myPrograms.programs.map((p) => ({
+          ...p,
+          userRole: p.userRole || undefined,
+        }))
+      )
       setTotalPages(programData.myPrograms.totalPages || 1)
     }
   }, [programData])

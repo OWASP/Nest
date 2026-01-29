@@ -52,10 +52,10 @@ const SnapshotDetailsPage: React.FC = () => {
     return (
       <Card
         button={submitButton}
-        cardKey={project.key}
+        cardKey={project.key || ''}
         icons={filteredIcons}
-        level={level[`${project.level.toLowerCase() as keyof typeof level}`]}
-        summary={project.summary}
+        level={level[(project.level || 'incubator').toLowerCase() as keyof typeof level] ?? level.incubator}
+        summary={project.summary || ''}
         title={project.name}
         topContributors={project.topContributors}
         url={`/projects/${project.key}`}
@@ -66,7 +66,7 @@ const SnapshotDetailsPage: React.FC = () => {
   const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.relatedUrls)
+    const formattedUrls = handleSocialUrls(chapter.relatedUrls || [])
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
@@ -81,10 +81,10 @@ const SnapshotDetailsPage: React.FC = () => {
     return (
       <Card
         button={submitButton}
-        cardKey={chapter.key}
+        cardKey={chapter.key || ''}
         icons={filteredIcons}
         social={formattedUrls}
-        summary={chapter.summary}
+        summary={chapter.summary || ''}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
       />

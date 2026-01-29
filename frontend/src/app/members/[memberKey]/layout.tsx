@@ -30,9 +30,11 @@ export async function generateMetadata({
         canonicalPath: `/members/${memberKey}`,
         description: user.bio ?? `${title} OWASP community member details.`,
         keywords: [user.login, user.name, 'owasp', 'owasp community member'],
-        title: title,
+        title: title || '',
       })
-    : null
+    : {
+        title: 'Not Found',
+      }
 }
 
 export default async function UserDetailsLayout({

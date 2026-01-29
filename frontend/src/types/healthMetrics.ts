@@ -6,10 +6,10 @@ export type ApexLineChartSeries = {
 export type ApexBarChartDataSeries = {
   x: string
   y: number
-  fill?
+  fill?: any // ApexFill
   fillColor?: string
   strokeColor?: string
-  meta?
+  meta?: any // eslint-disable-line @typescript-eslint/no-explicit-any
   goals?: {
     barHeightOffset?: number
     columnWidthOffset?: number
@@ -45,7 +45,7 @@ export type HealthMetricsProps = {
   projectName?: string
   projectKey?: string
   recentReleasesCount?: number
-  score?: number
+  score?: number | null
   starsCount?: number
   totalIssuesCount?: number
   totalReleasesCount?: number

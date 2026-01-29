@@ -7,7 +7,7 @@ const createApolloClient = () => {
   if (!GRAPHQL_URL) {
     const error = new AppError(500, 'Missing GraphQL URL')
     handleAppError(error)
-    return null
+    throw error
   }
 
   const httpLink = new HttpLink({

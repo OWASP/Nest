@@ -186,7 +186,10 @@ const UserDetailsPage: React.FC = () => {
       recentIssues={issues}
       recentMilestones={milestones}
       recentReleases={releases}
-      repositories={topRepositories}
+      repositories={topRepositories?.map((repo) => ({
+        ...repo,
+        organization: repo.organization || undefined,
+      }))}
       showAvatar={false}
       stats={userStats}
       title={user?.name || user?.login}

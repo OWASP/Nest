@@ -33,7 +33,9 @@ export async function generateMetadata({
         keywords: ['owasp', 'security', 'chapter', chapterKey, chapter.name],
         title: chapter.name,
       })
-    : null
+    : {
+        title: 'Not Found',
+      }
 }
 
 export default async function ChapterDetailsLayout({

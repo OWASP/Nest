@@ -21,12 +21,24 @@ const CommitteesPage = () => {
     pageTitle: 'OWASP Committees',
   })
   const router = useRouter()
-  const renderCommitteeCard = (committee: Committee) => {
+  const renderCommitteeCard = (committee: Committee, index: number) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(committee, params)
-    const formattedUrls = handleSocialUrls(committee.relatedUrls)
+    const formattedUrls = handleSocialUrls(committee.relatedUrls || [])
+
+    const uniqueKey = committee.objectID ?? committee.key ?? `committee-${index}`
+    const hasValidUrl = Boolean(committee.key || committee.objectID)
+    const urlKey = committee.key ?? committee.objectID ?? `committee-${index}`
+
+    if (!hasValidUrl) {
+      // eslint-disable-next-line no-console
+      console.warn('Invalid committee data:', { index, committee, uniqueKey })
+    }
+
     const handleButtonClick = () => {
-      router.push(`/committees/${committee.key}`)
+      if (hasValidUrl) {
+        router.push(`/committees/${urlKey}`)
+      }
     }
 
     const submitButton = {
@@ -37,11 +49,11 @@ const CommitteesPage = () => {
 
     return (
       <Card
-        key={committee.objectID}
-        cardKey={committee.objectID}
+        key={uniqueKey}
+        cardKey={uniqueKey}
         title={committee.name}
-        url={`/committees/${committee.key}`}
-        summary={committee.summary}
+        url={hasValidUrl ? `/committees/${urlKey}` : ''}
+        summary={committee.summary || ''}
         icons={filteredIcons}
         topContributors={committee.topContributors}
         button={submitButton}

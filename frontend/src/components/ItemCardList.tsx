@@ -24,19 +24,19 @@ const ItemCardList = ({
   showAvatar?: boolean
   showSingleColumn?: boolean
   renderDetails: (item: {
-    createdAt: string
-    commentsCount: number
-    organizationName: string
-    publishedAt: string
-    repositoryName: string
-    tagName: string
-    openIssuesCount: number
-    closedIssuesCount: number
-    author: {
+    createdAt?: string | number
+    commentsCount?: number
+    organizationName?: string | null
+    publishedAt?: number
+    repositoryName?: string | null
+    tagName?: string
+    openIssuesCount?: number
+    closedIssuesCount?: number
+    author?: {
       avatarUrl: string
       login: string
-      name: string
-    }
+      name?: string
+    } | null
   }) => JSX.Element
 }) => (
   <SecondaryCard icon={icon} title={title}>
@@ -67,13 +67,14 @@ const ItemCardList = ({
                       <Image
                         height={24}
                         width={24}
-                        src={item?.author?.avatarUrl}
+                        src={item?.author?.avatarUrl || ''}
                         alt={
                           item.author && (item.author.name || item.author.login)
                             ? `${item.author.name || item.author.login}'s avatar`
                             : "Author's avatar"
                         }
                         className="mr-2 rounded-full"
+                        style={{ objectFit: 'cover' }}
                       />
                     </Link>
                   </Tooltip>

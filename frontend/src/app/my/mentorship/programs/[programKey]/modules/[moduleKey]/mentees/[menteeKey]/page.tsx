@@ -50,8 +50,16 @@ const MenteeProfilePage = () => {
 
   useEffect(() => {
     if (data) {
-      setMenteeDetails(data.getMenteeDetails ?? null)
-      setMenteeIssuesData(data.getMenteeModuleIssues ?? [])
+      setMenteeDetails(
+        data.getMenteeDetails
+          ? {
+              ...data.getMenteeDetails,
+              bio: data.getMenteeDetails.bio || undefined,
+              domains: (data.getMenteeDetails.domains || undefined) as string[] | undefined,
+              tags: (data.getMenteeDetails.tags || undefined) as string[] | undefined,
+            }
+          : null
+      )
     }
     if (error) {
       handleAppError(error)
@@ -153,7 +161,7 @@ const MenteeProfilePage = () => {
         </div>
 
         {/* Domains and Skills */}
-        {(menteeDetails.domains?.length > 0 || menteeDetails.tags?.length > 0) && (
+        {((menteeDetails.domains?.length ?? 0) > 0 || (menteeDetails.tags?.length ?? 0) > 0) && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {menteeDetails.domains && menteeDetails.domains.length > 0 && (
               <SecondaryCard title="Domains">
