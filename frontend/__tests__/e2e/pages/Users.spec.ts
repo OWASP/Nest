@@ -13,7 +13,7 @@ test.describe('Users Page', () => {
         }),
       })
     })
-    await page.goto('/members', { timeout: 120000 })
+    await page.goto('/members', { timeout: 25000 })
   })
 
   test('renders user data correctly', async ({ page }) => {

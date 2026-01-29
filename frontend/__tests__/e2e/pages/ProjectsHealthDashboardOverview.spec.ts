@@ -6,14 +6,14 @@ import millify from 'millify'
 test.describe('Projects Health Dashboard Overview', () => {
   test('renders 404 when user is not OWASP staff', async ({ page }) => {
     await mockDashboardCookies(page, mockProjectsDashboardOverviewData, false)
-    await page.goto('/projects/dashboard', { timeout: 120000 })
+    await page.goto('/projects/dashboard', { timeout: 25000 })
     await expect(page.getByText('404')).toBeVisible()
     await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
   })
 
   test('renders project health stats', async ({ page }) => {
     await mockDashboardCookies(page, mockProjectsDashboardOverviewData, true)
-    await page.goto('/projects/dashboard', { timeout: 120000 })
+    await page.goto('/projects/dashboard', { timeout: 25000 })
     await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible()
 
     // Check for healthy projects

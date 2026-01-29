@@ -1,6 +1,6 @@
 import { test, expect, Page, BrowserContext } from '@playwright/test'
 
-test.describe('Chapter Details Page', () => {
+test.describe.serial('Chapter Details Page', () => {
   let context: BrowserContext
   let page: Page
 
