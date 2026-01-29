@@ -8,8 +8,7 @@ const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
   showViewProfile = true,
 }) => {
   return (
-    <div
-      role="status"
+    <output
       className="group flex h-64 w-80 flex-col items-center rounded-lg bg-white p-6 text-left shadow-lg dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full flex-col items-center gap-4">
@@ -29,7 +28,7 @@ const UserCardSkeleton: React.FC<UserCardSkeletonProps> = ({
           <Skeleton className="h-5 w-24" />
         </div>
       )}
-    </div>
+    </output>
   )
 }
 

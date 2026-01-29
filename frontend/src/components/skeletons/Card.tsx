@@ -16,7 +16,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   const NUM_CONTRIBUTORS = 8
 
   return (
-    <div role="status" className="flex w-full justify-center">
+    <output
+      className="flex w-full justify-center">
       <div className="border-border bg-card hover:bg-accent/10 mb-6 w-full rounded-lg border-1 p-6 transition-colors duration-300 ease-linear md:max-w-6xl">
         <div className="flex flex-col gap-6">
           {/* Header Section */}
@@ -32,8 +33,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
           {showIcons && (
             <div className="flex min-w-[30%] grow flex-row items-center justify-start gap-2 overflow-auto">
               {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
-              {Array.from({ length: numIcons }).map((_, i) => (
-                <Skeleton key={i} className="h-8 w-16" />
+              {new Array(numIcons).fill(null).map((_, i) => `icon-${i}`).map((key) => (
+                <Skeleton key={key} className="h-8 w-16" />
               ))}
               <Skeleton />
             </div>
@@ -58,8 +59,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
               {showContributors && (
                 <div className="mt-3 flex w-full flex-wrap items-center gap-2">
                   {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
-                  {[...Array(NUM_CONTRIBUTORS)].map((_, i) => (
-                    <Skeleton key={i} className="border-background h-8 w-8 rounded-full border-2" />
+                  {new Array(NUM_CONTRIBUTORS).fill(null).map((_, i) => `contributor-${i}`).map((key) => (
+                    <Skeleton key={key} className="border-background h-8 w-8 rounded-full border-2" />
                   ))}
                 </div>
               )}
@@ -81,7 +82,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </output>
   )
 }
 
