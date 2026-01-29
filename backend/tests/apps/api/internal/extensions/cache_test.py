@@ -9,6 +9,7 @@ from django.conf import settings
 from strawberry.permission import PermissionExtension
 
 from apps.api.internal.extensions.cache import (
+    CACHE_MISS,
     CacheExtension,
     generate_key,
     get_protected_fields,
@@ -22,8 +23,8 @@ class TestGenerateKey:
 
     def test_creates_deterministic_hash(self):
         """Test that generate_key creates a deterministic hash key."""
-        key1 = generate_key("chapter", {"key": "germany"})
-        key2 = generate_key("chapter", {"key": "germany"})
+        key1 = generate_key("chapter", {"key": "germany"}, role=None)
+        key2 = generate_key("chapter", {"key": "germany"}, role=None)
 
         assert key1 == key2
         assert key1.startswith("graphql-")
@@ -31,22 +32,22 @@ class TestGenerateKey:
 
     def test_differs_for_different_field_names(self):
         """Test that different field names produce different keys."""
-        key1 = generate_key("chapter", {"key": "germany"})
-        key2 = generate_key("project", {"key": "germany"})
+        key1 = generate_key("chapter", {"key": "germany"}, role=None)
+        key2 = generate_key("project", {"key": "germany"}, role=None)
 
         assert key1 != key2
 
     def test_differs_for_different_args(self):
         """Test that different arguments produce different keys."""
-        key1 = generate_key("chapter", {"key": "germany"})
-        key2 = generate_key("chapter", {"key": "canada"})
+        key1 = generate_key("chapter", {"key": "germany"}, role=None)
+        key2 = generate_key("chapter", {"key": "canada"}, role=None)
 
         assert key1 != key2
 
     def test_sorts_args_for_consistency(self):
         """Test that argument order doesn't affect the key."""
-        key1 = generate_key("chapter", {"a": "1", "b": "2"})
-        key2 = generate_key("chapter", {"b": "2", "a": "1"})
+        key1 = generate_key("chapter", {"a": "1", "b": "2"}, role=None)
+        key2 = generate_key("chapter", {"b": "2", "a": "1"}, role=None)
 
         assert key1 == key2
 
@@ -56,11 +57,25 @@ class TestGenerateKey:
         uid = UUID("550e8400-e29b-41d4-a716-446655440000")
         field_args = {"at": dt, "id": uid}
 
-        key1 = generate_key("someField", field_args)
-        key2 = generate_key("someField", field_args)
+        key1 = generate_key("someField", field_args, role=None)
+        key2 = generate_key("someField", field_args, role=None)
 
         assert key1 == key2
         assert key1.startswith(f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-")
+
+    def test_differs_for_different_roles(self):
+        """Test that different roles produce different keys."""
+        key1 = generate_key("getProgram", {"programKey": "test"}, role="admin")
+        key2 = generate_key("getProgram", {"programKey": "test"}, role="public")
+
+        assert key1 != key2
+
+    def test_same_role_produces_same_key(self):
+        """Test that the same role produces the same key."""
+        key1 = generate_key("getProgram", {"programKey": "test"}, role="admin")
+        key2 = generate_key("getProgram", {"programKey": "test"}, role="admin")
+
+        assert key1 == key2
 
 
 class TestGetProtectedFields:
@@ -162,58 +177,78 @@ class TestResolve:
     def test_returns_cached_result_on_hit(self, mock_cache, extension, mock_info, mock_next):
         """Test that cached result is returned on cache hit."""
         cached_result = {"name": "Cached OWASP"}
-        mock_cache.get_or_set.return_value = cached_result
+        mock_cache.get.return_value = cached_result
 
         result = extension.resolve(mock_next, None, mock_info, key="germany")
 
         assert result == cached_result
-        mock_cache.get_or_set.assert_called_once()
+        mock_cache.get.assert_called_once()
         mock_next.assert_not_called()
 
     @patch("apps.api.internal.extensions.cache.cache")
     def test_caches_result_on_miss(self, mock_cache, extension, mock_info, mock_next):
         """Test that result is cached on cache miss."""
-        mock_cache.get_or_set.side_effect = lambda _key, default, _timeout: default()
+        mock_cache.get.return_value = CACHE_MISS
 
         extension.resolve(mock_next, None, mock_info, key="germany")
 
         mock_next.assert_called_once()
-        mock_cache.get_or_set.assert_called_once()
+        mock_cache.set.assert_called_once()
 
 
-class TestInvalidationHelpers:
-    """Test cases for invalidation helper functions."""
+class TestInvalidateProgramCache:
+    """Test cases for invalidate_program_cache function."""
 
-    @patch("apps.api.internal.extensions.cache.cache")
-    @patch("apps.api.internal.extensions.cache.generate_key")
-    def test_invalidate_program_cache_uses_camel_case_keys(self, mock_generate_key, mock_cache):
-        """Test that invalidate_program_cache uses correct camelCase keys."""
-        mock_generate_key.side_effect = lambda name, _args: f"{name}-hashed"
+    @patch("apps.api.internal.extensions.cache.cache.delete")
+    def test_invalidates_admin_and_public_caches(self, mock_delete):
+        """Test that invalidate_program_cache invalidates both admin and public caches."""
+        invalidate_program_cache("test-program")
+        assert mock_delete.call_count == 4
 
-        invalidate_program_cache("my-program")
+    @patch("apps.api.internal.extensions.cache.cache.delete")
+    def test_invalidates_get_program_query(self, mock_delete):
+        """Test that invalidate_program_cache invalidates getProgram queries."""
+        invalidate_program_cache("test-program")
+        calls = mock_delete.call_args_list
+        keys = [call[0][0] for call in calls]
+        admin_key = generate_key("getProgram", {"programKey": "test-program"}, "admin")
+        public_key = generate_key("getProgram", {"programKey": "test-program"}, "public")
+        assert admin_key in keys
+        assert public_key in keys
 
-        # Verify calls to generate_key use camelCase 'programKey'
-        assert mock_generate_key.call_count == 2
-        mock_generate_key.assert_any_call("getProgram", {"programKey": "my-program"})
-        mock_generate_key.assert_any_call("getProgramModules", {"programKey": "my-program"})
+    @patch("apps.api.internal.extensions.cache.cache.delete")
+    def test_invalidates_get_program_modules_query(self, mock_delete):
+        """Test that invalidate_program_cache invalidates getProgramModules queries."""
+        invalidate_program_cache("test-program")
+        calls = mock_delete.call_args_list
+        keys = [call[0][0] for call in calls]
+        admin_key = generate_key("getProgramModules", {"programKey": "test-program"}, "admin")
+        public_key = generate_key("getProgramModules", {"programKey": "test-program"}, "public")
+        assert admin_key in keys
+        assert public_key in keys
 
-        assert mock_cache.delete.call_count == 2
-        mock_cache.delete.assert_any_call("getProgram-hashed")
-        mock_cache.delete.assert_any_call("getProgramModules-hashed")
 
-    @patch("apps.api.internal.extensions.cache.cache")
-    @patch("apps.api.internal.extensions.cache.generate_key")
-    def test_invalidate_module_cache_uses_camel_case_keys(self, mock_generate_key, mock_cache):
-        """Test that invalidate_module_cache uses correct camelCase keys."""
-        mock_generate_key.side_effect = lambda name, _args: f"{name}-hashed"
+class TestInvalidateModuleCache:
+    """Test cases for invalidate_module_cache function."""
 
-        invalidate_module_cache("module-1", "program-1")
+    @patch("apps.api.internal.extensions.cache.cache.delete")
+    def test_invalidates_module_and_program_caches(self, mock_delete):
+        """Test that invalidate_module_cache invalidates both module and program caches."""
+        invalidate_module_cache("test-module", "test-program")
+        assert mock_delete.call_count == 6
 
-        assert mock_generate_key.call_count == 3
-        mock_generate_key.assert_any_call(
-            "getModule", {"moduleKey": "module-1", "programKey": "program-1"}
+    @patch("apps.api.internal.extensions.cache.cache.delete")
+    def test_invalidates_get_module_query(self, mock_delete):
+        """Test that invalidate_module_cache invalidates getModule queries."""
+        invalidate_module_cache("test-module", "test-program")
+
+        calls = mock_delete.call_args_list
+        keys = [call[0][0] for call in calls]
+        admin_key = generate_key(
+            "getModule", {"moduleKey": "test-module", "programKey": "test-program"}, "admin"
         )
-        mock_generate_key.assert_any_call("getProgram", {"programKey": "program-1"})
-        mock_generate_key.assert_any_call("getProgramModules", {"programKey": "program-1"})
-
-        assert mock_cache.delete.call_count == 3
+        public_key = generate_key(
+            "getModule", {"moduleKey": "test-module", "programKey": "test-program"}, "public"
+        )
+        assert admin_key in keys
+        assert public_key in keys
