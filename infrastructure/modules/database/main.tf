@@ -42,7 +42,7 @@ resource "aws_db_instance" "main" {
   db_name                         = var.db_name
   db_subnet_group_name            = aws_db_subnet_group.main.name
   deletion_protection             = var.db_deletion_protection
-  enabled_cloudwatch_logs_exports = var.db_enabled_cloudwatch_logs_exports
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
   engine                          = "postgres"
   engine_version                  = var.db_engine_version
   identifier                      = lower("${var.project_name}-${var.environment}-db")
@@ -62,6 +62,7 @@ resource "aws_db_instance" "main" {
 
 resource "aws_secretsmanager_secret" "db_credentials" {
   description             = "Stores the credentials for the RDS database"
+  kms_key_id              = var.kms_key_arn
   name                    = "${var.project_name}-${var.environment}-db-credentials"
   recovery_window_in_days = var.secret_recovery_window_in_days
   tags = merge(var.common_tags, {
@@ -113,6 +114,11 @@ resource "aws_iam_role_policy" "rds_proxy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      {
+        Action   = ["kms:Decrypt"]
+        Effect   = "Allow"
+        Resource = var.kms_key_arn
+      },
       {
         Action   = ["secretsmanager:GetSecretValue"]
         Effect   = "Allow"

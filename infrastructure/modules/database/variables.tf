@@ -49,12 +49,6 @@ variable "db_deletion_protection" {
   default     = true
 }
 
-variable "db_enabled_cloudwatch_logs_exports" {
-  description = "List of log types to export to CloudWatch Logs."
-  type        = list(string)
-  default     = ["postgresql", "upgrade"]
-}
-
 variable "db_engine_version" {
   description = "The version of the PostgreSQL engine."
   type        = string
@@ -122,6 +116,11 @@ variable "db_user" {
 
 variable "environment" {
   description = "The environment (e.g., staging, production)."
+  type        = string
+}
+
+variable "kms_key_arn" {
+  description = "The ARN of the KMS key."
   type        = string
 }
 

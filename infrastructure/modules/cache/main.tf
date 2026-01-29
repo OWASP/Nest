@@ -20,12 +20,14 @@ locals {
 }
 
 resource "aws_cloudwatch_log_group" "engine_log" {
+  kms_key_id        = var.kms_key_arn
   name              = "/aws/elasticache/${var.project_name}-${var.environment}-cache-engine-log"
   retention_in_days = var.log_retention_in_days
   tags              = var.common_tags
 }
 
 resource "aws_cloudwatch_log_group" "slow_log" {
+  kms_key_id        = var.kms_key_arn
   name              = "/aws/elasticache/${var.project_name}-${var.environment}-cache-slow-log"
   retention_in_days = var.log_retention_in_days
   tags              = var.common_tags

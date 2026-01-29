@@ -25,7 +25,6 @@ module "alb" {
   alb_sg_id                  = module.security.alb_sg_id
   common_tags                = local.common_tags
   domain_name                = var.domain_name
-  enable_https               = var.domain_name != null
   environment                = var.environment
   frontend_health_check_path = "/"
   frontend_port              = 3000
@@ -40,6 +39,7 @@ module "cache" {
 
   common_tags           = local.common_tags
   environment           = var.environment
+  kms_key_arn           = module.kms.key_arn
   project_name          = var.project_name
   redis_engine_version  = var.redis_engine_version
   redis_node_type       = var.redis_node_type
@@ -66,6 +66,7 @@ module "database" {
   db_subnet_ids                  = module.networking.private_subnet_ids
   db_user                        = var.db_user
   environment                    = var.environment
+  kms_key_arn                    = module.kms.key_arn
   project_name                   = var.project_name
   proxy_security_group_ids       = [module.security.rds_proxy_sg_id]
   secret_recovery_window_in_days = var.secret_recovery_window_in_days
@@ -75,7 +76,7 @@ module "database" {
 module "ecs" {
   source = "../modules/ecs"
 
-  assign_public_ip              = var.ecs_use_public_subnets
+  assign_public_ip              = var.ecs_assign_public_ip
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns
@@ -83,8 +84,9 @@ module "ecs" {
   environment                   = var.environment
   fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
+  kms_key_arn                   = module.kms.key_arn
   project_name                  = var.project_name
-  subnet_ids                    = var.ecs_use_public_subnets ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
+  subnet_ids                    = var.ecs_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
   use_fargate_spot              = var.ecs_use_fargate_spot
 }
 
@@ -98,12 +100,21 @@ module "frontend" {
   environment              = var.environment
   frontend_parameters_arns = module.parameters.frontend_ssm_parameter_arns
   frontend_sg_id           = module.security.frontend_sg_id
+  kms_key_arn              = module.kms.key_arn
   max_count                = var.frontend_max_count
   min_count                = var.frontend_min_count
   private_subnet_ids       = module.networking.private_subnet_ids
   project_name             = var.project_name
   target_group_arn         = module.alb.frontend_target_group_arn
   use_fargate_spot         = var.frontend_use_fargate_spot
+}
+
+module "kms" {
+  source = "../modules/kms"
+
+  common_tags  = local.common_tags
+  environment  = var.environment
+  project_name = var.project_name
 }
 
 module "networking" {
@@ -119,6 +130,7 @@ module "networking" {
   create_vpc_secretsmanager_endpoint  = var.create_vpc_secretsmanager_endpoint
   create_vpc_ssm_endpoint             = var.create_vpc_ssm_endpoint
   environment                         = var.environment
+  kms_key_arn                         = module.kms.key_arn
   private_subnet_cidrs                = var.private_subnet_cidrs
   project_name                        = var.project_name
   public_subnet_cidrs                 = var.public_subnet_cidrs
@@ -129,10 +141,10 @@ module "parameters" {
   source = "../modules/parameters"
 
   allowed_hosts = join(",", [
-    var.domain_name != null ? var.domain_name : module.alb.alb_dns_name,
+    var.domain_name,
     "zappa",
   ])
-  allowed_origins    = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
+  allowed_origins    = "https://${var.domain_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
   db_name            = var.db_name
@@ -140,12 +152,12 @@ module "parameters" {
   db_port            = var.db_port
   db_user            = var.db_user
   environment        = var.environment
-  nextauth_url       = var.domain_name != null ? "https://${var.domain_name}" : "http://${module.alb.alb_dns_name}"
+  nextauth_url       = "https://${var.domain_name}"
   project_name       = var.project_name
   redis_host         = module.cache.redis_primary_endpoint
   redis_password_arn = module.cache.redis_password_arn
-  server_csrf_url    = var.domain_name != null ? "https://${var.domain_name}/csrf/" : "http://${module.alb.alb_dns_name}/csrf/"
-  server_graphql_url = var.domain_name != null ? "https://${var.domain_name}/graphql/" : "http://${module.alb.alb_dns_name}/graphql/"
+  server_csrf_url    = "https://${var.domain_name}/csrf/"
+  server_graphql_url = "https://${var.domain_name}/graphql/"
 }
 
 module "security" {
