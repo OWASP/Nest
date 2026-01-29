@@ -16,7 +16,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && apk upgrade && apk add libc6-compat
+    apk update && \
+    apk add --no-cache libc6-compat
 
 WORKDIR /app
 

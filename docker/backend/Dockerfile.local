@@ -45,8 +45,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && apk upgrade && \
-    apk add postgresql16-client redis && \
+    apk update && \
+    apk add --no-cache postgresql16-client redis && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp
 

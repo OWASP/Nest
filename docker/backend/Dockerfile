@@ -47,6 +47,7 @@ ARG OWASP_GID
 ARG OWASP_UID
 
 RUN apk update && \
+    apk add --no-cache postgresql16-client && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
