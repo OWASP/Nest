@@ -31,7 +31,7 @@ class TestPermissions:
             "apps.owasp.api.internal.views.permissions.settings.IS_E2E_ENVIRONMENT",
             new=True,
         )
-        assert has_dashboard_permission(request) is True
+        assert has_dashboard_permission(request)
 
     def test_has_dashboard_permission_staff(self, mocker, user_with_staff):
         request = mocker.Mock()
@@ -44,7 +44,7 @@ class TestPermissions:
             "apps.owasp.api.internal.views.permissions.settings.IS_FUZZ_ENVIRONMENT",
             new=False,
         )
-        assert has_dashboard_permission(request) is True
+        assert has_dashboard_permission(request)
 
     def test_has_dashboard_permission_no_staff(self, mocker, user_without_staff):
         request = mocker.Mock()
@@ -57,7 +57,7 @@ class TestPermissions:
             "apps.owasp.api.internal.views.permissions.settings.IS_FUZZ_ENVIRONMENT",
             new=False,
         )
-        assert has_dashboard_permission(request) is False
+        assert not has_dashboard_permission(request)
 
     def test_has_dashboard_permission_anonymous(self, mocker):
         request = mocker.Mock()
@@ -70,7 +70,7 @@ class TestPermissions:
             "apps.owasp.api.internal.views.permissions.settings.IS_FUZZ_ENVIRONMENT",
             new=False,
         )
-        assert has_dashboard_permission(request) is False
+        assert not has_dashboard_permission(request)
 
     def test_dashboard_access_required_decorator_allow(self, mocker, user_with_staff):
         @dashboard_access_required

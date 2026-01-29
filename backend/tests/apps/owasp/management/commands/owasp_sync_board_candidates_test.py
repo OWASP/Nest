@@ -2,6 +2,7 @@ import json
 from unittest.mock import Mock
 
 import pytest
+from django.contrib.contenttypes.models import ContentType
 
 from apps.owasp.management.commands.owasp_sync_board_candidates import Command
 
@@ -13,9 +14,6 @@ class TestSyncBoardCandidatesCommand:
         cmd.stdout = Mock()
         cmd.stderr = Mock()
         cmd.style = Mock()
-
-        # Mock ContentType to avoid DB connection errors during tests using GenericForeignKeys
-        from django.contrib.contenttypes.models import ContentType
 
         mock_ct = ContentType(app_label="owasp", model="boardofdirectors")
         mock_ct.id = 1
@@ -104,7 +102,7 @@ Content"""
         mock_update_data.assert_called_once()
         args, kwargs = mock_update_data.call_args
         data_arg = args[0]
-        assert kwargs["save"] is True
+        assert kwargs["save"]
         assert data_arg["member_name"] == "Jane Doe"
 
     def test_sync_year_candidates_api_error(self, command, mocker):
