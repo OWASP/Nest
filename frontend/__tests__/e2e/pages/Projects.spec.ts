@@ -13,7 +13,7 @@ test.describe('Projects Page', () => {
         }),
       })
     })
-    await page.goto('/projects', { timeout: 120000 })
+    await page.goto('/projects', { timeout: 25000 })
   })
 
   test('renders project data correctly', async ({ page }) => {

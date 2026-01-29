@@ -13,7 +13,7 @@ test.describe('Contribute Page', () => {
         }),
       })
     })
-    await page.goto('/contribute', { timeout: 120000 })
+    await page.goto('/contribute', { timeout: 25000 })
   })
 
   test('renders issue data correctly', async ({ page }) => {
