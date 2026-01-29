@@ -54,11 +54,10 @@ class ProjectNode(GenericEntityNode):
         self, root: Project, limit: int = 30
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
-        validated_limit = normalize_limit(limit, MAX_LIMIT)
-        if validated_limit is None:
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return root.health_metrics.order_by("nest_created_at")[:validated_limit]
+        return root.health_metrics.order_by("nest_created_at")[:normalized_limit]
 
     @strawberry_django.field(prefetch_related=["health_metrics"])
     def health_metrics_latest(self, root: Project) -> ProjectHealthMetricsNode | None:
@@ -88,8 +87,7 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        validated_limit = normalize_limit(limit, MAX_LIMIT)
-        if validated_limit is None:
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
         return (
@@ -101,7 +99,7 @@ class ProjectNode(GenericEntityNode):
                 "author__owasp_profile",
             )
             .prefetch_related("labels")
-            .order_by("-created_at")[:validated_limit]
+            .order_by("-created_at")[:normalized_limit]
         )
 
     @strawberry_django.field

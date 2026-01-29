@@ -77,8 +77,7 @@ class MilestoneQuery:
                 id__in=Subquery(latest_milestone_per_author),
             )
 
-        validated_limit = normalize_limit(limit, MAX_LIMIT)
-        if validated_limit is None:
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return milestones.order_by("-created_at")[:validated_limit]
+        return milestones.order_by("-created_at")[:normalized_limit]

@@ -46,11 +46,10 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
-        validated_limit = normalize_limit(limit, MAX_RECENT_PROJECTS_LIMIT)
-        if validated_limit is None:
+        if (normalized_limit := normalize_limit(limit, MAX_RECENT_PROJECTS_LIMIT)) is None:
             return []
 
-        return Project.objects.filter(is_active=True).order_by("-created_at")[:validated_limit]
+        return Project.objects.filter(is_active=True).order_by("-created_at")[:normalized_limit]
 
     @strawberry_django.field
     def search_projects(self, query: str) -> list[ProjectNode]:
