@@ -8,17 +8,17 @@ test.describe('About Page', () => {
       const request = route.request()
       const postData = request.postDataJSON()
 
-      if (postData.query?.includes('user')) {
-        const username = postData.variables.key
-        const userData = mockAboutData.users[username]
-        await route.fulfill({ status: 200, json: { data: { user: userData } } })
-      } else if (postData.query?.includes('topContributors')) {
+      if (postData.operationName === 'GetAboutPageData') {
         await route.fulfill({
           status: 200,
-          json: { data: { topContributors: mockAboutData.topContributors } },
+          json: {
+            data: {
+              project: mockAboutData.project,
+              topContributors: mockAboutData.topContributors,
+              users: mockAboutData.users,
+            },
+          },
         })
-      } else {
-        await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
       }
     })
 

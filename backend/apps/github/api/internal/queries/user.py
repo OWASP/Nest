@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Case, IntegerField, Value, When
 
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.api.internal.nodes.user import UserNode
@@ -52,3 +53,23 @@ class UserQuery:
 
         """
         return User.objects.filter(has_public_member_page=True, login=login).first()
+
+    @strawberry_django.field
+    def users(self, logins: list[str]) -> list[UserNode]:
+        """Resolve users by their logins.
+
+        Args:
+            logins (list[str]): List of user logins.
+
+        Returns:
+            list[User]: List of user objects.
+
+        """
+        qs = User.objects.filter(login__in=logins, has_public_member_page=True)
+        if logins:
+            order = Case(
+                *[When(login=login, then=Value(pos)) for pos, login in enumerate(logins)],
+                output_field=IntegerField(),
+            )
+            qs = qs.order_by(order)
+        return qs
