@@ -1,5 +1,7 @@
 """Test cases for ProjectNode."""
 
+from unittest.mock import MagicMock, Mock
+
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
@@ -7,6 +9,7 @@ from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
+from apps.owasp.models.project import Project
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -114,8 +117,6 @@ class TestProjectNode(GraphQLNodeBaseTest):
 
     def test_contribution_stats_transforms_snake_case_to_camel_case(self):
         """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
-        from unittest.mock import Mock
-
         mock_project = Mock()
         mock_project.contribution_stats = {
             "commits": 100,
@@ -138,3 +139,46 @@ class TestProjectNode(GraphQLNodeBaseTest):
         assert result["releases"] == 10
         assert result["total"] == 185
         assert "pull_requests" not in result
+
+    def test_recent_pull_requests_returns_empty_when_not_prefetched(self):
+        """Test that recent_pull_requests returns empty list when _recent_pull_requests not set."""
+        mock_project = Mock(spec=Project)
+        mock_queryset = MagicMock()
+        mock_queryset.order_by.return_value.__getitem__.return_value = []
+        mock_project.pull_requests = mock_queryset
+        mock_info = Mock()
+        resolver = ProjectNode.recent_pull_requests.base_resolver.wrapped_func
+        result = resolver(mock_info, mock_project)
+
+        assert result == []
+        mock_queryset.order_by.assert_called_once_with("-created_at")
+
+    def test_recent_pull_requests_returns_prefetched_data(self):
+        """Test that recent_pull_requests returns prefetched data from _recent_pull_requests."""
+        mock_pr1 = Mock()
+        mock_pr1.id = 1
+        mock_pr2 = Mock()
+        mock_pr2.id = 2
+
+        mock_project = Mock(spec=Project)
+        mock_project._recent_pull_requests = [mock_pr1, mock_pr2]
+        mock_info = Mock()
+
+        resolver = ProjectNode.recent_pull_requests.base_resolver.wrapped_func
+        result = resolver(mock_info, mock_project)
+
+        assert len(result) == 2
+        assert result[0] == mock_pr1
+        assert result[1] == mock_pr2
+
+    def test_recent_pull_requests_prefetch_configuration(self):
+        """Test that recent_pull_requests has prefetch_related optimization configured."""
+        field = self._get_field_by_name("recent_pull_requests", ProjectNode)
+        assert field is not None
+        assert hasattr(field, "extensions")
+
+    def test_recent_pull_requests_uses_correct_limit(self):
+        """Test that recent_pull_requests respects the RECENT_PULL_REQUESTS_LIMIT."""
+        from apps.owasp.api.internal.nodes.project import RECENT_PULL_REQUESTS_LIMIT
+
+        assert RECENT_PULL_REQUESTS_LIMIT == 5
