@@ -48,9 +48,10 @@ AI/ML enthusiast | GSoC'25 contributor at PSF
 
 Senior GRC & Technology Risk Leader, CISSP
 
-[GitHub](https://github.com/TheCyberLeader) • [LinkedIn](https://www.linkedin.com/in/mariezw/) • [Slack](https://owasp.slack.com/team/U0A23223B8B) • Country (Timezone)
+[GitHub](https://github.com/TheCyberLeader) • [LinkedIn](https://www.linkedin.com/in/mariezw/) • [Slack](https://owasp.slack.com/team/U0A23223B8B) • United States, EST Timezone
 
-*This section is reserved for the mentor to add their own description.*
+Hey there! I'm a cybersecurity professional focused on Governance, Risk, and Compliance. I love helping people navigate the sometimes confusing world of GRC, whether you're just starting out, prepping for your CISSP, or tackling real-world risk management challenges.
+I'm here to share what I've learned, answer questions, and help you build practical skills. Feel free to reach out on LinkedIn, or Slack, always happy to chat about security, risk, or career paths in this field!
 
 #### Muhammad Salman
 
