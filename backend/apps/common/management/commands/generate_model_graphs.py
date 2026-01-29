@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from django.apps import apps
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
@@ -13,7 +14,7 @@ class Command(BaseCommand):
     help = "Generate per-app and inter-app model graphs"
 
     def handle(self, *args, **options):
-        base_dir = Path("model-graphs")
+        base_dir = Path(settings.BASE_DIR) / "model-graphs"
         apps_dir = base_dir / "apps"
         inter_dir = base_dir / "inter-app"
 
