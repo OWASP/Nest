@@ -5,10 +5,10 @@ from __future__ import annotations
 import logging
 import os
 
-import openai
 from django.core.exceptions import ObjectDoesNotExist
 from pgvector.django.functions import CosineDistance
 
+from apps.ai.common.llm_config import get_llm
 from apps.ai.embeddings.factory import get_embedder
 from apps.ai.models.chunk import Chunk
 from apps.core.models.prompt import Prompt
@@ -24,18 +24,9 @@ class QuestionDetector:
     CHAT_MODEL = "gpt-4o-mini"
     CHUNKS_RETRIEVAL_LIMIT = 10
 
-    def __init__(self):
-        """Initialize the question detector.
-
-        Raises:
-            ValueError: If the OpenAI API key is not set.
-
-        """
-        if not (openai_api_key := os.getenv("DJANGO_OPEN_AI_SECRET_KEY")):
-            error_msg = "DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
-            raise ValueError(error_msg)
-
-        self.openai_client = openai.OpenAI(api_key=openai_api_key)
+    def __init__(self) -> None:
+        """Initialize the question detector."""
+        self.llm = get_llm()
         self.embedder = get_embedder()
 
     def is_owasp_question(self, text: str) -> bool:
@@ -56,7 +47,7 @@ class QuestionDetector:
             limit=self.CHUNKS_RETRIEVAL_LIMIT,
         )
 
-        openai_result = self.is_owasp_question_with_openai(text, context_chunks)
+        openai_result = self.is_owasp_question_with_llm(text, context_chunks)
 
         if openai_result is None:
             logger.warning(
@@ -66,7 +57,7 @@ class QuestionDetector:
 
         return openai_result
 
-    def is_owasp_question_with_openai(self, text: str, context_chunks: list[dict]) -> bool | None:
+    def is_owasp_question_with_llm(self, text: str, context_chunks: list[dict]) -> bool | None:
         """Determine if the text is an OWASP-related question using retrieved context chunks.
 
         Args:
@@ -94,22 +85,20 @@ class QuestionDetector:
         user_prompt = f'Question: "{text}"\n\n Context: {formatted_context}'
 
         try:
-            response = self.openai_client.chat.completions.create(
-                model=self.CHAT_MODEL,
-                messages=[
+            # Use CrewAI LLM abstraction instead of direct OpenAI client
+            response = self.llm.call(
+                [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                temperature=self.TEMPERATURE,
-                max_tokens=self.MAX_TOKENS,
             )
-        except openai.OpenAIError:
-            logger.exception("OpenAI API error during question detection")
+        except Exception:
+            logger.exception("LLM error during question detection")
             return None
         else:
-            answer = response.choices[0].message.content
+            answer = response
             if not answer:
-                logger.error("OpenAI returned an empty response")
+                logger.error("LLM returned an empty response")
                 return None
 
             clean_answer = answer.strip().upper()

@@ -22,6 +22,13 @@ def get_llm() -> LLM:
             api_key=os.getenv("DJANGO_OPEN_AI_SECRET_KEY"),
             temperature=0.1,
         )
+    if provider == "google":
+        return LLM(
+            model=f"openai/{os.getenv('GOOGLE_MODEL_NAME', 'gemini-2.5-flash')}",
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            api_key=os.getenv("GOOGLE_API_KEY"),
+            temperature=0.1,
+        )
     if provider == "anthropic":
         return LLM(
             model=os.getenv("ANTHROPIC_MODEL_NAME", "claude-3-5-sonnet-20241022"),
