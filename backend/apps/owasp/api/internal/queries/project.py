@@ -8,10 +8,11 @@ from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
 
-MAX_RECENT_PROJECTS_LIMIT = 1000
+MAX_RECENT_PROJECTS_LIMIT = 100
 MAX_SEARCH_QUERY_LENGTH = 100
 MIN_SEARCH_QUERY_LENGTH = 3
-SEARCH_PROJECTS_LIMIT = 3
+SEARCH_PROJECTS_LIMIT = 100
+MAX_PROJECT_KEY_LENGTH = 50
 
 
 @strawberry.type
@@ -29,8 +30,15 @@ class ProjectQuery:
             ProjectNode | None: The project node if found, otherwise None.
 
         """
+        normalized_key = key.strip()
+
+        if not normalized_key or len(normalized_key) > MAX_PROJECT_KEY_LENGTH:
+            return None
+
         try:
-            return Project.objects.get(key=f"www-project-{key}")
+            return Project.objects.only("id", "key", "name", "is_active", "created_at").get(
+                key=f"www-project-{normalized_key}"
+            )
         except Project.DoesNotExist:
             return None
 
@@ -45,10 +53,15 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
-        return (
-            Project.objects.filter(is_active=True).order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_RECENT_PROJECTS_LIMIT)) > 0
-            else []
+        if limit <= 0:
+            return []
+
+        limit = min(max(limit, 1), MAX_RECENT_PROJECTS_LIMIT)
+
+        return list(
+            Project.objects.filter(is_active=True)
+            .only("id", "key", "name", "created_at", "is_active")
+            .order_by("-created_at")[:limit]
         )
 
     @strawberry_django.field
@@ -61,14 +74,21 @@ class ProjectQuery:
         ):
             return []
 
-        return Project.objects.filter(
-            is_active=True,
-            name__icontains=cleaned_query,
-        ).order_by("name")[:SEARCH_PROJECTS_LIMIT]
+        return list(
+            Project.objects.filter(
+                is_active=True,
+                name__icontains=cleaned_query,
+            )
+            .only("id", "key", "name", "is_active")
+            .order_by("name")[:SEARCH_PROJECTS_LIMIT]
+        )
 
     @strawberry_django.field
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:
         """Check if a GitHub login or name is listed as a project leader."""
+        if not login or not login.strip():
+            return False
+
         try:
             github_user = GithubUser.objects.get(login=login)
         except GithubUser.DoesNotExist:

@@ -20,7 +20,7 @@ RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
 RECENT_PULL_REQUESTS_LIMIT = 5
 
-MAX_LIMIT = 1000
+MAX_LIMIT = 100
 
 
 @strawberry_django.type(
@@ -54,7 +54,7 @@ class ProjectNode(GenericEntityNode):
     ) -> list[ProjectHealthMetricsNode]:
         """Resolve project health metrics."""
         return (
-            root.health_metrics.order_by("nest_created_at")[:limit]
+            root.health_metrics.order_by("-nest_created_at")[:limit]
             if (limit := min(limit, MAX_LIMIT)) > 0
             else []
         )

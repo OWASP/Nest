@@ -6,7 +6,7 @@ import strawberry_django
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
 from apps.owasp.models.snapshot import Snapshot
 
-MAX_LIMIT = 100
+MAX_LIMIT = 10
 
 
 @strawberry.type
@@ -27,12 +27,15 @@ class SnapshotQuery:
     @strawberry_django.field
     def snapshots(self, limit: int = 12) -> list[SnapshotNode]:
         """Resolve snapshots."""
-        return (
+        if limit <= 0:
+            return []
+
+        limit = min(max(limit, 1), MAX_LIMIT)
+
+        return list(
             Snapshot.objects.filter(
                 status=Snapshot.Status.COMPLETED,
-            ).order_by(
-                "-created_at",
-            )[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
+            )
+            .only("id", "key", "title", "created_at")
+            .order_by("-created_at")[:limit]
         )

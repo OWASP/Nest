@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
+MAX_RECENT_MILESTONES_LIMIT = 100
 
 
 @strawberry_django.type(
@@ -69,6 +70,9 @@ class RepositoryNode(strawberry.relay.Node):
     @strawberry_django.field(prefetch_related=["milestones"])
     def recent_milestones(self, root: Repository, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
+        if limit < 0:
+            return []
+        limit = min(limit, MAX_RECENT_MILESTONES_LIMIT)
         return root.recent_milestones.order_by("-created_at")[:limit]
 
     @strawberry_django.field(prefetch_related=["releases"])
