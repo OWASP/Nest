@@ -1,5 +1,6 @@
 """Admin configuration for the EntityChannel model."""
 
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.contenttypes.models import ContentType
 
@@ -8,8 +9,15 @@ from apps.slack.models import Conversation
 
 
 @admin.action(description="Mark selected EntityChannels as reviewed")
-def mark_as_reviewed(_modeladmin, request, queryset):
-    """Admin action to mark selected EntityChannels as reviewed."""
+def mark_as_reviewed(_modeladmin, request, queryset) -> None:
+    """Admin action to mark selected EntityChannels as reviewed.
+
+    Args:
+        _modeladmin: The ModelAdmin instance (unused).
+        request: The HTTP request object.
+        queryset: QuerySet of EntityChannel instances to mark as reviewed.
+
+    """
     messages.success(
         request,
         f"Marked {queryset.update(is_reviewed=True)} EntityChannel(s) as reviewed.",
@@ -61,8 +69,19 @@ class EntityChannelAdmin(admin.ModelAdmin):
         "channel_id",
     )
 
-    def channel_search_display(self, obj):
-        """Display the channel name for the selected channel."""
+    def channel_search_display(self, obj) -> str:
+        """Display the channel name in the admin list view.
+
+        Retrieves and displays the Conversation name if the channel_id
+        references a valid Slack conversation.
+
+        Args:
+            obj: The EntityChannel instance.
+
+        Returns:
+            str: Channel name as '#name', error message, or '-' if not found.
+
+        """
         if obj.channel_id and obj.channel_type:
             try:
                 if obj.channel_type.model == "conversation":
@@ -74,8 +93,21 @@ class EntityChannelAdmin(admin.ModelAdmin):
 
     channel_search_display.short_description = "Channel Name"
 
-    def get_form(self, request, obj=None, **kwargs):
-        """Get the form for the EntityChannel model."""
+    def get_form(self, request, obj=None, **kwargs) -> forms.ModelForm:
+        """Get the form for the EntityChannel model.
+
+        Prepares the form with necessary metadata for channel selection
+        and custom widgets.
+
+        Args:
+            request: The HTTP request object.
+            obj: The EntityChannel instance being edited (None for add).
+            **kwargs: Additional keyword arguments passed to parent.
+
+        Returns:
+            Form: The EntityChannel form with conversation content type metadata.
+
+        """
         form = super().get_form(request, obj, **kwargs)
         form.conversation_content_type_id = ContentType.objects.get_for_model(Conversation).id
 
