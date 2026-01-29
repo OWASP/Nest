@@ -45,13 +45,17 @@ class ProjectQuery:
             list[ProjectNode]: A list of recent active projects.
 
         """
+        if limit <= 0:
+            return []
+
+        limit = min(limit, MAX_RECENT_PROJECTS_LIMIT)
+
         return (
-
-
             Project.objects.filter(is_active=True)
             .prefetch_related("published_releases")
             .order_by("-created_at")[:limit]
         )
+
 
 
     @strawberry_django.field
