@@ -231,6 +231,12 @@ export type IssueNode = Node & {
   url: Scalars['String']['output'];
 };
 
+
+export type IssueNodePullRequestsArgs = {
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
 export type LogoutResult = {
   __typename?: 'LogoutResult';
   code?: Maybe<Scalars['String']['output']>;
@@ -358,6 +364,7 @@ export type ModuleNodeIssuesCountArgs = {
 
 export type ModuleNodeRecentPullRequestsArgs = {
   limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
 };
 
 
