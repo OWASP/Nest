@@ -233,4 +233,14 @@ def validate_url(url: str | None) -> bool:
     except ValueError:
         return False
 
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    # Check scheme
+    if parsed.scheme not in {"http", "https"}:
+        return False
+
+    # Check netloc exists and is not just whitespace/dots/hyphens
+    netloc = parsed.netloc.strip()
+    if not netloc or netloc in {".", "..", "-", ".-", "-."}:
+        return False
+
+    # Check netloc contains at least one alphanumeric character
+    return any(c.isalnum() for c in netloc)
