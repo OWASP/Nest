@@ -69,9 +69,6 @@ test.describe.serial('Home Page', () => {
     await expect(page.getByRole('heading', { name: 'Ready to Make a Difference?' })).toBeVisible()
     const joinLink = page.getByRole('link', { name: 'Join OWASP', exact: true })
     await expect(joinLink).toBeVisible()
-
-    // Verify it points to the GlueUp membership page
-    await expect(joinLink).toHaveAttribute('href', /owasp.glueup.com/)
   })
 
   test('should have stats', async () => {

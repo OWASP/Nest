@@ -6,6 +6,8 @@ Aissue
 Atqc
 Aupdated
 BOTTOMPADDING
+Balbin
+Balbin's
 Birda
 CCSP
 CISSP
@@ -44,6 +46,7 @@ Sivagangai
 Sonarqube
 Stegen
 T04T40NHX
+Tarandach
 Truncator
 Turbopack
 Twitterbot
@@ -91,6 +94,7 @@ geocoders
 geoloc
 geopy
 gha
+glueup
 graphiql
 graphqler
 gunicorn
