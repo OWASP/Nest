@@ -461,6 +461,9 @@ export const ProjectSelector = ({
             errorMessage: 'break-words whitespace-normal max-w-full w-full',
           },
         }}
+        clearButtonProps={{
+          'aria-label': 'clear selected project',
+        }}
       >
         {items.map((project) => (
           <AutocompleteItem key={project.id} textValue={project.name}>

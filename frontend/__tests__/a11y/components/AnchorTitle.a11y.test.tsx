@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import AnchorTitle from 'components/AnchorTitle'
-
-expect.extend(toHaveNoViolations)
 
 describe('AnchorTitle Accessibility', () => {
   it('should not have any accessibility violations', async () => {

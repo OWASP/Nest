@@ -321,6 +321,7 @@ export type ModuleNode = {
   program?: Maybe<ProgramNode>;
   projectId?: Maybe<Scalars['ID']['output']>;
   projectName?: Maybe<Scalars['String']['output']>;
+  recentPullRequests: Array<PullRequestNode>;
   startedAt: Scalars['DateTime']['output'];
   tags?: Maybe<Array<Scalars['String']['output']>>;
   taskAssignedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -352,6 +353,11 @@ export type ModuleNodeIssuesArgs = {
 
 export type ModuleNodeIssuesCountArgs = {
   label?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type ModuleNodeRecentPullRequestsArgs = {
+  limit?: Scalars['Int']['input'];
 };
 
 
@@ -530,6 +536,7 @@ export type ProgramNode = {
   key: Scalars['String']['output'];
   menteesLimit?: Maybe<Scalars['Int']['output']>;
   name: Scalars['String']['output'];
+  recentMilestones: Array<MilestoneNode>;
   startedAt: Scalars['DateTime']['output'];
   status: ProgramStatusEnum;
   tags?: Maybe<Array<Scalars['String']['output']>>;
