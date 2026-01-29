@@ -24,9 +24,9 @@ Kateryna is OWASP Nest Project Leader who enjoys mentoring open source contribut
 
 Cybersecurity Engineer | GSoC'23 contributor at Mifos Initiative
 
-[GitHub](https://github.com/kerlynNkep) • [LinkedIn](https://www.linkedin.com/in/kerlyn-manyi-a80201123/) • [Slack](https://owasp.slack.com/team/U06M01ARG3V) • Country (Timezone)
+[GitHub](https://github.com/kerlynNkep) • [LinkedIn](https://www.linkedin.com/in/kerlyn-manyi-a80201123/) • [Slack](https://owasp.slack.com/team/U06M01ARG3V) • [Cameroon (West African Time)](https://time-time.net/time/yaounde-cameroon.php)
 
-*This section is reserved for the mentor to add their own description.*
+Kerlyn is a cybersecurity practitioner with a strong focus on penetration testing and offensive security. She previously mentored GSoC'25 under the Mifos Initiative. She mentors open-source contributions focused on penetration testing, ML-driven threat detection, and secure architecture design. She helps contributors build real-world offensive security skills.
 
 #### Keshav Malik
 
@@ -64,9 +64,9 @@ Muhammad Salman is a Linux-focused software engineer and GSoC'25 contributor at 
 
 Application Security Analyst at Bloomreach, CISSP
 
-[GitHub](https://github.com/noland-crane) • [LinkedIn](https://www.linkedin.com/in/nolandcrane/) • [Slack](https://owasp.slack.com/team/U0A4M7U056U) • Country (Timezone)
+[GitHub](https://github.com/noland-crane) • [LinkedIn](https://www.linkedin.com/in/nolandcrane/) • [Slack](https://owasp.slack.com/team/U0ABF22MQ2Z) • [United States (Central Time)](https://time-time.net/times/time-zones/usa-canada/current-central-time-cst.php)
 
-*This section is reserved for the mentor to add their own description.*
+Noland Crane is a Product Security Engineer at Bloomreach where he conducts pentesting, threat modeling, secure code reviews, and vulnerability) management. He holds a Bachelor's degree in Cyber Security along with several industry certifications.
 
 #### Raja Nagori
 
