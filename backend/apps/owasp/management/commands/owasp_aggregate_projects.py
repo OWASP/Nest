@@ -27,7 +27,7 @@ class Command(BaseCommand):
         active_projects_count = active_projects.count()
 
         offset = options["offset"]
-        projects = []
+        
         for idx, project in enumerate(active_projects[offset:]):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
             print(f"{prefix:<10} {project.owasp_url}")
@@ -129,7 +129,4 @@ class Command(BaseCommand):
                 )
             )
 
-            projects.append(project)
-
-        # Bulk save data.
-        Project.bulk_save(projects)
+            

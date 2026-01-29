@@ -38,10 +38,10 @@ class TestOwaspAggregateProjects:
         ],
     )
     @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
-    @mock.patch.object(Project, "bulk_save", autospec=True)
+    
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_projects.Release.objects.filter")
 
-    def test_handle(self, mock_release_filter, mock_bulk_save, command, mock_project, offset, projects):
+    def test_handle(self, mock_release_filter, command, mock_project, offset, projects):
         # ✅ Prevent real DB filtering with mock repository objects
         mock_release_filter.return_value = []
 
@@ -89,7 +89,10 @@ class TestOwaspAggregateProjects:
         ):
             command.handle(offset=offset)
 
-        assert mock_bulk_save.called
+        assert mock_project.save.called
+        assert mock_project.published_releases.set.called
+        assert mock_release_filter.called
+
         assert mock_print.call_count == projects - offset
 
         for call in mock_print.call_args_list:
