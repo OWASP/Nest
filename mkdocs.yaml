@@ -3,6 +3,14 @@ nav:
   - Home: index.md
   - Code of Conduct: code-of-conduct.md
   - Contributing: contributing.md
+  - Backend:
+      - Overview: backend/overview.md
+  - Frontend:
+      - Overview: frontend/overview.md
+  - Schema:
+      - Overview: schema/overview.md
+  - API SDKs:
+      - Overview: sdks/overview.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material
