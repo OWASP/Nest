@@ -52,6 +52,7 @@ anthturner
 anuragayumishra
 anwar-haq
 aphilipti
+aramattamara
 aramhovsepyan
 aramrami
 aravind2000-786
@@ -305,6 +306,7 @@ kellysantalucia
 kenhuangus
 kenprole
 kerberosmansour
+kerlynnkep
 kevcody
 kingthorin
 kirk-owasp
@@ -313,6 +315,7 @@ kmcquade
 korniko98
 korvalas
 kozmic
+kritibirda
 ks-raj
 ksg97031
 ktreptow
@@ -506,6 +509,7 @@ sagarbhure
 saidas45
 saikrishnagobburi
 sakerman
+salmandeveloperz
 salmankhwaja
 sampsonc
 samyak8ktr
@@ -579,6 +583,8 @@ tejax-v2
 tghosth
 thavisoukj1
 thecyberfang
+thecyberleader
+theinfosecguy
 thejonmccoy
 thekyles
 theseion
