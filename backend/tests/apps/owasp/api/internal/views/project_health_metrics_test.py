@@ -117,7 +117,9 @@ class TestProjectHealthMetricsViews:
         with pytest.raises(Http404):
             generate_project_health_metrics_pdf(request, "unknown")
 
-    def test_generate_project_health_metrics_pdf_no_metrics(self, user_with_permission, mocker):
+    def test_generate_project_health_metrics_pdf_generation_fails(
+        self, user_with_permission, mocker
+    ):
         mock_project = mocker.Mock()
         mocker.patch(
             "apps.owasp.models.project.Project.objects.filter",
