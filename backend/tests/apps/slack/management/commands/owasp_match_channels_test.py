@@ -85,6 +85,7 @@ class TestOwaspMatchChannels:
         )
 
         mock_ec_qs = mocker.Mock()
+        mock_ec_qs.filter.return_value.exists.return_value = False
         mocker.patch("apps.owasp.models.entity_channel.EntityChannel.objects", mock_ec_qs)
         mock_get_or_create = mock_ec_qs.get_or_create
         mock_get_or_create.return_value = (None, True)

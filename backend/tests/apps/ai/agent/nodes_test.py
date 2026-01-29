@@ -1,3 +1,4 @@
+import openai
 import pytest
 
 from apps.ai.agent.nodes import AgentNodes
@@ -8,7 +9,7 @@ class TestAgentNodes:
     @pytest.fixture
     def mock_openai(self, mocker):
         mocker.patch("os.getenv", return_value="fake-key")
-        return mocker.patch("openai.OpenAI")
+        return mocker.patch("apps.ai.agent.nodes.openai.OpenAI")
 
     @pytest.fixture
     def nodes(self, mock_openai, mocker):
@@ -109,8 +110,6 @@ class TestAgentNodes:
         assert filtered[0]["text"] == "foo"
 
     def test_extract_query_metadata_openai_error(self, nodes, mocker):
-        import openai
-
         mocker.patch(
             "apps.ai.agent.nodes.Prompt.get_metadata_extractor_prompt", return_value="sys prompt"
         )
@@ -120,8 +119,6 @@ class TestAgentNodes:
         assert metadata["intent"] == "general query"
 
     def test_call_evaluator_openai_error(self, nodes, mocker):
-        import openai
-
         nodes.generator.prepare_context.return_value = "ctx"
         mocker.patch(
             "apps.ai.agent.nodes.Prompt.get_evaluator_system_prompt", return_value="sys prompt"

@@ -1,4 +1,3 @@
-# cspell:ignore boardofdirectors
 import json
 from unittest.mock import Mock
 

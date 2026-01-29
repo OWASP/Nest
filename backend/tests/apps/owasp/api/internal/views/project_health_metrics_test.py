@@ -1,4 +1,5 @@
 import io
+from http import HTTPStatus
 
 import pytest
 from django.http import Http404
@@ -44,7 +45,7 @@ class TestProjectHealthMetricsViews:
 
         response = generate_overview_pdf(request)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         content = b"".join(response.streaming_content)
         assert b"PDF CONTENT" in content
         assert response["Content-Type"] == "application/pdf"
@@ -85,7 +86,7 @@ class TestProjectHealthMetricsViews:
 
         response = generate_project_health_metrics_pdf(request, project_key)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         content = b"".join(response.streaming_content)
         assert b"PROJECT PDF" in content
         assert (

@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
@@ -87,7 +89,7 @@ class TestPermissions:
         )
 
         response = my_view(request)
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         assert response.content == b"OK"
 
     def test_dashboard_access_required_decorator_deny(self, mocker, user_without_staff):
@@ -107,4 +109,4 @@ class TestPermissions:
         )
 
         response = my_view(request)
-        assert response.status_code == 403
+        assert response.status_code == HTTPStatus.FORBIDDEN

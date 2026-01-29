@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 import pytest
 from django.http import HttpResponse
@@ -22,13 +23,13 @@ class TestBlockNullCharactersMiddleware:
     def test_clean_request_passes(self, middleware, factory):
         request = factory.get("/clean/path")
         response = middleware(request)
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         assert response.content == b"OK"
 
     def test_null_in_path_blocks(self, middleware, factory):
         request = factory.get("/path/with/\x00/null")
         response = middleware(request)
-        assert response.status_code == 400
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         assert json.loads(response.content) == {
             "message": "Request contains null characters in URL or parameters "
             "which are not allowed.",
@@ -38,12 +39,12 @@ class TestBlockNullCharactersMiddleware:
     def test_null_in_query_params_blocks(self, middleware, factory):
         request = factory.get("/clean/path", {"q": "bad\x00value"})
         response = middleware(request)
-        assert response.status_code == 400
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_null_in_post_data_blocks(self, middleware, factory):
         request = factory.post("/clean/path", {"data": "bad\x00value"})
         response = middleware(request)
-        assert response.status_code == 400
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_null_in_body_blocks(self, middleware, factory):
         request = factory.post(
@@ -52,7 +53,7 @@ class TestBlockNullCharactersMiddleware:
             content_type="application/json",
         )
         response = middleware(request)
-        assert response.status_code == 400
+        assert response.status_code == HTTPStatus.BAD_REQUEST
         assert json.loads(response.content) == {
             "message": "Request contains null characters in body which are not allowed.",
             "errors": {},
@@ -65,4 +66,4 @@ class TestBlockNullCharactersMiddleware:
             content_type="application/json",
         )
         response = middleware(request)
-        assert response.status_code == 400
+        assert response.status_code == HTTPStatus.BAD_REQUEST
