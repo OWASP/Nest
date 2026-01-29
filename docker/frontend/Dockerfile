@@ -1,4 +1,4 @@
-FROM node:24.13-alpine3.23 AS base
+FROM node:25.5-alpine3.23 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
