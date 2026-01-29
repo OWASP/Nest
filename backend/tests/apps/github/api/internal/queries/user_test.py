@@ -79,3 +79,55 @@ class TestUserQuery:
             mock_queryset.filter.return_value.order_by.assert_called_once_with(
                 "-contributions_count"
             )
+
+    def test_resolve_users_with_logins(self, mock_user):
+        """Test resolving multiple users by their logins."""
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.order_by.return_value = [mock_user]
+
+            result = UserQuery().users(logins=["user1", "user2"])
+
+            assert result == [mock_user]
+            mock_filter.assert_called_once_with(
+                login__in=["user1", "user2"], has_public_member_page=True
+            )
+            mock_queryset.order_by.assert_called_once()
+
+    def test_resolve_users_empty_list(self):
+        """Test resolving users with an empty logins list."""
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.order_by.return_value = []
+
+            result = UserQuery().users(logins=[])
+
+            assert result == []
+
+    def test_resolve_users_filters_by_public_member_page_and_login_in(self):
+        """Test that users query filters by both has_public_member_page and login__in."""
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.order_by.return_value = []
+
+            UserQuery().users(logins=["user1", "user2", "user3"])
+
+            mock_filter.assert_called_once_with(
+                login__in=["user1", "user2", "user3"], has_public_member_page=True
+            )
+
+    def test_resolve_users_preserves_order(self, mock_user):
+        """Test that users are returned in the order of input logins."""
+        mock_user1 = Mock(spec=User, login="user1")
+        mock_user2 = Mock(spec=User, login="user2")
+
+        with patch("apps.github.models.user.User.objects.filter") as mock_filter:
+            mock_queryset = mock_filter.return_value
+            mock_queryset.order_by.return_value = [mock_user1, mock_user2]
+
+            logins = ["user1", "user2"]
+            result = UserQuery().users(logins=logins)
+
+            assert result == [mock_user1, mock_user2]
+            mock_filter.assert_called_once_with(login__in=logins, has_public_member_page=True)
+            mock_queryset.order_by.assert_called_once()

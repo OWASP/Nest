@@ -65,6 +65,8 @@ class UserQuery:
             list[User]: List of user objects.
 
         """
+        if not logins:
+            return []
         qs = User.objects.filter(login__in=logins, has_public_member_page=True)
         if logins:
             order = Case(
