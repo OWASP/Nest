@@ -1,4 +1,4 @@
-FROM node:24-alpine AS base
+FROM node:24.13-alpine3.23 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -52,14 +52,14 @@ ENV NODE_ENV=production
 # Fix CVE-2026-23745: Update npm's bundled tar to 7.5.3 in runner stage
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN cd /tmp && \
-    npm pack tar@7.5.4 && \
-    tar -xzf tar-7.5.4.tgz && \
+    npm pack tar@7.5.7 && \
+    tar -xzf tar-7.5.7.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.4.tgz && \
-    grep -q 'version.*7.5.4' "${TAR_DIR}/package.json"
+    rm -rf package tar-7.5.7.tgz && \
+    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json"
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs

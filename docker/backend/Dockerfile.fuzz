@@ -1,4 +1,4 @@
-FROM python:3.13.7-alpine AS builder
+FROM python:3.13.11-alpine3.23 AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
