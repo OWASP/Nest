@@ -119,7 +119,10 @@ class ProjectNode(GenericEntityNode):
     )
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
-        return getattr(root, "_recent_pull_requests", [])[:RECENT_PULL_REQUESTS_LIMIT]
+        cached = getattr(root, "_recent_pull_requests", None)
+        if cached is None:
+            return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
+        return cached[:RECENT_PULL_REQUESTS_LIMIT]
 
     @strawberry_django.field
     def recent_releases(self, root: Project) -> list[ReleaseNode]:
