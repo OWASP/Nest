@@ -274,18 +274,6 @@ files = [
 ]
 
 [[package]]
-name = "backoff"
-version = "2.2.1"
-description = "Function decoration for backoff and retry"
-optional = false
-python-versions = ">=3.7,<4.0"
-groups = ["main"]
-files = [
-    {file = "backoff-2.2.1-py3-none-any.whl", hash = "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8"},
-    {file = "backoff-2.2.1.tar.gz", hash = "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba"},
-]
-
-[[package]]
 name = "boto3"
 version = "1.42.37"
 description = "The AWS SDK for Python"
@@ -3159,31 +3147,6 @@ dev = ["pre-commit", "tox"]
 testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
-name = "posthog"
-version = "7.7.0"
-description = "Integrate PostHog into any python application."
-optional = false
-python-versions = ">=3.10"
-groups = ["main"]
-files = [
-    {file = "posthog-7.7.0-py3-none-any.whl", hash = "sha256:955f42097bf147459653b9102e5f7f9a22e4b6fc9f15003447bd1137fafbc505"},
-    {file = "posthog-7.7.0.tar.gz", hash = "sha256:b4f2b1a616e099961f6ab61a5a2f88de62082c26801699e556927d21c00737ef"},
-]
-
-[package.dependencies]
-backoff = ">=1.10.0"
-distro = ">=1.5.0"
-python-dateutil = ">=2.2"
-requests = ">=2.7,<3.0"
-six = ">=1.5"
-typing-extensions = ">=4.2.0"
-
-[package.extras]
-dev = ["django-stubs", "lxml", "mypy", "mypy-baseline", "packaging", "pre-commit", "pydantic", "ruff", "setuptools", "tomli", "tomli_w", "twine", "types-mock", "types-python-dateutil", "types-requests", "types-setuptools", "types-six", "wheel"]
-langchain = ["langchain (>=0.2.0)"]
-test = ["anthropic (>=0.72)", "coverage", "django", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=1.0)", "langchain-community (>=0.4)", "langchain-core (>=1.0)", "langchain-openai (>=1.0)", "langgraph (>=1.0)", "mock (>=2.0.0)", "openai (>=2.0)", "parameterized (>=0.8.1)", "pydantic", "pytest", "pytest-asyncio", "pytest-timeout"]
-
-[[package]]
 name = "pre-commit"
 version = "4.5.1"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
@@ -5581,4 +5544,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "91d82a89e9ad0ba6c59add8fe4c8a8b10c99ce64969bca59d593b540c20f7a64"
+content-hash = "bb642920d01afbc6cff553df46b61914f4765869e0a69720c935b5914e199918"

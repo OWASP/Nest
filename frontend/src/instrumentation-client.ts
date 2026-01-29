@@ -2,14 +2,11 @@ import * as Sentry from '@sentry/nextjs'
 import posthog from 'posthog-js'
 import {
   ENVIRONMENT,
+  POSTHOG_HOST,
+  POSTHOG_KEY,
   RELEASE_VERSION,
   SENTRY_DSN,
-  POSTHOG_KEY,
-  POSTHOG_HOST,
 } from 'utils/env.client'
-
-const env = ENVIRONMENT?.toLowerCase() || 'local'
-const isTrackingEnabled = env === 'production' || env === 'staging'
 
 Sentry.init({
   debug: false,
@@ -21,15 +18,14 @@ Sentry.init({
   replaysSessionSampleRate: 0.5,
 })
 
-if (isTrackingEnabled && POSTHOG_KEY) {
+if (POSTHOG_KEY) {
   posthog.init(POSTHOG_KEY, {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    api_host: POSTHOG_HOST,
+    /* eslint-disable @typescript-eslint/naming-convention */
+    api_host: POSTHOG_HOST ?? 'https://us.i.posthog.com',
+    capture_pageview: 'history_change',
     defaults: '2025-11-30',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     person_profiles: 'identified_only',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    capture_pageview: true,
+    /* eslint-enable @typescript-eslint/naming-convention */
   })
 }
 
