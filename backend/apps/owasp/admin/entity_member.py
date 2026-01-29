@@ -42,7 +42,15 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.action(description="Approve selected members")
     def approve_members(self, request, queryset):
-        """Approve selected members."""
+        """Admin action to approve selected members.
+
+        Sets is_active and is_reviewed flags for selected entity members.
+
+        Args:
+            request: The HTTP request object.
+            queryset: QuerySet of EntityMember instances to approve.
+
+        """
         self.message_user(
             request,
             f"Successfully approved {queryset.update(is_active=True, is_reviewed=True)} members.",
@@ -50,7 +58,15 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="Entity", ordering="entity_type")
     def entity(self, obj):
-        """Return entity link."""
+        """Display entity as a link in the admin list view.
+
+        Args:
+            obj: The EntityMember instance.
+
+        Returns:
+            str: HTML link to the entity's admin page or '-' if entity is missing.
+
+        """
         return (
             format_html(
                 '<a href="{}" target="_blank">{}</a>',
@@ -66,7 +82,15 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
     @admin.display(description="OWASP URL", ordering="entity_type")
     def owasp_url(self, obj):
-        """Return entity OWASP site URL."""
+        """Display entity OWASP website link in admin list view.
+
+        Args:
+            obj: The EntityMember instance.
+
+        Returns:
+            str: HTML link to the entity's OWASP website or '-' if entity is missing.
+
+        """
         return (
             format_html('<a href="{}" target="_blank">↗️</a>', obj.entity.owasp_url)
             if obj.entity
@@ -74,7 +98,22 @@ class EntityMemberAdmin(admin.ModelAdmin):
         )
 
     def get_search_results(self, request, queryset, search_term):
-        """Get search results from entity name or key."""
+        """Extend search results to include entity name or key matches.
+
+        Searches across Project, Chapter, and Committee entities by name or key
+        and includes matching results in the EntityMember search results.
+
+        Args:
+            request: The HTTP request object.
+            queryset: Initial QuerySet of EntityMember instances.
+            search_term: The search term entered by the user.
+
+        Returns:
+            tuple: (QuerySet, use_distinct) where QuerySet includes matching members
+                   and related entities by name/key, and use_distinct indicates
+                   if DISTINCT should be applied to the query.
+
+        """
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
 
         if search_term:
