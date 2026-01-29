@@ -100,7 +100,7 @@ class TestOwaspMatchChannels:
 
     def test_strip_owasp_prefix(self):
         cmd = Command()
-        assert cmd.strip_owasp_prefix("OWASP ZAP") == "ZAP"
+        assert cmd.strip_owasp_prefix("OWASP Nest") == "Nest"
         assert cmd.strip_owasp_prefix("Current OWASP Project") == "Current OWASP Project"
         assert cmd.strip_owasp_prefix("OWASP - Project") == "Project"
         assert cmd.strip_owasp_prefix("Simple Name") == "Simple Name"

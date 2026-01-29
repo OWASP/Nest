@@ -39,6 +39,7 @@ class TestAgentNodes:
         assert "context_chunks" in new_state
         assert len(new_state["context_chunks"]) == 1
         assert new_state["extracted_metadata"] == mock_metadata
+
         nodes.retriever.retrieve.assert_called_with(
             query="test query",
             limit=DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
