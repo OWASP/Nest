@@ -201,6 +201,7 @@ superfences
 tfbackend
 tgz
 tiktok
+trailofbits
 trgm
 trivyignores
 tsc
