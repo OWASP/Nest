@@ -1,6 +1,7 @@
 """A command to update OWASP projects data."""
 
 from django.core.management.base import BaseCommand
+from django.db.models import Count, Q
 
 from apps.github.models.issue import Issue
 from apps.owasp.models.project import Project
@@ -56,13 +57,18 @@ class Command(BaseCommand):
             project.issues.clear()
 
             issues = Issue.objects.filter(repository__in=project.repositories.all())
+            issues_aggregate = issues.aggregate(
+                count=Count("id"),
+                unanswered_count=Count("id", filter=Q(comments_count=0)),
+                unassigned_count=Count("id", filter=Q(assignees__isnull=True)),
+            )
             active_issues = Issue.open_issues.filter(
                 repository__in=project.repositories.all(),
             ).count()
             project.issues.set(issues)
-            project.issues_count = issues.count()
-            project.unanswered_issues_count = issues.filter(comments_count=0).count()
-            project.unassigned_issues_count = issues.filter(assignees__isnull=True).count()
+            project.issues_count = issues_aggregate["count"]
+            project.unanswered_issues_count = issues_aggregate["unanswered_count"]
+            project.unassigned_issues_count = issues_aggregate["unassigned_count"]
             project.active_issues_count = active_issues
 
             for repository in project.repositories.filter(

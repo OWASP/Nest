@@ -106,14 +106,13 @@ class TestOwaspAggregateProjects:
         mock_active_projects.count.return_value = 1
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
         mock_active_projects.__getitem__.return_value = mock_projects_list
-
+        mock_aggregate_result = {
+            "count": 100,
+            "unanswered_count": 20,
+            "unassigned_count": 10,
+        }
         mock_all_issues_qs = mock.Mock()
-        mock_all_issues_qs.count.return_value = 100
-
-        mock_all_issues_qs.filter.return_value.count.side_effect = [
-            20,
-            10,
-        ]
+        mock_all_issues_qs.aggregate.return_value = mock_aggregate_result
 
         mock_issue_model.objects.filter.return_value = mock_all_issues_qs
 
