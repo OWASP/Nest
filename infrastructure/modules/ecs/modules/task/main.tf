@@ -10,6 +10,7 @@ terraform {
 }
 
 resource "aws_cloudwatch_log_group" "task" {
+  kms_key_id        = var.kms_key_arn
   name              = "/aws/ecs/${var.project_name}-${var.environment}-${var.task_name}"
   retention_in_days = var.log_retention_in_days
   tags = merge(var.common_tags, {
