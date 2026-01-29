@@ -18,7 +18,7 @@
     "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
-    "@apollo/client": "^4.1.2",
+    "@apollo/client": "^4.1.3",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@heroui/button": "^2.2.29",
     "@heroui/modal": "^2.2.26",
