@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from apps.github.models.pull_request import PullRequest
 from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
 
 
@@ -21,6 +22,12 @@ class TestOwaspAggregateProjects:
         project.owasp_repository = mock.Mock()
         project.owasp_repository.is_archived = False
         project.owasp_repository.created_at = "2024-01-01T00:00:00Z"
+
+        # Mock pull_requests M2M field
+        project.pull_requests = mock.Mock()
+        project.pull_requests.clear = mock.Mock()
+        project.pull_requests.set = mock.Mock()
+
         return project
 
     @pytest.mark.parametrize(
@@ -76,7 +83,14 @@ class TestOwaspAggregateProjects:
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch("builtins.print") as mock_print,
+            mock.patch.object(PullRequest.objects, "filter") as mock_pr_filter,
         ):
+            # Mock the pull request queryset
+            mock_pr_queryset = mock.Mock()
+            mock_pr_queryset.select_related.return_value = mock_pr_queryset
+            mock_pr_queryset.prefetch_related.return_value = []
+            mock_pr_filter.return_value = mock_pr_queryset
+
             command.handle(offset=offset)
 
         assert mock_bulk_save.called
