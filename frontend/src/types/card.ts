@@ -76,6 +76,8 @@ export interface DetailsCardProps {
   recentReleases?: Release[]
   repositories?: RepositoryCardProps[]
   modules?: Module[]
+  onLoadMorePullRequests?: () => void
+  onResetPullRequests?: () => void
   showAvatar?: boolean
   socialLinks?: string[]
   stats?: Stats[]

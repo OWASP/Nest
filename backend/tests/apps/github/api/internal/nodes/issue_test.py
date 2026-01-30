@@ -85,3 +85,17 @@ class TestIssueNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("repository_name", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)
         assert result is None
+
+    def test_pull_requests_resolver(self):
+        """Test pull_requests field resolver with pagination."""
+        mock_issue = Mock()
+        mock_qs = Mock()
+
+        mock_issue.pull_requests.all.return_value = mock_qs
+        mock_qs.order_by.return_value = ["pr1", "pr2", "pr3", "pr4", "pr5"]
+
+        field = self._get_field_by_name("pull_requests", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
+        assert result == ["pr1", "pr2", "pr3", "pr4"]
+        result = field.base_resolver.wrapped_func(mock_issue, limit=2, offset=2)
+        assert result == ["pr3", "pr4"]
