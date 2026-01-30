@@ -56,13 +56,24 @@ generate-graphql-types:
 	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run graphql-codegen))
 
-security-scan-frontend-image: build-frontend-local-image
-	@trivy image \
-		--config trivy.yaml \
-		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
-		--exit-code 1 \
+# Defaults for Local Development
+FRONTEND_IMAGE_NAME ?= nest-frontend-local
+TRIVY_EXIT_CODE ?= 0
+
+security-scan-frontend-image:
+	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
+		$(MAKE) build-frontend-local-image; \
+	fi
+	@echo "Scanning $(FRONTEND_IMAGE_NAME)..."
+	@docker run --rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--exit-code $(TRIVY_EXIT_CODE) \
 		--severity CRITICAL,HIGH \
-		nest-frontend-local
+		--no-progress \
+		$(FRONTEND_IMAGE_NAME)
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
