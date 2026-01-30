@@ -87,24 +87,23 @@ class ProjectNode(GenericEntityNode):
 
     @strawberry_django.field(
         prefetch_related=[
-            Prefetch(
-                "recent_milestones",
+          lambda _info :Prefetch(
+                "milestones",
                 queryset=Milestone.objects.select_related(
                     "repository__organization",
                     "author__owasp_profile",
                 )
-                .prefetch_related("labels")
-                .order_by("-created_at"),
+                .order_by("-created_at")[:5],
+                to_attr="_recent_milestones",
             )
         ]
     )
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        return (
-            list(root.recent_milestones.all())[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        cached = getattr(root, "_recent_milestones", None)
+        if cached is None:
+            return root.milestones.order_by("-created_at")[:limit]
+        return cached
 
     @strawberry_django.field
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:

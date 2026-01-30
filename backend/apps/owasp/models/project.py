@@ -151,9 +151,9 @@ class Project(
         verbose_name="Repositories",
         blank=True,
     )
-    recent_milestones = models.ManyToManyField(
+    milestones = models.ManyToManyField(
         "github.Milestone",
-        verbose_name="Recent milestones",
+        verbose_name="milestones",
         blank=True,
     )
 

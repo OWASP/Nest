@@ -113,7 +113,7 @@ class Command(BaseCommand):
 
             projects.append(project)
 
-            project.recent_milestones.set(
+            project.milestones.set(
                 Milestone.objects.filter(repository__in=project.repositories.all())
             )
 
