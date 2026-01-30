@@ -28,7 +28,7 @@ export type Project = {
     releases: number
     total: number
   }
-  description?: string
+  description?: string | null
   entityLeaders?: Leader[]
   forksCount?: number
   healthMetricsList?: HealthMetricsProps[]
@@ -37,18 +37,18 @@ export type Project = {
   key?: string
   languages?: string[]
   leaders?: string[]
-  level?: string
+  level?: string | null
   name: string
   openIssuesCount?: number
-  organizations?: string
+  organizations?: string | null
   repositoriesCount?: number
   starsCount?: number
-  summary?: string
+  summary?: string | null
   topics?: string[]
   topContributors?: Contributor[]
   type?: string
   updatedAt?: number
-  url?: string
+  url?: string | null
   recentIssues?: Issue[]
   recentPullRequests?: PullRequest[]
   recentReleases?: Release[]

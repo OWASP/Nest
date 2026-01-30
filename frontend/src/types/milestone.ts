@@ -1,14 +1,14 @@
 import type { User } from 'types/user'
 
 export type Milestone = {
-  author?: User
+  author?: User | null
   body?: string
   closedIssuesCount?: number
   createdAt?: string
   openIssuesCount?: number
-  organizationName?: string
+  organizationName?: string | null
   progress?: number
-  repositoryName?: string
+  repositoryName?: string | null
   state?: string
   title: string
   url?: string

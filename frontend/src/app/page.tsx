@@ -111,23 +111,23 @@ export default function Home() {
   const counterData = [
     {
       label: 'Active Projects',
-      value: data.statsOverview.activeProjectsStats,
+      value: data?.statsOverview?.activeProjectsStats || 0,
     },
     {
       label: 'Contributors',
-      value: data.statsOverview.contributorsStats,
+      value: data?.statsOverview?.contributorsStats || 0,
     },
     {
       label: 'Local Chapters',
-      value: data.statsOverview.activeChaptersStats,
+      value: data?.statsOverview?.activeChaptersStats || 0,
     },
     {
       label: 'Countries',
-      value: data.statsOverview.countriesStats,
+      value: data?.statsOverview?.countriesStats || 0,
     },
     {
       label: 'Slack Community',
-      value: data.statsOverview.slackWorkspaceStats,
+      value: data?.statsOverview?.slackWorkspaceStats || 0,
     },
   ]
 
@@ -145,7 +145,7 @@ export default function Home() {
           </div>
           <div className="mx-auto mb-8 flex max-w-2xl justify-center">
             <MultiSearchBar
-              eventData={data.upcomingEvents}
+              eventData={data?.upcomingEvents || []}
               isLoaded={true}
               placeholder="Search the OWASP community"
               indexes={['chapters', 'organizations', 'projects', 'users']}
@@ -162,7 +162,7 @@ export default function Home() {
           className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data.upcomingEvents.map((event: Event, index: number) => (
+            {data?.upcomingEvents?.map((event: Event, index: number) => (
               <div key={`card-${event.id}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <div className="mb-2 flex items-center justify-between gap-2">
@@ -223,7 +223,7 @@ export default function Home() {
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-4">
-              {data.recentChapters?.map((chapter) => (
+              {data?.recentChapters?.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <Link
@@ -251,7 +251,7 @@ export default function Home() {
                       <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList
                         entityKey={`${chapter.key}-leaders`}
-                        leaders={String(chapter.leaders)}
+                        leaders={chapter.leaders?.join(', ') || ''}
                       />
                     </div>
                   )}
@@ -269,7 +269,7 @@ export default function Home() {
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-4">
-              {data.recentProjects?.map((project) => (
+              {data?.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
                     <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
@@ -294,7 +294,7 @@ export default function Home() {
                       <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList
                         entityKey={`${project.key}-leaders`}
-                        leaders={String(project.leaders)}
+                        leaders={project.leaders?.join(', ') || ''}
                       />
                     </div>
                   )}
@@ -322,19 +322,19 @@ export default function Home() {
           />
         </div>
         <ContributorsList
-          contributors={data?.topContributors}
+          contributors={data?.topContributors as any}
           icon={HiUserGroup}
           maxInitialDisplay={20}
           label="Top Contributors"
           getUrl={getMemberUrl}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
-          <RecentIssues data={data?.recentIssues} />
-          <Milestones data={data?.recentMilestones} />
+          <RecentIssues data={data?.recentIssues as any} />
+          <Milestones data={data?.recentMilestones as any} />
         </div>
         <div className="grid-cols-2 gap-4 lg:grid">
-          <RecentPullRequests data={data?.recentPullRequests} />
-          <RecentReleases data={data?.recentReleases} showSingleColumn={true} />
+          <RecentPullRequests data={data?.recentPullRequests as any} />
+          <RecentReleases data={data?.recentReleases as any} showSingleColumn={true} />
         </div>
         <SecondaryCard
           icon={FaNewspaper}
@@ -402,7 +402,7 @@ export default function Home() {
             </Link>
           </SecondaryCard>
           <SecondaryCard>
-            <MovingLogos sponsors={data?.sponsors} />
+            <MovingLogos sponsors={data?.sponsors as any} />
           </SecondaryCard>
         </div>
       </div>

@@ -28,8 +28,8 @@ export async function generateMetadata({
   return organization
     ? generateSeoMetadata({
         canonicalPath: `/organizations/${organizationKey}`,
-        description: organization?.description ?? `${title} organization details`,
-        title: title,
+        description: organization?.description ?? `${title || ''} organization details`,
+        title: title || 'Organization',
       })
     : null
 }

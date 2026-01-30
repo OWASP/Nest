@@ -74,7 +74,7 @@ const OrganizationDetailsPage = () => {
     },
     {
       label: 'Location',
-      value: organization.location,
+      value: organization.location || 'N/A',
     },
   ]
 
@@ -110,15 +110,15 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={recentIssues}
-      recentReleases={recentReleases}
-      recentMilestones={recentMilestones}
-      pullRequests={recentPullRequests}
-      repositories={repositories}
+      recentIssues={recentIssues?.map((i) => ({ ...i, author: i.author || undefined }))}
+      recentReleases={recentReleases || undefined}
+      recentMilestones={recentMilestones || undefined}
+      pullRequests={recentPullRequests?.map((pr) => ({ ...pr, author: pr.author || undefined }))}
+      repositories={repositories?.map((r) => ({ ...r, organization: r.organization || undefined }))}
       stats={organizationStats}
       summary={organization.description}
       title={organization.name}
-      topContributors={topContributors}
+      topContributors={topContributors || undefined}
       type="organization"
     />
   )

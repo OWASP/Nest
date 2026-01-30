@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -69,13 +70,20 @@ const ModuleDetailsPage = () => {
 
   return (
     <DetailsCard
-      admins={admins}
+      admins={(admins || []) as Contributor[]}
       details={moduleDetails}
-      domains={programModule.domains}
-      mentors={programModule.mentors}
-      pullRequests={programModule.recentPullRequests || []}
+      domains={(programModule.domains || undefined) as string[] | undefined}
+      mentors={(programModule.mentors || []) as Contributor[]}
+      programKey={programKey}
+      projectName={programModule.projectName || undefined}
+      pullRequests={
+        programModule.recentPullRequests?.map((pr) => ({
+          ...pr,
+          author: pr.author || undefined,
+        })) || []
+      }
       summary={programModule.description}
-      tags={programModule.tags}
+      tags={(programModule.tags || undefined) as string[] | undefined}
       title={programModule.name}
       type="module"
     />

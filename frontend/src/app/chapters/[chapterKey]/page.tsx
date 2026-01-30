@@ -56,7 +56,7 @@ export default function ChapterDetailsPage() {
 
   const details = [
     { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
-    { label: 'Location', value: chapter.suggestedLocation },
+    { label: 'Location', value: chapter.suggestedLocation || '' },
     { label: 'Region', value: chapter.region },
     {
       label: 'URL',

@@ -15,7 +15,8 @@ import ProgramForm from 'components/ProgramForm'
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
+  const sessionUser = (session as ExtendedSession)?.user
+  const isProjectLeader = sessionUser?.isLeader
 
   const [redirected, setRedirected] = useState(false)
 
@@ -79,8 +80,9 @@ const CreateProgramPage = () => {
 
       router.push('/my/mentorship')
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unable to complete the requested operation.'
       addToast({
-        description: err?.message || 'Unable to complete the requested operation.',
+        description: errorMessage,
         title: 'GraphQL Request Failed',
         timeout: 3000,
         shouldShowTimeoutProgress: true,

@@ -94,30 +94,30 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: titleCaseWord(program.status) },
-    { label: 'Start Date', value: formatDate(program.startedAt) },
-    { label: 'End Date', value: formatDate(program.endedAt) },
-    { label: 'Mentees Limit', value: String(program.menteesLimit) },
+    { label: 'Status', value: titleCaseWord(program?.status || '') },
+    { label: 'Start Date', value: formatDate(program?.startedAt) },
+    { label: 'End Date', value: formatDate(program?.endedAt) },
+    { label: 'Mentees Limit', value: String(program?.menteesLimit ?? 'N/A') },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
+      value: program?.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
     },
   ]
 
   return (
     <DetailsCard
       accessLevel="admin"
-      admins={program.admins}
+      admins={program?.admins || []}
       canUpdateStatus={canUpdateStatus}
       details={programDetails}
-      domains={program.domains}
+      domains={program?.domains || [] as string[]}
       modules={modules}
-      programKey={program.key}
-      setStatus={updateStatus}
-      status={program.status}
-      summary={program.description}
-      tags={program.tags}
-      title={program.name}
+      programKey={program?.key || programKey}
+      setStatus={(status) => updateStatus(status as ProgramStatusEnum)}
+      status={program?.status}
+      summary={program?.description || ''}
+      tags={program?.tags || [] as string[]}
+      title={program?.name || 'Program'}
       type="program"
     />
   )

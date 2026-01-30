@@ -1,7 +1,7 @@
 import { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 import type { User } from 'types/user'
 
-export const formatISODate = (input?: number | string): string => {
+export const formatISODate = (input?: number | string): string | undefined => {
   if (input == null) {
     return undefined
   }
@@ -45,15 +45,15 @@ export function generateProfilePageStructuredData(
       ...(user.location && {
         address: user.location,
       }),
-      description: user.bio,
+      description: user.bio || '',
       identifier: user.login,
       image: user.avatarUrl,
-      ...(user.followersCount > 0 && {
+      ...((user.followersCount || 0) > 0 && {
         interactionStatistic: [
           {
             '@type': 'InteractionCounter',
             interactionType: 'https://schema.org/FollowAction',
-            userInteractionCount: user.followersCount,
+            userInteractionCount: user.followersCount || 0,
           },
         ],
       }),
@@ -63,7 +63,7 @@ export function generateProfilePageStructuredData(
         url: 'https://nest.owasp.org/members',
       },
       name: user.name || user.login,
-      sameAs: [user.url],
+      sameAs: user.url ? [user.url] : [],
       url: `${baseUrl}/members/${user.login}`,
       ...(user.company && {
         worksFor: {
