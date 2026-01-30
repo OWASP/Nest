@@ -54,7 +54,7 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve languages."""
         return list(root.languages.keys())
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["releases"])
     def latest_release(self, root: Repository) -> str | None:
         """Resolve latest release."""
         return root.latest_release
