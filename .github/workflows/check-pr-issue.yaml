@@ -15,8 +15,10 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      # NOSEMGREP: yaml.github-actions.security.pull-request-target-code-checkout.pull-request-target-code-checkout
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
+          # Explicitly checking out base branch (target repository), not PR code.
           ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Check PR linked issue and assignee

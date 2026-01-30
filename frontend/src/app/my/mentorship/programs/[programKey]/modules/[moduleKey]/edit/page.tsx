@@ -9,6 +9,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -111,7 +112,11 @@ const EditModulePage = () => {
         tags: parseCommaSeparated(formData.tags),
       }
 
-      const result = await updateModule({ variables: { input } })
+      const result = await updateModule({
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        variables: { input },
+      })
       const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 
       addToast({
@@ -150,6 +155,10 @@ const EditModulePage = () => {
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      minDate={
+        data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
+      }
+      maxDate={data?.getProgram?.endedAt ? formatDateForInput(data.getProgram.endedAt) : undefined}
     />
   )
 }

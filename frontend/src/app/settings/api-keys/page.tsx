@@ -65,6 +65,7 @@ const ApiKeysTable = ({ data, onRevoke }: ApiKeysTableProps) => (
                 size="sm"
                 onPress={() => onRevoke(key)}
                 className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                aria-label="Revoke API Key"
               >
                 <FaTrash />
               </Button>
@@ -343,6 +344,7 @@ export default function Page() {
                       size="sm"
                       onPress={() => setShowNewKey(!showNewKey)}
                       isIconOnly
+                      aria-label="toggle show key"
                     >
                       {showNewKey ? <FaEyeSlash /> : <FaEye />}
                     </Button>
