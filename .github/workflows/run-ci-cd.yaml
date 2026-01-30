@@ -480,7 +480,7 @@ jobs:
       rest-url: http://localhost:9500/api/v0
 
   run-infrastructure-tests:
-    name: Run infrastructure tests
+    name: Run Infrastructure tests
     needs:
       - run-security-scan
       - scan-code
@@ -498,7 +498,6 @@ jobs:
           terraform_version: 1.14.0
 
       - name: Run Infrastructure tests
-        working-directory: infrastructure/staging
         run: make test-infrastructure
 
   build-staging-images:
