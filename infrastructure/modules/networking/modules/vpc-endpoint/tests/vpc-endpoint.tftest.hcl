@@ -15,11 +15,11 @@ run "test_security_group_not_created_when_no_endpoint" {
 
   variables {
     create_cloudwatch_logs = false
-    create_ecr_api = false
-    create_ecr_dkr = false
-    create_s3 = false
-    create_secretsmanager = false
-    create_ssm = false
+    create_ecr_api         = false
+    create_ecr_dkr         = false
+    create_s3              = false
+    create_secretsmanager  = false
+    create_ssm             = false
   }
 
   assert {
@@ -33,11 +33,11 @@ run "test_security_group_created_with_interface_endpoint" {
 
   variables {
     create_cloudwatch_logs = true
-    create_ecr_api = false
-    create_ecr_dkr = false
-    create_s3 = false
-    create_secretsmanager = false
-    create_ssm = false
+    create_ecr_api         = false
+    create_ecr_dkr         = false
+    create_s3              = false
+    create_secretsmanager  = false
+    create_ssm             = false
   }
   assert {
     condition     = length(aws_security_group.vpc_endpoints) == 1
@@ -50,7 +50,7 @@ run "test_security_group_allows_https_from_vpc" {
 
   variables {
     create_cloudwatch_logs = true
-    create_s3 = false
+    create_s3              = false
   }
   assert {
     condition     = aws_security_group_rule.vpc_endpoints_ingress_https[0].from_port == 443
@@ -71,7 +71,7 @@ run "test_security_group_name_format" {
 
   variables {
     create_cloudwatch_logs = true
-    create_s3 = false
+    create_s3              = false
   }
   assert {
     condition     = aws_security_group.vpc_endpoints[0].tags["Name"] == "nest-test-vpc-endpoints-sg"

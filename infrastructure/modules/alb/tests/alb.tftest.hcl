@@ -55,10 +55,10 @@ run "test_lambda_alias_name" {
   command = plan
 
   override_data {
-      target = data.aws_lambda_function.backend[0]
-      values = {
-        version = "1"
-      }
+    target = data.aws_lambda_function.backend[0]
+    values = {
+      version = "1"
+    }
   }
   variables {
     lambda_function_name = "test-function"
@@ -85,10 +85,10 @@ run "test_lambda_permission_action" {
   command = plan
 
   override_data {
-      target = data.aws_lambda_function.backend[0]
-      values = {
-        version = "1"
-      }
+    target = data.aws_lambda_function.backend[0]
+    values = {
+      version = "1"
+    }
   }
   variables {
     lambda_function_name = "test-function"
@@ -103,10 +103,10 @@ run "test_lambda_permission_principal" {
   command = plan
 
   override_data {
-      target = data.aws_lambda_function.backend[0]
-      values = {
-        version = "1"
-      }
+    target = data.aws_lambda_function.backend[0]
+    values = {
+      version = "1"
+    }
   }
   variables {
     lambda_function_name = "test-function"
@@ -327,10 +327,10 @@ run "test_lambda_target_group_name_format" {
   command = plan
 
   override_data {
-      target = data.aws_lambda_function.backend[0]
-      values = {
-        version = "1"
-      }
+    target = data.aws_lambda_function.backend[0]
+    values = {
+      version = "1"
+    }
   }
   variables {
     lambda_function_name = "test-function"
@@ -345,10 +345,10 @@ run "test_lambda_target_group_type" {
   command = plan
 
   override_data {
-      target = data.aws_lambda_function.backend[0]
-      values = {
-        version = "1"
-      }
+    target = data.aws_lambda_function.backend[0]
+    values = {
+      version = "1"
+    }
   }
   variables {
     lambda_function_name = "test-function"

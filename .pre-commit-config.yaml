@@ -13,7 +13,7 @@ repos:
     rev: v1.104.0
     hooks:
       - id: terraform_fmt
-        files: ^infrastructure/.*\.tf$
+        files: ^infrastructure/.*\.(tf|tftest\.hcl)$
       - id: terraform_tflint
         files: ^infrastructure/.*\.tf$
         args:
