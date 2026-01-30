@@ -86,6 +86,10 @@ def apply_structured_search(
             )
         elif field_type == "number":
             lookup_suffix = OPERATOR_MAPPING.get(operator, "")
+            try:
+                value = int(value)
+            except (ValueError, TypeError):
+                continue
         else:
             lookup_suffix = ""
 

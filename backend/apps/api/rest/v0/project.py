@@ -21,6 +21,10 @@ PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
         "type": "string",
         "lookup": "icontains",
     },
+    "stars": {
+        "type": "number",
+        "field": "stars_count",
+    },
     "stars_count": {
         "type": "number",
         "field": "stars_count",
@@ -79,7 +83,7 @@ class ProjectFilter(FilterSchema):
     )
     q: str | None = Field(
         None,
-        description="Structured search query (e.g. 'name:nest stars_count>100')",
+        description="Structured search query (e.g. 'name:nest stars_count:>100')",
     )
 
 
