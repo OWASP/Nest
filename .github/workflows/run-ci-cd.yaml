@@ -721,10 +721,10 @@ jobs:
           CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           ECS_USE_FARGATE_SPOT: true
-          ENVIRONMENT: "staging"
+          ENVIRONMENT: 'staging'
           FRONTEND_USE_FARGATE_SPOT: true
           LAMBDA_FUNCTION_NAME: ${{ secrets.ZAPPA_LAMBDA_FUNCTION_NAME }}
-          PROJECT_NAME: "nest"
+          PROJECT_NAME: 'nest'
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfvars <<-EOF
