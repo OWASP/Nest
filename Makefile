@@ -115,7 +115,7 @@ security-scan-code-trivy:
 		-w /src \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs \
-		--config trivy.yaml
+		--config trivy.yaml \
 			.
 
 test: \
