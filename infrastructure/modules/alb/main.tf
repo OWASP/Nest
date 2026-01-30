@@ -41,18 +41,8 @@ data "aws_lambda_function" "backend" {
   function_name = var.lambda_function_name
 }
 
-data "aws_iam_policy_document" "alb_logs" {
-  statement {
-    actions   = ["s3:PutObject"]
-    effect    = "Allow"
-    resources = ["${aws_s3_bucket.alb_logs.arn}/*"]
-    sid       = "AllowALBLogDelivery"
-
-    principals {
-      identifiers = [data.aws_elb_service_account.main.arn]
-      type        = "AWS"
-    }
-  }
+resource "random_id" "suffix" {
+  byte_length = 4
 }
 
 resource "aws_acm_certificate" "main" {
@@ -81,8 +71,8 @@ resource "aws_lambda_alias" "live" {
 }
 
 resource "aws_lambda_permission" "alb" {
-  count         = var.lambda_function_name != null ? 1 : 0
   action        = "lambda:InvokeFunction"
+  count         = var.lambda_function_name != null ? 1 : 0
   function_name = var.lambda_function_name
   principal     = "elasticloadbalancing.amazonaws.com"
   qualifier     = aws_lambda_alias.live[0].name
@@ -151,7 +141,6 @@ resource "aws_lb_listener_rule" "backend_https" {
     target_group_arn = aws_lb_target_group.lambda[0].arn
     type             = "forward"
   }
-
   condition {
     path_pattern {
       values = each.value
@@ -227,7 +216,18 @@ resource "aws_s3_bucket_lifecycle_configuration" "alb_logs" {
 
 resource "aws_s3_bucket_policy" "alb_logs" {
   bucket = aws_s3_bucket.alb_logs.id
-  policy = data.aws_iam_policy_document.alb_logs.json
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid    = "AllowALBLogDelivery"
+      Effect = "Allow"
+      Principal = {
+        AWS = data.aws_elb_service_account.main.arn
+      }
+      Action   = "s3:PutObject"
+      Resource = "${aws_s3_bucket.alb_logs.arn}/*"
+    }]
+  })
 }
 
 resource "aws_s3_bucket_public_access_block" "alb_logs" {
@@ -254,8 +254,4 @@ resource "aws_s3_bucket_versioning" "alb_logs" {
   versioning_configuration {
     status = "Enabled"
   }
-}
-
-resource "random_id" "suffix" {
-  byte_length = 4
 }
