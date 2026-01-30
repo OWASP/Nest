@@ -341,13 +341,13 @@ const DetailsCard = ({
           />
         )}
         {showIssuesAndMilestones(type) && (
-          <div className="grid-cols-2 gap-4 lg:grid">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <RecentIssues data={recentIssues} showAvatar={showAvatar} />
             <Milestones data={recentMilestones} showAvatar={showAvatar} />
           </div>
         )}
         {showPullRequestsAndReleases(type) && (
-          <div className="grid-cols-2 gap-4 lg:grid">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
