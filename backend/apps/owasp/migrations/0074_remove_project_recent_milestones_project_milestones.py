@@ -4,20 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('github', '0041_milestone_github_milestone_created_at_and_more'),
-        ('owasp', '0073_project_recent_milestones'),
+        ("github", "0041_milestone_github_milestone_created_at_and_more"),
+        ("owasp", "0073_project_recent_milestones"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='project',
-            name='recent_milestones',
+            model_name="project",
+            name="recent_milestones",
         ),
         migrations.AddField(
-            model_name='project',
-            name='milestones',
-            field=models.ManyToManyField(blank=True, to='github.milestone', verbose_name='milestones'),
+            model_name="project",
+            name="milestones",
+            field=models.ManyToManyField(
+                blank=True, to="github.milestone", verbose_name="milestones"
+            ),
         ),
     ]

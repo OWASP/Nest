@@ -87,13 +87,12 @@ class ProjectNode(GenericEntityNode):
 
     @strawberry_django.field(
         prefetch_related=[
-          lambda _info :Prefetch(
+            lambda _info: Prefetch(
                 "milestones",
                 queryset=Milestone.objects.select_related(
                     "repository__organization",
                     "author__owasp_profile",
-                )
-                .order_by("-created_at")[:5],
+                ).order_by("-created_at")[:5],
                 to_attr="_recent_milestones",
             )
         ]

@@ -21,7 +21,7 @@ class TestOwaspAggregateProjects:
         project.owasp_repository = mock.Mock()
         project.owasp_repository.is_archived = False
         project.owasp_repository.created_at = "2024-01-01T00:00:00Z"
-        project.recent_milestones = mock.Mock()
+        project.milestones = mock.Mock()
         return project
 
     @pytest.mark.parametrize(
@@ -83,7 +83,7 @@ class TestOwaspAggregateProjects:
         ):
             command.handle(offset=offset)
 
-        assert mock_project.recent_milestones.set.called
+        assert mock_project.milestones.set.called
         assert mock_bulk_save.called
         assert mock_print.call_count == projects - offset
 

@@ -405,8 +405,6 @@ class Project(
             "repository__organization",
         )
 
-
-
     @property
     def recent_releases_count(self) -> int:
         """Get the number of recent releases.
