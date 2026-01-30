@@ -1,5 +1,6 @@
 """A command to update OWASP projects data."""
 
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from apps.owasp.models.project import Project
@@ -114,3 +115,10 @@ class Command(BaseCommand):
 
         # Bulk save data.
         Project.bulk_save(projects)
+
+        if offset == 0:
+            self.stdout.write(self.style.NOTICE("Updating project level compliance..."))
+            call_command("owasp_update_project_level_compliance")
+
+            self.stdout.write(self.style.NOTICE("Updating project health scores..."))
+            call_command("owasp_update_project_health_scores")
