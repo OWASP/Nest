@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.api.internal.queries.project import ProjectQuery
 from apps.owasp.models.project import Project
@@ -66,3 +67,139 @@ class TestProjectResolution:
 
             assert result is None
             mock_get.assert_called_once_with(key="www-project-non-existent")
+
+
+class TestRecentProjectsResolution:
+    """Test cases for resolving recent_projects field."""
+
+    def test_recent_projects_with_positive_limit(self):
+        """Test recent_projects returns list within limit."""
+        mock_projects = [Mock(spec=Project), Mock(spec=Project)]
+
+        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
+            mock_filter.return_value.order_by.return_value.__getitem__ = Mock(
+                return_value=mock_projects
+            )
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["recent_projects"](query, limit=5)
+
+            assert result == mock_projects
+
+    def test_recent_projects_limit_zero_returns_empty(self):
+        """Test recent_projects returns empty list when limit is 0."""
+        query = ProjectQuery()
+        result = query.__class__.__dict__["recent_projects"](query, limit=0)
+
+        assert result == []
+
+    def test_recent_projects_negative_limit_returns_empty(self):
+        """Test recent_projects returns empty list when limit is negative."""
+        query = ProjectQuery()
+        result = query.__class__.__dict__["recent_projects"](query, limit=-5)
+
+        assert result == []
+
+
+class TestSearchProjectsResolution:
+    """Test cases for resolving search_projects field."""
+
+    def test_search_projects_with_valid_query(self):
+        """Test search_projects returns matching projects."""
+        mock_projects = [Mock(spec=Project)]
+
+        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
+            mock_filter.return_value.order_by.return_value.__getitem__ = Mock(
+                return_value=mock_projects
+            )
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["search_projects"](query, query="test")
+
+            assert result == mock_projects
+
+    def test_search_projects_query_too_short(self):
+        """Test search_projects returns empty for query < MIN_SEARCH_QUERY_LENGTH."""
+        query = ProjectQuery()
+        result = query.__class__.__dict__["search_projects"](query, query="ab")
+
+        assert result == []
+
+    def test_search_projects_query_too_long(self):
+        """Test search_projects returns empty for query > MAX_SEARCH_QUERY_LENGTH."""
+        query = ProjectQuery()
+        long_query = "a" * 101
+        result = query.__class__.__dict__["search_projects"](query, query=long_query)
+
+        assert result == []
+
+    def test_search_projects_whitespace_trimmed(self):
+        """Test search_projects trims whitespace before checking length."""
+        query = ProjectQuery()
+        result = query.__class__.__dict__["search_projects"](query, query="  ab  ")
+
+        assert result == []
+
+
+class TestIsProjectLeaderResolution:
+    """Test cases for resolving is_project_leader field."""
+
+    @pytest.fixture
+    def mock_info(self):
+        return Mock()
+
+    def test_is_project_leader_user_not_found(self, mock_info):
+        """Test is_project_leader returns False when user doesn't exist."""
+        with patch("apps.owasp.api.internal.queries.project.GithubUser.objects.get") as mock_get:
+            mock_get.side_effect = GithubUser.DoesNotExist
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="nonexistent"
+            )
+
+            assert not result
+
+    def test_is_project_leader_user_is_leader(self, mock_info):
+        """Test is_project_leader returns True when user is a leader."""
+        mock_user = Mock()
+        mock_user.login = "testuser"
+        mock_user.name = "Test User"
+
+        with (
+            patch(
+                "apps.owasp.api.internal.queries.project.GithubUser.objects.get"
+            ) as mock_get_user,
+            patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
+        ):
+            mock_get_user.return_value = mock_user
+            mock_filter.return_value.exists.return_value = True
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="testuser"
+            )
+
+            assert result
+
+    def test_is_project_leader_user_not_leader(self, mock_info):
+        """Test is_project_leader returns False when user is not a leader."""
+        mock_user = Mock()
+        mock_user.login = "testuser"
+        mock_user.name = "Test User"
+
+        with (
+            patch(
+                "apps.owasp.api.internal.queries.project.GithubUser.objects.get"
+            ) as mock_get_user,
+            patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
+        ):
+            mock_get_user.return_value = mock_user
+            mock_filter.return_value.exists.return_value = False
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="testuser"
+            )
+
+            assert not result
