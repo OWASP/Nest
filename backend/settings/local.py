@@ -23,3 +23,7 @@ class Local(Base):
     PUBLIC_IP_ADDRESS = values.Value()
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
+    
+    CSRF_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
