@@ -1,6 +1,5 @@
 variables {
   alb_sg_id                  = "sg-alb-12345"
-  aws_region                 = "us-east-2"
   common_tags                = { Environment = "test", Project = "nest" }
   domain_name                = "nest.owasp.dev"
   environment                = "test"
