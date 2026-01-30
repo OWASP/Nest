@@ -21,7 +21,7 @@ resource "aws_cloudwatch_log_group" "frontend" {
 }
 
 # TODO: disallow tag mutability
-# nosemgrep: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
+# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
 resource "aws_ecr_repository" "frontend" {
   image_tag_mutability = "MUTABLE"
   name                 = "${var.project_name}-${var.environment}-frontend"
@@ -206,7 +206,7 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
     Statement = [
       {
         # https://docs.aws.amazon.com/AmazonECR/latest/public/public-repository-policies.html#repository-policy-vs-iam-policy
-        # nosemgrep: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
+        # NOSEMGREP: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
         Action   = "ecr:GetAuthorizationToken"
         Effect   = "Allow"
         Resource = "*" # NOSONAR

@@ -107,7 +107,7 @@ resource "aws_iam_policy" "ecs_tasks_execution_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        # nosemgrep: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
+        # NOSEMGREP: terraform.lang.security.iam.no-iam-creds-exposure.no-iam-creds-exposure
         Action = [
           # https://docs.aws.amazon.com/AmazonECR/latest/public/public-repository-policies.html#repository-policy-vs-iam-policy
           "ecr:GetAuthorizationToken"
