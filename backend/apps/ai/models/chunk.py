@@ -1,33 +1,30 @@
 """AI app chunk model."""
 
 from django.db import models
-# Prefer langchain's text splitter when available; otherwise provide a local fallback
-try:
-    from langchain.text_splitter import RecursiveCharacterTextSplitter  # type: ignore
-except Exception:
-    class RecursiveCharacterTextSplitter:
-        """Local fallback splitter used in tests and when langchain isn't installed."""
+# Lightweight fallback splitter used for local tests when langchain is unavailable.
+class _RecursiveCharacterTextSplitterFallback:
+    """Local fallback splitter used in tests and when langchain isn't installed."""
 
-        def __init__(self, chunk_size=200, chunk_overlap=20, length_function=len, separators=None):
-            self.chunk_size = chunk_size
-            self.chunk_overlap = chunk_overlap
-            self.length_function = length_function
-            self.separators = separators or ["\n\n", "\n", " ", ""]
+    def __init__(self, chunk_size=200, chunk_overlap=20, length_function=len, separators=None):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        self.length_function = length_function
+        self.separators = separators or ["\n\n", "\n", " ", ""]
 
-        def split_text(self, text: str) -> list[str]:
-            """Simple fixed-size splitting with overlap as a lightweight fallback."""
-            if not text:
-                return []
-            out: list[str] = []
-            start = 0
-            text_len = len(text)
-            while start < text_len:
-                end = min(text_len, start + self.chunk_size)
-                out.append(text[start:end])
-                # move start forward but keep overlap
-                next_start = end - self.chunk_overlap
-                start = next_start if next_start > start else end
-            return out
+    def split_text(self, text: str) -> list[str]:
+        """Simple fixed-size splitting with overlap as a lightweight fallback."""
+        if not text:
+            return []
+        out: list[str] = []
+        start = 0
+        text_len = len(text)
+        while start < text_len:
+            end = min(text_len, start + self.chunk_size)
+            out.append(text[start:end])
+            # move start forward but keep overlap
+            next_start = end - self.chunk_overlap
+            start = next_start if next_start > start else end
+        return out
 
 from pgvector.django import VectorField
 
@@ -60,8 +57,18 @@ class Chunk(TimestampedModel):
 
     @staticmethod
     def split_text(text: str) -> list[str]:
-        """Split text into chunks."""
-        return RecursiveCharacterTextSplitter(
+        """Split text into chunks.
+
+        Uses langchain's splitter when available; otherwise, falls back to the
+        lightweight `_RecursiveCharacterTextSplitterFallback` implementation.
+        """
+        try:
+            from langchain.text_splitter import RecursiveCharacterTextSplitter  # type: ignore
+            splitter_cls = RecursiveCharacterTextSplitter
+        except Exception:
+            splitter_cls = _RecursiveCharacterTextSplitterFallback
+
+        return splitter_cls(
             chunk_size=200,
             chunk_overlap=20,
             length_function=len,
