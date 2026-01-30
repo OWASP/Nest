@@ -11,6 +11,8 @@ severity:
   - HIGH
   - UNKNOWN
 
+show-suppressed: true
+
 timeout: 10m
 
 vulnerability:

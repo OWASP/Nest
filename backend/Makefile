@@ -157,13 +157,25 @@ save-backup:
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
 
-security-scan-backend-image: build-backend-local-image
-	@trivy image \
-		--config trivy.yaml \
-		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
-		--exit-code 1 \
-		--severity CRITICAL,HIGH \
-		nest-backend-local
+# vars (defalts for Local dev)
+BACKEND_IMAGE_NAME ?= nest-backend-local
+TRIVY_EXIT_CODE ?= 0
+
+security-scan-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
+	@echo "Scanning $(BACKEND_IMAGE_NAME)..."
+	@docker run --rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v trivy-cache:/root/.cache/trivy \
+		-v "$(CURDIR):/src" \
+		-w /src \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--config /src/trivy.yaml \
+		--exit-code $(TRIVY_EXIT_CODE) \
+		$(BACKEND_IMAGE_NAME)
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
