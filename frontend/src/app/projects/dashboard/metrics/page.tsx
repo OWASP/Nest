@@ -288,9 +288,9 @@ const MetricsPage: FC = () => {
         <LoadingSpinner />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-4 md:gap-6">
             {metrics.length === 0 ? (
-              <div className="py-8 text-center text-gray-500">
+              <div className="col-span-full py-8 text-center text-gray-500">
                 No metrics found. Try adjusting your filters.
               </div>
             ) : (
