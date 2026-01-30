@@ -1,3 +1,5 @@
+mock_provider "aws" {}
+
 variables {
   alb_sg_id                  = "sg-alb-12345"
   common_tags                = { Environment = "test", Project = "nest" }

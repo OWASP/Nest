@@ -1,3 +1,5 @@
+mock_provider "aws" {}
+
 variables {
   common_tags  = { Environment = "test", Project = "nest" }
   db_port      = 5432

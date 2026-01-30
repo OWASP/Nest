@@ -1,3 +1,5 @@
+mock_provider "aws" {}
+
 variables {
   allowed_hosts      = "nest.owasp.dev"
   allowed_origins    = "https://nest.owasp.dev"
