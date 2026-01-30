@@ -42,15 +42,15 @@ const ItemCardList = ({
   <SecondaryCard icon={icon} title={title}>
     {data && data.length > 0 ? (
       <div
-        className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+        className={`grid w-full ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
       >
         {data.map((item, index) => (
           <div
             key={item.objectID || `${item.repositoryName}-${item.title || item.name}-${item.url}`}
-            className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+            className="mb-4 w-full rounded-lg bg-gray-200 p-3 sm:p-4 dark:bg-gray-700 overflow-x-auto"
           >
             <div className="flex w-full flex-col justify-between">
-              <div className="flex w-full items-center">
+              <div className="flex w-full items-center min-w-0">
                 {showAvatar && (
                   <Tooltip
                     closeDelay={100}
@@ -78,7 +78,7 @@ const ItemCardList = ({
                     </Link>
                   </Tooltip>
                 )}
-                <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap break-words">
                   <Link
                     className="text-blue-400 hover:underline"
                     href={item?.url || ''}
@@ -88,7 +88,7 @@ const ItemCardList = ({
                   </Link>
                 </h3>
               </div>
-              <div className="ml-0.5 w-full">{renderDetails(item)}</div>
+              <div className="ml-0.5 w-full break-words">{renderDetails(item)}</div>
             </div>
           </div>
         ))}
