@@ -48,9 +48,9 @@ AI/ML enthusiast | GSoC'25 contributor at PSF
 
 Senior GRC & Technology Risk Leader, CISSP
 
-[GitHub](https://github.com/TheCyberLeader) • [LinkedIn](https://www.linkedin.com/in/mariezw/) • [Slack](https://owasp.slack.com/team/U0A23223B8B) • Country (Timezone)
+[GitHub](https://github.com/TheCyberLeader) • [LinkedIn](https://www.linkedin.com/in/mariezw/) • [Slack](https://owasp.slack.com/team/U0A23223B8B) • [United States (Eastern Time)](https://time-time.net/times/time-zones/usa-canada/current-eastern-time-est.php)
 
-*This section is reserved for the mentor to add their own description.*
+Marie is a cybersecurity professional focused on Governance, Risk, and Compliance. She enjoys helping people navigate the sometimes confusing world of GRC, whether they are just starting out, prepping for their CISSP, or tackling real-world risk management challenges. She is happy to share what she has learned, answer questions, and help others build practical skills. She welcomes outreach on LinkedIn or Slack and is always happy to chat about security, risk, or career paths in this field.
 
 #### Muhammad Salman
 
