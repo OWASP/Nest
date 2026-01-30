@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Annotated
 import strawberry
 import strawberry_django
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
@@ -15,6 +16,7 @@ from apps.github.models.repository import Repository
 if TYPE_CHECKING:
     from apps.owasp.api.internal.nodes.project import ProjectNode
 
+MAX_LIMIT = 1000
 RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
 
@@ -69,7 +71,10 @@ class RepositoryNode(strawberry.relay.Node):
     @strawberry_django.field(prefetch_related=["milestones"])
     def recent_milestones(self, root: Repository, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        return root.recent_milestones.order_by("-created_at")[:limit]
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return root.recent_milestones.order_by("-created_at")[:normalized_limit]
 
     @strawberry_django.field(prefetch_related=["releases"])
     def releases(self, root: Repository) -> list[ReleaseNode]:
