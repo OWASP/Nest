@@ -33,16 +33,16 @@ resource "aws_ecr_lifecycle_policy" "main" {
   policy = jsonencode({
     rules = [
       {
-        rulePriority = 1
-        description  = "Remove untagged images"
-        selection = {
-          tagStatus   = "untagged"
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          countNumber = 7
-        }
         action = {
           type = "expire"
+        }
+        description  = "Remove untagged images"
+        rulePriority = 1
+        selection = {
+          countNumber = 7
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          tagStatus   = "untagged"
         }
       }
     ]
@@ -50,10 +50,10 @@ resource "aws_ecr_lifecycle_policy" "main" {
 }
 
 # TODO: disallow tag mutability
-# nosemgrep: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
+# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
 resource "aws_ecr_repository" "main" {
-  name                 = "${var.project_name}-${var.environment}-backend"
   image_tag_mutability = "MUTABLE"
+  name                 = "${var.project_name}-${var.environment}-backend"
   tags                 = var.common_tags
 
   image_scanning_configuration {
@@ -81,8 +81,8 @@ resource "aws_iam_role" "ecs_tasks_execution_role" {
 
 
 resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
-  name        = "${var.project_name}-${var.environment}-ecs-tasks-ssm-policy"
   description = "Allow ECS tasks to read SSM parameters"
+  name        = "${var.project_name}-${var.environment}-ecs-tasks-ssm-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -99,8 +99,8 @@ resource "aws_iam_policy" "ecs_tasks_execution_role_ssm_policy" {
 }
 
 resource "aws_iam_policy" "ecs_tasks_execution_policy" {
-  name        = "${var.project_name}-${var.environment}-ecs-tasks-execution-policy"
   description = "Custom policy for ECS task execution - ECR and CloudWatch Logs access"
+  name        = "${var.project_name}-${var.environment}-ecs-tasks-execution-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -147,9 +147,6 @@ resource "aws_iam_role_policy_attachment" "ecs_tasks_execution_role_ssm_policy_a
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.project_name}-${var.environment}-ecs-task-role"
-  tags = var.common_tags
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -162,6 +159,8 @@ resource "aws_iam_role" "ecs_task_role" {
       }
     ]
   })
+  name = "${var.project_name}-${var.environment}-ecs-task-role"
+  tags = var.common_tags
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_task_role_fixtures_s3_access" {
@@ -170,9 +169,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_fixtures_s3_access" {
 }
 
 resource "aws_iam_role" "event_bridge_role" {
-  name = "${var.project_name}-${var.environment}-event-bridge-role"
-  tags = var.common_tags
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -185,12 +181,13 @@ resource "aws_iam_role" "event_bridge_role" {
       }
     ]
   })
+  name = "${var.project_name}-${var.environment}-event-bridge-role"
+  tags = var.common_tags
 }
 
 resource "aws_iam_policy" "event_bridge_ecs_policy" {
-  name        = "${var.project_name}-${var.environment}-event-bridge-ecs-policy"
   description = "Allow EventBridge to run ECS tasks"
-
+  name        = "${var.project_name}-${var.environment}-event-bridge-ecs-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -206,7 +203,7 @@ resource "aws_iam_policy" "event_bridge_ecs_policy" {
       },
       {
         # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/CWE_IAM_role.html
-        # nosemgrep: terraform.lang.security.iam.no-iam-resource-exposure.no-iam-resource-exposure
+        # NOSEMGREP: terraform.lang.security.iam.no-iam-resource-exposure.no-iam-resource-exposure
         Action = "iam:PassRole"
         Effect = "Allow"
         Resource = [
