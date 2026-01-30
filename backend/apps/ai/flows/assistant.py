@@ -66,6 +66,52 @@ def process_query(  # noqa: PLR0911
 
     """
     try:
+        # Step 0: Handle simple greetings and non-question messages
+        query_lower = query.strip().lower()
+        # Common greetings and simple acknowledgments (standalone only)
+        simple_greetings = [
+            "hello",
+            "hi",
+            "hey",
+            "greetings",
+            "thanks",
+            "thank you",
+            "thankyou",
+            "thx",
+            "ty",
+            "goodbye",
+            "bye",
+            "see you",
+            "good morning",
+            "good afternoon",
+            "good evening",
+            "good night",
+            "gn",
+            "gm",
+        ]
+        
+        # Check if query is ONLY a simple greeting (exact match, no question words or content)
+        # If it contains question words or OWASP-related terms, it's not just a greeting
+        question_indicators = ["?", "what", "how", "when", "where", "who", "why", "which", "tell", "explain", "find", "show", "help"]
+        has_question_content = any(indicator in query_lower for indicator in question_indicators)
+        has_owasp_content = any(term in query_lower for term in ["owasp", "project", "chapter", "contribute", "gsoc", "security"])
+        
+        # Only treat as simple greeting if it's exactly a greeting AND has no question/OWASP content
+        is_simple_greeting = (
+            query_lower in simple_greetings or 
+            any(query_lower == greeting for greeting in simple_greetings)
+        ) and not has_question_content and not has_owasp_content
+        
+        if is_simple_greeting:
+            # For app mentions, respond friendly; for channel messages, skip
+            if is_app_mention:
+                return (
+                    "Hello! 👋 I'm NestBot, your OWASP assistant. "
+                    "I can help you with questions about OWASP projects, chapters, contributions, "
+                    "GSoC, and more. What would you like to know?"
+                )
+            return None
+        
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
         intent = router_result["intent"]
@@ -446,11 +492,17 @@ def execute_task(
         "- Never guess or make assumptions based on general knowledge\n"
         "- For RAG agent: ALWAYS call semantic_search tool first to retrieve relevant "
         "context\n"
+        "- For RAG agent: If the first search doesn't yield good results, try searching "
+        "with different keywords or rephrased queries (e.g., if searching for 'project lifecycle' "
+        "doesn't work, try 'project maturity', 'project stages', or 'project development process')\n"
         "- IMPORTANT: Do NOT retry the same tool call with the same input if it fails\n"
         "- If a tool call fails or doesn't provide useful results, try a different "
         "approach or tool\n"
         "- If you've already tried a tool and it didn't work, do NOT call it again "
-        "with the same parameters"
+        "with the same parameters\n"
+        "- If semantic search returns no results or irrelevant results after trying multiple "
+        "queries, provide a helpful response explaining what information you were looking for "
+        "and suggest where the user might find it (e.g., OWASP website, specific project pages)"
     )
 
     if is_channel_suggestion:

@@ -78,7 +78,9 @@ class QuestionDetector:
             prompt = (
                 "You are an expert OWASP assistant. Your task is to determine if a human question "
                 "is related to OWASP, its projects, chapters, events, or general web security. "
-                "Respond with 'YES' if it is related, and 'NO' otherwise. Be extremely concise."
+                "Respond with 'YES' if it is related, and 'NO' otherwise. Be extremely concise.\n\n"
+                "IMPORTANT: Simple greetings without questions (e.g., 'Hello', 'Hi', 'Thanks', 'Thank you') "
+                "should be classified as 'NO' - they are not OWASP-related questions."
             )
 
         formatted_context = self.format_context_chunks(context_chunks)

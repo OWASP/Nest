@@ -56,7 +56,18 @@ def generate_ai_reply_if_unanswered(message_id: int):
     ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)
     
     if not ai_response_text:
-        # Add shrugging reaction when no answer can be generated
+        # Remove eyes reaction and add shrugging reaction when no answer can be generated
+        try:
+            # Remove eyes reaction if it exists
+            client.reactions_remove(
+                channel=channel_id,
+                timestamp=message.slack_message_id,
+                name="eyes",
+            )
+        except SlackApiError:
+            # Ignore if eyes reaction doesn't exist
+            pass
+        
         try:
             result = client.reactions_add(
                 channel=channel_id,
@@ -87,7 +98,18 @@ def generate_ai_reply_if_unanswered(message_id: int):
         thread_ts=message.slack_message_id,
     )
 
-    # Add ✅ reaction to show we are done
+    # Remove 👀 reaction and add ✅ reaction to show we are done
+    try:
+        # Remove eyes reaction if it exists
+        client.reactions_remove(
+            channel=channel_id,
+            timestamp=message.slack_message_id,
+            name="eyes",
+        )
+    except SlackApiError:
+        # Ignore if eyes reaction doesn't exist
+        pass
+    
     try:
         client.reactions_add(
             channel=channel_id,
@@ -119,7 +141,18 @@ def process_ai_query_async(
     )
 
     if not ai_response_text:
-        # Add shrugging reaction when no answer can be generated
+        # Remove eyes reaction and add shrugging reaction when no answer can be generated
+        try:
+            # Remove eyes reaction if it exists
+            client.reactions_remove(
+                channel=channel_id,
+                timestamp=message_ts,
+                name="eyes",
+            )
+        except SlackApiError:
+            # Ignore if eyes reaction doesn't exist
+            pass
+        
         try:
             client.reactions_add(
                 channel=channel_id,
@@ -149,8 +182,19 @@ def process_ai_query_async(
         thread_ts=thread_ts or message_ts,
     )
 
-    # Add ✅ reaction to show we are done
+    # Remove 👀 reaction and add ✅ reaction to show we are done
     if message_ts:
+        try:
+            # Remove eyes reaction if it exists
+            client.reactions_remove(
+                channel=channel_id,
+                timestamp=message_ts,
+                name="eyes",
+            )
+        except SlackApiError:
+            # Ignore if eyes reaction doesn't exist
+            pass
+        
         try:
             client.reactions_add(
                 channel=channel_id,
