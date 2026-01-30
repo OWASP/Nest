@@ -1,5 +1,5 @@
 'use client'
-
+import type { ExtendedSession } from 'types/auth'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
@@ -13,7 +13,6 @@ import {
   GetMyProgramsDocument,
   GetProgramDetailsDocument,
 } from 'types/__generated__/programsQueries.generated'
-import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -54,10 +53,9 @@ const EditProgramPage = () => {
       return
     }
 
-    const isAdmin = data.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === (session as ExtendedSession)?.user?.login
-    )
-
+ const isAdmin = data.getProgram.admins?.some(
+  (admin: { login: string }) => admin.login === (session as ExtendedSession)?.user?.login
+)
     if (isAdmin) {
       setAccessStatus('allowed')
     } else {
