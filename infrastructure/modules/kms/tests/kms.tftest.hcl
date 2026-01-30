@@ -1,3 +1,12 @@
+mock_provider "aws" {}
+
+override_data {
+  target = data.aws_iam_policy_document.key_policy
+  values = {
+    json = "{\"Statement\":[{\"Sid\":\"EnableIAMUserPermissions\"},{\"Sid\":\"AllowCloudWatchLogs\"}]}"
+  }
+}
+
 variables {
   common_tags  = { Environment = "test", Project = "nest" }
   environment  = "test"

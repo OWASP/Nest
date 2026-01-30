@@ -1,3 +1,5 @@
+mock_provider "aws" {}
+
 variables {
   aws_region                    = "us-east-2"
   common_tags                   = { Environment = "test", Project = "nest" }
