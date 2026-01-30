@@ -236,8 +236,8 @@ class TestEventGeoMethods:
 
             event.generate_geo_location()
 
-            assert event.latitude == 37.7749
-            assert event.longitude == -122.4194
+            assert event.latitude == pytest.approx(37.7749)
+            assert event.longitude == pytest.approx(-122.4194)
             mock_get_coords.assert_called_once_with("San Francisco, CA")
 
     def test_generate_geo_location_falls_back_to_context(self):

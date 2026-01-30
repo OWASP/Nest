@@ -161,7 +161,7 @@ class TestProjectProperties:
         )
 
         project = Project()
-        assert project.health_score == 85.5
+        assert project.health_score == pytest.approx(85.5)
 
     def test_health_score_without_metrics(self, mocker):
         """Test health_score returns None when no metrics."""
