@@ -91,16 +91,16 @@ const MetricsPage: FC = () => {
   }
   const levelFiltersMapping = {
     incubator: {
-      level: 'incubator',
+      level: 'INCUBATOR',
     },
     lab: {
-      level: 'lab',
+      level: 'LAB',
     },
     production: {
-      level: 'production',
+      level: 'INCUBATOR',
     },
     flagship: {
-      level: 'flagship',
+      level: 'FLAGSHIP',
     },
   }
 
