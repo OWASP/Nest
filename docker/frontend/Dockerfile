@@ -49,7 +49,7 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.3 in runner stage
+# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.4 in runner stage
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN cd /tmp && \
     npm pack tar@7.5.7 && \
@@ -59,9 +59,8 @@ RUN cd /tmp && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
     rm -rf package tar-7.5.7.tgz && \
-    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json"
-
-RUN addgroup --system --gid 1001 nodejs && \
+    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json" && \
+    addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
 # Copying files with root as owner, so that executing user cannot change the container.
 COPY --from=builder --chown=root:root --chmod=555 /app/public public
