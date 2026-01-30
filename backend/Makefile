@@ -169,11 +169,12 @@ security-scan-backend-image:
 	@docker run --rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v trivy-cache:/root/.cache/trivy \
+		-v "$(CURDIR):/src" \
+		-w /src \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		image \
+		--config /src/trivy.yaml \
 		--exit-code $(TRIVY_EXIT_CODE) \
-		--severity CRITICAL,HIGH \
-		--no-progress \
 		$(BACKEND_IMAGE_NAME)
 
 shell-backend:

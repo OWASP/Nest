@@ -71,7 +71,7 @@ security-scan-images: \
 security-scan-code-semgrep:
 	@echo "Running Semgrep security scan..."
 	@docker run --rm \
-		-v "$(PWD):/src" \
+		-v "$(CURDIR):/src" \
 		-w /src \
 		$$(grep -E '^FROM semgrep/semgrep:' docker/semgrep/Dockerfile | sed 's/^FROM //') \
 		semgrep \
@@ -110,13 +110,13 @@ security-scan-code-trivy:
 	@echo "Running Trivy security scan..."
 	@docker run \
 		--rm \
-		-v "$(PWD):/src" \
+		-v "$(CURDIR):/src" \
 		-v trivy-cache:/root/.cache/trivy \
 		-w /src \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs \
 		--config trivy.yaml \
-			.
+		.
 
 test: \
 	test-nest-app
