@@ -45,6 +45,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     is_leader_requirements_compliant = models.BooleanField(
         verbose_name="Is leader requirements compliant", default=False
     )
+    level_non_compliant = models.BooleanField(verbose_name="Is level non-compliant", default=False)
     last_released_at = models.DateTimeField(verbose_name="Last released at", blank=True, null=True)
     last_committed_at = models.DateTimeField(
         verbose_name="Last committed at", blank=True, null=True

@@ -5,6 +5,8 @@ from django.core.management.base import BaseCommand
 from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 from apps.owasp.models.project_health_requirements import ProjectHealthRequirements
 
+LEVEL_NON_COMPLIANCE_PENALTY = 10.0
+
 
 class Command(BaseCommand):
     help = "Update OWASP project health scores."
@@ -56,6 +58,12 @@ class Command(BaseCommand):
             for field, weight in backward_fields.items():
                 if int(getattr(metric, field)) <= int(getattr(requirements, field)):
                     score += weight
+
+            # level non-compliance penalty
+            if metric.level_non_compliant:
+                score -= LEVEL_NON_COMPLIANCE_PENALTY
+
+            score = max(score, 0.0)
 
             metric.score = score
             project_health_metrics.append(metric)
