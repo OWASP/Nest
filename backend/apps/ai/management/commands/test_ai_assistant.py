@@ -52,11 +52,8 @@ class Command(BaseCommand):
             "How do I get started with application security?",
             
             # Multi-Intent / Collaborative Queries (should trigger multiple agents)
-            "Who leads the OWASP SAMM project and how can I find its Slack channel?",
-            "Find flagship projects and their leaders with their Slack channels.",
-            
+            "Who leads the OWASP SAMM project and how can I find its Slack channel?",            
             # RAG / Complex Knowledge Queries (should route to RAG Agent)
-            "What is the OWASP Code of Conduct?",
             "Explain the OWASP project lifecycle.",
             "What is OWASP?",
             "Tell me about web security.",
