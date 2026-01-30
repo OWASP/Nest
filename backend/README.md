@@ -41,7 +41,7 @@ For common tasks, use the provided `Makefile` targets:
 | Run backend tests      | `make test-backend`          |
 | Access Django shell    | `make django-shell`          |
 
-See the root `Makefile` and `Makefile` for more targets.
+See the root `Makefile` and the local `Makefile` for more targets.
 
 ## Key APIs
 
