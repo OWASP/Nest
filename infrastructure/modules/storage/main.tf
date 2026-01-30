@@ -28,7 +28,6 @@ module "fixtures_bucket" {
 resource "aws_iam_policy" "fixtures_read_only" {
   name        = "${var.project_name}-${var.environment}-fixtures-read-only"
   description = "Allows read-only access to the fixtures S3 bucket"
-  tags        = var.common_tags
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -37,6 +36,7 @@ resource "aws_iam_policy" "fixtures_read_only" {
       Resource = ["arn:aws:s3:::${var.fixtures_bucket_name}-${random_id.suffix.hex}/*"]
     }]
   })
+  tags = var.common_tags
 }
 
 module "zappa_bucket" {
