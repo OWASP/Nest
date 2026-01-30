@@ -31,6 +31,8 @@ class Command(BaseCommand):
             and app.label != "django_extensions"
         ]
 
+        failures: list[str] = []
+
         for label in app_labels:
             self.stdout.write(f"Generating graphs for {label}")
 
@@ -43,6 +45,7 @@ class Command(BaseCommand):
                 )
             except Exception as exc:  # noqa: BLE001
                 self.stderr.write(f"[warn] inheritance graph failed for {label}: {exc}")
+                failures.append(f"{label} inheritance")
 
             try:
                 call_command(
@@ -53,6 +56,7 @@ class Command(BaseCommand):
                 )
             except Exception as exc:  # noqa: BLE001
                 self.stderr.write(f"[warn] relations graph failed for {label}: {exc}")
+                failures.append(f"{label} relations")
 
         self.stdout.write("Generating inter-app graphs")
 
@@ -65,6 +69,7 @@ class Command(BaseCommand):
             )
         except Exception as exc:  # noqa: BLE001
             self.stderr.write(f"[warn] inter inheritance failed: {exc}")
+            failures.append("inter-app inheritance")
 
         try:
             call_command(
@@ -75,5 +80,13 @@ class Command(BaseCommand):
             )
         except Exception as exc:  # noqa: BLE001
             self.stderr.write(f"[warn] inter relations failed: {exc}")
+            failures.append("inter-app relations")
 
-        self.stdout.write(self.style.SUCCESS("Model graph generation completed"))
+        if failures:
+            self.stdout.write(
+                self.style.WARNING(
+                    "Model graph generation completed with failures: " + ", ".join(failures)
+                )
+            )
+        else:
+            self.stdout.write(self.style.SUCCESS("Model graph generation completed"))
