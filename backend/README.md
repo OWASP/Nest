@@ -34,12 +34,12 @@ docker compose -f docker-compose/local/compose.yaml up
 
 For common tasks, use the provided `Makefile` targets:
 
-| Task                   | Command                      |
-| ---------------------- | ---------------------------- |
-| Run database migrations | `make migrate`               |
-| Create a superuser     | `make create-superuser`      |
-| Run backend tests      | `make test-backend`          |
-| Access Django shell    | `make django-shell`          |
+| Task                    | Command                 |
+| ----------------------- | ----------------------- |
+| Run database migrations | `make migrate`          |
+| Create a superuser      | `make create-superuser` |
+| Run backend tests       | `make test-backend`     |
+| Access Django shell     | `make django-shell`     |
 
 See the root `Makefile` and the local `Makefile` for more targets.
 

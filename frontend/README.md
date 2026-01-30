@@ -43,15 +43,15 @@ pnpm run dev
 
 Common `pnpm` scripts defined in `package.json`:
 
-| Task                        | Command                      |
-| --------------------------- | ---------------------------- |
-| Start dev server            | `pnpm run dev`               |
-| Build for production        | `pnpm run build`             |
-| Lint code                   | `pnpm run lint`              |
-| Format code                 | `pnpm run format`            |
-| Generate GraphQL types      | `pnpm run graphql-codegen`   |
-| Run unit tests              | `pnpm run test:unit`         |
-| Run e2e tests               | `pnpm run test:e2e`          |
+| Task                   | Command                    |
+| ---------------------- | -------------------------- |
+| Start dev server       | `pnpm run dev`             |
+| Build for production   | `pnpm run build`           |
+| Lint code              | `pnpm run lint`            |
+| Format code            | `pnpm run format`          |
+| Generate GraphQL types | `pnpm run graphql-codegen` |
+| Run unit tests         | `pnpm run test:unit`       |
+| Run e2e tests          | `pnpm run test:e2e`        |
 
 See the `Makefile` for Docker-based convenience targets.
 
