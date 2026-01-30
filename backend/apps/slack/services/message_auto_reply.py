@@ -11,6 +11,15 @@ from apps.slack.models import Message
 
 logger = logging.getLogger(__name__)
 
+# Error messages
+ERROR_UNABLE_TO_GENERATE_RESPONSE = "⚠️ I was unable to generate a response. Please try again later."
+ERROR_POSTING_RESPONSE = "⚠️ An error occurred while posting the response. Please try again later."
+ERROR_UNEXPECTED_PROCESSING = "⚠️ An unexpected error occurred while processing your query. Please try again later."
+
+# Log messages
+LOG_ERROR_POSTING_ERROR_MESSAGE = "Error posting error message"
+LOG_ERROR_POSTING_EPHEMERAL_ERROR_MESSAGE = "Error posting ephemeral error message"
+
 
 @job("ai")
 def generate_ai_reply_if_unanswered(message_id: int):
@@ -120,11 +129,11 @@ def generate_ai_reply_if_unanswered(message_id: int):
             try:
                 client.chat_postMessage(
                     channel=channel_id,
-                    text="⚠️ I was unable to generate a response. Please try again later.",
+                    text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
                     thread_ts=message.slack_message_id,
                 )
             except SlackApiError:
-                logger.exception("Error posting error message")
+                logger.exception(LOG_ERROR_POSTING_ERROR_MESSAGE)
             return
 
         # Final validation before posting - double check we don't have "YES" or "NO"
@@ -143,11 +152,11 @@ def generate_ai_reply_if_unanswered(message_id: int):
             try:
                 client.chat_postMessage(
                     channel=channel_id,
-                    text="⚠️ I was unable to generate a response. Please try again later.",
+                    text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
                     thread_ts=message.slack_message_id,
                 )
             except SlackApiError:
-                logger.exception("Error posting error message")
+                logger.exception(LOG_ERROR_POSTING_ERROR_MESSAGE)
             return
 
         try:
@@ -181,11 +190,11 @@ def generate_ai_reply_if_unanswered(message_id: int):
             try:
                 client.chat_postMessage(
                     channel=channel_id,
-                    text="⚠️ An error occurred while posting the response. Please try again later.",
+                    text=ERROR_POSTING_RESPONSE,
                     thread_ts=message.slack_message_id,
                 )
             except SlackApiError:
-                logger.exception("Error posting error message")
+                logger.exception(LOG_ERROR_POSTING_ERROR_MESSAGE)
 
         # Remove 👀 reaction to show we are done
         try:
@@ -208,7 +217,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
         try:
             client.chat_postMessage(
                 channel=channel_id,
-                text="⚠️ An unexpected error occurred while processing your query. Please try again later.",
+                text=ERROR_UNEXPECTED_PROCESSING,
                 thread_ts=message.slack_message_id,
             )
         except SlackApiError:
@@ -311,21 +320,21 @@ def process_ai_query_async(
                 try:
                     client.chat_postMessage(
                         channel=channel_id,
-                        text="⚠️ I was unable to generate a response. Please try again later.",
+                        text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
                         thread_ts=thread_ts or message_ts,
                     )
                 except SlackApiError:
-                    logger.exception("Error posting error message")
+                    logger.exception(LOG_ERROR_POSTING_ERROR_MESSAGE)
             elif user_id:
                 # For slash commands, send ephemeral
                 try:
                     client.chat_postEphemeral(
                         channel=channel_id,
                         user=user_id,
-                        text="⚠️ I was unable to generate a response. Please try again later.",
+                        text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
                     )
                 except SlackApiError:
-                    logger.exception("Error posting ephemeral error message")
+                    logger.exception(LOG_ERROR_POSTING_EPHEMERAL_ERROR_MESSAGE)
             return
 
         # Post the response
@@ -356,20 +365,20 @@ def process_ai_query_async(
                 try:
                     client.chat_postMessage(
                         channel=channel_id,
-                        text="⚠️ An error occurred while posting the response. Please try again later.",
+                        text=ERROR_POSTING_RESPONSE,
                         thread_ts=thread_ts or message_ts,
                     )
                 except SlackApiError:
-                    logger.exception("Error posting error message")
+                    logger.exception(LOG_ERROR_POSTING_ERROR_MESSAGE)
             elif user_id:
                 try:
                     client.chat_postEphemeral(
                         channel=channel_id,
                         user=user_id,
-                        text="⚠️ An error occurred while posting the response. Please try again later.",
+                        text=ERROR_POSTING_RESPONSE,
                     )
                 except SlackApiError:
-                    logger.exception("Error posting ephemeral error message")
+                    logger.exception(LOG_ERROR_POSTING_EPHEMERAL_ERROR_MESSAGE)
 
         # Remove 👀 reaction to show we are done
         if message_ts:
@@ -394,17 +403,17 @@ def process_ai_query_async(
             try:
                 client.chat_postMessage(
                     channel=channel_id,
-                    text="⚠️ An unexpected error occurred while processing your query. Please try again later.",
+                    text=ERROR_UNEXPECTED_PROCESSING,
                     thread_ts=thread_ts or message_ts,
                 )
             except SlackApiError:
-                logger.exception("Error posting error message")
+                logger.exception(LOG_ERROR_POSTING_ERROR_MESSAGE)
         elif user_id:
             try:
                 client.chat_postEphemeral(
                     channel=channel_id,
                     user=user_id,
-                    text="⚠️ An unexpected error occurred while processing your query. Please try again later.",
+                    text=ERROR_UNEXPECTED_PROCESSING,
                 )
             except SlackApiError:
                 logger.exception("Error posting ephemeral error message")
