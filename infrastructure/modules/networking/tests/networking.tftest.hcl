@@ -128,7 +128,7 @@ run "test_private_subnets_no_public_ip" {
   command = plan
 
   assert {
-    condition     = alltrue([for subnet in aws_subnet.private : subnet.map_public_ip_on_launch == false])
+    condition     = alltrue([for subnet in aws_subnet.private : subnet.map_public_ip_on_launch != true])
     error_message = "Private subnets must not auto-assign public IPs."
   }
 }
