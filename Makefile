@@ -111,9 +111,11 @@ security-scan-code-trivy:
 	@docker run \
 		--rm \
 		-v "$(PWD):/src" \
+		-v trivy-cache:/root/.cache/trivy \
 		-w /src \
-		aquasec/trivy fs \
-			--config trivy.yaml \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		fs \
+		--config trivy.yaml
 			.
 
 test: \
