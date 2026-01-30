@@ -1,3 +1,5 @@
+mock_provider "aws" {}
+
 variables {
   common_tags          = { Environment = "test", Project = "nest" }
   create_rds_proxy     = false
@@ -8,7 +10,7 @@ variables {
   db_subnet_ids        = ["subnet-12345678"]
   db_user              = "nest_user"
   environment          = "test"
-  kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+  kms_key_arn          = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name         = "nest"
   security_group_ids   = ["sg-12345678"]
 }

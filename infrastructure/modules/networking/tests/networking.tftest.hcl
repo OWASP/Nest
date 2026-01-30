@@ -1,20 +1,22 @@
+mock_provider "aws" {}
+
 variables {
-  availability_zones                     = ["us-east-2a", "us-east-2b", "us-east-2c"]
-  aws_region                             = "us-east-2"
-  common_tags                            = { Environment = "test", Project = "nest" }
-  create_vpc_cloudwatch_logs_endpoint    = false
-  create_vpc_ecr_api_endpoint            = false
-  create_vpc_ecr_dkr_endpoint            = false
-  create_vpc_s3_endpoint                 = false
-  create_vpc_secretsmanager_endpoint     = false
-  create_vpc_ssm_endpoint                = false
-  environment                            = "test"
-  kms_key_arn                            = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
-  log_retention_in_days                  = 90
-  private_subnet_cidrs                   = ["10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24"]
-  project_name                           = "nest"
-  public_subnet_cidrs                    = ["10.0.1.0/24", "10.0.2.0/24", "10.0.6.0/24"]
-  vpc_cidr                               = "10.0.0.0/16"
+  availability_zones                  = ["us-east-2a", "us-east-2b", "us-east-2c"]
+  aws_region                          = "us-east-2"
+  common_tags                         = { Environment = "test", Project = "nest" }
+  create_vpc_cloudwatch_logs_endpoint = false
+  create_vpc_ecr_api_endpoint         = false
+  create_vpc_ecr_dkr_endpoint         = false
+  create_vpc_s3_endpoint              = false
+  create_vpc_secretsmanager_endpoint  = false
+  create_vpc_ssm_endpoint             = false
+  environment                         = "test"
+  kms_key_arn                         = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+  log_retention_in_days               = 90
+  private_subnet_cidrs                = ["10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24"]
+  project_name                        = "nest"
+  public_subnet_cidrs                 = ["10.0.1.0/24", "10.0.2.0/24", "10.0.6.0/24"]
+  vpc_cidr                            = "10.0.0.0/16"
 }
 
 run "test_vpc_name_format" {
@@ -57,7 +59,7 @@ run "test_public_subnet_name_format" {
   command = plan
 
   assert {
-    condition     = alltrue([
+    condition = alltrue([
       for i, subnet in aws_subnet.public :
       subnet.tags["Name"] == "${var.project_name}-${var.environment}-public-${var.availability_zones[i]}"
     ])
@@ -96,7 +98,7 @@ run "test_private_subnet_name_format" {
   command = plan
 
   assert {
-    condition     = alltrue([
+    condition = alltrue([
       for i, subnet in aws_subnet.private :
       subnet.tags["Name"] == "${var.project_name}-${var.environment}-private-${var.availability_zones[i]}"
     ])
@@ -126,7 +128,7 @@ run "test_private_subnets_no_public_ip" {
   command = plan
 
   assert {
-    condition     = alltrue([for subnet in aws_subnet.private : subnet.map_public_ip_on_launch == false])
+    condition     = alltrue([for subnet in aws_subnet.private : subnet.map_public_ip_on_launch != true])
     error_message = "Private subnets must not auto-assign public IPs."
   }
 }

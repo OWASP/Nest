@@ -1,3 +1,5 @@
+mock_provider "aws" {}
+
 variables {
   bucket_name = "test-bucket"
   tags        = { Environment = "test", Project = "nest" }
