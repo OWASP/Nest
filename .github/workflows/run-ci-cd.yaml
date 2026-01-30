@@ -479,6 +479,27 @@ jobs:
       test-file: rest_test.py
       rest-url: http://localhost:9500/api/v0
 
+  run-infrastructure-tests:
+    name: Run Infrastructure tests
+    needs:
+      - run-security-scan
+      - scan-code
+      - scan-ci-dependencies
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        with:
+          terraform_version: 1.14.0
+
+      - name: Run Infrastructure tests
+        run: make test-infrastructure
+
   build-staging-images:
     name: Build Staging Images
     env:
@@ -492,6 +513,7 @@ jobs:
       - run-frontend-a11y-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
+      - run-infrastructure-tests
       - set-release-version
     permissions:
       contents: read
@@ -651,7 +673,6 @@ jobs:
   plan-staging-nest:
     name: Plan Nest Staging
     env:
-      FORCE_COLOR: 1
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
@@ -700,10 +721,10 @@ jobs:
           CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           ECS_USE_FARGATE_SPOT: true
-          ENVIRONMENT: "staging"
+          ENVIRONMENT: 'staging'
           FRONTEND_USE_FARGATE_SPOT: true
           LAMBDA_FUNCTION_NAME: ${{ secrets.ZAPPA_LAMBDA_FUNCTION_NAME }}
-          PROJECT_NAME: "nest"
+          PROJECT_NAME: 'nest'
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfvars <<-EOF
@@ -750,7 +771,6 @@ jobs:
   deploy-staging-nest:
     name: Deploy Nest Staging
     env:
-      FORCE_COLOR: 1
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
