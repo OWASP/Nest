@@ -10,8 +10,8 @@ from apps.owasp.models.entity_member import EntityMember
 class TestEntityMemberModel:
     """Test cases for EntityMember model."""
 
-    def test_str_with_member_login(self):
-        """Test string representation uses member login when available."""
+    def test_role_and_member_name_attributes(self):
+        """Test role and member_name attributes are set correctly."""
         entity_member = EntityMember(
             member_name="Test User",
             role=EntityMember.Role.LEADER,
@@ -21,8 +21,8 @@ class TestEntityMemberModel:
         assert entity_member.member_name == "Test User"
         assert entity_member.get_role_display() == "Leader"
 
-    def test_str_without_member_uses_name(self):
-        """Test string representation uses member_name when member is None."""
+    def test_member_role_display(self):
+        """Test get_role_display returns correct role label."""
         entity_member = EntityMember(
             member_name="John Doe",
             role=EntityMember.Role.MEMBER,

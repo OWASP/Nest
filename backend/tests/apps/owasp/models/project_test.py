@@ -90,8 +90,6 @@ class TestProjectModel:
         Some project description
         """
         mock_requests_get.return_value = mock_response
-
-        # Setup test data
         gh_repository_mock = Mock()
         gh_repository_mock.name = "new_repo"
         repository_mock = Repository()
@@ -149,7 +147,7 @@ class TestProjectProperties:
         project = Project()
         result = project.entity_leaders
 
-        assert len(result) == 5  # MAX_LEADERS_COUNT
+        assert len(result) == 5
 
     def test_health_score_with_metrics(self, mocker):
         """Test health_score returns score when metrics exist."""

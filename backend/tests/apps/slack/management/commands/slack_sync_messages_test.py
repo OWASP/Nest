@@ -260,6 +260,9 @@ class TestSyncUserMessages:
         rate_limit_error.response.__getitem__ = (
             lambda _self, key: "ratelimited" if key == "error" else None
         )
+        rate_limit_error.response.get.side_effect = (
+            lambda key, default=None: "ratelimited" if key == "error" else default
+        )
         rate_limit_error.response.headers = {"Retry-After": "1"}
         mock_client.search_messages.side_effect = [
             rate_limit_error,
@@ -296,6 +299,9 @@ class TestSyncUserMessages:
         rate_limit_error.response.__getitem__ = (
             lambda _self, key: "ratelimited" if key == "error" else None
         )
+        rate_limit_error.response.get.side_effect = (
+            lambda key, default=None: "ratelimited" if key == "error" else default
+        )
         rate_limit_error.response.headers = {"Retry-After": "1"}
 
         mock_client.search_messages.side_effect = rate_limit_error
@@ -321,7 +327,7 @@ class TestFetchReplies:
         mock_message.conversation.slack_channel_id = "C123"
         mock_message.latest_reply = None
         mock_message.slack_message_id = "123.456"
-        mock_message.url = "http://test.com"
+        mock_message.url = "https://test.com"
 
         command = Command()
         command.stdout = MagicMock()
@@ -345,7 +351,7 @@ class TestFetchReplies:
         mock_message.conversation.slack_channel_id = "C123"
         mock_message.latest_reply = None
         mock_message.slack_message_id = "123.456"
-        mock_message.url = "http://test.com"
+        mock_message.url = "https://test.com"
 
         command = Command()
         command.stdout = MagicMock()
@@ -369,7 +375,7 @@ class TestFetchReplies:
         mock_message.conversation.slack_channel_id = "C123"
         mock_message.latest_reply = None
         mock_message.slack_message_id = "123.456"
-        mock_message.url = "http://test.com"
+        mock_message.url = "https://test.com"
 
         command = Command()
         command.stdout = MagicMock()

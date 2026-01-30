@@ -25,7 +25,7 @@ class TestSnapshotQuery:
         """Test snapshot returns snapshot when found."""
         mock_snapshot = MagicMock(spec=Snapshot)
 
-        with patch("apps.owasp.models.snapshot.Snapshot.objects.get") as mock_get:
+        with patch("apps.owasp.api.internal.queries.snapshot.Snapshot.objects.get") as mock_get:
             mock_get.return_value = mock_snapshot
 
             result = self.query.__class__.__dict__["snapshot"](self.query, key="test-key")
@@ -38,7 +38,7 @@ class TestSnapshotQuery:
 
     def test_snapshot_not_exists(self):
         """Test snapshot returns None when not found."""
-        with patch("apps.owasp.models.snapshot.Snapshot.objects.get") as mock_get:
+        with patch("apps.owasp.api.internal.queries.snapshot.Snapshot.objects.get") as mock_get:
             mock_get.side_effect = Snapshot.DoesNotExist
 
             result = self.query.__class__.__dict__["snapshot"](self.query, key="nonexistent")
@@ -49,7 +49,9 @@ class TestSnapshotQuery:
         """Test snapshots returns list with positive limit."""
         mock_snapshots = [MagicMock(spec=Snapshot), MagicMock(spec=Snapshot)]
 
-        with patch("apps.owasp.models.snapshot.Snapshot.objects.filter") as mock_filter:
+        with patch(
+            "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
+        ) as mock_filter:
             mock_filter.return_value.order_by.return_value.__getitem__ = MagicMock(
                 return_value=mock_snapshots
             )
@@ -74,7 +76,9 @@ class TestSnapshotQuery:
         """Test snapshots clamps limit to MAX_LIMIT."""
         mock_snapshots = [MagicMock(spec=Snapshot)]
 
-        with patch("apps.owasp.models.snapshot.Snapshot.objects.filter") as mock_filter:
+        with patch(
+            "apps.owasp.api.internal.queries.snapshot.Snapshot.objects.filter"
+        ) as mock_filter:
             mock_filter.return_value.order_by.return_value.__getitem__ = MagicMock(
                 return_value=mock_snapshots
             )

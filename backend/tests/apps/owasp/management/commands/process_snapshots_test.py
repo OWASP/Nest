@@ -12,15 +12,11 @@ class TestProcessSnapshots:
     def test_process_snapshots_with_snapshots(self):
         """Test if pending snapshots are processed."""
         command = Command()
-
-        # Create mock snapshot
         mock_snapshot = mock.MagicMock()
         mock_snapshot.id = 1
         mock_snapshot.status = "pending"
         mock_snapshot.start_at = timezone.now()
         mock_snapshot.end_at = timezone.now()
-
-        # Create mock queryset
         mock_queryset = mock.MagicMock()
         mock_queryset.exists.return_value = True
         mock_queryset.__iter__.return_value = [mock_snapshot]

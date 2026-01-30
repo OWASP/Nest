@@ -14,6 +14,8 @@ from apps.common.index import (
     register,
 )
 
+TEST_IP_ADDRESS = "127.0.0.1"
+
 ENV = settings.ENVIRONMENT.lower()
 TOTAL_COUNT = 42
 
@@ -310,6 +312,6 @@ class TestIndexBase:
             mock_config_instance.headers = {}
             mock_config.return_value = mock_config_instance
 
-            IndexBase.get_client(ip_address="192.168.1.1")
+            IndexBase.get_client(ip_address=TEST_IP_ADDRESS)
 
-            assert mock_config_instance.headers["X-Forwarded-For"] == "192.168.1.1"
+            assert mock_config_instance.headers["X-Forwarded-For"] == TEST_IP_ADDRESS

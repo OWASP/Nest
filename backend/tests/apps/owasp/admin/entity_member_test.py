@@ -22,10 +22,13 @@ class TestEntityMemberAdmin:
         mock_queryset = MagicMock()
         mock_queryset.update.return_value = 3
 
-        self.admin.approve_members(mock_request, mock_queryset)
+        with patch.object(self.admin, "message_user") as mock_message_user:
+            self.admin.approve_members(mock_request, mock_queryset)
 
         mock_queryset.update.assert_called_once_with(is_active=True, is_reviewed=True)
-        mock_request.assert_not_called()
+        mock_message_user.assert_called_once()
+        call_args = mock_message_user.call_args
+        assert "3" in call_args[0][1]
 
     def test_entity_display_with_entity(self):
         """Test entity display method when entity exists."""
