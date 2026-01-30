@@ -1,12 +1,16 @@
 """Test Cases for Project Health Metrics GraphQL Queries."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
-from apps.owasp.api.internal.queries.project_health_metrics import ProjectHealthMetricsQuery
+from apps.owasp.api.internal.queries.project_health_metrics import (
+    MAX_LIMIT,
+    MAX_OFFSET,
+    ProjectHealthMetricsQuery,
+)
 
 
 class TestProjectHealthMetricsQuery:
@@ -110,3 +114,87 @@ class TestProjectHealthMetricsQuery:
         result = query.project_health_metrics_distinct_length()
         assert result == 42
         mock_get_latest_metrics.return_value.count.assert_called_once()
+
+
+class TestProjectHealthMetricsPagination:
+    """Test cases for pagination edge cases in ProjectHealthMetricsQuery."""
+
+    def test_project_health_metrics_negative_offset_returns_empty(self):
+        """Test that negative offset returns empty list."""
+        query = ProjectHealthMetricsQuery()
+        pagination = MagicMock()
+        pagination.offset = -1
+        pagination.limit = 10
+
+        result = query.project_health_metrics(pagination=pagination)
+        assert result == []
+
+    def test_project_health_metrics_zero_limit_returns_empty(self):
+        """Test that zero limit returns empty list."""
+        query = ProjectHealthMetricsQuery()
+        pagination = MagicMock()
+        pagination.offset = 0
+        pagination.limit = 0
+
+        result = query.project_health_metrics(pagination=pagination)
+        assert result == []
+
+    def test_project_health_metrics_negative_limit_returns_empty(self):
+        """Test that negative limit returns empty list."""
+        query = ProjectHealthMetricsQuery()
+        pagination = MagicMock()
+        pagination.offset = 0
+        pagination.limit = -5
+
+        result = query.project_health_metrics(pagination=pagination)
+        assert result == []
+
+    @patch(
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+    )
+    def test_project_health_metrics_offset_clamped_to_max(self, mock_get_latest_metrics):
+        """Test that offset is clamped to MAX_OFFSET."""
+        query = ProjectHealthMetricsQuery()
+        pagination = MagicMock()
+        pagination.offset = 50000
+        pagination.limit = None
+
+        mock_get_latest_metrics.return_value = []
+        query.project_health_metrics(pagination=pagination)
+
+        assert pagination.offset == MAX_OFFSET
+
+    @patch(
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+    )
+    def test_project_health_metrics_limit_clamped_to_max(self, mock_get_latest_metrics):
+        """Test that limit is clamped to MAX_LIMIT."""
+        query = ProjectHealthMetricsQuery()
+        pagination = MagicMock()
+        pagination.offset = 0
+        pagination.limit = 5000
+
+        mock_get_latest_metrics.return_value = []
+        query.project_health_metrics(pagination=pagination)
+
+        assert pagination.limit == MAX_LIMIT
+
+    @patch(
+        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
+    )
+    @patch("strawberry_django.filters.apply")
+    def test_project_health_metrics_distinct_length_with_filters(
+        self, mock_apply, mock_get_latest_metrics
+    ):
+        """Test distinct_length with filters applied."""
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 10
+        mock_get_latest_metrics.return_value = mock_queryset
+        mock_apply.return_value = mock_queryset
+
+        mock_filters = MagicMock()
+        query = ProjectHealthMetricsQuery()
+        result = query.project_health_metrics_distinct_length(filters=mock_filters)
+
+        assert result == 10
+        mock_apply.assert_called_once_with(mock_filters, mock_queryset)

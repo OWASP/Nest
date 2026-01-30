@@ -152,6 +152,7 @@ pymdownx
 pypoetry
 pyyaml
 quasis
+reindexing
 relativedelta
 repositorycontributor
 requirepass
@@ -184,6 +185,7 @@ xapp
 xdg
 xdist
 xoxb
+xoxp
 xsser
 xzf
 zapconfig
