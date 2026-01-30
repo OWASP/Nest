@@ -53,10 +53,141 @@ def generate_ai_reply_if_unanswered(message_id: int):
     except SlackApiError:
         pass
 
-    ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)
-    
-    if not ai_response_text:
-        # Remove eyes reaction and add shrugging reaction when no answer can be generated
+    # Post a thinking message to let users know we're processing
+    thinking_ts = None
+    try:
+        result = client.chat_postMessage(
+            channel=channel_id,
+            text="Thinking...",
+            thread_ts=message.slack_message_id,
+        )
+        thinking_ts = result.get("ts")
+    except SlackApiError:
+        logger.exception("Error posting thinking message")
+
+    try:
+        ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)
+        
+        # Validate response - if it's just "YES" or "NO", something went wrong
+        if ai_response_text:
+            response_str = str(ai_response_text).strip()
+            response_upper = response_str.upper()
+            if response_upper == "YES" or response_upper == "NO":
+                logger.error(
+                    "AI query returned Question Detector output instead of agent response",
+                    extra={
+                        "channel_id": channel_id,
+                        "message_id": message.slack_message_id,
+                        "response": response_str,
+                    },
+                )
+                ai_response_text = None
+        
+        if not ai_response_text:
+            # Remove eyes reaction and add shrugging reaction when no answer can be generated
+            try:
+                # Remove eyes reaction if it exists
+                client.reactions_remove(
+                    channel=channel_id,
+                    timestamp=message.slack_message_id,
+                    name="eyes",
+                )
+            except SlackApiError:
+                # Ignore if eyes reaction doesn't exist
+                pass
+            
+            try:
+                result = client.reactions_add(
+                    channel=channel_id,
+                    timestamp=message.slack_message_id,
+                    name="man-shrugging",
+                )
+                if not result.get("ok"):
+                    error = result.get("error")
+                    if error != "already_reacted":
+                        logger.warning(
+                            "Failed to add reaction: %s",
+                            error,
+                            extra={
+                                "channel_id": channel_id,
+                                "message_id": message.slack_message_id,
+                            },
+                        )
+            except SlackApiError:
+                logger.exception("Error adding reaction to message")
+            
+            # Post error message to user
+            try:
+                client.chat_postMessage(
+                    channel=channel_id,
+                    text="⚠️ I was unable to generate a response. Please try again later.",
+                    thread_ts=message.slack_message_id,
+                )
+            except SlackApiError:
+                logger.exception("Error posting error message")
+            return
+
+        # Final validation before posting - double check we don't have "YES" or "NO"
+        if ai_response_text:
+            response_str = str(ai_response_text).strip()
+            if response_str.upper() in ("YES", "NO"):
+                logger.error(
+                    "Attempted to post Question Detector output, blocking",
+                    extra={"channel_id": channel_id, "message_id": message.slack_message_id},
+                )
+                ai_response_text = None
+
+        # Post the response
+        if not ai_response_text:
+            # Post error message instead
+            try:
+                client.chat_postMessage(
+                    channel=channel_id,
+                    text="⚠️ I was unable to generate a response. Please try again later.",
+                    thread_ts=message.slack_message_id,
+                )
+            except SlackApiError:
+                logger.exception("Error posting error message")
+            return
+
+        try:
+            # One more validation check right before formatting
+            if ai_response_text:
+                response_str = str(ai_response_text).strip()
+                if response_str.upper() in ("YES", "NO"):
+                    logger.error(
+                        "Blocking Question Detector output before formatting",
+                        extra={"channel_id": channel_id, "message_id": message.slack_message_id},
+                    )
+                    raise ValueError("Invalid response: Question Detector output detected")
+            
+            blocks = format_blocks(ai_response_text)
+            result = client.chat_postMessage(
+                channel=channel_id,
+                blocks=blocks,
+                text=ai_response_text,
+                thread_ts=message.slack_message_id,
+            )
+        except (ValueError, SlackApiError) as e:
+            logger.exception(
+                "Error posting AI response",
+                extra={
+                    "channel_id": channel_id,
+                    "message_id": message.slack_message_id,
+                    "error": str(e),
+                },
+            )
+            # Post error message to user
+            try:
+                client.chat_postMessage(
+                    channel=channel_id,
+                    text="⚠️ An error occurred while posting the response. Please try again later.",
+                    thread_ts=message.slack_message_id,
+                )
+            except SlackApiError:
+                logger.exception("Error posting error message")
+
+        # Remove 👀 reaction to show we are done
         try:
             # Remove eyes reaction if it exists
             client.reactions_remove(
@@ -67,57 +198,44 @@ def generate_ai_reply_if_unanswered(message_id: int):
         except SlackApiError:
             # Ignore if eyes reaction doesn't exist
             pass
-        
+
+    except Exception as e:
+        logger.exception(
+            "Unexpected error processing AI query",
+            extra={"channel_id": channel_id, "message_id": message.slack_message_id, "error": str(e)},
+        )
+        # Post error message to user
         try:
-            result = client.reactions_add(
+            client.chat_postMessage(
+                channel=channel_id,
+                text="⚠️ An unexpected error occurred while processing your query. Please try again later.",
+                thread_ts=message.slack_message_id,
+            )
+        except SlackApiError:
+            logger.exception("Error posting error message")
+        
+        # Remove eyes reaction
+        try:
+            client.reactions_remove(
                 channel=channel_id,
                 timestamp=message.slack_message_id,
-                name="man-shrugging",
+                name="eyes",
             )
-            if result.get("ok"):
-                logger.info("Successfully added 🤷 reaction to message")
-            else:
-                error = result.get("error")
-                if error != "already_reacted":
-                    logger.warning(
-                        "Failed to add reaction: %s",
-                        error,
-                        extra={
-                            "channel_id": channel_id,
-                            "message_id": message.slack_message_id,
-                        },
-                    )
         except SlackApiError:
-            logger.exception("Error adding reaction to message")
-        return
-
-    client.chat_postMessage(
-        channel=channel_id,
-        blocks=format_blocks(ai_response_text),
-        text=ai_response_text,
-        thread_ts=message.slack_message_id,
-    )
-
-    # Remove 👀 reaction and add ✅ reaction to show we are done
-    try:
-        # Remove eyes reaction if it exists
-        client.reactions_remove(
-            channel=channel_id,
-            timestamp=message.slack_message_id,
-            name="eyes",
-        )
-    except SlackApiError:
-        # Ignore if eyes reaction doesn't exist
-        pass
-    
-    try:
-        client.reactions_add(
-            channel=channel_id,
-            timestamp=message.slack_message_id,
-            name="white_check_mark",
-        )
-    except SlackApiError:
-        pass
+            pass
+    finally:
+        # Always remove the thinking message if it was posted
+        if thinking_ts:
+            try:
+                client.chat_delete(
+                    channel=channel_id,
+                    ts=thinking_ts,
+                )
+            except SlackApiError as e:
+                logger.exception(
+                    "Error deleting thinking message",
+                    extra={"channel_id": channel_id, "thinking_ts": thinking_ts, "error": str(e)},
+                )
 
 
 @job("ai")
@@ -136,70 +254,181 @@ def process_ai_query_async(
 
     client = SlackConfig.app.client
 
-    ai_response_text = process_ai_query(
-        query=query, channel_id=channel_id, is_app_mention=is_app_mention
-    )
-
-    if not ai_response_text:
-        # Remove eyes reaction and add shrugging reaction when no answer can be generated
+    # Post a thinking message to let users know we're processing
+    thinking_ts = None
+    if message_ts:
         try:
-            # Remove eyes reaction if it exists
-            client.reactions_remove(
+            result = client.chat_postMessage(
                 channel=channel_id,
-                timestamp=message_ts,
-                name="eyes",
+                text="Thinking...",
+                thread_ts=thread_ts or message_ts,
             )
+            thinking_ts = result.get("ts")
         except SlackApiError:
-            # Ignore if eyes reaction doesn't exist
-            pass
+            logger.exception("Error posting thinking message")
+
+    try:
+        ai_response_text = process_ai_query(
+            query=query, channel_id=channel_id, is_app_mention=is_app_mention
+        )
         
-        try:
-            client.reactions_add(
-                channel=channel_id,
-                timestamp=message_ts,
-                name="man-shrugging",
-            )
-        except SlackApiError:
-            pass
+        # Validate response - if it's just "YES" or "NO", something went wrong
+        if ai_response_text:
+            response_str = str(ai_response_text).strip()
+            if response_str.upper() in ("YES", "NO"):
+                logger.error(
+                    "AI query returned Question Detector output instead of agent response",
+                    extra={"channel_id": channel_id, "message_ts": message_ts},
+                )
+                ai_response_text = None
 
-        # If it's a slash command, we might want to send an ephemeral error
-        if not is_app_mention and user_id:
+        if not ai_response_text:
+            # Remove eyes reaction and add shrugging reaction when no answer can be generated
+            if message_ts:
+                try:
+                    # Remove eyes reaction if it exists
+                    client.reactions_remove(
+                        channel=channel_id,
+                        timestamp=message_ts,
+                        name="eyes",
+                    )
+                except SlackApiError:
+                    # Ignore if eyes reaction doesn't exist
+                    pass
+                
+                try:
+                    client.reactions_add(
+                        channel=channel_id,
+                        timestamp=message_ts,
+                        name="man-shrugging",
+                    )
+                except SlackApiError:
+                    pass
+
+            # Post error message
+            if is_app_mention:
+                # For app mentions, post in thread
+                try:
+                    client.chat_postMessage(
+                        channel=channel_id,
+                        text="⚠️ I was unable to generate a response. Please try again later.",
+                        thread_ts=thread_ts or message_ts,
+                    )
+                except SlackApiError:
+                    logger.exception("Error posting error message")
+            elif user_id:
+                # For slash commands, send ephemeral
+                try:
+                    client.chat_postEphemeral(
+                        channel=channel_id,
+                        user=user_id,
+                        text="⚠️ I was unable to generate a response. Please try again later.",
+                    )
+                except SlackApiError:
+                    logger.exception("Error posting ephemeral error message")
+            return
+
+        # Post the response
+        try:
+            blocks = format_blocks(ai_response_text)
+            logger.debug(
+                "Formatted blocks for posting",
+                extra={
+                    "channel_id": channel_id,
+                    "message_ts": message_ts,
+                    "blocks_count": len(blocks),
+                    "blocks": blocks,
+                },
+            )
+            result = client.chat_postMessage(
+                channel=channel_id,
+                blocks=blocks,
+                text=ai_response_text,
+                thread_ts=thread_ts or message_ts,
+            )
+        except SlackApiError as e:
+            logger.exception(
+                "Error posting AI response",
+                extra={"channel_id": channel_id, "message_ts": message_ts, "error": str(e)},
+            )
+            # Post error message to user
+            if is_app_mention:
+                try:
+                    client.chat_postMessage(
+                        channel=channel_id,
+                        text="⚠️ An error occurred while posting the response. Please try again later.",
+                        thread_ts=thread_ts or message_ts,
+                    )
+                except SlackApiError:
+                    logger.exception("Error posting error message")
+            elif user_id:
+                try:
+                    client.chat_postEphemeral(
+                        channel=channel_id,
+                        user=user_id,
+                        text="⚠️ An error occurred while posting the response. Please try again later.",
+                    )
+                except SlackApiError:
+                    logger.exception("Error posting ephemeral error message")
+
+        # Remove 👀 reaction to show we are done
+        if message_ts:
+            try:
+                # Remove eyes reaction if it exists
+                client.reactions_remove(
+                    channel=channel_id,
+                    timestamp=message_ts,
+                    name="eyes",
+                )
+            except SlackApiError:
+                # Ignore if eyes reaction doesn't exist
+                pass
+
+    except Exception as e:
+        logger.exception(
+            "Unexpected error processing AI query",
+            extra={"channel_id": channel_id, "message_ts": message_ts, "error": str(e)},
+        )
+        # Post error message to user
+        if is_app_mention:
+            try:
+                client.chat_postMessage(
+                    channel=channel_id,
+                    text="⚠️ An unexpected error occurred while processing your query. Please try again later.",
+                    thread_ts=thread_ts or message_ts,
+                )
+            except SlackApiError:
+                logger.exception("Error posting error message")
+        elif user_id:
             try:
                 client.chat_postEphemeral(
                     channel=channel_id,
                     user=user_id,
-                    text="⚠️ I was unable to generate a response. Please try again later.",
+                    text="⚠️ An unexpected error occurred while processing your query. Please try again later.",
+                )
+            except SlackApiError:
+                logger.exception("Error posting ephemeral error message")
+        
+        # Remove eyes reaction
+        if message_ts:
+            try:
+                client.reactions_remove(
+                    channel=channel_id,
+                    timestamp=message_ts,
+                    name="eyes",
                 )
             except SlackApiError:
                 pass
-        return
-
-    # Post the response
-    client.chat_postMessage(
-        channel=channel_id,
-        blocks=format_blocks(ai_response_text),
-        text=ai_response_text,
-        thread_ts=thread_ts or message_ts,
-    )
-
-    # Remove 👀 reaction and add ✅ reaction to show we are done
-    if message_ts:
-        try:
-            # Remove eyes reaction if it exists
-            client.reactions_remove(
-                channel=channel_id,
-                timestamp=message_ts,
-                name="eyes",
-            )
-        except SlackApiError:
-            # Ignore if eyes reaction doesn't exist
-            pass
-        
-        try:
-            client.reactions_add(
-                channel=channel_id,
-                timestamp=message_ts,
-                name="white_check_mark",
-            )
-        except SlackApiError:
-            pass
+    finally:
+        # Always remove the thinking message if it was posted
+        if thinking_ts:
+            try:
+                client.chat_delete(
+                    channel=channel_id,
+                    ts=thinking_ts,
+                )
+            except SlackApiError as e:
+                logger.exception(
+                    "Error deleting thinking message",
+                    extra={"channel_id": channel_id, "thinking_ts": thinking_ts, "error": str(e)},
+                )

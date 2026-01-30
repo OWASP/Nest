@@ -118,6 +118,10 @@ class QuestionDetector:
                 return True
             if "NO" in result:
                 return False
+            logger.warning(
+                "Question Detector: Unexpected result format",
+                extra={"result": result},
+            )
             return None
         except Exception:
             logger.exception("Agent-based detection failed")

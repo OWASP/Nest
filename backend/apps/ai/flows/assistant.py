@@ -114,16 +114,29 @@ def process_query(  # noqa: PLR0911
         
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
-        intent = router_result["intent"]
-        confidence = router_result["confidence"]
+        intent = router_result.get("intent")
+        confidence = router_result.get("confidence", 0.5)
+
+        # Validate router result - ensure we got a proper intent
+        if not intent or intent not in Intent.values():
+            logger.error(
+                "Router returned invalid intent",
+                extra={
+                    "intent": intent,
+                    "router_result": router_result,
+                    "query": query[:200],
+                },
+            )
+            # Fallback to RAG
+            intent = Intent.RAG.value
+            confidence = 0.3
 
         logger.info(
             "Query routed",
             extra={
                 "intent": intent,
                 "confidence": confidence,
-                "query": query,
-                "channel_id": channel_id,
+                "query": query[:200],
             },
         )
 
@@ -455,10 +468,33 @@ def process_query(  # noqa: PLR0911
         agent = agent_factory()
 
         # Step 6: Execute task with agent
-        return execute_task(agent, query)
+        result = execute_task(agent, query)
+        result_str = str(result).strip() if result else ""
+        
+        # Validate result - if it's just "YES" or "NO", something went wrong
+        if result_str and result_str.upper() in ("YES", "NO"):
+            logger.error(
+                "Agent returned Question Detector output instead of proper response",
+                extra={
+                    "intent": intent,
+                    "result": result_str,
+                    "result_length": len(result_str),
+                    "query": query[:200],
+                },
+            )
+            # Return a fallback response instead
+            return get_fallback_response()
+        
+        return result_str if result_str else result
 
-    except Exception:
-        logger.exception("Failed to process query: %s", query)
+    except Exception as e:
+        logger.exception(
+            "Failed to process query",
+            extra={
+                "query": query[:200],
+                "error": str(e),
+            },
+        )
         return get_fallback_response()
 
 

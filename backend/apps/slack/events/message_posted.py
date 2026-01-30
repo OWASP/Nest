@@ -89,7 +89,16 @@ class MessagePosted(EventBase):
             logger.warning("Conversation not found or assistant not enabled.")
             return
 
-        if not self.question_detector.is_owasp_question(text):
+        is_owasp = self.question_detector.is_owasp_question(text)
+        logger.info(
+            "Question detector result",
+            extra={
+                "channel_id": channel_id,
+                "is_owasp": is_owasp,
+                "text": text[:200],
+            },
+        )
+        if not is_owasp:
             return
 
         try:
@@ -103,6 +112,14 @@ class MessagePosted(EventBase):
             data=event, conversation=conversation, author=author, save=True
         )
 
+        logger.info(
+            "Enqueueing AI reply generation",
+            extra={
+                "message_id": message.id,
+                "channel_id": channel_id,
+                "delay_minutes": QUEUE_RESPONSE_TIME_MINUTES,
+            },
+        )
         django_rq.get_queue("ai").enqueue_in(
             timedelta(minutes=QUEUE_RESPONSE_TIME_MINUTES),
             generate_ai_reply_if_unanswered,
