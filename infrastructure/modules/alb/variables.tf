@@ -29,6 +29,11 @@ variable "frontend_port" {
   description = "The port for the frontend target group."
   type        = number
   default     = 3000
+
+  validation {
+    condition     = var.frontend_port > 0 && var.frontend_port < 65536
+    error_message = "Port must be between 1 and 65535."
+  }
 }
 
 variable "lambda_function_name" {
