@@ -25,15 +25,6 @@ module "fixtures_bucket" {
   })
 }
 
-module "zappa_bucket" {
-  source = "./modules/s3-bucket"
-
-  bucket_name = "${var.zappa_bucket_name}-${random_id.suffix.hex}"
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-zappa-deployments"
-  })
-}
-
 resource "aws_iam_policy" "fixtures_read_only" {
   name        = "${var.project_name}-${var.environment}-fixtures-read-only"
   description = "Allows read-only access to the fixtures S3 bucket"
@@ -45,5 +36,14 @@ resource "aws_iam_policy" "fixtures_read_only" {
       Action   = ["s3:GetObject"]
       Resource = ["arn:aws:s3:::${var.fixtures_bucket_name}-${random_id.suffix.hex}/*"]
     }]
+  })
+}
+
+module "zappa_bucket" {
+  source = "./modules/s3-bucket"
+
+  bucket_name = "${var.zappa_bucket_name}-${random_id.suffix.hex}"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-zappa-deployments"
   })
 }
