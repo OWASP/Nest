@@ -11,19 +11,19 @@ variable "common_tags" {
 variable "create_cloudwatch_logs" {
   description = "Whether to create CloudWatch Logs VPC endpoint."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_ecr_api" {
   description = "Whether to create ECR API VPC endpoint."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_ecr_dkr" {
   description = "Whether to create ECR DKR VPC endpoint."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_s3" {
@@ -35,13 +35,13 @@ variable "create_s3" {
 variable "create_secretsmanager" {
   description = "Whether to create Secrets Manager VPC endpoint."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_ssm" {
   description = "Whether to create SSM VPC endpoint."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "environment" {
@@ -72,6 +72,11 @@ variable "public_route_table_id" {
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC."
   type        = string
+
+  validation {
+    condition     = can(cidrhost(var.vpc_cidr, 0))
+    error_message = "The vpc_cidr must be a valid CIDR block."
+  }
 }
 
 variable "vpc_id" {

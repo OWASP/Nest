@@ -69,6 +69,19 @@ variable "log_retention_in_days" {
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets."
   type        = list(string)
+
+  validation {
+    condition     = length(var.private_subnet_cidrs) >= 1
+    error_message = "At least 1 private subnet CIDR is required."
+  }
+  validation {
+    condition     = alltrue([for cidr in var.private_subnet_cidrs : can(cidrhost(cidr, 0))])
+    error_message = "All private subnet CIDRs must be valid CIDR blocks."
+  }
+  validation {
+    condition     = length(var.private_subnet_cidrs) == length(var.availability_zones)
+    error_message = "Number of private subnet CIDRs must match number of availability zones."
+  }
 }
 
 variable "project_name" {
@@ -79,6 +92,19 @@ variable "project_name" {
 variable "public_subnet_cidrs" {
   description = "A list of CIDR blocks for the public subnets."
   type        = list(string)
+
+  validation {
+    condition     = length(var.public_subnet_cidrs) >= 1
+    error_message = "At least 1 public subnet CIDR is required."
+  }
+  validation {
+    condition     = alltrue([for cidr in var.public_subnet_cidrs : can(cidrhost(cidr, 0))])
+    error_message = "All public subnet CIDRs must be valid CIDR blocks."
+  }
+  validation {
+    condition     = length(var.public_subnet_cidrs) == length(var.availability_zones)
+    error_message = "Number of public subnet CIDRs must match number of availability zones."
+  }
 }
 
 variable "vpc_cidr" {
