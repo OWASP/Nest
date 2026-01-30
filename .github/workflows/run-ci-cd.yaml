@@ -513,6 +513,7 @@ jobs:
       - run-frontend-a11y-tests
       - run-frontend-e2e-tests
       - run-frontend-unit-tests
+      - run-infrastructure-tests
       - set-release-version
     permissions:
       contents: read
@@ -672,7 +673,6 @@ jobs:
   plan-staging-nest:
     name: Plan Nest Staging
     env:
-      FORCE_COLOR: 1
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
@@ -771,7 +771,6 @@ jobs:
   deploy-staging-nest:
     name: Deploy Nest Staging
     env:
-      FORCE_COLOR: 1
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
