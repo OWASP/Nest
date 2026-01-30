@@ -8,33 +8,6 @@ terraform {
   }
 }
 
-data "aws_iam_policy_document" "this" {
-  policy_id = "ForceHTTPS"
-
-  statement {
-    sid    = "HTTPSOnly"
-    effect = "Deny"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-
-    actions = ["s3:*"]
-
-    resources = [
-      aws_s3_bucket.this.arn,
-      "${aws_s3_bucket.this.arn}/*",
-    ]
-
-    condition {
-      test     = "Bool"
-      variable = "aws:SecureTransport"
-      values   = ["false"]
-    }
-  }
-}
-
 resource "aws_s3_bucket" "this" { # NOSONAR
   bucket = var.bucket_name
   tags   = var.tags
@@ -46,7 +19,25 @@ resource "aws_s3_bucket" "this" { # NOSONAR
 
 resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.id
-  policy = data.aws_iam_policy_document.this.json
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "ForceHTTPS"
+    Statement = [{
+      Sid       = "HTTPSOnly"
+      Effect    = "Deny"
+      Principal = { AWS = "*" }
+      Action    = "s3:*"
+      Resource = [
+        aws_s3_bucket.this.arn,
+        "${aws_s3_bucket.this.arn}/*"
+      ]
+      Condition = {
+        Bool = {
+          "aws:SecureTransport" = "false"
+        }
+      }
+    }]
+  })
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
