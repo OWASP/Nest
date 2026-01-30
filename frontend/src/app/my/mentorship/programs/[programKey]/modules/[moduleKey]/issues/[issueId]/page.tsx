@@ -27,18 +27,20 @@ const ModuleIssueDetailsPage = () => {
   const formatDeadline = (deadline: string | null) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
 
-    const deadlineDate = new Date(deadline)
-    const today = new Date()
+    const now = new Date()
 
-    const deadlineUTC = new Date(
+    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+
+    const deadlineDate = new Date(deadline)
+
+    const deadlineUTC = Date.UTC(
       deadlineDate.getUTCFullYear(),
       deadlineDate.getUTCMonth(),
       deadlineDate.getUTCDate()
     )
-    const todayUTC = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
 
-    const isOverdue = deadlineUTC < todayUTC
-    const daysLeft = Math.ceil((deadlineUTC.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24))
+    const daysLeft = Math.ceil((deadlineUTC - todayUTC) / (1000 * 60 * 60 * 24))
+    const isOverdue = daysLeft < 0
 
     let statusText: string
     if (isOverdue) {
