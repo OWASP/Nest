@@ -141,3 +141,18 @@ export const GET_MODULE_ISSUES = gql`
     }
   }
 `
+
+export const UPDATE_MODULE_POSITIONS = gql`
+  mutation UpdateModulePositions($programKey: String!, $modulePositions: [ModulePositionInput!]!) {
+    updateModulePositions(programKey: $programKey, modulePositions: $modulePositions) {
+      success
+      message
+      updatedModules {
+        id
+        key
+        name
+        position
+      }
+    }
+  }
+`
