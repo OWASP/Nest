@@ -27,6 +27,19 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
   }
 }
 
+
+# TODO: disallow tag mutability
+# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
+resource "aws_ecr_repository" "main" {
+  image_tag_mutability = "MUTABLE"
+  name                 = "${var.project_name}-${var.environment}-backend"
+  tags                 = var.common_tags
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
 resource "aws_ecr_lifecycle_policy" "main" {
   repository = aws_ecr_repository.main.name
 
@@ -47,18 +60,6 @@ resource "aws_ecr_lifecycle_policy" "main" {
       }
     ]
   })
-}
-
-# TODO: disallow tag mutability
-# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
-resource "aws_ecr_repository" "main" {
-  image_tag_mutability = "MUTABLE"
-  name                 = "${var.project_name}-${var.environment}-backend"
-  tags                 = var.common_tags
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
 }
 
 resource "aws_iam_role" "ecs_tasks_execution_role" {
