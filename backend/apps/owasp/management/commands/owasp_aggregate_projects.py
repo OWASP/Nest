@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
+from apps.github.models.release import Release
 from apps.owasp.models.project import Project
 
 
@@ -111,6 +112,14 @@ class Command(BaseCommand):
             ).exists()
 
             projects.append(project)
+
+            project.releases.set(
+                Release.objects.filter(
+                    is_draft=False,
+                    published_at__isnull=False,
+                    repository__in=project.repositories.all(),
+                )
+            )
 
         # Bulk save data.
         Project.bulk_save(projects)
