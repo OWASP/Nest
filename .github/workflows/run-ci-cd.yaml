@@ -379,7 +379,7 @@ jobs:
             -e NEXTAUTH_SECRET=secret \
             -e NEXTAUTH_URL=http://localhost:3000 \
             owasp/nest:test-frontend-e2e-latest npx playwright test
-    timeout-minutes: 25
+    timeout-minutes: 20
 
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests

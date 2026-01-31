@@ -31,32 +31,30 @@ test.describe.serial('Committees Page', () => {
     await expect(page.getByRole('button', { name: 'Learn more about Committee' })).toBeVisible()
   })
 
+  test('handles page change correctly', async () => {
+    const nextPageButton = page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
+    await nextPageButton.click()
+    await expect(page).toHaveURL(/page=2/)
+  })
+
+  test('breadcrumb renders correct segments on /committees', async () => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Committees'])
+  })
+  test('opens window on View Details button click', async () => {
+    const contributeButton = page.getByRole('button', { name: 'Learn more about Committee' })
+    await contributeButton.waitFor({ state: 'visible' })
+    await contributeButton.click()
+    await expect(page).toHaveURL('/committees/committee_1')
+  })
   test('displays "No committees found" when there are no committees', async () => {
+    await page.goto('/committees')
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
         body: JSON.stringify({ hits: [], nbPages: 0 }),
       })
     })
-    await page.goto('/committees')
     await expect(page.getByText('No committees found')).toBeVisible()
-  })
-
-  test('handles page change correctly', async () => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
-    await nextPageButton.waitFor({ state: 'visible' })
-    await nextPageButton.click()
-    await expect(page).toHaveURL(/page=2/)
-  })
-
-  test('opens window on View Details button click', async () => {
-    const contributeButton = await page.getByRole('button', { name: 'Learn more about Committee' })
-    await contributeButton.waitFor({ state: 'visible' })
-    await contributeButton.click()
-    await expect(page).toHaveURL('/committees/committee_1')
-  })
-
-  test('breadcrumb renders correct segments on /committees', async () => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Committees'])
   })
 })

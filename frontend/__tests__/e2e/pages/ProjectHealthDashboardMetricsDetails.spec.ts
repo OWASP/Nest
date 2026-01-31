@@ -14,12 +14,6 @@ test.describe.serial('Project Health Metrics Details Page', () => {
   test.afterAll(async () => {
     await context.close()
   })
-  test('renders 404 when user is not OWASP staff', async () => {
-    await mockDashboardCookies(page, mockProjectsDashboardMetricsDetailsData, false)
-    await page.goto('/projects/dashboard/metrics/test-project', { timeout: 25000 })
-    await expect(page.getByText('404')).toBeVisible()
-    await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
-  })
   test('renders project health metrics details', async () => {
     await mockDashboardCookies(page, mockProjectsDashboardMetricsDetailsData, true)
     await page.goto('/projects/dashboard/metrics/nest', { timeout: 25000 })
@@ -40,5 +34,11 @@ test.describe.serial('Project Health Metrics Details Page', () => {
     for (const header of headers) {
       await expect(page.getByText(header, { exact: true })).toBeVisible()
     }
+  })
+  test('renders 404 when user is not OWASP staff', async () => {
+    await mockDashboardCookies(page, mockProjectsDashboardMetricsDetailsData, false)
+    await page.goto('/projects/dashboard/metrics/test-project', { timeout: 25000 })
+    await expect(page.getByText('404')).toBeVisible()
+    await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
   })
 })

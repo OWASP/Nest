@@ -46,7 +46,7 @@ test.describe.serial('Committee Details Page', () => {
     await expect(page.getByText('Josh Grossman')).toBeVisible()
 
     await expect(page.getByRole('img', { name: "Harold Blankenship's avatar" })).toBeVisible()
-    await expect(page.getByText('Harold Blankenship')).toBeVisible()
+    await expect(page.getByText('Harold Blankenship', { exact: true }).first()).toBeVisible()
 
     await expect(page.getByRole('img', { name: "Andrew van der Stock's avatar" })).toBeVisible()
     await expect(page.getByText('Andrew van der Stock')).toBeVisible()

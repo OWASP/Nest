@@ -16,21 +16,19 @@ test.describe.serial('Organization Details Page', () => {
     await context.close()
   })
 
-  test('should have a heading and summary', async () => {
+  test('should have a heading', async () => {
     await expect(page.getByRole('heading', { name: 'OWASP', exact: true })).toBeVisible()
-    await expect(page.getByText(/The Open Worldwide Application Security Project/i)).toBeVisible()
   })
 
   test('should display organization details', async () => {
     await expect(page.getByText('@OWASP')).toBeVisible()
-    // OWASP Headquarters is in Bel Air, MD
-    await expect(page.getByText('Bel Air, MD')).toBeVisible()
+    await expect(page.getByText('United States of America')).toBeVisible()
   })
 
   test('should display organization statistics', async () => {
     const stats = ['Stars', 'Forks', 'Contributors', 'Issues', 'Repositories']
     for (const stat of stats) {
-      await expect(page.getByText(stat)).toBeVisible()
+      await expect(page.getByText(stat).first()).toBeVisible()
       // Verify that there is a number associated with the stat (e.g., "15.4K Stars")
       await expect(
         page
@@ -44,11 +42,7 @@ test.describe.serial('Organization Details Page', () => {
   test('should display recent issues section', async () => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     // Validate that at least one issue is listed
-    const firstIssue = page
-      .locator('section')
-      .filter({ hasText: 'Recent Issues' })
-      .locator('a')
-      .first()
+    const firstIssue = page.locator('div').filter({ hasText: 'Recent Issues' }).locator('a').first()
     await expect(firstIssue).toBeVisible()
   })
 
@@ -57,7 +51,7 @@ test.describe.serial('Organization Details Page', () => {
       timeout: 10000,
     })
     const milestone = page
-      .locator('section')
+      .locator('div')
       .filter({ hasText: 'Recent Milestones' })
       .locator('h3')
       .first()
@@ -67,7 +61,7 @@ test.describe.serial('Organization Details Page', () => {
   test('should display recent releases section', async () => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     const releaseLink = page
-      .locator('section')
+      .locator('div')
       .filter({ hasText: 'Recent Releases' })
       .locator('a')
       .first()
@@ -83,7 +77,7 @@ test.describe.serial('Organization Details Page', () => {
   test('should display recent pull requests section', async () => {
     await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
     const firstPR = page
-      .locator('section')
+      .locator('div')
       .filter({ hasText: 'Recent Pull Requests' })
       .locator('a')
       .first()

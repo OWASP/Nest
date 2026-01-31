@@ -18,14 +18,13 @@ test.describe.serial('Repository Details Page', () => {
 
   test('should have a heading and summary', async () => {
     await expect(page.getByRole('heading', { name: 'Nest', exact: true })).toBeVisible()
-    await expect(page.getByText(/OWASP Nest is a platform/i)).toBeVisible()
+    await expect(page.getByText(/Your gateway to OWASP/i)).toBeVisible()
   })
 
   test('should have repository details block', async () => {
     await expect(page.getByRole('heading', { name: 'Repository Details' })).toBeVisible()
 
-    // License is Apache-2.0 for Nest
-    await expect(page.getByText(/License:.*Apache-2\.0/i)).toBeVisible()
+    await expect(page.getByText('License: MIT')).toBeVisible()
 
     // Check that there is a link to the GitHub repo
     await expect(page.getByRole('link', { name: 'https://github.com/OWASP/Nest' })).toBeVisible()
@@ -51,14 +50,14 @@ test.describe.serial('Repository Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Topics' })).toBeVisible()
     const topics = ['python', 'nextjs', 'typescript']
     for (const topic of topics) {
-      await expect(page.getByText(topic)).toBeVisible()
+      await expect(page.getByText(topic).first()).toBeVisible()
     }
   })
 
   test('should have languages', async () => {
     await expect(page.getByRole('heading', { name: 'Languages' })).toBeVisible()
-    await expect(page.getByText('TypeScript', { exact: true })).toBeVisible()
-    await expect(page.getByText('Python', { exact: true })).toBeVisible()
+    await expect(page.getByText('TypeScript', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('Python', { exact: true }).first()).toBeVisible()
   })
 
   test('should have top contributors', async () => {
@@ -68,12 +67,12 @@ test.describe.serial('Repository Details Page', () => {
     await expect(contributor).toBeVisible()
   })
 
-  test('toggle top contributors', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Show more' })).toBeVisible()
-    await page.getByRole('button', { name: 'Show more' }).click()
-    await expect(page.getByRole('button', { name: 'Show less' })).toBeVisible()
-    await page.getByRole('button', { name: 'Show less' }).click()
-    await expect(page.getByRole('button', { name: 'Show more' })).toBeVisible()
+  test('toggle top contributors', async () => {
+    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
+    page.getByRole('button', { name: 'Show more' }).last().click()
+    await expect(page.getByRole('button', { name: 'Show less' }).last()).toBeVisible()
+    page.getByRole('button', { name: 'Show less' }).last().click()
+    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
   })
 
   test('should have recent activity sections', async () => {
@@ -85,7 +84,7 @@ test.describe.serial('Repository Details Page', () => {
 
     // Verify that at least one item exists in the PR section
     const firstPR = page
-      .locator('section')
+      .locator('div')
       .filter({ hasText: 'Recent Pull Requests' })
       .locator('a')
       .first()

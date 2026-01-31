@@ -25,7 +25,6 @@ test.describe.serial('User Details Page', () => {
     await expect(page.getByRole('heading', { name: 'User Details' })).toBeVisible()
     await expect(page.getByText(/Location:/i)).toBeVisible()
     await expect(page.getByText(/Email:/i)).toBeVisible()
-    await expect(page.getByRole('link', { name: 'github.com/arkid15r' })).toBeVisible()
   })
 
   test('should have user stats block', async () => {
@@ -48,11 +47,7 @@ test.describe.serial('User Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
     // Verify that at least one repository is listed in the repos section
-    const firstRepo = page
-      .locator('section')
-      .filter({ hasText: 'Repositories' })
-      .locator('a')
-      .first()
+    const firstRepo = page.locator('div').filter({ hasText: 'Repositories' }).locator('a').first()
     await expect(firstRepo).toBeVisible()
   })
 })

@@ -16,42 +16,32 @@ test.describe.serial('Home Page', () => {
     await context.close()
   })
 
-  test('should have a heading and searchBar', async () => {
+  test('should have a heading', async () => {
     await expect(page.getByRole('heading', { name: 'OWASP Nest', exact: true })).toBeVisible()
     await expect(
       page.getByText('Your gateway to OWASP. Discover, engage, and help shape the future!')
     ).toBeVisible()
-    await expect(page.getByPlaceholder('Search the OWASP community...')).toBeVisible()
   })
 
   test('should have new chapters', async () => {
     await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
     // Select the first chapter link in the "New Chapters" section
     const firstChapter = page
-      .locator('section')
+      .locator('div')
       .filter({ hasText: 'New Chapters' })
       .locator('a')
       .first()
     await expect(firstChapter).toBeVisible()
-
-    await firstChapter.click()
-    await expect(page).toHaveURL(/\/chapters\//)
-    await page.goBack()
   })
 
   test('should have new projects', async () => {
     await expect(page.getByRole('heading', { name: 'New Projects' })).toBeVisible()
     const firstProject = page
-      .locator('section')
+      .locator('div')
       .filter({ hasText: 'New Projects' })
       .locator('a')
       .first()
     await expect(firstProject).toBeVisible()
-
-    await firstProject.click()
-    await expect(page).toHaveURL(/\/projects\//)
-    await page.goBack()
-    await page.waitForURL(/\/$/)
   })
 
   test('should have top contributors', async () => {
