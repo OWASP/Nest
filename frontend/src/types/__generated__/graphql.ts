@@ -377,6 +377,7 @@ export type Mutation = {
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
+  deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
   revokeApiKey: RevokeApiKeyResult;
@@ -416,6 +417,12 @@ export type MutationCreateModuleArgs = {
 
 export type MutationCreateProgramArgs = {
   inputData: CreateProgramInput;
+};
+
+
+export type MutationDeleteModuleArgs = {
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 
