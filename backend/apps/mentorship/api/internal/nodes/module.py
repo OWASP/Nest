@@ -80,9 +80,8 @@ class ModuleNode:
         self, info: Info, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
-        # Inject current module into context for IssueNode.task_deadline
         info.context.current_module = self
-        
+
         queryset = self.issues.select_related("repository", "author").prefetch_related(
             "assignees", "labels"
         )
@@ -116,9 +115,8 @@ class ModuleNode:
     @strawberry.field
     def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
-        # Inject current module into context for IssueNode.task_deadline
         info.context.current_module = self
-        
+
         return (
             self.issues.select_related("repository", "author")
             .prefetch_related("assignees", "labels")

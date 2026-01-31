@@ -28,6 +28,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
             "pull_requests",
             "repository_name",
             "state",
+            "task_deadline",
             "title",
             "url",
         }

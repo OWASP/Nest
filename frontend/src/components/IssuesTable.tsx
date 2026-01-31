@@ -229,7 +229,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
 
               {/* Deadline */}
               {showDeadline && (
-                <td className="pt-2 text-right lg:pt-0 lg:table-cell lg:px-6 lg:py-4">
+                <td className="pt-2 text-right lg:table-cell lg:px-6 lg:py-4 lg:pt-0">
                   {(() => {
                     const status = getDeadlineStatus(issue.deadline)
                     return (
