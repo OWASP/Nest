@@ -238,7 +238,9 @@ def validate_url(url: str | None) -> bool:
         return False
 
     # Check netloc exists and is not just whitespace/dots/hyphens
-    netloc = parsed.netloc.strip()
+    # `urlparse` may return None for components in some typing contexts; ensure
+    # `netloc` is always a string before stripping/iterating to satisfy mypy.
+    netloc = (parsed.netloc or "").strip()
     if not netloc or netloc in {".", "..", "-", ".-", "-."}:
         return False
 
