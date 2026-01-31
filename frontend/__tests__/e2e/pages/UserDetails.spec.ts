@@ -4,8 +4,10 @@ test.describe.serial('User Details Page', () => {
   let context: BrowserContext
   let page: Page
 
-  test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext()
+  test.beforeAll(async ({ browser }, testInfo) => {
+    context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+    })
     page = await context.newPage()
     await page.goto('/members/arkid15r', { timeout: 25000 })
   })

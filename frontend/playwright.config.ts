@@ -25,7 +25,7 @@ export default defineConfig({
   testDir: './__tests__/e2e',
   timeout: 120_000,
   use: {
-    baseURL: process.env.FRONTEND_URL,
+    baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
     headless: true,
     trace: 'off',
   },

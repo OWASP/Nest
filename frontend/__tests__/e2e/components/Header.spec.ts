@@ -82,7 +82,7 @@ test.describe.serial('Header - Mobile (iPhone 13)', () => {
   test.beforeAll(async ({ browser }) => {
     context = await browser.newContext()
     page = await context.newPage()
-    await page.goto('/')
+    await page.goto('/', { timeout: 25000 })
   })
 
   test.afterAll(async () => {
