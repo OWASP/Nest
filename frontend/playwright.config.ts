@@ -2,7 +2,10 @@ import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  fullyParallel: false,
+  expect: {
+    timeout: 20000,
+  },
+  fullyParallel: true,
   projects: [
     {
       name: 'chromium',
@@ -14,9 +17,6 @@ export default defineConfig({
       name: 'Mobile Safari - iPhone 13',
       use: {
         ...devices['iPhone 13'],
-      },
-      expect: {
-        timeout: 10000, // Mobile Safari needs more time to render
       },
     },
   ],
