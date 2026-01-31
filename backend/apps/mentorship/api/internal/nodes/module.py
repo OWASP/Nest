@@ -83,19 +83,27 @@ class ModuleNode:
         info.context.current_module = self
 
         # BULK load data
-        task_rows = (
+        deadline_rows = (
             Task.objects.filter(module=self, deadline_at__isnull=False)
             .order_by("issue__number", "-assigned_at")
-            .values("issue__number", "deadline_at", "assigned_at")
+            .values("issue__number", "deadline_at")
+        )
+        assigned_rows = (
+            Task.objects.filter(module=self, assigned_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "assigned_at")
         )
 
         deadline_map = {}
         assigned_map = {}
 
-        for row in task_rows:
+        for row in deadline_rows:
             num = row["issue__number"]
             if num not in deadline_map:
                 deadline_map[num] = row["deadline_at"]
+        for row in assigned_rows:
+            num = row["issue__number"]
+            if num not in assigned_map:
                 assigned_map[num] = row["assigned_at"]
 
         info.context.task_deadlines_by_issue = deadline_map
@@ -160,7 +168,7 @@ class ModuleNode:
     def task_deadline(self, info: Info, issue_number: int) -> datetime | None:
         """Return the deadline for the latest assigned task linked to this module and issue."""
         mapping = getattr(info.context, "task_deadlines_by_issue", None)
-        if mapping:
+        if mapping is not None:
             return mapping.get(issue_number)
 
         # fallback (single issue query)
@@ -179,7 +187,7 @@ class ModuleNode:
     def task_assigned_at(self, info: Info, issue_number: int) -> datetime | None:
         """Return the latest assignment time for tasks linked to this module and issue."""
         mapping = getattr(info.context, "task_assigned_at_by_issue", None)
-        if mapping:
+        if mapping is not None:
             return mapping.get(issue_number)
 
         return (
