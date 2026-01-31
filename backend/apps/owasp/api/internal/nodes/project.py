@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.core.utils.index import deep_camelize
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -10,6 +11,7 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.models.milestone import Milestone
+from apps.github.models.pull_request import PullRequest
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
@@ -103,10 +105,23 @@ class ProjectNode(GenericEntityNode):
             else []
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        prefetch_related=[
+            lambda _info: Prefetch(
+                "pull_requests",
+                queryset=PullRequest.objects.select_related(
+                    "repository__organization", "author__owasp_profile"
+                ).order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT],
+                to_attr="_recent_pull_requests",
+            ),
+        ],
+    )
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
-        return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
+        cached = getattr(root, "_recent_pull_requests", None)
+        if cached is None:
+            return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
+        return cached
 
     @strawberry_django.field
     def recent_releases(self, root: Project) -> list[ReleaseNode]:

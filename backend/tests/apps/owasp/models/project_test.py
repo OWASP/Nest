@@ -1,6 +1,8 @@
+from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
+from django.utils import timezone
 
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
@@ -131,3 +133,61 @@ class TestProjectModel:
         assert project.level == ProjectLevel.LAB
         assert project.type == ProjectType.TOOL
         assert project.updated_at == owasp_repository.updated_at
+
+
+class TestProjectPullRequestsM2M:
+    """Test Project pull_requests M2M field and related properties."""
+
+    @pytest.fixture
+    def mock_project(self):
+        """Create mock project with pull_requests M2M field."""
+        project = Mock(spec=Project)
+        project.pull_requests = Mock()
+        return project
+
+    def test_pull_requests_count_with_empty_m2m(self, mock_project):
+        """Test pull_requests_count returns 0 when no PRs are associated."""
+        mock_project.pull_requests.count.return_value = 0
+
+        result = Project.pull_requests_count.fget(mock_project)
+
+        assert result == 0
+        mock_project.pull_requests.count.assert_called_once()
+
+    def test_pull_requests_count_with_m2m_data(self, mock_project):
+        """Test pull_requests_count uses M2M field."""
+        mock_project.pull_requests.count.return_value = 5
+
+        result = Project.pull_requests_count.fget(mock_project)
+
+        assert result == 5
+        mock_project.pull_requests.count.assert_called_once()
+
+    def test_open_pull_requests_count_filters_by_state(self, mock_project):
+        """Test open_pull_requests_count filters by state='open'."""
+        mock_filtered = Mock()
+        mock_filtered.count.return_value = 3
+        mock_project.pull_requests.filter.return_value = mock_filtered
+
+        result = Project.open_pull_requests_count.fget(mock_project)
+
+        assert result == 3
+        mock_project.pull_requests.filter.assert_called_once_with(state="open")
+
+    def test_pull_request_last_created_at_returns_max_date(self, mock_project):
+        """Test pull_request_last_created_at returns the most recent created_at."""
+        expected_date = datetime(2024, 1, 15, tzinfo=timezone.UTC)
+        mock_project.pull_requests.aggregate.return_value = {"created_at__max": expected_date}
+
+        result = Project.pull_request_last_created_at.fget(mock_project)
+
+        assert result == expected_date
+        mock_project.pull_requests.aggregate.assert_called_once()
+
+    def test_pull_request_last_created_at_returns_none_when_empty(self, mock_project):
+        """Test pull_request_last_created_at returns None when no PRs exist."""
+        mock_project.pull_requests.aggregate.return_value = {"created_at__max": None}
+
+        result = Project.pull_request_last_created_at.fget(mock_project)
+
+        assert result is None
