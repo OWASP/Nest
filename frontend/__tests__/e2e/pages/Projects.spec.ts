@@ -2,7 +2,7 @@ import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import mockProjectData from '@mockData/mockProjectData'
 import { test, expect, Page, BrowserContext } from '@playwright/test'
 
-test.describe('Projects Page', () => {
+test.describe.serial('Projects Page', () => {
   let page: Page
   let context: BrowserContext
   test.beforeAll(async ({ browser }, testInfo) => {
@@ -26,13 +26,29 @@ test.describe('Projects Page', () => {
     await context.close()
   })
 
-  test('renders project data correctly', async ({ page }) => {
+  test('renders project data correctly', async () => {
     await expect(page.getByRole('link', { name: 'Project 1' })).toBeVisible()
     await expect(page.getByText('This is a summary of Project 1')).toBeVisible()
     await expect(page.getByRole('button', { name: 'View Details' })).toBeVisible()
   })
 
-  test('displays "No Projects found" when there are no projects', async ({ page }) => {
+  test('handles page change correctly', async () => {
+    const nextPageButton = page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
+    await nextPageButton.click()
+    await expect(page).toHaveURL(/page=2/)
+  })
+
+  test('breadcrumb renders correct segments on /projects', async () => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Projects'])
+  })
+  test('opens window on View Details button click', async () => {
+    const contributeButton = page.getByRole('button', { name: 'View Details' })
+    await contributeButton.waitFor({ state: 'visible' })
+    await contributeButton.click()
+    await expect(page).toHaveURL('projects/project_1')
+  })
+  test('displays "No Projects found" when there are no projects', async () => {
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
@@ -41,22 +57,5 @@ test.describe('Projects Page', () => {
     })
     await page.goto('/projects')
     await expect(page.getByText('No projects found')).toBeVisible()
-  })
-
-  test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
-    await nextPageButton.waitFor({ state: 'visible' })
-    await nextPageButton.click()
-    await expect(page).toHaveURL(/page=2/)
-  })
-
-  test('opens window on View Details button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'View Details' })
-    await contributeButton.waitFor({ state: 'visible' })
-    await contributeButton.click()
-    await expect(page).toHaveURL('projects/project_1')
-  })
-  test('breadcrumb renders correct segments on /projects', async ({ page }) => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Projects'])
   })
 })

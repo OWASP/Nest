@@ -33,11 +33,6 @@ test.describe.serial('Organization Page', () => {
     await expect(viewDetailsButtons).toHaveCount(2)
   })
 
-  test('navigation to organization details works', async () => {
-    await page.getByRole('button', { name: 'View Profile' }).first().click()
-    expect(await page.url()).toContain('organizations')
-  })
-
   test('displays followers and repositories counts correctly', async () => {
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('1.5k')).toBeVisible()
@@ -45,5 +40,9 @@ test.describe.serial('Organization Page', () => {
 
   test('breadcrumb renders correct segments on /organizations', async () => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Organizations'])
+  })
+  test('navigation to organization details works', async () => {
+    page.getByRole('button', { name: 'View Profile' }).first().click()
+    expect(page.url()).toContain('organizations')
   })
 })

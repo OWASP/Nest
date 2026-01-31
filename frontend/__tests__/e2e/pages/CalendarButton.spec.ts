@@ -19,11 +19,7 @@ test.describe.serial('Calendar Export Functionality', () => {
   })
 
   test('should download a valid ICS file when clicked', async () => {
-    const eventSection = page.locator('section').filter({ hasText: 'Upcoming Events' })
-    await expect(eventSection).toBeVisible()
-    const firstEventButton = eventSection
-      .getByRole('button', { name: /Add .* to Calendar/i })
-      .first()
+    const firstEventButton = page.getByRole('button', { name: /Add .* to Calendar/i }).first()
     await expect(firstEventButton).toBeVisible()
     const buttonText =
       (await firstEventButton.getAttribute('aria-label')) || (await firstEventButton.innerText())

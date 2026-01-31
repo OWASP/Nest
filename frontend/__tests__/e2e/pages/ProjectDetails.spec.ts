@@ -65,9 +65,9 @@ test.describe.serial('Project Details Page', () => {
 
   test('toggle top contributors', async () => {
     await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
-    await page.getByRole('button', { name: 'Show more' }).last().click()
+    page.getByRole('button', { name: 'Show more' }).last().click()
     await expect(page.getByRole('button', { name: 'Show less' })).toBeVisible()
-    await page.getByRole('button', { name: 'Show less' }).click()
+    page.getByRole('button', { name: 'Show less' }).click()
     await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
   })
 

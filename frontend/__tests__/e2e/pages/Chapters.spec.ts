@@ -32,6 +32,23 @@ test.describe.serial('Chapters Page', () => {
     await expect(page.getByRole('button', { name: 'View Details' })).toBeVisible()
   })
 
+  test('handles page change correctly', async () => {
+    const nextPageButton = page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' }) // Ensure button is visible
+    await nextPageButton.click()
+    await expect(page).toHaveURL(/page=2/)
+  })
+
+  test('breadcrumb renders correct segments on /chapters', async () => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Chapters'])
+  })
+
+  test('opens window on View Details button click', async () => {
+    const contributeButton = page.getByRole('button', { name: 'View Details' })
+    await contributeButton.waitFor({ state: 'visible' })
+    await contributeButton.click()
+    await expect(page).toHaveURL('chapters/chapter_1')
+  })
   test('displays "No chapters found" when there are no chapters', async () => {
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
@@ -41,23 +58,5 @@ test.describe.serial('Chapters Page', () => {
     })
     await page.goto('/chapters')
     await expect(page.getByText('No chapters found')).toBeVisible()
-  })
-
-  test('handles page change correctly', async () => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
-    await nextPageButton.waitFor({ state: 'visible' }) // Ensure button is visible
-    await nextPageButton.click()
-    await expect(page).toHaveURL(/page=2/)
-  })
-
-  test('opens window on View Details button click', async () => {
-    const contributeButton = await page.getByRole('button', { name: 'View Details' })
-    await contributeButton.waitFor({ state: 'visible' })
-    await contributeButton.click()
-    await expect(page).toHaveURL('chapters/chapter_1')
-  })
-
-  test('breadcrumb renders correct segments on /chapters', async () => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Chapters'])
   })
 })

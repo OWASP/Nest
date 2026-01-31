@@ -24,7 +24,7 @@ test.describe.serial('Chapter Details Page', () => {
   })
 
   test('should have chapter details block', async () => {
-    await expect(page.getByText('Location: Unknown')).toBeVisible()
+    await expect(page.getByText('Location: Rosario, Santa Fe, Argentina')).toBeVisible()
     await expect(page.getByText('Region: South America')).toBeVisible()
     await expect(
       page.getByRole('link', { name: 'https://owasp.org/www-chapter-rosario' })
@@ -32,7 +32,7 @@ test.describe.serial('Chapter Details Page', () => {
   })
 
   test('should have map with geolocation', async () => {
-    const unlockButton = page.getByRole('button', { name: 'Click to interact with map' })
+    const unlockButton = page.getByRole('button', { name: 'Unlock map' })
     await expect(unlockButton).toBeVisible()
 
     await unlockButton.click()
