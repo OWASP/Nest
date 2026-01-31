@@ -39,9 +39,46 @@ class MessagePosted(EventBase):
                 logger.warning("Thread message not found.")
             return
 
+        # Only respond when bot is explicitly mentioned
+        # If bot is mentioned, app_mention event will handle it
+        # This handler should not auto-reply to messages without mentions
         channel_id = event.get("channel")
         user_id = event.get("user")
         text = event.get("text", "")
+
+        # Check if bot is mentioned in the message text or blocks
+        bot_mentioned = False
+        try:
+            bot_info = client.auth_test()
+            bot_user_id = bot_info.get("user_id")
+            if bot_user_id:
+                # Check text for mention format: <@BOT_USER_ID>
+                if f"<@{bot_user_id}>" in text:
+                    bot_mentioned = True
+                else:
+                    # Check blocks for user mentions
+                    for block in event.get("blocks", []):
+                        if block.get("type") == "rich_text":
+                            for element in block.get("elements", []):
+                                if element.get("type") == "rich_text_section":
+                                    for text_element in element.get("elements", []):
+                                        if (
+                                            text_element.get("type") == "user"
+                                            and text_element.get("user_id") == bot_user_id
+                                        ):
+                                            bot_mentioned = True
+                                            break
+                                    if bot_mentioned:
+                                        break
+                            if bot_mentioned:
+                                break
+        except Exception:
+            logger.warning("Could not check bot mention, skipping auto-reply to be safe.")
+            return
+
+        if not bot_mentioned:
+            logger.debug("Bot not mentioned in message, skipping auto-reply.")
+            return
 
         try:
             conversation = Conversation.objects.get(
@@ -52,7 +89,16 @@ class MessagePosted(EventBase):
             logger.warning("Conversation not found or assistant not enabled.")
             return
 
-        if not self.question_detector.is_owasp_question(text):
+        is_owasp = self.question_detector.is_owasp_question(text)
+        logger.info(
+            "Question detector result",
+            extra={
+                "channel_id": channel_id,
+                "is_owasp": is_owasp,
+                "text": text[:200],
+            },
+        )
+        if not is_owasp:
             return
 
         try:
@@ -66,6 +112,14 @@ class MessagePosted(EventBase):
             data=event, conversation=conversation, author=author, save=True
         )
 
+        logger.info(
+            "Enqueueing AI reply generation",
+            extra={
+                "message_id": message.id,
+                "channel_id": channel_id,
+                "delay_minutes": QUEUE_RESPONSE_TIME_MINUTES,
+            },
+        )
         django_rq.get_queue("ai").enqueue_in(
             timedelta(minutes=QUEUE_RESPONSE_TIME_MINUTES),
             generate_ai_reply_if_unanswered,

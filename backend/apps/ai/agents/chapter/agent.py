@@ -7,7 +7,7 @@ from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
 
 
-def create_chapter_agent() -> Agent:
+def create_chapter_agent(allow_delegation: bool = False) -> Agent:
     """Create Chapter Expert Agent.
 
     Returns:
@@ -25,6 +25,6 @@ def create_chapter_agent() -> Agent:
         tools=[search_chapters],
         llm=get_llm(),
         verbose=True,
-        allow_delegation=False,
+        allow_delegation=allow_delegation,
         memory=False,
     )

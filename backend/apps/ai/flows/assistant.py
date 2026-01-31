@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 import logging
 
-from crewai import Agent, Crew, Task
+from crewai import Agent, Crew, Process, Task
 
 from apps.ai.agents.channel import create_channel_agent
 from apps.ai.agents.chapter import create_chapter_agent
@@ -65,20 +65,171 @@ def process_query(  # noqa: PLR0911
 
     """
     try:
+        # Step 0: Handle simple greetings and non-question messages
+        query_lower = query.strip().lower()
+        # Common greetings and simple acknowledgments (standalone only)
+        simple_greetings = [
+            "hello",
+            "hi",
+            "hey",
+            "greetings",
+            "thanks",
+            "thank you",
+            "thankyou",
+            "thx",
+            "ty",
+            "goodbye",
+            "bye",
+            "see you",
+            "good morning",
+            "good afternoon",
+            "good evening",
+            "good night",
+            "gn",
+            "gm",
+        ]
+
+        # Check if query is ONLY a simple greeting (exact match, no question words or content)
+        # If it contains question words or OWASP-related terms, it's not just a greeting
+        question_indicators = [
+            "?",
+            "what",
+            "how",
+            "when",
+            "where",
+            "who",
+            "why",
+            "which",
+            "tell",
+            "explain",
+            "find",
+            "show",
+            "help",
+        ]
+        has_question_content = any(indicator in query_lower for indicator in question_indicators)
+        has_owasp_content = any(
+            term in query_lower
+            for term in ["owasp", "project", "chapter", "contribute", "gsoc", "security"]
+        )
+
+        # Only treat as simple greeting if it's exactly a greeting
+        # AND has no question/OWASP content
+        is_simple_greeting = (
+            (
+                query_lower in simple_greetings
+                or any(query_lower == greeting for greeting in simple_greetings)
+            )
+            and not has_question_content
+            and not has_owasp_content
+        )
+
+        if is_simple_greeting:
+            # For app mentions, respond friendly; for channel messages, skip
+            if is_app_mention:
+                return (
+                    "Hello! 👋 I'm NestBot, your OWASP assistant. "
+                    "I can help you with questions about OWASP projects, chapters, contributions, "
+                    "GSoC, and more. What would you like to know?"
+                )
+            return None
+
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
-        intent = router_result["intent"]
-        confidence = router_result["confidence"]
+        intent = router_result.get("intent")
+        confidence = router_result.get("confidence", 0.5)
+
+        # Validate router result - ensure we got a proper intent
+        if not intent or intent not in Intent.values():
+            logger.error(
+                "Router returned invalid intent",
+                extra={
+                    "intent": intent,
+                    "router_result": router_result,
+                    "query": query[:200],
+                },
+            )
+            # Fallback to RAG
+            intent = Intent.RAG.value
+            confidence = 0.3
 
         logger.info(
             "Query routed",
             extra={
                 "intent": intent,
                 "confidence": confidence,
-                "query": query,
-                "channel_id": channel_id,
+                "query": query[:200],
             },
         )
+
+        # Collaborative flow: if low confidence or multiple intents, invoke all expert agents
+        if confidence < CONFIDENCE_THRESHOLD or router_result.get("alternative_intents"):
+            logger.info(
+                "Low confidence or multiple intents detected, invoking collaborative flow",
+                extra={
+                    "confidence": confidence,
+                    "alternatives": router_result.get("alternative_intents"),
+                },
+            )
+            # Get all relevant intents
+            all_intents = [intent, *router_result.get("alternative_intents", [])]
+            all_intents = list(set(all_intents))  # Deduplicate
+
+            # Map intents to agent creation functions
+            agent_creators = {
+                Intent.CHAPTER.value: create_chapter_agent,
+                Intent.COMMUNITY.value: create_community_agent,
+                Intent.CONTRIBUTION.value: create_contribution_agent,
+                Intent.GSOC.value: create_contribution_agent,  # GSOC uses contribution agent
+                Intent.PROJECT.value: create_project_agent,
+                Intent.RAG.value: create_rag_agent,
+            }
+
+            agents = []
+            tasks = []
+
+            for intent_value in all_intents:
+                if creator := agent_creators.get(intent_value):
+                    agent = creator(allow_delegation=True)
+                    agents.append(agent)
+                    tasks.append(
+                        Task(
+                            description=(
+                                f"Address the user query '{query}' "
+                                f"from the perspective of an {agent.role}. "
+                                "Focus on parts relevant to your expertise and tools."
+                            ),
+                            agent=agent,
+                            expected_output=f"Information related to {intent_value}",
+                        )
+                    )
+
+            # Ensure RAG agent is included for synthesis if multiple intents
+            if len(agents) > 1 and Intent.RAG.value not in all_intents:
+                rag_agent = create_rag_agent(allow_delegation=False)
+                agents.append(rag_agent)
+
+            # Final synthesis task
+            synthesis_task = Task(
+                description=(
+                    f"Using all previous observations, synthesize a complete, "
+                    f"accurate, and concise answer to the user query: '{query}'. "
+                    "Ensure all parts of the query are addressed and formatted nicely for Slack."
+                ),
+                agent=agents[-1],  # Use the last agent (likely RAG or the last expert)
+                expected_output="Final comprehensive answer for Slack",
+            )
+            tasks.append(synthesis_task)
+
+            crew = Crew(
+                agents=agents,
+                tasks=tasks,
+                process=Process.sequential,
+                verbose=True,
+                max_iter=5,
+                max_rpm=10,
+            )
+            result = crew.kickoff()
+            return str(result)
 
         # Step 2: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
@@ -342,10 +493,33 @@ def process_query(  # noqa: PLR0911
         agent = agent_factory()
 
         # Step 6: Execute task with agent
-        return execute_task(agent, query)
+        result = execute_task(agent, query)
+        result_str = str(result).strip() if result else ""
 
-    except Exception:
-        logger.exception("Failed to process query: %s", query)
+        # Validate result - if it's just "YES" or "NO", something went wrong
+        if result_str and result_str.upper() in ("YES", "NO"):
+            logger.error(
+                "Agent returned Question Detector output instead of proper response",
+                extra={
+                    "intent": intent,
+                    "result": result_str,
+                    "result_length": len(result_str),
+                    "query": query[:200],
+                },
+            )
+            # Return a fallback response instead
+            return get_fallback_response()
+
+        return result_str if result_str else result
+
+    except Exception as e:
+        logger.exception(
+            "Failed to process query",
+            extra={
+                "query": query[:200],
+                "error": str(e),
+            },
+        )
         return get_fallback_response()
 
 
@@ -379,11 +553,18 @@ def execute_task(
         "- Never guess or make assumptions based on general knowledge\n"
         "- For RAG agent: ALWAYS call semantic_search tool first to retrieve relevant "
         "context\n"
+        "- For RAG agent: If the first search doesn't yield good results, "
+        "try searching with different keywords or rephrased queries "
+        "(e.g., if searching for 'project lifecycle' doesn't work, "
+        "try 'project maturity', 'project stages', or 'project development process')\n"
         "- IMPORTANT: Do NOT retry the same tool call with the same input if it fails\n"
         "- If a tool call fails or doesn't provide useful results, try a different "
         "approach or tool\n"
         "- If you've already tried a tool and it didn't work, do NOT call it again "
-        "with the same parameters"
+        "with the same parameters\n"
+        "- If semantic search returns no results or irrelevant results after trying multiple "
+        "queries, provide a helpful response explaining what information you were looking for "
+        "and suggest where the user might find it (e.g., OWASP website, specific project pages)"
     )
 
     if is_channel_suggestion:

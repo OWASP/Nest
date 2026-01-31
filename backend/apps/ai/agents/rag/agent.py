@@ -7,8 +7,11 @@ from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
 
 
-def create_rag_agent() -> Agent:
+def create_rag_agent(allow_delegation: bool = False) -> Agent:
     """Create RAG Agent.
+
+    Args:
+        allow_delegation (bool): Whether the agent can delegate tasks. Defaults to False.
 
     Returns:
         Agent: RAG Agent configured with semantic search tools
@@ -25,6 +28,6 @@ def create_rag_agent() -> Agent:
         tools=[semantic_search],
         llm=get_llm(),
         verbose=True,
-        allow_delegation=False,
+        allow_delegation=allow_delegation,
         memory=False,
     )
