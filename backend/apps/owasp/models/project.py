@@ -152,6 +152,12 @@ class Project(
         verbose_name="Repositories",
         blank=True,
     )
+    releases = models.ManyToManyField(
+        "github.Release",
+        verbose_name="Releases",
+        related_name="Projects",
+        blank=True,
+    )
 
     def __str__(self) -> str:
         """Project human readable representation."""
