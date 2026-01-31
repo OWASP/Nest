@@ -1,15 +1,19 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
-import { test, expect, Page } from '@playwright/test'
+import { test, expect, Page, BrowserContext } from '@playwright/test'
 
 test.describe.serial('About Page', () => {
   let page: Page
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext()
+  let context: BrowserContext
+
+  test.beforeAll(async ({ browser }, testInfo) => {
+    context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+    })
     page = await context.newPage()
     await page.goto('/about', { timeout: 25000 })
   })
   test.afterAll(async () => {
-    await page.close()
+    await context.close()
   })
 
   test('renders main sections correctly', async () => {
@@ -76,11 +80,6 @@ test.describe.serial('About Page', () => {
     await expect(page.getByText('Stars').last()).toBeVisible()
   })
 
-  test('opens user profile in new window when leader button is clicked', async () => {
-    await page.getByRole('button', { name: 'View Profile' }).first().click()
-    await expect(page).toHaveURL('/members/arkid15r')
-  })
-
   test('breadcrumb renders correct segments on /about', async () => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'About'])
   })
@@ -104,5 +103,10 @@ test.describe.serial('About Page', () => {
     await timelineSection.getByRole('button', { name: 'Show more' }).click()
 
     await expect(page.getByText('Project Inception')).toBeVisible()
+  })
+
+  test('opens user profile in new window when leader button is clicked', async () => {
+    await page.getByRole('button', { name: 'View Profile' }).first().click()
+    await expect(page).toHaveURL('/members/arkid15r')
   })
 })

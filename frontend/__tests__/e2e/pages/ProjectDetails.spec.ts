@@ -1,14 +1,18 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect, Page, BrowserContext } from '@playwright/test'
 
 test.describe.serial('Project Details Page', () => {
   let page: Page
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext()
+  let context: BrowserContext
+
+  test.beforeAll(async ({ browser }, testInfo) => {
+    context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+    })
     page = await context.newPage()
     await page.goto('/projects/nest', { timeout: 25000 })
   })
   test.afterAll(async () => {
-    await page.close()
+    await context.close()
   })
 
   test('should have a heading', async () => {
@@ -30,7 +34,7 @@ test.describe.serial('Project Details Page', () => {
     await expect(page.getByText('URL: https://owasp.org/www-project-nest')).toBeVisible()
   })
 
-  test('should have project statics block', async () => {
+  test('should have project statistics block', async () => {
     await expect(page.getByText('Stars').first()).toBeVisible()
     await expect(page.getByText('Forks').first()).toBeVisible()
     await expect(page.getByText('Contributors').first()).toBeVisible()
@@ -85,18 +89,18 @@ test.describe.serial('Project Details Page', () => {
     await expect(page.getByText('Nest').first()).toBeVisible()
   })
 
-  test('should have project repositories', async () => {
-    await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
-    await expect(page.getByText('www-project-nest', { exact: true })).toBeVisible()
-    await page.getByText('www-project-nest', { exact: true }).click()
-    await expect(page).toHaveURL('organizations/OWASP/repositories/www-project-nest')
-  })
-
   test('should display health metrics section', async () => {
     await expect(page.getByText('Issues Trend')).toBeVisible()
     await expect(page.getByText('Pull Requests Trend')).toBeVisible()
     await expect(page.getByText('Stars Trend')).toBeVisible()
     await expect(page.getByText('Forks Trend')).toBeVisible()
     await expect(page.getByText('Days Since Last Commit and Release')).toBeVisible()
+  })
+
+  test('should have project repositories', async () => {
+    await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
+    await expect(page.getByText('www-project-nest', { exact: true })).toBeVisible()
+    await page.getByText('www-project-nest', { exact: true }).click()
+    await expect(page).toHaveURL('organizations/OWASP/repositories/www-project-nest')
   })
 })

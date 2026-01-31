@@ -1,9 +1,15 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import mockProjectData from '@mockData/mockProjectData'
-import { test, expect } from '@playwright/test'
+import { test, expect, Page, BrowserContext } from '@playwright/test'
 
 test.describe('Projects Page', () => {
-  test.beforeEach(async ({ page }) => {
+  let page: Page
+  let context: BrowserContext
+  test.beforeAll(async ({ browser }, testInfo) => {
+    context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+    })
+    page = await context.newPage()
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
@@ -14,6 +20,10 @@ test.describe('Projects Page', () => {
       })
     })
     await page.goto('/projects', { timeout: 25000 })
+  })
+
+  test.afterAll(async () => {
+    await context.close()
   })
 
   test('renders project data correctly', async ({ page }) => {

@@ -4,8 +4,10 @@ test.describe.serial('Home Page', () => {
   let context: BrowserContext
   let page: Page
 
-  test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext()
+  test.beforeAll(async ({ browser }, testInfo) => {
+    context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+    })
     page = await context.newPage()
     await page.goto('/', { timeout: 25000 })
   })
@@ -49,6 +51,7 @@ test.describe.serial('Home Page', () => {
     await firstProject.click()
     await expect(page).toHaveURL(/\/projects\//)
     await page.goBack()
+    await page.waitForURL(/\/$/)
   })
 
   test('should have top contributors', async () => {

@@ -6,8 +6,10 @@ test.describe.serial('Calendar Export Functionality', () => {
   let context: BrowserContext
   let page: Page
 
-  test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext()
+  test.beforeAll(async ({ browser }, testInfo) => {
+    context = await browser.newContext({
+      baseURL: testInfo.project.use.baseURL,
+    })
     page = await context.newPage()
     await page.goto('/', { timeout: 25000 })
   })
