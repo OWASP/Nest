@@ -96,7 +96,7 @@ class Command(BaseCommand):
                 ),
             )
             project.issues.set(issues)
-            project.issues_count = issues.count()
+            project.issues_count_value = issues.count()
 
             project.pushed_at = max(pushed_at)
             if released_at:

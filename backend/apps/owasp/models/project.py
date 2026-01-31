@@ -91,7 +91,7 @@ class Project(
     commits_count = models.PositiveIntegerField(verbose_name="Commits", default=0)
     contributors_count = models.PositiveIntegerField(verbose_name="Contributors", default=0)
     forks_count = models.PositiveIntegerField(verbose_name="Forks", default=0)
-    issues_count = models.PositiveIntegerField(verbose_name="Issues", default=0)
+    issues_count_value = models.PositiveIntegerField(verbose_name="Issues", default=0)
     open_issues_count = models.PositiveIntegerField(verbose_name="Open issues", default=0)
     releases_count = models.PositiveIntegerField(verbose_name="Releases", default=0)
     stars_count = models.PositiveIntegerField(verbose_name="Stars", default=0)
@@ -236,30 +236,6 @@ class Project(
         return self.type == ProjectType.TOOL
 
     @property
-    def issues(self):
-        """Get issues across the project's repositories.
-
-        Returns:
-            QuerySet[Issue]: A queryset of issues with related entities prefetched.
-
-        """
-        return (
-            Issue.objects.filter(
-                repository__in=self.repositories.all(),
-            )
-            .select_related(
-                "author",
-                "level",
-                "milestone",
-                "repository",
-            )
-            .prefetch_related(
-                "assignees",
-                "labels",
-            )
-        )
-
-    @property
     def issues_count(self) -> int:
         """Get the total number of issues.
 
@@ -267,7 +243,7 @@ class Project(
             int: Count of issues across the project's repositories.
 
         """
-        return self.issues.count()
+        return self.issues_count_value
 
     @property
     def last_health_metrics(self) -> ProjectHealthMetrics | None:

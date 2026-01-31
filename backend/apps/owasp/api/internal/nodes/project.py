@@ -90,17 +90,19 @@ class ProjectNode(GenericEntityNode):
                     "level",
                     "milestone",
                     "repository",
-                ).prefetch_related(
+                )
+                .prefetch_related(
                     "assignees",
                     "labels",
-                ).order_by("-created_at")[:RECENT_ISSUES_LIMIT],
-                to_attr="_recent_issues",
+                )
+                .order_by("-created_at")[:RECENT_ISSUES_LIMIT],
+                to_attr="recent_issues",
             ),
         ],
     )
     def recent_issues(self, root: Project) -> list[IssueNode]:
         """Resolve recent issues."""
-        return root._recent_issues
+        return root.recent_issues
 
     @strawberry_django.field
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:

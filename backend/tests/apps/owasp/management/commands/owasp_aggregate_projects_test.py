@@ -72,13 +72,15 @@ class TestOwaspAggregateProjects:
                 return self
 
         mock_project.repositories.filter.return_value = QS([mock_repository])
-        
+
         mock_issues = mock.Mock()
-        mock_issues.count.return_value = 5  
-        
-        with mock.patch("apps.owasp.management.commands.owasp_aggregate_projects.Issue") as mock_issue_class:
+        mock_issues.count.return_value = 5
+
+        with mock.patch(
+            "apps.owasp.management.commands.owasp_aggregate_projects.Issue"
+        ) as mock_issue_class:
             mock_issue_class.objects.filter.return_value = mock_issues
-            
+
             mock_projects_list = [mock_project] * projects
             mock_active_projects = mock.MagicMock()
             mock_active_projects.__iter__.return_value = iter(mock_projects_list)
