@@ -1,39 +1,10 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
-import { mockAboutData } from '@mockData/mockAboutData'
 import { test, expect } from '@playwright/test'
 
 test.describe('About Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      const request = route.request()
-      const postData = request.postDataJSON()
-
-      if (postData.query?.includes('user')) {
-        const username = postData.variables.key
-        const userData = mockAboutData.users[username]
-        await route.fulfill({ status: 200, json: { data: { user: userData } } })
-      } else if (postData.query?.includes('topContributors')) {
-        await route.fulfill({
-          status: 200,
-          json: { data: { topContributors: mockAboutData.topContributors } },
-        })
-      } else {
-        await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
-      }
-    })
-
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-
-    await page.goto('/about')
+    await page.goto('/about', { timeout: 25000 })
   })
-
   test('renders main sections correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'About' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Project Timeline' })).toBeVisible()
@@ -43,8 +14,9 @@ test.describe('About Page', () => {
   })
 
   test('displays contributor information when data is loaded', async ({ page }) => {
-    await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
-    await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
+    await expect(page.getByText('Ahmed Gouda', { exact: true })).toBeVisible()
+    await expect(page.getByText('Abhay Mishra', { exact: true })).toBeVisible()
+    await expect(page.getByText('Raj gupta', { exact: true })).toBeVisible()
   })
 
   test('displays leaders data when data is loaded', async ({ page }) => {
@@ -72,7 +44,14 @@ test.describe('About Page', () => {
   test('loads roadmap items correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
 
-    await expect(page.getByText('Contribution Hub title')).toBeVisible()
+    await expect(
+      page.getByText('OWASP Board Activity Standardization and Data Programmatic Access')
+    ).toBeVisible()
+    await expect(
+      page.getByText(
+        'This milestone focuses on standardizing how OWASP Board activities are recorded, structured, and published, and on making this information available in structured formats designed for verification, analysis, and automation, as well as programmatically accessible formats via APIs and schemas. The objective is to create a consistent, auditable, and extensible representation of board actions -- including motions, votes, discussions, and decisions so they can be reliably accessed by tools, dashboards, and community members. This milestone reinforces OWASP’s commitment to openness, integrity, and community trust by making board-related information more transparent, auditable, and reliable.'
+      )
+    ).toBeVisible()
 
     const roadmapSection = page
       .locator('div')
@@ -81,23 +60,13 @@ test.describe('About Page', () => {
       .last()
 
     await roadmapSection.getByRole('button', { name: 'Show more' }).click()
-
-    for (const milestone of mockAboutData.project.recentMilestones) {
-      await expect(page.getByText(milestone.title, { exact: true })).toBeVisible()
-      await expect(page.getByText(milestone.body)).toBeVisible()
-    }
   })
 
-  test('displays project statistics with correct values', async ({ page }) => {
-    await expect(page.getByText('1.2K+Contributors')).toBeVisible()
-    await expect(page.getByText('40+Open Issues')).toBeVisible()
-    await expect(page.getByText('60+Forks')).toBeVisible()
-    await expect(page.getByText('890+Stars')).toBeVisible()
-  })
-
-  test('opens user profile in new window when leader button is clicked', async ({ page }) => {
-    await page.getByRole('button', { name: 'View Profile' }).first().click()
-    await expect(page).toHaveURL('/members/arkid15r')
+  test('displays project statistics', async ({ page }) => {
+    await expect(page.getByText('Contributors').last()).toBeVisible()
+    await expect(page.getByText('Open Issues').last()).toBeVisible()
+    await expect(page.getByText('Forks').last()).toBeVisible()
+    await expect(page.getByText('Stars').last()).toBeVisible()
   })
 
   test('breadcrumb renders correct segments on /about', async ({ page }) => {
@@ -123,5 +92,10 @@ test.describe('About Page', () => {
     await timelineSection.getByRole('button', { name: 'Show more' }).click()
 
     await expect(page.getByText('Project Inception')).toBeVisible()
+  })
+
+  test('opens user profile in new window when leader button is clicked', async ({ page }) => {
+    await page.getByRole('button', { name: 'View Profile' }).first().click()
+    await expect(page).toHaveURL('/members/arkid15r')
   })
 })

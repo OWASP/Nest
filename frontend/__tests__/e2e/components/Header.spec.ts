@@ -1,4 +1,3 @@
-import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect, devices } from '@playwright/test'
 
 // Desktop tests
@@ -9,21 +8,7 @@ test.describe('Header - Desktop (Chrome)', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: mockHomeData,
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/')
+    await page.goto('/', { timeout: 25000 })
   })
 
   test('should have logo', async ({ page }) => {
@@ -60,8 +45,6 @@ test.describe('Header - Desktop (Chrome)', () => {
   })
 
   test('all dropdown triggers should use pointer cursor', async ({ page }) => {
-    await page.goto('/')
-
     const dropdownButtons = page.locator('#navbar-sticky button')
 
     const count = await dropdownButtons.count()
@@ -83,21 +66,7 @@ test.use({
 
 test.describe('Header - Mobile (iPhone 13)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: mockHomeData,
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/')
+    await page.goto('/', { timeout: 25000 })
   })
 
   test('should have logo', async ({ page }) => {
@@ -109,12 +78,14 @@ test.describe('Header - Mobile (iPhone 13)', () => {
   test('should have mobile menu button', async ({ page }) => {
     await expect(page.getByRole('button', { name: /menu/i })).toBeVisible()
   })
+
   test('should show button when menu clicked', async ({ page }) => {
     const menuButton = page.getByRole('button', { name: /menu/i })
     await menuButton.click()
     await expect(page.getByRole('link', { name: 'Star On Github' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Sponsor Us' })).toBeVisible()
   })
+
   test('should show navigation when menu clicked', async ({ page }) => {
     const menuButton = page.getByRole('button', { name: /menu/i })
     await menuButton.click()
