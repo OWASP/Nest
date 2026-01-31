@@ -69,6 +69,7 @@ arkid15r
 askowasp
 attisdropped
 bangbang
+boardofdirectors
 bsky
 carryforward
 certbot
