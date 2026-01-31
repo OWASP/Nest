@@ -20,13 +20,11 @@
             - '--include=*/**/**/Makefile'
             - '--exclude=*'
 
-      - name: Update backend makefile for the staging environment
-        shell:
-          cmd: sed -i 's/\bnest-backend\b/staging-nest-backend/' ~/backend/Makefile
-
-      - name: Update frontend makefile for the staging environment
-        shell:
-          cmd: sed -i 's/\bnest-frontend\b/staging-nest-frontend/' ~/frontend/Makefile
+      - name: Update Makefiles for staging environment
+        shell: |
+          sed -i '/e2e-\|fuzz-/! s/\bnest-backend\b/staging-nest-backend/g' ~/backend/Makefile
+          sed -i '/e2e-\|fuzz-/! s/\bnest-db\b/staging-nest-db/g' ~/backend/Makefile
+          sed -i 's/\bnest-frontend\b/staging-nest-frontend/g' ~/frontend/Makefile
 
       - name: Ensure data directory exists
         ansible.builtin.file:
