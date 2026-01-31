@@ -3,13 +3,12 @@
 import logging
 import time
 
-from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
 
-from apps.owasp.models.notification import Notification, Subscription
+from apps.nest.models import User
+from apps.owasp.models.notification import Notification
 from apps.owasp.models.snapshot import Snapshot
 
 logger = logging.getLogger(__name__)
@@ -71,20 +70,16 @@ class Command(BaseCommand):
             snapshot_id = int(data.get(b"snapshot_id").decode("utf-8"))
             snapshot = Snapshot.objects.get(id=snapshot_id)
             
-            # Find subscribers
-            snapshot_ct = ContentType.objects.get_for_model(Snapshot)
-         
-            subscriptions = Subscription.objects.filter(
-                content_type=snapshot_ct,
-                object_id=0 
-            )
+            users = User.objects.filter(is_active=True)
             
-            if not subscriptions.exists():
-                logger.info("No subscribers found for Snapshot updates.")
+            if not users.exists():
+                logger.info("No active users found.")
                 return
 
-            for sub in subscriptions:
-                self.send_notification(sub.user, snapshot)
+            logger.info(f"Sending snapshot notification to {users.count()} users")
+            
+            for user in users:
+                self.send_notification(user, snapshot)
 
         except Snapshot.DoesNotExist:
             logger.error(f"Snapshot matching ID {snapshot_id} not found.")
