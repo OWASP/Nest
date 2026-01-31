@@ -12,3 +12,4 @@ from .project_health_metrics import ProjectHealthMetrics
 from .project_health_requirements import ProjectHealthRequirements
 from .snapshot import Snapshot
 from .sponsor import Sponsor
+from .notification import Subscription, Notification
