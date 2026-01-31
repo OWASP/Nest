@@ -88,13 +88,12 @@ class Command(BaseCommand):
                     topics.update(repository.topics)
 
             # Populate issues from all repositories.
-            repository_ids = project.repositories.filter(
-                is_empty=False,
-                is_fork=False,
-                is_template=False,
-            ).values_list("id", flat=True)
             issues = Issue.objects.filter(
-                repository_id__in=repository_ids,
+                repository__in=project.repositories.filter(
+                    is_empty=False,
+                    is_fork=False,
+                    is_template=False,
+                ),
             )
             project.issues.set(issues)
             project.issues_count = issues.count()
