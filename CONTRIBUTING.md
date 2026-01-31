@@ -480,10 +480,10 @@ For debugging the frontend e2e tests UI mode, run:
 make test-frontend-e2e-ui
 ```
 
-To run the frontend e2e tests UI mode with the database initialized, use the following command:
+To run the frontend e2e tests UI mode without the database initialized, use the following command:
 
 ```bash
-make test-frontend-e2e-ui-init
+make test-frontend-e2e-ui-no-init
 ```
 
 You can access the UI at [http://localhost:3800](http://localhost:3800).
