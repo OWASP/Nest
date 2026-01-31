@@ -456,6 +456,12 @@ This command automatically:
 - Executes the e2e tests
 - Cleans up containers when done
 
+To run e2e tests without initializing the database, use the following command:
+
+```bash
+make test-frontend-e2e-no-init
+```
+
 For debugging, you can run the e2e backend separately:
 
 ```bash
@@ -468,10 +474,16 @@ Then load data manually in another terminal:
 make load-data-e2e
 ```
 
-For debugging the frontend e2e tests UI, run:
+For debugging the frontend e2e tests UI mode, run:
 
 ```bash
 make test-frontend-e2e-ui
+```
+
+To run the frontend e2e tests UI mode with the database initialized, use the following command:
+
+```bash
+make test-frontend-e2e-ui-init
 ```
 
 You can access the UI at [http://localhost:3800](http://localhost:3800).
