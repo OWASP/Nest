@@ -1,4 +1,4 @@
-FROM python:3.13.7-alpine AS builder
+FROM python:3.13.11-alpine3.23 AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
@@ -12,8 +12,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && apk upgrade && \
-    apk add curl jq && \
+    apk update && \
+    apk add --no-cache curl jq && \
     addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp
 

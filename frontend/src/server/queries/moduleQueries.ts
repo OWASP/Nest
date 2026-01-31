@@ -93,6 +93,22 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         name
         avatarUrl
       }
+      recentPullRequests {
+        id
+        title
+        url
+        state
+        createdAt
+        mergedAt
+        organizationName
+        repositoryName
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
     }
   }
 `
