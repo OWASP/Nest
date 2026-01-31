@@ -47,6 +47,7 @@ const IssuesPage = () => {
       isMerged: i.isMerged,
       labels: i.labels || [],
       assignees: i.assignees || [],
+      deadline: i.taskDeadline ?? null,
     }))
   }, [moduleData])
 
@@ -134,6 +135,7 @@ const IssuesPage = () => {
         <IssuesTable
           issues={moduleIssues}
           showAssignee={true}
+          showDeadline={true}
           onIssueClick={handleIssueClick}
           emptyMessage="No issues found for the selected filter."
         />

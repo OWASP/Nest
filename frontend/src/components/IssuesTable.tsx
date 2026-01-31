@@ -20,6 +20,7 @@ export type IssueRow = {
 interface IssuesTableProps {
   issues: IssueRow[]
   showAssignee?: boolean
+  showDeadline?: boolean
   onIssueClick?: (issueNumber: number) => void
   issueUrl?: (issueNumber: number) => string
   maxVisibleLabels?: number
@@ -31,6 +32,7 @@ const MAX_VISIBLE_LABELS = 5
 const IssuesTable: React.FC<IssuesTableProps> = ({
   issues,
   showAssignee = true,
+  showDeadline = false,
   onIssueClick,
   issueUrl,
   maxVisibleLabels = MAX_VISIBLE_LABELS,
@@ -66,9 +68,45 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
   }
 
   const getColumnCount = () => {
-    let count = 3
+    let count = 3 // Title, Status, Labels
     if (showAssignee) count++
+    if (showDeadline) count++
     return count
+  }
+
+  const getDeadlineStatus = (deadline?: string | null) => {
+    if (!deadline)
+      return {
+        text: 'No Deadline',
+        class: 'border border-dashed border-gray-500 text-gray-500 bg-transparent',
+      }
+
+    const now = new Date()
+    const deadlineDate = new Date(deadline)
+    const nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const deadlineStart = new Date(
+      deadlineDate.getFullYear(),
+      deadlineDate.getMonth(),
+      deadlineDate.getDate()
+    )
+    const diffDays = Math.round((deadlineStart.getTime() - nowStart.getTime()) / 86400000)
+
+    if (diffDays < 0)
+      return {
+        text: 'Overdue',
+        class: 'bg-red-500/15 text-red-400 border border-red-500/30',
+      }
+
+    if (diffDays <= 7)
+      return {
+        text: 'Due Soon',
+        class: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+      }
+
+    return {
+      text: 'Upcoming',
+      class: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    }
   }
 
   return (
@@ -100,6 +138,14 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                 className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
               >
                 Assignee
+              </th>
+            )}
+            {showDeadline && (
+              <th
+                scope="col"
+                className="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+              >
+                Deadline
               </th>
             )}
           </tr>
@@ -178,6 +224,22 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                       </span>
                     </div>
                   ) : null}
+                </td>
+              )}
+
+              {/* Deadline */}
+              {showDeadline && (
+                <td className="pt-2 text-right lg:pt-0 lg:table-cell lg:px-6 lg:py-4">
+                  {(() => {
+                    const status = getDeadlineStatus(issue.deadline)
+                    return (
+                      <span
+                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium whitespace-nowrap ${status.class}`}
+                      >
+                        {status.text}
+                      </span>
+                    )
+                  })()}
                 </td>
               )}
             </tr>

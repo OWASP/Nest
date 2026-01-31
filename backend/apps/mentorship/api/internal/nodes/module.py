@@ -3,6 +3,7 @@
 from datetime import datetime
 
 import strawberry
+from strawberry.types import Info
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
@@ -76,9 +77,12 @@ class ModuleNode:
 
     @strawberry.field
     def issues(
-        self, limit: int = 20, offset: int = 0, label: str | None = None
+        self, info: Info, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
+        # Inject current module into context for IssueNode.task_deadline
+        info.context.current_module = self
+        
         queryset = self.issues.select_related("repository", "author").prefetch_related(
             "assignees", "labels"
         )
@@ -110,8 +114,11 @@ class ModuleNode:
         return sorted(label_names)
 
     @strawberry.field
-    def issue_by_number(self, number: int) -> IssueNode | None:
+    def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
+        # Inject current module into context for IssueNode.task_deadline
+        info.context.current_module = self
+        
         return (
             self.issues.select_related("repository", "author")
             .prefetch_related("assignees", "labels")
