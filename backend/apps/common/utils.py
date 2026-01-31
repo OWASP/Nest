@@ -245,4 +245,8 @@ def validate_url(url: str | None) -> bool:
         return False
 
     # Check netloc contains at least one alphanumeric character
-    return any(c.isalnum() for c in netloc)
+    return (
+        parsed.scheme in {"http", "https"}
+        and parsed.hostname is not None
+        and any(c.isalnum() for c in parsed.hostname)
+    )
