@@ -1,7 +1,10 @@
 """GitHub issue GraphQL node."""
 
+from datetime import datetime
+
 import strawberry
 import strawberry_django
+from strawberry.types import Info
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
@@ -59,3 +62,11 @@ class IssueNode(strawberry.relay.Node):
                 "user__login"
             )
         ]
+
+    @strawberry.field
+    def task_deadline(self, root: Issue, info: Info) -> datetime | None:
+        """Return the deadline for the latest assigned task linked to this issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping is None:
+            return None
+        return mapping.get(root.number)
