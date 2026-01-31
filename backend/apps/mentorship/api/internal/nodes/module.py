@@ -82,6 +82,25 @@ class ModuleNode:
         """Return paginated issues linked to this module, optionally filtered by label."""
         info.context.current_module = self
 
+        # BULK load data
+        task_rows = (
+            Task.objects.filter(module=self, deadline_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "deadline_at", "assigned_at")
+        )
+
+        deadline_map = {}
+        assigned_map = {}
+
+        for row in task_rows:
+            num = row["issue__number"]
+            if num not in deadline_map:
+                deadline_map[num] = row["deadline_at"]
+                assigned_map[num] = row["assigned_at"]
+
+        info.context.task_deadlines_by_issue = deadline_map
+        info.context.task_assigned_at_by_issue = assigned_map
+
         queryset = self.issues.select_related("repository", "author").prefetch_related(
             "assignees", "labels"
         )
@@ -138,8 +157,13 @@ class ModuleNode:
         return [i.user for i in interests]
 
     @strawberry.field
-    def task_deadline(self, issue_number: int) -> datetime | None:
+    def task_deadline(self, info: Info, issue_number: int) -> datetime | None:
         """Return the deadline for the latest assigned task linked to this module and issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping:
+            return mapping.get(issue_number)
+
+        # fallback (single issue query)
         return (
             Task.objects.filter(
                 module=self,
@@ -152,8 +176,12 @@ class ModuleNode:
         )
 
     @strawberry.field
-    def task_assigned_at(self, issue_number: int) -> datetime | None:
-        """Return the latest assignment time for tasks linked to this module and issue number."""
+    def task_assigned_at(self, info: Info, issue_number: int) -> datetime | None:
+        """Return the latest assignment time for tasks linked to this module and issue."""
+        mapping = getattr(info.context, "task_assigned_at_by_issue", None)
+        if mapping:
+            return mapping.get(issue_number)
+
         return (
             Task.objects.filter(
                 module=self,

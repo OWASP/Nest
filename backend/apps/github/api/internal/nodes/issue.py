@@ -65,28 +65,8 @@ class IssueNode(strawberry.relay.Node):
 
     @strawberry.field
     def task_deadline(self, root: Issue, info: Info) -> datetime | None:
-        """Return the deadline for the latest assigned task linked to this issue.
-
-        Reads the current module from GraphQL context and queries the Task model
-        to find the most recent deadline. Returns None if no module is in context
-        or if no deadline exists for this issue.
-        """
-        # Import here to avoid circular dependency
-        from apps.mentorship.models.task import Task
-
-        # Get module from context (injected by ModuleNode resolvers)
-        module = getattr(info.context, "current_module", None)
-        if not module:
+        """Return the deadline for the latest assigned task linked to this issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping is None:
             return None
-
-        # Query Task table for deadline
-        return (
-            Task.objects.filter(
-                module=module,
-                issue__number=root.number,
-                deadline_at__isnull=False,
-            )
-            .order_by("-assigned_at")
-            .values_list("deadline_at", flat=True)
-            .first()
-        )
+        return mapping.get(root.number)

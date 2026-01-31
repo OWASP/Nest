@@ -6,7 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
-import IssuesTable, { type IssueRow } from 'components/IssuesTable'
+import IssuesTable from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
 
@@ -26,13 +26,13 @@ const getDeadlineCategory = (deadline?: string | null): string => {
 
   const now = new Date()
   const deadlineDate = new Date(deadline)
-  const nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const deadlineStart = new Date(
-    deadlineDate.getFullYear(),
-    deadlineDate.getMonth(),
-    deadlineDate.getDate()
+  const nowStartUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  const deadlineStartUtc = Date.UTC(
+    deadlineDate.getUTCFullYear(),
+    deadlineDate.getUTCMonth(),
+    deadlineDate.getUTCDate()
   )
-  const diffDays = Math.round((deadlineStart.getTime() - nowStart.getTime()) / 86400000)
+  const diffDays = Math.floor((deadlineStartUtc - nowStartUtc) / 86400000)
 
   if (diffDays < 0) return 'overdue'
   if (diffDays <= 7) return 'due-soon'
@@ -49,12 +49,15 @@ const IssuesPage = () => {
   )
   const [currentPage, setCurrentPage] = useState(1)
 
+  const isDeadlineFilterActive = selectedDeadline !== DEADLINE_ALL
+  const MAX_ISSUES_FOR_DEADLINE_FILTER = 1000
+
   const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
     variables: {
       programKey,
       moduleKey,
-      limit: ITEMS_PER_PAGE,
-      offset: (currentPage - 1) * ITEMS_PER_PAGE,
+      limit: isDeadlineFilterActive ? MAX_ISSUES_FOR_DEADLINE_FILTER : ITEMS_PER_PAGE,
+      offset: isDeadlineFilterActive ? 0 : (currentPage - 1) * ITEMS_PER_PAGE,
       label: selectedLabel === LABEL_ALL ? null : selectedLabel,
     },
     skip: !programKey || !moduleKey,
@@ -67,8 +70,8 @@ const IssuesPage = () => {
 
   const moduleData = data?.getModule
 
-  const moduleIssues: IssueRow[] = useMemo(() => {
-    const issues = (moduleData?.issues || []).map((i) => ({
+  const { moduleIssues, filteredCount } = useMemo(() => {
+    const allIssues = (moduleData?.issues || []).map((i) => ({
       objectID: i.id,
       number: i.number,
       title: i.title,
@@ -80,13 +83,22 @@ const IssuesPage = () => {
     }))
 
     if (selectedDeadline !== DEADLINE_ALL) {
-      return issues.filter((issue) => getDeadlineCategory(issue.deadline) === selectedDeadline)
+      // Filter by deadline category
+      const filtered = allIssues.filter(
+        (issue) => getDeadlineCategory(issue.deadline) === selectedDeadline
+      )
+      // Apply client-side pagination on filtered results
+      const start = (currentPage - 1) * ITEMS_PER_PAGE
+      const paginatedIssues = filtered.slice(start, start + ITEMS_PER_PAGE)
+      return { moduleIssues: paginatedIssues, filteredCount: filtered.length }
     }
 
-    return issues
-  }, [moduleData, selectedDeadline])
+    return { moduleIssues: allIssues, filteredCount: moduleData?.issuesCount || 0 }
+  }, [moduleData, selectedDeadline, currentPage])
 
-  const totalPages = Math.ceil((moduleData?.issuesCount || 0) / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(
+    (isDeadlineFilterActive ? filteredCount : moduleData?.issuesCount || 0) / ITEMS_PER_PAGE
+  )
 
   const allLabels: string[] = useMemo(() => {
     const serverLabels = moduleData?.availableLabels

@@ -83,13 +83,8 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
 
     const now = new Date()
     const deadlineDate = new Date(deadline)
-    const nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const deadlineStart = new Date(
-      deadlineDate.getFullYear(),
-      deadlineDate.getMonth(),
-      deadlineDate.getDate()
-    )
-    const diffDays = Math.round((deadlineStart.getTime() - nowStart.getTime()) / 86400000)
+    const utcStart = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+    const diffDays = Math.floor((utcStart(deadlineDate) - utcStart(now)) / 86400000)
 
     if (diffDays < 0)
       return {
