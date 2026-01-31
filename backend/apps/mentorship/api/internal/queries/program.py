@@ -3,6 +3,7 @@
 import logging
 
 import strawberry
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
@@ -19,16 +20,59 @@ class ProgramQuery:
     """Program queries."""
 
     @strawberry.field
-    def get_program(self, program_key: str) -> ProgramNode | None:
+    def get_program(self, info: strawberry.Info, program_key: str) -> ProgramNode | None:
         """Get a program by Key."""
         try:
-            program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
+            program = Program.objects.prefetch_related(
+                "admins__github_user", "modules__mentors__github_user"
+            ).get(key=program_key)
+
+            if program.status == Program.ProgramStatus.PUBLISHED:
+                return program
+
+            user = getattr(info.context.request, "user", None)
+            if user and user.is_authenticated:
+                if not user.github_user:
+                    msg = f"Program with key '{program_key}' not found."
+                    logger.warning(
+                        "Attempted public access to unpublished program '%s' (status: %s)",
+                        program_key,
+                        program.status,
+                    )
+                    raise ObjectDoesNotExist(msg)
+                try:
+                    mentor = Mentor.objects.get(github_user=user.github_user)
+                    if program.admins.filter(id=mentor.id).exists():
+                        logger.info(
+                            "Admin '%s' accessing draft program '%s'",
+                            user.username,
+                            program_key,
+                        )
+                        return program
+
+                    for module in program.modules.all():
+                        if module.mentors.filter(id=mentor.id).exists():
+                            logger.info(
+                                "Mentor '%s' accessing draft program '%s'",
+                                user.username,
+                                program_key,
+                            )
+                            return program
+                except Mentor.DoesNotExist:
+                    pass
+
+            msg = f"Program with key '{program_key}' not found."
+            logger.warning(
+                "Attempted public access to unpublished program '%s' (status: %s)",
+                program_key,
+                program.status,
+            )
+            raise ObjectDoesNotExist(msg)
+
         except Program.DoesNotExist:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
             return None
-
-        return program
 
     @strawberry.field(permission_classes=[IsAuthenticated])
     def my_programs(
