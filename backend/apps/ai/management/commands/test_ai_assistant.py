@@ -6,6 +6,7 @@ from django.core.management.base import BaseCommand
 
 from apps.ai.flows.assistant import process_query
 
+
 class Command(BaseCommand):
     help = "Benchmark the NestBot AI Assistant with a set of test queries."
 
@@ -18,18 +19,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         single_query = options.get("query")
-        
+
         test_queries = [
             # Project-Related Queries (should route to Project Expert Agent)
             "What are the OWASP flagship projects?",
             "Tell me about the OWASP Top 10 project.",
             "Who leads the OWASP SAMM project?",
-            "What is the OWASP ASVS project about?",
             "Find information about OWASP Juice Shop.",
             "Tell me about OWASP Dependency-Check.",
             "What are the OWASP project maturity levels?",
             "Find flagship projects and their leaders.",
-            
             # Chapter-Related Queries (should route to Chapter Expert Agent)
             "Is there an OWASP chapter in London?",
             "Find OWASP chapters in India.",
@@ -37,27 +36,22 @@ class Command(BaseCommand):
             "What chapters exist in the United States?",
             "Find OWASP chapters in Bangalore.",
             "Tell me about the OWASP Mumbai chapter.",
-            
             # Committee-Related Queries
             "What does the OWASP Project Committee do?",
             "Tell me about OWASP committees.",
-            
             # Event-Related Queries
             "What OWASP events are coming up?",
             "Tell me about OWASP AppSec events.",
-            
             # Contribution & GSoC Queries (should route to Contribution Expert Agent)
             "How can I contribute to OWASP?",
             "Are there any OWASP projects for GSoC?",
             "How do I get started with application security?",
-            
             # Multi-Intent / Collaborative Queries (should trigger multiple agents)
-            "Who leads the OWASP SAMM project and how can I find its Slack channel?",            
+            "Who leads the OWASP SAMM project and how can I find its Slack channel?",
             # RAG / Complex Knowledge Queries (should route to RAG Agent)
             "Explain the OWASP project lifecycle.",
             "What is OWASP?",
             "Tell me about web security.",
-            
             # Edge Cases & Low Confidence Queries
             "Hello",
             "Thanks",
@@ -67,7 +61,9 @@ class Command(BaseCommand):
         if single_query:
             test_queries = [single_query]
 
-        self.stdout.write(self.style.SUCCESS(f"Starting benchmark for {len(test_queries)} queries...\n"))
+        self.stdout.write(
+            self.style.SUCCESS(f"Starting benchmark for {len(test_queries)} queries...\n")
+        )
         self.stdout.write(self.style.SUCCESS("=" * 70 + "\n"))
 
         results = {
@@ -93,7 +89,7 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.WARNING("RESPONSE: No response yielded."))
             except Exception as e:
                 results["failed"] += 1
-                self.stdout.write(self.style.ERROR(f"ERROR: {str(e)}"))
+                self.stdout.write(self.style.ERROR(f"ERROR: {e!s}"))
                 self.stdout.write(self.style.ERROR(traceback.format_exc()))
 
         # Print summary

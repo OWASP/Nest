@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from django.conf import settings
 from crewai import LLM
+from django.conf import settings
 
 
 def get_llm() -> LLM:

@@ -12,9 +12,13 @@ from apps.slack.models import Message
 logger = logging.getLogger(__name__)
 
 # Error messages
-ERROR_UNABLE_TO_GENERATE_RESPONSE = "⚠️ I was unable to generate a response. Please try again later."
+ERROR_UNABLE_TO_GENERATE_RESPONSE = (
+    "⚠️ I was unable to generate a response. Please try again later."
+)
 ERROR_POSTING_RESPONSE = "⚠️ An error occurred while posting the response. Please try again later."
-ERROR_UNEXPECTED_PROCESSING = "⚠️ An unexpected error occurred while processing your query. Please try again later."
+ERROR_UNEXPECTED_PROCESSING = (
+    "⚠️ An unexpected error occurred while processing your query. Please try again later."
+)
 
 # Log messages
 LOG_ERROR_POSTING_ERROR_MESSAGE = "Error posting error message"
@@ -51,7 +55,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
         logger.exception("Error checking for replies for message")
 
     channel_id = message.conversation.slack_channel_id
-    
+
     # Add 👀 reaction to show we are working on it
     try:
         client.reactions_add(
@@ -76,12 +80,12 @@ def generate_ai_reply_if_unanswered(message_id: int):
 
     try:
         ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)
-        
+
         # Validate response - if it's just "YES" or "NO", something went wrong
         if ai_response_text:
             response_str = str(ai_response_text).strip()
             response_upper = response_str.upper()
-            if response_upper == "YES" or response_upper == "NO":
+            if response_upper in {"YES", "NO"}:
                 logger.error(
                     "AI query returned Question Detector output instead of agent response",
                     extra={
@@ -91,7 +95,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
                     },
                 )
                 ai_response_text = None
-        
+
         if not ai_response_text:
             # Remove eyes reaction and add shrugging reaction when no answer can be generated
             try:
@@ -104,7 +108,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
             except SlackApiError:
                 # Ignore if eyes reaction doesn't exist
                 pass
-            
+
             try:
                 result = client.reactions_add(
                     channel=channel_id,
@@ -124,7 +128,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
                         )
             except SlackApiError:
                 logger.exception("Error adding reaction to message")
-            
+
             # Post error message to user
             try:
                 client.chat_postMessage(
@@ -169,7 +173,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
                         extra={"channel_id": channel_id, "message_id": message.slack_message_id},
                     )
                     raise ValueError("Invalid response: Question Detector output detected")
-            
+
             blocks = format_blocks(ai_response_text)
             result = client.chat_postMessage(
                 channel=channel_id,
@@ -211,7 +215,11 @@ def generate_ai_reply_if_unanswered(message_id: int):
     except Exception as e:
         logger.exception(
             "Unexpected error processing AI query",
-            extra={"channel_id": channel_id, "message_id": message.slack_message_id, "error": str(e)},
+            extra={
+                "channel_id": channel_id,
+                "message_id": message.slack_message_id,
+                "error": str(e),
+            },
         )
         # Post error message to user
         try:
@@ -222,7 +230,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
             )
         except SlackApiError:
             logger.exception("Error posting error message")
-        
+
         # Remove eyes reaction
         try:
             client.reactions_remove(
@@ -252,9 +260,9 @@ def process_ai_query_async(
     query: str,
     channel_id: str,
     message_ts: str,
-    thread_ts: str = None,
+    thread_ts: str | None = None,
     is_app_mention: bool = False,
-    user_id: str = None,
+    user_id: str | None = None,
 ):
     """Process an AI query asynchronously (app mention or slash command)."""
     if not SlackConfig.app:
@@ -280,7 +288,7 @@ def process_ai_query_async(
         ai_response_text = process_ai_query(
             query=query, channel_id=channel_id, is_app_mention=is_app_mention
         )
-        
+
         # Validate response - if it's just "YES" or "NO", something went wrong
         if ai_response_text:
             response_str = str(ai_response_text).strip()
@@ -304,7 +312,7 @@ def process_ai_query_async(
                 except SlackApiError:
                     # Ignore if eyes reaction doesn't exist
                     pass
-                
+
                 try:
                     client.reactions_add(
                         channel=channel_id,
@@ -417,7 +425,7 @@ def process_ai_query_async(
                 )
             except SlackApiError:
                 logger.exception("Error posting ephemeral error message")
-        
+
         # Remove eyes reaction
         if message_ts:
             try:

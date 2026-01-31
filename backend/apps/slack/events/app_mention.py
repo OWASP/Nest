@@ -2,7 +2,6 @@
 
 import logging
 
-from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
 

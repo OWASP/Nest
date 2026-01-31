@@ -46,8 +46,9 @@ def route(query: str) -> dict:
 
     """
     import logging
+
     logger = logging.getLogger(__name__)
-    
+
     router_agent = create_router_agent()
 
     task_template = env.get_template("router/tasks/route.jinja")
@@ -69,16 +70,16 @@ def route(query: str) -> dict:
         max_iter=5,
         max_rpm=10,
     )
-    
+
     result = crew.kickoff()
 
     # Parse result
     result_str = str(result).strip()
-    
+
     # Validate result - if it's just "YES" or "NO", something went wrong
     result_upper = result_str.upper().strip()
     # Check if result is exactly "YES" or "NO" (with or without whitespace)
-    if result_upper == "YES" or result_upper == "NO":
+    if result_upper in {"YES", "NO"}:
         logger.error(
             "Router returned Question Detector output instead of routing result",
             extra={
@@ -94,7 +95,7 @@ def route(query: str) -> dict:
             "reasoning": "Router returned invalid output, defaulting to RAG",
             "alternative_intents": [],
         }
-    
+
     # Additional validation: check if result looks like routing format
     has_intent_line = any("intent:" in line.lower() for line in result_str.split("\n")[:10])
     if not has_intent_line and len(result_str) < 50:
@@ -112,7 +113,7 @@ def route(query: str) -> dict:
             "reasoning": "Router returned invalid format, defaulting to RAG",
             "alternative_intents": [],
         }
-    
+
     intent = None
     confidence = 0.5
     reasoning = ""

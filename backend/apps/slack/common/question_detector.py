@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import logging
-import os
 
-from django.core.exceptions import ObjectDoesNotExist
 from pgvector.django.functions import CosineDistance
 
 from apps.ai.common.llm_config import get_llm
@@ -78,8 +76,10 @@ class QuestionDetector:
             prompt = (
                 "You are an expert OWASP assistant. Your task is to determine if a human question "
                 "is related to OWASP, its projects, chapters, events, or general web security. "
-                "Respond with 'YES' if it is related, and 'NO' otherwise. Be extremely concise.\n\n"
-                "IMPORTANT: Simple greetings without questions (e.g., 'Hello', 'Hi', 'Thanks', 'Thank you') "
+                "Respond with 'YES' if it is related, and 'NO' otherwise. "
+                "Be extremely concise.\n\n"
+                "IMPORTANT: Simple greetings without questions "
+                "(e.g., 'Hello', 'Hi', 'Thanks', 'Thank you') "
                 "should be classified as 'NO' - they are not OWASP-related questions."
             )
 

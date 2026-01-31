@@ -1,4 +1,5 @@
 """Factory function to get the configured embedder."""
+
 from django.conf import settings
 
 from apps.ai.embeddings.base import Embedder
