@@ -32,9 +32,9 @@ Kerlyn is a cybersecurity practitioner with a strong focus on penetration testin
 
 Senior Security Engineer at LinkedIn
 
-[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik/) • [Slack](https://owasp.slack.com/team/U0AB7UGB1NV) • Country (Timezone)
+[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik/) • [Slack](https://owasp.slack.com/team/U0AB7UGB1NV) • [India (IST)](https://time-time.net/time/new-delhi-india.php) • [About me](https://theinfosecguy.xyz/)
 
-*This section is reserved for the mentor to add their own description.*
+Keshav is a Senior Security Engineer at LinkedIn who works at the intersection of security and developer experience. He believes complex security problems can be solved using unique engineering solutions.
 
 #### Kriti Birda
 
