@@ -51,8 +51,7 @@ ENV NODE_ENV=production
 ENV NPM_CACHE="/app/.npm"
 
 RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g npm@latest --cache ${NPM_CACHE} && \
-    npm cache clean --force
+    npm install --ignore-scripts -g npm@10.9.0 --cache ${NPM_CACHE}
 
 # Fix CVE-2026-23745: Update npm's bundled tar to 7.5.3 in runner stage
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
