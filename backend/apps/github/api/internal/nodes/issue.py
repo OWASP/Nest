@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from strawberry_django.optimizer import Prefetch
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
@@ -22,9 +23,9 @@ from apps.github.models.issue import Issue
 class IssueNode(strawberry.relay.Node):
     """GitHub issue node."""
 
-    assignees: list[UserNode] = strawberry_django.field()
-    author: UserNode | None = strawberry_django.field()
-    pull_requests: list[PullRequestNode] = strawberry_django.field()
+    assignees: list[UserNode] = strawberry_django.field(prefetch_related=["assignees"])
+    author: UserNode | None = strawberry_django.field(select_related=["author"])
+    pull_requests: list[PullRequestNode] = strawberry_django.field(prefetch_related=["pull_requests"])
 
     @strawberry_django.field(select_related=["repository__organization", "repository"])
     def organization_name(self, root: Issue) -> str | None:
