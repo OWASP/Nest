@@ -56,66 +56,54 @@ run:
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 
+# Default Local Safe Scan  NO Secrets
 security-scan: \
-	security-scan-code \
-	security-scan-images
-
-security-scan-code: \
 	security-scan-code-semgrep \
-	security-scan-code-trivy
+	backend-security-scan \
+	frontend-security-scan
 
-security-scan-images: \
-	security-scan-backend-image \
-	security-scan-frontend-image
+# CI/CD full Scan
+security-scan-full: \
+	security-scan \
+	backend-security-scan-secrets \
+	frontend-security-scan-secrets
 
 security-scan-code-semgrep:
 	@echo "Running Semgrep security scan..."
 	@docker run --rm \
-		-v "$(CURDIR):/src" \
+		-v "$(PWD):/src" \
 		-w /src \
 		$$(grep -E '^FROM semgrep/semgrep:' docker/semgrep/Dockerfile | sed 's/^FROM //') \
 		semgrep \
-			--config p/ci \
-			--config p/command-injection \
-			--config p/cwe-top-25 \
-			--config p/default \
-			--config p/django \
-			--config p/docker \
-			--config p/docker-compose \
-			--config p/dockerfile \
-			--config p/javascript \
-			--config p/nextjs \
-			--config p/nginx \
-			--config p/nodejs \
-			--config p/owasp-top-ten \
-			--config p/python \
-			--config p/r2c-security-audit \
-			--config p/react \
-			--config p/secrets \
-			--config p/secure-defaults \
-			--config p/security-audit \
-			--config p/security-headers \
-			--config p/sql-injection \
-			--config p/terraform \
-			--config p/typescript \
-			--error \
-			--skip-unknown-extensions \
-			--timeout 10 \
-			--timeout-threshold 3 \
-			--text \
-			--text-output=semgrep-security-report.txt \
-			.
-
-security-scan-code-trivy:
-	@echo "Running Trivy security scan..."
-	@docker run \
-		--rm \
-		-v "$(CURDIR):/src" \
-		-v trivy-cache:/root/.cache/trivy \
-		-w /src \
-		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		fs \
-		--config trivy.yaml \
+		--config p/ci \
+		--config p/command-injection \
+		--config p/cwe-top-25 \
+		--config p/default \
+		--config p/django \
+		--config p/docker \
+		--config p/docker-compose \
+		--config p/dockerfile \
+		--config p/javascript \
+		--config p/nextjs \
+		--config p/nginx \
+		--config p/nodejs \
+		--config p/owasp-top-ten \
+		--config p/python \
+		--config p/r2c-security-audit \
+		--config p/react \
+		--config p/secrets \
+		--config p/secure-defaults \
+		--config p/security-audit \
+		--config p/security-headers \
+		--config p/sql-injection \
+		--config p/terraform \
+		--config p/typescript \
+		--error \
+		--skip-unknown-extensions \
+		--timeout 10 \
+		--timeout-threshold 3 \
+		--text \
+		--text-output=semgrep-security-report.txt \
 		.
 
 test: \

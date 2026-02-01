@@ -59,22 +59,54 @@ generate-graphql-types:
 # Defaults for Local Development
 FRONTEND_IMAGE_NAME ?= nest-frontend-local
 TRIVY_EXIT_CODE ?= 0
+TRIVY_IMAGE_TAG := $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')
 
-security-scan-frontend-image:
+frontend-security-scan-image:
 	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
 		$(MAKE) build-frontend-local-image; \
 	fi
-	@echo "Scanning $(FRONTEND_IMAGE_NAME)..."
+	@echo "Scanning Image: $(FRONTEND_IMAGE_NAME)..."
 	@docker run --rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v trivy-cache:/root/.cache/trivy \
-		-v "$(CURDIR):/src" \
-		-w /src \
-		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		$(TRIVY_IMAGE_TAG) \
 		image \
-		--config /src/trivy.yaml \
+		--scanners vuln \
 		--exit-code $(TRIVY_EXIT_CODE) \
+		--severity CRITICAL,HIGH \
+		--no-progress \
 		$(FRONTEND_IMAGE_NAME)
+
+# local
+frontend-security-scan-code:
+	@echo "Scanning Frontend Code (Vulns + Config)..."
+	@docker run --rm \
+		-v $(PWD)/frontend:/app \
+		-v trivy-cache:/root/.cache/trivy \
+		$(TRIVY_IMAGE_TAG) \
+		fs \
+				--scanners vuln,config \
+		--exit-code $(TRIVY_EXIT_CODE) \
+		--severity CRITICAL,HIGH \
+		--no-progress \
+		/app
+
+# CI
+frontend-security-scan-secrets:
+	@echo "Scanning Frontend for Secrets..."
+	@docker run --rm \
+		-v $(PWD)/frontend:/app \
+		-v trivy-cache:/root/.cache/trivy \
+		$(TRIVY_IMAGE_TAG) \
+		fs \
+		--scanners secret \
+		--exit-code $(TRIVY_EXIT_CODE) \
+		--severity CRITICAL,HIGH \
+		--no-progress \
+		/app
+
+frontend-security-scan: frontend-security-scan-code frontend-security-scan-image
+frontend-security-scan-full: frontend-security-scan frontend-security-scan-secrets
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it

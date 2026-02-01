@@ -151,11 +151,11 @@ jobs:
           cache: true
 
       - name: Run Trivy security scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          scan-type: fs
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+        run: |
+          make backend-security-scan-code
+          make frontend-security-scan-code
+          make backend-security-scan-secrets
+          make frontend-security-scan-secrets
     timeout-minutes: 5
 
   run-backend-tests:
@@ -553,8 +553,11 @@ jobs:
 
       - name: Run Trivy security scan via Makefile
         run: |
-          make security-scan-images \
+          make backend-security-scan-image \
             BACKEND_IMAGE_NAME=owasp/nest:backend-staging \
+            TRIVY_EXIT_CODE=1
+
+          make frontend-security-scan-image \
             FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging \
             TRIVY_EXIT_CODE=1
     timeout-minutes: 5
@@ -907,8 +910,11 @@ jobs:
 
       - name: Run Trivy security scan via Makefile
         run: |
-          make security-scan-images \
+          make backend-security-scan-image \
             BACKEND_IMAGE_NAME=owasp/nest:backend-production \
+            TRIVY_EXIT_CODE=1
+
+          make frontend-security-scan-image \
             FRONTEND_IMAGE_NAME=owasp/nest:frontend-production \
             TRIVY_EXIT_CODE=1
     timeout-minutes: 5

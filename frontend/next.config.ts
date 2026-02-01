@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   transpilePackages: ['@react-leaflet/core', 'leaflet', 'react-leaflet', 'react-leaflet-cluster'],
-  ...(isLocal ? {} : { output: 'standalone' }),
+  output: 'standalone' ,
 }
 
 export default withSentryConfig(nextConfig, {

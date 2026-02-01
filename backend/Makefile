@@ -157,25 +157,60 @@ save-backup:
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
 
-# vars (defalts for Local dev)
+# vars (defaults for Local dev)
 BACKEND_IMAGE_NAME ?= nest-backend-local
 TRIVY_EXIT_CODE ?= 0
+TRIVY_IMAGE_TAG := $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')
 
-security-scan-backend-image:
+backend-security-scan-image:
 	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
 		$(MAKE) build-backend-local-image; \
 	fi
-	@echo "Scanning $(BACKEND_IMAGE_NAME)..."
+	@echo "Scanning Image: $(BACKEND_IMAGE_NAME)..."
 	@docker run --rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v trivy-cache:/root/.cache/trivy \
-		-v "$(CURDIR):/src" \
-		-w /src \
-		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		$(TRIVY_IMAGE_TAG) \
 		image \
-		--config /src/trivy.yaml \
+		--scanners vuln \
 		--exit-code $(TRIVY_EXIT_CODE) \
+		--severity CRITICAL,HIGH \
+		--no-progress \
 		$(BACKEND_IMAGE_NAME)
+
+# For local
+backend-security-scan-code:
+	@echo "Scanning Backend Code (Vulns + Config)..."
+	@docker run --rm \
+		-v $(PWD)/backend:/app \
+		-v trivy-cache:/root/.cache/trivy \
+		$(TRIVY_IMAGE_TAG) \
+		fs \
+				--scanners vuln,config \
+		--exit-code $(TRIVY_EXIT_CODE) \
+		--severity CRITICAL,HIGH \
+		--no-progress \
+		/app
+
+# CI Only or Explicit Local Run
+backend-security-scan-secrets:
+	@echo "Scanning Backend for Secrets..."
+	@docker run --rm \
+		-v $(PWD)/backend:/app \
+		-v trivy-cache:/root/.cache/trivy \
+		$(TRIVY_IMAGE_TAG) \
+		fs \
+		--scanners secret \
+		--exit-code $(TRIVY_EXIT_CODE) \
+		--severity CRITICAL,HIGH \
+		--no-progress \
+		/app
+
+# local
+backend-security-scan: backend-security-scan-code backend-security-scan-image
+
+# Full CI Scan
+backend-security-scan-full: backend-security-scan backend-security-scan-secrets
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
