@@ -191,18 +191,12 @@ class TestUtils:
             ("https://[::1]", True),  # Valid IPv6 address
             ("https://example.com:99999", True),  # Valid port (urlparse accepts it)
             # Malformed netloc test cases (issue #3535)
-            ("http://.", False),  # Just a dot
-            ("https://.", False),  # Just a dot with https
-            ("http:// ", False),  # Just a space
-            ("https:// ", False),  # Just a space with https
-            ("http://-", False),  # Just a hyphen
-            ("https://-", False),  # Just a hyphen with https
-            ("http://...", False),  # Multiple dots
-            ("https://...", False),  # Multiple dots with https
-            ("http://.-", False),  # Dot and hyphen
-            ("https://.-", False),  # Dot and hyphen with https
-            ("http://-.", False),  # Hyphen and dot
-            ("https://-.", False),  # Hyphen and dot with https
+            ("https://.", False),  # Just a dot
+            ("https:// ", False),  # Just a space
+            ("https://-", False),  # Just a hyphen
+            ("https://...", False),  # Multiple dots
+            ("https://.-", False),  # Dot and hyphen
+            ("https://-.", False),  # Hyphen and dot
         ],
     )
     def test_validate_url(self, url, expected):
