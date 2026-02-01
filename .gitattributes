@@ -1,3 +1,14 @@
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+.pre-commit-config.yaml text eol=lf
+.yamllint text eol=lf
+.readthedocs.yaml text eol=lf
+.coderabbit.yaml text eol=lf
+mkdocs.yaml text eol=lf
+trivy.yaml text eol=lf
+trivyignore.yaml text eol=lf
+backend/apps/slack/MANIFEST.yaml text eol=lf
 * text=auto
 
 *.js eol=lf

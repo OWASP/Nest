@@ -1,12 +1,36 @@
 """AI app chunk model."""
 
 from django.db import models
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
 from apps.ai.models.context import Context
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
+
+
+class _RecursiveCharacterTextSplitterFallback:
+    """Lightweight fallback splitter used when langchain is unavailable."""
+
+    def __init__(self, chunk_size=200, chunk_overlap=20, length_function=len, separators=None):
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+        self.length_function = length_function
+        self.separators = separators or ["\n\n", "\n", " ", ""]
+
+    def split_text(self, text: str) -> list[str]:
+        """Split text into fixed-size chunks with overlap."""
+        if not text:
+            return []
+        out: list[str] = []
+        start = 0
+        text_len = len(text)
+        while start < text_len:
+            end = min(text_len, start + self.chunk_size)
+            out.append(text[start:end])
+            # move start forward but keep overlap
+            next_start = end - self.chunk_overlap
+            start = next_start if next_start > start else end
+        return out
 
 
 class Chunk(TimestampedModel):
@@ -33,8 +57,21 @@ class Chunk(TimestampedModel):
 
     @staticmethod
     def split_text(text: str) -> list[str]:
-        """Split text into chunks."""
-        return RecursiveCharacterTextSplitter(
+        """Split text into chunks.
+
+        Uses langchain's splitter when available; otherwise, falls back to the
+        lightweight `_RecursiveCharacterTextSplitterFallback` implementation.
+        """
+        try:
+            from langchain.text_splitter import (  # type: ignore[import-untyped]
+                RecursiveCharacterTextSplitter,
+            )
+
+            splitter_cls = RecursiveCharacterTextSplitter
+        except ImportError:
+            splitter_cls = _RecursiveCharacterTextSplitterFallback
+
+        return splitter_cls(
             chunk_size=200,
             chunk_overlap=20,
             length_function=len,

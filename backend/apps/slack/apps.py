@@ -16,14 +16,21 @@ class SlackConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.slack"
 
-    app = (
-        App(
-            signing_secret=settings.SLACK_SIGNING_SECRET,
-            token=settings.SLACK_BOT_TOKEN,
-        )
-        if settings.SLACK_BOT_TOKEN != "None" and settings.SLACK_SIGNING_SECRET != "None"  # noqa: S105
-        else None
-    )
+    # Initialize Slack App safely (do not raise on import in test/local environments).
+    app = None
+    # Avoid initializing the Slack SDK during tests (it attempts external auth at init).
+    _is_test = getattr(settings, "IS_TEST_ENVIRONMENT", False)
+    _has_token = settings.SLACK_BOT_TOKEN != "None"  # noqa: S105
+    _has_secret = settings.SLACK_SIGNING_SECRET != "None"  # noqa: S105
+    if not _is_test and _has_token and _has_secret:
+        try:
+            app = App(
+                signing_secret=settings.SLACK_SIGNING_SECRET,
+                token=settings.SLACK_BOT_TOKEN,
+            )
+        except Exception:
+            logger.exception("Could not initialize Slack App; continuing without it")
+            app = None
 
     def ready(self):
         """Configure Slack events when the app is ready."""

@@ -26,17 +26,8 @@ repos:
         types:
           - html
 
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.3
-    hooks:
-      - id: yamlfmt
-        args:
-          - --implicit_start
-          - --mapping=2
-          - --offset=2
-          - --sequence=4
-        exclude: (.github|pnpm-lock.yaml)
-
+  # Removed jumanjihouse/pre-commit-hook-yamlfmt due to Windows venv path issues.
+  # `yamllint` (above) continues to enforce YAML style and strictness.
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.1
     hooks:

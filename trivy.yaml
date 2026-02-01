@@ -16,6 +16,24 @@ timeout: 10m
 vulnerability:
   ignore-unfixed: true
   security-checks:
-    - config
-    - secret
-    - vuln
+    filesystem:
+      skip-files:
+
+    ignorefile: trivyignore.yaml
+
+    scan:
+      skip-files:
+
+    severity:
+      - CRITICAL
+      - HIGH
+      - UNKNOWN
+
+    timeout: 10m
+
+    vulnerability:
+      ignore-unfixed: true
+      security-checks:
+        - config
+        - secret
+        - vuln
