@@ -24,11 +24,11 @@ class Test(Base):
     }
 
     # Provide minimal secrets to avoid environment variable requirements during tests
-    SECRET_KEY = "test-secret"
+    SECRET_KEY = "test-secret"  # noqa: S105
     ALGOLIA_APPLICATION_ID = "test"
     ALGOLIA_WRITE_API_KEY = "test"
     REDIS_HOST = "localhost"
     REDIS_PASSWORD = ""
-    OPEN_AI_SECRET_KEY = "test"
-    SLACK_SIGNING_SECRET = "test"
-    SLACK_BOT_TOKEN = "test"
+    OPEN_AI_SECRET_KEY = "test"  # noqa: S105
+    SLACK_SIGNING_SECRET = "test"  # noqa: S105
+    SLACK_BOT_TOKEN = "test"  # noqa: S105

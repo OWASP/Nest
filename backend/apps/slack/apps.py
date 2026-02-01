@@ -19,7 +19,10 @@ class SlackConfig(AppConfig):
     # Initialize Slack App safely (do not raise on import in test/local environments).
     app = None
     # Avoid initializing the Slack SDK during tests (it attempts external auth at init).
-    if not getattr(settings, "IS_TEST_ENVIRONMENT", False) and settings.SLACK_BOT_TOKEN != "None" and settings.SLACK_SIGNING_SECRET != "None":  # noqa: S105
+    _is_test = getattr(settings, "IS_TEST_ENVIRONMENT", False)
+    _has_token = settings.SLACK_BOT_TOKEN != "None"  # noqa: S105
+    _has_secret = settings.SLACK_SIGNING_SECRET != "None"  # noqa: S105
+    if not _is_test and _has_token and _has_secret:
         try:
             app = App(
                 signing_secret=settings.SLACK_SIGNING_SECRET,

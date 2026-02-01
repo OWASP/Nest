@@ -1,9 +1,15 @@
 """AI app chunk model."""
 
 from django.db import models
-# Lightweight fallback splitter used for local tests when langchain is unavailable.
+from pgvector.django import VectorField
+
+from apps.ai.models.context import Context
+from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.utils import truncate
+
+
 class _RecursiveCharacterTextSplitterFallback:
-    """Local fallback splitter used in tests and when langchain isn't installed."""
+    """Lightweight fallback splitter used when langchain is unavailable."""
 
     def __init__(self, chunk_size=200, chunk_overlap=20, length_function=len, separators=None):
         self.chunk_size = chunk_size
@@ -12,7 +18,7 @@ class _RecursiveCharacterTextSplitterFallback:
         self.separators = separators or ["\n\n", "\n", " ", ""]
 
     def split_text(self, text: str) -> list[str]:
-        """Simple fixed-size splitting with overlap as a lightweight fallback."""
+        """Split text into fixed-size chunks with overlap."""
         if not text:
             return []
         out: list[str] = []
@@ -25,12 +31,6 @@ class _RecursiveCharacterTextSplitterFallback:
             next_start = end - self.chunk_overlap
             start = next_start if next_start > start else end
         return out
-
-from pgvector.django import VectorField
-
-from apps.ai.models.context import Context
-from apps.common.models import BulkSaveModel, TimestampedModel
-from apps.common.utils import truncate
 
 
 class Chunk(TimestampedModel):
@@ -63,9 +63,12 @@ class Chunk(TimestampedModel):
         lightweight `_RecursiveCharacterTextSplitterFallback` implementation.
         """
         try:
-            from langchain.text_splitter import RecursiveCharacterTextSplitter  # type: ignore
+            from langchain.text_splitter import (  # type: ignore[import-untyped]
+                RecursiveCharacterTextSplitter,
+            )
+
             splitter_cls = RecursiveCharacterTextSplitter
-        except Exception:
+        except ImportError:
             splitter_cls = _RecursiveCharacterTextSplitterFallback
 
         return splitter_cls(
