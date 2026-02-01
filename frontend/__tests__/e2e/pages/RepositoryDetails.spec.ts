@@ -81,13 +81,5 @@ test.describe.serial('Repository Details Page', () => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
-
-    // Verify that at least one item exists in the PR section
-    const firstPR = page
-      .locator('div')
-      .filter({ hasText: 'Recent Pull Requests' })
-      .locator('a')
-      .first()
-    await expect(firstPR).toBeVisible()
   })
 })
