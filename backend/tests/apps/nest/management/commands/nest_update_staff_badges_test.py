@@ -14,6 +14,7 @@ class TestStaffBadgeCommand(SimpleTestCase):
     def test_has_correct_metadata(self):
         assert Command.badge_name == "OWASP Staff"
         assert Command.badge_weight == 100
+        assert Command.badge_css_class == "ribbon"
 
     @patch("apps.nest.management.commands.nest_update_staff_badges.User")
     @patch("apps.nest.management.commands.base_badge_command.UserBadge")

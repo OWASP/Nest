@@ -237,3 +237,26 @@ class TestGithubUpdateUsersCommand:
 
         assert mock_user.bulk_save.call_count == 2
         assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
+
+    @patch("apps.github.management.commands.github_update_users.call_command")
+    @patch("apps.github.management.commands.github_update_users.User")
+    @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    def test_badge_sync_commands_are_called(
+        self, mock_repository_contributor, mock_user, mock_call_command
+    ):
+        """Test that badge sync commands run after user update."""
+        mock_users_queryset = MagicMock()
+        mock_users_queryset.count.return_value = 0
+        mock_users_queryset.__getitem__.return_value = []
+
+        mock_user.objects.order_by.return_value = mock_users_queryset
+
+        mock_rc_queryset = MagicMock()
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = []
+        mock_repository_contributor.objects = mock_rc_queryset
+
+        command = Command()
+        command.handle(offset=0)
+
+        mock_call_command.assert_any_call("nest_update_staff_badges")
+        mock_call_command.assert_any_call("nest_update_project_leader_badges")

@@ -2,6 +2,7 @@
 
 import logging
 
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db.models import Q, Sum
 
@@ -57,3 +58,9 @@ class Command(BaseCommand):
                 User.bulk_save(users, fields=("contributions_count",))
 
         User.bulk_save(users, fields=("contributions_count",))
+
+        # Sync badges after user data refresh
+        self.stdout.write("Syncing badges...")
+
+        call_command("nest_update_staff_badges")
+        call_command("nest_update_project_leader_badges")
