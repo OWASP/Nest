@@ -1,4 +1,3 @@
-import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
@@ -29,5 +28,5 @@ export default defineConfig({
     headless: true,
     trace: 'off',
   },
-  workers: os.cpus().length,
+  workers: 1,
 })
