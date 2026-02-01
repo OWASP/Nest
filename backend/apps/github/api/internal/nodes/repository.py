@@ -12,6 +12,7 @@ from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.issue import Issue
+from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 
 if TYPE_CHECKING:
@@ -80,7 +81,16 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve recent milestones."""
         return root.recent_milestones.order_by("-created_at")[:limit]
 
-    @strawberry_django.field(prefetch_related=["releases"])
+    @strawberry_django.field(
+        prefetch=[
+            Prefetch(
+                "releases",
+                queryset=Release.objects.filter(
+                    is_draft=False
+                ).order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+            )
+        ]
+    )
     def releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
         # TODO(arkid15r): rename this to recent_releases.

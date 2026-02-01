@@ -20,7 +20,7 @@ from apps.owasp.constants import OWASP_ORGANIZATION_NAME
 class ReleaseNode(strawberry.relay.Node):
     """GitHub release node."""
 
-    author: UserNode | None = strawberry_django.field()
+    author: UserNode | None = strawberry_django.field(select_related=["author"])
 
     @strawberry_django.field(select_related=["repository__organization"])
     def organization_name(self, root: Release) -> str | None:
