@@ -86,31 +86,28 @@ describe('Badges Component', () => {
   })
 
   describe('Backend enum icons', () => {
-    const backendIcons = [
-      { cssClass: 'award', expectedIcon: 'award' },
-      { cssClass: 'medal', expectedIcon: 'medal' },
-      { cssClass: 'ribbon', expectedIcon: 'ribbon' },
-      { cssClass: 'star', expectedIcon: 'star' },
-      { cssClass: 'certificate', expectedIcon: 'certificate' },
-      { cssClass: 'bug_slash', expectedIcon: 'bug' }, // Backend snake_case input
-    ]
+  const backendIcons = [
+    { cssClass: 'award', expectedIcon: 'award' },
+    { cssClass: 'medal', expectedIcon: 'medal' },
+    { cssClass: 'ribbon', expectedIcon: 'ribbon' },
+    { cssClass: 'star', expectedIcon: 'star' },
+    { cssClass: 'certificate', expectedIcon: 'certificate' },
+    { cssClass: 'bugSlash', expectedIcon: 'bug' }, // ✅ direct mapping only
+  ]
 
-    for (const backendIcon of backendIcons) {
-      it(`renders ${backendIcon.cssClass} icon correctly (transforms snake_case to camelCase)`, () => {
-        render(<Badges name={`${backendIcon.cssClass} Badge`} cssClass={backendIcon.cssClass} />)
-
-        const icon = screen.getByTestId('badge-icon')
-        expect(icon).toBeInTheDocument()
-        expect(icon).toHaveAttribute('data-icon', backendIcon.expectedIcon)
-      })
-    }
-
-    it('handles camelCase input directly', () => {
-      render(<Badges name="Bug Slash Badge" cssClass="bugSlash" />)
+  for (const backendIcon of backendIcons) {
+    it(`renders ${backendIcon.cssClass} icon correctly`, () => {
+      render(
+        <Badges
+          name={`${backendIcon.cssClass} Badge`}
+          cssClass={backendIcon.cssClass}
+        />,
+      )
 
       const icon = screen.getByTestId('badge-icon')
       expect(icon).toBeInTheDocument()
-      expect(icon).toHaveAttribute('data-icon', 'bug')
+      expect(icon).toHaveAttribute('data-icon', backendIcon.expectedIcon)
     })
-  })
+  }
+})
 })
