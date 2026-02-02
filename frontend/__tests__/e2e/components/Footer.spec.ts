@@ -2,16 +2,13 @@ import { test, expect, devices, Page, BrowserContext } from '@playwright/test'
 
 // Desktop tests
 test.describe.serial('Footer - Desktop (Chrome)', () => {
-  test.use({
-    viewport: { width: 1280, height: 800 },
-    isMobile: false,
-  })
-
   let page: Page
   let context: BrowserContext
 
   test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext()
+    context = await browser.newContext({
+      ...devices['Desktop Chrome'],
+    })
     page = await context.newPage()
     await page.goto('/', { timeout: 25000 })
   })
@@ -30,12 +27,6 @@ test.describe.serial('Footer - Desktop (Chrome)', () => {
     await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()
   })
-})
-
-// Mobile tests (iPhone 13)
-test.use({
-  ...devices['iPhone 13'],
-  isMobile: true,
 })
 
 test.describe.serial('Footer - Mobile (iPhone 13)', () => {

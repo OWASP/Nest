@@ -5,13 +5,10 @@ test.describe.serial('Header - Desktop (Chrome)', () => {
   let context: BrowserContext
   let page: Page
 
-  test.use({
-    viewport: { width: 1280, height: 800 },
-    isMobile: false,
-  })
-
   test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext()
+    context = await browser.newContext({
+      ...devices['Desktop Chrome'],
+    })
     page = await context.newPage()
     await page.goto('/', { timeout: 25000 })
   })
@@ -67,12 +64,6 @@ test.describe.serial('Header - Desktop (Chrome)', () => {
       expect(cursor).toBe('pointer')
     }
   })
-})
-
-// Mobile tests (iPhone 13)
-test.use({
-  ...devices['iPhone 13'],
-  isMobile: true,
 })
 
 test.describe.serial('Header - Mobile (iPhone 13)', () => {
