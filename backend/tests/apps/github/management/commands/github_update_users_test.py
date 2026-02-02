@@ -1,6 +1,6 @@
 """Tests for the github_update_users Django management command."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from django.core.management.base import BaseCommand
 
@@ -44,7 +44,11 @@ class TestGithubUpdateUsersCommand:
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
-        mock_users_queryset.__getitem__.return_value = [mock_user1, mock_user2, mock_user3]
+        mock_users_queryset.__getitem__.return_value = [
+            mock_user1,
+            mock_user2,
+            mock_user3,
+        ]
 
         mock_user.objects.order_by.return_value = mock_users_queryset
 
@@ -77,7 +81,11 @@ class TestGithubUpdateUsersCommand:
         assert mock_user3.contributions_count == 30
 
         assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2, mock_user3]
+        assert mock_user.bulk_save.call_args_list[-1][0][0] == [
+            mock_user1,
+            mock_user2,
+            mock_user3,
+        ]
 
     @patch("apps.github.management.commands.github_update_users.call_command")
     @patch("apps.github.management.commands.github_update_users.User")
@@ -274,5 +282,12 @@ class TestGithubUpdateUsersCommand:
         command = Command()
         command.handle(offset=0)
 
-        mock_call_command.assert_any_call("nest_update_staff_badges")
-        mock_call_command.assert_any_call("nest_update_project_leader_badges")
+        mock_call_command.assert_has_calls(
+            [
+                call("nest_update_staff_badges"),
+                call("nest_update_project_leader_badges"),
+            ],
+            any_order=False,
+        )
+
+        assert mock_call_command.call_count == 2

@@ -62,5 +62,9 @@ class Command(BaseCommand):
         # Sync badges after user data refresh
         self.stdout.write("Syncing badges...")
 
-        call_command("nest_update_staff_badges")
-        call_command("nest_update_project_leader_badges")
+        try:
+            call_command("nest_update_staff_badges", stdout=self.stdout)
+            call_command("nest_update_project_leader_badges", stdout=self.stdout)
+        except Exception as e:
+            logger.exception("Badge sync failed")
+            self.stderr.write(self.style.ERROR(f"Badge sync failed: {e}"))
