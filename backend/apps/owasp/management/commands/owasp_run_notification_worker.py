@@ -19,6 +19,12 @@ class Command(BaseCommand):
 
     help = "Run notification worker to process Redis stream messages."
 
+    # Retry configuration
+    MAX_RETRIES = 5
+    BASE_DELAY = 2  # seconds
+    DELAY_MULTIPLIER = 2
+    DLQ_STREAM_KEY = "owasp_notifications_dlq"
+
     def handle(self, *args, **options):
         """Handle execution."""
         self.stdout.write("Starting notification worker...")
@@ -66,6 +72,8 @@ class Command(BaseCommand):
 
     def handle_snapshot_published(self, data):
         """Handle snapshot published event."""
+        redis_conn = get_redis_connection("default")
+        
         try:
             snapshot_id = int(data.get(b"snapshot_id").decode("utf-8"))
             snapshot = Snapshot.objects.get(id=snapshot_id)
@@ -78,13 +86,67 @@ class Command(BaseCommand):
 
             logger.info(f"Sending snapshot notification to {users.count()} users")
             
+            failed_users = []
+            
             for user in users:
-                self.send_notification(user, snapshot)
+                success = self.send_notification_with_retry(user, snapshot)
+                if not success:
+                    failed_users.append({
+                        'user_id': str(user.id),
+                        'email': user.email,
+                        'snapshot_id': str(snapshot_id)
+                    })
+            
+            # Send failed users to DLQ
+            if failed_users:
+                for failed_user in failed_users:
+                    dlq_message = {
+                        'type': 'failed_notification',
+                        'user_id': failed_user['user_id'],
+                        'email': failed_user['email'],
+                        'snapshot_id': failed_user['snapshot_id'],
+                        'retry_count': str(self.MAX_RETRIES),
+                        'timestamp': str(time.time()),
+                        'last_attempt': str(time.time())
+                    }
+                    redis_conn.xadd(self.DLQ_STREAM_KEY, dlq_message)
+                
+                logger.warning(f"Sent {len(failed_users)} failed notifications to DLQ")
 
         except Snapshot.DoesNotExist:
             logger.error(f"Snapshot matching ID {snapshot_id} not found.")
         except Exception:
             logger.exception("Error handling snapshot published event")
+
+    def send_notification_with_retry(self, user, snapshot):
+        """Send notification with exponential backoff retry logic."""
+        retry_count = 0
+        last_error = None
+        
+        while retry_count <= self.MAX_RETRIES:
+            try:
+                self.send_notification(user, snapshot)
+                if retry_count > 0:
+                    logger.info(f"Email to {user.email} succeeded after {retry_count} retries")
+                return True
+            except Exception as e:
+                retry_count += 1
+                last_error = e
+                if retry_count <= self.MAX_RETRIES:
+                    delay = self.BASE_DELAY * (self.DELAY_MULTIPLIER ** (retry_count - 1))
+                    logger.warning(
+                        f"Email to {user.email} failed (attempt {retry_count}/{self.MAX_RETRIES}). "
+                        f"Retrying in {delay}s. Error: {str(e)}"
+                    )
+                    time.sleep(delay)
+                else:
+                    logger.error(
+                        f"Email to {user.email} failed after {self.MAX_RETRIES} retries. "
+                        f"Error: {str(last_error)}"
+                    )
+                    return False
+        
+        return False
 
     def send_notification(self, user, snapshot):
         """Send notification to user."""
@@ -100,14 +162,11 @@ class Command(BaseCommand):
         )
 
         # Send Email
-        try:
-            send_mail(
-                subject=title,
-                message=message,
-                from_email="noreply@owasp.org",
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-            logger.info(f"Sent email to {user.email}")
-        except Exception:
-            logger.exception(f"Failed to send email to {user.email}")
+        send_mail(
+            subject=title,
+            message=message,
+            from_email="noreply@owasp.org",
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        logger.info(f"Sent email to {user.email}")
