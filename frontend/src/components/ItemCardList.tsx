@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
 import type { IconType } from 'react-icons'
+import { FaUser } from 'react-icons/fa'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { PullRequest } from 'types/pullRequest'
@@ -60,22 +61,24 @@ const ItemCardList = ({
                     placement="bottom"
                     showArrow
                   >
-                    <Link
-                      className="shrink-0 text-blue-400 hover:underline"
-                      href={`/members/${item?.author?.login}`}
-                    >
-                      <Image
-                        height={24}
-                        width={24}
-                        src={item?.author?.avatarUrl}
-                        alt={
-                          item.author && (item.author.name || item.author.login)
-                            ? `${item.author.name || item.author.login}'s avatar`
-                            : "Author's avatar"
-                        }
-                        className="mr-2 rounded-full"
-                      />
-                    </Link>
+                    {item?.author && (item.author.name || item.author.login) ? (
+                      <Link
+                        className="shrink-0 text-blue-400 hover:underline"
+                        href={`/members/${item?.author?.login}`}
+                      >
+                        <Image
+                          height={24}
+                          width={24}
+                          src={item?.author?.avatarUrl}
+                          alt={`${item.author.name || item.author.login}'s avatar`}
+                          className="mr-2 rounded-full"
+                        />
+                      </Link>
+                    ) : (
+                      <div className="shrink-0">
+                        <FaUser className="mr-2 h-6 w-6 text-gray-400 dark:text-gray-500" />
+                      </div>
+                    )}
                   </Tooltip>
                 )}
                 <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
