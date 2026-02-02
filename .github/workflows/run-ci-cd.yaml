@@ -341,6 +341,7 @@ jobs:
           file: docker/frontend/Dockerfile
           build-args: |
             ENV_FILE=.env.e2e.example
+            NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
           load: true
           platforms: linux/amd64
           tags: owasp/nest:frontend-e2e-latest
