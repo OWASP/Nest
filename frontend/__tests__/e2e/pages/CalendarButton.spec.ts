@@ -25,7 +25,7 @@ test.describe.serial('Calendar Export Functionality', () => {
       (await firstEventButton.getAttribute('aria-label')) || (await firstEventButton.innerText())
     const eventName = buttonText
       .replace(/^Add\s+/i, '')
-      .replace(/\s+to Calendar$/i, '')
+      .replace(/\s+to Calendar$/i, '') // NOSONAR
       .trim()
     const downloadPromise = page.waitForEvent('download')
     await firstEventButton.click()
