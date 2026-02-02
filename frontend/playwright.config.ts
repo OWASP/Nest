@@ -29,5 +29,5 @@ export default defineConfig({
     headless: true,
     trace: 'off',
   },
-  workers: os.cpus().length,
+  workers: 2,
 })
