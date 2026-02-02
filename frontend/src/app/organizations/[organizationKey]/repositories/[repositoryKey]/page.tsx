@@ -43,7 +43,7 @@ const RepositoryDetailsPage = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !repository) {
+  if (graphQLRequestError || !repository) {
     return (
       <ErrorDisplay
         message="Sorry, the Repository you're looking for doesn't exist"

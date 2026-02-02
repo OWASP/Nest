@@ -37,7 +37,12 @@ export async function generateMetadata({
         keywords: ['owasp', 'repository', repositoryKey, repository.name],
         title: repository.name,
       })
-    : null
+    : generateSeoMetadata({
+        canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
+        description: 'Repository details',
+        keywords: ['owasp', 'repository', repositoryKey],
+        title: formatBreadcrumbTitle(repositoryKey),
+      })
 }
 
 export default async function RepositoryDetailsLayout({
