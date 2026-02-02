@@ -32,9 +32,9 @@ Kerlyn is a cybersecurity practitioner with a strong focus on penetration testin
 
 Senior Security Engineer at LinkedIn
 
-[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik/) • [Slack](https://owasp.slack.com/team/U0AB7UGB1NV) • Country (Timezone)
+[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik/) • [Slack](https://owasp.slack.com/team/U0AB7UGB1NV) • [India (IST)](https://time-time.net/time/new-delhi-india.php) • [About me](https://theinfosecguy.xyz/)
 
-*This section is reserved for the mentor to add their own description.*
+Keshav is a Senior Security Engineer at LinkedIn who works at the intersection of security and developer experience. He believes complex security problems can be solved using unique engineering solutions.
 
 #### Kriti Birda
 
@@ -72,7 +72,7 @@ Noland Crane is a Product Security Engineer at Bloomreach where he conducts pent
 
 Product Security Engineer at Splunk
 
-[GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • [India (IST)](https://time-time.net/time/india-ist.php) • [About me](https://rajanagori.in/)
+[GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • [India (IST)](https://time-time.net/time/new-delhi-india.php) • [About me](https://rajanagori.in/)
 
 Raja Nagori is a Product Security Engineer at Splunk with a strong focus on information security and continuous learning. He holds a Bachelor's degree in Computer Science and Engineering and has experience in penetration testing, threat modeling, and DevSecOps. Raja is an active member of the OWASP community and leads the Nightingale project, a Docker-based environment for penetration testers.
 
