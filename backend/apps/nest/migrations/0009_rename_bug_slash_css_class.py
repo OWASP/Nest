@@ -15,7 +15,7 @@ def reverse_bug_slash_css_class(apps, _schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("nest", "0072"),
+        ("nest", "0008_alter_badge_css_class"),
     ]
 
     operations = [

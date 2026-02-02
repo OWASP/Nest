@@ -1,6 +1,6 @@
 """Tests for the github_update_users Django management command."""
 
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import ANY, MagicMock, call, patch
 
 from django.core.management.base import BaseCommand
 
@@ -284,8 +284,8 @@ class TestGithubUpdateUsersCommand:
 
         mock_call_command.assert_has_calls(
             [
-                call("nest_update_staff_badges"),
-                call("nest_update_project_leader_badges"),
+                call("nest_update_staff_badges", stdout=ANY),
+                call("nest_update_project_leader_badges", stdout=ANY),
             ],
             any_order=False,
         )
