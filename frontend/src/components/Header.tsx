@@ -55,10 +55,15 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   }, [mobileMenuOpen])
 
   return (
-    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
+    <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800" role="banner">
       <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+        <Link 
+          href="/" 
+          onClick={() => setMobileMenuOpen(false)}
+          aria-label="OWASP Nest Home"
+          className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+        >
           <div className="flex h-full items-center">
             <div className="flex h-16 w-16 items-center justify-center py-2">
               <Image
@@ -133,19 +138,27 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="flex h-11 w-11 items-center justify-center bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
+              className="flex h-11 w-11 items-center justify-center bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
-              <span className="sr-only">Open main menu</span>
+              <span className="sr-only">
+                {mobileMenuOpen ? "Close main menu" : "Open main menu"}
+              </span>
               {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
             </Button>
           </div>
         </div>
       </div>
       <div
+        id="mobile-menu"
         className={cn(
           'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
+        role="navigation"
+        aria-label="Mobile navigation menu"
       >
         <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
           {/* Logo */}
