@@ -43,7 +43,9 @@ test.describe.serial('Footer - Mobile (iPhone 13)', () => {
   let context: BrowserContext
 
   test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext()
+    context = await browser.newContext({
+      ...devices['iPhone 13'],
+    })
     page = await context.newPage()
     await page.goto('/')
   })

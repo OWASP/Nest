@@ -50,6 +50,7 @@ test.describe.serial('Chapters Page', () => {
     await expect(page).toHaveURL('chapters/chapter_1')
   })
   test('displays "No chapters found" when there are no chapters', async () => {
+    await page.unroute('**/idx/')
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,

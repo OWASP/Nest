@@ -23,6 +23,7 @@ test.describe('Projects Health Dashboard Overview', () => {
   })
 
   test('renders project health stats', async () => {
+    await page.unrouteAll()
     await mockDashboardCookies(page, mockProjectsDashboardOverviewData, true)
     await page.goto('/projects/dashboard', { timeout: 25000 })
     await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible()

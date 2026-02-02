@@ -41,4 +41,9 @@ test.describe.serial('Organization Page', () => {
   test('breadcrumb renders correct segments on /organizations', async () => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Organizations'])
   })
+
+  test('navigation to organization details works', async () => {
+    await page.getByRole('button', { name: 'View Profile' }).first().click()
+    await expect(page).toHaveURL(/\/organizations\/[^/]+/)
+  })
 })

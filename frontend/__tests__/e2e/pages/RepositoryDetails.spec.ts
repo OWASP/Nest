@@ -69,9 +69,9 @@ test.describe.serial('Repository Details Page', () => {
 
   test('toggle top contributors', async () => {
     await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
-    page.getByRole('button', { name: 'Show more' }).last().click()
+    await page.getByRole('button', { name: 'Show more' }).last().click()
     await expect(page.getByRole('button', { name: 'Show less' }).last()).toBeVisible()
-    page.getByRole('button', { name: 'Show less' }).last().click()
+    await page.getByRole('button', { name: 'Show less' }).last().click()
     await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
   })
 

@@ -70,8 +70,7 @@ test.describe.serial('Organization Details Page', () => {
 
   test('should display top contributors section', async () => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    const contributorAvatar = page.locator('img[alt*="avatar"]').first()
-    await expect(contributorAvatar).toBeVisible()
+    await expect(page.locator('img[alt*="avatar"]').first()).toBeVisible()
   })
 
   test('should display recent pull requests section', async () => {

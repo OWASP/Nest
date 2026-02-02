@@ -49,6 +49,7 @@ test.describe.serial('Committees Page', () => {
   })
   test('displays "No committees found" when there are no committees', async () => {
     await page.goto('/committees')
+    await page.unroute('**/idx/')
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,

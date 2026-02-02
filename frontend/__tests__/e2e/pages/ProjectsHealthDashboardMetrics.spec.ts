@@ -21,6 +21,7 @@ test.describe.serial('Projects Health Dashboard Metrics', () => {
   })
 
   test('renders page headers', async () => {
+    await page.unrouteAll()
     await mockDashboardCookies(page, mockHealthMetricsData, true)
     await page.goto('/projects/dashboard/metrics', { timeout: 25000 })
     await expect(page.getByRole('heading', { name: 'Project Health Metrics' })).toBeVisible()

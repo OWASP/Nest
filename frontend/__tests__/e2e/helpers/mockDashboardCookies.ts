@@ -12,7 +12,7 @@ export const mockDashboardCookies = async (page, mockDashboardData, isOwaspStaff
       },
     })
   })
-  await page.route('**/graphql', async (route, request) => {
+  await page.route('**/graphql/', async (route, request) => {
     const postData = request.postDataJSON()
     if (postData.operationName === 'SyncDjangoSession') {
       await route.fulfill({

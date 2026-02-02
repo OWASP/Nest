@@ -36,6 +36,7 @@ test.describe.serial('Project Health Metrics Details Page', () => {
     }
   })
   test('renders 404 when user is not OWASP staff', async () => {
+    await page.unrouteAll()
     await mockDashboardCookies(page, mockProjectsDashboardMetricsDetailsData, false)
     await page.goto('/projects/dashboard/metrics/test-project', { timeout: 25000 })
     await expect(page.getByText('404')).toBeVisible()

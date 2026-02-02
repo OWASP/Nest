@@ -61,6 +61,7 @@ test.describe.serial('Contribute Page', () => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Contribute'])
   })
   test('displays "No Issues found" when there are no issues', async () => {
+    await page.unroute('**/idx/')
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
