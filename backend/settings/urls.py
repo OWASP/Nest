@@ -8,7 +8,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 from strawberry.django.views import GraphQLView
 
 from apps.api.rest.v0 import api as api_v0
@@ -21,8 +21,8 @@ from settings.graphql import schema
 
 urlpatterns = [
     path("csrf/", get_csrf_token),
-    path("idx/", csrf_exempt(algolia_search)),
-    path("graphql/", csrf_exempt(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
+    path("idx/", csrf_protect(algolia_search)),
+    path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v0/", api_v0.urls),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),
