@@ -48,6 +48,13 @@ class IssueNode(strawberry.relay.Node):
     @strawberry_django.field(prefetch_related=["pull_requests"])
     def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
+        pull_requests = getattr(root, "prefetched_pull_requests", None)
+        if pull_requests is not None:
+            return any(
+                pr.state == "closed" and pr.merged_at is not None
+                for pr in pull_requests
+        )
+        # fallback to ORM if not prefetched
         return root.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
 
     @strawberry_django.field(prefetch_related=["participant_interests__user"])

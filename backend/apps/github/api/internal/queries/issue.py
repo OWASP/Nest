@@ -4,9 +4,11 @@ import strawberry
 import strawberry_django
 from django.db.models import F, Window
 from django.db.models.functions import Rank
+from django.db.models import Prefetch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
 
 MAX_LIMIT = 1000
 
@@ -47,6 +49,14 @@ class IssueQuery:
             filters["repository__organization__login"] = organization
 
         queryset = queryset.filter(**filters)
+
+        queryset = queryset.prefetch_related(
+            Prefetch(
+                "pull_requests",
+                queryset=PullRequest.objects.only("id", "state", "merged_at"),
+                to_attr="prefetched_pull_requests"
+            )
+        )
 
         if distinct:
             queryset = (
