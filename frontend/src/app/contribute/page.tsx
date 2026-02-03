@@ -80,7 +80,7 @@ const ContributePage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      {issues?.map(renderContributeCard)}
+      {issues?.map((issue, index) => renderContributeCard(issue, index))}
     </SearchPageLayout>
   )
 }
