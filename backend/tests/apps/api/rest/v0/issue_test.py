@@ -134,7 +134,7 @@ class TestListIssues:
         filters = IssueFilter()
         list_issues(request, filters, "updated_at")
 
-        mock_qs.order_by.assert_called_once_with("updated_at", "-updated_at")
+        mock_qs.order_by.assert_called_once_with("updated_at")
 
 
 class TestGetIssue:

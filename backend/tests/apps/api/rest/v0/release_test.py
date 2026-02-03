@@ -131,7 +131,7 @@ class TestListRelease:
         filters = ReleaseFilter()
         list_release(request, filters, "created_at")
 
-        mock_qs.order_by.assert_called_once_with("created_at", "-created_at")
+        mock_qs.order_by.assert_called_once_with("created_at")
 
 
 class TestGetRelease:
