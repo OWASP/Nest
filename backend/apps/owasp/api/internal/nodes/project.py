@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.core.utils.index import deep_camelize
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -84,24 +85,24 @@ class ProjectNode(GenericEntityNode):
         """Resolve recent issues."""
         return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        prefetch_related=[
+            lambda _info: Prefetch(
+                "milestones",
+                queryset=Milestone.objects.select_related(
+                    "repository__organization",
+                    "author__owasp_profile",
+                ).order_by("-created_at")[:5],
+                to_attr="_recent_milestones",
+            )
+        ]
+    )
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
-        return (
-            Milestone.objects.filter(
-                repository__in=root.repositories.all(),
-            )
-            .select_related(
-                "repository__organization",
-                "author__owasp_profile",
-            )
-            .prefetch_related(
-                "labels",
-            )
-            .order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        cached = getattr(root, "_recent_milestones", None)
+        if cached is None:
+            return root.milestones.order_by("-created_at")[:limit]
+        return cached
 
     @strawberry_django.field
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
