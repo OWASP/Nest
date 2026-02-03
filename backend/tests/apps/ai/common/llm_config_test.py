@@ -3,8 +3,6 @@
 import os
 from unittest.mock import Mock, patch
 
-import pytest
-
 from apps.ai.common.llm_config import get_llm
 
 
@@ -54,20 +52,24 @@ class TestLLMConfig:
         os.environ,
         {
             "LLM_PROVIDER": "anthropic",
-            "ANTHROPIC_API_KEY": "test-anthropic-key",
+            "DJANGO_OPEN_AI_SECRET_KEY": "test-key",
         },
     )
+    @patch("apps.ai.common.llm_config.logger")
     @patch("apps.ai.common.llm_config.LLM")
-    def test_get_llm_anthropic_default(self, mock_llm):
-        """Test getting Anthropic LLM with default model."""
+    def test_get_llm_anthropic_default(self, mock_llm, mock_logger):
+        """Test getting LLM with unsupported Anthropic provider falls back to OpenAI."""
         mock_llm_instance = Mock()
         mock_llm.return_value = mock_llm_instance
 
         result = get_llm()
 
+        # Should log warning about unrecognized provider
+        mock_logger.warning.assert_called_once()
+        # Should fallback to OpenAI
         mock_llm.assert_called_once_with(
-            model="claude-3-5-sonnet-20241022",
-            api_key="test-anthropic-key",
+            model="gpt-4.1-mini",
+            api_key="test-key",
             temperature=0.1,
         )
         assert result == mock_llm_instance
@@ -76,27 +78,51 @@ class TestLLMConfig:
         os.environ,
         {
             "LLM_PROVIDER": "anthropic",
-            "ANTHROPIC_API_KEY": "test-anthropic-key",
-            "ANTHROPIC_MODEL_NAME": "claude-3-opus",
+            "DJANGO_OPEN_AI_SECRET_KEY": "test-key",
+            "OPENAI_MODEL_NAME": "gpt-4",
         },
     )
+    @patch("apps.ai.common.llm_config.logger")
     @patch("apps.ai.common.llm_config.LLM")
-    def test_get_llm_anthropic_custom_model(self, mock_llm):
-        """Test getting Anthropic LLM with custom model."""
+    def test_get_llm_anthropic_custom_model(self, mock_llm, mock_logger):
+        """Test getting LLM with unsupported Anthropic provider falls back to OpenAI."""
         mock_llm_instance = Mock()
         mock_llm.return_value = mock_llm_instance
 
         result = get_llm()
 
+        # Should log warning about unrecognized provider
+        mock_logger.warning.assert_called_once()
+        # Should fallback to OpenAI with custom model
         mock_llm.assert_called_once_with(
-            model="claude-3-opus",
-            api_key="test-anthropic-key",
+            model="gpt-4",
+            api_key="test-key",
             temperature=0.1,
         )
         assert result == mock_llm_instance
 
-    @patch.dict(os.environ, {"LLM_PROVIDER": "unsupported"})
-    def test_get_llm_unsupported_provider(self):
-        """Test getting LLM with unsupported provider raises error."""
-        with pytest.raises(ValueError, match="Unsupported LLM provider: unsupported"):
-            get_llm()
+    @patch.dict(
+        os.environ,
+        {
+            "LLM_PROVIDER": "unsupported",
+            "DJANGO_OPEN_AI_SECRET_KEY": "test-key",
+        },
+    )
+    @patch("apps.ai.common.llm_config.logger")
+    @patch("apps.ai.common.llm_config.LLM")
+    def test_get_llm_unsupported_provider(self, mock_llm, mock_logger):
+        """Test getting LLM with unsupported provider logs warning and falls back to OpenAI."""
+        mock_llm_instance = Mock()
+        mock_llm.return_value = mock_llm_instance
+
+        result = get_llm()
+
+        # Should log warning about unrecognized provider
+        mock_logger.warning.assert_called_once()
+        # Should fallback to OpenAI
+        mock_llm.assert_called_once_with(
+            model="gpt-4.1-mini",
+            api_key="test-key",
+            temperature=0.1,
+        )
+        assert result == mock_llm_instance

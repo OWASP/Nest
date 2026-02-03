@@ -74,7 +74,9 @@ def format_blocks(text: str) -> list[dict]:
             # Split the long line into chunks
             for i in range(0, line_length, MAX_BLOCK_TEXT_LENGTH):
                 chunk = line[i : i + MAX_BLOCK_TEXT_LENGTH]
-                blocks.append(markdown(chunk))
+                # Only add non-empty chunks (after stripping whitespace)
+                if chunk.strip():
+                    blocks.append(markdown(chunk.strip()))
             continue
 
         # Check if adding this line would exceed the limit

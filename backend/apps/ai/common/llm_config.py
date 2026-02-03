@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import logging
+
 from crewai import LLM
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 def get_llm() -> LLM:
@@ -30,6 +34,12 @@ def get_llm() -> LLM:
         )
 
     # Fallback to OpenAI if provider not recognized or not specified
+    if provider and provider not in ("openai", "google"):
+        logger.warning(
+            "Unrecognized LLM_PROVIDER '%s'. Falling back to OpenAI. "
+            "Supported providers: 'openai', 'google'",
+            provider,
+        )
     return LLM(
         model=settings.OPENAI_MODEL_NAME,
         api_key=settings.OPEN_AI_SECRET_KEY,

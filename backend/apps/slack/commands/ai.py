@@ -52,12 +52,39 @@ class Ai(CommandBase):
             process_ai_query_async,
         )
 
-        django_rq.get_queue("ai").enqueue(
-            process_ai_query_async,
-            query=query,
-            channel_id=channel_id,
-            message_ts=None,  # No TS to react to initially
-            thread_ts=None,
-            is_app_mention=False,
-            user_id=user_id,
-        )
+        try:
+            django_rq.get_queue("ai").enqueue(
+                process_ai_query_async,
+                query=query,
+                channel_id=channel_id,
+                message_ts=None,  # No TS to react to initially
+                thread_ts=None,
+                is_app_mention=False,
+                user_id=user_id,
+            )
+        except Exception as e:
+            # Post user-facing error message via ephemeral (slash command pattern)
+            try:
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    user=user_id,
+                    text=(
+                        "⚠️ An error occurred while processing your query. Please try again later."
+                    ),
+                )
+            except SlackApiError:
+                logger.warning(
+                    "Failed to post ephemeral error message to user",
+                    extra={"channel_id": channel_id, "user_id": user_id},
+                )
+
+            # Log the exception with context for debugging
+            logger.exception(
+                "Failed to enqueue AI query processing for /ai command",
+                extra={
+                    "channel_id": channel_id,
+                    "user_id": user_id,
+                    "query": query[:100],
+                    "error": str(e),
+                },
+            )

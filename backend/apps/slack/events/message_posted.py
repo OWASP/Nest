@@ -18,6 +18,7 @@ class MessagePosted(EventBase):
     """Handles new messages posted in channels."""
 
     event_type = "message"
+    _bot_user_id = None  # Cache bot user ID to avoid repeated auth_test() calls
 
     def __init__(self):
         """Initialize MessagePosted event handler."""
@@ -48,8 +49,11 @@ class MessagePosted(EventBase):
         # Check if bot is mentioned in the message text or blocks
         bot_mentioned = False
         try:
-            bot_info = client.auth_test()
-            bot_user_id = bot_info.get("user_id")
+            # Cache bot_user_id to avoid repeated auth_test() calls
+            if MessagePosted._bot_user_id is None:
+                bot_info = client.auth_test()
+                MessagePosted._bot_user_id = bot_info.get("user_id")
+            bot_user_id = MessagePosted._bot_user_id
             if bot_user_id:
                 # Check text for mention format: <@BOT_USER_ID>
                 if f"<@{bot_user_id}>" in text:
