@@ -5,7 +5,7 @@ from pathlib import Path
 from django.apps import apps
 from django.conf import settings
 from django.core.management import call_command
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -43,7 +43,7 @@ class Command(BaseCommand):
                     "--inheritance",
                     output=str(apps_dir / f"{label}_inheritance.svg"),
                 )
-            except Exception as exc:  # noqa: BLE001
+            except (CommandError, OSError) as exc:
                 self.stderr.write(f"[warn] inheritance graph failed for {label}: {exc}")
                 failures.append(f"{label} inheritance")
 
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                     "--no-inheritance",
                     output=str(apps_dir / f"{label}_relations.svg"),
                 )
-            except Exception as exc:  # noqa: BLE001
+            except (CommandError, OSError) as exc:
                 self.stderr.write(f"[warn] relations graph failed for {label}: {exc}")
                 failures.append(f"{label} relations")
 
@@ -67,7 +67,7 @@ class Command(BaseCommand):
                 "--inheritance",
                 output=str(inter_dir / "backend_inheritance.svg"),
             )
-        except Exception as exc:  # noqa: BLE001
+        except (CommandError, OSError) as exc:
             self.stderr.write(f"[warn] inter inheritance failed: {exc}")
             failures.append("inter-app inheritance")
 
@@ -78,7 +78,7 @@ class Command(BaseCommand):
                 "--no-inheritance",
                 output=str(inter_dir / "backend_relations.svg"),
             )
-        except Exception as exc:  # noqa: BLE001
+        except (CommandError, OSError) as exc:
             self.stderr.write(f"[warn] inter relations failed: {exc}")
             failures.append("inter-app relations")
 
