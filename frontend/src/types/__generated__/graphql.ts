@@ -1091,6 +1091,7 @@ export type UserNode = {
   badges: Array<BadgeNode>;
   bio: Scalars['String']['output'];
   company: Scalars['String']['output'];
+  contributionData?: Maybe<Scalars['JSON']['output']>;
   contributionsCount: Scalars['Int']['output'];
   createdAt: Scalars['Float']['output'];
   email: Scalars['String']['output'];
