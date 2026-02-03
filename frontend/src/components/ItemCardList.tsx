@@ -109,6 +109,7 @@ const ItemCardList = ({
                   <Link
                     className="text-blue-400 hover:underline"
                     href={item?.url || ''}
+                    rel="noopener noreferrer"
                     target="_blank"
                   >
                     <TruncatedText text={item.title || item.name} />
