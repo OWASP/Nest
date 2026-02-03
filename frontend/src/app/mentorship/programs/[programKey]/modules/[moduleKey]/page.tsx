@@ -89,6 +89,7 @@ const ModuleDetailsPage = () => {
       details={moduleDetails}
       domains={programModule.domains}
       mentors={programModule.mentors}
+      isFetchingMore={isFetchingMore}
       pullRequests={(programModule.recentPullRequests || []).slice(0, visibleCount)}
       summary={programModule.description}
       tags={programModule.tags}

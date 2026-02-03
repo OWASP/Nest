@@ -78,6 +78,7 @@ export interface DetailsCardProps {
   modules?: Module[]
   onLoadMorePullRequests?: () => void
   onResetPullRequests?: () => void
+  isFetchingMore?: boolean
   showAvatar?: boolean
   socialLinks?: string[]
   stats?: Stats[]

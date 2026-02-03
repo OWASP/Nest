@@ -102,6 +102,7 @@ const DetailsCard = ({
   languages,
   onLoadMorePullRequests,
   onResetPullRequests,
+  isFetchingMore,
   programKey,
   projectName,
   pullRequests,
@@ -388,11 +389,13 @@ const DetailsCard = ({
                 <div className="mt-4 flex justify-start gap-4">
                   {onLoadMorePullRequests && (
                     <button
+                      disabled={isFetchingMore}
                       onClick={onLoadMorePullRequests}
                       type="button"
-                      className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
                     >
-                      Show more <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                      {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
+                      <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
                     </button>
                   )}
 
