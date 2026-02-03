@@ -59,6 +59,7 @@ test.describe('About Page', () => {
       .last()
 
     await roadmapSection.getByRole('button', { name: 'Show more' }).click()
+    await expect(page.getByText('OWASP Community Snapshots')).toBeVisible()
   })
 
   test('displays project statistics', async ({ page }) => {
