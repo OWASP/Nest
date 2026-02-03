@@ -53,7 +53,7 @@ describe('Committees Component', () => {
   test('renders skeleton initially', async () => {
     render(<CommitteesPage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByTestId('card-skeleton')
+      const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
@@ -68,7 +68,7 @@ describe('Committees Component', () => {
     render(<CommitteesPage />)
 
     await waitFor(() => {
-      expect(screen.queryByTestId('card-skeleton')).not.toBeInTheDocument()
+      expect(screen.queryByRole('status')).not.toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -76,7 +76,7 @@ describe('Committees Component', () => {
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
-    expect(screen.queryByTestId('card-skeleton')).not.toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
   test('renders committee data correctly', async () => {

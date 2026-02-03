@@ -55,7 +55,7 @@ describe('ChaptersPage Component', () => {
   test('renders skeleton initially', async () => {
     render(<ChaptersPage />)
     await waitFor(() => {
-      const skeletonLoaders = screen.getAllByTestId('card-skeleton')
+      const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
   })
@@ -103,7 +103,7 @@ describe('ChaptersPage Component', () => {
     })
     render(<ChaptersPage />)
 
-    const skeletonLoaders = screen.getAllByTestId('card-skeleton')
+    const skeletonLoaders = screen.getAllByRole('status')
     await waitFor(() => {
       expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
@@ -114,7 +114,7 @@ describe('ChaptersPage Component', () => {
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
 
-    expect(screen.queryByTestId('status')).not.toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
   test('opens  window on View Details button click', async () => {
     render(<ChaptersPage />)
