@@ -61,11 +61,11 @@ def test_validate_domains_invalid_format():
     from apps.mentorship.api.internal.utils import validate_domains
 
     domains = ["App@Sec"]
-    with pytest.raises(ValueError, match="must be alphanumeric"):
+    with pytest.raises(ValueError, match="alphanumeric characters or spaces"):
         validate_domains(domains)
 
     domains = ["<script>"]
-    with pytest.raises(ValueError, match="must be alphanumeric"):
+    with pytest.raises(ValueError, match="alphanumeric characters or spaces"):
         validate_domains(domains)
 
 
@@ -93,7 +93,7 @@ def test_program_input_validation():
             tags=["Invalid Space"],
         )
 
-    with pytest.raises(ValueError, match="must be alphanumeric"):
+    with pytest.raises(ValueError, match="alphanumeric characters or spaces"):
         CreateProgramInput(
             name="Test",
             description="Desc",
@@ -132,7 +132,7 @@ def test_module_input_validation():
         tags=["Valid3"],
         domains=["Valid Domain"],
     )
-    with pytest.raises(ValueError, match="must be alphanumeric"):
+    with pytest.raises(ValueError, match="alphanumeric characters or spaces"):
         CreateModuleInput(
             name="Test",
             description="Desc",
