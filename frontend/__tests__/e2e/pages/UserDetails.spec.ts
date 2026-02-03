@@ -31,10 +31,11 @@ test.describe.serial('User Details Page', () => {
     // Validation of stats grid using regex to handle changing numbers
     const stats = ['Followers', 'Following', 'Repositories']
     for (const stat of stats) {
+      const text = String.raw`\d.*${stat}`
       await expect(
         page
           .locator('div')
-          .filter({ hasText: new RegExp(`\\d.*${stat}`) })
+          .filter({ hasText: new RegExp(text) })
           .first()
       ).toBeVisible()
     }

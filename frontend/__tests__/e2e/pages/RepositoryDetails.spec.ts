@@ -37,10 +37,11 @@ test.describe.serial('Repository Details Page', () => {
     const stats = ['Stars', 'Forks', 'Contributors', 'Issues', 'Commits']
     for (const stat of stats) {
       // Look for the stat label and ensure a number is nearby
+      const text = String.raw`\d.*${stat}`
       await expect(
         page
           .locator('div')
-          .filter({ hasText: new RegExp(`\\d.*${stat}`) })
+          .filter({ hasText: new RegExp(text) })
           .first()
       ).toBeVisible()
     }

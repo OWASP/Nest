@@ -55,12 +55,10 @@ test.describe.serial('About Page', () => {
   test('loads roadmap items correctly', async () => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
 
-    await expect(
-      page.getByText('OWASP Board Activity Standardization and Data Programmatic Access')
-    ).toBeVisible()
+    await expect(page.getByText('Enhance OWASP Nest Availability and Performance')).toBeVisible()
     await expect(
       page.getByText(
-        'This milestone focuses on standardizing how OWASP Board activities are recorded, structured, and published, and on making this information available in structured formats designed for verification, analysis, and automation, as well as programmatically accessible formats via APIs and schemas. The objective is to create a consistent, auditable, and extensible representation of board actions -- including motions, votes, discussions, and decisions so they can be reliably accessed by tools, dashboards, and community members. This milestone reinforces OWASP’s commitment to openness, integrity, and community trust by making board-related information more transparent, auditable, and reliable.'
+        'This milestone focuses on modernizing OWASP Nest to improve reliability, scalability, and availability. It includes migrating the Django + Ninja backend to AWS Lambda using Zappa, with static/media served via S3 and long-running tasks adapted for serverless execution. In parallel, a PoC for Infrastructure as Code will provision and manage key components - Lambda, ECS/Fargate, S3, RDS, Redis, and an EC2 instance for nightly syncs - using Terraform or an alternative tool.'
       )
     ).toBeVisible()
 

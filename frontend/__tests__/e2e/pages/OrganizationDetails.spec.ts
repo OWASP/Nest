@@ -30,10 +30,11 @@ test.describe.serial('Organization Details Page', () => {
     for (const stat of stats) {
       await expect(page.getByText(stat).first()).toBeVisible()
       // Verify that there is a number associated with the stat (e.g., "15.4K Stars")
+      const text = String.raw`\d.*${stat}`
       await expect(
         page
           .locator('div')
-          .filter({ hasText: new RegExp(`\\d.*${stat}`) })
+          .filter({ hasText: new RegExp(text) })
           .first()
       ).toBeVisible()
     }
