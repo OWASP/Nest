@@ -401,9 +401,10 @@ const DetailsCard = ({
 
                   {onResetPullRequests && (
                     <button
+                      disabled={isFetchingMore}
                       onClick={onResetPullRequests}
                       type="button"
-                      className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
                     >
                       Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
                     </button>

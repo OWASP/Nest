@@ -28,7 +28,7 @@ class IssueNode(strawberry.relay.Node):
     assignees: list[UserNode] = strawberry_django.field()
     author: UserNode | None = strawberry_django.field()
 
-    @strawberry.field
+    @strawberry_django.field(prefetch_related=["pull_requests"])
     def pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
         """Return pull requests linked to this issue."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
