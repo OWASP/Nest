@@ -168,11 +168,16 @@ def generate_ai_reply_if_unanswered(message_id: int):
             if ai_response_text:
                 response_str = str(ai_response_text).strip()
                 if response_str.upper() in ("YES", "NO"):
+                    err_msg = "Invalid response: Question Detector output detected"
                     logger.error(
                         "Blocking Question Detector output before formatting",
-                        extra={"channel_id": channel_id, "message_id": message.slack_message_id},
+                        extra={
+                            "channel_id": channel_id,
+                            "message_id": message.slack_message_id,
+                            "error": err_msg,
+                        },
                     )
-                    raise ValueError("Invalid response: Question Detector output detected")
+                    raise ValueError(err_msg)
 
             blocks = format_blocks(ai_response_text)
             result = client.chat_postMessage(

@@ -1,6 +1,12 @@
 """Slack bot AI command."""
 
+import logging
+
+from slack_sdk.errors import SlackApiError
+
 from apps.slack.commands.command import CommandBase
+
+logger = logging.getLogger(__name__)
 
 
 class Ai(CommandBase):
@@ -10,12 +16,26 @@ class Ai(CommandBase):
         """Handle the Slack /ai command."""
         ack()
 
-        query = command.get("text", "").strip()
-        if not query:
-            return
-
         channel_id = command.get("channel_id")
         user_id = command.get("user_id")
+
+        query = command.get("text", "").strip()
+        if not query:
+            try:
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    user=user_id,
+                    text=(
+                        "Usage: `/ai <your question>` - "
+                        "Ask NestBot a question to get an AI-powered response."
+                    ),
+                )
+            except SlackApiError:
+                logger.exception(
+                    "Failed to post ephemeral usage hint",
+                    extra={"channel_id": channel_id, "user_id": user_id},
+                )
+            return
 
         # Slash commands don't have a message TS until we post something,
         # but we can add reactions to the last message or just use the trigger_id

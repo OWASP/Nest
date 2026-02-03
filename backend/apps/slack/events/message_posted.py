@@ -39,9 +39,8 @@ class MessagePosted(EventBase):
                 logger.warning("Thread message not found.")
             return
 
-        # Only respond when bot is explicitly mentioned
-        # If bot is mentioned, app_mention event will handle it
-        # This handler should not auto-reply to messages without mentions
+        # message_posted ignores bot mentions - app_mention handler handles them
+        # This handler only processes non-mention messages to avoid duplicate processing
         channel_id = event.get("channel")
         user_id = event.get("user")
         text = event.get("text", "")
@@ -76,8 +75,11 @@ class MessagePosted(EventBase):
             logger.warning("Could not check bot mention, skipping auto-reply to be safe.")
             return
 
-        if not bot_mentioned:
-            logger.debug("Bot not mentioned in message, skipping auto-reply.")
+        # Skip messages where bot is mentioned - app_mention handler will process them
+        if bot_mentioned:
+            logger.debug(
+                "Bot mentioned in message, skipping - app_mention handler will process it."
+            )
             return
 
         try:
