@@ -1,31 +1,20 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-test.describe.serial('Organization Details Page', () => {
-  let context: BrowserContext
-  let page: Page
-
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
+test.describe('Organization Details Page', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/organizations/OWASP', { timeout: 25000 })
   })
 
-  test.afterAll(async () => {
-    await context.close()
-  })
-
-  test('should have a heading', async () => {
+  test('should have a heading', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'OWASP', exact: true })).toBeVisible()
   })
 
-  test('should display organization details', async () => {
+  test('should display organization details', async ({ page }) => {
     await expect(page.getByText('@OWASP')).toBeVisible()
     await expect(page.getByText('United States of America')).toBeVisible()
   })
 
-  test('should display organization statistics', async () => {
+  test('should display organization statistics', async ({ page }) => {
     const stats = ['Stars', 'Forks', 'Contributors', 'Issues', 'Repositories']
     for (const stat of stats) {
       await expect(page.getByText(stat).first()).toBeVisible()
@@ -40,14 +29,14 @@ test.describe.serial('Organization Details Page', () => {
     }
   })
 
-  test('should display recent issues section', async () => {
+  test('should display recent issues section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     // Validate that at least one issue is listed
     const firstIssue = page.locator('div').filter({ hasText: 'Recent Issues' }).locator('a').first()
     await expect(firstIssue).toBeVisible()
   })
 
-  test('should have organization recent milestones', async () => {
+  test('should have organization recent milestones', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible({
       timeout: 10000,
     })
@@ -59,7 +48,7 @@ test.describe.serial('Organization Details Page', () => {
     await expect(milestone).toBeVisible()
   })
 
-  test('should display recent releases section', async () => {
+  test('should display recent releases section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
     const releaseLink = page
       .locator('div')
@@ -69,12 +58,13 @@ test.describe.serial('Organization Details Page', () => {
     await expect(releaseLink).toBeVisible()
   })
 
-  test('should display top contributors section', async () => {
+  test('should display top contributors section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(page.locator('img[alt*="avatar"]').first()).toBeVisible()
+    const contributorAvatar = page.locator('img[alt*="avatar"]').first()
+    await expect(contributorAvatar).toBeVisible()
   })
 
-  test('should display recent pull requests section', async () => {
+  test('should display recent pull requests section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
     const firstPR = page
       .locator('div')

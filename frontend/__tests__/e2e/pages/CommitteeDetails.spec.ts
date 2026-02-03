@@ -1,22 +1,11 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-test.describe.serial('Committee Details Page', () => {
-  let context: BrowserContext
-  let page: Page
-
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
+test.describe('Committee Details Page', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/committees/events', { timeout: 25000 })
   })
 
-  test.afterAll(async () => {
-    await context.close()
-  })
-
-  test('should have a heading and summary', async () => {
+  test('should have a heading and summary', async ({ page }) => {
     await expect(
       page.getByRole('heading', { name: 'OWASP Events Committee', exact: true })
     ).toBeVisible()
@@ -27,7 +16,7 @@ test.describe.serial('Committee Details Page', () => {
     ).toBeVisible()
   })
 
-  test('should have committee details block', async () => {
+  test('should have committee details block', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Committee Details' })).toBeVisible()
 
     // Verification of leaders (checking for presence of key names)
@@ -39,7 +28,7 @@ test.describe.serial('Committee Details Page', () => {
     ).toBeVisible()
   })
 
-  test('should have top contributors', async () => {
+  test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
 
     await expect(page.getByRole('img', { name: "Josh Grossman's avatar" })).toBeVisible()

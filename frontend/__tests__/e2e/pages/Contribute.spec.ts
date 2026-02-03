@@ -1,15 +1,9 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
 import { mockContributeData } from '@mockData/mockContributeData'
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-test.describe.serial('Contribute Page', () => {
-  let page: Page
-  let context: BrowserContext
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
+test.describe('Contribute Page', () => {
+  test.beforeEach(async ({ page }) => {
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,
@@ -21,10 +15,8 @@ test.describe.serial('Contribute Page', () => {
     })
     await page.goto('/contribute', { timeout: 25000 })
   })
-  test.afterAll(async () => {
-    await context.close()
-  })
-  test('renders issue data correctly', async () => {
+
+  test('renders issue data correctly', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'Contribution 1' })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('4 months ago')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Owasp Nest', exact: true })).toBeVisible()
@@ -32,14 +24,14 @@ test.describe.serial('Contribute Page', () => {
     await expect(page.getByRole('button', { name: 'Read More' })).toBeVisible()
   })
 
-  test('handles page change correctly', async () => {
+  test('handles page change correctly', async ({ page }) => {
     const nextPageButton = page.getByRole('button', { name: '2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
   })
 
-  test('opens dialog on View Details button click', async () => {
+  test('opens dialog on View Details button click', async ({ page }) => {
     const contributeButton = page.getByRole('button', { name: 'Read More' }).first()
     await contributeButton.click()
     const dialog = page.getByRole('dialog')
@@ -52,16 +44,19 @@ test.describe.serial('Contribute Page', () => {
     await expect(dialog.getByRole('link', { name: 'View Issue', exact: true })).toBeVisible()
   })
 
-  test('closes dialog on close button click', async () => {
+  test('closes dialog on close button click', async ({ page }) => {
+    const contributeButton = page.getByRole('button', { name: 'Read More' }).first()
+    await contributeButton.click()
     const closeButton = page.getByRole('button', { name: 'close-modal' })
     await expect(closeButton).toBeVisible()
     await closeButton.click()
   })
-  test('breadcrumb renders correct segments on /contribute', async () => {
+
+  test('breadcrumb renders correct segments on /contribute', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Contribute'])
   })
-  test('displays "No Issues found" when there are no issues', async () => {
-    await page.unroute('**/idx/')
+
+  test('displays "No Issues found" when there are no issues', async ({ page }) => {
     await page.route('**/idx/', async (route) => {
       await route.fulfill({
         status: 200,

@@ -1,24 +1,13 @@
 import fs from 'node:fs'
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import slugify from 'utils/slugify'
 
-test.describe.serial('Calendar Export Functionality', () => {
-  let context: BrowserContext
-  let page: Page
-
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
+test.describe('Calendar Export Functionality', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/', { timeout: 25000 })
   })
 
-  test.afterAll(async () => {
-    await context.close()
-  })
-
-  test('should download a valid ICS file when clicked', async () => {
+  test('should download a valid ICS file when clicked', async ({ page }) => {
     const firstEventButton = page.getByRole('button', { name: /Add .* to Calendar/i }).first()
     await expect(firstEventButton).toBeVisible()
     const buttonText =

@@ -1,27 +1,16 @@
 import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
 import { mockHealthMetricsData } from '@mockData/mockProjectsHealthMetricsData'
-import { test, expect, Page, BrowserContext } from '@playwright/test'
-test.describe.serial('Projects Health Dashboard Metrics', () => {
-  let page: Page
-  let context: BrowserContext
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
-  })
-  test.afterAll(async () => {
-    await context.close()
-  })
-  test('renders 404 when user is not OWASP staff', async () => {
+import { test, expect } from '@playwright/test'
+
+test.describe('Projects Health Dashboard Metrics', () => {
+  test('renders 404 when user is not OWASP staff', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, false)
     await page.goto('/projects/dashboard/metrics', { timeout: 25000 })
     await expect(page.getByText('404')).toBeVisible()
     await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
   })
 
-  test('renders page headers', async () => {
-    await page.unrouteAll()
+  test('renders page headers', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, true)
     await page.goto('/projects/dashboard/metrics', { timeout: 25000 })
     await expect(page.getByRole('heading', { name: 'Project Health Metrics' })).toBeVisible()
@@ -29,7 +18,7 @@ test.describe.serial('Projects Health Dashboard Metrics', () => {
     await expect(page.getByRole('button', { name: 'Score' })).toBeVisible()
   })
 
-  test('renders health metrics data', async () => {
+  test('renders health metrics data', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, true)
     await page.goto('/projects/dashboard/metrics', { timeout: 25000 })
     const firstMetric = mockHealthMetricsData.projectHealthMetrics[0]

@@ -2,7 +2,7 @@ import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  fullyParallel: false,
+  fullyParallel: true,
   expect: {
     timeout: 25000,
   },

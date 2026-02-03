@@ -1,27 +1,20 @@
-import { test, expect, devices, Page, BrowserContext } from '@playwright/test'
+import { test, expect, devices } from '@playwright/test'
 
 // Desktop tests
-test.describe.serial('Footer - Desktop (Chrome)', () => {
-  let page: Page
-  let context: BrowserContext
-
-  test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext({
-      ...devices['Desktop Chrome'],
-    })
-    page = await context.newPage()
-    await page.goto('/', { timeout: 25000 })
+test.describe('Footer - Desktop (Chrome)', () => {
+  test.use({
+    viewport: { width: 1280, height: 800 },
+    isMobile: false,
   })
 
-  test.afterAll(async () => {
-    await context.close()
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
   })
-
-  test('should have buttons', async () => {
+  test('should have buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'OWASP Nest' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Resources' })).toBeVisible()
   })
-  test('should have links', async () => {
+  test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest LinkedIn' })).toBeVisible()
@@ -29,33 +22,27 @@ test.describe.serial('Footer - Desktop (Chrome)', () => {
   })
 })
 
-test.describe.serial('Footer - Mobile (iPhone 13)', () => {
-  let page: Page
-  let context: BrowserContext
+// Mobile tests (iPhone 13)
+test.use({
+  ...devices['iPhone 13'],
+  isMobile: true,
+})
 
-  test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext({
-      ...devices['iPhone 13'],
-    })
-    page = await context.newPage()
+test.describe('Footer - Mobile (iPhone 13)', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/')
   })
-
-  test.afterAll(async () => {
-    await context.close()
-  })
-
-  test('should have buttons', async () => {
+  test('should have buttons', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'OWASP Nest' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Resources' })).toBeVisible()
   })
 
-  test('should show sub-menu when menu clicked', async () => {
+  test('should show sub-menu when menu clicked', async ({ page }) => {
     await page.getByRole('button', { name: 'OWASP Nest' }).click()
     // only check if the sub-menu is visible
     await expect(page.getByRole('link', { name: 'GSoC 2026' })).toBeVisible()
   })
-  test('should have links', async () => {
+  test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest GitHub' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'OWASP Nest Slack' })).toBeVisible()

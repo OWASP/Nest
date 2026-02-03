@@ -1,29 +1,18 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-test.describe.serial('Chapter Details Page', () => {
-  let context: BrowserContext
-  let page: Page
-
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
+test.describe('Chapter Details Page', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/chapters/rosario', { timeout: 25000 })
   })
 
-  test.afterAll(async () => {
-    await context.close()
-  })
-
-  test('should have a heading and summary', async () => {
+  test('should have a heading and summary', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'OWASP Rosario', exact: true })).toBeVisible()
     await expect(
       page.getByText(/The OWASP Rosario chapter is located in Argentina, South America/i)
     ).toBeVisible()
   })
 
-  test('should have chapter details block', async () => {
+  test('should have chapter details block', async ({ page }) => {
     await expect(page.getByText('Location: Rosario, Santa Fe, Argentina')).toBeVisible()
     await expect(page.getByText('Region: South America')).toBeVisible()
     await expect(
@@ -31,7 +20,7 @@ test.describe.serial('Chapter Details Page', () => {
     ).toBeVisible()
   })
 
-  test('should have map with geolocation', async () => {
+  test('should have map with geolocation', async ({ page }) => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
     await expect(unlockButton).toBeVisible()
 
@@ -48,7 +37,7 @@ test.describe.serial('Chapter Details Page', () => {
     await expect(popupButton).toBeVisible()
   })
 
-  test('should have top contributors', async () => {
+  test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
     await expect(
       page.getByRole('img', { name: "Tomas Illuminati Balbin's avatar", exact: true })
@@ -56,7 +45,7 @@ test.describe.serial('Chapter Details Page', () => {
     await expect(page.getByText('Tomas Illuminati Balbin', { exact: true })).toBeVisible()
   })
 
-  test('should have buttons for sponsoring', async () => {
+  test('should have buttons for sponsoring', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'Sponsor OWASP Rosario' })).toBeVisible()
   })
 })

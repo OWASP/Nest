@@ -1,21 +1,11 @@
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
-test.describe.serial('Project Details Page', () => {
-  let page: Page
-  let context: BrowserContext
-
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
+test.describe('Project Details Page', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto('/projects/nest', { timeout: 25000 })
   })
-  test.afterAll(async () => {
-    await context.close()
-  })
 
-  test('should have a heading', async () => {
+  test('should have a heading', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'OWASP Nest', exact: true })).toBeVisible()
     await expect(
       page.getByText(
@@ -24,7 +14,7 @@ test.describe.serial('Project Details Page', () => {
     ).toBeVisible()
   })
 
-  test('should have project details block', async () => {
+  test('should have project details block', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Project Details' })).toBeVisible()
     await expect(page.getByText('Level: Lab')).toBeVisible()
     await expect(page.getByText('Type: Code')).toBeVisible()
@@ -34,7 +24,7 @@ test.describe.serial('Project Details Page', () => {
     await expect(page.getByText('URL: https://owasp.org/www-project-nest')).toBeVisible()
   })
 
-  test('should have project statistics block', async () => {
+  test('should have project statistics block', async ({ page }) => {
     await expect(page.getByText('Stars').first()).toBeVisible()
     await expect(page.getByText('Forks').first()).toBeVisible()
     await expect(page.getByText('Contributors').first()).toBeVisible()
@@ -42,7 +32,7 @@ test.describe.serial('Project Details Page', () => {
     await expect(page.getByText('Repositories').first()).toBeVisible()
   })
 
-  test('should have project topics', async () => {
+  test('should have project topics', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Topics' })).toBeVisible()
     await expect(page.getByText('graphql', { exact: true })).toBeVisible()
     await expect(page.getByText('django', { exact: true })).toBeVisible()
@@ -50,20 +40,20 @@ test.describe.serial('Project Details Page', () => {
     await expect(page.getByText('nextjs', { exact: true })).toBeVisible()
   })
 
-  test('should have project languages', async () => {
+  test('should have project languages', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Languages' })).toBeVisible()
     await expect(page.getByText('Python', { exact: true })).toBeVisible()
     await expect(page.getByText('TypeScript', { exact: true })).toBeVisible()
   })
 
-  test('should have top contributors', async () => {
+  test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
     await expect(page.getByText('Arkadii Yakovets', { exact: true }).first()).toBeVisible()
     await expect(page.getByText('Kate Golovanova', { exact: true }).first()).toBeVisible()
     await expect(page.getByText('Ahmed Gouda', { exact: true })).toBeVisible()
   })
 
-  test('toggle top contributors', async () => {
+  test('toggle top contributors', async ({ page }) => {
     await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
     await page.getByRole('button', { name: 'Show more' }).last().click()
     await expect(page.getByRole('button', { name: 'Show less' })).toBeVisible()
@@ -71,25 +61,25 @@ test.describe.serial('Project Details Page', () => {
     await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
   })
 
-  test('should have project recent issues', async () => {
+  test('should have project recent issues', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
     await expect(page.getByText('Nest').first()).toBeVisible()
   })
 
-  test('should have project recent releases', async () => {
+  test('should have project recent releases', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
   })
 
-  test('should have project recent milestones', async () => {
+  test('should have project recent milestones', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
   })
 
-  test('should display recent pull requests section', async () => {
+  test('should display recent pull requests section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
     await expect(page.getByText('Nest').first()).toBeVisible()
   })
 
-  test('should display health metrics section', async () => {
+  test('should display health metrics section', async ({ page }) => {
     await expect(page.getByText('Issues Trend')).toBeVisible()
     await expect(page.getByText('Pull Requests Trend')).toBeVisible()
     await expect(page.getByText('Stars Trend')).toBeVisible()
@@ -97,7 +87,7 @@ test.describe.serial('Project Details Page', () => {
     await expect(page.getByText('Days Since Last Commit and Release')).toBeVisible()
   })
 
-  test('should have project repositories', async () => {
+  test('should have project repositories', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
     await expect(page.getByText('www-project-nest', { exact: true })).toBeVisible()
     await page.getByText('www-project-nest', { exact: true }).click()

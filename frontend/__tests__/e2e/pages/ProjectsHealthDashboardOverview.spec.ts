@@ -1,29 +1,17 @@
 import { mockDashboardCookies } from '@e2e/helpers/mockDashboardCookies'
 import { mockProjectsDashboardOverviewData } from '@mockData/mockProjectsDashboardOverviewData'
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import millify from 'millify'
 
 test.describe('Projects Health Dashboard Overview', () => {
-  let page: Page
-  let context: BrowserContext
-  test.beforeAll(async ({ browser }, testInfo) => {
-    context = await browser.newContext({
-      baseURL: testInfo.project.use.baseURL,
-    })
-    page = await context.newPage()
-  })
-  test.afterAll(async () => {
-    await context.close()
-  })
-  test('renders 404 when user is not OWASP staff', async () => {
+  test('renders 404 when user is not OWASP staff', async ({ page }) => {
     await mockDashboardCookies(page, mockProjectsDashboardOverviewData, false)
     await page.goto('/projects/dashboard', { timeout: 25000 })
     await expect(page.getByText('404')).toBeVisible()
     await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
   })
 
-  test('renders project health stats', async () => {
-    await page.unrouteAll()
+  test('renders project health stats', async ({ page }) => {
     await mockDashboardCookies(page, mockProjectsDashboardOverviewData, true)
     await page.goto('/projects/dashboard', { timeout: 25000 })
     await expect(page.getByText('Project Health Dashboard Overview')).toBeVisible()
