@@ -1,6 +1,6 @@
 """Test cases for IssueNode."""
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -99,3 +99,20 @@ class TestIssueNode(GraphQLNodeBaseTest):
         assert result == ["pr1", "pr2", "pr3", "pr4"]
         result = field.base_resolver.wrapped_func(mock_issue, limit=2, offset=2)
         assert result == ["pr3", "pr4"]
+
+    @patch("apps.github.api.internal.nodes.issue.normalize_limit")
+    def test_pull_requests_resolver_security(self, mock_normalize_limit):
+        """Test pull_requests field security check."""
+        mock_issue = Mock()
+
+        mock_normalize_limit.return_value = 10
+        field = self._get_field_by_name("pull_requests", IssueNode)
+
+        mock_issue.pull_requests.all.return_value.order_by.return_value = []
+
+        field.base_resolver.wrapped_func(mock_issue, limit=10)
+        mock_normalize_limit.assert_called()
+
+        mock_normalize_limit.return_value = None
+        result = field.base_resolver.wrapped_func(mock_issue, limit=999999)
+        assert result == []
