@@ -22,9 +22,12 @@ interface AuthorAvatarProps {
 const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
   const hasAuthorInfo = author?.name || author?.login
   const hasLogin = author?.login
+  const hasAvatarUrl = Boolean(author?.avatarUrl)
+
+  const fallbackIcon = <FaUser className="mr-2 h-6 w-6 text-gray-400 dark:text-gray-500" />
 
   if (hasAuthorInfo) {
-    const imageElement = (
+    const avatarContent = hasAvatarUrl ? (
       <Image
         height={24}
         width={24}
@@ -32,24 +35,21 @@ const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
         alt={`${author.name || author.login}'s avatar`}
         className="mr-2 rounded-full"
       />
+    ) : (
+      fallbackIcon
     )
 
     if (hasLogin) {
       return (
         <Link className="shrink-0 text-blue-400 hover:underline" href={`/members/${author.login}`}>
-          {imageElement}
+          {avatarContent}
         </Link>
       )
     }
-
-    return <div className="shrink-0">{imageElement}</div>
+    return <div className="shrink-0">{avatarContent}</div>
   }
 
-  return (
-    <div className="shrink-0">
-      <FaUser className="mr-2 h-6 w-6 text-gray-400 dark:text-gray-500" />
-    </div>
-  )
+  return <div className="shrink-0">{fallbackIcon}</div>
 }
 
 const ItemCardList = ({
