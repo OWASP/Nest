@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import strawberry
 from django.db.models import Prefetch
@@ -12,7 +12,6 @@ from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models import Label
 from apps.github.models.user import User as GithubUser
-from apps.mentorship.api.internal.nodes.mentee import MenteeNode
 from apps.mentorship.models import Module
 from apps.mentorship.models.mentee import Mentee
 from apps.mentorship.models.mentee_module import MenteeModule
@@ -20,6 +19,7 @@ from apps.mentorship.models.mentor import Mentor
 
 if TYPE_CHECKING:
     from apps.github.api.internal.nodes.issue import IssueNode
+    from apps.mentorship.api.internal.nodes.mentee import MenteeNode
 
 logger = logging.getLogger(__name__)
 MAX_LIMIT = 1000
@@ -59,13 +59,21 @@ class MentorshipQuery:
         try:
             module = Module.objects.only("id").get(key=module_key, program__key=program_key)
 
-            github_user = GithubUser.objects.only("login", "name", "avatar_url", "bio").get(
-                login=mentee_key
+            mentee = (
+                Mentee.objects.select_related("github_user")
+                .only(
+                    "id",
+                    "experience_level",
+                    "domains",
+                    "tags",
+                    "github_user__login",
+                    "github_user__name",
+                    "github_user__avatar_url",
+                    "github_user__bio",
+                )
+                .get(github_user__login=mentee_key)
             )
 
-            mentee = Mentee.objects.only("id", "experience_level", "domains", "tags").get(
-                github_user=github_user
-            )
             is_enrolled = MenteeModule.objects.filter(mentee=mentee, module=module).exists()
 
             if not is_enrolled:
@@ -73,21 +81,13 @@ class MentorshipQuery:
                 logger.warning(message)
                 return None
 
-            return MenteeNode(
-                id=cast("strawberry.ID", str(mentee.id)),
-                login=github_user.login,
-                name=github_user.name or github_user.login,
-                avatar_url=github_user.avatar_url,
-                bio=github_user.bio,
-                experience_level=mentee.experience_level,
-                domains=mentee.domains,
-                tags=mentee.tags,
-            )
-
         except (Module.DoesNotExist, GithubUser.DoesNotExist, Mentee.DoesNotExist) as e:
             message = f"Mentee details not found: {e}"
             logger.warning(message)
             return None
+
+        else:
+            return mentee
 
     @strawberry.field
     def get_mentee_module_issues(
