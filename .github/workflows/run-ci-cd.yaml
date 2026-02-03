@@ -152,10 +152,10 @@ jobs:
 
       - name: Run Trivy security scan
         run: |
-          make backend-security-scan-code
-          make frontend-security-scan-code
-          make backend-security-scan-secrets
-          make frontend-security-scan-secrets
+          make backend-security-scan-code TRIVY_EXIT_CODE=1
+          make frontend-security-scan-code TRIVY_EXIT_CODE=1
+          make backend-security-scan-secrets TRIVY_EXIT_CODE=1
+          make frontend-security-scan-secrets TRIVY_EXIT_CODE=1
     timeout-minutes: 5
 
   run-backend-tests:
