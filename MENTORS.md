@@ -12,6 +12,14 @@ Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
 Arkadii is an OWASP Nest founder and current leader focusing on project strategic goals as well as day-to-day contribution and maintenance making sure the project aligns with OWASP community needs.
 
+#### Illia Oleksiuk
+
+Senior DevOps Engineer | OWASP GenAI Data Security Risk and Mitigations initiative 2026 contributor
+
+[GitHub](https://github.com/ioleksiuk) • [LinkedIn](https://linkedin.com/in/ioleksiuk) • [Slack](https://owasp.slack.com/team/U0AAP59RN87) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
+
+Illia is a Senior DevOps Engineer with experience building and operating large-scale systems, with a focus on infrastructure, automation, reliability, and security.
+
 #### Kate Golovanova
 
 Senior Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
