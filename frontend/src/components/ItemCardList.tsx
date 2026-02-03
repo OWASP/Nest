@@ -23,33 +23,33 @@ const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
   const hasAuthorInfo = author?.name || author?.login
   const hasLogin = author?.login
 
-  if (!hasAuthorInfo) {
-    return (
-      <div className="shrink-0">
-        <FaUser className="mr-2 h-6 w-6 text-gray-400 dark:text-gray-500" />
-      </div>
+  if (hasAuthorInfo) {
+    const imageElement = (
+      <Image
+        height={24}
+        width={24}
+        src={author.avatarUrl}
+        alt={`${author.name || author.login}'s avatar`}
+        className="mr-2 rounded-full"
+      />
     )
+
+    if (hasLogin) {
+      return (
+        <Link className="shrink-0 text-blue-400 hover:underline" href={`/members/${author.login}`}>
+          {imageElement}
+        </Link>
+      )
+    }
+
+    return <div className="shrink-0">{imageElement}</div>
   }
 
-  const imageElement = (
-    <Image
-      height={24}
-      width={24}
-      src={author.avatarUrl}
-      alt={`${author.name || author.login}'s avatar`}
-      className="mr-2 rounded-full"
-    />
+  return (
+    <div className="shrink-0">
+      <FaUser className="mr-2 h-6 w-6 text-gray-400 dark:text-gray-500" />
+    </div>
   )
-
-  if (hasLogin) {
-    return (
-      <Link className="shrink-0 text-blue-400 hover:underline" href={`/members/${author.login}`}>
-        {imageElement}
-      </Link>
-    )
-  }
-
-  return <div className="shrink-0">{imageElement}</div>
 }
 
 const ItemCardList = ({
