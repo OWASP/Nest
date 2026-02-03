@@ -15,6 +15,8 @@ import { getSimpleDuration } from 'components/ModuleCard'
 const ModuleDetailsPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const [hasMorePRs, setHasMorePRs] = useState(true)
+  const [visibleCount, setVisibleCount] = useState(4)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
   const limit = 4
 
   const {
@@ -87,66 +89,51 @@ const ModuleDetailsPage = () => {
       details={moduleDetails}
       domains={programModule.domains}
       mentors={programModule.mentors}
-      pullRequests={programModule.recentPullRequests || []}
+      pullRequests={(programModule.recentPullRequests || []).slice(0, visibleCount)}
       summary={programModule.description}
       tags={programModule.tags}
       title={programModule.name}
       type="module"
       onLoadMorePullRequests={
-        hasMorePRs
+        hasMorePRs || (programModule.recentPullRequests || []).length > visibleCount
           ? () => {
+              if (isFetchingMore) return
               const currentLength = programModule.recentPullRequests?.length || 0
-              fetchMore({
-                variables: {
-                  programKey,
-                  moduleKey,
-                  offset: currentLength,
-                  limit,
-                },
-                updateQuery: (prevResult, { fetchMoreResult }) => {
-                  if (!fetchMoreResult) return prevResult
-                  const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
-                  if (newPRs.length < limit) setHasMorePRs(false)
-                  if (newPRs.length === 0) return prevResult
-                  return {
-                    ...prevResult,
-                    getModule: {
-                      ...prevResult.getModule,
-                      recentPullRequests: [
-                        ...(prevResult.getModule?.recentPullRequests || []),
-                        ...newPRs,
-                      ],
-                    },
-                  }
-                },
-              })
+              if (hasMorePRs && currentLength < visibleCount + limit) {
+                setIsFetchingMore(true)
+                fetchMore({
+                  variables: {
+                    programKey,
+                    moduleKey,
+                    offset: currentLength,
+                    limit,
+                  },
+                  updateQuery: (prevResult, { fetchMoreResult }) => {
+                    if (!fetchMoreResult) return prevResult
+                    const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
+                    if (newPRs.length < limit) setHasMorePRs(false)
+                    if (newPRs.length === 0) return prevResult
+                    return {
+                      ...prevResult,
+                      getModule: {
+                        ...prevResult.getModule,
+                        recentPullRequests: [
+                          ...(prevResult.getModule?.recentPullRequests || []),
+                          ...newPRs,
+                        ],
+                      },
+                    }
+                  },
+                }).finally(() => setIsFetchingMore(false))
+              }
+              setVisibleCount((prev) => prev + limit)
             }
           : undefined
       }
       onResetPullRequests={
-        hasMorePRs
-          ? undefined
-          : () => {
-              setHasMorePRs(true)
-              fetchMore({
-                variables: {
-                  programKey,
-                  moduleKey,
-                  offset: 0,
-                  limit,
-                },
-                updateQuery: (prevResult, { fetchMoreResult }) => {
-                  if (!fetchMoreResult) return prevResult
-                  return {
-                    ...prevResult,
-                    getModule: {
-                      ...prevResult.getModule,
-                      recentPullRequests: fetchMoreResult.getModule?.recentPullRequests || [],
-                    },
-                  }
-                },
-              })
-            }
+        visibleCount > limit && (programModule.recentPullRequests || []).length > limit
+          ? () => setVisibleCount(limit)
+          : undefined
       }
     />
   )

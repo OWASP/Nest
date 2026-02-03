@@ -29,6 +29,8 @@ import SecondaryCard from 'components/SecondaryCard'
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
   const [hasMorePRs, setHasMorePRs] = useState(true)
+  const [visibleCount, setVisibleCount] = useState(4)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
   const limit = 4
   const { programKey, moduleKey, issueId } = params
 
@@ -341,84 +343,70 @@ const ModuleIssueDetailsPage = () => {
 
         <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
           <div className="grid grid-cols-1 gap-3">
-            {(issue.pullRequests || []).map((pr) => (
+            {(issue.pullRequests || []).slice(0, visibleCount).map((pr) => (
               <MentorshipPullRequest key={pr.id} pr={pr} />
             ))}
 
-            {hasMorePRs && (
+            {(hasMorePRs ||
+              (issue.pullRequests || []).length > visibleCount ||
+              (visibleCount > limit && (issue.pullRequests || []).length > limit)) && (
               <div className="mt-4 flex justify-start gap-4">
-                <button
-                  onClick={() => {
-                    const currentLength = issue.pullRequests?.length || 0
-                    fetchMore({
-                      variables: {
-                        programKey,
-                        moduleKey,
-                        number: Number(issueId),
-                        offset: currentLength,
-                        limit,
-                      },
-                      updateQuery: (prevResult, { fetchMoreResult }) => {
-                        if (!fetchMoreResult) return prevResult
-                        const newPRs = fetchMoreResult.getModule?.issueByNumber?.pullRequests || []
-                        if (newPRs.length < limit) setHasMorePRs(false)
-                        if (newPRs.length === 0) return prevResult
-                        return {
-                          ...prevResult,
-                          getModule: {
-                            ...prevResult.getModule,
-                            issueByNumber: {
-                              ...prevResult.getModule?.issueByNumber,
-                              pullRequests: [
-                                ...(prevResult.getModule?.issueByNumber?.pullRequests || []),
-                                ...newPRs,
-                              ],
-                            },
+                {(hasMorePRs || (issue.pullRequests || []).length > visibleCount) && (
+                  <button
+                    onClick={() => {
+                      if (isFetchingMore) return
+                      const currentLength = issue.pullRequests?.length || 0
+                      // If we need more data than we have, fetch it
+                      if (hasMorePRs && currentLength < visibleCount + limit) {
+                        setIsFetchingMore(true)
+                        fetchMore({
+                          variables: {
+                            programKey,
+                            moduleKey,
+                            number: Number(issueId),
+                            offset: currentLength,
+                            limit,
                           },
-                        }
-                      },
-                    })
-                  }}
-                  className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-                >
-                  Show more <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
-                </button>
-              </div>
-            )}
+                          updateQuery: (prevResult, { fetchMoreResult }) => {
+                            if (!fetchMoreResult) return prevResult
+                            const newPRs =
+                              fetchMoreResult.getModule?.issueByNumber?.pullRequests || []
+                            if (newPRs.length < limit) setHasMorePRs(false)
+                            if (newPRs.length === 0) return prevResult
+                            return {
+                              ...prevResult,
+                              getModule: {
+                                ...prevResult.getModule,
+                                issueByNumber: {
+                                  ...prevResult.getModule?.issueByNumber,
+                                  pullRequests: [
+                                    ...(prevResult.getModule?.issueByNumber?.pullRequests || []),
+                                    ...newPRs,
+                                  ],
+                                },
+                              },
+                            }
+                          },
+                        }).finally(() => setIsFetchingMore(false))
+                      }
+                      setVisibleCount((prev) => prev + limit)
+                    }}
+                    type="button"
+                    className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                  >
+                    Show more <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                  </button>
+                )}
 
-            {!hasMorePRs && (issue.pullRequests || []).length > 4 && (
-              <div className="mt-4 flex justify-start gap-4">
-                <button
-                  onClick={() => {
-                    setHasMorePRs(true)
-                    fetchMore({
-                      variables: {
-                        programKey,
-                        moduleKey,
-                        number: Number(issueId),
-                        offset: 0,
-                        limit,
-                      },
-                      updateQuery: (prevResult, { fetchMoreResult }) => {
-                        if (!fetchMoreResult) return prevResult
-                        return {
-                          ...prevResult,
-                          getModule: {
-                            ...prevResult.getModule,
-                            issueByNumber: {
-                              ...prevResult.getModule?.issueByNumber,
-                              pullRequests:
-                                fetchMoreResult.getModule?.issueByNumber?.pullRequests || [],
-                            },
-                          },
-                        }
-                      },
-                    })
-                  }}
-                  className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-                >
-                  Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
-                </button>
+                {visibleCount > limit && (issue.pullRequests || []).length > limit && (
+                  <button
+                    onClick={() => setVisibleCount(limit)}
+                    type="button"
+                    className="flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                  >
+                    Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                  </button>
+                )}
               </div>
             )}
 

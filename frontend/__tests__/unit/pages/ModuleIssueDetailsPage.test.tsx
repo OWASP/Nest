@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client/react'
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import { useParams } from 'next/navigation'
 import ModuleIssueDetailsPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/[issueId]/page'
@@ -401,5 +401,61 @@ describe('ModuleIssueDetailsPage', () => {
 
     const unassignButton = screen.getByRole('button', { name: /Unassign @user1/i })
     expect(unassignButton).toBeDisabled()
+  })
+  it('calls fetchMore when clicking Show More button', async () => {
+    const fetchMoreMock = jest.fn().mockResolvedValue({
+      data: {
+        getModule: {
+          issueByNumber: {
+            pullRequests: [
+              {
+                id: 'pr-new',
+                title: 'New PR',
+                url: 'http://example.com',
+                state: 'open',
+                mergedAt: null,
+                createdAt: new Date().toISOString(),
+                author: { login: 'user-new', avatarUrl: '' },
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: {
+        getModule: {
+          issueByNumber: {
+            ...mockIssueData.getModule.issueByNumber,
+            pullRequests: Array.from({ length: 4 }, (_, i) => ({
+              ...mockIssueData.getModule.issueByNumber.pullRequests[0],
+              id: `pr-${i}`,
+            })),
+          },
+        },
+      },
+      loading: false,
+      error: undefined,
+      fetchMore: fetchMoreMock,
+    })
+
+    render(<ModuleIssueDetailsPage />)
+
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    expect(showMoreButton).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(showMoreButton)
+    })
+
+    expect(fetchMoreMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: expect.objectContaining({
+          offset: 4,
+          limit: 4,
+        }),
+      })
+    )
   })
 })
