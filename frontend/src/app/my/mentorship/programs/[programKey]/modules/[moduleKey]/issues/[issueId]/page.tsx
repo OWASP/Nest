@@ -16,7 +16,7 @@ import {
   FaChevronUp,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
@@ -356,7 +356,6 @@ const ModuleIssueDetailsPage = () => {
                     onClick={() => {
                       if (isFetchingMore) return
                       const currentLength = issue.pullRequests?.length || 0
-                      // If we need more data than we have, fetch it
                       if (hasMorePRs && currentLength < visibleCount + limit) {
                         setIsFetchingMore(true)
                         fetchMore({
@@ -387,7 +386,9 @@ const ModuleIssueDetailsPage = () => {
                               },
                             }
                           },
-                        }).finally(() => setIsFetchingMore(false))
+                        })
+                          .catch((error) => handleAppError(error))
+                          .finally(() => setIsFetchingMore(false))
                       }
                       setVisibleCount((prev) => prev + limit)
                     }}

@@ -124,7 +124,9 @@ const ModuleDetailsPage = () => {
                       },
                     }
                   },
-                }).finally(() => setIsFetchingMore(false))
+                })
+                  .catch((error) => handleAppError(error))
+                  .finally(() => setIsFetchingMore(false))
               }
               setVisibleCount((prev) => prev + limit)
             }
