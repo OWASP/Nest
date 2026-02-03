@@ -20,6 +20,7 @@ GTM
 Golovanova
 Hackbright
 Héllo
+Illia
 Kateryna
 Kerlyn
 Keshav
@@ -33,6 +34,7 @@ NOSONAR
 Nadu
 Nagori
 Nominatim
+Oleksiuk
 PGPASSWORD
 PLR
 PYTHONUNBUFFERED
@@ -65,6 +67,7 @@ arkid15r
 askowasp
 attisdropped
 bangbang
+boardofdirectors
 bsky
 carryforward
 certbot
