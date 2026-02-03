@@ -17,7 +17,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
 
   return (
     <div>
-      <output role="status"
+      <output 
       aria-live="polite"
       aria-busy="true"
       aria-label="Loading"
