@@ -16,7 +16,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   const NUM_CONTRIBUTORS = 8
 
   return (
-    <output
+    <div
+      role="status"
       aria-live="polite"
       aria-busy="true"
       aria-label="Loading"
@@ -91,7 +92,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
           </div>
         </div>
       </div>
-    </output>
+    </div>
   )
 }
 
