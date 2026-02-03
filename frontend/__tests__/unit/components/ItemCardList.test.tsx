@@ -715,7 +715,7 @@ describe('ItemCardList Component', () => {
       expect(avatarImage).toHaveAttribute('alt', `${issueWithoutAuthor.author.login}'s avatar`)
     })
 
-    it('uses generic fallback alt text when author is missing', () => {
+    it('shows fallback icon when author is missing', () => {
       const issueWithoutAuthor = {
         ...mockIssue,
         author: null,
@@ -730,11 +730,11 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
+      const avatarImage = screen.queryByTestId('avatar-image')
+      expect(avatarImage).not.toBeInTheDocument()
     })
 
-    it('uses generic fallback alt text when author name and login are missing', () => {
+    it('shows fallback icon when author name and login are missing', () => {
       const issueWithEmptyAuthor = {
         ...mockIssue,
         author: {
@@ -753,8 +753,8 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
+      const avatarImage = screen.queryByTestId('avatar-image')
+      expect(avatarImage).not.toBeInTheDocument()
     })
 
     it('opens external links in new tab', () => {

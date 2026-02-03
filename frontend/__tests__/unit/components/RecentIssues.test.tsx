@@ -197,7 +197,7 @@ describe('<RecentIssues />', () => {
     expect(screen.getByAltText("User One's avatar")).toBeInTheDocument()
   })
 
-  it('uses fallback alt text when author name and login are missing', () => {
+  it('shows fallback icon when author name and login are missing', () => {
     const issueWithEmptyAuthor = {
       ...baseIssue,
       author: {
@@ -207,6 +207,7 @@ describe('<RecentIssues />', () => {
       },
     }
     render(<RecentIssues data={[issueWithEmptyAuthor]} />)
-    expect(screen.getByAltText("Author's avatar")).toBeInTheDocument()
+    const avatarImage = screen.queryByAltText("Author's avatar")
+    expect(avatarImage).not.toBeInTheDocument()
   })
 })
