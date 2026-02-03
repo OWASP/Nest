@@ -36,11 +36,11 @@ class TestAgenticRAGAgent:
 
         mock_compiled_graph.invoke.return_value = {
             "answer": "Test answer",
-            "iteration": 2,
-            "evaluation": {"score": 0.9},
             "context_chunks": [{"text": "chunk1"}],
-            "history": ["step1", "step2"],
+            "evaluation": {"score": 0.9},
             "extracted_metadata": {"key": "value"},
+            "history": ["step1", "step2"],
+            "iteration": 2,
         }
 
         agent = AgenticRAGAgent()
@@ -48,11 +48,11 @@ class TestAgenticRAGAgent:
 
         mock_compiled_graph.invoke.assert_called_once()
         assert result["answer"] == "Test answer"
-        assert result["iterations"] == 2
-        assert result["evaluation"] == {"score": 0.9}
         assert result["context_chunks"] == [{"text": "chunk1"}]
-        assert result["history"] == ["step1", "step2"]
+        assert result["evaluation"] == {"score": 0.9}
         assert result["extracted_metadata"] == {"key": "value"}
+        assert result["history"] == ["step1", "step2"]
+        assert result["iterations"] == 2
 
     def test_run_with_empty_result(self, mocker):
         """Test run method handles empty results gracefully."""
@@ -70,11 +70,11 @@ class TestAgenticRAGAgent:
         result = agent.run("Test query")
 
         assert result["answer"] == ""
-        assert result["iterations"] == 0
-        assert result["evaluation"] == {}
         assert result["context_chunks"] == []
-        assert result["history"] == []
+        assert result["evaluation"] == {}
         assert result["extracted_metadata"] == {}
+        assert result["history"] == []
+        assert result["iterations"] == 0
 
     def test_build_graph(self, mocker):
         """Test build_graph creates the correct state machine."""

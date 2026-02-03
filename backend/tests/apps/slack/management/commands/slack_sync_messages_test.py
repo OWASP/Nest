@@ -314,11 +314,11 @@ class TestSyncUserMessages:
 class TestFetchReplies:
     """Tests for _fetch_replies method."""
 
-    target_module = "apps.slack.management.commands.slack_sync_messages"
+    target_module_path = "apps.slack.management.commands.slack_sync_messages"
 
     def test_no_replies_found(self, mocker):
         """Test handles case when no replies are found."""
-        mocker.patch(f"{self.target_module}.Message")
+        mocker.patch(f"{self.target_module_path}.Message")
 
         mock_client = MagicMock()
         mock_client.conversations_replies.return_value = {"ok": True, "messages": []}
@@ -338,7 +338,7 @@ class TestFetchReplies:
 
     def test_replies_saved(self, mocker):
         """Test replies are saved when found."""
-        mock_message_model = mocker.patch(f"{self.target_module}.Message")
+        mock_message_model = mocker.patch(f"{self.target_module_path}.Message")
 
         mock_client = MagicMock()
         mock_client.conversations_replies.return_value = {
@@ -388,12 +388,12 @@ class TestFetchReplies:
 class TestCreateMessage:
     """Tests for _create_message method."""
 
-    target_module = "apps.slack.management.commands.slack_sync_messages"
+    target_module_path = "apps.slack.management.commands.slack_sync_messages"
 
     def test_create_message_with_existing_member(self, mocker):
         """Test creates message with existing member."""
-        mock_member = mocker.patch(f"{self.target_module}.Member")
-        mock_message_model = mocker.patch(f"{self.target_module}.Message")
+        mock_member = mocker.patch(f"{self.target_module_path}.Member")
+        mock_message_model = mocker.patch(f"{self.target_module_path}.Message")
 
         existing_member = MagicMock()
         mock_member.objects.get.return_value = existing_member
@@ -405,7 +405,7 @@ class TestCreateMessage:
         command = Command()
         command.stdout = MagicMock()
 
-        command._create_message(mock_client, message_data, mock_conversation, 1.0, 3)
+        command._create_message(mock_client, message_data, mock_conversation, 1, 3)
 
         mock_message_model.update_data.assert_called_once_with(
             data=message_data,
@@ -417,7 +417,7 @@ class TestCreateMessage:
 
     def test_create_message_no_user_id(self, mocker):
         """Test creates message without user lookup when no user ID."""
-        mock_message_model = mocker.patch(f"{self.target_module}.Message")
+        mock_message_model = mocker.patch(f"{self.target_module_path}.Message")
 
         mock_client = MagicMock()
         mock_conversation = MagicMock()
@@ -438,8 +438,8 @@ class TestCreateMessage:
 
     def test_create_message_with_new_user(self, mocker):
         """Test creates new member when user doesn't exist."""
-        mock_member = mocker.patch(f"{self.target_module}.Member")
-        mocker.patch(f"{self.target_module}.Message")
+        mock_member = mocker.patch(f"{self.target_module_path}.Member")
+        mocker.patch(f"{self.target_module_path}.Message")
 
         mock_member.DoesNotExist = Exception
         mock_member.objects.get.side_effect = mock_member.DoesNotExist
@@ -459,14 +459,14 @@ class TestCreateMessage:
         command = Command()
         command.stdout = MagicMock()
 
-        command._create_message(mock_client, message_data, mock_conversation, 1.0, 3)
+        command._create_message(mock_client, message_data, mock_conversation, 1, 3)
 
         mock_client.users_info.assert_called_once()
 
     def test_create_message_with_bot(self, mocker):
         """Test creates bot member when bot_id is present."""
-        mock_member = mocker.patch(f"{self.target_module}.Member")
-        mocker.patch(f"{self.target_module}.Message")
+        mock_member = mocker.patch(f"{self.target_module_path}.Member")
+        mocker.patch(f"{self.target_module_path}.Message")
 
         mock_member.DoesNotExist = Exception
         mock_member.objects.get.side_effect = mock_member.DoesNotExist
@@ -486,15 +486,15 @@ class TestCreateMessage:
         command = Command()
         command.stdout = MagicMock()
 
-        command._create_message(mock_client, message_data, mock_conversation, 1.0, 3)
+        command._create_message(mock_client, message_data, mock_conversation, 1, 3)
 
         mock_client.bots_info.assert_called_once()
 
     def test_create_message_rate_limit_on_user_lookup(self, mocker):
         """Test handles rate limiting when looking up user info."""
-        mock_member = mocker.patch(f"{self.target_module}.Member")
-        mocker.patch(f"{self.target_module}.Message")
-        mocker.patch(f"{self.target_module}.time.sleep")
+        mock_member = mocker.patch(f"{self.target_module_path}.Member")
+        mocker.patch(f"{self.target_module_path}.Message")
+        mocker.patch(f"{self.target_module_path}.time.sleep")
 
         mock_member.DoesNotExist = Exception
         mock_member.objects.get.side_effect = mock_member.DoesNotExist

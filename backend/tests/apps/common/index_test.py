@@ -251,7 +251,7 @@ class TestIndexBase:
         self.mock_logger.exception.assert_called_once()
 
     def test_reindex_synonyms_success(self):
-        """Test successful reindexing of synonyms."""
+        """Test successful re-indexing of synonyms."""
         synonyms = [
             {"objectID": "1", "type": "synonym", "synonyms": ["a", "b"]},
             {"objectID": "2", "type": "synonym", "synonyms": ["c", "d"]},

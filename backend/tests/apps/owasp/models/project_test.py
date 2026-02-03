@@ -1,3 +1,4 @@
+import math
 from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
@@ -161,7 +162,7 @@ class TestProjectProperties:
         )
 
         project = Project()
-        assert project.health_score == pytest.approx(85.5)
+        assert math.isclose(project.health_score, 85.5)
 
     def test_health_score_without_metrics(self, mocker):
         """Test health_score returns None when no metrics."""

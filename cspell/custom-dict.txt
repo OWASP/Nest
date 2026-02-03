@@ -152,7 +152,6 @@ pymdownx
 pypoetry
 pyyaml
 quasis
-reindexing
 relativedelta
 repositorycontributor
 requirepass

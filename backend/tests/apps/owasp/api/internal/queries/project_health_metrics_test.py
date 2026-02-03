@@ -54,7 +54,7 @@ class TestProjectHealthMetricsQuery:
         """Test resolving the health stats."""
         expected_stats = ProjectHealthStatsNode(
             average_score=65.0,
-            monthly_overall_scores=[77.5, 60.0, 40.0],
+            monthly_overall_scores=[77.5, 60, 40],
             monthly_overall_scores_months=[1, 2, 3],
             projects_count_healthy=1,
             projects_count_need_attention=2,
@@ -82,7 +82,7 @@ class TestProjectHealthMetricsQuery:
             ProjectHealthMetricsNode(
                 stars_count=1000,
                 forks_count=200,
-                score=85.0,
+                score=85,
                 contributors_count=50,
                 open_issues_count=10,
                 open_pull_requests_count=5,

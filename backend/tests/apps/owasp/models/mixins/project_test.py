@@ -1,9 +1,8 @@
 """Tests for ProjectIndexMixin."""
 
+import math
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from apps.owasp.models.mixins.project import (
     DEFAULT_HEALTH_SCORE,
@@ -97,7 +96,7 @@ class TestProjectIndexMixin:
 
         result = ProjectIndexMixin.idx_health_score.fget(mock_project)
 
-        assert result == pytest.approx(75.0)
+        assert math.isclose(result, 75.0)
 
     def test_idx_is_active(self):
         """Test idx_is_active returns active status."""
@@ -146,7 +145,7 @@ class TestProjectIndexMixin:
 
         result = ProjectIndexMixin.idx_level_raw.fget(mock_project)
 
-        assert result == pytest.approx(3.0)
+        assert math.isclose(result, 3)
 
     def test_idx_level_raw_none(self):
         """Test idx_level_raw returns None when level_raw is empty."""
