@@ -21,6 +21,7 @@ class TestOwaspAggregateProjects:
         project.owasp_repository = mock.Mock()
         project.owasp_repository.is_archived = False
         project.owasp_repository.created_at = "2024-01-01T00:00:00Z"
+        project.issues = mock.Mock()
         return project
 
     @pytest.mark.parametrize(
@@ -37,6 +38,7 @@ class TestOwaspAggregateProjects:
     def test_handle(self, mock_bulk_save, command, mock_project, offset, projects):
         mock_organization = mock.Mock()
         mock_repository = mock.Mock()
+        mock_repository.id = 1
         mock_repository.organization = mock_organization
         mock_repository.owner = mock.Mock()
         mock_repository.is_archived = False
@@ -61,27 +63,44 @@ class TestOwaspAggregateProjects:
             def exists(self):
                 return bool(self)
 
+            def values_list(self, *args, **kwargs):
+                # Extract values from list items based on field names
+                flat = kwargs.get("flat", False)
+                field_name = args[0] if args else None
+                if flat and field_name:
+                    return [getattr(item, field_name) for item in self]
+                return self
+
         mock_project.repositories.filter.return_value = QS([mock_repository])
-        mock_projects_list = [mock_project] * projects
-        mock_active_projects = mock.MagicMock()
-        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
-        mock_active_projects.count.return_value = len(mock_projects_list)
-        mock_active_projects.__getitem__.side_effect = (
-            lambda idx: mock_projects_list[idx.start : idx.stop]
-            if isinstance(idx, slice)
-            else mock_projects_list[idx]
-        )
-        mock_active_projects.order_by.return_value = mock_active_projects
 
-        with (
-            mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print") as mock_print,
-        ):
-            command.handle(offset=offset)
+        mock_issues = mock.Mock()
+        mock_issues.count.return_value = 5
 
-        assert mock_bulk_save.called
-        assert mock_print.call_count == projects - offset
+        with mock.patch(
+            "apps.owasp.management.commands.owasp_aggregate_projects.Issue"
+        ) as mock_issue_class:
+            mock_issue_class.objects.filter.return_value = mock_issues
 
-        for call in mock_print.call_args_list:
-            args, _ = call
-            assert "https://owasp.org/www-project-test" in args[0]
+            mock_projects_list = [mock_project] * projects
+            mock_active_projects = mock.MagicMock()
+            mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+            mock_active_projects.count.return_value = len(mock_projects_list)
+            mock_active_projects.__getitem__.side_effect = (
+                lambda idx: mock_projects_list[idx.start : idx.stop]
+                if isinstance(idx, slice)
+                else mock_projects_list[idx]
+            )
+            mock_active_projects.order_by.return_value = mock_active_projects
+
+            with (
+                mock.patch.object(Project, "active_projects", mock_active_projects),
+                mock.patch("builtins.print") as mock_print,
+            ):
+                command.handle(offset=offset)
+
+            assert mock_bulk_save.called
+            assert mock_print.call_count == projects - offset
+
+            for call in mock_print.call_args_list:
+                args, _ = call
+                assert "https://owasp.org/www-project-test" in args[0]

@@ -2,6 +2,7 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
 from apps.core.utils.index import deep_camelize
@@ -10,6 +11,7 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.models.issue import Issue
 from apps.github.models.milestone import Milestone
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
@@ -67,7 +69,7 @@ class ProjectNode(GenericEntityNode):
     @strawberry_django.field
     def issues_count(self, root: Project) -> int:
         """Resolve issues count."""
-        return root.idx_issues_count
+        return root.issues_count
 
     @strawberry_django.field
     def key(self, root: Project) -> str:
@@ -79,10 +81,28 @@ class ProjectNode(GenericEntityNode):
         """Resolve languages."""
         return root.idx_languages
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        prefetch_related=[
+            lambda _info: Prefetch(
+                "issues",
+                queryset=Issue.objects.select_related(
+                    "author",
+                    "level",
+                    "milestone",
+                    "repository",
+                )
+                .prefetch_related(
+                    "assignees",
+                    "labels",
+                )
+                .order_by("-created_at")[:RECENT_ISSUES_LIMIT],
+                to_attr="recent_issues",
+            ),
+        ],
+    )
     def recent_issues(self, root: Project) -> list[IssueNode]:
         """Resolve recent issues."""
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        return root.recent_issues
 
     @strawberry_django.field
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
