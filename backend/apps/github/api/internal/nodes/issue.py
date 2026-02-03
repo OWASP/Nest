@@ -49,11 +49,13 @@ class IssueNode(strawberry.relay.Node):
     def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
         pull_requests = getattr(root, "prefetched_pull_requests", None)
+        if pull_requests is None:
+            pull_requests = getattr(root, "_prefetched_objects_cache", {}).get("pull_requests")
         if pull_requests is not None:
             return any(
                 pr.state == "closed" and pr.merged_at is not None
                 for pr in pull_requests
-        )
+            )
         # fallback to ORM if not prefetched
         return root.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
 
