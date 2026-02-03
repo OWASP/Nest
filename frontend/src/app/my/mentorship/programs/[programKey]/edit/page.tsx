@@ -53,10 +53,10 @@ const EditProgramPage = () => {
       return
     }
 
-    const userLogin : string | undefined =
+    const userLogin: string | undefined =
       session?.user && 'login' in session.user
         ? (session.user as { login?: string }).login
-        : undefined;
+        : undefined
 
     const isAdmin = data.getProgram.admins?.some(
       (admin: { login: string }) => admin.login === userLogin
