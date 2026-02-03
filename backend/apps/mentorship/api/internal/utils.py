@@ -55,7 +55,7 @@ def validate_domains(domains: list[str]) -> list[str]:
     pattern = re.compile(r"^[a-zA-Z0-9 ]+$")
     for domain in domains:
         if not pattern.match(domain):
-            msg = f"Domain '{domain}' must be alphanumeric."
+            msg = f"Domain '{domain}' must contain only alphanumeric characters or spaces."
             raise ValueError(msg)
 
     return domains
