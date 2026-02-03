@@ -46,6 +46,15 @@ Current Leaders:
 All OWASP Nest leaders are certified ISC2 professionals and adhere to the OWASP Code of Conduct.
 For questions or discussions with the leadership team and other contributors, please use the [#project-nest](https://owasp.slack.com/archives/project-nest) channel on OWASP Slack.
 
+## Before you start
+
+> ⚠️ **Important for Windows users**
+>
+> OWASP Nest must be run inside **WSL (Linux environment)**.  
+> Running setup or development commands from **Windows PowerShell or Command Prompt is not supported** and may lead to setup failures.
+>
+> Docker is required to provide a consistent development environment across operating systems.
+
 ## Contributing
 
 OWASP Nest thrives on community contributions. Whether you are a developer, designer, writer, or enthusiast, there are various ways to get involved:
