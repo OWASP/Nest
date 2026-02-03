@@ -13,7 +13,11 @@ export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
   useEffect(() => {
     if (scrollerRef.current) {
       const scrollContainer = scrollerRef.current
-      scrollContainer.innerHTML += scrollContainer.innerHTML
+      // Clone and append children for infinite scroll effect.
+      const children = Array.from(scrollContainer.children)
+      children.forEach((child) => {
+        scrollContainer.appendChild(child.cloneNode(true))
+      })
     }
   }, [sponsors])
 

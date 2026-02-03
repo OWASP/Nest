@@ -15,6 +15,7 @@ import {
   FaCircleCheck,
   FaCircleExclamation,
   FaSignsPost,
+  FaCodeBranch,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
@@ -35,6 +36,7 @@ import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
 import Markdown from 'components/MarkdownWrapper'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
@@ -114,6 +116,7 @@ const DetailsCard = ({
   userSummary,
 }: DetailsCardProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
+  const [showAllPRs, setShowAllPRs] = useState(false)
   const [showAllMilestones, setShowAllMilestones] = useState(false)
 
   // compute styles based on type prop
@@ -367,6 +370,18 @@ const DetailsCard = ({
             <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
           </div>
         )}
+        {type === 'module' && pullRequests && pullRequests.length > 0 && (
+          <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
+            <div className="grid grid-cols-1 gap-3">
+              {pullRequests.slice(0, showAllPRs ? undefined : 4).map((pr) => (
+                <MentorshipPullRequest key={pr.id} pr={pr} />
+              ))}
+              {pullRequests.length > 4 && (
+                <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
+              )}
+            </div>
+          </SecondaryCard>
+        )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
             <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
@@ -376,7 +391,9 @@ const DetailsCard = ({
         {type === 'program' && modules.length > 0 && (
           <>
             {modules.length === 1 ? (
-              <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              <div className="mb-8">
+                <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+              </div>
             ) : (
               <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
                 <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
@@ -386,7 +403,7 @@ const DetailsCard = ({
         )}
         {type === 'program' && recentMilestones && recentMilestones.length > 0 && (
           <SecondaryCard icon={FaSignsPost} title={<AnchorTitle title="Recent Milestones" />}>
-            <div className="grid gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
               {recentMilestones
                 .slice(0, showAllMilestones ? recentMilestones.length : MILESTONE_LIMIT)
                 .map((milestone, index) => (
@@ -440,21 +457,21 @@ const DetailsCard = ({
                         </h3>
                       </div>
                       <div className="ml-0.5 w-full">
-                        <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
-                          <div className="mr-4 flex items-center">
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center">
                             <FaCalendar className="mr-2 h-4 w-4" />
                             <span>{formatDate(milestone.createdAt)}</span>
                           </div>
-                          <div className="mr-4 flex items-center">
+                          <div className="flex items-center">
                             <FaCircleCheck className="mr-2 h-4 w-4" />
                             <span>{milestone.closedIssuesCount} closed</span>
                           </div>
-                          <div className="mr-4 flex items-center">
+                          <div className="flex items-center">
                             <FaCircleExclamation className="mr-2 h-4 w-4" />
                             <span>{milestone.openIssuesCount} open</span>
                           </div>
                           {milestone?.repositoryName && milestone?.organizationName && (
-                            <div className="flex flex-1 items-center overflow-hidden">
+                            <div className="flex min-w-0 flex-1 items-center overflow-hidden">
                               <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
                               <Link
                                 href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName}`}

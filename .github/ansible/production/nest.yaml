@@ -20,13 +20,11 @@
             - '--include=*/**/**/Makefile'
             - '--exclude=*'
 
-      - name: Update backend makefile for the production environment
-        shell:
-          cmd: sed -i 's/\bnest-backend\b/production-nest-backend/' ~/backend/Makefile
-
-      - name: Update frontend makefile for the production environment
-        shell:
-          cmd: sed -i 's/\bnest-frontend\b/production-nest-frontend/' ~/frontend/Makefile
+      - name: Update Makefiles for production environment
+        shell: |
+          sed -i '/e2e-\|fuzz-/! s/\bnest-backend\b/production-nest-backend/g' ~/backend/Makefile
+          sed -i '/e2e-\|fuzz-/! s/\bnest-db\b/production-nest-db/g' ~/backend/Makefile
+          sed -i 's/\bnest-frontend\b/production-nest-frontend/g' ~/frontend/Makefile
 
       - name: Copy secrets
         copy:
