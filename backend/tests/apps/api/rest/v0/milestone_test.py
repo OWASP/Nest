@@ -157,11 +157,9 @@ class TestListMilestones:
     def test_list_milestones_with_state_filter(self, mocker):
         """Test listing milestones with state filter."""
         mock_qs = MagicMock()
-        mock_filtered = MagicMock()
         mock_qs.select_related.return_value = mock_qs
-        mock_qs.filter.return_value = mock_filtered
-        mock_filtered.filter.return_value = mock_filtered
-        mock_filtered.order_by.return_value = []
+        mock_qs.filter.return_value = mock_qs
+        mock_qs.order_by.return_value = []
         mocker.patch(
             "apps.api.rest.v0.milestone.MilestoneModel.objects",
             mock_qs,
@@ -170,6 +168,8 @@ class TestListMilestones:
         request = MagicMock()
         filters = MilestoneFilter(state="open")
         list_milestones(request, filters, None)
+
+        mock_qs.filter.assert_called_with(state="open")
 
     def test_list_milestones_with_ordering(self, mocker):
         """Test listing milestones with custom ordering."""

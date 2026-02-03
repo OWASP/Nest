@@ -106,11 +106,9 @@ class TestListIssues:
     def test_list_issues_with_state_filter(self, mocker):
         """Test listing issues with state filter."""
         mock_qs = MagicMock()
-        mock_filtered = MagicMock()
         mock_qs.select_related.return_value = mock_qs
-        mock_qs.filter.return_value = mock_filtered
-        mock_filtered.filter.return_value = mock_filtered
-        mock_filtered.order_by.return_value = []
+        mock_qs.filter.return_value = mock_qs
+        mock_qs.order_by.return_value = []
         mocker.patch(
             "apps.api.rest.v0.issue.IssueModel.objects",
             mock_qs,
@@ -119,6 +117,8 @@ class TestListIssues:
         request = MagicMock()
         filters = IssueFilter(state="open")
         list_issues(request, filters, None)
+
+        mock_qs.filter.assert_called_with(state="open")
 
     def test_list_issues_with_ordering(self, mocker):
         """Test listing issues with custom ordering."""

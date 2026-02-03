@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.common.models import BulkSaveModel
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
 from apps.owasp.models.enums.project import ProjectLevel, ProjectType
@@ -445,7 +446,7 @@ class TestProjectProperties:
             return_value=mock_prompt,
         )
         mock_generate = mocker.patch.object(Project, "generate_summary")
-        mocker.patch.object(Project.__bases__[0], "save")
+        mocker.patch.object(BulkSaveModel, "save")
 
         project = Project(is_active=True, summary="")
         project.save()
@@ -455,7 +456,7 @@ class TestProjectProperties:
     def test_save_skips_summary_when_exists(self, mocker):
         """Test save skips summary generation when summary exists."""
         mock_generate = mocker.patch.object(Project, "generate_summary")
-        mocker.patch.object(Project.__bases__[0], "save")
+        mocker.patch.object(BulkSaveModel, "save")
 
         project = Project(is_active=True, summary="Existing summary")
         project.save()

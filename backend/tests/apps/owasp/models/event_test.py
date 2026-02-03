@@ -258,7 +258,8 @@ class TestEventGeoMethods:
 
             event.generate_geo_location()
 
-            assert event.latitude is not None
+            assert math.isclose(event.latitude, 40.7128)
+            assert math.isclose(event.longitude, -74.0060)
 
     def test_generate_suggested_location(self):
         """Test generate_suggested_location uses OpenAI."""

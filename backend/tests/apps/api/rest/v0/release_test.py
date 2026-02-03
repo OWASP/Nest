@@ -103,11 +103,9 @@ class TestListRelease:
     def test_list_release_with_tag_filter(self, mocker):
         """Test listing releases with tag_name filter."""
         mock_qs = MagicMock()
-        mock_filtered = MagicMock()
         mock_qs.exclude.return_value.select_related.return_value = mock_qs
-        mock_qs.filter.return_value = mock_filtered
-        mock_filtered.filter.return_value = mock_filtered
-        mock_filtered.order_by.return_value = []
+        mock_qs.filter.return_value = mock_qs
+        mock_qs.order_by.return_value = []
         mocker.patch(
             "apps.api.rest.v0.release.ReleaseModel.objects",
             mock_qs,
@@ -116,6 +114,8 @@ class TestListRelease:
         request = MagicMock()
         filters = ReleaseFilter(tag_name="v1.0.0")
         list_release(request, filters, None)
+
+        mock_qs.filter.assert_called_with(tag_name="v1.0.0")
 
     def test_list_release_with_ordering(self, mocker):
         """Test listing releases with custom ordering."""
