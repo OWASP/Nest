@@ -168,49 +168,43 @@ backend-security-scan-image:
 	fi
 	@echo "Scanning Image: $(BACKEND_IMAGE_NAME)..."
 	@docker run --rm \
-		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v trivy-cache:/root/.cache/trivy \
-		$(TRIVY_IMAGE_TAG) \
-		image \
-		--scanners vuln \
-		--exit-code $(TRIVY_EXIT_CODE) \
-		--severity CRITICAL,HIGH \
-		--no-progress \
-		$(BACKEND_IMAGE_NAME)
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    -v $(PWD)/trivy.yaml:/trivy.yaml:ro \
+		-v $(PWD)/trivyignore.yaml:/trivyignore.yaml:ro \
+	    -v trivy-cache:/root/.cache/trivy \
+		-e TRIVY_SCANNERS \
+	    $(TRIVY_IMAGE_TAG) \
+	    image \
+	    --config /trivy.yaml \
+	    --exit-code $(TRIVY_EXIT_CODE) \
+	    --no-progress \
+	    $(BACKEND_IMAGE_NAME)
 
-# For local
 backend-security-scan-code:
-	@echo "Scanning Backend Code (Vulns + Config)..."
+	@echo "Scanning Backend Code..."
 	@docker run --rm \
-		-v $(PWD)/backend:/app \
-		-v trivy-cache:/root/.cache/trivy \
-		$(TRIVY_IMAGE_TAG) \
-		fs \
-				--scanners vuln,config \
-		--exit-code $(TRIVY_EXIT_CODE) \
-		--severity CRITICAL,HIGH \
-		--no-progress \
-		/app
-
-# CI Only or Explicit Local Run
-backend-security-scan-secrets:
-	@echo "Scanning Backend for Secrets..."
-	@docker run --rm \
-		-v $(PWD)/backend:/app \
-		-v trivy-cache:/root/.cache/trivy \
-		$(TRIVY_IMAGE_TAG) \
-		fs \
-		--scanners secret \
-		--exit-code $(TRIVY_EXIT_CODE) \
-		--severity CRITICAL,HIGH \
-		--no-progress \
-		/app
+	   -v $(PWD)/backend:/app \
+	   -v $(PWD)/trivy.yaml:/trivy.yaml:ro \
+	   -v $(PWD)/trivyignore.yaml:/trivyignore.yaml:ro \
+	   -v trivy-cache:/root/.cache/trivy \
+	   -e TRIVY_SCANNERS \
+	   $(TRIVY_IMAGE_TAG) \
+	   fs \
+	   --config /trivy.yaml \
+	   --exit-code $(TRIVY_EXIT_CODE) \
+	   --no-progress \
+	   /app
 
 # local
-backend-security-scan: backend-security-scan-code backend-security-scan-image
+backend-security-scan:
+	@echo "Running LOCAL security scan (vuln + config only)"
+	@TRIVY_SCANNERS=vuln,misconfig \
+	$(MAKE) backend-security-scan-code backend-security-scan-image
 
-# Full CI Scan
-backend-security-scan-full: backend-security-scan backend-security-scan-secrets
+# full (TRIVY_SCANNERS=vuln,misconfig,secret) when not set
+backend-security-scan-ci:
+	@echo "Running CI backend security scan (vuln + config + secret)"
+	$(MAKE) backend-security-scan-code backend-security-scan-image
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it

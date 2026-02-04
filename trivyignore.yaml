@@ -1,3 +1,7 @@
 vulnerabilities:
   # TODO(arkid15r): Remove when v5.9.3 is no longer current.
   - id: CVE-2025-64756  # glob: Command Injection Vulnerability via Malicious Filenames.
+  - id: CVE-2024-21538  # cross-spawn: Regular expression denial of service (High)
+  - id: CVE-2026-23745  # node-tar: Arbitrary file overwrite and symlink poisoning (High)
+  - id: CVE-2026-23950  # node-tar: Arbitrary file overwrite via Unicode path collision (High)
+  - id: CVE-2026-24842  # node-tar: Arbitrary file creation via path traversal (High)

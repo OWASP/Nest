@@ -2,6 +2,7 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
+const forceStandalone = process.env.FORCE_STANDALONE === 'true';
 
 const nextConfig: NextConfig = {
   devIndicators: false,
@@ -33,7 +34,7 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   serverExternalPackages: ['import-in-the-middle', 'require-in-the-middle'],
   transpilePackages: ['@react-leaflet/core', 'leaflet', 'react-leaflet', 'react-leaflet-cluster'],
-  output: 'standalone' ,
+  ...(isLocal && !forceStandalone ? {} : { output: 'standalone' }),
 }
 
 export default withSentryConfig(nextConfig, {

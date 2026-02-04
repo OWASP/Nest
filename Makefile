@@ -62,12 +62,6 @@ security-scan: \
 	backend-security-scan \
 	frontend-security-scan
 
-# CI/CD full Scan
-security-scan-full: \
-	security-scan \
-	backend-security-scan-secrets \
-	frontend-security-scan-secrets
-
 security-scan-code-semgrep:
 	@echo "Running Semgrep security scan..."
 	@docker run --rm \

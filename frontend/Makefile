@@ -2,6 +2,7 @@ SHELL := /bin/bash
 
 build-frontend-local-image:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	    --build-arg FORCE_STANDALONE=true \
 		--no-cache \
 		-f docker/frontend/Dockerfile \
 		-t nest-frontend-local \
@@ -56,7 +57,6 @@ generate-graphql-types:
 	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run graphql-codegen))
 
-# Defaults for Local Development
 FRONTEND_IMAGE_NAME ?= nest-frontend-local
 TRIVY_EXIT_CODE ?= 0
 TRIVY_IMAGE_TAG := $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')
@@ -68,45 +68,40 @@ frontend-security-scan-image:
 	@echo "Scanning Image: $(FRONTEND_IMAGE_NAME)..."
 	@docker run --rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(PWD)/trivy.yaml:/trivy.yaml:ro \
+		-v $(PWD)/trivyignore.yaml:/trivyignore.yaml:ro \
 		-v trivy-cache:/root/.cache/trivy \
+		-e TRIVY_SCANNERS \
 		$(TRIVY_IMAGE_TAG) \
 		image \
-		--scanners vuln \
+		--config trivy.yaml \
 		--exit-code $(TRIVY_EXIT_CODE) \
-		--severity CRITICAL,HIGH \
 		--no-progress \
 		$(FRONTEND_IMAGE_NAME)
 
-# local
 frontend-security-scan-code:
-	@echo "Scanning Frontend Code (Vulns + Config)..."
+	@echo "Scanning Frontend Code..."
 	@docker run --rm \
 		-v $(PWD)/frontend:/app \
 		-v trivy-cache:/root/.cache/trivy \
+		-v $(PWD)/trivyignore.yaml:/trivyignore.yaml:ro \
+		-v $(PWD)/trivy.yaml:/trivy.yaml:ro \
+		-e TRIVY_SCANNERS \
 		$(TRIVY_IMAGE_TAG) \
 		fs \
-				--scanners vuln,config \
+		--config trivy.yaml \
 		--exit-code $(TRIVY_EXIT_CODE) \
-		--severity CRITICAL,HIGH \
 		--no-progress \
 		/app
 
-# CI
-frontend-security-scan-secrets:
-	@echo "Scanning Frontend for Secrets..."
-	@docker run --rm \
-		-v $(PWD)/frontend:/app \
-		-v trivy-cache:/root/.cache/trivy \
-		$(TRIVY_IMAGE_TAG) \
-		fs \
-		--scanners secret \
-		--exit-code $(TRIVY_EXIT_CODE) \
-		--severity CRITICAL,HIGH \
-		--no-progress \
-		/app
+frontend-security-scan:
+	@echo "Running LOCAL frontend security scan (vuln + config only)"
+	@TRIVY_SCANNERS=vuln,misconfig \
+	$(MAKE) frontend-security-scan-code frontend-security-scan-image
 
-frontend-security-scan: frontend-security-scan-code frontend-security-scan-image
-frontend-security-scan-full: frontend-security-scan frontend-security-scan-secrets
+frontend-security-scan-ci:
+	@echo "Running CI frontend security scan (vuln + config + secret)"
+	$(MAKE) frontend-security-scan-code frontend-security-scan-image
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it

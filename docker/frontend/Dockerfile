@@ -33,6 +33,9 @@ COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.m
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 
+ARG FORCE_STANDALONE
+ENV FORCE_STANDALONE=$FORCE_STANDALONE
+
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -48,10 +51,6 @@ WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NPM_CACHE="/app/.npm"
-
-RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g npm@10.9.0 --cache ${NPM_CACHE}
 
 # Fix CVE-2026-23745: Update npm's bundled tar to 7.5.3 in runner stage
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
@@ -64,18 +63,6 @@ RUN cd /tmp && \
     chmod -R 755 "${TAR_DIR}" && \
     rm -rf package tar-7.5.7.tgz && \
     grep -q 'version.*7.5.7' "${TAR_DIR}/package.json"
-
-# Fix CVE-2025-64756: Update npm's bundled glob to 11.1.0 in runner stage
-# Note: Must download glob with npm pack BEFORE removing the old glob (npm needs it)
-RUN cd /tmp && \
-    npm pack glob@11.1.0 && \
-    tar -xzf glob-11.1.0.tgz && \
-    GLOB_DIR="/usr/local/lib/node_modules/npm/node_modules/glob" && \
-    rm -rf "${GLOB_DIR}" && \
-    cp -r package "${GLOB_DIR}" && \
-    chmod -R 755 "${GLOB_DIR}" && \
-    rm -rf package glob-11.1.0.tgz && \
-    grep -q 'version.*11.1.0' "${GLOB_DIR}/package.json"
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
