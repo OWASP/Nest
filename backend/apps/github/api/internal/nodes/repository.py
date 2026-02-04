@@ -86,14 +86,14 @@ class RepositoryNode(strawberry.relay.Node):
                     is_draft=False,
                     is_pre_release=False,
                     published_at__isnull=False,
-                ).order_by("-published_at")[:RECENT_RELEASES_LIMIT],
+                ).order_by("-published_at"),
                 to_attr="prefetched_releases",
             )
         ]
     )
     def releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
-        return root.prefetched_releases
+        return root.prefetched_releases[:RECENT_RELEASES_LIMIT]
 
     @strawberry_django.field
     def top_contributors(self, root: Repository) -> list[RepositoryContributorNode]:
