@@ -374,7 +374,6 @@ def process_ai_query_async(
 
         # Remove 👀 reaction to show we are done
         if message_ts:
-            try:
             # Remove eyes reaction if it exists
             with contextlib.suppress(SlackApiError):
                 client.reactions_remove(

@@ -4,6 +4,7 @@ import logging
 from datetime import timedelta
 
 import django_rq
+from slack_sdk.errors import SlackApiError
 
 from apps.ai.common.constants import QUEUE_RESPONSE_TIME_MINUTES
 from apps.slack.common.question_detector import QuestionDetector
@@ -58,17 +59,17 @@ class MessagePosted(EventBase):
         # Check if bot is mentioned in the message text or blocks
         # Cache bot_user_id per workspace to support multi-workspace deployments
         bot_mentioned = False
-        try:
-            team_id = conversation.workspace.slack_workspace_id
-            bot_user_id = MessagePosted._bot_user_id_by_team.get(team_id)
-            
-            # Only call auth_test() if we don't have a cached bot_user_id for this team
-            if bot_user_id is None:
+        team_id = conversation.workspace.slack_workspace_id
+        bot_user_id = MessagePosted._bot_user_id_by_team.get(team_id)
+
+        # Handle Slack API errors separately
+        if bot_user_id is None:
+            try:
                 bot_info = client.auth_test()
                 # Verify team_id matches (safety check for multi-workspace)
                 auth_team_id = bot_info.get("team_id")
                 bot_user_id = bot_info.get("user_id")
-                
+
                 if auth_team_id == team_id:
                     # Normal case: cache under conversation's team_id
                     MessagePosted._bot_user_id_by_team[team_id] = bot_user_id
@@ -81,7 +82,16 @@ class MessagePosted(EventBase):
                     # Cache under both keys so subsequent lookups work regardless of which key is used
                     MessagePosted._bot_user_id_by_team[team_id] = bot_user_id
                     MessagePosted._bot_user_id_by_team[auth_team_id] = bot_user_id
-            if bot_user_id:
+            except SlackApiError:
+                logger.exception(
+                    "Failed to get bot user ID from Slack API",
+                    extra={"channel_id": channel_id, "team_id": team_id},
+                )
+                return
+
+        # Handle parsing errors separately
+        if bot_user_id:
+            try:
                 # Check text for mention format: <@BOT_USER_ID>
                 if f"<@{bot_user_id}>" in text:
                     bot_mentioned = True
@@ -102,9 +112,16 @@ class MessagePosted(EventBase):
                                         break
                             if bot_mentioned:
                                 break
-        except Exception:
-            logger.warning("Could not check bot mention, skipping auto-reply to be safe.")
-            return
+            except (KeyError, TypeError, ValueError) as e:
+                logger.warning(
+                    "Error parsing event blocks/text for bot mention check",
+                    extra={
+                        "channel_id": channel_id,
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                    },
+                )
+                return
 
         # Skip messages where bot is mentioned - app_mention handler will process them
         if bot_mentioned:
