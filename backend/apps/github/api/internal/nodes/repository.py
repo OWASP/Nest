@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Annotated
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -11,6 +12,7 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
+from apps.github.models.release import Release
 from apps.github.models.repository import Repository
 
 if TYPE_CHECKING:
@@ -76,11 +78,22 @@ class RepositoryNode(strawberry.relay.Node):
 
         return root.recent_milestones.order_by("-created_at")[:normalized_limit]
 
-    @strawberry_django.field(prefetch_related=["releases"])
+    @strawberry_django.field(
+        prefetch_related=[
+            lambda _: Prefetch(
+                "releases",
+                queryset=Release.objects.filter(
+                    is_draft=False,
+                    is_pre_release=False,
+                    published_at__isnull=False,
+                ).order_by("-published_at")[:RECENT_RELEASES_LIMIT],
+                to_attr="prefetched_releases",
+            )
+        ]
+    )
     def releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
-        # TODO(arkid15r): rename this to recent_releases.
-        return root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
+        return root.prefetched_releases
 
     @strawberry_django.field
     def top_contributors(self, root: Repository) -> list[RepositoryContributorNode]:

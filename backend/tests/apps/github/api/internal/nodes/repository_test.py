@@ -145,14 +145,13 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
     def test_releases_method(self):
         """Test releases method resolution."""
         mock_repository = Mock()
-        mock_releases = Mock()
-        mock_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
-        mock_repository.published_releases = mock_releases
+        mock_releases = [Mock(), Mock()]
+        mock_repository.prefetched_releases = mock_releases
 
         field = self._get_field_by_name("releases", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
-        resolver(None, mock_repository)
-        mock_releases.order_by.assert_called_with("-published_at")
+        result = resolver(None, mock_repository)
+        assert result == mock_releases
 
     def test_top_contributors_method(self):
         """Test top_contributors method resolution."""
