@@ -17,7 +17,7 @@ class MessagePosted(EventBase):
     """Handles new messages posted in channels."""
 
     event_type = "message"
-    _bot_user_id = None  # Cache bot user ID to avoid repeated auth_test() calls
+    _bot_user_id_by_team = {}  # Cache bot user ID per workspace to avoid repeated auth_test() calls
 
     def __init__(self):
         """Initialize MessagePosted event handler."""
@@ -45,14 +45,40 @@ class MessagePosted(EventBase):
         user_id = event.get("user")
         text = event.get("text", "")
 
+        # Get conversation first to access workspace for team_id (more efficient than auth_test)
+        try:
+            conversation = Conversation.objects.get(
+                slack_channel_id=channel_id,
+                is_nest_bot_assistant_enabled=True,
+            )
+        except Conversation.DoesNotExist:
+            logger.warning("Conversation not found or assistant not enabled.")
+            return
+
         # Check if bot is mentioned in the message text or blocks
+        # Cache bot_user_id per workspace to support multi-workspace deployments
         bot_mentioned = False
         try:
-            # Cache bot_user_id to avoid repeated auth_test() calls
-            if MessagePosted._bot_user_id is None:
+            team_id = conversation.workspace.slack_workspace_id
+            bot_user_id = MessagePosted._bot_user_id_by_team.get(team_id)
+            
+            # Only call auth_test() if we don't have a cached bot_user_id for this team
+            if bot_user_id is None:
                 bot_info = client.auth_test()
-                MessagePosted._bot_user_id = bot_info.get("user_id")
-            bot_user_id = MessagePosted._bot_user_id
+                # Verify team_id matches (safety check for multi-workspace)
+                auth_team_id = bot_info.get("team_id")
+                if auth_team_id == team_id:
+                    bot_user_id = bot_info.get("user_id")
+                    MessagePosted._bot_user_id_by_team[team_id] = bot_user_id
+                else:
+                    logger.warning(
+                        "Team ID mismatch between conversation and auth_test",
+                        extra={"conversation_team_id": team_id, "auth_team_id": auth_team_id},
+                    )
+                    # Fall back to auth_team_id if mismatch
+                    team_id = auth_team_id
+                    bot_user_id = bot_info.get("user_id")
+                    MessagePosted._bot_user_id_by_team[team_id] = bot_user_id
             if bot_user_id:
                 # Check text for mention format: <@BOT_USER_ID>
                 if f"<@{bot_user_id}>" in text:
@@ -85,22 +111,21 @@ class MessagePosted(EventBase):
             )
             return
 
-        try:
-            conversation = Conversation.objects.get(
-                slack_channel_id=channel_id,
-                is_nest_bot_assistant_enabled=True,
-            )
-        except Conversation.DoesNotExist:
-            logger.warning("Conversation not found or assistant not enabled.")
-            return
-
         is_owasp = self.question_detector.is_owasp_question(text)
         logger.info(
             "Question detector result",
             extra={
                 "channel_id": channel_id,
                 "is_owasp": is_owasp,
-                "text": text[:200],
+                "text_length": len(text),
+            },
+        )
+        logger.debug(
+            "Question detector result (debug)",
+            extra={
+                "channel_id": channel_id,
+                "is_owasp": is_owasp,
+                "text_preview": text[:200] if text else "",
             },
         )
         if not is_owasp:

@@ -1,5 +1,7 @@
 """AI app chunk model."""
 
+import logging
+
 from django.db import models
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
@@ -7,6 +9,8 @@ from pgvector.django import VectorField
 from apps.ai.models.context import Context
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
+
+logger = logging.getLogger(__name__)
 
 
 class Chunk(TimestampedModel):
@@ -60,7 +64,24 @@ class Chunk(TimestampedModel):
         Returns:
           Chunk: The created chunk instance.
 
+        Raises:
+          ValueError: If embedding dimension doesn't match the field dimension.
+
         """
+        # Validate embedding dimension matches the field dimension
+        expected_dimension = Chunk._meta.get_field("embedding").dimensions
+        actual_dimension = len(embedding) if embedding else 0
+
+        if actual_dimension != expected_dimension:
+            error_msg = (
+                f"Embedding dimension mismatch: expected {expected_dimension}, "
+                f"got {actual_dimension}. This usually indicates a mismatch between "
+                f"the LLM_PROVIDER setting and the Chunk model's VectorField dimension. "
+                f"Ensure the embedding provider matches the configured dimension."
+            )
+            logger.error(error_msg, extra={"context_id": context.id if context else None})
+            raise ValueError(error_msg)
+
         if Chunk.objects.filter(context=context, text=text).exists():
             return None
 

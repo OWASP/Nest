@@ -1,5 +1,6 @@
 """Slack bot AI command."""
 
+import hashlib
 import logging
 
 import django_rq
@@ -38,16 +39,9 @@ class Ai(CommandBase):
                 )
             return
 
-        # Slash commands don't have a message TS until we post something,
-        # but we can add reactions to the last message or just use the trigger_id
-        # However, it's better to just post an ephemeral message or send a message to the channel.
-
-        # For /ai, we usually want to post to the channel.
-        # But Slack doesn't provide a message TS for the command itself.
-        # We'll just post a placeholder or just wait for the async reply.
-
-        # Let's post an ephemeral "Thinking..." message or just go async.
         # Import here to avoid AppRegistryNotReady error (lazy import)
+        # Note: Slash commands don't have a message TS, so we pass None for message_ts.
+        # The async handler will post a "Thinking..." message if needed.
         from apps.slack.services.message_auto_reply import (
             process_ai_query_async,
         )
@@ -78,13 +72,15 @@ class Ai(CommandBase):
                     extra={"channel_id": channel_id, "user_id": user_id},
                 )
 
-            # Log the exception with context for debugging
+            # Log the exception with context for debugging (avoid logging PII)
+            query_hash = hashlib.sha256(query.encode()).hexdigest()[:16] if query else None
             logger.exception(
                 "Failed to enqueue AI query processing for /ai command",
                 extra={
                     "channel_id": channel_id,
                     "user_id": user_id,
-                    "query": query[:100],
+                    "query_length": len(query),
+                    "query_hash": query_hash,
                     "error": str(e),
                 },
             )

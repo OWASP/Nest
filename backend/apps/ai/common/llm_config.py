@@ -27,7 +27,7 @@ def get_llm() -> LLM:
         )
     if provider == "google":
         return LLM(
-            model=f"openai/{settings.GOOGLE_MODEL_NAME}",
+            model=settings.GOOGLE_MODEL_NAME,
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
             api_key=settings.GOOGLE_API_KEY,
             temperature=0.1,
