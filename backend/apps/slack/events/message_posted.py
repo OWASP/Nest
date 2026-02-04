@@ -9,7 +9,6 @@ from apps.ai.common.constants import QUEUE_RESPONSE_TIME_MINUTES
 from apps.slack.common.question_detector import QuestionDetector
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation, Member, Message
-from apps.slack.services.message_auto_reply import generate_ai_reply_if_unanswered
 
 logger = logging.getLogger(__name__)
 
@@ -126,6 +125,11 @@ class MessagePosted(EventBase):
                 "delay_minutes": QUEUE_RESPONSE_TIME_MINUTES,
             },
         )
+        # Import here to avoid AppRegistryNotReady error (lazy import)
+        from apps.slack.services.message_auto_reply import (
+            generate_ai_reply_if_unanswered,
+        )
+
         django_rq.get_queue("ai").enqueue_in(
             timedelta(minutes=QUEUE_RESPONSE_TIME_MINUTES),
             generate_ai_reply_if_unanswered,
