@@ -2,9 +2,13 @@
 
 import logging
 
+import django_rq
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.commands.command import CommandBase
+from apps.slack.services.message_auto_reply import (
+    process_ai_query_async,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -46,12 +50,6 @@ class Ai(CommandBase):
         # We'll just post a placeholder or just wait for the async reply.
 
         # Let's post an ephemeral "Thinking..." message or just go async.
-        import django_rq
-
-        from apps.slack.services.message_auto_reply import (
-            process_ai_query_async,
-        )
-
         try:
             django_rq.get_queue("ai").enqueue(
                 process_ai_query_async,

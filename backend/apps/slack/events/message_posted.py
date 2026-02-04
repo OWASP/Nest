@@ -31,13 +31,13 @@ class MessagePosted(EventBase):
             return
 
         if event.get("thread_ts"):
-            try:
-                Message.objects.filter(
-                    slack_message_id=event.get("thread_ts"),
-                    conversation__slack_channel_id=event.get("channel"),
-                ).update(has_replies=True)
-            except Message.DoesNotExist:
-                logger.warning("Thread message not found.")
+            # filter().update() doesn't raise DoesNotExist, it just returns 0 if no matches
+            updated_count = Message.objects.filter(
+                slack_message_id=event.get("thread_ts"),
+                conversation__slack_channel_id=event.get("channel"),
+            ).update(has_replies=True)
+            if updated_count == 0:
+                logger.debug("Thread message not found for update.")
             return
 
         # message_posted ignores bot mentions - app_mention handler handles them

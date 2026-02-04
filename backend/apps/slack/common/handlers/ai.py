@@ -10,6 +10,10 @@ from apps.slack.utils import format_ai_response_for_slack
 
 logger = logging.getLogger(__name__)
 
+# Slack has a limit of 3001 characters per block text
+# Leave some margin for safety
+MAX_BLOCK_TEXT_LENGTH = 3000
+
 
 def get_blocks(
     query: str, channel_id: str | None = None, *, is_app_mention: bool = False
@@ -47,10 +51,7 @@ def format_blocks(text: str) -> list[dict]:
     # Format the AI response for Slack (remove code blocks, fix markdown)
     formatted_response = format_ai_response_for_slack(text)
 
-    # Slack has a limit of 3001 characters per block text
     # Split into multiple blocks if needed
-    MAX_BLOCK_TEXT_LENGTH = 3000  # Leave some margin for safety
-
     if len(formatted_response) <= MAX_BLOCK_TEXT_LENGTH:
         return [markdown(formatted_response)]
 
