@@ -96,6 +96,8 @@ class Command(BaseCommand):
             metric.level_non_compliant = project.level != expected_level
             updated_metrics.append(metric)
 
+        updated_count = len(updated_metrics)
+
         if updated_metrics:
             ProjectHealthMetrics.bulk_save(
                 updated_metrics,
@@ -103,5 +105,5 @@ class Command(BaseCommand):
             )
 
         self.stdout.write(
-            self.style.SUCCESS(f"Updated level compliance for {len(updated_metrics)} projects.")
+            self.style.SUCCESS(f"Updated level compliance for {updated_count} projects.")
         )
