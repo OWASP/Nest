@@ -2,10 +2,10 @@ import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  fullyParallel: true,
   expect: {
     timeout: 30000,
   },
+  fullyParallel: true,
   projects: [
     {
       name: 'chromium',
