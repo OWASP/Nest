@@ -25,10 +25,6 @@ PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
         "type": "number",
         "field": "stars_count",
     },
-    "stars_count": {
-        "type": "number",
-        "field": "stars_count",
-    },
 }
 
 router = RouterPaginated(tags=["Projects"])
@@ -83,7 +79,7 @@ class ProjectFilter(FilterSchema):
     )
     q: str | None = Field(
         None,
-        description="Structured search query (e.g. 'name:nest stars_count:>100')",
+        description="Structured search query (e.g. 'name:security stars:>100')",
     )
 
 
@@ -104,12 +100,8 @@ def list_projects(
     ),
 ) -> list[Project]:
     """Get projects."""
-    queryset = ProjectModel.active_projects.order_by(
-        ordering or "-level_raw", "-stars_count", "-forks_count"
-    )
-
     queryset = apply_structured_search(
-        queryset=queryset,
+        queryset=ProjectModel.active_projects,
         query=filters.q,
         field_schema=PROJECT_SEARCH_FIELDS,
     )
@@ -117,7 +109,7 @@ def list_projects(
     if filters.level is not None:
         queryset = queryset.filter(level=filters.level)
 
-    return queryset
+    return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 
 
 @router.get(
