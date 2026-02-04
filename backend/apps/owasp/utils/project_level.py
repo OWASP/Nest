@@ -36,6 +36,9 @@ def map_level(level: Decimal) -> ProjectLevel | None:
     except (InvalidOperation, TypeError, ValueError):
         return None
 
+    if not parsed_level.is_finite():
+        return None
+
     if parsed_level < 0:
         return None
 
