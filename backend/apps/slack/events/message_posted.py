@@ -67,18 +67,20 @@ class MessagePosted(EventBase):
                 bot_info = client.auth_test()
                 # Verify team_id matches (safety check for multi-workspace)
                 auth_team_id = bot_info.get("team_id")
+                bot_user_id = bot_info.get("user_id")
+                
                 if auth_team_id == team_id:
-                    bot_user_id = bot_info.get("user_id")
+                    # Normal case: cache under conversation's team_id
                     MessagePosted._bot_user_id_by_team[team_id] = bot_user_id
                 else:
+                    # Mismatch case: cache under both keys to ensure lookups work
                     logger.warning(
                         "Team ID mismatch between conversation and auth_test",
                         extra={"conversation_team_id": team_id, "auth_team_id": auth_team_id},
                     )
-                    # Fall back to auth_team_id if mismatch
-                    team_id = auth_team_id
-                    bot_user_id = bot_info.get("user_id")
+                    # Cache under both keys so subsequent lookups work regardless of which key is used
                     MessagePosted._bot_user_id_by_team[team_id] = bot_user_id
+                    MessagePosted._bot_user_id_by_team[auth_team_id] = bot_user_id
             if bot_user_id:
                 # Check text for mention format: <@BOT_USER_ID>
                 if f"<@{bot_user_id}>" in text:
