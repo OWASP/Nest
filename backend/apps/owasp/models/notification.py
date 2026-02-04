@@ -19,9 +19,6 @@ class Subscription(models.Model):
     class Meta:
         db_table = "owasp_subscriptions"
         unique_together = ("user", "content_type", "object_id")
-        indexes = [
-            models.Index(fields=["user", "content_type", "object_id"]),
-        ]
 
     def __str__(self):  # noqa: D105
         return f"{self.user} -> {self.content_object}"
@@ -34,7 +31,7 @@ class Notification(models.Model):
     type = models.CharField(max_length=50)  # e.g., 'snapshot_published', 'release', etc.
     title = models.CharField(max_length=255)
     message = models.TextField()
-    related_link = models.URLField(blank=True)
+    related_link = models.URLField(blank=True, default="")
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -50,9 +50,9 @@ class Command(BaseCommand):
                     count=1,
                     block=5000,
                 )
-                print("Events: ", events)
+                logger.info("Events: %s", events)
                 count += 1
-                print(f"count:{count}")
+                logger.info("count:%s", count)
                 # Process main stream messages
                 if events:
                     for _, messages in events:
@@ -61,7 +61,7 @@ class Command(BaseCommand):
                                 self.process_message(data)
                                 # Explicitly acknowledge the message
                                 redis_conn.xack(stream_key, group_name, message_id)
-                                print("Message processed successfully.")
+                                logger.info("Message processed successfully.")
                             except Exception:
                                 logger.exception("Error processing message %s", message_id)
 
@@ -190,14 +190,6 @@ class Command(BaseCommand):
         title = f"New Snapshot Published: {snapshot.title}"
         message = f"Check out the latest OWASP snapshot: {snapshot.title}"
 
-        # Create DB record
-        Notification.objects.create(
-            recipient=user,
-            type="snapshot_published",
-            title=title,
-            message=message,
-        )
-
         # Send Email
         send_mail(
             subject=title,
@@ -208,12 +200,20 @@ class Command(BaseCommand):
         )
         logger.info("Sent email to %s", user.email)
 
+        # Create DB record
+        Notification.objects.create(
+            recipient=user,
+            type="snapshot_published",
+            title=title,
+            message=message,
+        )
+
     def process_dlq(self, redis_conn):
         """Process messages from DLQ - retry failed notifications."""
         self.stdout.write("Checking DLQ for failed notifications...")
 
         try:
-            messages = redis_conn.xrange(self.DLQ_STREAM_KEY, "-", "+")
+            messages = redis_conn.xrange(self.DLQ_STREAM_KEY, "-", "+", count=100)
 
             if not messages:
                 self.stdout.write("No messages in DLQ")
