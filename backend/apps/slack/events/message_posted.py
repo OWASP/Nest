@@ -114,14 +114,15 @@ class MessagePosted(EventBase):
                                 break
             except (KeyError, TypeError, ValueError) as e:
                 logger.warning(
-                    "Error parsing event blocks/text for bot mention check",
+                    "Error parsing event blocks/text for bot mention check, assuming bot not mentioned",
                     extra={
                         "channel_id": channel_id,
                         "error": str(e),
                         "error_type": type(e).__name__,
                     },
                 )
-                return
+                # Continue processing with bot_mentioned = False rather than dropping the message
+                bot_mentioned = False
 
         # Skip messages where bot is mentioned - app_mention handler will process them
         if bot_mentioned:
