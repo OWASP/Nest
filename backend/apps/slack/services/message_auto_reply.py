@@ -353,13 +353,23 @@ def process_ai_query_async(
         # Post the response
         try:
             blocks = format_blocks(ai_response_text)
+            # Create a sanitized preview for logging (avoid logging full blocks with PII)
+            preview_length = 200
+            preview = ""
+            if blocks:
+                # Get text from first block
+                first_block_text = blocks[0].get("text", {}).get("text", "")
+                if first_block_text:
+                    preview = first_block_text[:preview_length]
+                    if len(first_block_text) > preview_length:
+                        preview += "..."
             logger.debug(
                 "Formatted blocks for posting",
                 extra={
                     "channel_id": channel_id,
                     "message_ts": message_ts,
                     "blocks_count": len(blocks),
-                    "blocks": blocks,
+                    "preview": preview,
                 },
             )
             result = client.chat_postMessage(
