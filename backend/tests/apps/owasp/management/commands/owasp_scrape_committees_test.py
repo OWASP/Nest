@@ -53,8 +53,8 @@ class TestOwaspScrapeCommittees:
         mock_active_committees = mock.MagicMock()
         mock_active_committees.__iter__.return_value = iter(mock_committees_list)
         mock_active_committees.count.return_value = len(mock_committees_list)
-        mock_active_committees.__getitem__.side_effect = (
-            lambda idx: mock_committees_list[idx.start : idx.stop]
+        mock_active_committees.__getitem__.side_effect = lambda idx: (
+            mock_committees_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_committees_list[idx]
         )
