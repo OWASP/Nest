@@ -1,7 +1,8 @@
 """Admin registration for notification models."""
 
 from django.contrib import admin
-from apps.owasp.models.notification import Subscription, Notification
+
+from apps.owasp.models.notification import Notification, Subscription
 
 
 @admin.register(Subscription)

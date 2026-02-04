@@ -1,9 +1,7 @@
 """Notification utils."""
 
 import logging
-from datetime import datetime
 
-from django.conf import settings
 from django.utils.timezone import now
 from django_redis import get_redis_connection
 
@@ -23,7 +21,9 @@ def publish_snapshot_notification(snapshot: Snapshot) -> None:
             "timestamp": str(now().timestamp()),
         }
         redis_conn.xadd(stream_key, message)
-        print(f"Successfully added message to Redis stream '{stream_key}'")
-        logger.info(f"Published snapshot notification for snapshot {snapshot.id}")
+        logger.info("Published snapshot notification for snapshot %s", snapshot.id)
     except Exception:
-        logger.exception(f"Failed to publish snapshot notification for snapshot {snapshot.id}")
+        logger.exception(
+            "Failed to publish snapshot notification for snapshot %s",
+            snapshot.id,
+        )

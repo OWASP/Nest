@@ -9,6 +9,7 @@ Birda
 CCSP
 CISSP
 Cañón
+DLQ
 DRF
 ELEVENLABS
 FOSS
@@ -78,6 +79,7 @@ cva
 defectdojo
 demojize
 dismissable
+dlq
 dockerhub
 dsn
 elevenlabs
@@ -179,10 +181,14 @@ vcodec
 webgoat
 winsrdf
 wsgi
+xack
 xapp
+xdel
 xdg
 xdist
+xgroup
 xoxb
+xreadgroup
 xsser
 xzf
 zapconfig

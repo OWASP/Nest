@@ -6,44 +6,77 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('owasp', '0072_project_project_name_gin_idx_and_more'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("owasp", "0072_project_project_name_gin_idx_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(max_length=50)),
-                ('title', models.CharField(max_length=255)),
-                ('message', models.TextField()),
-                ('related_link', models.URLField(blank=True, null=True)),
-                ('is_read', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('recipient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("type", models.CharField(max_length=50)),
+                ("title", models.CharField(max_length=255)),
+                ("message", models.TextField()),
+                ("related_link", models.URLField(blank=True, null=True)),
+                ("is_read", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "recipient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'owasp_notifications',
-                'ordering': ['-created_at'],
+                "db_table": "owasp_notifications",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Subscription',
+            name="Subscription",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.PositiveIntegerField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscriptions', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("object_id", models.PositiveIntegerField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="contenttypes.contenttype"
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="subscriptions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'db_table': 'owasp_subscriptions',
-                'indexes': [models.Index(fields=['user', 'content_type', 'object_id'], name='owasp_subsc_user_id_33ae6d_idx')],
-                'unique_together': {('user', 'content_type', 'object_id')},
+                "db_table": "owasp_subscriptions",
+                "indexes": [
+                    models.Index(
+                        fields=["user", "content_type", "object_id"],
+                        name="owasp_subsc_user_id_33ae6d_idx",
+                    )
+                ],
+                "unique_together": {("user", "content_type", "object_id")},
             },
         ),
     ]

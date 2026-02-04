@@ -8,9 +8,7 @@ from apps.owasp.utils.notifications import publish_snapshot_notification
 
 
 @receiver(post_save, sender=Snapshot)
-def snapshot_published(sender, instance, created, **kwargs):
+def snapshot_published(sender, instance, created, **kwargs):  # noqa: ARG001
     """Signal handler for snapshot publication."""
-    print(f"Signal fired for Snapshot {instance.id}, Status: {instance.status}")
     if instance.status == Snapshot.Status.COMPLETED:
-        print(f"Publishing notification for Snapshot {instance.id}")
         publish_snapshot_notification(instance)
