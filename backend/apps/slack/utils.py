@@ -97,9 +97,9 @@ def format_ai_response_for_slack(text: str) -> str:
     text = re.sub(r"`([^`<]+)`", r"\1", text)
 
     # Preserve Slack channel links (format: <#channel_id|channel_name>)
-    # These should not be modified by format_links_for_slack
-    # Convert markdown links to Slack format (but preserve existing Slack links)
-    return format_links_for_slack(text)
+    # Note: Link formatting is handled by markdown() in blocks.py to avoid
+    # redundant processing when format_ai_response_for_slack() output is passed to markdown()
+    return text
 
 
 # Import get_news_data and get_staff_data from owasp utils
