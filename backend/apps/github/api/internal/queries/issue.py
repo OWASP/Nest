@@ -2,12 +2,11 @@
 
 import strawberry
 import strawberry_django
-from django.db.models import Exists, F, OuterRef, Window
+from django.db.models import F, Window
 from django.db.models.functions import Rank
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
-from apps.github.models.pull_request import PullRequest
 
 MAX_LIMIT = 1000
 
@@ -48,13 +47,6 @@ class IssueQuery:
             filters["repository__organization__login"] = organization
 
         queryset = queryset.filter(**filters)
-
-        merged_pr_exists = PullRequest.objects.filter(
-            related_issues__id=OuterRef("pk"),
-            state="closed",
-            merged_at__isnull=False,
-        )
-        queryset = queryset.annotate(is_merged=Exists(merged_pr_exists))
 
         if distinct:
             queryset = (

@@ -2,10 +2,12 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Exists, OuterRef
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
 
 
 @strawberry_django.type(
@@ -45,13 +47,20 @@ class IssueNode(strawberry.relay.Node):
         """Resolve label names for the issue."""
         return [label.name for label in root.labels.all()]
 
-    @strawberry_django.field
+    @strawberry_django.field(
+        annotate={
+            "is_merged": Exists(
+                PullRequest.objects.filter(
+                    merged_at__isnull=False,
+                    related_issues=OuterRef("pk"),
+                    state="closed",
+                )
+            )
+        }
+    )
     def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
-        is_merged = getattr(root, "is_merged", None)
-        if is_merged is not None:
-            return bool(is_merged)
-        return root.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
+        return bool(root.is_merged)
 
     @strawberry_django.field(prefetch_related=["participant_interests__user"])
     def interested_users(self, root: Issue) -> list[UserNode]:
