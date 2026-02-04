@@ -6,7 +6,6 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 
-from apps.api.internal.extensions.cache import invalidate_program_cache
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
@@ -101,7 +100,6 @@ class ProgramMutation:
 
         try:
             program = Program.objects.get(key=input_data.key)
-            old_key = program.key
         except Program.DoesNotExist as err:
             msg = f"Program with key '{input_data.key}' not found."
             logger.warning(msg, exc_info=True)
@@ -148,13 +146,6 @@ class ProgramMutation:
             admins_to_set = resolve_admins_from_logins(input_data.admin_logins)
             program.admins.set(admins_to_set)
 
-        def _invalidate():
-            invalidate_program_cache(old_key)
-            if program.key != old_key:
-                invalidate_program_cache(program.key)
-
-        transaction.on_commit(_invalidate)
-
         return program
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
@@ -176,8 +167,6 @@ class ProgramMutation:
 
         program.status = input_data.status.value
         program.save()
-
-        transaction.on_commit(lambda: invalidate_program_cache(program.key))
 
         logger.info("Updated status of program '%s' to '%s'", program.key, program.status)
 

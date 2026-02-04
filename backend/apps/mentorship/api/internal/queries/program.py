@@ -5,12 +5,14 @@ import logging
 import strawberry
 from django.db.models import Q
 
+from apps.common.utils import normalize_limit
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
 
 PAGE_SIZE = 25
+MAX_LIMIT = 1000
 logger = logging.getLogger(__name__)
 
 
@@ -51,6 +53,9 @@ class ProgramQuery:
         if user.github_user:
             query |= Q(modules__mentors__github_user=user.github_user)
 
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            normalized_limit = PAGE_SIZE
+
         queryset = (
             Program.objects.prefetch_related(
                 "admins__github_user",
@@ -65,11 +70,13 @@ class ProgramQuery:
             queryset = queryset.filter(name__icontains=search)
 
         total_count = queryset.count()
-        total_pages = max(1, (total_count + limit - 1) // limit)
+        total_pages = max(1, (total_count + normalized_limit - 1) // normalized_limit)
         page = max(1, min(page, total_pages))
-        offset = (page - 1) * limit
+        offset = (page - 1) * normalized_limit
 
-        paginated_programs = queryset.order_by("-nest_created_at")[offset : offset + limit]
+        paginated_programs = queryset.order_by("-nest_created_at")[
+            offset : offset + normalized_limit
+        ]
 
         results = []
         for program in paginated_programs:

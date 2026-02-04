@@ -33,7 +33,7 @@ class ProgramNode:
     @strawberry.field
     def admins(self) -> list[AdminNode] | None:
         """Get the list of program administrators."""
-        return list(self.admins.all()) or None
+        return self.admins.order_by("github_user__login")
 
     @strawberry.field
     def recent_milestones(self) -> list["MilestoneNode"]:
