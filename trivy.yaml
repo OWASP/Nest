@@ -5,6 +5,10 @@ ignorefile: trivyignore.yaml
 
 scan:
   skip-files:
+  scanners:
+    - misconfig
+    - secret
+    - vuln
 
 severity:
   - CRITICAL
@@ -17,7 +21,3 @@ timeout: 10m
 
 vulnerability:
   ignore-unfixed: true
-  security-checks:
-    - misconfig
-    - secret
-    - vuln

@@ -144,7 +144,7 @@ jobs:
           name: semgrep-results-run-${{ github.run_number }}
           path: semgrep-security-report.txt
           retention-days: 14
- # semgrep shouldnot run again
+ # semgrep should not un again
       - name: Run Trivy security scan
         run: |
            make backend-security-scan-ci TRIVY_EXIT_CODE=1
