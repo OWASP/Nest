@@ -7,6 +7,7 @@ import uuid
 from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 API_KEY_LENGTH = 32
 MAX_ACTIVE_KEYS = 3
@@ -56,7 +57,7 @@ class ApiKey(models.Model):
     def create(cls, user, name, expires_at):
         """Create a new API key instance."""
 
-        User = type(user)
+        User = get_user_model()
         user = User.objects.select_for_update().get(pk=user.pk)
         
         if user.active_api_keys.select_for_update().count() >= MAX_ACTIVE_KEYS:
