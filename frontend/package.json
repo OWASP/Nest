@@ -14,8 +14,6 @@
     "lint:check": "eslint . --config eslint.config.mjs --max-warnings=0",
     "start": "next start",
     "test:a11y": "NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest __tests__/a11y/ --coverage=false",
-    "test:e2e": "npx playwright test",
-    "test:e2e:ui": "npx playwright test --ui-host=0.0.0.0 --ui-port=3800",
     "test:unit": "tsc --noEmit && NODE_OPTIONS='--experimental-vm-modules --no-warnings=DEP0040' jest"
   },
   "dependencies": {
@@ -78,7 +76,6 @@
     "@graphql-codegen/typescript": "^5.0.7",
     "@graphql-codegen/typescript-operations": "^5.0.7",
     "@lhci/cli": "^0.15.1",
-    "@playwright/test": "^1.58.1",
     "@swc/core": "^1.15.11",
     "@swc/jest": "^0.2.39",
     "@tailwindcss/postcss": "^4.1.18",

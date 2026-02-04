@@ -123,7 +123,7 @@ services:
     depends_on:
       frontend:
         condition: service_healthy
-    command: ${E2E_TEST_COMMAND:-sh -c "npx playwright test"}
+    command: ${E2E_TEST_COMMAND:-sh -c "pnpm run test:e2e"}
     environment:
       - FRONTEND_URL=http://frontend:3000
     ports:

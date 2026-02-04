@@ -184,9 +184,6 @@ importers:
       '@lhci/cli':
         specifier: ^0.15.1
         version: 0.15.1
-      '@playwright/test':
-        specifier: ^1.58.1
-        version: 1.58.1
       '@swc/core':
         specifier: ^1.15.11
         version: 1.15.11(@swc/helpers@0.5.18)
@@ -10682,6 +10679,7 @@ snapshots:
   '@playwright/test@1.58.1':
     dependencies:
       playwright: 1.58.1
+    optional: true
 
   '@posthog/core@1.17.0':
     dependencies:
@@ -15652,13 +15650,15 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  playwright-core@1.58.1: {}
+  playwright-core@1.58.1:
+    optional: true
 
   playwright@1.58.1:
     dependencies:
       playwright-core: 1.58.1
     optionalDependencies:
       fsevents: 2.3.2
+    optional: true
 
   possible-typed-array-names@1.1.0: {}
 
