@@ -93,7 +93,7 @@ const Release: React.FC<ReleaseProps> = ({
               onKeyDown={handleKeyDown}
               aria-label={`View repository ${release.repositoryName}`}
             >
-              <TruncatedText text={release.repositoryName} />
+              <TruncatedText text={release.repositoryName ?? ''} />
             </button>
           </div>
         </div>

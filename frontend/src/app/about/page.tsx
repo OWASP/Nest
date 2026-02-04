@@ -12,6 +12,7 @@ import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetAboutPageDataDocument } from 'types/__generated__/aboutQueries.generated'
+import type { Leader } from 'types/leader'
 import {
   technologies,
   missionContent,
@@ -77,11 +78,14 @@ const About = () => {
   const projectMetadata = data?.project
   const topContributors = data?.topContributors
 
-  const leadersData = [data?.leader1, data?.leader2, data?.leader3].filter(Boolean).map((user) => ({
-    description: user?.login ? leaders[user.login as keyof typeof leaders] : '',
-    memberName: user?.name || user?.login,
-    member: user,
-  }))
+  const leadersData = [data?.leader1, data?.leader2, data?.leader3]
+    .filter(Boolean)
+    .map((user) => ({
+      description: user?.login ? leaders[user.login as keyof typeof leaders] : '',
+      memberName: user?.name || user?.login || '',
+      member: user,
+    }))
+    .filter((leader) => leader.memberName) as Leader[]
 
   const [showAllRoadmap, setShowAllRoadmap] = useState(false)
   const [showAllTimeline, setShowAllTimeline] = useState(false)

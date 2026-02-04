@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { FC, useState, useEffect } from 'react'
+import { FC, useState, useEffect, Key } from 'react'
 import { FaFilter, FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
 import { Ordering } from 'types/__generated__/graphql'
@@ -114,14 +114,14 @@ const MetricsPage: FC = () => {
   const currentFilterKeys = []
   if (healthFilter) {
     currentFilters = {
-      ...healthFiltersMapping[healthFilter],
+      ...healthFiltersMapping[healthFilter as keyof typeof healthFiltersMapping],
     }
     currentFilterKeys.push(healthFilter)
   }
   if (levelFilter) {
     currentFilters = {
       ...currentFilters,
-      ...levelFiltersMapping[levelFilter],
+      ...levelFiltersMapping[levelFilter as keyof typeof levelFiltersMapping],
     }
     currentFilterKeys.push(levelFilter)
   }
@@ -156,7 +156,7 @@ const MetricsPage: FC = () => {
 
   useEffect(() => {
     if (data) {
-      setMetrics(data.projectHealthMetrics)
+      setMetrics(data.projectHealthMetrics as unknown as HealthMetricsProps[])
       setMetricsLength(data.projectHealthMetricsDistinctLength)
     }
     if (graphQLRequestError) {
@@ -237,13 +237,13 @@ const MetricsPage: FC = () => {
               selectedLabels={
                 urlKey ? [SORT_FIELDS.find((f) => f.key === urlKey)?.label || ''] : []
               }
-              onAction={(key: string) => {
+              onAction={(key: Key) => {
                 if (key === 'reset-sort') {
                   handleSort(null)
                   return
                 }
 
-                handleSort(key)
+                handleSort(key as string)
               }}
             />
           </div>
@@ -254,17 +254,23 @@ const MetricsPage: FC = () => {
             selectionMode="multiple"
             selectedKeys={activeFilters}
             selectedLabels={getKeysLabels(filteringSections, activeFilters)}
-            onAction={(key: string) => {
+            onAction={(key: Key) => {
               // Because how apollo caches pagination, we need to reset the pagination.
               setPagination({ offset: 0, limit: PAGINATION_LIMIT })
               let newFilters = { ...currentFilters }
               const newParams = new URLSearchParams(searchParams.toString())
-              if (key in healthFiltersMapping) {
-                newParams.set('health', key)
-                newFilters = { ...newFilters, ...healthFiltersMapping[key] }
-              } else if (key in levelFiltersMapping) {
-                newParams.set('level', key)
-                newFilters = { ...newFilters, ...levelFiltersMapping[key] }
+              if ((key as string) in healthFiltersMapping) {
+                newParams.set('health', key as string)
+                newFilters = {
+                  ...newFilters,
+                  ...healthFiltersMapping[key as string as keyof typeof healthFiltersMapping],
+                }
+              } else if ((key as string) in levelFiltersMapping) {
+                newParams.set('level', key as string)
+                newFilters = {
+                  ...newFilters,
+                  ...levelFiltersMapping[key as string as keyof typeof levelFiltersMapping],
+                }
               } else {
                 newParams.delete('health')
                 newParams.delete('level')

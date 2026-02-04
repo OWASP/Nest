@@ -8,6 +8,11 @@ import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetOrganizationDataDocument } from 'types/__generated__/organizationQueries.generated'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
@@ -110,11 +115,11 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={recentIssues}
-      recentReleases={recentReleases}
-      recentMilestones={recentMilestones}
-      pullRequests={recentPullRequests}
-      repositories={repositories}
+      recentIssues={recentIssues as unknown as Issue[]}
+      recentReleases={recentReleases as unknown as Release[]}
+      recentMilestones={recentMilestones as unknown as Milestone[]}
+      pullRequests={recentPullRequests as unknown as PullRequest[]}
+      repositories={repositories as unknown as RepositoryCardProps[]}
       stats={organizationStats}
       summary={organization.description}
       title={organization.name}

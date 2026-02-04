@@ -34,7 +34,7 @@
       "utils/*": ["src/utils/*"],
       "wrappers/*": ["src/wrappers/*"]
     },
-    "strict": false
+    "strict": true
   },
   "include": [
     ".next/dev/types/**/*.ts",
@@ -44,5 +44,13 @@
     "next-env.d.ts",
     "src"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "jest.setup.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "__tests__/**"
+  ]
 }

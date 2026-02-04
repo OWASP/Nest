@@ -11,6 +11,8 @@ import type { Release } from 'types/release'
 import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
 
+type ItemCardData = Issue | Milestone | PullRequest | Release
+
 interface AuthorAvatarProps {
   author: {
     avatarUrl: string
@@ -90,40 +92,62 @@ const ItemCardList = ({
       <div
         className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
       >
-        {data.map((item, index) => (
-          <div
-            key={item.objectID || `${item.repositoryName}-${item.title || item.name}-${item.url}`}
-            className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-          >
-            <div className="flex w-full flex-col justify-between">
-              <div className="flex w-full items-center">
-                {showAvatar && (
-                  <Tooltip
-                    closeDelay={100}
-                    content={item?.author?.name || item?.author?.login}
-                    id={`avatar-tooltip-${index}`}
-                    delay={100}
-                    placement="bottom"
-                    showArrow
-                  >
-                    <AuthorAvatar author={item.author} />
-                  </Tooltip>
-                )}
-                <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
-                  <Link
-                    className="text-blue-400 hover:underline"
-                    href={item?.url || ''}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <TruncatedText text={item.title || item.name} />
-                  </Link>
-                </h3>
+        {data.map((item, index) => {
+          const getItemKey = (i: ItemCardData): string => {
+            if ('objectID' in i && i.objectID) return i.objectID
+            const repoName = 'repositoryName' in i ? i.repositoryName : ''
+            const title = 'title' in i ? i.title : ''
+            const name = 'name' in i ? i.name : ''
+            const url = 'url' in i ? i.url : ''
+            return `${repoName}-${title || name}-${url}`
+          }
+          return (
+            <div
+              key={getItemKey(item)}
+              className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+            >
+              <div className="flex w-full flex-col justify-between">
+                <div className="flex w-full items-center">
+                  {showAvatar && item.author && (
+                    <Tooltip
+                      closeDelay={100}
+                      content={item.author?.name || item.author?.login}
+                      id={`avatar-tooltip-${index}`}
+                      delay={100}
+                      placement="bottom"
+                      showArrow
+                    >
+                      <AuthorAvatar
+                        author={{
+                          avatarUrl: item.author.avatarUrl || '',
+                          login: item.author.login || '',
+                          name: item.author.name || '',
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                  <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                    <Link
+                      className="text-blue-400 hover:underline"
+                      href={('url' in item ? item.url : '') || ''}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <TruncatedText
+                        text={
+                          ('title' in item ? item.title : '') || ('name' in item ? item.name : '')
+                        }
+                      />
+                    </Link>
+                  </h3>
+                </div>
+                <div className="ml-0.5 w-full">
+                  {renderDetails(item as unknown as Parameters<typeof renderDetails>[0])}
+                </div>
               </div>
-              <div className="ml-0.5 w-full">{renderDetails(item)}</div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     ) : (
       <p>Nothing to display.</p>

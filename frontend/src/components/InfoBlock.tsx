@@ -10,8 +10,8 @@ const InfoBlock = ({
   label = '',
   pluralizedName,
   precision = 1,
-  unit,
-  value,
+  unit = '',
+  value = 0,
 }: {
   className?: string
   icon: IconType

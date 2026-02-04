@@ -8,7 +8,12 @@ import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
+import type { GetRepositoryDataQuery } from 'types/__generated__/repositoryQueries.generated'
 import type { Contributor } from 'types/contributor'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -18,9 +23,11 @@ const RepositoryDetailsPage = () => {
     repositoryKey: string
     organizationKey: string
   }>()
-  const [repository, setRepository] = useState(null)
+  const [repository, setRepository] = useState<GetRepositoryDataQuery['repository']>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [recentPullRequests, setRecentPullRequests] = useState(null)
+  const [recentPullRequests, setRecentPullRequests] = useState<
+    GetRepositoryDataQuery['recentPullRequests']
+  >([])
   const {
     data,
     error: graphQLRequestError,
@@ -43,7 +50,7 @@ const RepositoryDetailsPage = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !repository) {
+  if (!repository) {
     return (
       <ErrorDisplay
         message="Sorry, the Repository you're looking for doesn't exist"
@@ -110,10 +117,10 @@ const RepositoryDetailsPage = () => {
       isArchived={repository.isArchived}
       languages={repository.languages}
       projectName={repository.project?.name}
-      pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentMilestones={repository.recentMilestones}
-      recentReleases={repository.releases}
+      pullRequests={recentPullRequests as unknown as PullRequest[]}
+      recentIssues={repository.issues as unknown as Issue[]}
+      recentMilestones={repository.recentMilestones as unknown as Milestone[]}
+      recentReleases={repository.releases as unknown as Release[]}
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}

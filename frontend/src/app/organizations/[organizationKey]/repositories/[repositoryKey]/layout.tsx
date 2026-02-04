@@ -25,7 +25,7 @@ export async function generateMetadata({
     repositoryKey: string
     organizationKey: string
   }>
-}): Promise<Metadata> {
+}): Promise<Metadata | undefined> {
   const { repositoryKey, organizationKey } = await params
   const data = await getRepositoryMetadata(organizationKey, repositoryKey)
   const repository = data?.repository
@@ -37,7 +37,7 @@ export async function generateMetadata({
         keywords: ['owasp', 'repository', repositoryKey, repository.name],
         title: repository.name,
       })
-    : null
+    : undefined
 }
 
 export default async function RepositoryDetailsLayout({

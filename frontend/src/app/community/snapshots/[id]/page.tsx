@@ -7,6 +7,7 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
+import type { Release as ReleaseType } from 'types/release'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -52,10 +53,12 @@ const SnapshotDetailsPage: React.FC = () => {
     return (
       <Card
         button={submitButton}
-        cardKey={project.key}
+        cardKey={project.key ?? project.name}
         icons={filteredIcons}
-        level={level[`${project.level.toLowerCase() as keyof typeof level}`]}
-        summary={project.summary}
+        level={
+          project.level ? level[`${project.level.toLowerCase() as keyof typeof level}`] : undefined
+        }
+        summary={project.summary ?? ''}
         title={project.name}
         topContributors={project.topContributors}
         url={`/projects/${project.key}`}
@@ -66,7 +69,7 @@ const SnapshotDetailsPage: React.FC = () => {
   const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.relatedUrls)
+    const formattedUrls = handleSocialUrls(chapter.relatedUrls ?? [])
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
@@ -84,7 +87,7 @@ const SnapshotDetailsPage: React.FC = () => {
         cardKey={chapter.key}
         icons={filteredIcons}
         social={formattedUrls}
-        summary={chapter.summary}
+        summary={chapter.summary ?? ''}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
       />
@@ -142,7 +145,7 @@ const SnapshotDetailsPage: React.FC = () => {
           </h2>
           <div className="mb-4">
             <ChapterMapWrapper
-              geoLocData={snapshot.newChapters}
+              geoLocData={snapshot.newChapters as unknown as Chapter[]}
               showLocal={false}
               showLocationSharing={true}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
@@ -152,7 +155,9 @@ const SnapshotDetailsPage: React.FC = () => {
             {snapshot.newChapters
               .filter((chapter) => chapter.isActive)
               .map((chapter) => (
-                <React.Fragment key={chapter.key}>{renderChapterCard(chapter)}</React.Fragment>
+                <React.Fragment key={chapter.key}>
+                  {renderChapterCard(chapter as unknown as Chapter)}
+                </React.Fragment>
               ))}
           </div>
         </div>
@@ -183,7 +188,7 @@ const SnapshotDetailsPage: React.FC = () => {
               return (
                 <Release
                   key={release.id || `${release.tagName}-${release.repositoryName}-${index}`}
-                  release={release}
+                  release={release as unknown as ReleaseType}
                   showAvatar={true}
                   index={index}
                 />

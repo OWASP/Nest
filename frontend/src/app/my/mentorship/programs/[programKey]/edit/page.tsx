@@ -32,7 +32,17 @@ const EditProgramPage = () => {
     skip: !programKey,
     fetchPolicy: 'network-only',
   })
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string
+    description: string
+    menteesLimit: number
+    startedAt: string
+    endedAt: string
+    tags: string
+    domains: string
+    adminLogins?: string
+    status?: string
+  }>({
     name: '',
     description: '',
     menteesLimit: 0,
@@ -109,7 +119,7 @@ const EditProgramPage = () => {
         tags: parseCommaSeparated(formData.tags),
         domains: parseCommaSeparated(formData.domains),
         adminLogins: parseCommaSeparated(formData.adminLogins),
-        status: formData.status,
+        status: (formData.status as ProgramStatusEnum) || ProgramStatusEnum.Draft,
       }
 
       const result = await updateProgram({

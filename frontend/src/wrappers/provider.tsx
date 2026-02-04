@@ -22,6 +22,10 @@ export function Providers({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  if (!apolloClient) {
+    return <>{children}</>
+  }
+
   return (
     <Suspense>
       <SessionProvider>

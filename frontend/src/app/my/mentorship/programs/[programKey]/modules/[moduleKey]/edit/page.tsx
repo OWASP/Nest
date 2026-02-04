@@ -82,7 +82,7 @@ const EditModulePage = () => {
         startedAt: formatDateForInput(m.startedAt),
         endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
-        projectName: m.projectName,
+        projectName: m.projectName || '',
         tags: (m.tags || []).join(', '),
         labels: (m.labels || []).join(', '),
         projectId: m.projectId || '',
@@ -99,7 +99,7 @@ const EditModulePage = () => {
       const input = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || null,
+        endedAt: formData.endedAt,
         experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
         labels: parseCommaSeparated(formData.labels),
@@ -108,7 +108,7 @@ const EditModulePage = () => {
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        startedAt: formData.startedAt || null,
+        startedAt: formData.startedAt,
         tags: parseCommaSeparated(formData.tags),
       }
 
@@ -149,8 +149,8 @@ const EditModulePage = () => {
   return (
     <ModuleForm
       title="Edit Module"
-      formData={formData}
-      setFormData={setFormData}
+      formData={formData!}
+      setFormData={setFormData as React.Dispatch<React.SetStateAction<ModuleFormData>>}
       onSubmit={handleSubmit}
       loading={mutationLoading}
       submitText="Save"

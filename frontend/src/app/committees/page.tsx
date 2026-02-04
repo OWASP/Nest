@@ -37,11 +37,11 @@ const CommitteesPage = () => {
 
     return (
       <Card
-        key={committee.objectID}
-        cardKey={committee.objectID}
+        key={committee.objectID ?? committee.key!}
+        cardKey={committee.objectID ?? committee.key!}
         title={committee.name}
         url={`/committees/${committee.key}`}
-        summary={committee.summary}
+        summary={committee.summary ?? ''}
         icons={filteredIcons}
         topContributors={committee.topContributors}
         button={submitButton}
