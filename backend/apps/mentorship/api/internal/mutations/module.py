@@ -8,7 +8,6 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import transaction
 from django.utils import timezone
 
-from apps.api.internal.extensions.cache import invalidate_module_cache, invalidate_program_cache
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -121,8 +120,6 @@ class ModuleMutation:
         mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins or [])
         mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
-
-        transaction.on_commit(lambda: invalidate_program_cache(program.key))
 
         return module
 
@@ -336,7 +333,6 @@ class ModuleMutation:
             module = Module.objects.select_related("program").get(
                 key=input_data.key, program__key=input_data.program_key
             )
-            old_module_key = module.key
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
@@ -406,14 +402,5 @@ class ModuleMutation:
             module.program.experience_levels.remove(old_experience_level)
 
         module.program.save(update_fields=["experience_levels"])
-
-        program_key = module.program.key
-
-        def _invalidate():
-            invalidate_module_cache(old_module_key, program_key)
-            if module.key != old_module_key:
-                invalidate_module_cache(module.key, program_key)
-
-        transaction.on_commit(_invalidate)
 
         return module
