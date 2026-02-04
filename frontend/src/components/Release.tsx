@@ -95,9 +95,9 @@ const Release: React.FC<ReleaseProps> = ({
               disabled={!release.organizationName || !release.repositoryName}
               onClick={handleClickRepository}
               onKeyDown={handleKeyDown}
-              aria-label={`View repository ${release.repositoryName || 'unknown'}`}
+              aria-label={`View repository ${release.repositoryName ?? 'Unknown repository'}`}
             >
-              <TruncatedText text={release.repositoryName ?? ''} />
+              <TruncatedText text={release.repositoryName ?? 'Unknown repository'} />
             </button>
           </div>
         </div>

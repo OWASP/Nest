@@ -115,20 +115,11 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={
-        recentIssues?.map((issue) => ({
-          ...issue,
-          createdAt:
-            typeof issue.createdAt === 'number' ? issue.createdAt : Number(issue.createdAt) || 0,
-        })) as Issue[]
-      }
+      recentIssues={recentIssues as Issue[]}
       recentReleases={
         recentReleases?.map((release) => ({
           ...release,
-          publishedAt:
-            typeof release.publishedAt === 'number'
-              ? release.publishedAt
-              : Number(release.publishedAt) || 0,
+          publishedAt: release.publishedAt as number,
         })) as Release[]
       }
       recentMilestones={recentMilestones as Milestone[]}
