@@ -2,9 +2,8 @@
 
 import strawberry
 import strawberry_django
-from django.db.models import F, Window
+from django.db.models import Exists, F, OuterRef, Window
 from django.db.models.functions import Rank
-from django.db.models import Prefetch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
@@ -50,13 +49,12 @@ class IssueQuery:
 
         queryset = queryset.filter(**filters)
 
-        queryset = queryset.prefetch_related(
-            Prefetch(
-                "pull_requests",
-                queryset=PullRequest.objects.only("id", "state", "merged_at"),
-                to_attr="prefetched_pull_requests"
-            )
+        merged_pr_exists = PullRequest.objects.filter(
+            related_issues__id=OuterRef("pk"),
+            state="closed",
+            merged_at__isnull=False,
         )
+        queryset = queryset.annotate(is_merged=Exists(merged_pr_exists))
 
         if distinct:
             queryset = (
