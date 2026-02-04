@@ -187,7 +187,10 @@ const SnapshotDetailsPage: React.FC = () => {
             {snapshot.newReleases.map((release, index) => {
               return (
                 <Release
-                  key={release.id || `${release.tagName}-${release.repositoryName}-${index}`}
+                  key={
+                    release.id ||
+                    `${release.tagName}-${release.repositoryName ?? 'unknown'}-${index}`
+                  }
                   release={release as unknown as ReleaseType}
                   showAvatar={true}
                   index={index}

@@ -143,7 +143,7 @@ const ModuleIssueDetailsPage = () => {
             </h1>
             <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
               <span>
-                {issue.organizationName}/{issue.repositoryName} • #{issue.number}
+                {issue.organizationName}/{issue.repositoryName ?? 'unknown'} • #{issue.number}
               </span>
               <span
                 className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${issueStatusClass}`}

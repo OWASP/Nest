@@ -23,7 +23,11 @@ export function Providers({
   children: React.ReactNode
 }>) {
   if (!apolloClient) {
-    return <>{children}</>
+    return (
+      <div className="flex min-h-screen items-center justify-center text-red-500">
+        Configuration Error: GraphQL Client failed to initialize
+      </div>
+    )
   }
 
   return (

@@ -93,17 +93,19 @@ const ItemCardList = ({
         className={`grid ${showSingleColumn ? 'grid-cols-1' : 'gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
       >
         {data.map((item, index) => {
-          const getItemKey = (i: ItemCardData): string => {
+          const getItemKey = (i: ItemCardData, idx: number): string => {
             if ('objectID' in i && i.objectID) return i.objectID
+            if ('id' in i && i.id) return i.id
             const repoName = 'repositoryName' in i ? i.repositoryName : ''
             const title = 'title' in i ? i.title : ''
             const name = 'name' in i ? i.name : ''
             const url = 'url' in i ? i.url : ''
-            return `${repoName}-${title || name}-${url}`
+            const key = `${repoName || ''}-${title || name || ''}-${url || ''}`
+            return key || `item-${idx}`
           }
           return (
             <div
-              key={getItemKey(item)}
+              key={getItemKey(item, index)}
               className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
             >
               <div className="flex w-full flex-col justify-between">
@@ -127,18 +129,26 @@ const ItemCardList = ({
                     </Tooltip>
                   )}
                   <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
-                    <Link
-                      className="text-blue-400 hover:underline"
-                      href={('url' in item ? item.url : '') || ''}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
+                    {'url' in item && item.url ? (
+                      <Link
+                        className="text-blue-400 hover:underline"
+                        href={item.url}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        <TruncatedText
+                          text={
+                            ('title' in item ? item.title : '') || ('name' in item ? item.name : '')
+                          }
+                        />
+                      </Link>
+                    ) : (
                       <TruncatedText
                         text={
                           ('title' in item ? item.title : '') || ('name' in item ? item.name : '')
                         }
                       />
-                    </Link>
+                    )}
                   </h3>
                 </div>
                 <div className="ml-0.5 w-full">

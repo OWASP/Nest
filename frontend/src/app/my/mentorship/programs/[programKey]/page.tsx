@@ -46,7 +46,18 @@ const ProgramDetailsPage = () => {
     return true
   }, [isAdmin, program])
 
-  const updateStatus = async (newStatus: ProgramStatusEnum) => {
+  const updateStatus = async (newStatus: string) => {
+    if (!Object.values(ProgramStatusEnum).includes(newStatus as ProgramStatusEnum)) {
+      addToast({
+        title: 'Invalid Status',
+        description: 'The provided status is not valid.',
+        variant: 'solid',
+        color: 'danger',
+        timeout: 3000,
+      })
+      return
+    }
+
     if (!program || !isAdmin) {
       addToast({
         title: 'Permission Denied',
@@ -64,7 +75,7 @@ const ProgramDetailsPage = () => {
           inputData: {
             key: program.key,
             name: program.name,
-            status: newStatus,
+            status: newStatus as ProgramStatusEnum,
           },
         },
       })
@@ -113,7 +124,7 @@ const ProgramDetailsPage = () => {
       domains={program?.domains ?? undefined}
       modules={modules}
       programKey={program?.key ?? ''}
-      setStatus={updateStatus as (newStatus: string) => void}
+      setStatus={updateStatus}
       status={program?.status ?? ''}
       summary={program?.description ?? ''}
       tags={program?.tags ?? undefined}

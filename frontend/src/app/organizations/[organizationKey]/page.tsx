@@ -115,11 +115,30 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={recentIssues as unknown as Issue[]}
-      recentReleases={recentReleases as unknown as Release[]}
-      recentMilestones={recentMilestones as unknown as Milestone[]}
-      pullRequests={recentPullRequests as unknown as PullRequest[]}
-      repositories={repositories as unknown as RepositoryCardProps[]}
+      recentIssues={
+        recentIssues?.map((issue) => ({
+          ...issue,
+          createdAt:
+            typeof issue.createdAt === 'number' ? issue.createdAt : Number(issue.createdAt) || 0,
+        })) as Issue[]
+      }
+      recentReleases={
+        recentReleases?.map((release) => ({
+          ...release,
+          publishedAt:
+            typeof release.publishedAt === 'number'
+              ? release.publishedAt
+              : Number(release.publishedAt) || 0,
+        })) as Release[]
+      }
+      recentMilestones={recentMilestones as Milestone[]}
+      pullRequests={recentPullRequests as PullRequest[]}
+      repositories={
+        repositories?.map((repo) => ({
+          ...repo,
+          organization: repo.organization ? { login: repo.organization.login } : undefined,
+        })) as RepositoryCardProps[]
+      }
       stats={organizationStats}
       summary={organization.description}
       title={organization.name}

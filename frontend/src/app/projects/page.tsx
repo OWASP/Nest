@@ -49,7 +49,7 @@ const ProjectsPage = () => {
         button={submitButton}
         cardKey={project.key ?? ''}
         icons={filteredIcons}
-        key={project.key}
+        key={project.key ?? project.name}
         level={level[`${project.level as keyof typeof level}`]}
         summary={project.summary ?? ''}
         title={project.name}

@@ -19,7 +19,7 @@ const InfoBlock = ({
   pluralizedName?: string
   precision?: number
   unit?: string
-  value: number
+  value?: number
 }) => {
   const name = pluralizedName ? pluralize(value, unit, pluralizedName) : pluralize(value, unit)
   const formattedValue = value ? `${millify(value, { precision })} ${name}` : `No ${name}`

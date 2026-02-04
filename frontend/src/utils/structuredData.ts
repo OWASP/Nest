@@ -63,7 +63,9 @@ export function generateProfilePageStructuredData(
         url: 'https://nest.owasp.org/members',
       },
       name: user.name || user.login,
-      sameAs: [user.url ?? ''],
+      ...(user.url && {
+        sameAs: [user.url],
+      }),
       url: `${baseUrl}/members/${user.login}`,
       ...(user.company && {
         worksFor: {

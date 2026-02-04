@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
@@ -96,10 +97,10 @@ const EditModulePage = () => {
     if (!formData) return
 
     try {
-      const input = {
+      const input: UpdateModuleInput = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt,
+        endedAt: formData.endedAt || '',
         experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
         labels: parseCommaSeparated(formData.labels),
@@ -108,7 +109,7 @@ const EditModulePage = () => {
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        startedAt: formData.startedAt,
+        startedAt: formData.startedAt || '',
         tags: parseCommaSeparated(formData.tags),
       }
 
@@ -149,7 +150,7 @@ const EditModulePage = () => {
   return (
     <ModuleForm
       title="Edit Module"
-      formData={formData!}
+      formData={formData}
       setFormData={setFormData as React.Dispatch<React.SetStateAction<ModuleFormData>>}
       onSubmit={handleSubmit}
       loading={mutationLoading}

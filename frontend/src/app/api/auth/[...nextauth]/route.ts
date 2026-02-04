@@ -6,7 +6,7 @@ import {
   IsProjectLeaderDocument,
 } from 'types/__generated__/mentorshipQueries.generated'
 import { ExtendedProfile, ExtendedSession } from 'types/auth'
-import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
+import { IS_GITHUB_AUTH_ENABLED, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from 'utils/env.server'
 
 async function checkIfProjectLeader(login: string): Promise<boolean> {
   try {
@@ -45,10 +45,12 @@ async function checkIfMentor(login: string): Promise<boolean> {
 const providers = []
 
 if (IS_GITHUB_AUTH_ENABLED) {
+  const githubClientId = GITHUB_CLIENT_ID!
+  const githubClientSecret = GITHUB_CLIENT_SECRET!
   providers.push(
     GitHubProvider({
-      clientId: process.env.NEXT_SERVER_GITHUB_CLIENT_ID!,
-      clientSecret: process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET!,
+      clientId: githubClientId,
+      clientSecret: githubClientSecret,
       profile(profile) {
         return {
           email: profile.email,
@@ -88,7 +90,8 @@ const authOptions: AuthOptions = {
       }
 
       if (trigger === 'update' && session) {
-        token.isOwaspStaff = (session as ExtendedSession).user!.isOwaspStaff || false
+        const extSession = session as ExtendedSession
+        token.isOwaspStaff = extSession.user?.isOwaspStaff || false
       }
       return token
     },
