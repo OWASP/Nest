@@ -264,7 +264,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
 def process_ai_query_async(
     query: str,
     channel_id: str,
-    message_ts: str,
+    message_ts: str | None,
     thread_ts: str | None = None,
     is_app_mention: bool = False,
     user_id: str | None = None,
