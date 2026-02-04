@@ -120,19 +120,7 @@ def format_blocks(text: str) -> list[dict]:
         else:
             validated_blocks.append(block)
 
-    # One more pass to ensure we didn't miss anything
-    final_blocks = []
-    for block in validated_blocks:
-        block_text = block.get("text", {}).get("text", "")
-        if len(block_text) > MAX_BLOCK_TEXT_LENGTH:
-            for i in range(0, len(block_text), MAX_BLOCK_TEXT_LENGTH):
-                chunk = block_text[i : i + MAX_BLOCK_TEXT_LENGTH]
-                if chunk.strip():
-                    final_blocks.append(markdown(chunk.strip()))
-        else:
-            final_blocks.append(block)
-
-    return final_blocks
+    return validated_blocks
 
 
 def process_ai_query(
