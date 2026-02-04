@@ -220,7 +220,7 @@ class Base(Configuration):
 
     OPEN_AI_SECRET_KEY = values.SecretValue()
     OPENAI_MODEL_NAME = values.Value(default="gpt-4o-mini")
-    GOOGLE_API_KEY = values.Value(default=None)
+    GOOGLE_API_KEY = values.SecretValue()
     GOOGLE_MODEL_NAME = values.Value(default="gemini-2.0-flash")
     LLM_PROVIDER = values.Value(default="openai")
 
