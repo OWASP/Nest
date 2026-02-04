@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 from pgvector.django.functions import CosineDistance
 
@@ -114,9 +115,16 @@ class QuestionDetector:
 
         try:
             result = str(crew.kickoff()).strip().upper()
-            if "YES" in result:
+            # Use precise matching with regex word boundaries to avoid false positives
+            # This prevents false matches like "I do not KNOW" matching "NO" or
+            # "YES, but..." being parsed incorrectly
+            # Check for "YES" or "NO" at word boundaries (start of string)
+            yes_pattern = re.compile(r"^YES\b")
+            no_pattern = re.compile(r"^NO\b")
+
+            if yes_pattern.match(result):
                 return True
-            if "NO" in result:
+            if no_pattern.match(result):
                 return False
             logger.warning(
                 "Question Detector: Unexpected result format",
