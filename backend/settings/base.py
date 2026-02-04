@@ -224,7 +224,8 @@ class Base(Configuration):
     # (only required when LLM_PROVIDER == "google"). SecretValue() requires the env var
     # to always be set, which breaks setups using only OpenAI. This should still be
     # treated as a secret and not exposed in logs or configuration output.
-    GOOGLE_API_KEY = values.Value(default=None)
+    # Using environ_name explicitly to allow it to be optional
+    GOOGLE_API_KEY = values.Value(environ_name="DJANGO_GOOGLE_API_KEY", default=None)
     GOOGLE_MODEL_NAME = values.Value(default="gemini-2.0-flash")
     LLM_PROVIDER = values.Value(default="openai")
 
