@@ -1,5 +1,6 @@
 """Slack service tasks for background processing."""
 
+import contextlib
 import logging
 
 from django_rq import job
@@ -57,14 +58,12 @@ def generate_ai_reply_if_unanswered(message_id: int):
     channel_id = message.conversation.slack_channel_id
 
     # Add 👀 reaction to show we are working on it
-    try:
+    with contextlib.suppress(SlackApiError):
         client.reactions_add(
             channel=channel_id,
             timestamp=message.slack_message_id,
             name="eyes",
         )
-    except SlackApiError:
-        pass
 
     # Post a thinking message to let users know we're processing
     thinking_ts = None
@@ -98,36 +97,31 @@ def generate_ai_reply_if_unanswered(message_id: int):
 
         if not ai_response_text:
             # Remove eyes reaction and add shrugging reaction when no answer can be generated
-            try:
-                # Remove eyes reaction if it exists
+            # Remove eyes reaction if it exists
+            with contextlib.suppress(SlackApiError):
                 client.reactions_remove(
                     channel=channel_id,
                     timestamp=message.slack_message_id,
                     name="eyes",
                 )
-            except SlackApiError:
-                # Ignore if eyes reaction doesn't exist
-                pass
 
             try:
-                result = client.reactions_add(
+                client.reactions_add(
                     channel=channel_id,
                     timestamp=message.slack_message_id,
                     name="man-shrugging",
                 )
-                if not result.get("ok"):
-                    error = result.get("error")
-                    if error != "already_reacted":
-                        logger.warning(
-                            "Failed to add reaction: %s",
-                            error,
-                            extra={
-                                "channel_id": channel_id,
-                                "message_id": message.slack_message_id,
-                            },
-                        )
-            except SlackApiError:
-                logger.exception("Error adding reaction to message")
+            except SlackApiError as e:
+                # Only log warning if error is not "already_reacted" (idempotent case)
+                if e.response.get("error") != "already_reacted":
+                    logger.warning(
+                        "Failed to add reaction: %s",
+                        e.response.get("error"),
+                        extra={
+                            "channel_id": channel_id,
+                            "message_id": message.slack_message_id,
+                        },
+                    )
 
             # Post error message to user
             try:
@@ -164,21 +158,6 @@ def generate_ai_reply_if_unanswered(message_id: int):
             return
 
         try:
-            # One more validation check right before formatting
-            if ai_response_text:
-                response_str = str(ai_response_text).strip()
-                if response_str.upper() in ("YES", "NO"):
-                    err_msg = "Invalid response: Question Detector output detected"
-                    logger.error(
-                        "Blocking Question Detector output before formatting",
-                        extra={
-                            "channel_id": channel_id,
-                            "message_id": message.slack_message_id,
-                            "error": err_msg,
-                        },
-                    )
-                    raise ValueError(err_msg)
-
             blocks = format_blocks(ai_response_text)
             result = client.chat_postMessage(
                 channel=channel_id,
@@ -206,16 +185,13 @@ def generate_ai_reply_if_unanswered(message_id: int):
                 logger.exception(LOG_ERROR_POSTING_ERROR_MESSAGE)
 
         # Remove 👀 reaction to show we are done
-        try:
-            # Remove eyes reaction if it exists
+        # Remove eyes reaction if it exists
+        with contextlib.suppress(SlackApiError):
             client.reactions_remove(
                 channel=channel_id,
                 timestamp=message.slack_message_id,
                 name="eyes",
             )
-        except SlackApiError:
-            # Ignore if eyes reaction doesn't exist
-            pass
 
     except Exception as e:
         logger.exception(
@@ -237,14 +213,12 @@ def generate_ai_reply_if_unanswered(message_id: int):
             logger.exception("Error posting error message")
 
         # Remove eyes reaction
-        try:
+        with contextlib.suppress(SlackApiError):
             client.reactions_remove(
                 channel=channel_id,
                 timestamp=message.slack_message_id,
                 name="eyes",
             )
-        except SlackApiError:
-            pass
     finally:
         # Always remove the thinking message if it was posted
         if thinking_ts:
@@ -307,25 +281,20 @@ def process_ai_query_async(
         if not ai_response_text:
             # Remove eyes reaction and add shrugging reaction when no answer can be generated
             if message_ts:
-                try:
-                    # Remove eyes reaction if it exists
+                # Remove eyes reaction if it exists
+                with contextlib.suppress(SlackApiError):
                     client.reactions_remove(
                         channel=channel_id,
                         timestamp=message_ts,
                         name="eyes",
                     )
-                except SlackApiError:
-                    # Ignore if eyes reaction doesn't exist
-                    pass
 
-                try:
+                with contextlib.suppress(SlackApiError):
                     client.reactions_add(
                         channel=channel_id,
                         timestamp=message_ts,
                         name="man-shrugging",
                     )
-                except SlackApiError:
-                    pass
 
             # Post error message
             if is_app_mention:
@@ -406,15 +375,13 @@ def process_ai_query_async(
         # Remove 👀 reaction to show we are done
         if message_ts:
             try:
-                # Remove eyes reaction if it exists
+            # Remove eyes reaction if it exists
+            with contextlib.suppress(SlackApiError):
                 client.reactions_remove(
                     channel=channel_id,
                     timestamp=message_ts,
                     name="eyes",
                 )
-            except SlackApiError:
-                # Ignore if eyes reaction doesn't exist
-                pass
 
     except Exception as e:
         logger.exception(
@@ -443,14 +410,12 @@ def process_ai_query_async(
 
         # Remove eyes reaction
         if message_ts:
-            try:
+            with contextlib.suppress(SlackApiError):
                 client.reactions_remove(
                     channel=channel_id,
                     timestamp=message_ts,
                     name="eyes",
                 )
-            except SlackApiError:
-                pass
     finally:
         # Always remove the thinking message if it was posted
         if thinking_ts:
