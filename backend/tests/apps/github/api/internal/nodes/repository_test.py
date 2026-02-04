@@ -94,13 +94,12 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
     def test_issues_method(self):
         """Test issues method resolution."""
         mock_repository = Mock()
-        mock_issues = Mock()
-        mock_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
-        mock_repository.issues = mock_issues
+        mock_issues = []
+        mock_repository.recent_issues = mock_issues
 
         field = self._get_field_by_name("issues", RepositoryNode)
-        field.base_resolver.wrapped_func(None, mock_repository)
-        mock_issues.order_by.assert_called_with("-created_at")
+        result = field.base_resolver.wrapped_func(None, mock_repository)
+        assert result == mock_issues
 
     def test_languages_method(self):
         """Test languages method resolution."""

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Annotated
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -11,6 +12,7 @@ from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
+from apps.github.models.issue import Issue
 from apps.github.models.repository import Repository
 
 if TYPE_CHECKING:
@@ -45,11 +47,19 @@ class RepositoryNode(strawberry.relay.Node):
 
     organization: OrganizationNode | None = strawberry_django.field()
 
-    @strawberry_django.field(prefetch_related=["issues"])
+    @strawberry_django.field(
+        prefetch_related=[
+            Prefetch(
+                "issues",
+                queryset=Issue.objects.all().order_by("-created_at"),
+                to_attr="recent_issues",
+            )
+        ]
+    )
     def issues(self, root: Repository) -> list[IssueNode]:
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        return getattr(root, "recent_issues", [])[:RECENT_ISSUES_LIMIT]
 
     @strawberry_django.field
     def languages(self, root: Repository) -> list[str]:

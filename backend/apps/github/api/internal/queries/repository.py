@@ -2,9 +2,11 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.models.issue import Issue
 from apps.github.models.repository import Repository
 
 MAX_LIMIT = 1000
@@ -31,9 +33,18 @@ class RepositoryQuery:
 
         """
         try:
-            return Repository.objects.select_related("organization").get(
-                key__iexact=repository_key,
-                organization__login__iexact=organization_key,
+            issue_prefetch = Prefetch(
+                "issues",
+                queryset=Issue.objects.all().order_by("-created_at"),
+                to_attr="recent_issues",
+            )
+            return (
+                Repository.objects.prefetch_related(issue_prefetch)
+                .select_related("organization")
+                .get(
+                    key__iexact=repository_key,
+                    organization__login__iexact=organization_key,
+                )
             )
         except Repository.DoesNotExist:
             return None
