@@ -8,10 +8,6 @@ import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
-import type { Issue } from 'types/issue'
-import type { Milestone } from 'types/milestone'
-import type { PullRequest } from 'types/pullRequest'
-import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -32,6 +28,10 @@ const RepositoryDetailsPage = () => {
   const repository = data?.repository
   const topContributors = data?.topContributors ?? []
   const recentPullRequests = data?.recentPullRequests
+  const recentIssues = repository?.issues?.map((issue) => ({
+    ...issue,
+    author: issue.author ?? undefined,
+  }))
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -110,10 +110,10 @@ const RepositoryDetailsPage = () => {
       isArchived={repository.isArchived}
       languages={repository.languages}
       projectName={repository.project?.name}
-      pullRequests={recentPullRequests as unknown as PullRequest[]}
-      recentIssues={repository.issues as unknown as Issue[]}
-      recentMilestones={repository.recentMilestones as unknown as Milestone[]}
-      recentReleases={repository.releases as unknown as Release[]}
+      pullRequests={recentPullRequests ?? []}
+      recentIssues={recentIssues ?? []}
+      recentMilestones={repository.recentMilestones ?? []}
+      recentReleases={repository.releases ?? []}
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}
