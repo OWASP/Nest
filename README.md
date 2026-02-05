@@ -49,7 +49,6 @@ For questions or discussions with the leadership team and other contributors, pl
 ## Before you start
 
 > ⚠️ **Important for Windows users**
->
 >OWASP Nest must be run inside **[WSL 2](https://learn.microsoft.com/en-us/windows/wsl/install) (Linux environment)**.
 >Running setup or development commands from **Windows PowerShell or Command Prompt is not supported** and may lead to setup failures.
 >[Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) is required to provide a consistent development environment across operating systems.
@@ -57,17 +56,14 @@ For questions or discussions with the leadership team and other contributors, pl
 ### Entering the WSL environment
 
 If you are on Windows, first ensure that WSL is installed with a Linux distribution (for example, Ubuntu).
-
 From **PowerShell** or **Command Prompt**, you can enter the Linux environment by running:
-
+```md
 ```bash
 wsl
+
 ### Cloning the repository
-
 Once inside WSL, clone the repository into your Linux filesystem (for example, `~/` or `/home/user/`), **not** under `/mnt/c`.
-
 Cloning under `/mnt/c` (the Windows C: drive mounted in WSL) can cause permission issues and performance problems.
-
 **Example:**
 ```bash
 cd ~
