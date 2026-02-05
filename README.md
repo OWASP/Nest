@@ -46,29 +46,7 @@ Current Leaders:
 All OWASP Nest leaders are certified ISC2 professionals and adhere to the OWASP Code of Conduct.
 For questions or discussions with the leadership team and other contributors, please use the [#project-nest](https://owasp.slack.com/archives/project-nest) channel on OWASP Slack.
 
-## Before you start
-
-> ⚠️ **Important for Windows users**
->OWASP Nest must be run inside **[WSL 2](https://learn.microsoft.com/en-us/windows/wsl/install) (Linux environment)**.
->Running setup or development commands from **Windows PowerShell or Command Prompt is not supported** and may lead to setup failures.
->[Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) is required to provide a consistent development environment across operating systems.
-
-### Entering the WSL environment
-
-If you are on Windows, first ensure that WSL is installed with a Linux distribution (for example, Ubuntu).
-From **PowerShell** or **Command Prompt**, you can enter the Linux environment by running:
-```md
-```bash
-wsl
-
-### Cloning the repository
-Once inside WSL, clone the repository into your Linux filesystem (for example, `~/` or `/home/user/`), **not** under `/mnt/c`.
-Cloning under `/mnt/c` (the Windows C: drive mounted in WSL) can cause permission issues and performance problems.
-**Example:**
-```bash
-cd ~
-git clone https://github.com/OWASP/Nest.git
-cd Nest
+Note for Windows Users: Please refer to the CONTRIBUTING.md file in this repository for essential WSL setup steps and performance optimization.
 
 ## Contributing
 
