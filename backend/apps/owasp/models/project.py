@@ -124,9 +124,6 @@ class Project(
         help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
     )
 
-    # GKs.
-    members = GenericRelation("owasp.EntityMember")
-
     # FKs.
     owasp_repository = models.ForeignKey(
         "github.Repository",

@@ -76,9 +76,6 @@ class Chapter(
         help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
     )
 
-    # GRs.
-    members = GenericRelation("owasp.EntityMember")
-
     def __str__(self) -> str:
         """Chapter human readable representation."""
         return f"{self.name or self.key}"

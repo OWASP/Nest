@@ -27,9 +27,6 @@ class Committee(
         db_table = "owasp_committees"
         verbose_name_plural = "Committees"
 
-    # GRs.
-    members = GenericRelation("owasp.EntityMember")
-
     def __str__(self) -> str:
         """Committee human readable representation."""
         return f"{self.name}"
