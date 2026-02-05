@@ -1,7 +1,9 @@
 """GraphQL schema."""
 
 import strawberry
+from django.conf import settings
 from strawberry.extensions import QueryDepthLimiter
+from strawberry.schema.config import StrawberryConfig
 from strawberry_django.optimizer import DjangoOptimizerExtension
 
 from apps.api.internal.mutations import ApiMutations
@@ -46,4 +48,8 @@ schema = strawberry.Schema(
     mutation=Mutation,
     query=Query,
     extensions=[QueryDepthLimiter(max_depth=5), DjangoOptimizerExtension()],
+    config=StrawberryConfig(
+        enable_introspection=settings.DEBUG
+        or getattr(settings, "IS_FUZZ_ENVIRONMENT", False)
+    ),
 )
