@@ -52,7 +52,7 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.3 in runner stage
+# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.7 in runner stage
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN cd /tmp && \
     npm pack tar@7.5.7 && \
@@ -63,6 +63,18 @@ RUN cd /tmp && \
     chmod -R 755 "${TAR_DIR}" && \
     rm -rf package tar-7.5.7.tgz && \
     grep -q 'version.*7.5.7' "${TAR_DIR}/package.json"
+
+# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1 in runner stage
+RUN cd /tmp && \
+    npm pack @isaacs/brace-expansion@5.0.1 && \
+    tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
+    BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
+    rm -rf "${BRACE_DIR}" && \
+    mkdir -p /usr/local/lib/node_modules/npm/node_modules/@isaacs && \
+    cp -r package "${BRACE_DIR}" && \
+    chmod -R 755 "${BRACE_DIR}" && \
+    rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
+    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json"
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs

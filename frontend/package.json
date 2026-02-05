@@ -124,7 +124,6 @@
   "packageManager": "pnpm@10.24.0",
   "pnpm": {
     "overrides": {
-      "@isaacs/brace-expansion": "^5.0.1",
       "glob": "^11.1.0",
       "test-exclude": "^7.0.1"
     }
