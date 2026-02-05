@@ -62,7 +62,17 @@ From **PowerShell** or **Command Prompt**, you can enter the Linux environment b
 
 ```bash
 wsl
+### Cloning the repository
 
+Once inside WSL, clone the repository into your Linux filesystem (for example, `~/` or `/home/user/`), **not** under `/mnt/c`.
+
+Cloning under `/mnt/c` (the Windows C: drive mounted in WSL) can cause permission issues and performance problems.
+
+**Example:**
+```bash
+cd ~
+git clone https://github.com/OWASP/Nest.git
+cd Nest
 
 ## Contributing
 
