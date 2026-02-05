@@ -1,21 +1,20 @@
+exit-code: 1
+
 filesystem:
   skip-files:
 
-ignorefile: trivyignore.yaml
+ignorefile: /trivyignore.yaml
+
+report: all
 
 scan:
+  show-suppressed: true
   skip-files:
-  scanners:
-    - misconfig
-    - secret
-    - vuln
 
 severity:
   - CRITICAL
   - HIGH
   - UNKNOWN
-
-show-suppressed: true
 
 timeout: 10m
 

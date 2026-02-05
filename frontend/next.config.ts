@@ -1,8 +1,8 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
+const forceStandalone = process.env.FORCE_STANDALONE === 'yes'
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
-const forceStandalone = process.env.FORCE_STANDALONE === 'true';
 
 const nextConfig: NextConfig = {
   devIndicators: false,

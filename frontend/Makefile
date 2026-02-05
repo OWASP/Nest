@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 build-frontend-local-image:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
-	    --build-arg FORCE_STANDALONE=true \
+	    --build-arg FORCE_STANDALONE=yes \
 		--no-cache \
 		-f docker/frontend/Dockerfile \
 		-t nest-frontend-local \
@@ -58,50 +58,22 @@ generate-graphql-types:
 		&& pnpm run graphql-codegen))
 
 FRONTEND_IMAGE_NAME ?= nest-frontend-local
-TRIVY_EXIT_CODE ?= 0
-TRIVY_IMAGE_TAG := $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //')
+IMAGE_SCANNERS ?= misconfig,secret,vuln
 
-frontend-security-scan-image:
+security-scan-frontend-image:
 	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
 		$(MAKE) build-frontend-local-image; \
 	fi
-	@echo "Scanning Image: $(FRONTEND_IMAGE_NAME)..."
-	@docker run --rm \
+	@echo "Scanning image: $(FRONTEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(PWD)/trivy.yaml:/trivy.yaml:ro \
-		-v $(PWD)/trivyignore.yaml:/trivyignore.yaml:ro \
-		-v trivy-cache:/root/.cache/trivy \
-		-e TRIVY_SCANNERS \
-		$(TRIVY_IMAGE_TAG) \
-		image \
-		--config trivy.yaml \
-		--exit-code $(TRIVY_EXIT_CODE) \
-		--no-progress \
-		$(FRONTEND_IMAGE_NAME)
-
-frontend-security-scan-code:
-	@echo "Scanning Frontend Code..."
-	@docker run --rm \
-		-v $(PWD)/frontend:/app \
-		-v trivy-cache:/root/.cache/trivy \
-		-v $(PWD)/trivyignore.yaml:/trivyignore.yaml:ro \
-		-v $(PWD)/trivy.yaml:/trivy.yaml:ro \
-		-e TRIVY_SCANNERS \
-		$(TRIVY_IMAGE_TAG) \
-		fs \
-		--config trivy.yaml \
-		--exit-code $(TRIVY_EXIT_CODE) \
-		--no-progress \
-		/app
-
-frontend-security-scan:
-	@echo "Running LOCAL frontend security scan (vuln + config only)"
-	@TRIVY_SCANNERS=vuln,misconfig \
-	$(MAKE) frontend-security-scan-code frontend-security-scan-image
-
-frontend-security-scan-ci:
-	@echo "Running CI frontend security scan (vuln + config + secret)"
-	$(MAKE) frontend-security-scan-code frontend-security-scan-image
+		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image --config /trivy.yaml $(FRONTEND_IMAGE_NAME)
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it

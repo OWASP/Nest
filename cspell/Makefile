@@ -17,9 +17,10 @@ cspell-run:
 
 update-cspell-dependencies: cspell-install
 	@-docker run \
-		-it \
-		--mount type=bind,src="$(CURDIR)",dst=/nest \
 		--entrypoint=/bin/sh \
-		--workdir=/nest/cspell \
+		--interactive \
+		--mount type=bind,src="$(CURDIR)",dst=/nest \
 		--rm \
+		--tty \
+		--workdir=/nest/cspell \
 		cspell -c "pnpm install && pnpm upgrade && rm -rf ./node_modules"

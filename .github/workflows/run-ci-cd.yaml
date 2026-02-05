@@ -137,18 +137,15 @@ jobs:
       - name: Run Semgrep security scan
         run: make security-scan-code-semgrep
 
-      - name: Upload Semgrep report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          name: semgrep-results-run-${{ github.run_number }}
-          path: semgrep-security-report.txt
-          retention-days: 14
- # semgrep should not un again
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
+
       - name: Run Trivy security scan
-        run: |
-           make backend-security-scan-ci TRIVY_EXIT_CODE=1
-           make frontend-security-scan-ci TRIVY_EXIT_CODE=1
+        run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
     timeout-minutes: 5
 
   run-backend-tests:
@@ -544,15 +541,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        with:
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
+
       - name: Run Trivy security scan via Makefile
         run: |
-          make backend-security-scan-image \
-            BACKEND_IMAGE_NAME=owasp/nest:backend-staging \
-            TRIVY_EXIT_CODE=1
-
-          make frontend-security-scan-image \
-            FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging \
-            TRIVY_EXIT_CODE=1
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
     timeout-minutes: 5
 
   deploy-staging-nest:
@@ -901,15 +900,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        with:
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
+
       - name: Run Trivy security scan via Makefile
         run: |
-          make backend-security-scan-image \
-            BACKEND_IMAGE_NAME=owasp/nest:backend-production \
-            TRIVY_EXIT_CODE=1
-
-          make frontend-security-scan-image \
-            FRONTEND_IMAGE_NAME=owasp/nest:frontend-production \
-            TRIVY_EXIT_CODE=1
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
     timeout-minutes: 5
 
   deploy-production-nest:
