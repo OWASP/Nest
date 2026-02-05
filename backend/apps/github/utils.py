@@ -86,7 +86,7 @@ def get_repository_path(url: str) -> str | None:
         or None if parsing fails.
 
     """
-    match = GITHUB_REPOSITORY_RE.search(url.split("#")[0])
+    match = GITHUB_REPOSITORY_RE.search(url.split("#", maxsplit=1)[0])
     return "/".join((match.group(1), match.group(2))) if match else None
 
 
