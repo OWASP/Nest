@@ -4,6 +4,7 @@ from datetime import datetime
 
 import strawberry
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
@@ -15,6 +16,8 @@ from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -79,6 +82,9 @@ class ModuleNode:
         self, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
         queryset = self.issues.select_related("repository", "author").prefetch_related(
             "assignees", "labels"
         )
@@ -86,7 +92,7 @@ class ModuleNode:
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
 
-        return list(queryset.order_by("-updated_at")[offset : offset + limit])
+        return list(queryset.order_by("-updated_at")[offset : offset + normalized_limit])
 
     @strawberry.field
     def issues_count(self, label: str | None = None) -> int:
@@ -163,12 +169,15 @@ class ModuleNode:
     @strawberry.field
     def recent_pull_requests(self, limit: int = 5) -> list[PullRequestNode]:
         """Return recent pull requests linked to issues in this module."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
         issue_ids = self.issues.values_list("id", flat=True)
         return list(
             PullRequest.objects.filter(related_issues__id__in=issue_ids)
             .select_related("author")
             .distinct()
-            .order_by("-created_at")[:limit]
+            .order_by("-created_at")[:normalized_limit]
         )
 
 

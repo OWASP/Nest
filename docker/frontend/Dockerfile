@@ -1,4 +1,4 @@
-FROM node:24-alpine AS base
+FROM node:24.13-alpine3.23 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -16,7 +16,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && apk upgrade && apk add libc6-compat
+    apk update && \
+    apk add --no-cache libc6-compat
 
 WORKDIR /app
 
@@ -48,17 +49,29 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.3 in runner stage
+# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.7 in runner stage
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN cd /tmp && \
-    npm pack tar@7.5.4 && \
-    tar -xzf tar-7.5.4.tgz && \
+    npm pack tar@7.5.7 && \
+    tar -xzf tar-7.5.7.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.4.tgz && \
-    grep -q 'version.*7.5.4' "${TAR_DIR}/package.json"
+    rm -rf package tar-7.5.7.tgz && \
+    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json"
+
+# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1 in runner stage
+RUN cd /tmp && \
+    npm pack @isaacs/brace-expansion@5.0.1 && \
+    tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
+    BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
+    rm -rf "${BRACE_DIR}" && \
+    mkdir -p /usr/local/lib/node_modules/npm/node_modules/@isaacs && \
+    cp -r package "${BRACE_DIR}" && \
+    chmod -R 755 "${BRACE_DIR}" && \
+    rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
+    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json"
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
