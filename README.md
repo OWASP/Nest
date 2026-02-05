@@ -55,6 +55,16 @@ For questions or discussions with the leadership team and other contributors, pl
 >
 > Docker is required to provide a consistent development environment across operating systems.
 
+#### Entering the WSL environment
+
+If you are on Windows, first ensure that WSL is installed with a Linux distribution (for example, Ubuntu).
+
+From **PowerShell** or **Command Prompt**, you can enter the Linux environment by running:
+
+```bash
+wsl
+
+
 ## Contributing
 
 OWASP Nest thrives on community contributions. Whether you are a developer, designer, writer, or enthusiast, there are various ways to get involved:
