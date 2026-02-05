@@ -171,14 +171,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.35.4"
+version = "4.36.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.35.4-py3-none-any.whl", hash = "sha256:4a61efd953357ebc2fd8687bcb8e470a3947f7988367384457ab793172456eda"},
-    {file = "algoliasearch-4.35.4.tar.gz", hash = "sha256:7d958459fa2ec80aa610a425737edec7e6a4d2f704649952b8edd63e4bff44ca"},
+    {file = "algoliasearch-4.36.0-py3-none-any.whl", hash = "sha256:2a76bbda08916d8c1dc99982896c0bec4af9048ae63b7a7951ad5299c532ec9b"},
+    {file = "algoliasearch-4.36.0.tar.gz", hash = "sha256:f73cc88ad4c59ab9640f8b2fba26a77453a65681091cd8e8e5415fa29a684e8a"},
 ]
 
 [package.dependencies]
@@ -275,18 +275,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.42.41"
+version = "1.42.42"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.41-py3-none-any.whl", hash = "sha256:32470b1d32208e03b47cf6ce4a7adb337b8a1730aaefb97c336cfd4e2be2577f"},
-    {file = "boto3-1.42.41.tar.gz", hash = "sha256:86dd2bc577e33da5cd9f10e21b22cdda01a24f83f31ca1bb5ac1f5f8b8e9e67e"},
+    {file = "boto3-1.42.42-py3-none-any.whl", hash = "sha256:8c78169ef47dc29863ebb11ba99134b1b418d3dfdd836419830f22552f8afe43"},
+    {file = "boto3-1.42.42.tar.gz", hash = "sha256:8c2537156f5ccd72bbbfe4fc27a8a80bf3e4f80523f306417f3fb6023d13edda"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.41,<1.43.0"
+botocore = ">=1.42.42,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -295,14 +295,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.41"
+version = "1.42.42"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.41-py3-none-any.whl", hash = "sha256:567530f7d4da668af891c1259fb80c01578ab8d9f1098127cc250451a46fb54f"},
-    {file = "botocore-1.42.41.tar.gz", hash = "sha256:0698967741d873d819134bea1ffe9c35decc00c741f49a42885dbd7ad8198fbc"},
+    {file = "botocore-1.42.42-py3-none-any.whl", hash = "sha256:1c9df5fc31e9073a9aa956271c4007d72f5d342cafca5f4154ea099bc6f83085"},
+    {file = "botocore-1.42.42.tar.gz", hash = "sha256:cb75639f5ba7bf73b83ac18bcd87f07b7f484f302748da974dad2801a83a1d60"},
 ]
 
 [package.dependencies]
@@ -2609,14 +2609,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "2.16.0"
+version = "2.17.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "openai-2.16.0-py3-none-any.whl", hash = "sha256:5f46643a8f42899a84e80c38838135d7038e7718333ce61396994f887b09a59b"},
-    {file = "openai-2.16.0.tar.gz", hash = "sha256:42eaa22ca0d8ded4367a77374104d7a2feafee5bd60a107c3c11b5243a11cd12"},
+    {file = "openai-2.17.0-py3-none-any.whl", hash = "sha256:4f393fd886ca35e113aac7ff239bcd578b81d8f104f5aedc7d3693eb2af1d338"},
+    {file = "openai-2.17.0.tar.gz", hash = "sha256:47224b74bd20f30c6b0a6a329505243cb2f26d5cf84d9f8d0825ff8b35e9c999"},
 ]
 
 [package.dependencies]
@@ -4381,14 +4381,14 @@ enum = ["django-choices-field (>=2.2.2)"]
 
 [[package]]
 name = "tenacity"
-version = "9.1.2"
+version = "9.1.3"
 description = "Retry code until it succeeds"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "tenacity-9.1.2-py3-none-any.whl", hash = "sha256:f77bf36710d8b73a50b2dd155c97b870017ad21afe6ab300326b0371b3b05138"},
-    {file = "tenacity-9.1.2.tar.gz", hash = "sha256:1169d376c297e7de388d18b4481760d478b0e99a777cad3a9c86e556f4b697cb"},
+    {file = "tenacity-9.1.3-py3-none-any.whl", hash = "sha256:51171cfc6b8a7826551e2f029426b10a6af189c5ac6986adcd7eb36d42f17954"},
+    {file = "tenacity-9.1.3.tar.gz", hash = "sha256:a6724c947aa717087e2531f883bde5c9188f603f6669a9b8d54eb998e604c12a"},
 ]
 
 [package.extras]
