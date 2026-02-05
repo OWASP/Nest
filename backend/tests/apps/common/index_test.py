@@ -150,7 +150,7 @@ class TestIndexBase:
                 if name == index_name:
                     return is_indexable
                 if is_local:
-                    return name in {"index_name_index_name_attr_asc"}
+                    return name == "index_name_index_name_attr_asc"
                 return True
 
             mock_is_indexable.side_effect = mock_is_indexable_func
