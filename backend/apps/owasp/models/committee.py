@@ -2,7 +2,6 @@
 
 from functools import lru_cache
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.models import BulkSaveModel, TimestampedModel

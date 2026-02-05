@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.geocoding import get_location_coordinates

@@ -6,7 +6,6 @@ import datetime
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.utils import timezone
