@@ -1,5 +1,5 @@
 misconfigurations:
-  - id: AVD-DS-0002  # Require non-root USER in Dockerfile.
+  - id: DS-0002  # Specify at least 1 USER command in Dockerfile with non-root user as argument.
     paths:
       - docker/semgrep/Dockerfile
       - docker/trivy/Dockerfile
