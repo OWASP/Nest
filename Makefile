@@ -3,7 +3,8 @@ include cspell/Makefile
 include docs/Makefile
 include frontend/Makefile
 
-.PHONY: build clean check pre-commit prune run scan-images security-scan test update
+.PHONY: build clean check pre-commit prune run scan-images security-scan test update validate-compose
+.ONESHELL: validate-compose
 
 MAKEFLAGS += --no-print-directory
 
@@ -55,6 +56,30 @@ run:
 	@DOCKER_BUILDKIT=1 \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
+
+ENV_FILES := .env.backend .env.cache .env.db .env.frontend
+
+validate-compose:
+	@set -eu
+	@files_to_clean=""
+	# cleanup any placeholders we create
+	@trap 'if [ -n "$$files_to_clean" ]; then rm -f $$files_to_clean; fi' EXIT
+	# ensure production/staging env files exist for validation
+	@for dir in production staging; do
+		@for env_file in $(ENV_FILES); do
+			@path="docker-compose/$$dir/$$env_file"
+			@if [ ! -f "$$path" ]; then
+				@touch "$$path"
+				@files_to_clean="$$files_to_clean $$path"
+			@fi
+		@done
+	@done
+	# validate all compose files
+	@for file in docker-compose/*/compose.yaml; do
+		@echo "Validating $$file..."
+		@docker compose -f "$$file" config --quiet
+	@done
+	@echo "✅ All compose files are valid!"
 
 security-scan: \
 	security-scan-code \

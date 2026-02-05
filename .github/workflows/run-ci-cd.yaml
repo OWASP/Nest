@@ -25,6 +25,18 @@ env:
   FORCE_COLOR: 1
 
 jobs:
+  validate-compose:
+    name: Validate Docker Compose files
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Validate compose files
+        run: make validate-compose
+
   pre-commit:
     name: Run pre-commit checks
     permissions:
