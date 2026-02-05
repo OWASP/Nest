@@ -24,7 +24,11 @@ const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
   const hasLogin = author?.login
   const hasAvatarUrl = Boolean(author?.avatarUrl)
 
-  const fallbackIcon = <FaUser className="mr-2 h-6 w-6 text-gray-400 dark:text-gray-500" />
+  const fallbackAvatar = (
+    <div className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600">
+      <FaUser className="h-4 w-4 text-gray-400" />
+    </div>
+  )
 
   if (hasAuthorInfo) {
     const avatarContent = hasAvatarUrl ? (
@@ -36,7 +40,7 @@ const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
         className="mr-2 rounded-full"
       />
     ) : (
-      fallbackIcon
+      fallbackAvatar
     )
 
     if (hasLogin) {
@@ -49,7 +53,7 @@ const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
     return <div className="shrink-0">{avatarContent}</div>
   }
 
-  return <div className="shrink-0">{fallbackIcon}</div>
+  return <div className="shrink-0">{fallbackAvatar}</div>
 }
 
 const ItemCardList = ({
@@ -109,6 +113,7 @@ const ItemCardList = ({
                   <Link
                     className="text-blue-400 hover:underline"
                     href={item?.url || ''}
+                    rel="noopener noreferrer"
                     target="_blank"
                   >
                     <TruncatedText text={item.title || item.name} />

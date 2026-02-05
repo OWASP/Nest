@@ -5,6 +5,7 @@ import strawberry_django
 from django.db.models import F, Window
 from django.db.models.functions import Rank
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
 
@@ -61,4 +62,7 @@ class IssueQuery:
                 .order_by("-created_at")
             )
 
-        return queryset[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return queryset[:normalized_limit]
