@@ -8,8 +8,6 @@ import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
-import type { GetRepositoryDataQuery } from 'types/__generated__/repositoryQueries.generated'
-import type { Contributor } from 'types/contributor'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { PullRequest } from 'types/pullRequest'
@@ -23,14 +21,6 @@ const RepositoryDetailsPage = () => {
     repositoryKey: string
     organizationKey: string
   }>()
-<<<<<<< enable-strict-mode
-  const [repository, setRepository] = useState<GetRepositoryDataQuery['repository']>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [recentPullRequests, setRecentPullRequests] = useState<
-    GetRepositoryDataQuery['recentPullRequests']
-  >([])
-=======
->>>>>>> main
   const {
     data,
     error: graphQLRequestError,

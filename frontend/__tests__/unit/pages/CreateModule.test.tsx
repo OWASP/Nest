@@ -49,56 +49,54 @@ describe('CreateModulePage', () => {
     jest.clearAllMocks()
   })
 
-  it(
-    'submits the form and navigates to programs page',
-    async () => {
-      const user = userEvent.setup({ delay: null })
+  it('submits the form and navigates to programs page', async () => {
+    const user = userEvent.setup({ delay: null })
 
-      ;(useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin-user' } },
-        status: 'authenticated',
-      })
-      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+        },
+      },
+      loading: false,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockCreateModule.mockResolvedValue({
         data: {
-          getProgram: {
-            admins: [{ login: 'admin-user' }],
+          createModule: {
+            key: 'my-test-module',
           },
         },
-        loading: false,
-      })
-      ;(useMutation as unknown as jest.Mock).mockReturnValue([
-        mockCreateModule.mockResolvedValue({
-          data: {
-            createModule: {
-              key: 'my-test-module',
-            },
-          },
-        }),
-        { loading: false },
-      ])
+      }),
+      { loading: false },
+    ])
 
-      render(<CreateModulePage />)
+    render(<CreateModulePage />)
 
-      // Fill all inputs
-      await user.type(screen.getByLabelText('Name'), 'My Test Module')
-      await user.type(screen.getByLabelText(/Description/i), 'This is a test module')
-      await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
-      await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
-      await user.type(screen.getByLabelText(/Domains/i), 'AI, ML')
-      await user.type(screen.getByLabelText(/Tags/i), 'react, graphql')
+    // Fill all inputs
+    await user.type(screen.getByLabelText('Name'), 'My Test Module')
+    await user.type(screen.getByLabelText(/Description/i), 'This is a test module')
+    await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
+    await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
+    await user.type(screen.getByLabelText(/Domains/i), 'AI, ML')
+    await user.type(screen.getByLabelText(/Tags/i), 'react, graphql')
 
-      const projectInput = await waitFor(() => {
-        return screen.getByPlaceholderText('Start typing project name...')
-      })
+    const projectInput = await waitFor(() => {
+      return screen.getByPlaceholderText('Start typing project name...')
+    })
 
-      await user.type(projectInput, 'Aw')
+    await user.type(projectInput, 'Aw')
 
-      await waitFor(
-        () => {
-          expect(mockQuery).toHaveBeenCalled()
-        },
-        { timeout: 1000 }
-      )
+    await waitFor(
+      () => {
+        expect(mockQuery).toHaveBeenCalled()
+      },
+      { timeout: 1000 }
+    )
 
     const projectOption = await waitFor(
       () => {

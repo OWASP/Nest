@@ -45,12 +45,10 @@ async function checkIfMentor(login: string): Promise<boolean> {
 const providers = []
 
 if (IS_GITHUB_AUTH_ENABLED) {
-  const githubClientId = GITHUB_CLIENT_ID!
-  const githubClientSecret = GITHUB_CLIENT_SECRET!
   providers.push(
     GitHubProvider({
-      clientId: githubClientId,
-      clientSecret: githubClientSecret,
+      clientId: GITHUB_CLIENT_ID!,
+      clientSecret: GITHUB_CLIENT_SECRET!,
       profile(profile) {
         return {
           email: profile.email,

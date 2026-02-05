@@ -1,6 +1,7 @@
 import type { User } from 'types/user'
 
 export type Milestone = {
+  __typename?: string
   author?: User | null
   body?: string
   closedIssuesCount?: number
@@ -13,5 +14,4 @@ export type Milestone = {
   state?: string
   title: string
   url?: string
-  __typename?: string
 }

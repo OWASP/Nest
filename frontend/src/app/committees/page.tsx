@@ -25,7 +25,7 @@ const CommitteesPage = () => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(committee, params)
     const formattedUrls = handleSocialUrls(committee.relatedUrls)
-    const safeId = committee.objectID ?? committee.key
+    const committeeId = committee.objectID ?? committee.key
     const handleButtonClick = () => {
       router.push(`/committees/${committee.key}`)
     }
@@ -38,8 +38,8 @@ const CommitteesPage = () => {
 
     return (
       <Card
-        key={safeId}
-        cardKey={safeId}
+        key={committeeId}
+        cardKey={committeeId}
         title={committee.name}
         url={`/committees/${committee.key}`}
         summary={committee.summary ?? ''}
