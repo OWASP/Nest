@@ -20,5 +20,5 @@ export type Issue = {
   summary?: string
   title: string
   updatedAt?: string | number
-  url?: string
+  url: string
 }
