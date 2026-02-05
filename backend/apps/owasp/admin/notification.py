@@ -9,7 +9,7 @@ from apps.owasp.models.notification import Notification, Subscription
 class SubscriptionAdmin(admin.ModelAdmin):
     """Admin for Subscription model."""
 
-    list_display = ("user", "content_type", "object_id", "content_object", "created_at")
+    list_display = ("user", "content_type", "object_id", "created_at")
     list_filter = ("content_type", "created_at")
     search_fields = ("user__email", "user__username")
 

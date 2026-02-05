@@ -2,6 +2,8 @@
 
 import logging
 import time
+import os
+import socket
 
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
@@ -33,9 +35,11 @@ class Command(BaseCommand):
         redis_conn = get_redis_connection("default")
         stream_key = "owasp_notifications"
         group_name = "notification_group"
-        consumer_name = "worker_1"
+        consumer_name = f"{socket.gethostname()}_{os.getpid()}"
 
         self.ensure_consumer_group(redis_conn, stream_key, group_name)
+
+        self.recover_pending_messages(redis_conn, stream_key, group_name, consumer_name)
 
         last_dlq_check = time.time()
 
@@ -100,7 +104,10 @@ class Command(BaseCommand):
         redis_conn = get_redis_connection("default")
 
         try:
-            snapshot_id = int(data.get(b"snapshot_id").decode("utf-8"))
+            raw_id = data.get(b"snapshot_id")
+            if not raw_id:
+                return 
+            snapshot_id = int(raw_id.decode("utf-8"))
             snapshot = Snapshot.objects.get(id=snapshot_id)
 
             users = User.objects.filter(is_active=True)
@@ -188,6 +195,11 @@ class Command(BaseCommand):
     def send_notification(self, user, snapshot):
         """Send notification to user."""
         title = f"New Snapshot Published: {snapshot.title}"
+
+        if Notification.objects.filter(recipient=user, title=title).exists():
+            logger.info("Already notified %s for this snapshot, skipping", user.email)         
+            return
+
         message = f"Check out the latest OWASP snapshot: {snapshot.title}"
 
         # Send Email
@@ -254,3 +266,30 @@ class Command(BaseCommand):
 
         except Exception:
             logger.exception("Error processing DLQ")
+
+
+
+    def recover_pending_messages(self, redis_conn, stream_key, group_name, consumer_name):
+        """Recover and reprocess stuck messages from PEL."""
+        self.stdout.write("Checking for stuck messages in PEL...")
+        try:
+            # Claim messages idle for more than 5 minutes (300000 ms)
+            result = redis_conn.xautoclaim(
+                stream_key, group_name, consumer_name,
+                min_idle_time=300000,  # 5 minutes 
+                start_id="0-0",
+                count=10
+            )
+            if result and result[1]:  
+                for message_id, data in result[1]:
+                    self.stdout.write(f"Recovering stuck message: {message_id}")
+                    try:
+                        self.process_message(data)
+                        redis_conn.xack(stream_key, group_name, message_id)
+                        self.stdout.write(f"Successfully recovered message {message_id}")
+                    except Exception:
+                        logger.exception("Failed to recover message %s", message_id)
+            else:
+                self.stdout.write("No stuck messages found.")
+        except Exception:
+            logger.exception("Error checking PEL for stuck messages")
