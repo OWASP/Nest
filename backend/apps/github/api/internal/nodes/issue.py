@@ -60,7 +60,7 @@ class IssueNode(strawberry.relay.Node):
     )
     def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
-        return bool(root.is_merged)
+        return root.is_merged
 
     @strawberry_django.field(prefetch_related=["participant_interests__user"])
     def interested_users(self, root: Issue) -> list[UserNode]:
