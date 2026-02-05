@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0073_notification_subscription'),
+        ("owasp", "0073_notification_subscription"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='subscription',
-            name='owasp_subsc_user_id_33ae6d_idx',
+            model_name="subscription",
+            name="owasp_subsc_user_id_33ae6d_idx",
         ),
         migrations.AlterField(
-            model_name='notification',
-            name='related_link',
-            field=models.URLField(blank=True, default=''),
+            model_name="notification",
+            name="related_link",
+            field=models.URLField(blank=True, default=""),
         ),
     ]

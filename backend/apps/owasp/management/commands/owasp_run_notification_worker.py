@@ -1,9 +1,9 @@
 """Management command to run notification worker."""
 
 import logging
-import time
 import os
 import socket
+import time
 
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
@@ -106,7 +106,7 @@ class Command(BaseCommand):
         try:
             raw_id = data.get(b"snapshot_id")
             if not raw_id:
-                return 
+                return
             snapshot_id = int(raw_id.decode("utf-8"))
             snapshot = Snapshot.objects.get(id=snapshot_id)
 
@@ -197,7 +197,7 @@ class Command(BaseCommand):
         title = f"New Snapshot Published: {snapshot.title}"
 
         if Notification.objects.filter(recipient=user, title=title).exists():
-            logger.info("Already notified %s for this snapshot, skipping", user.email)         
+            logger.info("Already notified %s for this snapshot, skipping", user.email)
             return
 
         message = f"Check out the latest OWASP snapshot: {snapshot.title}"
@@ -236,8 +236,18 @@ class Command(BaseCommand):
 
             for msg_id, data in messages:
                 try:
-                    user_id = int(data.get(b"user_id").decode("utf-8"))
-                    snapshot_id = int(data.get(b"snapshot_id").decode("utf-8"))
+                    raw_user_id = data.get(b"user_id")
+                    raw_snapshot_id = data.get(b"snapshot_id")
+
+                    if not raw_user_id or not raw_snapshot_id:
+                        logger.warning(
+                            "DLQ message %s missing required fields, removing", msg_id
+                        )
+                        redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
+                        continue
+
+                    user_id = int(raw_user_id.decode("utf-8"))
+                    snapshot_id = int(raw_snapshot_id.decode("utf-8"))
 
                     user = User.objects.get(id=user_id)
                     snapshot = Snapshot.objects.get(id=snapshot_id)
@@ -267,20 +277,20 @@ class Command(BaseCommand):
         except Exception:
             logger.exception("Error processing DLQ")
 
-
-
     def recover_pending_messages(self, redis_conn, stream_key, group_name, consumer_name):
         """Recover and reprocess stuck messages from PEL."""
         self.stdout.write("Checking for stuck messages in PEL...")
         try:
             # Claim messages idle for more than 5 minutes (300000 ms)
             result = redis_conn.xautoclaim(
-                stream_key, group_name, consumer_name,
-                min_idle_time=300000,  # 5 minutes 
+                stream_key,
+                group_name,
+                consumer_name,
+                min_idle_time=300000,  # 5 minutes
                 start_id="0-0",
-                count=10
+                count=10,
             )
-            if result and result[1]:  
+            if result and result[1]:
                 for message_id, data in result[1]:
                     self.stdout.write(f"Recovering stuck message: {message_id}")
                     try:

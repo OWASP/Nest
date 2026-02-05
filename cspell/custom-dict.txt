@@ -144,6 +144,7 @@ owasppcitoolkit
 owtf
 pdfgen
 pdfium
+pel
 pentest
 pentesting
 pgvector
@@ -186,13 +187,14 @@ winsrdf
 wsgi
 xack
 xapp
+xautoclaim
 xdel
 xdg
 xdist
 xgroup
 xoxb
-xreadgroup
 xoxp
+xreadgroup
 xsser
 xzf
 zapconfig
