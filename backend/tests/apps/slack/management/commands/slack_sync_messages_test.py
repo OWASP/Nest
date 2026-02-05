@@ -257,11 +257,11 @@ class TestSyncUserMessages:
             message="Rate limited",
         )
         rate_limit_error.response = MagicMock()
-        rate_limit_error.response.__getitem__ = (
-            lambda _self, key: "ratelimited" if key == "error" else None
+        rate_limit_error.response.__getitem__ = lambda _self, key: (
+            "ratelimited" if key == "error" else None
         )
-        rate_limit_error.response.get.side_effect = (
-            lambda key, default=None: "ratelimited" if key == "error" else default
+        rate_limit_error.response.get.side_effect = lambda key, default=None: (
+            "ratelimited" if key == "error" else default
         )
         rate_limit_error.response.headers = {"Retry-After": "1"}
         mock_client.search_messages.side_effect = [
@@ -296,11 +296,11 @@ class TestSyncUserMessages:
             message="Rate limited",
         )
         rate_limit_error.response = MagicMock()
-        rate_limit_error.response.__getitem__ = (
-            lambda _self, key: "ratelimited" if key == "error" else None
+        rate_limit_error.response.__getitem__ = lambda _self, key: (
+            "ratelimited" if key == "error" else None
         )
-        rate_limit_error.response.get.side_effect = (
-            lambda key, default=None: "ratelimited" if key == "error" else default
+        rate_limit_error.response.get.side_effect = lambda key, default=None: (
+            "ratelimited" if key == "error" else default
         )
         rate_limit_error.response.headers = {"Retry-After": "1"}
 
@@ -507,8 +507,8 @@ class TestCreateMessage:
             message="Rate limited",
         )
         rate_limit_error.response = MagicMock()
-        rate_limit_error.response.get = (
-            lambda key, default=None: "ratelimited" if key == "error" else default
+        rate_limit_error.response.get = lambda key, default=None: (
+            "ratelimited" if key == "error" else default
         )
         rate_limit_error.response.headers = MagicMock()
         rate_limit_error.response.headers.get = lambda _key, _default: 1
