@@ -1,10 +1,12 @@
 """Management command to run notification worker."""
 
+import contextlib
 import logging
 import os
 import socket
 import time
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
@@ -195,8 +197,13 @@ class Command(BaseCommand):
     def send_notification(self, user, snapshot):
         """Send notification to user."""
         title = f"New Snapshot Published: {snapshot.title}"
+        related_link = f"snapshot:{snapshot.id}"
 
-        if Notification.objects.filter(recipient=user, title=title).exists():
+        if Notification.objects.filter(
+            recipient=user,
+            type="snapshot_published",
+            related_link=related_link,
+        ).exists():
             logger.info("Already notified %s for this snapshot, skipping", user.email)
             return
 
@@ -218,13 +225,17 @@ class Command(BaseCommand):
             type="snapshot_published",
             title=title,
             message=message,
+            related_link=related_link,
         )
 
     def process_dlq(self, redis_conn):
         """Process messages from DLQ - retry failed notifications."""
-        self.stdout.write("Checking DLQ for failed notifications...")
+        lock = redis_conn.lock("owasp_notifications_dlq_lock", timeout=60, blocking=False)
+        if not lock.acquire():
+            return
 
         try:
+            self.stdout.write("Checking DLQ for failed notifications...")
             messages = redis_conn.xrange(self.DLQ_STREAM_KEY, "-", "+", count=100)
 
             if not messages:
@@ -236,13 +247,21 @@ class Command(BaseCommand):
 
             for msg_id, data in messages:
                 try:
+                    msg_type = (data.get(b"type") or b"").decode("utf-8")
+                    if msg_type == "recovery_failed":
+                        logger.error(
+                            "Permanent recovery failure for message %s: %s",
+                            (data.get(b"message_id") or b"unknown").decode("utf-8"),
+                            (data.get(b"error") or b"unknown").decode("utf-8"),
+                        )
+                        redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
+                        continue
+
                     raw_user_id = data.get(b"user_id")
                     raw_snapshot_id = data.get(b"snapshot_id")
 
                     if not raw_user_id or not raw_snapshot_id:
-                        logger.warning(
-                            "DLQ message %s missing required fields, removing", msg_id
-                        )
+                        logger.warning("DLQ message %s missing required fields, removing", msg_id)
                         redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                         continue
 
@@ -261,6 +280,10 @@ class Command(BaseCommand):
                         user.email,
                     )
 
+                except ObjectDoesNotExist:
+                    logger.warning("User or snapshot not found, removing from DLQ")
+                    redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
+                    failed_count += 1
                 except Exception:
                     failed_count += 1
                     logger.exception(
@@ -276,6 +299,9 @@ class Command(BaseCommand):
 
         except Exception:
             logger.exception("Error processing DLQ")
+        finally:
+            with contextlib.suppress(Exception):
+                lock.release()
 
     def recover_pending_messages(self, redis_conn, stream_key, group_name, consumer_name):
         """Recover and reprocess stuck messages from PEL."""
@@ -297,8 +323,17 @@ class Command(BaseCommand):
                         self.process_message(data)
                         redis_conn.xack(stream_key, group_name, message_id)
                         self.stdout.write(f"Successfully recovered message {message_id}")
-                    except Exception:
+                    except Exception as exc:
                         logger.exception("Failed to recover message %s", message_id)
+                        redis_conn.xadd(
+                            self.DLQ_STREAM_KEY,
+                            {
+                                "type": "recovery_failed",
+                                "message_id": str(message_id),
+                                "error": str(exc),
+                            },
+                        )
+                        redis_conn.xack(stream_key, group_name, message_id)
             else:
                 self.stdout.write("No stuck messages found.")
         except Exception:
