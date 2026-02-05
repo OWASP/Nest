@@ -229,3 +229,5 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
