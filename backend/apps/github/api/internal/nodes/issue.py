@@ -2,10 +2,12 @@
 
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
 
 
 @strawberry_django.type(
@@ -50,12 +52,15 @@ class IssueNode(strawberry.relay.Node):
         """Return True if this issue has at least one merged pull request."""
         return root.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
 
-    @strawberry_django.field(prefetch_related=["participant_interests__user"])
-    def interested_users(self, root: Issue) -> list[UserNode]:
-        """Return all users who have expressed interest in this issue."""
-        return [
-            interest.user
-            for interest in root.participant_interests.select_related("user").order_by(
-                "user__login"
+    @strawberry_django.field(
+        prefetch_related=[
+            Prefetch(
+                "participant_interests",
+                queryset=IssueUserInterest.objects.select_related("user").order_by("user__login"),
+                to_attr="interests_users",
             )
         ]
+    )
+    def interested_users(self, root: Issue) -> list[UserNode]:
+        """Return all users who have expressed interest in this issue."""
+        return [interest.user for interest in getattr(root, "interests_users", [])]
