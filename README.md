@@ -51,9 +51,7 @@ For questions or discussions with the leadership team and other contributors, pl
 > ⚠️ **Important for Windows users**
 >
 >OWASP Nest must be run inside **[WSL 2](https://learn.microsoft.com/en-us/windows/wsl/install) (Linux environment)**.
-
 >Running setup or development commands from **Windows PowerShell or Command Prompt is not supported** and may lead to setup failures.
->
 >[Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) is required to provide a consistent development environment across operating systems.
 
 ### Entering the WSL environment
