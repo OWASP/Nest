@@ -238,15 +238,7 @@ def normalize_limit(limit: int, max_limit: int = 1000) -> int | None:
 
 
 def validate_url(url: str | None) -> bool:
-    """Validate that a URL has proper scheme and netloc.
-
-    Args:
-        url (str, optional): URL string to validate.
-
-    Returns:
-        bool: True if URL is valid, False otherwise.
-
-    """
+    """Validate that a URL has proper scheme and netloc."""
     if not url:
         return False
 
@@ -255,4 +247,13 @@ def validate_url(url: str | None) -> bool:
     except ValueError:
         return False
 
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    if parsed.scheme not in {"http", "https"}:
+        return False
+
+    netloc = parsed.netloc.strip()
+
+    if not netloc:
+        return False
+
+    # Must contain at least one alphanumeric character
+    return bool(re.search(r"[A-Za-z0-9]", netloc))
