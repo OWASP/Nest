@@ -12,10 +12,9 @@ ENV APK_CACHE_DIR="/app/.cache/apk" \
 
 ENV PATH="$PNPM_HOME:$PATH"
 
-RUN mkdir -p ${APK_CACHE_DIR} && \
-    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
-
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    mkdir -p ${APK_CACHE_DIR} && \
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR} && \
     apk update && \
     apk add --no-cache libc6-compat
 
@@ -62,10 +61,8 @@ RUN cd /tmp && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
     rm -rf package tar-7.5.7.tgz && \
-    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json"
-
-# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1 in runner stage
-RUN cd /tmp && \
+    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json" && \
+    cd /tmp && \
     npm pack @isaacs/brace-expansion@5.0.1 && \
     tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
     BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
@@ -74,9 +71,8 @@ RUN cd /tmp && \
     cp -r package "${BRACE_DIR}" && \
     chmod -R 755 "${BRACE_DIR}" && \
     rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
-    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json"
-
-RUN addgroup --system --gid 1001 nodejs && \
+    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json" && \
+    addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
 # Copying files with root as owner, so that executing user cannot change the container.
 COPY --from=builder --chown=root:root --chmod=555 /app/public public
