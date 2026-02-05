@@ -66,8 +66,8 @@ class TestOwaspAggregateProjects:
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
         mock_active_projects.count.return_value = len(mock_projects_list)
-        mock_active_projects.__getitem__.side_effect = (
-            lambda idx: mock_projects_list[idx.start : idx.stop]
+        mock_active_projects.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_projects_list[idx]
         )

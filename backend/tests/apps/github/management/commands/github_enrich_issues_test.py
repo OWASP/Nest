@@ -78,10 +78,8 @@ def test_handle(
     mock_ordered_queryset = MagicMock()
     mock_ordered_queryset.__iter__.return_value = iter(mock_issues)
     mock_ordered_queryset.count.return_value = len(mock_issues)
-    mock_ordered_queryset.__getitem__ = (
-        lambda _, idx: mock_issues[idx]
-        if isinstance(idx, int)
-        else mock_issues[idx.start : idx.stop]
+    mock_ordered_queryset.__getitem__ = lambda _, idx: (
+        mock_issues[idx] if isinstance(idx, int) else mock_issues[idx.start : idx.stop]
     )
 
     mock_issue_class.open_issues = mock_open_issues
@@ -132,10 +130,8 @@ def test_handle_with_offset(mock_issue_class, mock_open_ai_class):
     mock_ordered_queryset = MagicMock()
     mock_ordered_queryset.__iter__.return_value = iter(mock_issues)
     mock_ordered_queryset.count.return_value = len(mock_issues)
-    mock_ordered_queryset.__getitem__ = (
-        lambda _, idx: mock_issues[idx]
-        if isinstance(idx, int)
-        else mock_issues[idx.start : idx.stop]
+    mock_ordered_queryset.__getitem__ = lambda _, idx: (
+        mock_issues[idx] if isinstance(idx, int) else mock_issues[idx.start : idx.stop]
     )
 
     mock_issue_class.open_issues = mock_open_issues
@@ -218,10 +214,8 @@ def test_handle_no_update_fields(mock_issue_class, mock_open_ai_class):
     mock_ordered_queryset = MagicMock()
     mock_ordered_queryset.__iter__.return_value = iter(mock_issues)
     mock_ordered_queryset.count.return_value = len(mock_issues)
-    mock_ordered_queryset.__getitem__ = (
-        lambda _, idx: mock_issues[idx]
-        if isinstance(idx, int)
-        else mock_issues[idx.start : idx.stop]
+    mock_ordered_queryset.__getitem__ = lambda _, idx: (
+        mock_issues[idx] if isinstance(idx, int) else mock_issues[idx.start : idx.stop]
     )
 
     mock_issue_class.open_issues = mock_open_issues
