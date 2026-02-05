@@ -30,6 +30,7 @@ export async function generateMetadata({
   const data = await getRepositoryMetadata(organizationKey, repositoryKey)
   const repository = data?.repository
 
+<<<<<<< enable-strict-mode
   return repository
     ? generateSeoMetadata({
         canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
@@ -38,6 +39,18 @@ export async function generateMetadata({
         title: repository.name,
       })
     : undefined
+=======
+  if (!repository) {
+    return {}
+  }
+
+  return generateSeoMetadata({
+    canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
+    description: repository.description ?? `${repository.name} repository details`,
+    keywords: ['owasp', 'repository', repositoryKey, repository.name],
+    title: repository.name,
+  })
+>>>>>>> main
 }
 
 export default async function RepositoryDetailsLayout({

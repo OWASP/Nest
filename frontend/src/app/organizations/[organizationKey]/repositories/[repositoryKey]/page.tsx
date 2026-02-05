@@ -2,7 +2,7 @@
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa'
 import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
@@ -23,11 +23,14 @@ const RepositoryDetailsPage = () => {
     repositoryKey: string
     organizationKey: string
   }>()
+<<<<<<< enable-strict-mode
   const [repository, setRepository] = useState<GetRepositoryDataQuery['repository']>(null)
   const [topContributors, setTopContributors] = useState<Contributor[]>([])
   const [recentPullRequests, setRecentPullRequests] = useState<
     GetRepositoryDataQuery['recentPullRequests']
   >([])
+=======
+>>>>>>> main
   const {
     data,
     error: graphQLRequestError,
@@ -35,16 +38,16 @@ const RepositoryDetailsPage = () => {
   } = useQuery(GetRepositoryDataDocument, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
+
+  const repository = data?.repository
+  const topContributors = data?.topContributors ?? []
+  const recentPullRequests = data?.recentPullRequests
+
   useEffect(() => {
-    if (data) {
-      setRepository(data.repository)
-      setTopContributors(data.topContributors)
-      setRecentPullRequests(data.recentPullRequests)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [data, graphQLRequestError, repositoryKey])
+  }, [graphQLRequestError])
 
   if (isLoading) {
     return <LoadingSpinner />

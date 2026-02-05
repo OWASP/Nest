@@ -22,6 +22,7 @@ backend/fuzzing_results/
 .python_history
 .python-version
 .ruff_cache
+.trivy-cache
 .venv/
 .vscode
 *.bak
