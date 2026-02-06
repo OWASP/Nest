@@ -23,6 +23,7 @@ export const GET_REPOSITORY_DATA = gql`
         repositoryName
         createdAt
         title
+        url
       }
       languages
       license
