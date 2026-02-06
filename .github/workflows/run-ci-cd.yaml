@@ -552,6 +552,28 @@ jobs:
         run: |
           make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
           make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
+
+      - name: Generate SBOM for backend image
+        run: |
+          trivy image \
+           --format cyclonedx \
+           --output backend-sbom.cdx.json \
+           owasp/nest:backend-staging
+
+      - name: Generate SBOM for frontend image
+        run: |
+          trivy image \
+           --format cyclonedx \
+           --output frontend-sbom.cdx.json \
+           owasp/nest:frontend-staging
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: staging-sboms
+          path: |
+            backend-sbom.cdx.json
+            frontend-sbom.cdx.json
     timeout-minutes: 5
 
   deploy-staging-nest:

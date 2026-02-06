@@ -71,6 +71,7 @@ bangbang
 boardofdirectors
 bsky
 carryforward
+cdx
 certbot
 collectstatic
 coraza
@@ -79,6 +80,7 @@ csrfguard
 csrfprotector
 csrftoken
 cva
+cyclonedx
 defectdojo
 demojize
 dismissable
@@ -164,6 +166,7 @@ rsc
 saft
 sakanashi
 samm
+sbom
 schemathesis
 semgrep
 seo
