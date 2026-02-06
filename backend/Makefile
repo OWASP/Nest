@@ -112,6 +112,10 @@ load-data-fuzz:
 	@echo "Loading Nest fuzz data"
 	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
+load-data-staging:
+	@echo "Loading Nest staging data"
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
