@@ -10,9 +10,9 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     'flex flex-row-reverse items-center justify-center gap-1 px-4 pb-1 -ml-2',
     item === 'stars_count' || item === 'starsCount' ? 'rotate-container' : '',
     item === 'forks_count' ||
-    item === 'contributors_count' ||
-    item === 'forksCount' ||
-    item === 'contributionCount'
+      item === 'contributors_count' ||
+      item === 'forksCount' ||
+      item === 'contributionCount'
       ? 'flip-container'
       : '',
   ]
@@ -21,12 +21,12 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
 
   // className for the icon
   const iconClassName = [
-    'text-gray-600 dark:text-gray-300',
+    'text-gray-800 dark:text-gray-300',
     item === 'stars_count' || item === 'starsCount' ? 'icon-rotate' : '',
     item === 'forks_count' ||
-    item === 'contributors_count' ||
-    item === 'forksCount' ||
-    item === 'contributionCount'
+      item === 'contributors_count' ||
+      item === 'forksCount' ||
+      item === 'contributionCount'
       ? 'icon-flip'
       : '',
   ]
@@ -43,7 +43,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     >
       <div className={containerClassName}>
         {/* Display formatted number if the value is a number */}
-        <span className="text-gray-600 dark:text-gray-300">
+        <span className="text-gray-800 dark:text-gray-300">
           {typeof icons[item] === 'number' ? millify(icons[item], { precision: 1 }) : icons[item]}
         </span>
         <span>

@@ -288,13 +288,13 @@ describe('DisplayIcon', () => {
     it('applies correct icon classes', () => {
       render(<DisplayIcon item="starsCount" icons={mockIcons} />)
       const icon = screen.getByTestId('font-awesome-icon')
-      expect(icon).toHaveClass('text-gray-600', 'dark:text-gray-300', 'icon-rotate')
+      expect(icon).toHaveClass('text-gray-800', 'dark:text-gray-300', 'icon-rotate')
     })
 
     it('applies correct text span classes', () => {
       render(<DisplayIcon item="license" icons={mockIcons} />)
       const textSpan = screen.getByText('MIT')
-      expect(textSpan).toHaveClass('text-gray-600', 'dark:text-gray-300')
+      expect(textSpan).toHaveClass('text-gray-800', 'dark:text-gray-300')
     })
   })
 

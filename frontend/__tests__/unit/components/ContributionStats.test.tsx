@@ -313,7 +313,7 @@ describe('ContributionStats', () => {
 
       // Verify icons have proper styling classes
       icons.forEach((icon) => {
-        expect(icon).toHaveClass('text-gray-600', 'dark:text-gray-400')
+        expect(icon).toHaveClass('text-gray-800', 'dark:text-gray-200')
       })
 
       // Verify specific viewBox attributes for different react-icons

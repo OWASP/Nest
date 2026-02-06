@@ -156,7 +156,7 @@ describe('LeadersList Component', () => {
     it('applies correct CSS classes to links', () => {
       render(<LeadersList entityKey="test" leaders="John Doe" />)
       const link = screen.getByTestId('leader-link')
-      expect(link).toHaveClass('text-gray-600', 'hover:underline', 'dark:text-gray-400')
+      expect(link).toHaveClass('text-gray-800', 'hover:underline', 'dark:text-gray-200')
     })
 
     it('generates correct href for each leader', () => {

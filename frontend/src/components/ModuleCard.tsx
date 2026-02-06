@@ -46,7 +46,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
             type="button"
             onClick={() => setShowAllModule(!showAllModule)}
             onKeyDown={handleKeyDown}
-            className="mt-4 flex items-center justify-center text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+            className="mt-4 flex items-center justify-center text-blue-300 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
           >
             {showAllModule ? (
               <>
@@ -95,10 +95,10 @@ const ModuleItem = ({ module }: { module: Module }) => {
   }
 
   return (
-    <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 text-gray-600 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+    <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 text-gray-800 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
       <Link
         href={`${pathname}/modules/${module.key}`}
-        className="text-start font-semibold text-gray-600 hover:underline dark:text-gray-300"
+        className="text-start font-semibold text-gray-800 hover:underline dark:text-gray-300"
       >
         <TruncatedText text={module?.name} />
       </Link>
@@ -114,7 +114,7 @@ const ModuleItem = ({ module }: { module: Module }) => {
         <div className="mt-auto flex w-full gap-4">
           {mentorsWithAvatars.length > 0 && (
             <div className="flex flex-1 flex-col gap-2">
-              <span className="text-xs font-bold tracking-wider text-gray-600 uppercase dark:text-gray-300">
+              <span className="text-xs font-bold tracking-wider text-gray-800 uppercase dark:text-gray-300">
                 Mentors
               </span>
               <div className="flex flex-wrap gap-1">
@@ -135,7 +135,7 @@ const ModuleItem = ({ module }: { module: Module }) => {
                   </Link>
                 ))}
                 {mentorsWithAvatars.length > 4 && (
-                  <span className="self-center text-xs font-medium text-gray-600 dark:text-gray-300">
+                  <span className="self-center text-xs font-medium text-gray-800 dark:text-gray-300">
                     +{mentorsWithAvatars.length - 4}
                   </span>
                 )}
@@ -146,7 +146,7 @@ const ModuleItem = ({ module }: { module: Module }) => {
             <div
               className={`flex flex-1 flex-col gap-2 ${mentorsWithAvatars.length > 0 ? 'border-l-1 border-gray-100 pl-4 dark:border-gray-700' : ''}`}
             >
-              <span className="text-xs font-bold tracking-wider text-gray-600 uppercase dark:text-gray-300">
+              <span className="text-xs font-bold tracking-wider text-gray-800 uppercase dark:text-gray-300">
                 Mentees
               </span>
               <div className="flex flex-wrap gap-1">
@@ -167,7 +167,7 @@ const ModuleItem = ({ module }: { module: Module }) => {
                   </Link>
                 ))}
                 {menteesWithAvatars.length > 4 && (
-                  <span className="self-center text-xs font-medium text-gray-600 dark:text-gray-300">
+                  <span className="self-center text-xs font-medium text-gray-800 dark:text-gray-300">
                     +{menteesWithAvatars.length - 4}
                   </span>
                 )}

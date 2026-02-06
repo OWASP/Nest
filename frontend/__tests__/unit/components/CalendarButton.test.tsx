@@ -34,14 +34,14 @@ describe('CalendarButton', () => {
     jest.clearAllMocks()
     globalThis.URL.createObjectURL = jest.fn(() => 'mock-url')
     globalThis.URL.revokeObjectURL = jest.fn()
-    ;(getIcsFileUrl as jest.Mock).mockResolvedValue(mockUrl)
+      ; (getIcsFileUrl as jest.Mock).mockResolvedValue(mockUrl)
 
     appendSpy = jest.spyOn(document.body, 'appendChild')
     createSpy = jest.spyOn(document, 'createElement')
 
-    clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    clickSpy = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => { })
 
-    jest.spyOn(globalThis, 'alert').mockImplementation(() => {})
+    jest.spyOn(globalThis, 'alert').mockImplementation(() => { })
   })
 
   afterEach(() => {
@@ -121,9 +121,9 @@ describe('CalendarButton', () => {
     })
 
     it('handles errors gracefully when generation fails', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { })
       const errorMock = new Error('Failed to generate')
-      ;(getIcsFileUrl as jest.Mock).mockRejectedValueOnce(errorMock)
+        ; (getIcsFileUrl as jest.Mock).mockRejectedValueOnce(errorMock)
 
       render(<CalendarButton event={mockEvent} />)
       const button = screen.getByRole('button')
@@ -305,13 +305,13 @@ describe('CalendarButton', () => {
             startDate: '2025-12-02',
             endDate: '2025-12-03',
           }}
-          className="text-gray-600 hover:text-gray-800 dark:text-gray-400"
+          className="text-gray-800 hover:text-gray-800 dark:text-gray-200"
           iconClassName="h-4 w-4"
         />
       )
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('text-gray-600')
-      expect(button).toHaveClass('dark:text-gray-400')
+      expect(button).toHaveClass('text-gray-800')
+      expect(button).toHaveClass('dark:text-gray-200')
     })
 
     it('works in poster page context with label', () => {
@@ -358,7 +358,7 @@ describe('CalendarButton', () => {
             title: 'Very Long Event Title That Could Potentially Cause Overflow Issues',
             startDate: '2025-12-01',
           }}
-          className="flex-shrink-0 text-gray-600"
+          className="flex-shrink-0 text-gray-800"
         />
       )
       const button = screen.getByRole('button')

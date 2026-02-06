@@ -41,7 +41,7 @@ export default function BreadCrumbsWrapper() {
                 ) : (
                   <Link
                     href={item.path}
-                    className="hover:text-blue-700 hover:underline dark:text-blue-400"
+                    className="hover:text-blue-700 hover:underline dark:text-blue-300"
                   >
                     <TruncatedText
                       text={item.title}

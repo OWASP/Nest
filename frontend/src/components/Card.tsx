@@ -54,7 +54,7 @@ const Card = ({
           {/* Project title and link */}
           <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
-              className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
+              className="max-w-full text-base font-semibold break-words text-blue-300 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
               style={{
                 transition: 'color 0.3s ease',
               }}
@@ -81,7 +81,7 @@ const Card = ({
 
         {/* Timeline Section (Optional) */}
         {timeline?.start && timeline?.end && (
-          <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 text-sm text-gray-500 dark:text-gray-200">
             <FaCalendar className="mr-2 h-4 w-4" />
             <span>{formatDateRange(timeline.start, timeline.end)}</span>
           </div>
@@ -102,7 +102,7 @@ const Card = ({
 
       <Markdown
         content={summary}
-        className="mt-2 w-full [overflow-wrap:anywhere] break-words text-gray-600 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
+        className="mt-2 w-full [overflow-wrap:anywhere] break-words text-gray-800 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
       />
 
       <div className="mt-4 w-full">
@@ -121,7 +121,7 @@ const Card = ({
                     className="transition-colors"
                     aria-label={item.title || 'Social media link'}
                   >
-                    <SocialIcon className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:text-gray-400" />
+                    <SocialIcon className="h-5 w-5 text-blue-500 hover:text-gray-800 dark:hover:text-gray-400" />
                   </Link>
                 )
               })}

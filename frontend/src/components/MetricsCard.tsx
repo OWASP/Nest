@@ -36,7 +36,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
         <hr className="my-4 border-0 border-t border-gray-200 dark:border-gray-600" />
         <div className="grid grid-cols-3 gap-4 md:grid-cols-4">
           <div>
-            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+            <p className="text-xs font-medium text-gray-800 lg:text-base dark:text-gray-200">
               Stars
             </p>
             <p className="text-md font-semibold text-gray-800 lg:text-xl dark:text-gray-200">
@@ -44,7 +44,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+            <p className="text-xs font-medium text-gray-800 lg:text-base dark:text-gray-200">
               Forks
             </p>
             <p className="text-md font-semibold text-gray-800 lg:text-xl dark:text-gray-200">
@@ -52,7 +52,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+            <p className="text-xs font-medium text-gray-800 lg:text-base dark:text-gray-200">
               Contributors
             </p>
             <p className="text-md font-semibold text-gray-800 lg:text-xl dark:text-gray-200">
@@ -60,7 +60,7 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
             </p>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+            <p className="text-xs font-medium text-gray-800 lg:text-base dark:text-gray-200">
               Health Checked
             </p>
             <p className="text-sm text-gray-800 lg:text-lg dark:text-gray-200">

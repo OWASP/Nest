@@ -3,7 +3,7 @@ import Link from 'next/link'
 const SponsorCard = ({ target, title, type }: { target: string; title: string; type: string }) => (
   <div className="rounded-lg bg-gray-100 p-6 text-center shadow-md dark:bg-gray-800">
     <h3 className="mb-4 text-2xl font-semibold">Want to become a sponsor?</h3>
-    <p className="mb-6 text-gray-600 dark:text-gray-400">
+    <p className="mb-6 text-gray-800 dark:text-gray-200">
       Support {title} to help grow global cybersecurity community.
     </p>
     <Link

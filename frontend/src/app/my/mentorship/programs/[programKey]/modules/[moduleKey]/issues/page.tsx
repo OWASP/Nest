@@ -59,9 +59,9 @@ const IssuesPage = () => {
     }
 
     const labels = new Set<string>()
-    ;(moduleData?.issues || []).forEach((i) =>
-      (i.labels || []).forEach((l: string) => labels.add(l))
-    )
+      ; (moduleData?.issues || []).forEach((i) =>
+        (i.labels || []).forEach((l: string) => labels.add(l))
+      )
     return Array.from(labels).sort((a, b) => a.localeCompare(b))
   }, [moduleData])
 
@@ -95,7 +95,7 @@ const IssuesPage = () => {
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 
   return (
-    <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="mt-16 min-h-screen bg-white p-8 text-gray-800 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold">{moduleData.name} Issues</h1>
@@ -107,7 +107,7 @@ const IssuesPage = () => {
               label="Label :"
               classNames={{
                 label:
-                  'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
+                  'font-small text-sm text-gray-800 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
                 trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-40',
                 popoverContent: 'text-md min-w-40 dark:bg-[#323232] rounded-none p-0',
               }}

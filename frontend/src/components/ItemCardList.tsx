@@ -61,7 +61,7 @@ const ItemCardList = ({
                     showArrow
                   >
                     <Link
-                      className="shrink-0 text-blue-400 hover:underline"
+                      className="shrink-0 text-blue-300 hover:underline"
                       href={`/members/${item?.author?.login}`}
                     >
                       <Image
@@ -80,7 +80,7 @@ const ItemCardList = ({
                 )}
                 <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                   <Link
-                    className="text-blue-400 hover:underline"
+                    className="text-blue-300 hover:underline"
                     href={item?.url || ''}
                     target="_blank"
                   >

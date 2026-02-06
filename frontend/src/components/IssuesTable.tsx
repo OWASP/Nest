@@ -78,26 +78,26 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
           <tr>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+              className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-200"
             >
               Title
             </th>
             <th
               scope="col"
-              className="hidden px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase lg:table-cell dark:text-gray-400"
+              className="hidden px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase lg:table-cell dark:text-gray-200"
             >
               Status
             </th>
             <th
               scope="col"
-              className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+              className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-200"
             >
               Labels
             </th>
             {showAssignee && (
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+                className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-200"
               >
                 Assignee
               </th>
@@ -124,7 +124,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                     <button
                       type="button"
                       onClick={() => handleIssueClick(issue.number)}
-                      className="line-clamp-2 h-12 cursor-pointer overflow-hidden text-left text-sm font-medium text-blue-600 hover:underline lg:max-w-md dark:text-blue-400"
+                      className="line-clamp-2 h-12 cursor-pointer overflow-hidden text-left text-sm font-medium text-blue-600 hover:underline lg:max-w-md dark:text-blue-300"
                     >
                       {issue.title}
                     </button>
@@ -152,7 +152,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                       </span>
                     ))}
                     {issue.labels.length > maxVisibleLabels && (
-                      <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-500 lg:rounded-lg lg:border lg:border-gray-400 lg:bg-transparent lg:text-gray-700 lg:hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:lg:border-gray-300 dark:lg:text-gray-300 dark:lg:hover:bg-gray-700">
+                      <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-500 lg:rounded-lg lg:border lg:border-gray-400 lg:bg-transparent lg:text-gray-700 lg:hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:lg:border-gray-300 dark:lg:text-gray-300 dark:lg:hover:bg-gray-700">
                         +{issue.labels.length - maxVisibleLabels} more
                       </span>
                     )}
@@ -162,7 +162,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
 
               {/* Assignee */}
               {showAssignee && (
-                <td className="block pb-0 text-xs text-gray-600 lg:table-cell lg:px-6 lg:py-4 lg:text-sm lg:text-gray-700 dark:text-gray-400 dark:lg:text-gray-300">
+                <td className="block pb-0 text-xs text-gray-800 lg:table-cell lg:px-6 lg:py-4 lg:text-sm lg:text-gray-700 dark:text-gray-200 dark:lg:text-gray-300">
                   {issue.assignees && issue.assignees.length > 0 ? (
                     <div className="flex items-center gap-2">
                       <Image
@@ -186,7 +186,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
             <tr>
               <td
                 colSpan={getColumnCount()}
-                className="block p-6 text-center text-sm text-gray-500 lg:table-cell lg:px-6 lg:py-8 dark:text-gray-400"
+                className="block p-6 text-center text-sm text-gray-500 lg:table-cell lg:px-6 lg:py-8 dark:text-gray-200"
               >
                 {emptyMessage}
               </td>

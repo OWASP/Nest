@@ -537,7 +537,7 @@ describe('Card', () => {
     expect(titleElement).toHaveClass(
       'text-base',
       'font-semibold',
-      'text-blue-400',
+      'text-blue-300',
       'hover:text-blue-600',
       'sm:text-lg',
       'lg:text-2xl'
@@ -548,7 +548,7 @@ describe('Card', () => {
     render(<Card {...baseProps} />)
 
     const markdown = screen.getByTestId('markdown')
-    expect(markdown).toHaveClass('mt-2', 'w-full', 'text-gray-600', 'dark:text-gray-300')
+    expect(markdown).toHaveClass('mt-2', 'w-full', 'text-gray-800', 'dark:text-gray-300')
   })
 
   it('filters and passes icons correctly to DisplayIcon components', () => {

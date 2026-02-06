@@ -51,7 +51,7 @@ export const PageWrapper = ({
   ariaBusy?: boolean
 }) => (
   <div
-    className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300"
+    className="min-h-screen bg-white p-8 text-gray-800 dark:bg-[#212529] dark:text-gray-300"
     aria-busy={ariaBusy}
   >
     <div className="mx-auto max-w-6xl">{children}</div>

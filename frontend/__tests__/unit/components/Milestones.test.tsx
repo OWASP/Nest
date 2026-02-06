@@ -272,8 +272,8 @@ describe('Milestones', () => {
       'flex-wrap',
       'items-center',
       'text-sm',
-      'text-gray-600',
-      'dark:text-gray-400'
+      'text-gray-800',
+      'dark:text-gray-200'
     )
   })
 
@@ -285,9 +285,9 @@ describe('Milestones', () => {
       'overflow-hidden',
       'text-ellipsis',
       'whitespace-nowrap',
-      'text-gray-600',
+      'text-gray-800',
       'hover:underline',
-      'dark:text-gray-400'
+      'dark:text-gray-200'
     )
   })
 

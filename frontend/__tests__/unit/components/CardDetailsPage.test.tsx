@@ -94,7 +94,7 @@ jest.mock('components/ChapterMapWrapper', () => ({
 
 jest.mock('components/HealthMetrics', () => ({
   __esModule: true,
-  default: ({ data, ...props }: { data: unknown[]; [key: string]: unknown }) => (
+  default: ({ data, ...props }: { data: unknown[];[key: string]: unknown }) => (
     <div data-testid="health-metrics" {...props}>
       Health Metrics ({data.length} items)
     </div>
@@ -262,7 +262,7 @@ jest.mock('components/RecentPullRequests', () => ({
 
 jest.mock('components/MentorshipPullRequest', () => ({
   __esModule: true,
-  default: ({ pr, ...props }: { pr: PullRequest; [key: string]: unknown }) => (
+  default: ({ pr, ...props }: { pr: PullRequest;[key: string]: unknown }) => (
     <div data-testid="pull-request-item" {...props}>
       MentorshipPullRequest: {pr.title}
     </div>
@@ -957,7 +957,7 @@ describe('CardDetailsPage', () => {
         'min-h-screen',
         'bg-white',
         'p-8',
-        'text-gray-600',
+        'text-gray-800',
         'dark:bg-[#212529]',
         'dark:text-gray-300'
       )

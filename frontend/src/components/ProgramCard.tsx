@@ -63,7 +63,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               placement="bottom"
               isDisabled={program.name.length <= 50}
             >
-              <h2 className="mr-1 line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-600 dark:text-white">
+              <h2 className="mr-1 line-clamp-2 h-12 overflow-hidden text-base font-semibold text-gray-800 dark:text-white">
                 {program.name}
               </h2>
             </Tooltip>
@@ -78,13 +78,12 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
               </div>
             )}
           </div>
-          <div className="mb-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="mb-2 text-sm text-gray-800 dark:text-gray-200">
             <span>{dateInfo}</span>
             {accessLevel === 'admin' && program.userRole && (
               <span
-                className={`ml-2 rounded-full px-2 py-1 text-xs font-medium capitalize ${
-                  roleClass[program.userRole] ?? roleClass.default
-                }`}
+                className={`ml-2 rounded-full px-2 py-1 text-xs font-medium capitalize ${roleClass[program.userRole] ?? roleClass.default
+                  }`}
               >
                 {program.userRole}
               </span>

@@ -89,7 +89,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
                   width={24}
                 />
                 <Link
-                  className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
+                  className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-300 hover:underline"
                   href={
                     isMentee && isPrivateView
                       ? `/my/mentorship/programs/${programKey}/modules/${module.key}/mentees/${contributor.login}`
@@ -114,7 +114,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
         <div className="flex cursor-pointer items-center gap-2">
           <FaFolderOpen className="h-5 w-5 text-gray-500 dark:text-gray-300" />
           <Link href={`${pathname}/modules/${module.key}`} className="flex-1">
-            <h2 className="max-w-full text-2xl font-semibold break-words text-blue-400 transition-colors duration-300 hover:text-blue-600 sm:break-normal">
+            <h2 className="max-w-full text-2xl font-semibold break-words text-blue-300 transition-colors duration-300 hover:text-blue-600 sm:break-normal">
               {module.name}
             </h2>
           </Link>

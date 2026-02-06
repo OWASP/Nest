@@ -59,7 +59,7 @@ const OrganizationDetailsPage = () => {
     {
       label: 'GitHub Profile',
       value: (
-        <Link href={organization.url} className="text-blue-400 hover:underline">
+        <Link href={organization.url} className="text-blue-300 hover:underline">
           @{organization.login}
         </Link>
       ),

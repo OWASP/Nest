@@ -2,7 +2,7 @@ import { Skeleton } from '@heroui/skeleton'
 
 const AboutSkeleton = () => {
   return (
-    <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen p-8 text-gray-800 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         {/* Title Skeleton */}
         <Skeleton className="mt-4 mb-6 h-10 w-32" />

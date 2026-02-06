@@ -62,7 +62,7 @@ export default function CommitteeDetailsPage() {
     {
       label: 'URL',
       value: (
-        <Link href={committee.url} className="text-blue-400 hover:underline">
+        <Link href={committee.url} className="text-blue-300 hover:underline">
           {committee.url}
         </Link>
       ),

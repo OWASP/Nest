@@ -29,7 +29,7 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
               <HeroUIBreadcrumbItem key={item.path}>
                 {isLast ? (
                   <span
-                    className="cursor-default font-semibold text-gray-600 dark:text-gray-300"
+                    className="cursor-default font-semibold text-gray-800 dark:text-gray-300"
                     aria-current="page"
                   >
                     <TruncatedText
@@ -40,7 +40,7 @@ export default function BreadCrumbRenderer({ items }: BreadCrumbRendererProps) {
                 ) : (
                   <Link
                     href={item.path}
-                    className="hover:text-blue-700 hover:underline dark:text-blue-400"
+                    className="hover:text-blue-700 hover:underline dark:text-blue-300"
                   >
                     <TruncatedText
                       text={item.title}

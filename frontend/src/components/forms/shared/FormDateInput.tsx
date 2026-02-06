@@ -4,7 +4,7 @@ import { Input } from '@heroui/react'
 
 const COMMON_INPUT_CLASS_NAMES = {
   base: 'w-full min-w-0',
-  label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+  label: 'text-sm font-semibold text-gray-800 dark:text-gray-300',
   input: 'text-gray-800 dark:text-gray-200',
   inputWrapper: 'bg-gray-50 dark:bg-gray-800',
   helperWrapper: 'min-w-0 max-w-full w-full',

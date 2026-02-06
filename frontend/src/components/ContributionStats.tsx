@@ -14,14 +14,14 @@ export default function ContributionStats({ title, stats }: Readonly<Contributio
   return (
     <section aria-labelledby="contribution-stats-title">
       <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800 sm:text-xl md:text-2xl dark:text-gray-200">
-        <FaChartLine className="h-5 w-5 text-gray-600 sm:h-6 sm:w-6 dark:text-gray-400" />
+        <FaChartLine className="h-5 w-5 text-gray-800 sm:h-6 sm:w-6 dark:text-gray-200" />
         {title}
       </h2>
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="flex items-center gap-2">
-          <FaCode className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <FaCode className="h-5 w-5 text-gray-800 dark:text-gray-200" />
           <div>
-            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">
+            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-200">
               Commits
             </p>
             <p className="text-base font-bold text-gray-900 sm:text-lg dark:text-white">
@@ -30,18 +30,18 @@ export default function ContributionStats({ title, stats }: Readonly<Contributio
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <FaCodeBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <FaCodeBranch className="h-5 w-5 text-gray-800 dark:text-gray-200" />
           <div>
-            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">PRs</p>
+            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-200">PRs</p>
             <p className="text-base font-bold text-gray-900 sm:text-lg dark:text-white">
               {formatNumber(stats?.pullRequests)}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <FaExclamationCircle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <FaExclamationCircle className="h-5 w-5 text-gray-800 dark:text-gray-200" />
           <div>
-            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">
+            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-200">
               Issues
             </p>
             <p className="text-base font-bold text-gray-900 sm:text-lg dark:text-white">
@@ -50,9 +50,9 @@ export default function ContributionStats({ title, stats }: Readonly<Contributio
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <FaCodeBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <FaCodeBranch className="h-5 w-5 text-gray-800 dark:text-gray-200" />
           <div>
-            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-400">Total</p>
+            <p className="text-xs font-medium text-gray-500 sm:text-sm dark:text-gray-200">Total</p>
             <p className="text-base font-bold text-gray-900 sm:text-lg dark:text-white">
               {formatNumber(stats?.total)}
             </p>

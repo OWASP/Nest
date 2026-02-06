@@ -64,7 +64,7 @@ const LoginPageContent: FC<LoginPageContentProps> = ({ isGitHubAuthEnabled }) =>
         <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-white">
           Welcome back
         </h2>
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-200">
           Sign in with your GitHub account to continue
         </p>
 

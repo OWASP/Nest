@@ -25,7 +25,7 @@ const ModuleIssueDetailsPage = () => {
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
-    if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
+    if (!deadline) return { text: 'No deadline set', color: 'text-gray-800 dark:text-gray-300' }
 
     const deadlineDate = new Date(deadline)
     const today = new Date()
@@ -57,7 +57,7 @@ const ModuleIssueDetailsPage = () => {
     } else if (daysLeft <= 3) {
       color = 'text-[#F59E0B]'
     } else {
-      color = 'text-gray-600 dark:text-gray-300'
+      color = 'text-gray-800 dark:text-gray-300'
     }
 
     return {
@@ -91,10 +91,9 @@ const ModuleIssueDetailsPage = () => {
   const taskDeadline = data?.getModule?.taskDeadline as string | undefined
 
   const getButtonClassName = (disabled: boolean) =>
-    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
-      disabled
-        ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
-        : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
+    `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${disabled
+      ? 'cursor-not-allowed border-gray-300 text-gray-400 dark:border-gray-600'
+      : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
   if (error) {
@@ -230,11 +229,10 @@ const ModuleIssueDetailsPage = () => {
                         setIsEditingDeadline(true)
                       }
                     }}
-                    className={`inline-flex items-center gap-2 rounded px-2 py-1 text-left transition-colors ${
-                      canEditDeadline
-                        ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800'
-                        : 'cursor-not-allowed font-medium'
-                    }`}
+                    className={`inline-flex items-center gap-2 rounded px-2 py-1 text-left transition-colors ${canEditDeadline
+                      ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800'
+                      : 'cursor-not-allowed font-medium'
+                      }`}
                   >
                     {(() => {
                       const { text, color } = formatDeadline(taskDeadline)
@@ -277,7 +275,7 @@ const ModuleIssueDetailsPage = () => {
                 >
                   <Link
                     href={`/my/mentorship/programs/${programKey}/modules/${moduleKey}/mentees/${a.login}`}
-                    className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-400"
+                    className="inline-flex items-center gap-2 text-blue-600 hover:underline dark:text-blue-300"
                   >
                     {a.avatarUrl ? (
                       <Image
