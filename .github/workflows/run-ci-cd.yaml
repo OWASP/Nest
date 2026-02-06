@@ -376,8 +376,6 @@ jobs:
         run: |
           docker run --network host \
             -e FRONTEND_URL=http://localhost:3000 \
-            -e NEXTAUTH_SECRET=secret \
-            -e NEXTAUTH_URL=http://localhost:3000 \
             owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
     timeout-minutes: 20
 
