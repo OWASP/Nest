@@ -27,6 +27,7 @@ class Command(BaseCommand):
     MAX_RETRIES = 5
     BASE_DELAY = 2  # seconds
     DELAY_MULTIPLIER = 2
+    MAX_DLQ_RETRIES = 5
     DLQ_STREAM_KEY = "owasp_notifications_dlq"
     DLQ_CHECK_INTERVAL = 300  # seconds
 
@@ -68,7 +69,7 @@ class Command(BaseCommand):
                                 # Explicitly acknowledge the message
                                 redis_conn.xack(stream_key, group_name, message_id)
                                 logger.info("Message processed successfully.")
-                            except Exception:
+                            except Exception:  # noqa: BLE001
                                 logger.exception("Error processing message %s", message_id)
 
                 # Check DLQ every 300 seconds
@@ -200,7 +201,7 @@ class Command(BaseCommand):
         related_link = f"snapshot:{snapshot.id}"
 
         if Notification.objects.filter(
-            recipient=user,
+            recipient_id=user.id,
             type="snapshot_published",
             related_link=related_link,
         ).exists():
@@ -257,6 +258,9 @@ class Command(BaseCommand):
                         redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                         continue
 
+                    raw_dlq_retries = data.get(b"dlq_retries", b"0")
+                    dlq_retries = int(raw_dlq_retries.decode("utf-8"))
+
                     raw_user_id = data.get(b"user_id")
                     raw_snapshot_id = data.get(b"snapshot_id")
 
@@ -272,7 +276,6 @@ class Command(BaseCommand):
                     snapshot = Snapshot.objects.get(id=snapshot_id)
 
                     self.send_notification(user, snapshot)
-
                     redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                     processed_count += 1
                     logger.info(
@@ -284,12 +287,28 @@ class Command(BaseCommand):
                     logger.warning("User or snapshot not found, removing from DLQ")
                     redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                     failed_count += 1
-                except Exception:
+                except Exception:  # noqa: BLE001
                     failed_count += 1
-                    logger.exception(
-                        "Failed to reprocess DLQ message %s - keeping in DLQ",
-                        msg_id,
-                    )
+                    dlq_retries += 1
+
+                    redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
+
+                    if dlq_retries > self.MAX_DLQ_RETRIES:
+                        logger.exception(
+                            "DLQ message %s exceeded max retries (%d). Dropping.",
+                            msg_id,
+                            self.MAX_DLQ_RETRIES,
+                        )
+                    else:
+                        new_data = {k.decode("utf-8"): v.decode("utf-8") for k, v in data.items()}
+                        new_data["dlq_retries"] = str(dlq_retries)
+                        redis_conn.xadd(self.DLQ_STREAM_KEY, new_data)
+                        logger.warning(
+                            "Failed to reprocess DLQ message %s (attempt %d/%d). Re-queued.",
+                            msg_id,
+                            dlq_retries,
+                            self.MAX_DLQ_RETRIES,
+                        )
 
             logger.info(
                 "DLQ processing complete: %d successful, %d failed",

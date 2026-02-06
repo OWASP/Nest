@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0074_remove_subscription_owasp_subsc_user_id_33ae6d_idx_and_more'),
+        ("owasp", "0074_remove_subscription_owasp_subsc_user_id_33ae6d_idx_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='subscription',
-            name='object_id',
+            model_name="subscription",
+            name="object_id",
             field=models.PositiveBigIntegerField(),
         ),
     ]
