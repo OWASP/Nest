@@ -1,0 +1,24 @@
+name: Lint Ansible
+
+on:
+  pull_request:
+    paths:
+      - .github/ansible/**
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ansible-lint:
+    name: Run ansible-lint
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@7f6abc5ef97d0fb043a0f3d416dfbc74399fbda0
+        with:
+          args: --skip-list yaml .github/ansible
