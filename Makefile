@@ -6,7 +6,7 @@ include frontend/Makefile
 .PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
 	security-scan-backend-image security-scan-frontend-image test update \
-	clean-trivy-cache
+	clean-trivy-cache lint-ansible
 
 MAKEFLAGS += --no-print-directory
 
@@ -62,6 +62,9 @@ run:
 	@DOCKER_BUILDKIT=1 \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
+
+lint-ansible:
+	@ansible-lint --skip-list yaml .github/ansible
 
 security-scan: \
 	security-scan-code \
