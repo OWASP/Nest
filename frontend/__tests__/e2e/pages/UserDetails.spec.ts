@@ -32,10 +32,10 @@ test.describe('User Details Page', () => {
 
   test('should have user activity sections', async ({ page }) => {
     // Check for standard activity headings
-    await expect(page.getByRole('heading', { name: 'Issues' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Pull Requests' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Issues', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Pull Requests', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Repositories', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Recent Milestones', exact: true })).toBeVisible()
     // Verify that at least one repository is listed in the repos section
     const firstRepo = page.locator('div').filter({ hasText: 'Repositories' }).locator('a').first()
     await expect(firstRepo).toBeVisible()
