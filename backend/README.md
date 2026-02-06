@@ -18,7 +18,7 @@ The OWASP Nest backend is a Python-based API server built with the [Django](http
 
 The backend code lives in this directory. Key directories include:
 
-- `apps/` - Contains all Django applications (e.g., `owasp`, `GitHub`, `api`).
+- `apps/` - Contains all Django applications (e.g., `owasp`, `github`, `api`).
 - `settings/` - Django configuration files.
 - `tests/` - Automated tests.
 - `data/` - Database dumps and backup files.
