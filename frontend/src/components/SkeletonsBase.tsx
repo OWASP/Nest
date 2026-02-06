@@ -6,6 +6,7 @@ import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSke
 import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
 import UserCardSkeleton from 'components/skeletons/UserCard'
+import MentorshipPageSkeleton from 'components/skeletons/MentorshipPageSkeleton'
 function userCardRender() {
   const cardCount = 12
   return (
@@ -74,6 +75,14 @@ const SkeletonBase = ({
       return <MemberDetailsPageSkeleton />
     case 'organizations-details':
       return <OrganizationDetailsPageSkeleton />
+    case 'programs':
+      return <MentorshipPageSkeleton type="programs" />
+    case 'modules':
+      return <MentorshipPageSkeleton type="modules" />
+    case 'issues':
+      return <MentorshipPageSkeleton type="issues" />
+    case 'mentees':
+      return <MentorshipPageSkeleton type="mentees" />
     default:
       return <LoadingSpinner imageUrl={loadingImageUrl} />
   }
@@ -84,9 +93,6 @@ const SkeletonBase = ({
       ) : (
         <Component />
       )}
-      <Component />
-      <Component />
-      <Component />
     </div>
   )
 }

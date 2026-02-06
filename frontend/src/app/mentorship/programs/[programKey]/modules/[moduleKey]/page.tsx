@@ -8,7 +8,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import MentorshipPageSkeleton from 'components/skeletons/MentorshipPageSkeleton'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
@@ -35,7 +35,7 @@ const ModuleDetailsPage = () => {
     }
   }, [error])
 
-  if (isLoading && !data) return <LoadingSpinner />
+  if (isLoading && !data) return <MentorshipPageSkeleton type="modules" />
 
   if (error) {
     return (

@@ -13,7 +13,7 @@ import type { ExtendedSession } from 'types/auth'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import MentorshipPageSkeleton from 'components/skeletons/MentorshipPageSkeleton'
 
 const ProgramDetailsPage = () => {
   const { programKey } = useParams<{ programKey: string }>()
@@ -81,7 +81,7 @@ const ProgramDetailsPage = () => {
     }
   }
 
-  if (isLoading && !data) return <LoadingSpinner />
+  if (isLoading && !data) return <MentorshipPageSkeleton type="programs" />
 
   if (!program && !isLoading) {
     return (
