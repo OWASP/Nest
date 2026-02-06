@@ -1,3 +1,4 @@
+AVD
 Abhay
 Agentic
 Agsoc
@@ -132,6 +133,7 @@ menteemodule_set
 mentees
 mern
 millify
+misconfig
 mkv
 mpim
 navlink
@@ -191,6 +193,7 @@ xapp
 xdg
 xdist
 xoxb
+xoxp
 xsser
 xzf
 zapconfig
