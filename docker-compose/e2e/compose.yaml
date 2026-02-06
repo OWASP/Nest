@@ -96,6 +96,9 @@ services:
       dockerfile: ../docker/frontend/Dockerfile
       args:
         ENV_FILE: .env.e2e.example
+        NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://backend:9000
+        NEXT_SERVER_CSRF_URL: http://backend:9000/csrf/
+        NEXT_SERVER_GRAPHQL_URL: http://backend:9000/graphql/
 
     env_file: ../../frontend/.env.e2e.example
     depends_on:
