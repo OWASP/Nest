@@ -332,8 +332,6 @@ jobs:
           build-args: |
             ENV_FILE=.env.e2e.example
             NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
-            NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/
-            NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/
           load: true
           platforms: linux/amd64
           tags: owasp/nest:frontend-e2e-latest
@@ -344,6 +342,8 @@ jobs:
           --env-file frontend/.env.e2e.example \
           --network host \
           -p 3000:3000 \
+          -e NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
+          -e NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
           owasp/nest:frontend-e2e-latest
 
       - name: Wait for frontend to be ready
