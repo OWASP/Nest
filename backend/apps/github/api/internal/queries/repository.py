@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.models.repository import Repository
 
@@ -54,12 +55,9 @@ class RepositoryQuery:
             list[RepositoryNode]: A list of repositories.
 
         """
-        return (
-            (
-                Repository.objects.filter(
-                    organization__login__iexact=organization,
-                ).order_by("-stars_count")[:limit]
-            )
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return Repository.objects.filter(
+            organization__login__iexact=organization,
+        ).order_by("-stars_count")[:normalized_limit]

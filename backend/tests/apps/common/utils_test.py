@@ -13,6 +13,7 @@ from apps.common.utils import (
     join_values,
     natural_date,
     natural_number,
+    normalize_limit,
     round_down,
     validate_url,
 )
@@ -196,3 +197,45 @@ class TestUtils:
         """Test the validate_url function."""
         result = validate_url(url)
         assert result == expected
+
+    @pytest.mark.parametrize(
+        ("limit", "max_limit", "expected"),
+        [
+            (5, 1000, 5),
+            (100, 1000, 100),
+            (1000, 1000, 1000),
+            (1500, 1000, 1000),
+            (999, 1000, 999),
+            (0, 1000, None),
+            (-5, 1000, None),
+            (5, 10, 5),
+            (15, 10, 10),
+            (100, 50, 50),
+            (1, 1, 1),
+        ],
+    )
+    def test_normalize_limit(self, limit, max_limit, expected):
+        """Test the normalize_limit function with valid integers."""
+        assert normalize_limit(limit, max_limit) == expected
+
+    @pytest.mark.parametrize(
+        ("limit", "max_limit"),
+        [
+            ("invalid", 1000),
+            ("5.5", 1000),
+            (None, 1000),
+            ([], 1000),
+            ({}, 1000),
+        ],
+    )
+    def test_normalize_limit_invalid_types(self, limit, max_limit):
+        """Test the normalize_limit function with invalid types."""
+        assert normalize_limit(limit, max_limit) is None
+
+    def test_normalize_limit_default_max_limit(self):
+        """Test the normalize_limit function with default max_limit."""
+        assert normalize_limit(500) == 500
+        assert normalize_limit(1000) == 1000
+        assert normalize_limit(1500) == 1000
+        assert normalize_limit(-1) is None
+        assert normalize_limit(0) is None
