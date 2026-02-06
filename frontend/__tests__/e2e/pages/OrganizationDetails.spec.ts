@@ -30,14 +30,18 @@ test.describe('Organization Details Page', () => {
   })
 
   test('should display recent issues section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Issues' })
+    ).toBeVisible()
     // Validate that at least one issue is listed
     const firstIssue = page.locator('div').filter({ hasText: 'Recent Issues' }).locator('a').first()
     await expect(firstIssue).toBeVisible()
   })
 
   test('should have organization recent milestones', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible({
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Milestones' })
+    ).toBeVisible({
       timeout: 10000,
     })
     const milestone = page
@@ -49,7 +53,9 @@ test.describe('Organization Details Page', () => {
   })
 
   test('should display recent releases section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Releases' })
+    ).toBeVisible()
     const releaseLink = page
       .locator('div')
       .filter({ hasText: 'Recent Releases' })
@@ -59,13 +65,17 @@ test.describe('Organization Details Page', () => {
   })
 
   test('should display top contributors section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Top Contributors' })
+    ).toBeVisible()
     const contributorAvatar = page.locator('img[alt*="avatar"]').first()
     await expect(contributorAvatar).toBeVisible()
   })
 
   test('should display recent pull requests section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Pull Requests' })
+    ).toBeVisible()
     const firstPR = page
       .locator('div')
       .filter({ hasText: 'Recent Pull Requests' })

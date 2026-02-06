@@ -41,10 +41,16 @@ test.describe('Home Page', () => {
   })
 
   test('should have recent activity sections', async ({ page }) => {
-    // These sections often load dynamically; grouping to ensure data exists
-    await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    // These sections often load dynamically; grouping to ensure data exists (using data-anchor-title attribute for AnchorTitle components)
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Issues' })
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Releases' })
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Milestones' })
+    ).toBeVisible()
   })
 
   test('should be able to join OWASP', async ({ page }) => {

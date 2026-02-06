@@ -62,20 +62,28 @@ test.describe('Project Details Page', () => {
   })
 
   test('should have project recent issues', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Issues' })
+    ).toBeVisible()
     await expect(page.getByText('Nest').first()).toBeVisible()
   })
 
   test('should have project recent releases', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Releases' })
+    ).toBeVisible()
   })
 
   test('should have project recent milestones', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Milestones' })
+    ).toBeVisible()
   })
 
   test('should display recent pull requests section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Pull Requests' })
+    ).toBeVisible()
     await expect(page.getByText('Nest').first()).toBeVisible()
   })
 

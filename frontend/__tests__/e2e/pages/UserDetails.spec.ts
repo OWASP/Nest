@@ -31,14 +31,18 @@ test.describe('User Details Page', () => {
   })
 
   test('should have user activity sections', async ({ page }) => {
-    // Check for standard activity headings
-    await expect(page.getByRole('heading', { name: 'Recent Issues', exact: true })).toBeVisible()
+    // Check for standard activity headings (using data-anchor-title attribute for AnchorTitle components)
     await expect(
-      page.getByRole('heading', { name: 'Recent Pull Requests', exact: true })
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Issues' })
     ).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Repositories', exact: true })).toBeVisible()
     await expect(
-      page.getByRole('heading', { name: 'Recent Milestones', exact: true })
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Pull Requests' })
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Repositories' })
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Milestones' })
     ).toBeVisible()
     // Verify that at least one repository is listed in the repos section
     const firstRepo = page.locator('div').filter({ hasText: 'Repositories' }).locator('a').first()
