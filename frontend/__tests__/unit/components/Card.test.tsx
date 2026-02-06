@@ -537,10 +537,12 @@ describe('Card', () => {
     expect(titleElement).toHaveClass(
       'text-base',
       'font-semibold',
-      'text-blue-300',
-      'hover:text-blue-600',
+      'text-blue-600',
+      'hover:text-blue-800',
       'sm:text-lg',
-      'lg:text-2xl'
+      'lg:text-2xl',
+      'dark:text-blue-300',
+      'dark:hover:text-blue-400'
     )
   })
 

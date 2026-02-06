@@ -126,7 +126,7 @@ const About = () => {
           <div className="grid gap-4 md:grid-cols-2">
             {keyFeatures.map((feature) => (
               <div key={feature.title} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold text-blue-300">{feature.title}</h3>
+                <h3 className="mb-2 text-lg font-semibold text-blue-700 dark:text-blue-300">{feature.title}</h3>
                 <p className="text-gray-800 dark:text-gray-300">{feature.description}</p>
               </div>
             ))}
@@ -150,7 +150,7 @@ const About = () => {
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
                 <div key={tech.section} className="mb-2">
-                  <h3 className="mb-3 font-semibold text-blue-300">{tech.section}</h3>
+                  <h3 className="mb-3 font-semibold text-blue-600 dark:text-blue-300">{tech.section}</h3>
                   <ul className="flex flex-col gap-3">
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
@@ -214,7 +214,7 @@ const About = () => {
                                 rel="noopener noreferrer"
                                 className="block"
                               >
-                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-300">
+                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-700 dark:text-blue-300">
                                   {milestone.title}
                                 </h3>
                               </Link>
@@ -269,7 +269,7 @@ const About = () => {
                     className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
                   ></div>
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-300">{milestone.title}</h3>
+                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-300">{milestone.title}</h3>
                     <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
                     <p className="text-gray-800 dark:text-gray-300">{milestone.description}</p>
                   </div>
@@ -291,7 +291,7 @@ const About = () => {
           ].map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
-                <div className="mb-2 text-3xl font-bold text-blue-300">
+                <div className="mb-2 text-3xl font-bold text-blue-600 dark:text-blue-300">
                   {millify(Math.floor(stat.value / 10 || 0) * 10)}+
                 </div>
                 <div className="text-gray-800 dark:text-gray-300">{stat.label}</div>

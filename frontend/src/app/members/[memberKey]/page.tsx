@@ -70,7 +70,7 @@ const UserDetailsPage: React.FC = () => {
             href={`https://github.com/${username}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-300 hover:underline"
+            className="text-blue-600 hover:underline dark:text-blue-300"
           >
             @{username}
           </Link>
@@ -143,7 +143,7 @@ const UserDetailsPage: React.FC = () => {
           <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-200">
             <Link
               href={user?.url || '#'}
-              className="text-xl font-bold text-blue-300 hover:underline"
+              className="text-xl font-bold text-blue-600 hover:underline dark:text-blue-300"
             >
               @{user?.login}
             </Link>

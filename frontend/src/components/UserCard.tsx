@@ -83,7 +83,7 @@ const UserCard = ({
         )}
       </div>
 
-      <div className="flex items-center justify-center text-sm font-medium text-blue-300">
+      <div className="flex items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-300">
         {button.label}
         <FaChevronRight className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1" />
       </div>

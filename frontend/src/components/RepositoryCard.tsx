@@ -58,7 +58,7 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
           type="button"
           onClick={handleClick}
           onKeyDown={handleKeyDown}
-          className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-300 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+          className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-600 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-blue-300"
         >
           <TruncatedText text={details?.name} />
         </button>

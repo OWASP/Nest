@@ -118,7 +118,7 @@ jest.mock('components/ShowMoreButton', () => ({
       <div className="mt-4 flex justify-start">
         <button
           onClick={handleClick}
-          className="flex items-center bg-transparent px-0 text-blue-300"
+          className="flex items-center bg-transparent px-0 text-blue-600 dark:text-blue-300"
         >
           {isExpanded ? (
             <>
@@ -727,8 +727,9 @@ describe('ContributorsList Component', () => {
           'text-ellipsis',
           'whitespace-nowrap',
           'font-semibold',
-          'text-blue-300',
-          'hover:underline'
+          'text-blue-700',
+          'hover:underline',
+          'dark:text-blue-300'
         )
       }
     })

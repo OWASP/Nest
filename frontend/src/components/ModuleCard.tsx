@@ -46,7 +46,7 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
             type="button"
             onClick={() => setShowAllModule(!showAllModule)}
             onKeyDown={handleKeyDown}
-            className="mt-4 flex items-center justify-center text-blue-300 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+            className="mt-4 flex items-center justify-center text-blue-600 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-blue-300"
           >
             {showAllModule ? (
               <>

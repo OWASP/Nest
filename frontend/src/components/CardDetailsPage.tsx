@@ -423,7 +423,7 @@ const DetailsCard = ({
                             showArrow
                           >
                             <Link
-                              className="shrink-0 text-blue-300 hover:underline"
+                              className="shrink-0 text-blue-700 hover:underline dark:text-blue-300"
                               href={`/members/${milestone?.author?.login}`}
                             >
                               <Image
@@ -523,7 +523,7 @@ export const SocialLinks = ({ urls }) => {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-300 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+              className="text-blue-600 transition-colors hover:text-gray-800 dark:text-blue-300 dark:hover:text-gray-200"
               aria-label={`Link to ${url}`}
             >
               <SocialIcon className="h-5 w-5" />

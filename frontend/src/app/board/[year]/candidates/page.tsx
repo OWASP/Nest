@@ -350,7 +350,7 @@ const BoardCandidatesPage = () => {
                 href={`https://github.com/${candidate.member.login}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="truncate text-sm text-blue-300 hover:underline"
+                className="truncate text-sm text-blue-600 hover:underline dark:text-blue-300"
                 onClick={(e) => e.stopPropagation()}
               >
                 @{candidate.member.login}

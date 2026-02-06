@@ -50,7 +50,7 @@ const Release: React.FC<ReleaseProps> = ({
               showArrow
             >
               <Link
-                className="shrink-0 text-blue-300 hover:underline"
+                className="shrink-0 text-blue-700 hover:underline dark:text-blue-300"
                 href={release.author.login ? `/members/${release.author.login}` : '#'}
               >
                 <Image
@@ -69,7 +69,7 @@ const Release: React.FC<ReleaseProps> = ({
           )}
           <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
             <Link
-              className="text-blue-300 hover:underline"
+              className="text-blue-700 hover:underline dark:text-blue-300"
               href={`https://github.com/${release.organizationName}/${release.repositoryName}/releases/tag/${release.tagName}`}
               target="_blank"
               rel="noopener noreferrer"

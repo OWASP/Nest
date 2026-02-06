@@ -167,7 +167,7 @@ export default function Home() {
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <button
-                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-300 hover:underline"
+                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-700 hover:underline dark:text-blue-300"
                       type="button"
                       onClick={() => setModalOpenIndex(index)}
                     >
@@ -228,7 +228,7 @@ export default function Home() {
                   <h3 className="mb-2 text-lg font-semibold">
                     <Link
                       href={`/chapters/${chapter.key}`}
-                      className="text-blue-300 hover:underline"
+                      className="text-blue-700 hover:underline dark:text-blue-300"
                     >
                       <TruncatedText text={chapter.name} />
                     </Link>
@@ -271,7 +271,7 @@ export default function Home() {
             <div className="flex flex-col gap-4">
               {data.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <Link href={`/projects/${project.key}`} className="text-blue-300 hover:underline">
+                  <Link href={`/projects/${project.key}`} className="text-blue-700 hover:underline dark:text-blue-300">
                     <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
@@ -354,7 +354,7 @@ export default function Home() {
                 <h3 className="mb-1 text-lg font-semibold">
                   <Link
                     href={post.url}
-                    className="text-blue-300 hover:underline"
+                    className="text-blue-700 hover:underline dark:text-blue-300"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -379,7 +379,7 @@ export default function Home() {
           {counterData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
-                <div className="mb-2 text-3xl font-bold text-blue-300">{millify(stat.value)}+</div>
+                <div className="mb-2 text-3xl font-bold text-blue-600 dark:text-blue-300">{millify(stat.value)}+</div>
                 <div className="text-gray-800 dark:text-gray-200">{stat.label}</div>
               </SecondaryCard>
             </div>

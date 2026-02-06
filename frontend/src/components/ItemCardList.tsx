@@ -45,7 +45,7 @@ const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
 
     if (hasLogin) {
       return (
-        <Link className="shrink-0 text-blue-400 hover:underline" href={`/members/${author.login}`}>
+        <Link className="shrink-0 text-blue-700 hover:underline dark:text-blue-300" href={`/members/${author.login}`}>
           {avatarContent}
         </Link>
       )
