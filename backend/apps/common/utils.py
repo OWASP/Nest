@@ -215,6 +215,28 @@ def truncate(text: str, limit: int, truncate: str = "...") -> str:
     return Truncator(text).chars(limit, truncate=truncate)
 
 
+def normalize_limit(limit: int, max_limit: int = 1000) -> int | None:
+    """Normalize and validate a limit parameter.
+
+    Args:
+        limit (int): The requested limit.
+        max_limit (int): The maximum allowed limit. Defaults to 1000.
+
+    Returns:
+        int | None: The normalized limit capped at max_limit, or None if invalid.
+
+    """
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        return None
+
+    if limit <= 0:
+        return None
+
+    return min(limit, max_limit)
+
+
 def validate_url(url: str | None) -> bool:
     """Validate that a URL has proper scheme and netloc.
 
