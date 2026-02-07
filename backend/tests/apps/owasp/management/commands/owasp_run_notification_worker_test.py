@@ -25,6 +25,7 @@ class TestOwaspRunNotificationWorker:
         snapshot = mock.MagicMock(spec=Snapshot)
         snapshot.title = "Test Snapshot"
         snapshot.id = 456
+        snapshot.key = "2025-02"
         return snapshot
 
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.send_mail")
@@ -45,7 +46,7 @@ class TestOwaspRunNotificationWorker:
             type="snapshot_published",
             title=f"New Snapshot Published: {mock_snapshot.title}",
             message=f"Check out the latest OWASP snapshot: {mock_snapshot.title}",
-            related_link=f"https://example.com/community/snapshots/{mock_snapshot.id}",
+            related_link=f"https://example.com/community/snapshots/{mock_snapshot.key}",
         )
 
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.send_mail")

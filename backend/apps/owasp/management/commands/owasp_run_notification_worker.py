@@ -193,7 +193,7 @@ class Command(BaseCommand):
     def send_notification(self, user, snapshot):
         """Send notification to user."""
         title = f"New Snapshot Published: {snapshot.title}"
-        related_link = f"{settings.SITE_URL}/community/snapshots/{snapshot.id}"
+        related_link = f"{settings.SITE_URL}/community/snapshots/{snapshot.key}"
 
         if Notification.objects.filter(
             recipient_id=user.id,
