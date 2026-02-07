@@ -4,8 +4,8 @@ from datetime import datetime
 
 import strawberry
 import strawberry_django
-from strawberry.types import Info
 from django.db.models import Exists, OuterRef
+from strawberry.types import Info
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode

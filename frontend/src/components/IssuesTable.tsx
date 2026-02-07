@@ -214,20 +214,19 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
               )}
 
               {/* Deadline */}
-              {showDeadline && (
-                <td className="pt-2 text-right lg:table-cell lg:px-6 lg:py-4 lg:pt-0">
-                  {(() => {
-                    const status = getDeadlineStatus(issue.deadline)
-                    return (
+              {showDeadline &&
+                (() => {
+                  const status = getDeadlineStatus(issue.deadline)
+                  return (
+                    <td className="block pt-2 text-right lg:table-cell lg:px-6 lg:py-4 lg:pt-0">
                       <span
                         className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium whitespace-nowrap ${status.class}`}
                       >
                         {status.text}
                       </span>
-                    )
-                  })()}
-                </td>
-              )}
+                    </td>
+                  )
+                })()}
             </tr>
           ))}
           {issues.length === 0 && (
