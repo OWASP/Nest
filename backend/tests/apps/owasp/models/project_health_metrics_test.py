@@ -179,8 +179,3 @@ class TestProjectHealthMetricsModel:
         assert stats.monthly_overall_scores == []
         assert stats.monthly_overall_scores_months == []
 
-    @pytest.fixture
-    def mock_now(self, mocker):
-        fixed_now = timezone.make_aware(timezone.datetime(2026, 2, 7))
-        mocker.patch("django.utils.timezone.now", return_value=fixed_now)
-        return fixed_now
