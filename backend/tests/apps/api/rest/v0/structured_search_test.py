@@ -188,7 +188,7 @@ def test_field_with_no_type_uses_empty_lookup_suffix():
 
 
 def test_number_field_with_none_value_is_skipped():
-    """Test that number field with None value triggers TypeError."""
+    """Test that number field with None value is skipped."""
     from unittest.mock import patch
 
     qs = make_queryset()

@@ -23,9 +23,11 @@ class TestPostQuery:
             mock_recent.return_value.__getitem__ = Mock(return_value=mock_posts)
 
             query = PostQuery()
-            query.recent_posts(limit=5)
+            result = query.recent_posts(limit=5)
 
             assert mock_recent.called
+            mock_recent.return_value.__getitem__.assert_called_once_with(slice(None, 5))
+            assert result == mock_posts
 
     def test_recent_posts_invalid_limit(self):
         """Test recent_posts with invalid limit returns empty list."""

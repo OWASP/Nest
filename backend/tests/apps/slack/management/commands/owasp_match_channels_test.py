@@ -122,9 +122,8 @@ class TestOwaspMatchChannels:
 
         conversations = [mock_conv_without_name, mock_conv_empty_name, mock_conv_with_name]
         matches = cmd.find_fuzzy_matches("Test Project", conversations, threshold=50)
-        assert len(matches) <= 1
-        if matches:
-            assert matches[0][0].name == "project-test"
+        assert len(matches) == 1
+        assert matches[0][0].name == "project-test"
 
     def test_handle_skips_entity_without_name(self, mocker):
         """Test that entities with empty name are skipped."""

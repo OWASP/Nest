@@ -272,8 +272,6 @@ class TestProjectHealthMetricsProperties:
     @patch("apps.owasp.models.project_health_metrics.ProjectHealthRequirements")
     def test_project_requirements_returns_requirements(self, mock_requirements_model):
         """Test project_requirements returns requirements for project level."""
-        from apps.owasp.models.project import Project
-
         mock_requirements = MagicMock()
         mock_requirements_model.objects.filter.return_value.first.return_value = mock_requirements
 
