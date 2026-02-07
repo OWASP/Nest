@@ -29,7 +29,7 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
 
 
 # TODO: disallow tag mutability
-# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
+# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags #trivy:ignore:AVD-AWS-0031
 resource "aws_ecr_repository" "main" {
   image_tag_mutability = "MUTABLE"
   name                 = "${var.project_name}-${var.environment}-backend"

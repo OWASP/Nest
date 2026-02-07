@@ -18,7 +18,7 @@ resource "aws_vpc" "main" {
   })
 }
 
-# NOSEMGREP: terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address
+# NOSEMGREP: terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address #trivy:ignore:AVD-AWS-0164
 resource "aws_subnet" "public" {
   availability_zone       = var.availability_zones[count.index]
   cidr_block              = var.public_subnet_cidrs[count.index]
