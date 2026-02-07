@@ -87,3 +87,12 @@ repos:
     rev: v2.12.1
     hooks:
       - id: pyproject-fmt
+
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v24.7.0
+    hooks:
+      - id: ansible-lint
+        args:
+          - .github/ansible
+        files: ^\.github/ansible/.*\.ya?ml$
+        pass_filenames: false
