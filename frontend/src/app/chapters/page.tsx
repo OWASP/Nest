@@ -1,7 +1,9 @@
 'use client'
-import { useSearchPage } from 'hooks/useSearchPage'
+
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useSearchPage } from 'hooks/useSearchPage'
+
 import { FaRightToBracket } from 'react-icons/fa6'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import type { AlgoliaResponse } from 'types/algolia'
@@ -12,6 +14,7 @@ import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 const ChaptersPage = () => {
+  const isMountedRef = useRef(true)
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
   const {
     items: chapters,
@@ -27,6 +30,8 @@ const ChaptersPage = () => {
   })
 
   useEffect(() => {
+    isMountedRef.current = true
+  
     const fetchData = async () => {
       const searchParams = {
         indexName: 'chapters',
@@ -34,15 +39,25 @@ const ChaptersPage = () => {
         currentPage,
         hitsPerPage: currentPage === 1 ? 1000 : 25,
       }
-      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
-        searchParams.indexName,
-        searchParams.query,
-        searchParams.currentPage,
-        searchParams.hitsPerPage
-      )
-      setGeoLocData(data.hits)
+  
+      const data: AlgoliaResponse<Chapter> =
+        await fetchAlgoliaData(
+          searchParams.indexName,
+          searchParams.query,
+          searchParams.currentPage,
+          searchParams.hitsPerPage
+        )
+  
+      if (isMountedRef.current) {
+        setGeoLocData(data.hits)
+      }
     }
+  
     fetchData()
+  
+    return () => {
+      isMountedRef.current = false
+    }
   }, [currentPage])
 
   const router = useRouter()
