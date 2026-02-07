@@ -256,7 +256,7 @@ class Command(BaseCommand):
                     raw_dlq_retries = data.get(b"dlq_retries", b"0")
                     try:
                         dlq_retries = int(raw_dlq_retries.decode("utf-8"))
-                    except (ValueError, UnicodeDecodeError, AttributeError):
+                    except (ValueError, AttributeError):
                         dlq_retries = 0
                     raw_user_id = data.get(b"user_id")
                     raw_snapshot_id = data.get(b"snapshot_id")
