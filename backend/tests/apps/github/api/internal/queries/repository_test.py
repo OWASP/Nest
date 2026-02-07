@@ -21,8 +21,9 @@ class TestRepositoryQuery:
     def test_resolve_repository_existing(self, mock_repository):
         """Test resolving an existing repository."""
         mock_queryset = MagicMock()
+        mock_queryset.prefetch_related.return_value = mock_queryset
         mock_queryset.select_related.return_value = mock_queryset
-        mock_queryset.filter.return_value = [mock_repository]
+        mock_queryset.get.return_value = mock_repository
 
         with patch(
             "apps.github.models.repository.Repository.objects",
@@ -33,9 +34,10 @@ class TestRepositoryQuery:
                 repository_key="test-repo",
             )
 
-            assert result == [mock_repository]
+            assert result == mock_repository
+            mock_queryset.prefetch_related.assert_called_once()
             mock_queryset.select_related.assert_called_once_with("organization")
-            mock_queryset.filter.assert_called_once_with(
+            mock_queryset.get.assert_called_once_with(
                 organization__login__iexact="test-org",
                 key__iexact="test-repo",
             )
@@ -43,9 +45,9 @@ class TestRepositoryQuery:
     def test_resolve_repository_not_found(self):
         """Test resolving a non-existent repository."""
         mock_queryset = MagicMock()
+        mock_queryset.prefetch_related.return_value = mock_queryset
         mock_queryset.select_related.return_value = mock_queryset
-        mock_queryset.filter.return_value = []
-
+        mock_queryset.get.side_effect = Repository.DoesNotExist
         with patch(
             "apps.github.models.repository.Repository.objects",
             mock_queryset,
@@ -55,9 +57,10 @@ class TestRepositoryQuery:
                 repository_key="non-existent-repo",
             )
 
-            assert result == []
+            assert result is None
+            mock_queryset.prefetch_related.assert_called_once()
             mock_queryset.select_related.assert_called_once_with("organization")
-            mock_queryset.filter.assert_called_once_with(
+            mock_queryset.get.assert_called_once_with(
                 organization__login__iexact="non-existent-org",
                 key__iexact="non-existent-repo",
             )

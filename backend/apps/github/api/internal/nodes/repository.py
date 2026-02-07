@@ -51,7 +51,7 @@ class RepositoryNode(strawberry.relay.Node):
         prefetch_related=[
             Prefetch(
                 "issues",
-                queryset=Issue.objects.all().order_by("-created_at"),
+                queryset=Issue.objects.order_by("-created_at"),
                 to_attr="recent_issues",
             )
         ]
