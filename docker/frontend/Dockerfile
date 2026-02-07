@@ -33,6 +33,9 @@ COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.m
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 
+ARG FORCE_STANDALONE
+ENV FORCE_STANDALONE=$FORCE_STANDALONE
+
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
