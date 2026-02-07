@@ -67,14 +67,14 @@ const MockLabelList = (props: MockLabelListProps) => {
           {label}
         </span>
       ))}
-      {remainingCount > 0 && (
-        <span data-testid="label-more">+{remainingCount} more</span>
-      )}
+      {remainingCount > 0 && <span data-testid="label-more">+{remainingCount} more</span>}
     </div>
   )
 }
 
 jest.mock('components/LabelList', () => ({
+  // Must match the module export name for the mock to be used by IssuesTable
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- component export name
   LabelList: jest.fn((props: MockLabelListProps) => <MockLabelList {...props} />),
 }))
 
@@ -250,9 +250,7 @@ describe('<IssuesTable />', () => {
     })
 
     it('passes maxVisibleLabels to LabelList as maxVisible', () => {
-      render(
-        <IssuesTable issues={[mockIssues[0]]} maxVisibleLabels={3} />
-      )
+      render(<IssuesTable issues={[mockIssues[0]]} maxVisibleLabels={3} />)
       expect(LabelList).toHaveBeenCalledTimes(1)
       expect(LabelList).toHaveBeenCalledWith(
         expect.objectContaining({
