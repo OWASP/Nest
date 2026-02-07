@@ -33,6 +33,9 @@ COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.m
 COPY --chmod=555 public public
 COPY --chmod=555 src src
 
+ARG FORCE_STANDALONE
+ENV FORCE_STANDALONE=$FORCE_STANDALONE
+
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -49,8 +52,10 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.4 in runner stage
-# Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
+# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.7 in runner stage
+# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
+# Combined into single RUN to reduce layers
+Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN cd /tmp && \
     npm pack tar@7.5.7 && \
     tar -xzf tar-7.5.7.tgz && \
@@ -60,6 +65,15 @@ RUN cd /tmp && \
     chmod -R 755 "${TAR_DIR}" && \
     rm -rf package tar-7.5.7.tgz && \
     grep -q 'version.*7.5.7' "${TAR_DIR}/package.json" && \
+    npm pack @isaacs/brace-expansion@5.0.1 && \
+    tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
+    BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
+    rm -rf "${BRACE_DIR}" && \
+    mkdir -p /usr/local/lib/node_modules/npm/node_modules/@isaacs && \
+    cp -r package "${BRACE_DIR}" && \
+    chmod -R 755 "${BRACE_DIR}" && \
+    rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
+    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json" && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
 # Copying files with root as owner, so that executing user cannot change the container.

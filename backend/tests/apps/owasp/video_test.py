@@ -169,8 +169,8 @@ class TestSlideBuilder:
         """Test add_intro_slide with different first and last snapshots."""
         mock_qs = MagicMock()
         first_snapshot = Mock()
-        first_snapshot.start_at.strftime.side_effect = (
-            lambda fmt: "2024" if fmt == "%Y" else "Jan 01"
+        first_snapshot.start_at.strftime.side_effect = lambda fmt: (
+            "2024" if fmt == "%Y" else "Jan 01"
         )
         last_snapshot = Mock()
         last_snapshot.end_at.strftime.return_value = "Dec 31, 2024"
