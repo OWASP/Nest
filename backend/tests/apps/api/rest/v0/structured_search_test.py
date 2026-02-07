@@ -168,8 +168,8 @@ def test_condition_field_not_in_schema_is_skipped():
     qs.filter.assert_called_once()
 
 
-def test_field_with_no_type_uses_empty_lookup_suffix():
-    """Test field with no type hits else branch."""
+def test_boolean_field_uses_no_lookup_suffix():
+    """Test boolean field uses empty lookup suffix."""
     from unittest.mock import patch
 
     schema_with_boolean = {

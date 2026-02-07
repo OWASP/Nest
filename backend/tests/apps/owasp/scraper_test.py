@@ -328,8 +328,8 @@ class TestOwaspScraper:
 
         mock_session.get.side_effect = requests.exceptions.RequestException("Connection error")
 
-        with caplog.at_level(logging.WARNING):
+        with caplog.at_level(logging.ERROR):
             result = scraper.verify_url("https://example.org")
 
         assert result is None
-        assert "Couldn't verify URL" in caplog.text or "Connection error" in caplog.text
+        assert "Request failed" in caplog.text
