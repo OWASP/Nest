@@ -25,5 +25,5 @@ export function hasExtendedUser(session: Session | null): session is Session & {
     isLeader?: boolean
   }
 } {
-  return !!session && !!session.user;
+  return !!session && !!session.user
 }

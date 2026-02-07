@@ -22,8 +22,6 @@ const MyMentorshipPage: React.FC = () => {
   const searchParams = useSearchParams()
 
   const { data: session } = useSession()
-  // const extendedSession = session as ExtendedSession | null
-  // const userName = extendedSession?.user?.login
 
   const userName = hasExtendedUser(session) ? session.user.login : undefined
 
@@ -62,7 +60,7 @@ const MyMentorshipPage: React.FC = () => {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-  // const isProjectLeader = extendedSession?.user?.isLeader
+
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
 
   useEffect(() => {
