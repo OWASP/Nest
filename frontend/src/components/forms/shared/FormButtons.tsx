@@ -21,7 +21,7 @@ export const FormButtons = ({ loading, submitText = 'Save', onCancel }: FormButt
   }
 
   return (
-    <div className="border-t border-gray-200 pt-8 text-gray-600 dark:border-gray-700 dark:text-gray-300">
+    <div className="border-t border-gray-200 pt-8 text-gray-800 dark:border-gray-700 dark:text-gray-300">
       <div className="flex flex-col justify-end gap-4 sm:flex-row">
         <Button type="button" variant="bordered" onPress={handleCancel} className="font-medium">
           Cancel

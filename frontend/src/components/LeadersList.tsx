@@ -29,7 +29,7 @@ const LeadersList = ({ entityKey, leaders }: LeadersListProps) => {
           <Link
             href={`/members?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}
-            className="text-gray-600 hover:underline dark:text-gray-400"
+            className="text-gray-800 hover:underline dark:text-gray-200"
             title={leader}
           >
             {leader}

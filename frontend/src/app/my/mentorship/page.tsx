@@ -91,8 +91,8 @@ const MyMentorshipPage: React.FC = () => {
     return (
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-4 text-center">
         <FaGraduationCap className="mb-4 text-6xl text-red-400" />
-        <h2 className="mb-2 text-2xl font-bold text-gray-600 dark:text-white">Access Denied</h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <h2 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">Access Denied</h2>
+        <p className="text-gray-800 dark:text-gray-200">
           Only project leaders can access this page.
         </p>
       </div>
@@ -103,8 +103,8 @@ const MyMentorshipPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8 dark:bg-[#212529]">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-600 dark:text-white">My Mentorship</h1>
-          <p className="text-gray-600 dark:text-gray-400">Programs you've created or joined</p>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">My Mentorship</h1>
+          <p className="text-gray-800 dark:text-gray-200">Programs you've created or joined</p>
         </div>
         <ActionButton onClick={handleCreate}>
           <FaPlus className="mr-2" />
@@ -130,7 +130,7 @@ const MyMentorshipPage: React.FC = () => {
       >
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {programs.length === 0 ? (
-            <div className="col-span-full flex min-h-[40vh] flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+            <div className="col-span-full flex min-h-[40vh] flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-200">
               <p className="text-lg font-semibold">Program not found</p>
             </div>
           ) : (

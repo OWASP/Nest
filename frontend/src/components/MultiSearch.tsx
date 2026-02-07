@@ -259,17 +259,16 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             {suggestions.map((suggestion, index) => (
               <div
                 key={suggestion.indexName}
-                className="border-b-1 border-b-gray-200 text-gray-600 last:border-b-0 dark:border-b-gray-700 dark:text-gray-300"
+                className="border-b-1 border-b-gray-200 text-gray-800 last:border-b-0 dark:border-b-gray-700 dark:text-gray-300"
               >
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
                       key={`multi-search-${suggestion.indexName}-${hit.key || hit.login || hit.url}`}
-                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
-                          ? 'bg-gray-100 dark:bg-gray-700'
-                          : ''
-                      }`}
+                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
+                        ? 'bg-gray-100 dark:bg-gray-700'
+                        : ''
+                        }`}
                     >
                       <button
                         type="button"
@@ -287,7 +286,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
             ))}
             <a
               aria-label="Search by Algolia (opens in a new tab)"
-              className="flex items-center justify-center gap-2 bg-white py-2 text-gray-500 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              className="flex items-center justify-center gap-2 bg-white py-2 text-gray-500 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:text-gray-200"
               href="https://www.algolia.com"
               rel="noopener noreferrer"
               target="_blank"

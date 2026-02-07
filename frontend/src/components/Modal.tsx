@@ -40,7 +40,7 @@ const DialogComp: React.FC<ModalProps> = ({
 
           <Markdown
             content={summary}
-            className="text-base [overflow-wrap:anywhere] break-words text-gray-600 dark:text-gray-300"
+            className="text-base [overflow-wrap:anywhere] break-words text-gray-800 dark:text-gray-300"
           />
 
           {hint && (

@@ -70,7 +70,7 @@ const UserDetailsPage: React.FC = () => {
             href={`https://github.com/${username}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-400 hover:underline"
+            className="text-blue-600 hover:underline dark:text-blue-300"
           >
             @{username}
           </Link>
@@ -140,10 +140,10 @@ const UserDetailsPage: React.FC = () => {
       />
       <div className="w-full overflow-x-auto text-center lg:text-left">
         <div className="pl-0 lg:pl-4">
-          <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
+          <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-200">
             <Link
               href={user?.url || '#'}
-              className="text-xl font-bold text-blue-400 hover:underline"
+              className="text-xl font-bold text-blue-600 hover:underline dark:text-blue-300"
             >
               @{user?.login}
             </Link>
@@ -161,7 +161,7 @@ const UserDetailsPage: React.FC = () => {
               </div>
             )}
           </div>
-          <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+          <p className="text-gray-800 dark:text-gray-200">{formattedBio}</p>
         </div>
         {hasContributionData && dateRange.startDate && dateRange.endDate && (
           <div className="w-full lg:block">

@@ -109,16 +109,16 @@ const About = () => {
   }
 
   return (
-    <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen p-8 text-gray-800 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
         <div className="grid gap-0 md:grid-cols-2 md:gap-6">
           <SecondaryCard icon={FaBullseye} title={<AnchorTitle title="Our Mission" />}>
-            <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
+            <p className="text-gray-800 dark:text-gray-300">{missionContent.mission}</p>
           </SecondaryCard>
 
           <SecondaryCard icon={FaUser} title={<AnchorTitle title="Who It's For" />}>
-            <p className="text-gray-600 dark:text-gray-300">{missionContent.whoItsFor}</p>
+            <p className="text-gray-800 dark:text-gray-300">{missionContent.whoItsFor}</p>
           </SecondaryCard>
         </div>
 
@@ -126,8 +126,8 @@ const About = () => {
           <div className="grid gap-4 md:grid-cols-2">
             {keyFeatures.map((feature) => (
               <div key={feature.title} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold text-blue-400">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                <h3 className="mb-2 text-lg font-semibold text-blue-700 dark:text-blue-300">{feature.title}</h3>
+                <p className="text-gray-800 dark:text-gray-300">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -150,7 +150,7 @@ const About = () => {
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
                 <div key={tech.section} className="mb-2">
-                  <h3 className="mb-3 font-semibold text-blue-400">{tech.section}</h3>
+                  <h3 className="mb-3 font-semibold text-blue-600 dark:text-blue-300">{tech.section}</h3>
                   <ul className="flex flex-col gap-3">
                     {Object.entries(tech.tools).map(([name, details]) => (
                       <li key={name} className="flex flex-row items-center gap-2">
@@ -163,7 +163,7 @@ const About = () => {
                         />
                         <Link
                           href={details.url}
-                          className="text-gray-600 hover:underline dark:text-gray-300"
+                          className="text-gray-800 hover:underline dark:text-gray-300"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -179,10 +179,10 @@ const About = () => {
         </SecondaryCard>
 
         <SecondaryCard icon={FaUsersGear} title={<AnchorTitle title="Get Involved" />}>
-          <p className="mb-2 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
+          <p className="mb-2 text-gray-800 dark:text-gray-300">{getInvolvedContent.description}</p>
           <ul className="mb-6 list-inside list-disc space-y-2 pl-4">
             {getInvolvedContent.ways.map((way) => (
-              <li key={way} className="pb-1 text-gray-600 dark:text-gray-300">
+              <li key={way} className="pb-1 text-gray-800 dark:text-gray-300">
                 {way}
               </li>
             ))}
@@ -214,7 +214,7 @@ const About = () => {
                                 rel="noopener noreferrer"
                                 className="block"
                               >
-                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
+                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-700 dark:text-blue-300">
                                   {milestone.title}
                                 </h3>
                               </Link>
@@ -231,7 +231,7 @@ const About = () => {
                                 </span>
                               </Tooltip>
                             </div>
-                            <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                            <p className="text-gray-800 dark:text-gray-300">{milestone.body}</p>
                           </div>
                         </div>
                       ))}
@@ -269,9 +269,9 @@ const About = () => {
                     className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
                   ></div>
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+                    <h3 className="text-lg font-semibold text-blue-600 dark:text-blue-300">{milestone.title}</h3>
                     <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                    <p className="text-gray-800 dark:text-gray-300">{milestone.description}</p>
                   </div>
                 </div>
               ))
@@ -291,10 +291,10 @@ const About = () => {
           ].map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
-                <div className="mb-2 text-3xl font-bold text-blue-400">
+                <div className="mb-2 text-3xl font-bold text-blue-600 dark:text-blue-300">
                   {millify(Math.floor(stat.value / 10 || 0) * 10)}+
                 </div>
-                <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
+                <div className="text-gray-800 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
             </div>
           ))}

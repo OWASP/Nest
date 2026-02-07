@@ -132,7 +132,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="mt-16 min-h-screen p-8 text-gray-800 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="pt-5 text-center sm:mb-10">
           <div className="flex flex-col items-center py-10">
@@ -167,17 +167,17 @@ export default function Home() {
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <button
-                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
+                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-700 hover:underline dark:text-blue-300"
                       type="button"
                       onClick={() => setModalOpenIndex(index)}
                     >
                       <TruncatedText text={event.name} />
                     </button>
                   </div>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-wrap items-center text-sm text-gray-800 dark:text-gray-200">
                     <div className="mr-2 flex items-center">
                       <CalendarButton
-                        className="cursor-pointer text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                        className="cursor-pointer text-gray-800 hover:text-gray-800 dark:text-gray-200 dark:hover:text-gray-200"
                         event={{
                           title: event.name,
                           description: event.summary || '',
@@ -228,12 +228,12 @@ export default function Home() {
                   <h3 className="mb-2 text-lg font-semibold">
                     <Link
                       href={`/chapters/${chapter.key}`}
-                      className="text-blue-400 hover:underline"
+                      className="text-blue-700 hover:underline dark:text-blue-300"
                     >
                       <TruncatedText text={chapter.name} />
                     </Link>
                   </h3>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-wrap items-center text-sm text-gray-800 dark:text-gray-200">
                     <div className="mr-4 flex items-center">
                       <FaCalendar className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
@@ -247,7 +247,7 @@ export default function Home() {
                   </div>
 
                   {chapter.leaders.length > 0 && (
-                    <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-800 dark:text-gray-200">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList
                         entityKey={`${chapter.key}-leaders`}
@@ -271,12 +271,12 @@ export default function Home() {
             <div className="flex flex-col gap-4">
               {data.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
+                  <Link href={`/projects/${project.key}`} className="text-blue-700 hover:underline dark:text-blue-300">
                     <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
                       <TruncatedText text={project.name} />
                     </h3>
                   </Link>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-wrap items-center text-sm text-gray-800 dark:text-gray-200">
                     <div className="mr-4 flex items-center">
                       <FaCalendar className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
@@ -290,7 +290,7 @@ export default function Home() {
                     </div>
                   </div>
                   {project.leaders.length > 0 && (
-                    <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-800 dark:text-gray-200">
                       <HiUserGroup className="h-4 w-4 shrink-0" />
                       <LeadersList
                         entityKey={`${project.key}-leaders`}
@@ -354,14 +354,14 @@ export default function Home() {
                 <h3 className="mb-1 text-lg font-semibold">
                   <Link
                     href={post.url}
-                    className="text-blue-400 hover:underline"
+                    className="text-blue-700 hover:underline dark:text-blue-300"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <TruncatedText text={post.title} />
                   </Link>
                 </h3>
-                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-800 dark:text-gray-200">
                   <div className="mr-4 flex items-center">
                     <FaCalendar className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
@@ -379,8 +379,8 @@ export default function Home() {
           {counterData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
-                <div className="mb-2 text-3xl font-bold text-blue-400">{millify(stat.value)}+</div>
-                <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+                <div className="mb-2 text-3xl font-bold text-blue-600 dark:text-blue-300">{millify(stat.value)}+</div>
+                <div className="text-gray-800 dark:text-gray-200">{stat.label}</div>
               </SecondaryCard>
             </div>
           ))}
@@ -389,7 +389,7 @@ export default function Home() {
         <div className="mt-8 mb-20">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">
+            <p className="mb-6 text-gray-800 dark:text-gray-200">
               Join OWASP and be part of the global cybersecurity community.
             </p>
             <Link

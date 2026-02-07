@@ -132,7 +132,7 @@ const BoardCandidatesPage = () => {
         href={`https://owasp.slack.com/archives/${channelName}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+        className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
         onClick={(e) => e.stopPropagation()}
       >
         <span>#{channelName}</span>
@@ -151,7 +151,7 @@ const BoardCandidatesPage = () => {
           href={`https://github.com/${repoName}/commits?author=${candidate.member?.login}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-700/10 ring-inset hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-900/30"
           onClick={(e) => e.stopPropagation()}
         >
           <span>{repoName}</span>
@@ -338,7 +338,7 @@ const BoardCandidatesPage = () => {
                       'noopener,noreferrer'
                     )
                   }}
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-300"
                   aria-label={`${candidate.memberName}'s LinkedIn profile`}
                 >
                   <FaLinkedin className="h-5 w-5" />
@@ -350,14 +350,14 @@ const BoardCandidatesPage = () => {
                 href={`https://github.com/${candidate.member.login}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="truncate text-sm text-blue-400 hover:underline"
+                className="truncate text-sm text-blue-600 hover:underline dark:text-blue-300"
                 onClick={(e) => e.stopPropagation()}
               >
                 @{candidate.member.login}
               </Link>
             )}
             {candidate.member?.createdAt != null && (
-              <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
+              <p className="mt-1 truncate text-sm text-gray-800 dark:text-gray-200">
                 GitHub account created{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
                   {dayjs(
@@ -370,7 +370,7 @@ const BoardCandidatesPage = () => {
               </p>
             )}
             {candidate.member?.firstOwaspContributionAt != null && (
-              <p className="truncate text-sm text-gray-600 dark:text-gray-400">
+              <p className="truncate text-sm text-gray-800 dark:text-gray-200">
                 First OWASP contribution made nearly{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
                   {dayjs(candidate.member.firstOwaspContributionAt * 1000).fromNow()}
@@ -421,36 +421,36 @@ const BoardCandidatesPage = () => {
             </h4>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="flex items-center gap-2">
-                <FaCode className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <FaCode className="h-4 w-4 text-gray-800 dark:text-gray-200" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Commits</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-200">Commits</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
                     {millify(snapshot.commitsCount, { precision: 1 })}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <FaCodeBranch className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <FaCodeBranch className="h-4 w-4 text-gray-800 dark:text-gray-200" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">PRs</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-200">PRs</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
                     {millify(snapshot.pullRequestsCount, { precision: 1 })}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <FaExclamationCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <FaExclamationCircle className="h-4 w-4 text-gray-800 dark:text-gray-200" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Issues</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-200">Issues</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
                     {millify(snapshot.issuesCount, { precision: 1 })}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <FaCodeMerge className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                <FaCodeMerge className="h-4 w-4 text-gray-800 dark:text-gray-200" />
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-200">Total</p>
                   <p className="font-semibold text-gray-900 dark:text-white">
                     {millify(snapshot.totalContributions, { precision: 1 })}
                   </p>
@@ -512,20 +512,18 @@ const BoardCandidatesPage = () => {
                         href={`/chapters/${chapter.key.replace('www-chapter-', '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                          contributionCount === 0
-                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
-                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${contributionCount === 0
+                          ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+                          : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+                          }`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span>{chapter.name}</span>
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                            contributionCount === 0
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
-                          }`}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${contributionCount === 0
+                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+                            }`}
                         >
                           {contributionCount === 0
                             ? 'no contributions'
@@ -549,20 +547,18 @@ const BoardCandidatesPage = () => {
                         href={`/projects/${project.key.replace('www-project-', '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-                          contributionCount === 0
-                            ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
-                            : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${contributionCount === 0
+                          ? 'bg-orange-50 text-orange-700 ring-orange-700/10 hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30 dark:hover:bg-orange-900/30'
+                          : 'bg-blue-50 text-blue-700 ring-blue-700/10 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-900/30'
+                          }`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <span>{project.name}</span>
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
-                            contributionCount === 0
-                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
-                              : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
-                          }`}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${contributionCount === 0
+                            ? 'bg-orange-100 text-orange-800 dark:bg-orange-800/40 dark:text-orange-300'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-800/40 dark:text-blue-300'
+                            }`}
                         >
                           {contributionCount === 0
                             ? 'no contributions'
@@ -639,42 +635,42 @@ const BoardCandidatesPage = () => {
           candidate.member?.isFormerOwaspStaff ||
           candidate.member?.isGsocMentor ||
           leadsFlagshipProject) && (
-          <div className="mt-4 w-full border-t border-gray-200 pt-4 dark:border-gray-700">
-            <h4 className="mb-2 text-sm text-gray-700 dark:text-gray-300">
-              <span className="font-semibold">Additional Information</span>
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {candidate.member?.isOwaspBoardMember && (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
-                  OWASP Board of Directors Member
-                </span>
-              )}
-              {candidate.member?.isFormerOwaspStaff && (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
-                  Former OWASP Staff Member
-                </span>
-              )}
-              {candidate.member?.isGsocMentor && (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
-                  Google Summer of Code Mentor
-                </span>
+            <div className="mt-4 w-full border-t border-gray-200 pt-4 dark:border-gray-700">
+              <h4 className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+                <span className="font-semibold">Additional Information</span>
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {candidate.member?.isOwaspBoardMember && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
+                    OWASP Board of Directors Member
+                  </span>
+                )}
+                {candidate.member?.isFormerOwaspStaff && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
+                    Former OWASP Staff Member
+                  </span>
+                )}
+                {candidate.member?.isGsocMentor && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 ring-inset dark:bg-purple-900/20 dark:text-purple-400 dark:ring-purple-400/30">
+                    Google Summer of Code Mentor
+                  </span>
+                )}
+              </div>
+              {leadsFlagshipProject && (
+                <div
+                  className="mt-3 text-xs text-gray-800 dark:text-gray-200"
+                  style={{
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'normal',
+                  }}
+                >
+                  This candidate may have additional community engagement in other Slack workspaces
+                  based on the flagship level project(s) they are leading.
+                </div>
               )}
             </div>
-            {leadsFlagshipProject && (
-              <div
-                className="mt-3 text-xs text-gray-600 dark:text-gray-400"
-                style={{
-                  wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
-                  whiteSpace: 'normal',
-                }}
-              >
-                This candidate may have additional community engagement in other Slack workspaces
-                based on the flagship level project(s) they are leading.
-              </div>
-            )}
-          </div>
-        )}
+          )}
       </Button>
     )
   }
@@ -699,14 +695,14 @@ const BoardCandidatesPage = () => {
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
           {year} Board of Directors Candidates
         </h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-gray-800 dark:text-gray-200">
           Meet the candidates running for the OWASP Board of Directors. For official election
           information, visit the{' '}
           <Link
             href={`https://board.owasp.org/elections/${year}_elections`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-600 hover:underline dark:text-blue-300"
           >
             OWASP Board Elections page
           </Link>{' '}
@@ -715,7 +711,7 @@ const BoardCandidatesPage = () => {
             href="https://owasp.org/www-board-candidates/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-600 hover:underline dark:text-blue-300"
           >
             official candidate pages
           </Link>
@@ -734,7 +730,7 @@ const BoardCandidatesPage = () => {
             href="https://github.com/OWASP/Nest"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline dark:text-blue-400"
+            className="text-blue-600 hover:underline dark:text-blue-300"
           >
             OWASP Nest
           </Link>{' '}
@@ -744,7 +740,7 @@ const BoardCandidatesPage = () => {
 
       {candidates.length === 0 ? (
         <div className="rounded-lg bg-white p-8 text-center shadow-md dark:bg-gray-800">
-          <p className="text-gray-600 dark:text-gray-400">No candidates found for {year}</p>
+          <p className="text-gray-800 dark:text-gray-200">No candidates found for {year}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

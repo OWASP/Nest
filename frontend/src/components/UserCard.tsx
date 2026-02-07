@@ -48,12 +48,12 @@ const UserCard = ({
             </h3>
           </Tooltip>
           {(company || location || email || login) && (
-            <p className="mt-1.5 truncate px-3 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+            <p className="mt-1.5 truncate px-3 text-xs text-gray-800 sm:text-sm dark:text-gray-200">
               {company || location || email || login}
             </p>
           )}
           {description && (
-            <p className="mt-1.5 truncate px-3 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+            <p className="mt-1.5 truncate px-3 text-xs text-gray-800 sm:text-sm dark:text-gray-200">
               {description}
             </p>
           )}
@@ -62,19 +62,19 @@ const UserCard = ({
         {(followersCount > 0 || repositoriesCount > 0 || badgeCount > 0) && (
           <div className="flex flex-wrap justify-center gap-3 px-2">
             {followersCount > 0 && (
-              <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-gray-800 sm:text-sm dark:text-gray-200">
                 <HiUserGroup className="h-4 w-4" />
                 <span>{millify(followersCount, { precision: 1 })}</span>
               </div>
             )}
             {repositoriesCount > 0 && (
-              <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-gray-800 sm:text-sm dark:text-gray-200">
                 <FaFolderOpen className="h-3.5 w-3.5" />
                 <span>{millify(repositoriesCount, { precision: 1 })}</span>
               </div>
             )}
             {badgeCount > 0 && (
-              <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-gray-800 sm:text-sm dark:text-gray-200">
                 <FaMedal className="h-3.5 w-3.5" aria-label="badges" />
                 <span>{millify(badgeCount, { precision: 1 })}</span>
               </div>
@@ -83,7 +83,7 @@ const UserCard = ({
         )}
       </div>
 
-      <div className="flex items-center justify-center text-sm font-medium text-blue-400">
+      <div className="flex items-center justify-center text-sm font-medium text-blue-600 dark:text-blue-300">
         {button.label}
         <FaChevronRight className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1" />
       </div>

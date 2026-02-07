@@ -217,12 +217,12 @@ describe('ModuleIssueDetailsPage', () => {
       {
         dayOffset: 10,
         expectedText: /\(10 days left\)/,
-        expectedColor: 'text-gray-600 dark:text-gray-300',
+        expectedColor: 'text-gray-800 dark:text-gray-300',
       },
       {
         dayOffset: null,
         expectedText: /No deadline set/,
-        expectedColor: 'text-gray-600 dark:text-gray-300',
+        expectedColor: 'text-gray-800 dark:text-gray-300',
       },
     ])(
       'renders deadline text for deadline with offset $dayOffset',

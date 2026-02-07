@@ -43,7 +43,7 @@ const ProjectsDashboardNavBar: React.FC = () => {
             <Link
               href={href}
               aria-current={isActive(href) ? 'page' : undefined}
-              className="text-blue-500 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500"
+              className="text-blue-500 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-500"
             >
               <div className="flex w-full items-center gap-2 rounded p-2 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-800">
                 <IconWrapper icon={icon} className="text-xl" aria-hidden="true" />

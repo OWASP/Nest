@@ -133,7 +133,7 @@ const DetailsCard = ({
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
   return (
-    <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen bg-white p-8 text-gray-800 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
@@ -423,7 +423,7 @@ const DetailsCard = ({
                             showArrow
                           >
                             <Link
-                              className="shrink-0 text-blue-400 hover:underline"
+                              className="shrink-0 text-blue-700 hover:underline dark:text-blue-300"
                               href={`/members/${milestone?.author?.login}`}
                             >
                               <Image
@@ -432,7 +432,7 @@ const DetailsCard = ({
                                 src={milestone?.author?.avatarUrl}
                                 alt={
                                   milestone.author &&
-                                  (milestone.author.name || milestone.author.login)
+                                    (milestone.author.name || milestone.author.login)
                                     ? `${milestone.author.name || milestone.author.login}'s avatar`
                                     : "Author's avatar"
                                 }
@@ -444,7 +444,7 @@ const DetailsCard = ({
                         <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                           {milestone?.url ? (
                             <Link
-                              className="text-blue-400 hover:underline"
+                              className="text-blue-700 dark:text-blue-300 hover:underline"
                               href={milestone?.url}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -457,7 +457,7 @@ const DetailsCard = ({
                         </h3>
                       </div>
                       <div className="ml-0.5 w-full">
-                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
                           <div className="flex items-center">
                             <FaCalendar className="mr-2 h-4 w-4" />
                             <span>{formatDate(milestone.createdAt)}</span>
@@ -475,7 +475,7 @@ const DetailsCard = ({
                               <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
                               <Link
                                 href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName}`}
-                                className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+                                className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-800 hover:underline dark:text-gray-200"
                               >
                                 <TruncatedText text={milestone.repositoryName} />
                               </Link>
@@ -523,7 +523,7 @@ export const SocialLinks = ({ urls }) => {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+              className="text-blue-600 transition-colors hover:text-gray-800 dark:text-blue-300 dark:hover:text-gray-200"
               aria-label={`Link to ${url}`}
             >
               <SocialIcon className="h-5 w-5" />

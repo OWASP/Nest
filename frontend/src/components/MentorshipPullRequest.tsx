@@ -44,11 +44,11 @@ const MentorshipPullRequest: React.FC<MentorshipPullRequestProps> = ({ pr }) => 
             href={pr.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-300"
           >
             <TruncatedText text={pr.title} />
           </Link>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-sm text-gray-500 dark:text-gray-200">
             by {pr.author?.login || 'Unknown'} • {new Date(pr.createdAt).toLocaleDateString()}
           </div>
         </div>

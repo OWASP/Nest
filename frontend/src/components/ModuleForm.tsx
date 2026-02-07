@@ -171,7 +171,7 @@ const ModuleForm = ({
           <div className="flex flex-col gap-8 p-8">
             {/* Basic Information */}
             <section className="flex flex-col gap-6">
-              <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
+              <div className="grid grid-cols-1 gap-6 text-gray-800 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
                   id="module-name"
                   label="Name"
@@ -204,7 +204,7 @@ const ModuleForm = ({
             </section>
 
             {/* Configuration */}
-            <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
+            <section className="flex flex-col gap-6 text-gray-800 dark:text-gray-300">
               <div className="module-config-grid grid gap-6">
                 <FormDateInput
                   id="module-start-date"
@@ -248,7 +248,7 @@ const ModuleForm = ({
                     errorMessage={touched.experienceLevel ? errors.experienceLevel : undefined}
                     classNames={{
                       base: 'w-full min-w-0',
-                      label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+                      label: 'text-sm font-semibold text-gray-800 dark:text-gray-300',
                       trigger: 'bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200',
                       value: 'text-gray-800 dark:text-gray-200',
                       helperWrapper: 'min-w-0 max-w-full w-full',
@@ -265,7 +265,7 @@ const ModuleForm = ({
 
             {/* Additional Details */}
             <section className="flex flex-col gap-6">
-              <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
+              <div className="grid grid-cols-1 gap-6 text-gray-800 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
                   id="module-domains"
                   label="Domains"
@@ -454,7 +454,7 @@ export const ProjectSelector = ({
         }}
         inputProps={{
           classNames: {
-            label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
+            label: 'text-sm font-semibold text-gray-800 dark:text-gray-300',
             input: 'text-gray-800 dark:text-gray-200',
             inputWrapper: 'bg-gray-50 dark:bg-gray-800',
             helperWrapper: 'min-w-0 max-w-full w-full',

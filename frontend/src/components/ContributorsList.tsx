@@ -60,7 +60,7 @@ const ContributorsList = ({
                 width={24}
               />
               <Link
-                className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
+                className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-700 hover:underline dark:text-blue-300"
                 href={getUrl(item?.login)}
                 title={item?.name || item?.login}
               >

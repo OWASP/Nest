@@ -32,44 +32,44 @@ const ProjectsDashboardDropDown: FC<{
   sections,
   selectedLabels,
 }) => {
-  const orderingIconsMapping = {
-    desc: FaArrowDownWideShort,
-    asc: FaArrowUpShortWide,
-  }
+    const orderingIconsMapping = {
+      desc: FaArrowDownWideShort,
+      asc: FaArrowUpShortWide,
+    }
 
-  return (
-    <Dropdown>
-      <DropdownTrigger>
-        <Button variant="solid">
-          <IconWrapper
-            icon={
-              isOrdering
-                ? orderingIconsMapping[selectedKeys?.[0] as keyof typeof orderingIconsMapping] ||
+    return (
+      <Dropdown>
+        <DropdownTrigger>
+          <Button variant="solid">
+            <IconWrapper
+              icon={
+                isOrdering
+                  ? orderingIconsMapping[selectedKeys?.[0] as keyof typeof orderingIconsMapping] ||
                   FaArrowDownWideShort
-                : icon || FaArrowDownWideShort
-            }
-          />
-          <div className="flex flex-col items-center">
-            <span className="text-md">{buttonDisplayName}</span>
-            {selectedLabels && selectedLabels.length > 0 && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {selectedLabels.join(', ')}
-              </span>
-            )}
-          </div>
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu onAction={onAction} selectedKeys={selectedKeys} selectionMode={selectionMode}>
-        {sections.map((section) => (
-          <DropdownSection key={section.title} title={section.title}>
-            {section.items.map((item) => (
-              <DropdownItem key={item.key}>{item.label}</DropdownItem>
-            ))}
-          </DropdownSection>
-        ))}
-      </DropdownMenu>
-    </Dropdown>
-  )
-}
+                  : icon || FaArrowDownWideShort
+              }
+            />
+            <div className="flex flex-col items-center">
+              <span className="text-md">{buttonDisplayName}</span>
+              {selectedLabels && selectedLabels.length > 0 && (
+                <span className="text-xs text-gray-500 dark:text-gray-200">
+                  {selectedLabels.join(', ')}
+                </span>
+              )}
+            </div>
+          </Button>
+        </DropdownTrigger>
+        <DropdownMenu onAction={onAction} selectedKeys={selectedKeys} selectionMode={selectionMode}>
+          {sections.map((section) => (
+            <DropdownSection key={section.title} title={section.title}>
+              {section.items.map((item) => (
+                <DropdownItem key={item.key}>{item.label}</DropdownItem>
+              ))}
+            </DropdownSection>
+          ))}
+        </DropdownMenu>
+      </Dropdown>
+    )
+  }
 
 export default ProjectsDashboardDropDown

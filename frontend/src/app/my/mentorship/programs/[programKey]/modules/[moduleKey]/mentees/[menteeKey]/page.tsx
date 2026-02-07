@@ -113,7 +113,7 @@ const MenteeProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen p-8 text-gray-800 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
         <SecondaryCard>
@@ -129,7 +129,7 @@ const MenteeProfilePage = () => {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {menteeDetails.name || menteeDetails.login}
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400">@{menteeDetails.login}</p>
+              <p className="text-lg text-gray-800 dark:text-gray-200">@{menteeDetails.login}</p>
               {menteeDetails.bio && (
                 <p className="mt-2 text-gray-700 dark:text-gray-300">{menteeDetails.bio}</p>
               )}
@@ -140,13 +140,13 @@ const MenteeProfilePage = () => {
         {/* Mentee Information */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <SecondaryCard title="Completed Levels">
-            <p className="text-gray-500 italic dark:text-gray-400">
+            <p className="text-gray-500 italic dark:text-gray-200">
               No completed levels data available yet
             </p>
           </SecondaryCard>
 
           <SecondaryCard title="Penalties">
-            <p className="text-gray-500 italic dark:text-gray-400">
+            <p className="text-gray-500 italic dark:text-gray-200">
               No penalties data available yet
             </p>
           </SecondaryCard>

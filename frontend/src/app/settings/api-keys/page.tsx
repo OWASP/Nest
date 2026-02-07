@@ -28,7 +28,7 @@ const ErrorState = () => (
 )
 
 const EmptyState = () => (
-  <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
+  <div className="rounded-md bg-gray-50 p-8 text-center text-gray-500 dark:bg-gray-800/50 dark:text-gray-200">
     You don't have any API keys yet.
   </div>
 )
@@ -243,17 +243,17 @@ export default function Page() {
       <div className="w-full max-w-4xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold">API Key Management</h1>
-          <p className="mt-2 text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-gray-500 dark:text-gray-200">
             Create and manage API keys for programmatic access to the API.
           </p>
         </div>
 
         <SecondaryCard>
           <div className="flex items-start gap-3">
-            <FaInfoCircle className="mt-0.5 text-blue-600 dark:text-blue-400" />
+            <FaInfoCircle className="mt-0.5 text-blue-600 dark:text-blue-300" />
             <div>
               <h2 className="font-semibold text-blue-800 dark:text-blue-300">API Key Limits</h2>
-              <p className="mt-1 text-sm text-blue-700 dark:text-blue-400">
+              <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
                 You can have a maximum of <strong>{MAX_ACTIVE_KEYS} active API keys</strong> at any
                 time. Currently:{' '}
                 <strong>
@@ -274,7 +274,7 @@ export default function Page() {
         <SecondaryCard>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <FaKey className="text-gray-600 dark:text-gray-400" />
+              <FaKey className="text-gray-800 dark:text-gray-200" />
               <h2 className="text-xl font-semibold">Your API Keys</h2>
             </div>
             <Button
