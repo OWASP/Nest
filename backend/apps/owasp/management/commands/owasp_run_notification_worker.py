@@ -226,13 +226,13 @@ class Command(BaseCommand):
 
     def process_dlq(self, redis_conn):
         """Process messages from DLQ - retry failed notifications."""
-        lock = redis_conn.lock("owasp_notifications_dlq_lock", timeout=60, blocking=False)
+        lock = redis_conn.lock("owasp_notifications_dlq_lock", timeout=600, blocking=False)
         if not lock.acquire():
             return
 
         try:
             self.stdout.write("Checking DLQ for failed notifications...")
-            messages = redis_conn.xrange(self.DLQ_STREAM_KEY, "-", "+", count=100)
+            messages = redis_conn.xrange(self.DLQ_STREAM_KEY, "-", "+", count=50)
 
             if not messages:
                 self.stdout.write("No messages in DLQ")
@@ -243,6 +243,7 @@ class Command(BaseCommand):
 
             for msg_id, data in messages:
                 try:
+                    dlq_retries = 0
                     msg_type = (data.get(b"type") or b"").decode("utf-8")
                     if msg_type == "recovery_failed":
                         logger.error(
