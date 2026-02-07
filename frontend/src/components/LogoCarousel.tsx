@@ -30,7 +30,7 @@ export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
                 width={168}
               />
             ) : (
-              <span className="text-sm text-gray-400">{sponsor.name}</span>
+              <span className="text-sm text-gray-400">{sponsor.name || 'Sponsor'}</span>
             )}
           </div>
         </Link>
