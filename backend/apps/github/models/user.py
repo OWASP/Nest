@@ -15,6 +15,7 @@ from apps.github.constants import (
     OWASP_FOUNDATION_LOGIN,
 )
 from apps.github.models.common import GenericUserModel, NodeModel
+from apps.github.models.managers.user import SnapshotUserManager
 from apps.github.models.mixins.user import UserIndexMixin
 from apps.github.models.organization import Organization
 
@@ -27,6 +28,9 @@ if TYPE_CHECKING:
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     """User model."""
+
+    objects = models.Manager()
+    snapshot_users = SnapshotUserManager()
 
     class Meta:
         db_table = "github_users"
