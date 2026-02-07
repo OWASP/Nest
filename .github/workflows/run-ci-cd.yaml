@@ -420,9 +420,7 @@ jobs:
   run-infrastructure-tests:
     name: Run Infrastructure tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
