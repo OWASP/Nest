@@ -5,7 +5,6 @@ import { screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
 import UserDetailsPage from 'app/members/[memberKey]/page'
-import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
 
 // Mock Apollo Client
 jest.mock('@apollo/client/react', () => ({
@@ -53,11 +52,14 @@ jest.mock('next/navigation', () => ({
   useParams: () => ({ memberKey: 'test-user' }),
 }))
 
-// Mock GitHub heatmap utilities
-jest.mock('utils/helpers/githubHeatmap', () => ({
-  fetchHeatmapData: jest.fn(),
-  drawContributions: jest.fn(() => {}),
-}))
+jest.mock('components/ContributionHeatmap', () => {
+  const MockContributionHeatmap = () => <div data-testid="contribution-heatmap">Heatmap</div>
+  MockContributionHeatmap.displayName = 'MockContributionHeatmap'
+  return {
+    __esModule: true,
+    default: MockContributionHeatmap,
+  }
+})
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
@@ -70,10 +72,6 @@ describe('UserDetailsPage', () => {
       loading: false,
       error: null,
     })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      contributions: { years: [{ year: '2023' }] },
-    })
-    ;(drawContributions as jest.Mock).mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -271,35 +269,35 @@ describe('UserDetailsPage', () => {
       error: null,
       loading: false,
     })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      years: [{ year: '2023' }], // Provide years data to satisfy condition in component
-    })
 
     render(<UserDetailsPage />)
 
-    // Wait for useEffect to process the fetchHeatmapData result
     await waitFor(() => {
-      const heatmapContainer = screen
-        .getByAltText('Heatmap Background')
-        .closest(String.raw`div.hidden.lg\:block`)
-      expect(heatmapContainer).toBeInTheDocument()
-      expect(heatmapContainer).toHaveClass('hidden')
-      expect(heatmapContainer).toHaveClass('lg:block')
+      const heatmap = screen.getByTestId('contribution-heatmap')
+      expect(heatmap).toBeInTheDocument()
     })
   })
 
   test('handles contribution heatmap loading error correctly', async () => {
+    const dataWithoutContributions = {
+      ...mockUserDetailsData,
+      user: {
+        ...mockUserDetailsData.user,
+        contributionData: null,
+      },
+    }
+
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockUserDetailsData,
+      data: dataWithoutContributions,
       error: null,
+      loading: false,
     })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue(null)
 
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      const heatmapTitle = screen.queryByText('Contribution Heatmap')
-      expect(heatmapTitle).not.toBeInTheDocument()
+      const heatmap = screen.queryByTestId('contribution-heatmap')
+      expect(heatmap).not.toBeInTheDocument()
     })
   })
 
@@ -307,6 +305,7 @@ describe('UserDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
+      loading: false,
     })
 
     render(<UserDetailsPage />)
@@ -802,6 +801,52 @@ describe('UserDetailsPage', () => {
           'badge-top-contributor', // weight 3
         ]
         expectBadgesInCorrectOrder(expectedOrder)
+      })
+    })
+  })
+
+  describe('Contribution Heatmap', () => {
+    test('does not render heatmap when user has empty contribution data', async () => {
+      const dataWithEmptyContributions = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          contributionData: {},
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithEmptyContributions,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('contribution-heatmap')).not.toBeInTheDocument()
+      })
+    })
+
+    test('does not render heatmap when user has null contribution data', async () => {
+      const dataWithoutContributions = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          contributionData: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithoutContributions,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('contribution-heatmap')).not.toBeInTheDocument()
       })
     })
   })

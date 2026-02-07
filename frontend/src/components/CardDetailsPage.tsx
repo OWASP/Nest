@@ -403,7 +403,7 @@ const DetailsCard = ({
         )}
         {type === 'program' && recentMilestones && recentMilestones.length > 0 && (
           <SecondaryCard icon={FaSignsPost} title={<AnchorTitle title="Recent Milestones" />}>
-            <div className="grid gap-4 gap-y-0 sm:grid-cols-1 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
               {recentMilestones
                 .slice(0, showAllMilestones ? recentMilestones.length : MILESTONE_LIMIT)
                 .map((milestone, index) => (
@@ -457,21 +457,21 @@ const DetailsCard = ({
                         </h3>
                       </div>
                       <div className="ml-0.5 w-full">
-                        <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
-                          <div className="mr-4 flex items-center">
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center">
                             <FaCalendar className="mr-2 h-4 w-4" />
                             <span>{formatDate(milestone.createdAt)}</span>
                           </div>
-                          <div className="mr-4 flex items-center">
+                          <div className="flex items-center">
                             <FaCircleCheck className="mr-2 h-4 w-4" />
                             <span>{milestone.closedIssuesCount} closed</span>
                           </div>
-                          <div className="mr-4 flex items-center">
+                          <div className="flex items-center">
                             <FaCircleExclamation className="mr-2 h-4 w-4" />
                             <span>{milestone.openIssuesCount} open</span>
                           </div>
                           {milestone?.repositoryName && milestone?.organizationName && (
-                            <div className="flex flex-1 items-center overflow-hidden">
+                            <div className="flex min-w-0 flex-1 items-center overflow-hidden">
                               <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
                               <Link
                                 href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName}`}

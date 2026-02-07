@@ -1,4 +1,4 @@
-FROM node:24-alpine
+FROM node:24.13-alpine3.23
 
 WORKDIR /opt/node
 

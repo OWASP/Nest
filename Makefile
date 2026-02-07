@@ -4,7 +4,10 @@ include docs/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
-.PHONY: build clean check pre-commit prune run scan-images security-scan test update
+.PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
+	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
+	security-scan-backend-image security-scan-frontend-image test update \
+	clean-trivy-cache
 
 MAKEFLAGS += --no-print-directory
 
@@ -13,7 +16,8 @@ build:
 
 clean: \
 	clean-dependencies \
-	clean-docker
+	clean-docker \
+	clean-trivy-cache
 
 clean-dependencies: \
 	clean-backend-dependencies \
@@ -23,6 +27,9 @@ clean-docker: \
 	clean-backend-docker \
 	clean-docs-docker \
 	clean-frontend-docker
+
+clean-trivy-cache:
+	@rm -rf $(CURDIR)/.trivy-cache
 
 check: \
 	check-spelling \
@@ -57,13 +64,22 @@ run:
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 
-scan-images: \
-	scan-backend-image \
-	scan-frontend-image
+security-scan: \
+	security-scan-code \
+	security-scan-images
 
-security-scan:
-	@echo "Running Security Scan..."
-	@docker run --rm \
+security-scan-code: \
+	security-scan-code-semgrep \
+	security-scan-code-trivy
+
+security-scan-images: \
+	security-scan-backend-image \
+	security-scan-frontend-image
+
+security-scan-code-semgrep:
+	@echo "Running Semgrep security scan..."
+	@docker run \
+		--rm \
 		-v "$(PWD):/src" \
 		-w /src \
 		$$(grep -E '^FROM semgrep/semgrep:' docker/semgrep/Dockerfile | sed 's/^FROM //') \
@@ -97,7 +113,21 @@ security-scan:
 			--timeout-threshold 3 \
 			--text \
 			--text-output=semgrep-security-report.txt \
-			.
+	.
+
+SCANNERS ?= misconfig,vuln
+
+security-scan-code-trivy:
+	@echo "Running Trivy security scan..."
+	@docker run \
+		--rm \
+		-e TRIVY_SCANNERS="$(SCANNERS)" \
+		-v $(CURDIR):/src \
+		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
+		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		fs --config /trivy.yaml /src
 
 test: \
 	test-nest-app

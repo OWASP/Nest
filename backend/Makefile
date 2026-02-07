@@ -124,6 +124,10 @@ load-data-fuzz:
 	@echo "Loading Nest fuzz data"
 	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
+load-data-staging:
+	@echo "Loading Nest staging data"
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
@@ -169,13 +173,24 @@ save-backup:
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
 
-scan-backend-image: build-backend-local-image
-	@trivy image \
-		--config trivy.yaml \
-		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
-		--exit-code 1 \
-		--severity CRITICAL,HIGH \
-		nest-backend-local
+# vars (defaults for local dev)
+BACKEND_IMAGE_NAME ?= nest-backend-local
+IMAGE_SCANNERS ?= misconfig,secret,vuln
+
+security-scan-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
+	@echo "Scanning image: $(BACKEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
+		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    -v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+	    -v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+	    $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+	    image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
@@ -222,7 +237,8 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
-	owasp-aggregate-contributions \
+	owasp-aggregate-entity-contributions \
+	owasp-aggregate-member-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \
