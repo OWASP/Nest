@@ -114,5 +114,73 @@ class TestProjectHealthMetricsModel:
         metrics.last_released_at = self.FIXED_DATE
         metrics.owasp_page_last_updated_at = self.FIXED_DATE
         metrics.pull_request_last_created_at = self.FIXED_DATE
-
         assert getattr(metrics, field_name) == expected_days
+
+    def test_get_stats_monthly_grouping_logic(self, mocker):
+        """Should correctly format month and year strings from metrics."""
+        from django.db.models import QuerySet
+
+        mock_entry_1 = {"month": timezone.datetime(2024, 1, 1), "score": 80.0}
+        mock_entry_2 = {"month": timezone.datetime(2025, 1, 1), "score": 90.0}
+
+        mock_query = mocker.Mock(spec=QuerySet)
+        mock_query.aggregate.return_value = {
+            "projects_count_healthy": 1,
+            "projects_count_need_attention": 0,
+            "projects_count_unhealthy": 0,
+            "projects_count_total": 1,
+            "average_score": 85.0,
+            "total_contributors": 10,
+            "total_forks": 5,
+            "total_stars": 20,
+        }
+
+        chain = mock_query.annotate.return_value.filter.return_value.values.return_value
+        chain.annotate.return_value.order_by.return_value = [mock_entry_1, mock_entry_2]
+
+        mocker.patch.object(
+            ProjectHealthMetrics, "get_latest_health_metrics", return_value=mock_query
+        )
+        mocker.patch.object(
+            ProjectHealthMetrics.objects, "annotate", return_value=mock_query.annotate.return_value
+        )
+
+        stats = ProjectHealthMetrics.get_stats()
+
+        assert stats.monthly_overall_scores_months == ["Jan 2024", "Jan 2025"]
+        assert stats.monthly_overall_scores == [80.0, 90.0]
+
+    def test_get_stats_empty_state(self, mocker):
+        """Should return empty lists when no metrics exist."""
+        mock_query = mocker.Mock()
+        mock_query.aggregate.return_value = {
+            "projects_count_healthy": 0,
+            "projects_count_need_attention": 0,
+            "projects_count_unhealthy": 0,
+            "projects_count_total": 0,
+            "average_score": 0.0,
+            "total_contributors": 0,
+            "total_forks": 0,
+            "total_stars": 0,
+        }
+
+        chain = mock_query.annotate.return_value.filter.return_value.values.return_value
+        chain.annotate.return_value.order_by.return_value = []
+
+        mocker.patch.object(
+            ProjectHealthMetrics, "get_latest_health_metrics", return_value=mock_query
+        )
+        mocker.patch.object(
+            ProjectHealthMetrics.objects, "annotate", return_value=mock_query.annotate.return_value
+        )
+
+        stats = ProjectHealthMetrics.get_stats()
+
+        assert stats.monthly_overall_scores == []
+        assert stats.monthly_overall_scores_months == []
+
+    @pytest.fixture
+    def mock_now(self, mocker):
+        fixed_now = timezone.make_aware(timezone.datetime(2026, 2, 7))
+        mocker.patch("django.utils.timezone.now", return_value=fixed_now)
+        return fixed_now

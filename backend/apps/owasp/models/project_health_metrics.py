@@ -4,7 +4,7 @@ from functools import cached_property
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.functions import Coalesce, ExtractMonth, TruncDate
+from django.db.models.functions import Coalesce, TruncDate, TruncMonth
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -210,21 +210,18 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
         total = stats["projects_count_total"] or 1  # Avoid division by zero
         monthly_overall_metrics = (
-            ProjectHealthMetrics.objects.annotate(month=ExtractMonth("nest_created_at"))
-            .filter(
-                nest_created_at__gte=timezone.now() - timezone.timedelta(days=365)
-            )  # Last year data
-            .order_by("month")
+            ProjectHealthMetrics.objects.annotate(month=TruncMonth("nest_created_at"))
+            .filter(nest_created_at__gte=timezone.now() - timezone.timedelta(days=365))
             .values("month")
-            .distinct()
             .annotate(
                 score=models.Avg("score"),
             )
+            .order_by("month")
         )
         months = []
         scores = []
         for entry in monthly_overall_metrics:
-            months.append(entry["month"])
+            months.append(entry["month"].strftime("%b %Y"))
             scores.append(entry["score"])
 
         return ProjectHealthStatsNode(
