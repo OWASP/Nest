@@ -39,8 +39,8 @@ jest.mock('next/image', () => {
     width?: number
     height?: number
   }) {
-     
     return (
+      // eslint-disable-next-line @next/next/no-img-element -- mock for unit tests
       <img
         src={src}
         alt={alt}
