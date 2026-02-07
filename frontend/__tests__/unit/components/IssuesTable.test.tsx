@@ -275,6 +275,24 @@ describe('<IssuesTable />', () => {
       )
     })
 
+    it('passes empty array to LabelList when issue.labels is undefined', () => {
+      const issueWithUndefinedLabels = {
+        ...mockIssues[0],
+        objectID: 'undefined-labels',
+        labels: undefined,
+      } as IssueRow
+      render(<IssuesTable issues={[issueWithUndefinedLabels]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-undefined-labels',
+          labels: [],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
     it('calls LabelList once per issue row with correct labels', () => {
       render(<IssuesTable issues={mockIssues} />)
       expect(LabelList).toHaveBeenCalledTimes(3)
