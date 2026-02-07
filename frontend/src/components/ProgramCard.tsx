@@ -39,9 +39,9 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program, href, accessLevel, i
   // computes a formatted date string for the program based on its start and end dates.
   const dateInfo = (() => {
     if (program.startedAt && program.endedAt) {
-      return `${formatDate(program.startedAt)} – ${formatDate(program.endedAt)}`
+      return `${formatDate(new Date(program.startedAt).getTime() / 1000)} – ${formatDate(new Date(program.endedAt).getTime() / 1000)}`
     } else if (program.startedAt) {
-      return `Started: ${formatDate(program.startedAt)}`
+      return `Started: ${formatDate(new Date(program.startedAt).getTime() / 1000)}`
     } else {
       return 'No dates set'
     }

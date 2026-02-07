@@ -29,7 +29,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
         <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
           <div className="mr-4 flex items-center">
             <FaCalendar className="mr-2 h-4 w-4" />
-            <span>{formatDate(item.createdAt)}</span>
+            <span>{formatDate(new Date(item.createdAt).getTime() / 1000)}</span>
           </div>
 
           {item?.repositoryName && (
