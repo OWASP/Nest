@@ -554,6 +554,7 @@ jobs:
           make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
       - name: Generate SBOM for backend image
+        continue-on-error: true
         run: |
           trivy image \
            --format cyclonedx \
@@ -561,6 +562,7 @@ jobs:
            owasp/nest:backend-staging
 
       - name: Generate SBOM for frontend image
+        continue-on-error: true
         run: |
           trivy image \
            --format cyclonedx \
