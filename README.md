@@ -46,8 +46,6 @@ Current Leaders:
 All OWASP Nest leaders are certified ISC2 professionals and adhere to the OWASP Code of Conduct.
 For questions or discussions with the leadership team and other contributors, please use the [#project-nest](https://owasp.slack.com/archives/project-nest) channel on OWASP Slack.
 
-Note for Windows Users: Please refer to the CONTRIBUTING.md file in this repository for essential WSL setup steps and performance optimization.
-
 ## Contributing
 
 OWASP Nest thrives on community contributions. Whether you are a developer, designer, writer, or enthusiast, there are various ways to get involved:

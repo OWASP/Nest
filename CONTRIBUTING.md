@@ -12,35 +12,19 @@ Nest is a full-stack web application built using:
 
 The project uses a **containerized approach** for both development and production environments. Docker is required to run Nest locally.
 
-## Prerequisite
+## Prerequisites
 
 Before contributing, ensure you have the following installed:
 
-1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
-2. **pre-commit**: Required to automate code checks. Install via `pip install pre-commit`.
+1. **Docker**: Required for running the Nest instance - [Docker documentation](https://docs.docker.com/).
+1. **pre-commit**: Required to automate code checks - [pre-commit documentation](https://pre-commit.com/)
+1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+   1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
+      If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. You can enter the Linux environment by running `wsl`. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
+   1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
+   1. Cloning or running the project under `/mnt/c` (the Windows C: drive) can lead to significant performance degradation and Docker permission issues.
 
-### Windows (WSL 2) Setup & Performance
-> [!IMPORTANT]
-> **Windows users** must run OWASP Nest inside **[WSL 2](https://learn.microsoft.com/en-us/windows/wsl/install)**. Running commands from PowerShell or Command Prompt is not supported.
-
-* **Entering WSL**: From PowerShell or Command Prompt, enter the Linux environment by running `wsl`.
-* **File System Best Practice**: You **must** clone the repository into your Linux filesystem (e.g., `~/` or `/home/user/`). 
-* **Performance Warning**: Cloning or running the project under `/mnt/c` (the Windows C: drive) causes significant performance drops and permission errors with Docker.
-* **Docker Integration**: Ensure WSL integration is enabled in Docker Desktop settings under `Resources > WSL integration`.
-
-**Example:**
-```bash
-cd ~
-git clone https://github.com/OWASP/Nest.git
-cd Nest
-```
-
-1. **Clone the Repository**:
-   - Open your WSL terminal.
-   - Clone the repository into your **Linux filesystem** (see [Windows Setup](#windows-wsl-2-setup--performance) for performance requirements):
-     ```bash
-     git clone [https://github.com/](https://github.com/)<your-account>/<nest-fork>
-     ```
 ## Starring the Project
 
 [![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
