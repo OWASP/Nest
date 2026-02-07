@@ -1,11 +1,13 @@
 from unittest import mock
+
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
-from apps.owasp.management.commands.owasp_run_notification_worker import Command
+
 from apps.nest.models import User
-from apps.owasp.models.notification import Notification
+from apps.owasp.management.commands.owasp_run_notification_worker import Command
 from apps.owasp.models.snapshot import Snapshot
- 
+
+
 class TestOwaspRunNotificationWorker:
     @pytest.fixture
     def command(self):
@@ -27,8 +29,12 @@ class TestOwaspRunNotificationWorker:
 
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.send_mail")
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.Notification")
-    def test_send_notification_success(self, mock_notification, mock_send_mail, command, mock_user, mock_snapshot):
+    @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.settings")
+    def test_send_notification_success(
+        self, mock_settings, mock_notification, mock_send_mail, command, mock_user, mock_snapshot
+    ):
         """Test successful notification sending."""
+        mock_settings.SITE_URL = "https://example.com"
         mock_notification.objects.filter.return_value.exists.return_value = False
 
         command.send_notification(mock_user, mock_snapshot)
@@ -39,12 +45,14 @@ class TestOwaspRunNotificationWorker:
             type="snapshot_published",
             title=f"New Snapshot Published: {mock_snapshot.title}",
             message=f"Check out the latest OWASP snapshot: {mock_snapshot.title}",
-            related_link=f"http://localhost:8000/community/snapshots/{mock_snapshot.id}",
+            related_link=f"https://example.com/community/snapshots/{mock_snapshot.id}",
         )
 
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.send_mail")
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.Notification")
-    def test_send_notification_idempotency(self, mock_notification, mock_send_mail, command, mock_user, mock_snapshot):
+    def test_send_notification_idempotency(
+        self, mock_notification, mock_send_mail, command, mock_user, mock_snapshot
+    ):
         """Test that notification is skipped if it already exists."""
         mock_notification.objects.filter.return_value.exists.return_value = True
 
@@ -55,16 +63,24 @@ class TestOwaspRunNotificationWorker:
 
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.User")
     @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.Snapshot")
-    @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.Command.send_notification")
-    def test_process_dlq_success(self, mock_send_notify, mock_snapshot_model, mock_user_model, command, mock_user, mock_snapshot):
+    @mock.patch(
+        "apps.owasp.management.commands.owasp_run_notification_worker.Command.send_notification"
+    )
+    def test_process_dlq_success(
+        self,
+        mock_send_notify,
+        mock_snapshot_model,
+        mock_user_model,
+        command,
+        mock_user,
+        mock_snapshot,
+    ):
         """Test successful DLQ processing."""
         redis_conn = mock.Mock()
         redis_conn.lock.return_value.acquire.return_value = True
-        
+
         # Mock message data
-        redis_conn.xrange.return_value = [
-            (b"123-0", {b"user_id": b"123", b"snapshot_id": b"456"})
-        ]
+        redis_conn.xrange.return_value = [(b"123-0", {b"user_id": b"123", b"snapshot_id": b"456"})]
 
         mock_user_model.objects.get.return_value = mock_user
         mock_snapshot_model.objects.get.return_value = mock_snapshot
@@ -79,10 +95,8 @@ class TestOwaspRunNotificationWorker:
         """Test DLQ processing handles ObjectDoesNotExist by removing message."""
         redis_conn = mock.Mock()
         redis_conn.lock.return_value.acquire.return_value = True
-        
-        redis_conn.xrange.return_value = [
-            (b"123-0", {b"user_id": b"999", b"snapshot_id": b"456"})
-        ]
+
+        redis_conn.xrange.return_value = [(b"123-0", {b"user_id": b"999", b"snapshot_id": b"456"})]
 
         mock_user.objects.get.side_effect = ObjectDoesNotExist
 
@@ -96,9 +110,7 @@ class TestOwaspRunNotificationWorker:
         redis_conn.lock.return_value.acquire.return_value = True
 
         # Missing user_id
-        redis_conn.xrange.return_value = [
-            (b"123-0", {b"snapshot_id": b"456"})
-        ]
+        redis_conn.xrange.return_value = [(b"123-0", {b"snapshot_id": b"456"})]
 
         command.process_dlq(redis_conn)
 
@@ -110,28 +122,25 @@ class TestOwaspRunNotificationWorker:
         redis_conn.lock.return_value.acquire.return_value = True
 
         redis_conn.xrange.return_value = [
-            (b"123-0", {
-                b"type": b"recovery_failed",
-                b"message_id": b"original-999",
-                b"error": b"Something went wrong"
-            })
+            (
+                b"123-0",
+                {
+                    b"type": b"recovery_failed",
+                    b"message_id": b"original-999",
+                    b"error": b"Something went wrong",
+                },
+            )
         ]
 
         command.process_dlq(redis_conn)
-        
+
         redis_conn.xdel.assert_called_with(command.DLQ_STREAM_KEY, b"123-0")
 
     @mock.patch.object(Command, "process_message")
     def test_recover_pending_messages(self, mock_process, command):
         """Test recovery of pending messages."""
         redis_conn = mock.Mock()
-        redis_conn.xautoclaim.return_value = (
-            b"0-0",
-            [
-                (b"123-0", {b"data": b"test"})
-            ],
-            []
-        )
+        redis_conn.xautoclaim.return_value = (b"0-0", [(b"123-0", {b"data": b"test"})], [])
 
         command.recover_pending_messages(redis_conn, "stream", "group", "consumer")
 
@@ -142,16 +151,12 @@ class TestOwaspRunNotificationWorker:
     def test_recover_pending_messages_failure(self, mock_process, command):
         """Test recovery failure moves message to DLQ."""
         redis_conn = mock.Mock()
-        redis_conn.xautoclaim.return_value = (
-            b"0-0",
-            [(b"123-0", {b"data": b"test"})],
-            []
-        )
-        
+        redis_conn.xautoclaim.return_value = (b"0-0", [(b"123-0", {b"data": b"test"})], [])
+
         mock_process.side_effect = Exception("Boom")
 
         command.recover_pending_messages(redis_conn, "stream", "group", "consumer")
-       
+
         assert redis_conn.xadd.called
         assert redis_conn.xadd.call_args[0][0] == command.DLQ_STREAM_KEY
         redis_conn.xack.assert_called_once()
@@ -166,7 +171,6 @@ class TestOwaspRunNotificationWorker:
             (b"123-0", {b"user_id": b"123", b"snapshot_id": b"456", b"dlq_retries": b"1"})
         ]
 
-        
         mock_user.objects.get.side_effect = Exception("Temp Error")
 
         command.process_dlq(redis_conn)
@@ -191,6 +195,6 @@ class TestOwaspRunNotificationWorker:
         mock_user.objects.get.side_effect = Exception("Final Error")
 
         command.process_dlq(redis_conn)
-   
-        redis_conn.xdel.assert_called_with(command.DLQ_STREAM_KEY, b"123-0")        
+
+        redis_conn.xdel.assert_called_with(command.DLQ_STREAM_KEY, b"123-0")
         assert redis_conn.xadd.call_count == 0

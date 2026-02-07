@@ -1,3 +1,9 @@
+misconfigurations:
+  - id: DS-0002  # Specify at least 1 USER command in Dockerfile with non-root user as argument.
+    paths:
+      - docker/semgrep/Dockerfile
+      - docker/trivy/Dockerfile
+
 vulnerabilities:
   # TODO(arkid15r): Remove when v5.9.3 is no longer current.
   - id: CVE-2025-64756  # glob: Command Injection Vulnerability via Malicious Filenames.
