@@ -57,7 +57,7 @@ class ProjectNode(GenericEntityNode):
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return root.health_metrics.order_by("nest_created_at")[:normalized_limit]
+        return root.health_metrics.order_by("-nest_created_at")[:normalized_limit]
 
     @strawberry_django.field(prefetch_related=["health_metrics"])
     def health_metrics_latest(self, root: Project) -> ProjectHealthMetricsNode | None:
