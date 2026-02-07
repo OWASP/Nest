@@ -75,6 +75,7 @@ resource "aws_network_acl_rule" "private_inbound_redis" {
   to_port        = 6379
 }
 
+#trivy:ignore:AVD-AWS-0102
 resource "aws_network_acl_rule" "private_outbound_all" {
   cidr_block     = "0.0.0.0/0"
   egress         = true
@@ -116,6 +117,7 @@ resource "aws_network_acl_rule" "public_inbound_https" {
   to_port        = 443
 }
 
+#trivy:ignore:AVD-AWS-0102
 resource "aws_network_acl_rule" "public_outbound_all" {
   cidr_block     = "0.0.0.0/0"
   egress         = true

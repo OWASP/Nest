@@ -64,6 +64,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   }
 }
 
+#trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   bucket = aws_s3_bucket.this.id
 

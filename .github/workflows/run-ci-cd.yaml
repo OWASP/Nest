@@ -7,13 +7,13 @@ on:
       - feature/**
       - main
     paths-ignore:
-      - backend/data/nest.json.gz
+      - backend/data/nest.dump
   push:
     branches:
       - feature/**
       - main
     paths-ignore:
-      - backend/data/nest.json.gz
+      - backend/data/nest.dump
   release:
     types:
       - published
@@ -45,7 +45,7 @@ jobs:
           python-version: '3.13'
 
       - name: Set up pre-commit cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -132,8 +132,8 @@ jobs:
         run: |
           make check-spelling
 
-  scan-code:
-    name: Run Code Scan
+  run-security-scan-code:
+    name: Run code security scan
     needs:
       - check-frontend
       - pre-commit
@@ -145,76 +145,24 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Run Semgrep security scan
+        run: make security-scan-code-semgrep
+
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Run Trivy Repository Scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          scan-type: repo
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-    timeout-minutes: 5
-
-  scan-ci-dependencies:
-    name: Run CI Dependencies Scan
-    needs:
-      - check-frontend
-      - pre-commit
-      - spellcheck
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
-        with:
-          cache: true
-
-      - name: Run Trivy Filesystem Scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          scan-type: fs
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-    timeout-minutes: 5
-
-  run-security-scan:
-    name: Run security scan
-    needs:
-      - check-frontend
-      - pre-commit
-      - spellcheck
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Run Security CI Scan
-        run: make security-scan
-
-      - name: Upload security scan report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
-          name: semgrep-results-run-${{ github.run_number }}
-          path: semgrep-security-report.txt
-          retention-days: 14
+      - name: Run Trivy security scan
+        run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
     timeout-minutes: 5
 
   run-backend-tests:
     name: Run backend tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
       id-token: write
@@ -264,9 +212,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
       id-token: write
@@ -315,9 +261,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -408,9 +352,7 @@ jobs:
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -461,9 +403,7 @@ jobs:
     name: Run GraphQL fuzz tests
     if: false
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
@@ -471,9 +411,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: rest_test.py
@@ -482,9 +420,7 @@ jobs:
   run-infrastructure-tests:
     name: Run Infrastructure tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -529,7 +465,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Login to Docker Hub
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -573,6 +509,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_IDX_URL: ${{ secrets.VITE_IDX_URL }}
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
@@ -585,6 +523,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
           NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
+          NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+          NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
           NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
           NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
           EOF
@@ -646,28 +586,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Scan backend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:backend-staging
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-
-      - name: Scan frontend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:frontend-staging
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Run Trivy security scan via Makefile
+        run: |
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
     timeout-minutes: 5
 
   plan-staging-nest:
@@ -1031,7 +960,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Login to Docker Hub
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -1069,6 +998,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_IDX_URL: ${{ secrets.VITE_IDX_URL }}
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
@@ -1081,6 +1012,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
           NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
+          NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+          NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
           NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
           NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
           EOF
@@ -1130,28 +1063,17 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Scan backend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:backend-production
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-
-      - name: Scan frontend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:frontend-production
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Run Trivy security scan via Makefile
+        run: |
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
     timeout-minutes: 5
 
   deploy-production-nest:

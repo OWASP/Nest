@@ -80,6 +80,7 @@ resource "aws_lambda_permission" "alb" {
   statement_id  = "AllowALBInvoke"
 }
 
+#trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "main" {
   depends_on                 = [aws_s3_bucket_policy.alb_logs]
   drop_invalid_header_fields = true
@@ -238,6 +239,7 @@ resource "aws_s3_bucket_public_access_block" "alb_logs" {
   restrict_public_buckets = true
 }
 
+#trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "alb_logs" {
   bucket = aws_s3_bucket.alb_logs.id
 

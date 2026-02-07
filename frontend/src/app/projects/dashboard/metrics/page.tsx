@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { FaFilter, FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
-import { Ordering } from 'types/__generated__/graphql'
+import { Ordering, ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 import { HealthMetricsProps } from 'types/healthMetrics'
@@ -91,16 +91,16 @@ const MetricsPage: FC = () => {
   }
   const levelFiltersMapping = {
     incubator: {
-      level: 'incubator',
+      level: ProjectLevel.Incubator,
     },
     lab: {
-      level: 'lab',
+      level: ProjectLevel.Lab,
     },
     production: {
-      level: 'production',
+      level: ProjectLevel.Production,
     },
     flagship: {
-      level: 'flagship',
+      level: ProjectLevel.Flagship,
     },
   }
 

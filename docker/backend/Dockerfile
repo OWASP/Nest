@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.7-alpine AS builder
+FROM python:3.13.11-alpine3.23 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -33,7 +33,7 @@ USER owasp
 
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry install --no-root --without dev --without test --without video
+    poetry install --no-root --without test --without video
 
 COPY apps apps
 COPY Makefile entrypoint.sh manage.py wsgi.py ./
@@ -44,7 +44,7 @@ COPY templates templates
 # Required to run make targets
 RUN ln -s . backend
 
-FROM python:3.13.7-alpine
+FROM python:3.13.11-alpine3.23
 
 ARG OWASP_GID
 ARG OWASP_UID

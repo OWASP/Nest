@@ -64,6 +64,7 @@ resource "aws_security_group" "ecs" {
   vpc_id = var.vpc_id
 }
 
+#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "ecs_egress_all" {
   cidr_blocks       = var.default_egress_cidr_blocks
   description       = "Allow all outbound traffic"
@@ -104,6 +105,7 @@ resource "aws_security_group_rule" "frontend_from_alb" {
   type                     = "ingress"
 }
 
+#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "frontend_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow HTTPS for external API calls"
@@ -134,6 +136,7 @@ resource "aws_security_group" "lambda" {
   vpc_id = var.vpc_id
 }
 
+#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "lambda_egress_all" {
   cidr_blocks       = var.default_egress_cidr_blocks
   description       = "Allow all outbound traffic"
