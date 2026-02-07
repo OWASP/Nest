@@ -332,3 +332,4 @@ class TestOwaspScraper:
             result = scraper.verify_url("https://example.org")
 
         assert result is None
+        assert "Couldn't verify URL" in caplog.text or "Connection error" in caplog.text
