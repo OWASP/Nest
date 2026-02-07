@@ -5,7 +5,18 @@ import type { Sponsor } from 'types/home'
 interface MovingLogosProps {
   readonly sponsors: Sponsor[]
 }
-
+/**
+ * Corporate Supporters Carousel Component
+ *
+ * Renders an infinite scrolling marquee of corporate supporter logos.
+ *
+ * Key Features:
+ * - **Infinite Loop**: Uses CSS keyframes to scroll continuously.
+ * - **Dark Mode Support**: Wraps logos in white cards to ensure visibility.
+ * - **Normalization**: Enforces consistent sizing for all logos.
+ *
+ * @returns {JSX.Element} The rendered logo carousel component.
+ */
 export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
   const animationDuration = `${Math.max(sponsors.length, 1) * 3}s`
 
