@@ -542,15 +542,26 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         assert result == {}
 
     def test_get_urls_with_domain_value_error(self):
-        """Test get_urls handles ValueError in domain parsing."""
+        """Test get_urls handles ValueError during domain filtering."""
+        from urllib.parse import urlparse as original_urlparse
+
         model = EntityModel()
         repository = Repository()
         repository.name = "www-project-example"
         model.owasp_repository = repository
         content = """* [Link](https://example.com)
-* [Invalid](https://[::1]:8080)"""
+* [Other](https://other.com)"""
 
-        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+        def side_effect_urlparse(url):
+            if "other.com" in url:
+                msg = "forced error"
+                raise ValueError(msg)
+            return original_urlparse(url)
+
+        with (
+            patch("apps.owasp.models.common.get_repository_file_content", return_value=content),
+            patch("apps.owasp.models.common.urlparse", side_effect=side_effect_urlparse),
+        ):
             urls = model.get_urls(domain="example.com")
 
         assert "https://example.com" in urls

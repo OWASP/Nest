@@ -1,5 +1,7 @@
 """Test cases for ChapterNode."""
 
+import math
+
 from apps.owasp.api.internal.nodes.chapter import ChapterNode
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -111,8 +113,8 @@ class TestChapterNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_chapter)
 
         assert isinstance(result, GeoLocationType)
-        assert result.lat == 40.7128
-        assert result.lng == -74.0060
+        assert math.isclose(result.lat, 40.7128)
+        assert math.isclose(result.lng, -74.0060)
 
     def test_geo_location_resolver_without_coordinates(self):
         """Test geo_location resolver returns None without coordinates."""

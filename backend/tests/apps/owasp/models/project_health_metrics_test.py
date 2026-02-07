@@ -1,3 +1,4 @@
+import math
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -315,11 +316,14 @@ class TestProjectHealthMetricsGetStats:
         mock_annotate.return_value = mock_monthly_queryset
 
         result = ProjectHealthMetrics.get_stats()
-        assert result.average_score == 75.5
+        assert math.isclose(result.average_score, 75.5)
         assert result.projects_count_healthy == 10
         assert result.projects_count_need_attention == 5
         assert result.projects_count_unhealthy == 3
-        assert result.monthly_overall_scores == [70.0, 72.5, 75.0]
+        assert all(
+            math.isclose(a, b)
+            for a, b in zip(result.monthly_overall_scores, [70.0, 72.5, 75.0], strict=True)
+        )
         assert result.monthly_overall_scores_months == [1, 2, 3]
 
     @patch.object(ProjectHealthMetrics, "get_latest_health_metrics")

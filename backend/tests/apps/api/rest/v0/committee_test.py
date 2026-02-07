@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.committee import CommitteeDetail, get_chapter, list_committees
+from apps.api.rest.v0.committee import CommitteeDetail, get_committee, list_committees
 
 
 @pytest.mark.parametrize(
@@ -71,7 +71,7 @@ class TestListCommittees:
 
 
 class TestGetCommittee:
-    """Tests for get_chapter (committee) endpoint."""
+    """Tests for get_committee endpoint."""
 
     @patch("apps.api.rest.v0.committee.CommitteeModel")
     def test_get_committee_success(self, mock_committee_model):
@@ -82,7 +82,7 @@ class TestGetCommittee:
             mock_committee
         )
 
-        result = get_chapter(mock_request, "project")
+        result = get_committee(mock_request, "project")
 
         mock_committee_model.active_committees.filter.assert_called_with(
             is_active=True, key__iexact="www-committee-project"
@@ -98,7 +98,7 @@ class TestGetCommittee:
             mock_committee
         )
 
-        result = get_chapter(mock_request, "www-committee-project")
+        result = get_committee(mock_request, "www-committee-project")
 
         mock_committee_model.active_committees.filter.assert_called_with(
             is_active=True, key__iexact="www-committee-project"
@@ -111,6 +111,6 @@ class TestGetCommittee:
         mock_request = MagicMock()
         mock_committee_model.active_committees.filter.return_value.first.return_value = None
 
-        result = get_chapter(mock_request, "NonExistent")
+        result = get_committee(mock_request, "NonExistent")
 
         assert result.status_code == HTTPStatus.NOT_FOUND

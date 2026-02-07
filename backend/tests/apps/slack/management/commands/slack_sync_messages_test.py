@@ -594,6 +594,7 @@ class TestFetchMessages:
     def test_rate_limit_handling(self, mocker):
         """Test rate limiting is handled in _fetch_messages."""
         mocker.patch(f"{self.target_module}.time.sleep")
+        mocker.patch(f"{self.target_module}.Message")
         mock_conversation = MagicMock()
         mock_conversation.slack_channel_id = "C123"
         mock_conversation.latest_message = None

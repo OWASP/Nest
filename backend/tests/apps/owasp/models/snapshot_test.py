@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
+from django.db import models
 from django.test import SimpleTestCase
-from django.utils import timezone
 
 from apps.owasp.models.snapshot import Snapshot
 
@@ -81,16 +81,17 @@ class SnapshotModelPropertyTest(SimpleTestCase):
         result = Snapshot.new_users_count.fget(mock_snapshot)
         assert result == 15
 
-    @patch.object(Snapshot, "save", lambda _self, *_args, **_kwargs: None)
     def test_save_generates_key_when_empty(self):
         """Test save method auto-generates key from current date."""
         snapshot = Snapshot.__new__(Snapshot)
         snapshot.key = ""
 
-        with patch.object(timezone, "now") as mock_now:
+        with (
+            patch("apps.owasp.models.snapshot.now") as mock_now,
+            patch.object(models.Model, "save"),
+        ):
             mock_now.return_value.strftime.return_value = "2025-02"
-            if not snapshot.key:
-                snapshot.key = mock_now().strftime("%Y-%m")
+            snapshot.save()
 
         assert snapshot.key == "2025-02"
 
@@ -98,7 +99,8 @@ class SnapshotModelPropertyTest(SimpleTestCase):
         """Test save method preserves existing key."""
         snapshot = Snapshot.__new__(Snapshot)
         snapshot.key = "2024-12"
-        if not snapshot.key:
-            snapshot.key = "should-not-be-set"
+
+        with patch.object(models.Model, "save"):
+            snapshot.save()
 
         assert snapshot.key == "2024-12"

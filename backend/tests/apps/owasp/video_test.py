@@ -120,16 +120,28 @@ class TestSlide:
     @patch("apps.owasp.video.pdfium.PdfDocument")
     @patch("apps.owasp.video.HTML")
     @patch("apps.owasp.video.video_env")
-    def test_render_and_save_image_finally_block(
+    def test_render_and_save_image_render_error(
         self, mock_video_env, mock_html, mock_pdfium, slide
     ):
-        """Test render_and_save_image ensures resources are closed even on error."""
+        """Test render_and_save_image handles render error."""
         mock_template = Mock()
         mock_video_env.get_template.return_value = mock_template
         mock_html.return_value.write_pdf.side_effect = Exception("Render Error")
+
+        with pytest.raises(Exception, match="Render Error"):
+            slide.render_and_save_image()
+
+    @patch("apps.owasp.video.pdfium.PdfDocument")
+    @patch("apps.owasp.video.HTML")
+    @patch("apps.owasp.video.video_env")
+    def test_render_and_save_image_page_error_closes_pdf(
+        self, mock_video_env, mock_html, mock_pdfium, slide
+    ):
+        """Test render_and_save_image ensures PDF is closed on page error."""
+        mock_template = Mock()
+        mock_video_env.get_template.return_value = mock_template
         mock_pdf = MagicMock()
         mock_pdfium.return_value = mock_pdf
-        mock_html.return_value.write_pdf.side_effect = None
         mock_pdf.__getitem__.side_effect = Exception("Page Error")
 
         with pytest.raises(Exception, match="Page Error"):

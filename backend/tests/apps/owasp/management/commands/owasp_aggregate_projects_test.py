@@ -5,6 +5,13 @@ import pytest
 from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
 
 
+class MockQuerySet(list):
+    """Helper class to simulate a QuerySet with exists() method."""
+
+    def exists(self):
+        return bool(self)
+
+
 class TestOwaspAggregateProjects:
     @pytest.fixture
     def command(self):
@@ -56,12 +63,7 @@ class TestOwaspAggregateProjects:
         mock_repository.topics = ["security", "owasp"]
 
         mock_project.repositories.all.return_value = [mock_repository]
-
-        class QS(list):
-            def exists(self):
-                return bool(self)
-
-        mock_project.repositories.filter.return_value = QS([mock_repository])
+        mock_project.repositories.filter.return_value = MockQuerySet([mock_repository])
         mock_projects_list = [mock_project] * projects
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
@@ -112,12 +114,7 @@ class TestOwaspAggregateProjects:
         mock_repository.topics = None
 
         mock_project.repositories.all.return_value = [mock_repository]
-
-        class QS(list):
-            def exists(self):
-                return bool(self)
-
-        mock_project.repositories.filter.return_value = QS([mock_repository])
+        mock_project.repositories.filter.return_value = MockQuerySet([mock_repository])
         mock_projects_list = [mock_project]
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
@@ -160,12 +157,7 @@ class TestOwaspAggregateProjects:
         mock_repository.license = None
         mock_repository.topics = None
         mock_project.repositories.all.return_value = [mock_repository]
-
-        class QS(list):
-            def exists(self):
-                return bool(self)
-
-        mock_project.repositories.filter.return_value = QS([mock_repository])
+        mock_project.repositories.filter.return_value = MockQuerySet([mock_repository])
         mock_projects_list = [mock_project]
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)

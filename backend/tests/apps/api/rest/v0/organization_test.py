@@ -59,6 +59,7 @@ class TestListOrganization:
         result = list_organization(mock_request, mock_filters, ordering=None)
 
         mock_org_model.objects.filter.assert_called_with(is_owasp_related_organization=True)
+        mock_org_model.objects.filter.return_value.order_by.assert_called_with("-created_at")
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.organization.OrganizationModel")
