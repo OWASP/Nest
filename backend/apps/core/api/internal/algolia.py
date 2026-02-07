@@ -51,7 +51,7 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
         limit = data.get("hitsPerPage", 25)
         page = data.get("page", 1)
         query = data.get("query", "")
-        filters_key = "_".join(sorted(facet_filters))
+        filters_key = ";".join(sorted(facet_filters))
         cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
 
         if filters_key:
