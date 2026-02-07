@@ -556,20 +556,29 @@ jobs:
       - name: Generate SBOM for backend image
         continue-on-error: true
         run: |
-          trivy image \
-           --format cyclonedx \
-           --output backend-sbom.cdx.json \
-           owasp/nest:backend-staging
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD:/work" \
+            -v ./.trivy-cache:/root/.cache/trivy \
+            aquasec/trivy:0.69.1 image \
+            --format cyclonedx \
+            --output /work/backend-sbom.cdx.json \
+            owasp/nest:backend-staging
 
       - name: Generate SBOM for frontend image
         continue-on-error: true
         run: |
-          trivy image \
-           --format cyclonedx \
-           --output frontend-sbom.cdx.json \
-           owasp/nest:frontend-staging
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD:/work" \
+            -v ./.trivy-cache:/root/.cache/trivy \
+            aquasec/trivy:0.69.1 image \
+            --format cyclonedx \
+            --output /work/frontend-sbom.cdx.json \
+            owasp/nest:frontend-staging
 
       - name: Upload SBOM artifacts
+        if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: staging-sboms
