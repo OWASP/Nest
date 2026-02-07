@@ -1,12 +1,9 @@
-export const formatDate = (input: number | string) => {
+export const formatDate = (input: number) => {
   if (!input) {
     return ''
   }
 
-  const date =
-    typeof input === 'number'
-      ? new Date(input * 1000) // Unix timestamp in seconds
-      : new Date(input) // ISO date string
+  const date = new Date(input * 1000)
 
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
@@ -20,9 +17,9 @@ export const formatDate = (input: number | string) => {
   })
 }
 
-export const formatDateRange = (startDate: number | string, endDate: number | string) => {
-  const start = typeof startDate === 'number' ? new Date(startDate * 1000) : new Date(startDate)
-  const end = typeof endDate === 'number' ? new Date(endDate * 1000) : new Date(endDate)
+export const formatDateRange = (startDate: number , endDate: number) => {
+  const start = new Date(startDate * 1000)
+  const end = new Date(endDate * 1000)
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     throw new Error('Invalid date')
@@ -62,9 +59,9 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   }
 }
 
-export const formatDateForInput = (dateStr: string | number) => {
+export const formatDateForInput = (dateStr:number) => {
   if (!dateStr) return ''
-  const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr)
+  const date = new Date(dateStr * 1000)
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
   }
