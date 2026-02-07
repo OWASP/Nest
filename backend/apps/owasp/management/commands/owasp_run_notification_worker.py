@@ -6,6 +6,7 @@ import os
 import socket
 import time
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
@@ -34,7 +35,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Handle execution."""
         self.stdout.write("Starting notification worker...")
-        count = 0
         redis_conn = get_redis_connection("default")
         stream_key = "owasp_notifications"
         group_name = "notification_group"
@@ -57,9 +57,6 @@ class Command(BaseCommand):
                     count=1,
                     block=5000,
                 )
-                logger.info("Events: %s", events)
-                count += 1
-                logger.info("count:%s", count)
                 # Process main stream messages
                 if events:
                     for _, messages in events:
@@ -69,7 +66,7 @@ class Command(BaseCommand):
                                 # Explicitly acknowledge the message
                                 redis_conn.xack(stream_key, group_name, message_id)
                                 logger.info("Message processed successfully.")
-                            except Exception:  # noqa: BLE001
+                            except Exception:
                                 logger.exception("Error processing message %s", message_id)
 
                 # Check DLQ every 300 seconds
@@ -140,11 +137,9 @@ class Command(BaseCommand):
                     dlq_message = {
                         "type": "failed_notification",
                         "user_id": failed_user["user_id"],
-                        "email": failed_user["email"],
                         "snapshot_id": failed_user["snapshot_id"],
-                        "retry_count": str(self.MAX_RETRIES),
                         "timestamp": str(time.time()),
-                        "last_attempt": str(time.time()),
+                        "dlq_retries": "0",
                     }
                     redis_conn.xadd(self.DLQ_STREAM_KEY, dlq_message)
 
@@ -198,7 +193,7 @@ class Command(BaseCommand):
     def send_notification(self, user, snapshot):
         """Send notification to user."""
         title = f"New Snapshot Published: {snapshot.title}"
-        related_link = f"snapshot:{snapshot.id}"
+        related_link = f"{settings.SITE_URL}/community/snapshots/{snapshot.id}"
 
         if Notification.objects.filter(
             recipient_id=user.id,
@@ -259,8 +254,10 @@ class Command(BaseCommand):
                         continue
 
                     raw_dlq_retries = data.get(b"dlq_retries", b"0")
-                    dlq_retries = int(raw_dlq_retries.decode("utf-8"))
-
+                    try:
+                        dlq_retries = int(raw_dlq_retries.decode("utf-8"))
+                    except (ValueError, UnicodeDecodeError, AttributeError):
+                        dlq_retries = 0
                     raw_user_id = data.get(b"user_id")
                     raw_snapshot_id = data.get(b"snapshot_id")
 
@@ -287,13 +284,12 @@ class Command(BaseCommand):
                     logger.warning("User or snapshot not found, removing from DLQ")
                     redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                     failed_count += 1
-                except Exception:  # noqa: BLE001
+                except Exception:
                     failed_count += 1
                     dlq_retries += 1
 
-                    redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
-
                     if dlq_retries > self.MAX_DLQ_RETRIES:
+                        redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                         logger.exception(
                             "DLQ message %s exceeded max retries (%d). Dropping.",
                             msg_id,
@@ -303,6 +299,7 @@ class Command(BaseCommand):
                         new_data = {k.decode("utf-8"): v.decode("utf-8") for k, v in data.items()}
                         new_data["dlq_retries"] = str(dlq_retries)
                         redis_conn.xadd(self.DLQ_STREAM_KEY, new_data)
+                        redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                         logger.warning(
                             "Failed to reprocess DLQ message %s (attempt %d/%d). Re-queued.",
                             msg_id,

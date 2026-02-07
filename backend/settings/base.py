@@ -230,4 +230,6 @@ class Base(Configuration):
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
 
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_BACKEND = values.Value(
+        environ_name="EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+    )
