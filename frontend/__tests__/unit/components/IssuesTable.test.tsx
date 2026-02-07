@@ -2,6 +2,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
+import { LabelList } from 'components/LabelList'
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -45,6 +46,36 @@ jest.mock('@heroui/tooltip', () => ({
       </div>
     )
   },
+}))
+
+interface MockLabelListProps {
+  entityKey: string
+  labels: string[]
+  maxVisible?: number
+  className?: string
+}
+
+const MockLabelList = (props: MockLabelListProps) => {
+  const { entityKey, labels, maxVisible = 5, className } = props
+  if (!labels || labels.length === 0) return null
+  const visibleLabels = labels.slice(0, maxVisible)
+  const remainingCount = labels.length - maxVisible
+  return (
+    <div data-testid="label-list" className={className}>
+      {visibleLabels.map((label) => (
+        <span key={`${entityKey}-${label}`} data-testid="label">
+          {label}
+        </span>
+      ))}
+      {remainingCount > 0 && (
+        <span data-testid="label-more">+{remainingCount} more</span>
+      )}
+    </div>
+  )
+}
+
+jest.mock('components/LabelList', () => ({
+  LabelList: jest.fn((props: MockLabelListProps) => <MockLabelList {...props} />),
 }))
 
 const mockIssues: IssueRow[] = [
@@ -101,6 +132,10 @@ describe('<IssuesTable />', () => {
   const defaultProps = {
     issues: mockIssues,
   }
+
+  beforeEach(() => {
+    jest.mocked(LabelList).mockClear()
+  })
 
   describe('Rendering', () => {
     it('renders table view', () => {
@@ -199,6 +234,67 @@ describe('<IssuesTable />', () => {
       }
       render(<IssuesTable issues={[manyLabelsIssue]} maxVisibleLabels={3} />)
       expect(screen.getByText('+2 more')).toBeInTheDocument()
+    })
+
+    it('uses LabelList with entityKey derived from issue objectID', () => {
+      render(<IssuesTable issues={[mockIssues[0]]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-1',
+          labels: ['bug', 'enhancement'],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('passes maxVisibleLabels to LabelList as maxVisible', () => {
+      render(
+        <IssuesTable issues={[mockIssues[0]]} maxVisibleLabels={3} />
+      )
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-1',
+          labels: ['bug', 'enhancement'],
+          maxVisible: 3,
+        }),
+        undefined
+      )
+    })
+
+    it('passes empty array to LabelList when issue has no labels', () => {
+      render(<IssuesTable issues={[mockIssues[2]]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-3',
+          labels: [],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('calls LabelList once per issue row with correct labels', () => {
+      render(<IssuesTable issues={mockIssues} />)
+      expect(LabelList).toHaveBeenCalledTimes(3)
+      expect(LabelList).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ entityKey: 'issue-1', labels: ['bug', 'enhancement'] }),
+        undefined
+      )
+      expect(LabelList).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ entityKey: 'issue-2', labels: ['documentation'] }),
+        undefined
+      )
+      expect(LabelList).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ entityKey: 'issue-3', labels: [] }),
+        undefined
+      )
     })
   })
 
