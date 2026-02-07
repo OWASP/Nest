@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
 import type { Sponsor } from 'types/home'
 
 interface MovingLogosProps {
@@ -8,54 +7,52 @@ interface MovingLogosProps {
 }
 
 export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
-  const scrollerRef = useRef<HTMLDivElement>(null)
+  // Keep duration behavior stable even when sponsors is empty.
+  const animationDurationSeconds = Math.max(sponsors.length, 1) * 2
 
-  useEffect(() => {
-    if (scrollerRef.current) {
-      const scrollContainer = scrollerRef.current
-      // Clone and append children for infinite scroll effect.
-      const children = Array.from(scrollContainer.children)
-      children.forEach((child) => {
-        scrollContainer.appendChild(child.cloneNode(true))
-      })
-    }
-  }, [sponsors])
+  const renderSponsorCard = (sponsor: Sponsor, index: number, keySuffix: string) => {
+    // Include `index` to guarantee uniqueness even if `sponsor.id` repeats (e.g. in tests).
+    const keyBase = sponsor.id
+      ? `${sponsor.id}-${index}`
+      : `${sponsor.url || sponsor.name || 'sponsor'}-${index}`
+
+    return (
+      <div
+        key={['logo-carousel', keyBase, keySuffix ?? ''].filter(Boolean).join('-')}
+        className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
+      >
+        <Link
+          href={sponsor.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex h-full w-full flex-col items-center justify-center"
+        >
+          <div className="relative mb-4 flex h-16 w-full items-center justify-center">
+            {sponsor.imageUrl ? (
+              <Image
+                fill
+                alt={sponsor.name ? `${sponsor.name}'s logo` : 'Sponsor logo'}
+                src={sponsor.imageUrl}
+                style={{ objectFit: 'contain' }}
+              />
+            ) : (
+              <span className="sr-only">{sponsor.name}</span>
+            )}
+          </div>
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div>
       <div className="relative overflow-hidden py-2">
         <div
-          ref={scrollerRef}
           className="animate-scroll flex w-full gap-6"
-          style={{ animationDuration: `${sponsors.length * 2}s` }}
+          style={{ animationDuration: `${animationDurationSeconds}s` }}
         >
-          {sponsors.map((sponsor, index) => (
-            <div
-              // eslint-disable-next-line react/no-array-index-key
-              key={`logo-carousel-${sponsor.id}-${index}`}
-              className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
-            >
-              <Link
-                href={sponsor.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-full w-full flex-col items-center justify-center"
-              >
-                <div className="relative mb-4 flex h-16 w-full items-center justify-center">
-                  {sponsor.imageUrl ? (
-                    <Image
-                      fill
-                      alt={sponsor.name ? `${sponsor.name}'s logo` : 'Sponsor logo'}
-                      src={sponsor.imageUrl}
-                      style={{ objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <span className="sr-only">{sponsor.name}</span>
-                  )}
-                </div>
-              </Link>
-            </div>
-          ))}
+          {sponsors.map((sponsor, index) => renderSponsorCard(sponsor, index, ''))}
+          {sponsors.map((sponsor, index) => renderSponsorCard(sponsor, index, 'loop'))}
         </div>
       </div>
       <div className="text-muted-foreground mt-4 flex w-full flex-col items-center justify-center text-center text-sm">

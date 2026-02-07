@@ -6,7 +6,6 @@ import datetime
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.utils import timezone
@@ -123,9 +122,6 @@ class Project(
         null=True,
         help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
     )
-
-    # GKs.
-    members = GenericRelation("owasp.EntityMember")
 
     # FKs.
     owasp_repository = models.ForeignKey(
