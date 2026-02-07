@@ -18,7 +18,7 @@ export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
 
     return (
       <div
-        key={`logo-carousel-${keyBase}${keySuffix ? `-${keySuffix}` : ''}`}
+        key={['logo-carousel', keyBase, keySuffix ?? ''].filter(Boolean).join('-')}
         className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
       >
         <Link
@@ -52,7 +52,7 @@ export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
           style={{ animationDuration: `${animationDurationSeconds}s` }}
         >
           {sponsors.map((sponsor, index) => renderSponsorCard(sponsor, index, ''))}
-          {sponsors.map((sponsor, index) => renderSponsorCard(sponsor, index, 'duplicate'))}
+          {sponsors.map((sponsor, index) => renderSponsorCard(sponsor, index, 'loop'))}
         </div>
       </div>
       <div className="text-muted-foreground mt-4 flex w-full flex-col items-center justify-center text-center text-sm">
