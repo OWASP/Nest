@@ -138,3 +138,137 @@ class TestProjectNode(GraphQLNodeBaseTest):
         assert result["releases"] == 10
         assert result["total"] == 185
         assert "pull_requests" not in result
+
+
+class TestProjectNodeResolvers:
+    """Test ProjectNode resolver execution."""
+
+    def _get_resolver(self, field_name):
+        """Get the resolver function for a field."""
+        for field in ProjectNode.__strawberry_definition__.fields:
+            if field.name == field_name:
+                return field.base_resolver.wrapped_func if field.base_resolver else None
+        return None
+
+    def test_health_metrics_list_with_invalid_limit(self):
+        """Test health_metrics_list returns empty list for invalid limit."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("health_metrics_list")
+        mock_project = MagicMock()
+
+        result = resolver(None, mock_project, limit=0)
+        assert result == []
+
+        result = resolver(None, mock_project, limit=-5)
+        assert result == []
+
+    def test_health_metrics_list_with_valid_limit(self):
+        """Test health_metrics_list returns metrics with valid limit."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("health_metrics_list")
+        mock_project = MagicMock()
+        mock_metrics = [MagicMock(), MagicMock()]
+        mock_project.health_metrics.order_by.return_value.__getitem__.return_value = mock_metrics
+
+        result = resolver(None, mock_project, limit=10)
+
+        mock_project.health_metrics.order_by.assert_called_once_with("nest_created_at")
+        assert result == mock_metrics
+
+    def test_health_metrics_latest(self):
+        """Test health_metrics_latest returns latest metric."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("health_metrics_latest")
+        mock_project = MagicMock()
+        mock_latest = MagicMock()
+        mock_project.health_metrics.order_by.return_value.first.return_value = mock_latest
+
+        result = resolver(None, mock_project)
+
+        mock_project.health_metrics.order_by.assert_called_once_with("-nest_created_at")
+        assert result == mock_latest
+
+    def test_health_metrics_latest_none(self):
+        """Test health_metrics_latest returns None when no metrics."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("health_metrics_latest")
+        mock_project = MagicMock()
+        mock_project.health_metrics.order_by.return_value.first.return_value = None
+
+        result = resolver(None, mock_project)
+
+        assert result is None
+
+    def test_recent_milestones_with_invalid_limit(self):
+        """Test recent_milestones returns empty list for invalid limit."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("recent_milestones")
+        mock_project = MagicMock()
+
+        result = resolver(None, mock_project, limit=0)
+        assert result == []
+
+    def test_issues_count(self):
+        """Test issues_count resolver returns idx_issues_count."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("issues_count")
+        mock_project = MagicMock()
+        mock_project.idx_issues_count = 42
+
+        result = resolver(None, mock_project)
+
+        assert result == 42
+
+    def test_key(self):
+        """Test key resolver returns idx_key."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("key")
+        mock_project = MagicMock()
+        mock_project.idx_key = "test-project"
+
+        result = resolver(None, mock_project)
+
+        assert result == "test-project"
+
+    def test_languages(self):
+        """Test languages resolver returns idx_languages."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("languages")
+        mock_project = MagicMock()
+        mock_project.idx_languages = ["Python", "JavaScript"]
+
+        result = resolver(None, mock_project)
+
+        assert result == ["Python", "JavaScript"]
+
+    def test_repositories_count(self):
+        """Test repositories_count resolver returns idx_repositories_count."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("repositories_count")
+        mock_project = MagicMock()
+        mock_project.idx_repositories_count = 5
+
+        result = resolver(None, mock_project)
+
+        assert result == 5
+
+    def test_topics(self):
+        """Test topics resolver returns idx_topics."""
+        from unittest.mock import MagicMock
+
+        resolver = self._get_resolver("topics")
+        mock_project = MagicMock()
+        mock_project.idx_topics = ["security", "owasp"]
+
+        result = resolver(None, mock_project)
+
+        assert result == ["security", "owasp"]

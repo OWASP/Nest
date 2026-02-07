@@ -1,8 +1,14 @@
 from datetime import datetime
+from http import HTTPStatus
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.organization import OrganizationDetail
+from apps.api.rest.v0.organization import (
+    OrganizationDetail,
+    get_organization,
+    list_organization,
+)
 
 
 class TestOrganizationSchema:
@@ -36,3 +42,63 @@ class TestOrganizationSchema:
         assert organization.login == organization_data["login"]
         assert organization.name == organization_data["name"]
         assert organization.updated_at == datetime.fromisoformat(organization_data["updated_at"])
+
+
+class TestListOrganization:
+    """Tests for list_organization endpoint."""
+
+    @patch("apps.api.rest.v0.organization.OrganizationModel")
+    def test_list_organization_no_ordering(self, mock_org_model):
+        """Test listing organizations without ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+        mock_org_model.objects.filter.return_value.order_by.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_organization(mock_request, mock_filters, ordering=None)
+
+        mock_org_model.objects.filter.assert_called_with(is_owasp_related_organization=True)
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.organization.OrganizationModel")
+    def test_list_organization_with_ordering(self, mock_org_model):
+        """Test listing organizations with custom ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+        mock_org_model.objects.filter.return_value.order_by.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_organization(mock_request, mock_filters, ordering="updated_at")
+
+        mock_org_model.objects.filter.return_value.order_by.assert_called_with("updated_at")
+        assert result == mock_queryset
+
+
+class TestGetOrganization:
+    """Tests for get_organization endpoint."""
+
+    @patch("apps.api.rest.v0.organization.OrganizationModel")
+    def test_get_organization_success(self, mock_org_model):
+        """Test getting an organization when found."""
+        mock_request = MagicMock()
+        mock_org = MagicMock()
+        mock_org_model.objects.filter.return_value.first.return_value = mock_org
+
+        result = get_organization(mock_request, "OWASP")
+
+        mock_org_model.objects.filter.assert_called_with(
+            is_owasp_related_organization=True, login__iexact="OWASP"
+        )
+        assert result == mock_org
+
+    @patch("apps.api.rest.v0.organization.OrganizationModel")
+    def test_get_organization_not_found(self, mock_org_model):
+        """Test getting an organization when not found."""
+        mock_request = MagicMock()
+        mock_org_model.objects.filter.return_value.first.return_value = None
+
+        result = get_organization(mock_request, "NonExistent")
+
+        assert result.status_code == HTTPStatus.NOT_FOUND

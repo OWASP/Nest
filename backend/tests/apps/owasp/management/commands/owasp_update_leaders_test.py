@@ -69,7 +69,7 @@ class TestOwaspUpdateLeaders:
         filter_call = mock_em.objects.filter.call_args
         assert filter_call[1]["entity_type"] == mock_ct.objects.get_for_model.return_value
         assert filter_call[1]["role"] == mock_em.Role.LEADER
-        assert filter_call[1]["member__isnull"] is True
+        assert filter_call[1]["member__isnull"]
 
         # Verify all members were matched and saved
         assert mock_members[0].save.called
@@ -171,3 +171,77 @@ class TestOwaspUpdateLeaders:
         assert mock_members[0].save.called
         assert mock_members[0].member_id == 1  # john.doe
         assert "Matched 1 out of 1 Chapter leaders" in out.getvalue()
+
+    @patch(f"{COMMAND_PATH}.EntityMember")
+    @patch(f"{COMMAND_PATH}.ContentType")
+    @patch(f"{COMMAND_PATH}.Chapter")
+    def test_invalid_model_name(self, mock_chapter, mock_ct, mock_em):
+        """Test that an invalid model name raises a CommandError."""
+        from django.core.management.base import CommandError
+
+        with pytest.raises(
+            CommandError, match="Error: argument model_name: invalid choice: 'invalid_model'"
+        ):
+            call_command("owasp_update_leaders", "invalid_model")
+
+        assert not mock_em.objects.filter.called
+
+    def test_find_best_user_match_empty_name(self):
+        """Test find_best_user_match returns None for empty member name."""
+        cmd = TestOwaspUpdateLeaders._create_command()
+        assert cmd.find_best_user_match(None, "email", [], 75) is None
+        assert cmd.find_best_user_match("", "email", [], 75) is None
+
+    def test_find_best_user_match_exact_variations(self):
+        """Test exact matches by name and email."""
+        cmd = TestOwaspUpdateLeaders._create_command()
+        users = [
+            {"id": 1, "login": "login_match", "name": "Wrong Name", "email": "wrong@email.com"},
+            {"id": 2, "login": "wrong_login", "name": "Name Match", "email": "wrong@email.com"},
+            {"id": 3, "login": "wrong_login2", "name": "Wrong Name", "email": "email@match.com"},
+        ]
+
+        match = cmd.find_best_user_match("Name Match", "other@email.com", users, 75)
+        assert match == users[1]
+
+        match = cmd.find_best_user_match("No Name Match", "email@match.com", users, 75)
+        assert match == users[2]
+
+    def test_find_best_user_match_fuzzy_variations(self):
+        """Test fuzzy matches by name and email, and priority handling."""
+        cmd = TestOwaspUpdateLeaders._create_command()
+        users = [
+            {"id": 1, "login": "fuzzy_login", "name": "Wrong", "email": "wrong@email.com"},
+            {"id": 2, "login": "wrong", "name": "Fuzzy Name", "email": "wrong@email.com"},
+            {"id": 3, "login": "wrong", "name": "Wrong", "email": "fuzzy@email.com"},
+        ]
+
+        match = cmd.find_best_user_match("fuzzy_login", None, users, 75)
+        assert match == users[0]
+
+        match = cmd.find_best_user_match("Fuzzy Name Delta", None, users, 75)
+        assert match == users[1]
+
+        match = cmd.find_best_user_match("Unrelated", "fuzzy_email@email.com", users, 75)
+        assert match == users[2]
+
+    def test_find_best_user_match_priority(self):
+        """Test that login > name > email for equal scores."""
+        cmd = TestOwaspUpdateLeaders._create_command()
+        users = [
+            {"id": 1, "login": "target", "name": "A", "email": "a@a.com"},
+            {"id": 2, "login": "b", "name": "target", "email": "b@b.com"},
+            {"id": 3, "login": "c", "name": "C", "email": "target"},
+        ]
+
+        match = cmd.find_best_user_match("target", "target", users, 0)
+        assert match == users[0]
+
+        match = cmd.find_best_user_match("target", "target", users[1:], 0)
+        assert match == users[1]
+
+    @staticmethod
+    def _create_command():
+        from apps.owasp.management.commands.owasp_update_leaders import Command
+
+        return Command()

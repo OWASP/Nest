@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -116,3 +118,232 @@ class TestProjectHealthMetricsModel:
         metrics.pull_request_last_created_at = self.FIXED_DATE
 
         assert getattr(metrics, field_name) == expected_days
+
+
+class TestProjectHealthMetricsRequirements:
+    """Tests for requirement properties."""
+
+    def test_age_days_requirement_with_requirements(self):
+        """Test age_days_requirement returns value when requirements exist."""
+        mock_requirements = MagicMock()
+        mock_requirements.age_days = 30
+
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: mock_requirements),
+        ):
+            assert metrics.age_days_requirement == 30
+
+    def test_age_days_requirement_without_requirements(self):
+        """Test age_days_requirement returns 0 when no requirements."""
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: None),
+        ):
+            assert metrics.age_days_requirement == 0
+
+    def test_last_commit_days_requirement_with_requirements(self):
+        """Test last_commit_days_requirement returns value when requirements exist."""
+        mock_requirements = MagicMock()
+        mock_requirements.last_commit_days = 14
+
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: mock_requirements),
+        ):
+            assert metrics.last_commit_days_requirement == 14
+
+    def test_last_commit_days_requirement_without_requirements(self):
+        """Test last_commit_days_requirement returns 0 when no requirements."""
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: None),
+        ):
+            assert metrics.last_commit_days_requirement == 0
+
+    def test_last_pull_request_days_requirement_with_requirements(self):
+        """Test last_pull_request_days_requirement returns value when requirements exist."""
+        mock_requirements = MagicMock()
+        mock_requirements.last_pull_request_days = 21
+
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: mock_requirements),
+        ):
+            assert metrics.last_pull_request_days_requirement == 21
+
+    def test_last_pull_request_days_requirement_without_requirements(self):
+        """Test last_pull_request_days_requirement returns 0 when no requirements."""
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: None),
+        ):
+            assert metrics.last_pull_request_days_requirement == 0
+
+    def test_last_release_days_requirement_with_requirements(self):
+        """Test last_release_days_requirement returns value when requirements exist."""
+        mock_requirements = MagicMock()
+        mock_requirements.last_release_days = 90
+
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: mock_requirements),
+        ):
+            assert metrics.last_release_days_requirement == 90
+
+    def test_last_release_days_requirement_without_requirements(self):
+        """Test last_release_days_requirement returns 0 when no requirements."""
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: None),
+        ):
+            assert metrics.last_release_days_requirement == 0
+
+    def test_owasp_page_last_update_days_requirement_with_requirements(self):
+        """Test owasp_page_last_update_days_requirement returns value when requirements exist."""
+        mock_requirements = MagicMock()
+        mock_requirements.owasp_page_last_update_days = 60
+
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: mock_requirements),
+        ):
+            assert metrics.owasp_page_last_update_days_requirement == 60
+
+    def test_owasp_page_last_update_days_requirement_without_requirements(self):
+        """Test owasp_page_last_update_days_requirement returns 0 when no requirements."""
+        metrics = ProjectHealthMetrics()
+        with patch.object(
+            ProjectHealthMetrics,
+            "project_requirements",
+            new_callable=lambda: property(lambda _: None),
+        ):
+            assert metrics.owasp_page_last_update_days_requirement == 0
+
+
+class TestProjectHealthMetricsStaticMethods:
+    """Tests for static methods."""
+
+    @patch("apps.owasp.models.project_health_metrics.BulkSaveModel")
+    def test_bulk_save(self, mock_bulk_save_model):
+        """Test bulk_save calls BulkSaveModel correctly."""
+        mock_metrics = [MagicMock(), MagicMock()]
+        mock_fields = ["score", "contributors_count"]
+
+        ProjectHealthMetrics.bulk_save(mock_metrics, fields=mock_fields)
+
+        mock_bulk_save_model.bulk_save.assert_called_once_with(
+            ProjectHealthMetrics, mock_metrics, fields=mock_fields
+        )
+
+    @patch.object(ProjectHealthMetrics.objects, "filter")
+    def test_get_latest_health_metrics(self, mock_filter):
+        """Test get_latest_health_metrics returns filtered queryset."""
+        mock_queryset = MagicMock()
+        mock_filter.return_value = mock_queryset
+
+        result = ProjectHealthMetrics.get_latest_health_metrics()
+        assert mock_filter.call_count == 2
+        assert result == mock_queryset
+
+
+class TestProjectHealthMetricsProperties:
+    """Tests for property methods."""
+
+    @patch("apps.owasp.models.project_health_metrics.ProjectHealthRequirements")
+    def test_project_requirements_returns_requirements(self, mock_requirements_model):
+        """Test project_requirements returns requirements for project level."""
+        from apps.owasp.models.project import Project
+
+        mock_requirements = MagicMock()
+        mock_requirements_model.objects.filter.return_value.first.return_value = mock_requirements
+
+        project = Project(level="FLAGSHIP")
+
+        metrics = ProjectHealthMetrics()
+        metrics.project = project
+
+        result = metrics.project_requirements
+
+        mock_requirements_model.objects.filter.assert_called_once_with(level="FLAGSHIP")
+        assert result == mock_requirements
+
+
+class TestProjectHealthMetricsGetStats:
+    """Tests for get_stats method."""
+
+    @patch.object(ProjectHealthMetrics, "get_latest_health_metrics")
+    @patch.object(ProjectHealthMetrics.objects, "annotate")
+    def test_get_stats(self, mock_annotate, mock_get_latest):
+        """Test get_stats returns ProjectHealthStatsNode with all data."""
+        mock_queryset = MagicMock()
+        mock_queryset.aggregate.return_value = {
+            "projects_count_healthy": 10,
+            "projects_count_need_attention": 5,
+            "projects_count_unhealthy": 3,
+            "projects_count_total": 18,
+            "average_score": 75.5,
+            "total_contributors": 100,
+            "total_forks": 50,
+            "total_stars": 200,
+        }
+        mock_get_latest.return_value = mock_queryset
+        mock_monthly_queryset = MagicMock()
+        mock_monthly_queryset.filter.return_value.order_by.return_value.values.return_value.distinct.return_value.annotate.return_value = [  # noqa: E501
+            {"month": 1, "score": 70.0},
+            {"month": 2, "score": 72.5},
+            {"month": 3, "score": 75.0},
+        ]
+        mock_annotate.return_value = mock_monthly_queryset
+
+        result = ProjectHealthMetrics.get_stats()
+        assert result.average_score == 75.5
+        assert result.projects_count_healthy == 10
+        assert result.projects_count_need_attention == 5
+        assert result.projects_count_unhealthy == 3
+        assert result.monthly_overall_scores == [70.0, 72.5, 75.0]
+        assert result.monthly_overall_scores_months == [1, 2, 3]
+
+    @patch.object(ProjectHealthMetrics, "get_latest_health_metrics")
+    @patch.object(ProjectHealthMetrics.objects, "annotate")
+    def test_get_stats_avoids_division_by_zero(self, mock_annotate, mock_get_latest):
+        """Test get_stats handles zero projects gracefully."""
+        mock_queryset = MagicMock()
+        mock_queryset.aggregate.return_value = {
+            "projects_count_healthy": 0,
+            "projects_count_need_attention": 0,
+            "projects_count_unhealthy": 0,
+            "projects_count_total": 0,
+            "average_score": 0.0,
+            "total_contributors": 0,
+            "total_forks": 0,
+            "total_stars": 0,
+        }
+        mock_get_latest.return_value = mock_queryset
+        mock_monthly_queryset = MagicMock()
+        mock_monthly_queryset.filter.return_value.order_by.return_value.values.return_value.distinct.return_value.annotate.return_value = []  # noqa: E501
+        mock_annotate.return_value = mock_monthly_queryset
+
+        result = ProjectHealthMetrics.get_stats()
+
+        assert result.projects_percentage_healthy == 0
+        assert result.projects_percentage_need_attention == 0
+        assert result.projects_percentage_unhealthy == 0

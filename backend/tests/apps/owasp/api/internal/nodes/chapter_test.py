@@ -84,3 +84,81 @@ class TestChapterNode(GraphQLNodeBaseTest):
         assert result["releases"] == 5
         assert result["total"] == 125
         assert "pull_requests" not in result
+
+    def test_created_at_resolver(self):
+        """Test created_at resolver uses idx_created_at."""
+        from unittest.mock import Mock
+
+        mock_chapter = Mock()
+        mock_chapter.idx_created_at = 1672531200
+
+        field = self._get_field_by_name("created_at", ChapterNode)
+        result = field.base_resolver.wrapped_func(None, mock_chapter)
+
+        assert result == 1672531200
+
+    def test_geo_location_resolver_with_coordinates(self):
+        """Test geo_location resolver with valid coordinates."""
+        from unittest.mock import Mock
+
+        from apps.owasp.api.internal.nodes.chapter import GeoLocationType
+
+        mock_chapter = Mock()
+        mock_chapter.latitude = 40.7128
+        mock_chapter.longitude = -74.0060
+
+        field = self._get_field_by_name("geo_location", ChapterNode)
+        result = field.base_resolver.wrapped_func(None, mock_chapter)
+
+        assert isinstance(result, GeoLocationType)
+        assert result.lat == 40.7128
+        assert result.lng == -74.0060
+
+    def test_geo_location_resolver_without_coordinates(self):
+        """Test geo_location resolver returns None without coordinates."""
+        from unittest.mock import Mock
+
+        mock_chapter = Mock()
+        mock_chapter.latitude = None
+        mock_chapter.longitude = None
+
+        field = self._get_field_by_name("geo_location", ChapterNode)
+        result = field.base_resolver.wrapped_func(None, mock_chapter)
+
+        assert result is None
+
+    def test_key_resolver(self):
+        """Test key resolver uses idx_key."""
+        from unittest.mock import Mock
+
+        mock_chapter = Mock()
+        mock_chapter.idx_key = "www-chapter-test"
+
+        field = self._get_field_by_name("key", ChapterNode)
+        result = field.base_resolver.wrapped_func(None, mock_chapter)
+
+        assert result == "www-chapter-test"
+
+    def test_suggested_location_resolver(self):
+        """Test suggested_location resolver uses idx_suggested_location."""
+        from unittest.mock import Mock
+
+        mock_chapter = Mock()
+        mock_chapter.idx_suggested_location = "New York, USA"
+
+        field = self._get_field_by_name("suggested_location", ChapterNode)
+        result = field.base_resolver.wrapped_func(None, mock_chapter)
+
+        assert result == "New York, USA"
+
+    def test_suggested_location_resolver_none(self):
+        """Test suggested_location resolver when None."""
+        from unittest.mock import Mock
+
+        mock_chapter = Mock()
+        mock_chapter.idx_suggested_location = None
+
+        field = self._get_field_by_name("suggested_location", ChapterNode)
+        result = field.base_resolver.wrapped_func(None, mock_chapter)
+
+        assert result is None

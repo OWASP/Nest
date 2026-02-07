@@ -13,6 +13,7 @@ from apps.api.rest.v0.snapshot import (
     list_snapshot_members,
     list_snapshot_projects,
     list_snapshot_releases,
+    list_snapshots,
 )
 from apps.github.models.issue import Issue
 from apps.github.models.release import Release
@@ -261,3 +262,34 @@ class TestSnapshotAPI:
 
         assert SnapshotRelease.resolve_organization_login(release) is None
         assert SnapshotRelease.resolve_repository_name(release) == "test-repo"
+
+
+class TestListSnapshots:
+    """Tests for list_snapshots endpoint."""
+
+    @patch("apps.api.rest.v0.snapshot.SnapshotModel")
+    def test_list_snapshots_default_ordering(self, mock_snapshot_model):
+        """Test listing snapshots with default ordering."""
+        mock_request = MagicMock()
+        mock_queryset = MagicMock()
+        mock_snapshot_model.objects.filter.return_value.order_by.return_value = mock_queryset
+
+        result = list_snapshots(mock_request, ordering=None)
+
+        mock_snapshot_model.objects.filter.assert_called_with(
+            status=mock_snapshot_model.Status.COMPLETED
+        )
+        mock_snapshot_model.objects.filter.return_value.order_by.assert_called_with("-created_at")
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.snapshot.SnapshotModel")
+    def test_list_snapshots_with_ordering(self, mock_snapshot_model):
+        """Test listing snapshots with custom ordering."""
+        mock_request = MagicMock()
+        mock_queryset = MagicMock()
+        mock_snapshot_model.objects.filter.return_value.order_by.return_value = mock_queryset
+
+        result = list_snapshots(mock_request, ordering="start_at")
+
+        mock_snapshot_model.objects.filter.return_value.order_by.assert_called_with("start_at")
+        assert result == mock_queryset
