@@ -52,8 +52,8 @@ describe('formatDateRange function', () => {
   })
 
   test('handles year boundaries correctly', () => {
-    // 1703808000 is Dec 29, 2024
-    expect(formatDateRange(1703808000, 1704153600)).toBe('Dec 29, 2023 — Jan 2, 2024')
+    // 1104278400 is Dec 29, 2004
+    expect(formatDateRange(1104278400, 1104624000)).toBe('Dec 29, 2004 — Jan 2, 2005')
   })
 
   test('handles single-day ranges correctly', () => {
