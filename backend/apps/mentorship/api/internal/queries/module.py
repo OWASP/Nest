@@ -56,8 +56,9 @@ class ModuleQuery:
             user = getattr(info.context.request, "user", None)
             if _is_program_admin_or_mentor(user, program):
                 logger.info(
-                    "Admin/mentor accessing modules for draft program '%s'",
+                    "Admin/mentor accessing modules for non-published program '%s' (status: %s)",
                     program_key,
+                    program.status,
                 )
                 return (
                     Module.objects.filter(program__key=program_key)
@@ -67,7 +68,7 @@ class ModuleQuery:
                 )
 
             logger.warning(
-                "Attempted to access modules for unpublished program '%s' (status: %s)",
+                "Attempted to access modules for non-published program '%s' (status: %s)",
                 program_key,
                 program.status,
             )
@@ -106,16 +107,20 @@ class ModuleQuery:
                         f"Module with key '{module_key}' under program '{program_key}' not found."
                     )
                     logger.warning(
-                        "Attempted to access module '%s' from unpublished program '%s'",
+                        "Attempted to access module '%s' from non-published program '%s' "
+                        "(status: %s)",
                         module_key,
                         program_key,
+                        program.status,
                     )
                     raise ObjectDoesNotExist(msg)
 
                 logger.info(
-                    "Admin/mentor accessing module '%s' from draft program '%s'",
+                    "Admin/mentor accessing module '%s' from non-published program '%s' "
+                    "(status: %s)",
                     module_key,
                     program_key,
+                    program.status,
                 )
 
             return (

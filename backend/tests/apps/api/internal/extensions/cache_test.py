@@ -2,7 +2,7 @@
 
 import asyncio
 import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 from uuid import UUID
 
 import pytest
@@ -32,7 +32,7 @@ class TestGenerateKey:
 
         assert key1 == key2
         assert key1.startswith(f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-")
-        assert len(key1.split("-")[-1]) == 64  # SHA256 hex digest length
+        assert len(key1.split("-")[-1]) == 64
 
     def test_differs_for_different_field_names(self):
         """Test that different field names produce different keys."""
@@ -203,15 +203,19 @@ class TestResolve:
 class TestInvalidateProgramCache:
     """Test cases for invalidate_program_cache function."""
 
+    @patch("apps.api.internal.extensions.cache.Module")
     @patch("apps.api.internal.extensions.cache.cache.delete")
-    def test_invalidates_admin_and_public_caches(self, mock_delete):
+    def test_invalidates_admin_and_public_caches(self, mock_delete, mock_module_class):
         """Test that invalidate_program_cache invalidates both admin and public caches."""
+        mock_module_class.objects.filter.return_value = []
         invalidate_program_cache("test-program")
         assert mock_delete.call_count == 4
 
+    @patch("apps.api.internal.extensions.cache.Module")
     @patch("apps.api.internal.extensions.cache.cache.delete")
-    def test_invalidates_get_program_query(self, mock_delete):
+    def test_invalidates_get_program_query(self, mock_delete, mock_module_class):
         """Test that invalidate_program_cache invalidates getProgram queries."""
+        mock_module_class.objects.filter.return_value = []
         invalidate_program_cache("test-program")
         calls = mock_delete.call_args_list
         keys = [call[0][0] for call in calls]
@@ -220,9 +224,11 @@ class TestInvalidateProgramCache:
         assert admin_key in keys
         assert public_key in keys
 
+    @patch("apps.api.internal.extensions.cache.Module")
     @patch("apps.api.internal.extensions.cache.cache.delete")
-    def test_invalidates_get_program_modules_query(self, mock_delete):
+    def test_invalidates_get_program_modules_query(self, mock_delete, mock_module_class):
         """Test that invalidate_program_cache invalidates getProgramModules queries."""
+        mock_module_class.objects.filter.return_value = []
         invalidate_program_cache("test-program")
         calls = mock_delete.call_args_list
         keys = [call[0][0] for call in calls]
@@ -231,19 +237,56 @@ class TestInvalidateProgramCache:
         assert admin_key in keys
         assert public_key in keys
 
+    @patch("apps.api.internal.extensions.cache.Module")
+    @patch("apps.api.internal.extensions.cache.cache.delete")
+    def test_invalidates_all_module_caches(self, mock_delete, mock_module_class):
+        """Test that invalidate_program_cache invalidates all module caches for the program."""
+        mock_module1 = Mock(key="module-1")
+        mock_module2 = Mock(key="module-2")
+        mock_module_class.objects.filter.return_value = [mock_module1, mock_module2]
+
+        invalidate_program_cache("test-program")
+
+        assert mock_delete.call_count == 8
+
+        calls = mock_delete.call_args_list
+        keys = [call[0][0] for call in calls]
+
+        module1_admin_key = generate_key(
+            "getModule", {"moduleKey": "module-1", "programKey": "test-program"}, "admin"
+        )
+        module1_public_key = generate_key(
+            "getModule", {"moduleKey": "module-1", "programKey": "test-program"}, "public"
+        )
+        module2_admin_key = generate_key(
+            "getModule", {"moduleKey": "module-2", "programKey": "test-program"}, "admin"
+        )
+        module2_public_key = generate_key(
+            "getModule", {"moduleKey": "module-2", "programKey": "test-program"}, "public"
+        )
+
+        assert module1_admin_key in keys
+        assert module1_public_key in keys
+        assert module2_admin_key in keys
+        assert module2_public_key in keys
+
 
 class TestInvalidateModuleCache:
     """Test cases for invalidate_module_cache function."""
 
+    @patch("apps.api.internal.extensions.cache.Module")
     @patch("apps.api.internal.extensions.cache.cache.delete")
-    def test_invalidates_module_and_program_caches(self, mock_delete):
+    def test_invalidates_module_and_program_caches(self, mock_delete, mock_module_class):
         """Test that invalidate_module_cache invalidates both module and program caches."""
+        mock_module_class.objects.filter.return_value = []
         invalidate_module_cache("test-module", "test-program")
         assert mock_delete.call_count == 6
 
+    @patch("apps.api.internal.extensions.cache.Module")
     @patch("apps.api.internal.extensions.cache.cache.delete")
-    def test_invalidates_get_module_query(self, mock_delete):
+    def test_invalidates_get_module_query(self, mock_delete, mock_module_class):
         """Test that invalidate_module_cache invalidates getModule queries."""
+        mock_module_class.objects.filter.return_value = []
         invalidate_module_cache("test-module", "test-program")
 
         calls = mock_delete.call_args_list
@@ -360,17 +403,15 @@ class TestGetUserRole:
         mock_program_model.objects.filter.return_value.exists.return_value = True
         field_args = {"programKey": "test-program"}
 
-        # First call
         role1 = _get_user_role(mock_info, field_args)
         assert role1 == "admin"
         assert mock_mentor_model.objects.filter.call_count == 1
         assert mock_program_model.objects.filter.call_count == 1
 
-        # Second call - should use cached value
         role2 = _get_user_role(mock_info, field_args)
         assert role2 == "admin"
-        assert mock_mentor_model.objects.filter.call_count == 1  # No additional DB call
-        assert mock_program_model.objects.filter.call_count == 1  # No additional DB call
+        assert mock_mentor_model.objects.filter.call_count == 1
+        assert mock_program_model.objects.filter.call_count == 1
 
     @patch("apps.api.internal.extensions.cache.Program")
     @patch("apps.api.internal.extensions.cache.Mentor")
@@ -381,21 +422,17 @@ class TestGetUserRole:
         mock_mentor = MagicMock()
         mock_mentor_model.objects.filter.return_value.first.return_value = mock_mentor
 
-        # First program: admin
         mock_program_model.objects.filter.return_value.exists.return_value = True
         role1 = _get_user_role(mock_info, {"programKey": "program-1"})
         assert role1 == "admin"
 
-        # Second program: public
         mock_program_model.objects.filter.return_value.exists.return_value = False
         role2 = _get_user_role(mock_info, {"programKey": "program-2"})
         assert role2 == "public"
 
-        # First program again - should return cached "admin"
         role3 = _get_user_role(mock_info, {"programKey": "program-1"})
         assert role3 == "admin"
 
-        # Verify DB queries: 2 calls (one for each unique program)
         assert mock_program_model.objects.filter.call_count == 2
 
     def test_caches_public_for_unauthenticated(self, mock_info):
@@ -408,7 +445,6 @@ class TestGetUserRole:
 
         assert role1 == "public"
         assert role2 == "public"
-        # No cache needed for unauthenticated users as it returns immediately
 
 
 class TestInvalidateCache:
@@ -498,6 +534,7 @@ class TestCacheExtensionAdvanced:
         """Test that async coroutines are not cached."""
 
         async def async_resolver():
+            await asyncio.sleep(0)
             return {"name": "Async OWASP"}
 
         mock_next = MagicMock(return_value=async_resolver())
@@ -508,8 +545,6 @@ class TestCacheExtensionAdvanced:
 
         assert asyncio.iscoroutine(result)
         mock_cache.set.assert_not_called()
-
-        # Clean up the coroutine to avoid resource warning
         result.close()
 
     @patch("apps.api.internal.extensions.cache.cache")

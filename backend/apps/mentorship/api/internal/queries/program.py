@@ -34,7 +34,6 @@ class ProgramQuery:
             if program.status == Program.ProgramStatus.PUBLISHED:
                 return program
 
-            # For unpublished programs, check if user is authorized
             user = getattr(info.context.request, "user", None)
             if user and user.is_authenticated and user.github_user:
                 try:
@@ -58,9 +57,8 @@ class ProgramQuery:
                 except Mentor.DoesNotExist:
                     pass
 
-            # User is not authorized to access unpublished program
             logger.warning(
-                "Attempted public access to unpublished program '%s' (status: %s)",
+                "Attempted public access to non-published program '%s' (status: %s)",
                 program_key,
                 program.status,
             )

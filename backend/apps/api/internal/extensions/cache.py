@@ -14,7 +14,7 @@ from strawberry.permission import PermissionExtension
 from strawberry.schema import Schema
 from strawberry.utils.str_converters import to_camel_case
 
-from apps.mentorship.models import Program
+from apps.mentorship.models import Module, Program
 from apps.mentorship.models.mentor import Mentor
 
 
@@ -58,7 +58,6 @@ def _get_user_role(info, field_args: dict) -> str:
     if not user or not user.is_authenticated or not program_key:
         return "public"
 
-    # Check request-level cache to avoid redundant DB queries
     request = info.context.request
     if not hasattr(request, "graphql_user_role_cache"):
         request.graphql_user_role_cache = {}
@@ -67,7 +66,6 @@ def _get_user_role(info, field_args: dict) -> str:
     if cache_key in request.graphql_user_role_cache:
         return request.graphql_user_role_cache[cache_key]
 
-    # Compute role with DB queries
     github_user = getattr(user, "github_user", None)
     mentor = Mentor.objects.filter(github_user=github_user).first() if github_user else None
     if not mentor:
@@ -118,6 +116,9 @@ def invalidate_cache(field_name: str, field_args: dict, role: str | None = None)
 def invalidate_program_cache(program_key: str) -> None:
     """Invalidate all GraphQL caches related to a program.
 
+    This includes the program itself, its module list, and all individual modules
+    to prevent cached access to modules when the program status changes.
+
     Args:
         program_key: The program's key identifier.
 
@@ -125,6 +126,13 @@ def invalidate_program_cache(program_key: str) -> None:
     for role in ["admin", "public"]:
         invalidate_cache("getProgram", {"programKey": program_key}, role)
         invalidate_cache("getProgramModules", {"programKey": program_key}, role)
+
+    modules = Module.objects.filter(program__key=program_key)
+    for module in modules:
+        for role in ["admin", "public"]:
+            invalidate_cache(
+                "getModule", {"moduleKey": module.key, "programKey": program_key}, role
+            )
 
 
 def invalidate_module_cache(module_key: str, program_key: str) -> None:
