@@ -17,7 +17,7 @@ export const formatDate = (input: number) => {
   })
 }
 
-export const formatDateRange = (startDate: number , endDate: number) => {
+export const formatDateRange = (startDate: number, endDate: number) => {
   const start = new Date(startDate * 1000)
   const end = new Date(endDate * 1000)
 
@@ -59,7 +59,7 @@ export const formatDateRange = (startDate: number , endDate: number) => {
   }
 }
 
-export const formatDateForInput = (dateStr:number) => {
+export const formatDateForInput = (dateStr: number) => {
   if (!dateStr) return ''
   const date = new Date(dateStr * 1000)
   if (Number.isNaN(date.getTime())) {
