@@ -43,8 +43,8 @@ class TestQueryParser:
         [
             ("case_sensitive_parser", '"John Doe"'),
             ("case_sensitive_strict_parser", '"John Doe"'),
-            ("parser", '"john doe"'),
-            ("strict_parser", '"john doe"'),
+            ("parser", '"John Doe"'),
+            ("strict_parser", '"John Doe"'),
         ],
     )
     def test_basic_field_parsing_all_types(self, parser_type, expected_string):
@@ -95,7 +95,7 @@ class TestQueryParser:
             (
                 'author:"John Doe" stars:>100 archived:false some "free text"',
                 [
-                    {"type": "string", "field": "author", "value": '"john doe"'},
+                    {"type": "string", "field": "author", "value": '"John Doe"'},
                     {"type": "number", "field": "stars", "op": ">", "value": 100},
                     {"type": "boolean", "field": "archived", "value": False},
                     {"type": "string", "field": "query", "value": "some"},
@@ -106,7 +106,7 @@ class TestQueryParser:
                 'project:"my-awesome-project" language:"C++"',
                 [
                     {"type": "string", "field": "project", "value": '"my-awesome-project"'},
-                    {"type": "string", "field": "language", "value": '"c++"'},
+                    {"type": "string", "field": "language", "value": '"C++"'},
                 ],
             ),
         ],
@@ -208,3 +208,12 @@ class TestQueryParser:
             self.strict_parser.parse(f"stars:{overflow_number}")
 
         assert e.value.error_type == "NUMBER_VALUE_ERROR"
+
+    def test_quoted_multi_word_values(self):
+        """Test that multi-word values in quotes are parsed correctly without splitting."""
+        query = 'project:"OWASP Nest" author:"John Doe"'
+        results = self.parser.parse(query)
+
+        assert len(results) == 2
+        assert results[0]["value"] == '"OWASP Nest"'
+        assert results[1]["value"] == '"John Doe"'

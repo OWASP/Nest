@@ -170,8 +170,6 @@ class QueryParser:
         """
         conditions: list[dict] = []
         query = query.strip()
-        if not self.case_sensitive:
-            query = query.lower()
 
         tokens = self._split_tokens(query)
         try:
@@ -184,12 +182,14 @@ class QueryParser:
                     conditions.append(self._create_text_search_condition(raw_value))
                     continue
 
-                if field not in self.field_schema:
-                    self._handle_unknown_field(field)
+                normalized_field = field.lower()
+
+                if normalized_field not in self.field_schema:
+                    self._handle_unknown_field(normalized_field)
                     continue
 
-                field_type = self.field_schema[field]
-                condition = self.to_dict(field, field_type, raw_value)
+                field_type = self.field_schema[normalized_field]
+                condition = self.to_dict(normalized_field, field_type, raw_value)
                 if condition:
                     conditions.append(condition)
         except QueryParserError as e:
@@ -360,23 +360,17 @@ class QueryParser:
 
         """
         regex_components = {
-            # Support escaped quotes within quotes.
-            "key_value": r'\S+:"([^"\\]|\\.)*"',
+            # Key-value pairs with quoted values: name:"OWASP"
+            "key_value_quoted": r'[a-zA-Z0-9_]+:"([^"\\]|\\.)*"',
+            # Standard key-value pairs: stars:>10
+            "key_value_plain": r"[a-zA-Z0-9_]+:\S+",
+            # Standalone quoted strings: "OWASP Foundation"
             "quoted_string": r'"([^"\\]|\\.)*"',
+            # Single words
             "unquoted_word": r"\S+",
         }
 
-        parser = ZeroOrMore(
-            Regex(
-                "|".join(
-                    [
-                        regex_components["key_value"],
-                        regex_components["quoted_string"],
-                        regex_components["unquoted_word"],
-                    ]
-                )
-            )
-        )
+        parser = ZeroOrMore(Regex("|".join(regex_components.values())))
         try:
             result = parser.parse_string(query, parse_all=True)
         except ParseException as e:
