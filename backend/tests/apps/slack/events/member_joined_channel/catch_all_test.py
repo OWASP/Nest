@@ -23,10 +23,12 @@ class TestCatchAllModuleRegistration:
         module_name = "apps.slack.events.member_joined_channel.catch_all"
         if module_name in sys.modules:
             del sys.modules[module_name]
+
         mock_app = MagicMock()
         mocker.patch("apps.slack.apps.SlackConfig.app", mock_app)
         importlib.import_module(module_name)
         mock_app.event.assert_called_once()
         call_args = mock_app.event.call_args
+
         assert call_args[0][0] == "member_joined_channel"
         assert "matchers" in call_args[1]

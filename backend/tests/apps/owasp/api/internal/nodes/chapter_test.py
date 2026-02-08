@@ -1,8 +1,9 @@
 """Test cases for ChapterNode."""
 
 import math
+from unittest.mock import Mock
 
-from apps.owasp.api.internal.nodes.chapter import ChapterNode
+from apps.owasp.api.internal.nodes.chapter import ChapterNode, GeoLocationType
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
@@ -89,8 +90,6 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
     def test_created_at_resolver(self):
         """Test created_at resolver uses idx_created_at."""
-        from unittest.mock import Mock
-
         mock_chapter = Mock()
         mock_chapter.idx_created_at = 1672531200
 
@@ -101,10 +100,6 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
     def test_geo_location_resolver_with_coordinates(self):
         """Test geo_location resolver with valid coordinates."""
-        from unittest.mock import Mock
-
-        from apps.owasp.api.internal.nodes.chapter import GeoLocationType
-
         mock_chapter = Mock()
         mock_chapter.latitude = 40.7128
         mock_chapter.longitude = -74.0060
@@ -118,8 +113,6 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
     def test_geo_location_resolver_without_coordinates(self):
         """Test geo_location resolver returns None without coordinates."""
-        from unittest.mock import Mock
-
         mock_chapter = Mock()
         mock_chapter.latitude = None
         mock_chapter.longitude = None
@@ -131,8 +124,6 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
     def test_key_resolver(self):
         """Test key resolver uses idx_key."""
-        from unittest.mock import Mock
-
         mock_chapter = Mock()
         mock_chapter.idx_key = "www-chapter-test"
 
@@ -143,8 +134,6 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
     def test_suggested_location_resolver(self):
         """Test suggested_location resolver uses idx_suggested_location."""
-        from unittest.mock import Mock
-
         mock_chapter = Mock()
         mock_chapter.idx_suggested_location = "New York, USA"
 

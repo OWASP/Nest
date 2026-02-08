@@ -1,5 +1,7 @@
 """Test cases for ProjectNode."""
 
+from unittest.mock import MagicMock
+
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
@@ -152,8 +154,6 @@ class TestProjectNodeResolvers:
 
     def test_health_metrics_list_with_invalid_limit(self):
         """Test health_metrics_list returns empty list for invalid limit."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("health_metrics_list")
         mock_project = MagicMock()
 
@@ -165,8 +165,6 @@ class TestProjectNodeResolvers:
 
     def test_health_metrics_list_with_valid_limit(self):
         """Test health_metrics_list returns metrics with valid limit."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("health_metrics_list")
         mock_project = MagicMock()
         mock_metrics = [MagicMock(), MagicMock()]
@@ -179,8 +177,6 @@ class TestProjectNodeResolvers:
 
     def test_health_metrics_latest(self):
         """Test health_metrics_latest returns latest metric."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("health_metrics_latest")
         mock_project = MagicMock()
         mock_latest = MagicMock()
@@ -193,8 +189,6 @@ class TestProjectNodeResolvers:
 
     def test_health_metrics_latest_none(self):
         """Test health_metrics_latest returns None when no metrics."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("health_metrics_latest")
         mock_project = MagicMock()
         mock_project.health_metrics.order_by.return_value.first.return_value = None
@@ -205,8 +199,6 @@ class TestProjectNodeResolvers:
 
     def test_recent_milestones_with_invalid_limit(self):
         """Test recent_milestones returns empty list for invalid limit."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("recent_milestones")
         mock_project = MagicMock()
 
@@ -215,8 +207,6 @@ class TestProjectNodeResolvers:
 
     def test_issues_count(self):
         """Test issues_count resolver returns idx_issues_count."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("issues_count")
         mock_project = MagicMock()
         mock_project.idx_issues_count = 42
@@ -227,8 +217,6 @@ class TestProjectNodeResolvers:
 
     def test_key(self):
         """Test key resolver returns idx_key."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("key")
         mock_project = MagicMock()
         mock_project.idx_key = "test-project"
@@ -239,8 +227,6 @@ class TestProjectNodeResolvers:
 
     def test_languages(self):
         """Test languages resolver returns idx_languages."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("languages")
         mock_project = MagicMock()
         mock_project.idx_languages = ["Python", "JavaScript"]
@@ -251,8 +237,6 @@ class TestProjectNodeResolvers:
 
     def test_repositories_count(self):
         """Test repositories_count resolver returns idx_repositories_count."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("repositories_count")
         mock_project = MagicMock()
         mock_project.idx_repositories_count = 5
@@ -263,8 +247,6 @@ class TestProjectNodeResolvers:
 
     def test_topics(self):
         """Test topics resolver returns idx_topics."""
-        from unittest.mock import MagicMock
-
         resolver = self._get_resolver("topics")
         mock_project = MagicMock()
         mock_project.idx_topics = ["security", "owasp"]

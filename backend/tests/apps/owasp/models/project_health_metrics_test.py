@@ -286,6 +286,22 @@ class TestProjectHealthMetricsProperties:
         assert result == mock_requirements
 
 
+def _mock_monthly_queryset_chain(result: list) -> MagicMock:
+    """Build a mock for annotate().filter().order_by().values().distinct().annotate().
+
+    The production code chains these QuerySet methods; this helper returns a mock
+    that supports that chain and yields `result` from the final .annotate().
+    """
+    mock = MagicMock()
+    chain = MagicMock()
+    mock.filter.return_value = chain
+    chain.order_by.return_value = chain
+    chain.values.return_value = chain
+    chain.distinct.return_value = chain
+    chain.annotate.return_value = result
+    return mock
+
+
 class TestProjectHealthMetricsGetStats:
     """Tests for get_stats method."""
 
@@ -305,13 +321,13 @@ class TestProjectHealthMetricsGetStats:
             "total_stars": 200,
         }
         mock_get_latest.return_value = mock_queryset
-        mock_monthly_queryset = MagicMock()
-        mock_monthly_queryset.filter.return_value.order_by.return_value.values.return_value.distinct.return_value.annotate.return_value = [  # noqa: E501
-            {"month": 1, "score": 70.0},
-            {"month": 2, "score": 72.5},
-            {"month": 3, "score": 75.0},
-        ]
-        mock_annotate.return_value = mock_monthly_queryset
+        mock_annotate.return_value = _mock_monthly_queryset_chain(
+            [
+                {"month": 1, "score": 70.0},
+                {"month": 2, "score": 72.5},
+                {"month": 3, "score": 75.0},
+            ]
+        )
 
         result = ProjectHealthMetrics.get_stats()
         assert math.isclose(result.average_score, 75.5)
@@ -340,9 +356,7 @@ class TestProjectHealthMetricsGetStats:
             "total_stars": 0,
         }
         mock_get_latest.return_value = mock_queryset
-        mock_monthly_queryset = MagicMock()
-        mock_monthly_queryset.filter.return_value.order_by.return_value.values.return_value.distinct.return_value.annotate.return_value = []  # noqa: E501
-        mock_annotate.return_value = mock_monthly_queryset
+        mock_annotate.return_value = _mock_monthly_queryset_chain([])
 
         result = ProjectHealthMetrics.get_stats()
 

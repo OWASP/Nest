@@ -4,6 +4,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
+from django.core.management.base import CommandError
+
+from apps.owasp.management.commands.owasp_update_leaders import Command
 
 COMMAND_PATH = "apps.owasp.management.commands.owasp_update_leaders"
 
@@ -177,8 +180,6 @@ class TestOwaspUpdateLeaders:
     @patch(f"{COMMAND_PATH}.Chapter")
     def test_invalid_model_name(self, mock_chapter, mock_ct, mock_em):
         """Test that an invalid model name raises a CommandError."""
-        from django.core.management.base import CommandError
-
         with pytest.raises(
             CommandError, match="Error: argument model_name: invalid choice: 'invalid_model'"
         ):
@@ -242,6 +243,4 @@ class TestOwaspUpdateLeaders:
 
     @staticmethod
     def _create_command():
-        from apps.owasp.management.commands.owasp_update_leaders import Command
-
         return Command()
