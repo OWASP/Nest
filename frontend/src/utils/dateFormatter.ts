@@ -1,13 +1,10 @@
-export const formatDate = (input: number) => {
+export const formatDate = (input: number | string | Date) => {
   if (!input) {
     return ''
   }
 
-  const date = new Date(input * 1000)
-
-  if (Number.isNaN(date.getTime())) {
-    throw new Error('Invalid date')
-  }
+  const timestamp = toUnixTimestamp(input)
+  const date = new Date(timestamp * 1000)
 
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -17,13 +14,15 @@ export const formatDate = (input: number) => {
   })
 }
 
-export const formatDateRange = (startDate: number, endDate: number) => {
-  const start = new Date(startDate * 1000)
-  const end = new Date(endDate * 1000)
+export const formatDateRange = (
+  startDate: number | string | Date,
+  endDate: number | string | Date
+) => {
+  const startTimestamp = toUnixTimestamp(startDate)
+  const endTimestamp = toUnixTimestamp(endDate)
 
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new Error('Invalid date')
-  }
+  const start = new Date(startTimestamp * 1000)
+  const end = new Date(endTimestamp * 1000)
 
   if (
     start.getTime() === end.getTime() ||
@@ -118,4 +117,14 @@ export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
     startDate: startDate.toISOString().split('T')[0],
     endDate: endDate.toISOString().split('T')[0],
   }
+}
+
+export const toUnixTimestamp = (input: string | number | Date): number => {
+  if (typeof input === 'number') return input
+  const date = typeof input === 'string' ? new Date(input) : input
+
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    throw new Error('Invalid date')
+  }
+  return Math.floor(date.getTime() / 1000)
 }
