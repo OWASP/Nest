@@ -53,8 +53,8 @@ ENV NODE_ENV=production
 
 WORKDIR /tmp
 
-# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Fix CVE-2026-23745: Update npm's bundled tar to 7.5.7 in runner stage
+# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN npm pack tar@7.5.7 && \
     tar -xzf tar-7.5.7.tgz && \
