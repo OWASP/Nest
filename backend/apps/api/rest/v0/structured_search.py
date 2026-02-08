@@ -59,7 +59,7 @@ def apply_structured_search(
     }
 
     try:
-        parser = QueryParser(field_schema=parser_schema, strict=False)
+        parser = QueryParser(field_schema=parser_schema, strict=False, case_sensitive=True)
         conditions = parser.parse(query)
     except QueryParserError:
         # Fail safely

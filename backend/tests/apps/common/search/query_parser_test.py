@@ -217,3 +217,9 @@ class TestQueryParser:
         assert len(results) == 2
         assert results[0]["value"] == '"OWASP Nest"'
         assert results[1]["value"] == '"John Doe"'
+
+    def test_case_sensitivity_toggle(self):
+        """Verify that the case_sensitive flag controls value normalization."""
+        query = "Author:OWASP"
+        cs_result = self.case_sensitive_parser.parse(query)
+        assert cs_result[0]["value"] == "OWASP"
