@@ -23,7 +23,7 @@ class ElevenLabs:
         model_id: str = "eleven_multilingual_v2",
         output_format: str = "mp3_44100_128",
         similarity_boost: float = 0.75,
-        speed: float = 0.75,
+        speed: float = 0.85,
         stability: float = 0.5,
         style: float = 0.0,
         voice_id: str = "TX3LPaxmHKxFdv7VOQHJ",  # Liam # cspell:disable-line
