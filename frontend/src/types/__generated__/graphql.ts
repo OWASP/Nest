@@ -227,6 +227,7 @@ export type IssueNode = Node & {
   pullRequests: Array<PullRequestNode>;
   repositoryName?: Maybe<Scalars['String']['output']>;
   state: Scalars['String']['output'];
+  taskDeadline?: Maybe<Scalars['DateTime']['output']>;
   title: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
