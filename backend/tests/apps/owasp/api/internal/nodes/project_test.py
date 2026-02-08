@@ -168,11 +168,13 @@ class TestProjectNodeResolvers:
         resolver = self._get_resolver("health_metrics_list")
         mock_project = MagicMock()
         mock_metrics = [MagicMock(), MagicMock()]
-        mock_project.health_metrics.order_by.return_value.__getitem__.return_value = mock_metrics
+        mock_sliced = MagicMock()
+        mock_sliced.__reversed__ = lambda _: iter(mock_metrics)
+        mock_project.health_metrics.order_by.return_value.__getitem__.return_value = mock_sliced
 
         result = resolver(None, mock_project, limit=10)
 
-        mock_project.health_metrics.order_by.assert_called_once_with("nest_created_at")
+        mock_project.health_metrics.order_by.assert_called_once_with("-nest_created_at")
         assert result == mock_metrics
 
     def test_health_metrics_latest(self):
