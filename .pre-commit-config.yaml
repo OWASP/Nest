@@ -92,7 +92,8 @@ repos:
     rev: v26.1.1
     hooks:
       - id: ansible-lint
+        language_version: python3
         args:
           - .github/ansible
         files: ^\.github/ansible/.*\.ya?ml$
-        pass_filenames: false
+        pass_filenames: true
