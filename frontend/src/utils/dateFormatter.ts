@@ -2,8 +2,8 @@ export const toUnixTimestamp = (input: string | number | Date): number => {
   if (typeof input === 'number') return input
   const date = typeof input === 'string' ? new Date(input) : input
 
-  if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) {
-    throw new Error('Invalid date')
+  if (!date || Number.isNaN(date.getTime())) {
+    return Number.NaN
   }
   return Math.floor(date.getTime() / 1000)
 }
