@@ -53,11 +53,15 @@ class ProjectNode(GenericEntityNode):
     def health_metrics_list(
         self, root: Project, limit: int = 30
     ) -> list[ProjectHealthMetricsNode]:
-        """Resolve project health metrics."""
+        """Resolve project health metrics for chart display.
+
+        Returns the N most recent metrics in chronological order (oldest to newest)
+        so charts display correctly from left to right.
+        """
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
-        return root.health_metrics.order_by("nest_created_at")[:normalized_limit]
+        return list(reversed(root.health_metrics.order_by("-nest_created_at")[:normalized_limit]))
 
     @strawberry_django.field(prefetch_related=["health_metrics"])
     def health_metrics_latest(self, root: Project) -> ProjectHealthMetricsNode | None:

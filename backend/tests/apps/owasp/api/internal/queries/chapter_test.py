@@ -60,3 +60,11 @@ class TestChapterResolution:
         with patch.object(query, "recent_chapters", return_value=mock_chapters):
             result = query.recent_chapters(limit=2)
             assert result == mock_chapters
+
+    def test_recent_chapters_with_invalid_limit(self, mock_info):
+        """Test recent_chapters with invalid limit returns empty list."""
+        query = ChapterQuery()
+        result = query.recent_chapters(limit=0)
+        assert result == []
+        result = query.recent_chapters(limit=-1)
+        assert result == []
