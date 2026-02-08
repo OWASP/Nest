@@ -602,4 +602,97 @@ describe('About Component', () => {
       })
     })
   })
+
+  test('renders milestone with progress 0 - Not Started', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            ...mockAboutData,
+            project: {
+              ...mockAboutData.project,
+              recentMilestones: [
+                {
+                  ...mockAboutData.project.recentMilestones[0],
+                  progress: 0,
+                  title: 'Not Started',
+                },
+              ],
+            },
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+    await act(async () => {
+      render(<About />)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Not Started')).toBeInTheDocument()
+    })
+  })
+
+  test('renders milestone with progress 50 - In Progress', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            ...mockAboutData,
+            project: {
+              ...mockAboutData.project,
+              recentMilestones: [
+                {
+                  ...mockAboutData.project.recentMilestones[0],
+                  progress: 50,
+                  title: 'In Progress Milestone',
+                },
+              ],
+            },
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+    await act(async () => {
+      render(<About />)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('In Progress Milestone')).toBeInTheDocument()
+    })
+  })
+
+  test('renders milestone with progress 100 - Completed', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            ...mockAboutData,
+            project: {
+              ...mockAboutData.project,
+              recentMilestones: [
+                {
+                  ...mockAboutData.project.recentMilestones[0],
+                  progress: 100,
+                  title: 'Completed',
+                },
+              ],
+            },
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+    await act(async () => {
+      render(<About />)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Completed')).toBeInTheDocument()
+    })
+  })
 })

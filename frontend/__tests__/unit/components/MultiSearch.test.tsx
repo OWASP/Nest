@@ -817,8 +817,7 @@ describe('Rendering', () => {
   describe('Component Cleanup', () => {
     it('cancels debounced search on unmount', () => {
       const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener')
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { debounce } = require('lodash')
+      const { debounce } = jest.requireMock('lodash')
       const { unmount } = render(<MultiSearchBar {...defaultProps} />)
 
       unmount()

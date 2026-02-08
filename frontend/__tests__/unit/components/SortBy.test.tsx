@@ -94,4 +94,55 @@ describe('<SortBy />', () => {
     expect(container).toBeInTheDocument()
     expect(hiddenSelect).toHaveAccessibleName(/Sort By/)
   })
+
+  it('toggles order when Enter key is pressed on order button', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedOrder="asc" />)
+    })
+    await act(async () => {
+      const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+      fireEvent.keyDown(orderButton, { key: 'Enter' })
+    })
+    expect(defaultProps.onOrderChange).toHaveBeenCalledWith('desc')
+  })
+
+  it('toggles order when Space key is pressed on order button', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedOrder="desc" />)
+    })
+    await act(async () => {
+      const orderButton = screen.getByLabelText(/Sort in descending order/i)
+      fireEvent.keyDown(orderButton, { key: ' ' })
+    })
+    expect(defaultProps.onOrderChange).toHaveBeenCalledWith('asc')
+  })
+
+  it('does not toggle order when other keys are pressed on order button', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedOrder="asc" />)
+    })
+    await act(async () => {
+      const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+      fireEvent.keyDown(orderButton, { key: 'Tab' })
+    })
+    expect(defaultProps.onOrderChange).not.toHaveBeenCalled()
+  })
+
+  it('returns null when sortOptions is empty', () => {
+    const { container } = render(<SortBy {...defaultProps} sortOptions={[]} />)
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('returns null when sortOptions is undefined', () => {
+    const { container } = render(<SortBy {...defaultProps} sortOptions={undefined} />)
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('hides sort order button when selectedSortOption is "default"', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="default" />)
+    })
+    const orderButtons = screen.queryByLabelText(/Sort in ascending order/i)
+    expect(orderButtons).not.toBeInTheDocument()
+  })
 })

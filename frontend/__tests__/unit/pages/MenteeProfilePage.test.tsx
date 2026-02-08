@@ -284,4 +284,161 @@ describe('MenteeProfilePage', () => {
     const emptyMessages = screen.getAllByText('No issues found for the selected filter.')
     expect(emptyMessages.length).toBeGreaterThan(0)
   })
+
+  describe('handleIssueClick', () => {
+    beforeEach(() => {
+      jest.spyOn(window, 'open').mockImplementation(() => null)
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    it('opens the issue URL in a new tab when clicking on an issue with a URL', () => {
+      mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      // The IssuesTable component renders the title as a button - click on it
+      const issueButton = screen.getAllByRole('button', { name: 'Open Issue 1' })[0]
+      fireEvent.click(issueButton)
+      expect(window.open).toHaveBeenCalledWith(
+        'http://example.com/issue1',
+        '_blank',
+        'noopener,noreferrer'
+      )
+    })
+
+    it('does not call window.open when issue has no URL', () => {
+      const dataWithNoUrl = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Issue without URL',
+            state: 'open',
+            url: '',
+            labels: ['bug'],
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithNoUrl, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      const issueButton = screen.getAllByRole('button', { name: 'Issue without URL' })[0]
+      fireEvent.click(issueButton)
+      // window.open should not be called for empty URL
+      expect(window.open).not.toHaveBeenCalled()
+    })
+
+    it('does not call window.open when issue URL is undefined', () => {
+      const dataWithUndefinedUrl = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Issue with undefined URL',
+            state: 'open',
+            url: undefined,
+            labels: ['bug'],
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithUndefinedUrl, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      const issueButton = screen.getAllByRole('button', { name: 'Issue with undefined URL' })[0]
+      fireEvent.click(issueButton)
+      // window.open should not be called for undefined URL
+      expect(window.open).not.toHaveBeenCalled()
+    })
+  })
+
+  it('renders mentee name from login when name is not provided', () => {
+    const dataWithoutName = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        name: null,
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithoutName, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    // Should show login as the heading when name is null
+    const headings = screen.getAllByRole('heading')
+    const nameHeading = headings.find((h) => h.textContent === 'test-mentee')
+    expect(nameHeading).toBeInTheDocument()
+  })
+
+  it('does not render bio section when bio is not provided', () => {
+    const dataWithoutBio = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        bio: null,
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithoutBio, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    expect(screen.queryByText('A test bio.')).not.toBeInTheDocument()
+  })
+
+  it('does not render domains/skills section when both are empty', () => {
+    const dataWithoutDomainsAndTags = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        domains: [],
+        tags: [],
+      },
+    }
+    mockUseQuery.mockReturnValue({
+      data: dataWithoutDomainsAndTags,
+      loading: false,
+      error: undefined,
+    })
+    render(<MenteeProfilePage />)
+
+    expect(screen.queryByRole('heading', { name: /Domains/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /Skills & Technologies/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders only domains section when tags are empty', () => {
+    const dataWithOnlyDomains = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        domains: ['frontend'],
+        tags: [],
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithOnlyDomains, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    expect(screen.getByRole('heading', { name: /Domains/i })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /Skills & Technologies/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders only skills section when domains are empty', () => {
+    const dataWithOnlyTags = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        domains: [],
+        tags: ['react'],
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithOnlyTags, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    expect(screen.queryByRole('heading', { name: /Domains/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Skills & Technologies/i })).toBeInTheDocument()
+  })
 })

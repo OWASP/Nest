@@ -52,6 +52,30 @@ jest.mock('components/skeletons/UserCard', () => {
   }
 })
 
+jest.mock('components/skeletons/SnapshotSkeleton', () => {
+  return function MockSnapshotSkeleton() {
+    return <div data-testid="snapshot-skeleton" />
+  }
+})
+
+jest.mock('components/skeletons/AboutSkeleton', () => {
+  return function MockAboutSkeleton() {
+    return <div data-testid="about-skeleton" />
+  }
+})
+
+jest.mock('components/skeletons/MemberDetailsPageSkeleton', () => {
+  return function MockMemberDetailsPageSkeleton() {
+    return <div data-testid="member-details-skeleton" />
+  }
+})
+
+jest.mock('components/skeletons/OrganizationDetailsPageSkeleton', () => {
+  return function MockOrganizationDetailsPageSkeleton() {
+    return <div data-testid="organization-details-skeleton" />
+  }
+})
+
 describe('SkeletonBase', () => {
   const defaultProps = {
     indexName: 'projects',
@@ -115,6 +139,50 @@ describe('SkeletonBase', () => {
 
       const skeletonComponents = screen.getAllByTestId('card-skeleton')
       expect(skeletonComponents).toHaveLength(4)
+    })
+
+    it('renders user cards grid for organizations indexName', () => {
+      render(<SkeletonBase indexName="organizations" loadingImageUrl="test.jpg" />)
+
+      const userCards = screen.getAllByTestId('user-card-skeleton')
+      expect(userCards).toHaveLength(12)
+
+      const gridContainer = userCards[0].parentElement
+      expect(gridContainer).toHaveClass('grid', 'grid-cols-1', 'gap-6')
+    })
+
+    it('renders snapshot skeletons for snapshots indexName', () => {
+      render(<SkeletonBase indexName="snapshots" loadingImageUrl="test.jpg" />)
+
+      const snapshotCards = screen.getAllByTestId('snapshot-skeleton')
+      expect(snapshotCards).toHaveLength(12)
+
+      const gridContainer = snapshotCards[0].parentElement
+      expect(gridContainer).toHaveClass('grid', 'grid-cols-1', 'gap-6')
+    })
+
+    it('renders AboutSkeleton for about indexName', () => {
+      render(<SkeletonBase indexName="about" loadingImageUrl="test.jpg" />)
+
+      expect(screen.getByTestId('about-skeleton')).toBeInTheDocument()
+    })
+
+    it('renders MemberDetailsPageSkeleton for member-details indexName', () => {
+      render(<SkeletonBase indexName="member-details" loadingImageUrl="test.jpg" />)
+
+      expect(screen.getByTestId('member-details-skeleton')).toBeInTheDocument()
+    })
+
+    it('renders MemberDetailsPageSkeleton for members indexName', () => {
+      render(<SkeletonBase indexName="members" loadingImageUrl="test.jpg" />)
+
+      expect(screen.getByTestId('member-details-skeleton')).toBeInTheDocument()
+    })
+
+    it('renders OrganizationDetailsPageSkeleton for organizations-details indexName', () => {
+      render(<SkeletonBase indexName="organizations-details" loadingImageUrl="test.jpg" />)
+
+      expect(screen.getByTestId('organization-details-skeleton')).toBeInTheDocument()
     })
   })
 

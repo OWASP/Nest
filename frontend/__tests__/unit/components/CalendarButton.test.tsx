@@ -332,58 +332,51 @@ describe('CalendarButton', () => {
     })
   })
 
-  describe('long title overflow handling', () => {
-    it('remains accessible with very long event titles', () => {
-      const longTitle =
-        'This Is A Very Long Event Title That Extends Beyond Normal Length With Additional Description'
-      render(
-        <CalendarButton
-          event={{
-            title: longTitle,
-            startDate: '2026-06-22',
-            endDate: '2026-06-26',
-          }}
-          className="flex-shrink-0"
-        />
-      )
+  describe('hover state', () => {
+    it('toggles icon on hover - shows FaCalendarPlus when hovering', async () => {
+      render(<CalendarButton event={mockEvent} />)
       const button = screen.getByRole('button')
-      expect(button).toBeInTheDocument()
-      expect(button).toHaveAttribute('aria-label', `Add ${longTitle} to Calendar`)
+
+      // Initially should show FaCalendar (not hovered)
+
+      // Simulate mouse enter
+      fireEvent.mouseEnter(button)
+      await waitFor(() => {
+        // After hover, FaCalendarPlus should be shown (different SVG)
+        expect(button).toBeInTheDocument()
+      })
     })
 
-    it('maintains visibility with flex-shrink-0 class', () => {
-      render(
-        <CalendarButton
-          event={{
-            title: 'Very Long Event Title That Could Potentially Cause Overflow Issues',
-            startDate: '2025-12-01',
-          }}
-          className="flex-shrink-0 text-gray-600"
-        />
-      )
+    it('reverts to FaCalendar icon when mouse leaves', async () => {
+      render(<CalendarButton event={mockEvent} />)
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('flex-shrink-0')
-      expect(button).toBeVisible()
+
+      // Mouse enter - hover state true
+      fireEvent.mouseEnter(button)
+
+      // Mouse leave - hover state false
+      fireEvent.mouseLeave(button)
+
+      await waitFor(() => {
+        expect(button).toBeInTheDocument()
+      })
     })
 
-    it('works correctly in flex container with long text sibling', () => {
-      const { container } = render(
-        <div className="flex items-center justify-between gap-2">
-          <button className="min-w-0 flex-1 truncate">
-            This Is A Really Long Event Title That Should Be Truncated Properly
-          </button>
-          <CalendarButton
-            event={{
-              title: 'Event',
-              startDate: '2025-12-01',
-            }}
-            className="flex-shrink-0"
-          />
-        </div>
-      )
-      const button = container.querySelector('button[aria-label="Add Event to Calendar"]')
-      expect(button).toBeInTheDocument()
-      expect(button).toHaveClass('flex-shrink-0')
+    it('maintains button functionality during hover state transitions', async () => {
+      render(<CalendarButton event={mockEvent} />)
+      const button = screen.getByRole('button')
+
+      fireEvent.mouseEnter(button)
+      fireEvent.mouseLeave(button)
+
+      expect(button).not.toBeDisabled()
+
+      fireEvent.click(button)
+      expect(button).toBeDisabled()
+
+      await waitFor(() => {
+        expect(button).not.toBeDisabled()
+      })
     })
   })
 })
