@@ -5,7 +5,7 @@ import pytest
 from django.utils import timezone
 from github.GithubException import UnknownObjectException
 
-from apps.github.common import sync_repository
+from apps.github.common import sync_issue_comments, sync_repository
 
 
 @pytest.fixture
@@ -68,7 +68,6 @@ def gh_item_factory():
 
     def _create_item(**kwargs):
         item = MagicMock()
-        # Set default attributes that are almost always needed
         item.updated_at = kwargs.pop("updated_at", timezone.now())
         item.pull_request = kwargs.pop("pull_request", None)
         item.milestone = kwargs.pop("milestone", None)
@@ -76,8 +75,6 @@ def gh_item_factory():
         item.labels = kwargs.pop("labels", [])
         item.creator = kwargs.pop("creator", MagicMock())
         item.get_labels = lambda: item.labels
-
-        # Apply any other specific attributes
         for key, value in kwargs.items():
             setattr(item, key, value)
 
@@ -374,3 +371,170 @@ class TestSyncRepository:
             repository=mock_repo,
         )
         mock_common_deps["PullRequest"].update_data.return_value.labels.add.assert_called_once()
+
+
+class TestSyncIssueComments:
+    """Tests for the sync_issue_comments function."""
+
+    @pytest.fixture
+    def mock_comment_deps(self, mocker):
+        """Mock all dependencies for the sync_issue_comments function."""
+        return {
+            "User": mocker.patch("apps.github.common.User"),
+            "Comment": mocker.patch("apps.github.common.Comment"),
+            "logger": mocker.patch("apps.github.common.logger"),
+        }
+
+    @pytest.fixture
+    def mock_gh_client(self):
+        """Provide a mock GitHub client."""
+        return MagicMock()
+
+    @pytest.fixture
+    def mock_issue(self):
+        """Provide a mock Issue model instance."""
+        issue = MagicMock()
+        issue.number = 42
+        issue.repository = MagicMock()
+        issue.repository.path = "owasp/test-repo"
+        issue.latest_comment = None
+        issue.updated_at = timezone.now() - td(days=1)
+        return issue
+
+    def test_sync_issue_comments_no_repository(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test that sync_issue_comments logs warning when issue has no repository."""
+        mock_issue.repository = None
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_comment_deps["logger"].warning.assert_called_once_with(
+            "Issue #%s has no repository, skipping", mock_issue.number
+        )
+
+    def test_sync_issue_comments_basic_success(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test successful comment sync."""
+        mock_gh_comment = MagicMock()
+        mock_gh_comment.user = MagicMock()
+        mock_gh_comment.id = 123
+
+        mock_gh_repo = MagicMock()
+        mock_gh_issue = MagicMock()
+        mock_gh_repo.get_issue.return_value = mock_gh_issue
+        mock_gh_issue.get_comments.return_value = [mock_gh_comment]
+        mock_gh_client.get_repo.return_value = mock_gh_repo
+
+        mock_comment_deps["User"].update_data.return_value = MagicMock()
+        mock_comment = MagicMock()
+        mock_comment_deps["Comment"].update_data.return_value = mock_comment
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_comment_deps["User"].update_data.assert_called_with(mock_gh_comment.user)
+        mock_comment_deps["Comment"].update_data.assert_called_once()
+        mock_comment_deps["Comment"].bulk_save.assert_called_once_with([mock_comment])
+
+    def test_sync_issue_comments_with_latest_comment(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test sync_issue_comments uses latest_comment time for 'since'."""
+        mock_issue.latest_comment = MagicMock()
+        mock_issue.latest_comment.updated_at = timezone.now() - td(days=2)
+        mock_issue.latest_comment.created_at = timezone.now() - td(days=3)
+
+        mock_gh_repo = MagicMock()
+        mock_gh_issue = MagicMock()
+        mock_gh_repo.get_issue.return_value = mock_gh_issue
+        mock_gh_issue.get_comments.return_value = []
+        mock_gh_client.get_repo.return_value = mock_gh_repo
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_gh_issue.get_comments.assert_called_once_with(
+            since=mock_issue.latest_comment.updated_at
+        )
+
+    def test_sync_issue_comments_author_update_fails(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test sync_issue_comments skips comment when author update fails."""
+        mock_gh_comment = MagicMock()
+        mock_gh_comment.user = MagicMock()
+        mock_gh_comment.id = 456
+
+        mock_gh_repo = MagicMock()
+        mock_gh_issue = MagicMock()
+        mock_gh_repo.get_issue.return_value = mock_gh_issue
+        mock_gh_issue.get_comments.return_value = [mock_gh_comment]
+        mock_gh_client.get_repo.return_value = mock_gh_repo
+
+        mock_comment_deps["User"].update_data.return_value = None
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_comment_deps["logger"].warning.assert_called_with(
+            "Could not sync author for comment %s", mock_gh_comment.id
+        )
+        mock_comment_deps["Comment"].update_data.assert_not_called()
+        mock_comment_deps["Comment"].bulk_save.assert_not_called()
+
+    def test_sync_issue_comments_unknown_object_exception(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test sync_issue_comments handles UnknownObjectException."""
+        mock_gh_client.get_repo.side_effect = UnknownObjectException(
+            status=404, data={}, headers={}
+        )
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_comment_deps["logger"].warning.assert_called()
+
+    def test_sync_issue_comments_unexpected_exception(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test sync_issue_comments handles unexpected exceptions."""
+        mock_gh_client.get_repo.side_effect = RuntimeError("Unexpected error")
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_comment_deps["logger"].exception.assert_called()
+
+    def test_sync_issue_comments_no_since_date(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test sync_issue_comments with no since date fallback."""
+        mock_issue.latest_comment = None
+        mock_issue.updated_at = None
+
+        mock_gh_repo = MagicMock()
+        mock_gh_issue = MagicMock()
+        mock_gh_repo.get_issue.return_value = mock_gh_issue
+        mock_gh_issue.get_comments.return_value = []
+        mock_gh_client.get_repo.return_value = mock_gh_repo
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_gh_issue.get_comments.assert_called_once_with()
+
+    def test_sync_issue_comments_latest_comment_uses_created_at(
+        self, mock_comment_deps, mock_gh_client, mock_issue
+    ):
+        """Test sync_issue_comments uses created_at when updated_at is None."""
+        created_at = timezone.now() - td(days=5)
+        mock_issue.latest_comment = MagicMock()
+        mock_issue.latest_comment.updated_at = None
+        mock_issue.latest_comment.created_at = created_at
+
+        mock_gh_repo = MagicMock()
+        mock_gh_issue = MagicMock()
+        mock_gh_repo.get_issue.return_value = mock_gh_issue
+        mock_gh_issue.get_comments.return_value = []
+        mock_gh_client.get_repo.return_value = mock_gh_repo
+
+        sync_issue_comments(mock_gh_client, mock_issue)
+
+        mock_gh_issue.get_comments.assert_called_once_with(since=created_at)

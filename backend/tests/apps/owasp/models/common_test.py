@@ -436,3 +436,141 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         leaders_to_save = call_args[0][1]
 
         assert len(leaders_to_save) == 2  # Updated existing + new leader
+
+    @pytest.mark.parametrize(
+        ("name", "expected_owasp_name"),
+        [
+            ("Test Project", "OWASP Test Project"),
+            ("OWASP Already Prefixed", "OWASP Already Prefixed"),
+            ("", "OWASP "),
+        ],
+    )
+    def test_owasp_name_property(self, name, expected_owasp_name):
+        """Test owasp_name property prefixes OWASP when needed."""
+        model = EntityModel()
+        model.name = name
+        assert model.owasp_name == expected_owasp_name
+
+    def test_generate_summary_empty_prompt(self):
+        """Test generate_summary returns early when prompt is empty."""
+        model = EntityModel()
+        model.summary = "existing"
+        mock_open_ai = MagicMock()
+
+        model.generate_summary(prompt="", open_ai=mock_open_ai)
+
+        mock_open_ai.set_input.assert_not_called()
+        assert model.summary == "existing"
+
+    def test_generate_summary_none_prompt(self):
+        """Test generate_summary returns early when prompt is None."""
+        model = EntityModel()
+        model.summary = "existing"
+        mock_open_ai = MagicMock()
+
+        model.generate_summary(prompt=None, open_ai=mock_open_ai)
+
+        mock_open_ai.set_input.assert_not_called()
+        assert model.summary == "existing"
+
+    def test_from_github_sets_values(self):
+        """Test from_github properly sets field values."""
+        model = EntityModel()
+        model.name = ""
+        model.leaders_raw = []
+        model.is_leaders_policy_compliant = True
+        model.tags = []
+
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        mock_metadata = {
+            "title": "Test Project",
+            "leader": "",
+            "tags": ["tag1", "tag2"],
+        }
+
+        with (
+            patch.object(model, "get_metadata", return_value=mock_metadata),
+            patch.object(model, "get_leaders", return_value=["Leader1", "Leader2"]),
+        ):
+            model.from_github({"name": "title"})
+
+        assert model.name == "Test Project"
+        assert model.leaders_raw == ["Leader1", "Leader2"]
+        assert model.is_leaders_policy_compliant
+
+    @pytest.mark.parametrize(
+        ("url", "exclude_domains", "include_domains", "expected_result"),
+        [
+            ("https://excluded.com/path", ("excluded.com",), (), None),
+            ("https://other.com/path", (), ("included.com",), None),
+            ("https://included.com/path", (), ("included.com",), "https://included.com/path"),
+            ("/cdn-cgi/l/email-protection#abc123", (), (), None),
+            ("", (), (), None),
+            (None, (), (), None),
+        ],
+    )
+    def test_get_related_url_edge_cases(
+        self, url, exclude_domains, include_domains, expected_result
+    ):
+        """Test get_related_url with edge cases."""
+        model = EntityModel()
+        result = model.get_related_url(
+            url, exclude_domains=exclude_domains, include_domains=include_domains
+        )
+        assert result == expected_result
+
+    def test_get_metadata_yaml_scanner_error(self):
+        """Test get_metadata handles YAML scanner errors gracefully."""
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "test-repo"
+        repository.key = "test-repo"
+        model.owasp_repository = repository
+
+        invalid_yaml = """---
+        invalid: yaml: content: [broken
+        ---"""
+
+        with patch(
+            "apps.owasp.models.common.get_repository_file_content", return_value=invalid_yaml
+        ):
+            result = model.get_metadata()
+
+        assert result == {}
+
+    def test_get_urls_with_domain_value_error(self):
+        """Test get_urls handles ValueError during domain filtering."""
+        from urllib.parse import urlparse as original_urlparse
+
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+        content = """* [Link](https://example.com)
+* [Other](https://other.com)"""
+
+        def side_effect_urlparse(url):
+            if "other.com" in url:
+                msg = "forced error"
+                raise ValueError(msg)
+            return original_urlparse(url)
+
+        with (
+            patch("apps.owasp.models.common.get_repository_file_content", return_value=content),
+            patch("apps.owasp.models.common.urlparse", side_effect=side_effect_urlparse),
+        ):
+            urls = model.get_urls(domain="example.com")
+
+        assert "https://example.com" in urls
+
+    def test_github_file_urls_no_repository(self):
+        """Test file URLs return None when no repository is linked."""
+        model = EntityModel()
+        model.owasp_repository = None
+
+        assert model.index_md_url is None
+        assert model.info_md_url is None
+        assert model.leaders_md_url is None

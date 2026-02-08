@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.repository_contributor import RepositoryContributor
 
@@ -42,7 +43,7 @@ class RepositoryContributorQuery:
             list: List of top contributors with their details.
 
         """
-        if (limit := min(limit, MAX_LIMIT)) <= 0:
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
         top_contributors = RepositoryContributor.get_top_contributors(
@@ -50,7 +51,7 @@ class RepositoryContributorQuery:
             committee=committee,
             excluded_usernames=excluded_usernames,
             has_full_name=has_full_name,
-            limit=limit,
+            limit=normalized_limit,
             organization=organization,
             project=project,
             repository=repository,

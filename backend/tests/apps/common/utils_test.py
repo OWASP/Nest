@@ -13,6 +13,7 @@ from apps.common.utils import (
     join_values,
     natural_date,
     natural_number,
+    normalize_limit,
     round_down,
     validate_url,
 )
@@ -170,29 +171,110 @@ class TestUtils:
     @pytest.mark.parametrize(
         ("url", "expected"),
         [
+            # Valid URLs.
             ("https://example.com", True),
             ("http://example.com", True),
             ("https://example.com/path", True),
             ("https://example.com/path?query=1", True),
             ("https://example.com/path#fragment", True),
             ("https://subdomain.example.com", True),
+            ("https://sub-domain.example.com", True),
+            ("https://example-domain.com", True),
             ("https://example.com:8080", True),
             ("https://example.com:8080/path", True),
+            ("https://example", True),
+            ("https://example.", True),
+            ("https://example.com.", True),
+            ("https://192.168.1.1", True),
+            ("https://[::1]", True),
+            ("https://[2001:db8::1]", True),
+            ("https://example.com:1", True),
+            ("https://example.com:80", True),
+            ("https://example.com:443", True),
+            ("https://example.com:65535", True),
+            ("https://example123.com", True),
+            ("https://123example.com", True),
+            # Invalid URLs - empty or None.
             ("", False),
             (None, False),
             ("not-a-url", False),
+            # Invalid URLs - wrong scheme.
             ("ftp://example.com", False),
+            ("javascript:alert(1)", False),
+            ("data:text/html,<script>alert(1)</script>", False),
+            ("file:///etc/passwd", False),
+            # Invalid URLs - missing netloc.
             ("https://", False),
             ("http://", False),
-            ("https://example", True),  # Valid single label domain
-            ("https://example.", True),  # Valid with trailing dot
-            ("https://example.com.", True),  # Valid with trailing dot
-            ("https://192.168.1.1", True),  # Valid IP address
-            ("https://[::1]", True),  # Valid IPv6 address
-            ("https://example.com:99999", True),  # Valid port (urlparse accepts it)
+            ("http://.", False),
+            ("http://-", False),
+            ("https://...", False),
+            ("http://---", False),
+            ("http:// ", False),
+            ("https://. ", False),
+            ("http://.example.com", False),
+            ("https://-example.com", False),
+            ("https://example.com-", False),
+            # Invalid URLs - invalid port.
+            ("https://example.com:0", False),
+            ("https://example.com:65536", False),
+            ("https://example.com:99999", False),
+            ("https://example.com:100000", False),
+            # Invalid URLs - has control characters.
+            ("http://example.com\x00", False),
+            ("http://exam\x00ple.com", False),
+            ("http://example.com\x01", False),
+            ("http://example.com\n", False),
+            ("http://example.com\r", False),
+            ("http://example.com\t", False),
+            # Invalid URLs - too long.
+            ("https://" + "a" * 2050 + ".com", False),
+            ("https://example.com/" + "x" * 2050, False),
         ],
     )
     def test_validate_url(self, url, expected):
         """Test the validate_url function."""
         result = validate_url(url)
-        assert result == expected
+        assert result == expected, f"validate_url({url!r}) returned {result}, expected {expected}"
+
+    @pytest.mark.parametrize(
+        ("limit", "max_limit", "expected"),
+        [
+            (5, 1000, 5),
+            (100, 1000, 100),
+            (1000, 1000, 1000),
+            (1500, 1000, 1000),
+            (999, 1000, 999),
+            (0, 1000, None),
+            (-5, 1000, None),
+            (5, 10, 5),
+            (15, 10, 10),
+            (100, 50, 50),
+            (1, 1, 1),
+        ],
+    )
+    def test_normalize_limit(self, limit, max_limit, expected):
+        """Test the normalize_limit function with valid integers."""
+        assert normalize_limit(limit, max_limit) == expected
+
+    @pytest.mark.parametrize(
+        ("limit", "max_limit"),
+        [
+            ("invalid", 1000),
+            ("5.5", 1000),
+            (None, 1000),
+            ([], 1000),
+            ({}, 1000),
+        ],
+    )
+    def test_normalize_limit_invalid_types(self, limit, max_limit):
+        """Test the normalize_limit function with invalid types."""
+        assert normalize_limit(limit, max_limit) is None
+
+    def test_normalize_limit_default_max_limit(self):
+        """Test the normalize_limit function with default max_limit."""
+        assert normalize_limit(500) == 500
+        assert normalize_limit(1000) == 1000
+        assert normalize_limit(1500) == 1000
+        assert normalize_limit(-1) is None
+        assert normalize_limit(0) is None

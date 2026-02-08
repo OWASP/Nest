@@ -2,13 +2,12 @@
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa'
 import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
-import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -18,9 +17,6 @@ const RepositoryDetailsPage = () => {
     repositoryKey: string
     organizationKey: string
   }>()
-  const [repository, setRepository] = useState(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [recentPullRequests, setRecentPullRequests] = useState(null)
   const {
     data,
     error: graphQLRequestError,
@@ -28,22 +24,22 @@ const RepositoryDetailsPage = () => {
   } = useQuery(GetRepositoryDataDocument, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
+
+  const repository = data?.repository
+  const topContributors = data?.topContributors ?? []
+  const recentPullRequests = data?.recentPullRequests
+
   useEffect(() => {
-    if (data) {
-      setRepository(data.repository)
-      setTopContributors(data.topContributors)
-      setRecentPullRequests(data.recentPullRequests)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [data, graphQLRequestError, repositoryKey])
+  }, [graphQLRequestError])
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !repository) {
+  if (!repository) {
     return (
       <ErrorDisplay
         message="Sorry, the Repository you're looking for doesn't exist"

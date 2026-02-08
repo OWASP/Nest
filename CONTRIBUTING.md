@@ -16,14 +16,14 @@ The project uses a **containerized approach** for both development and productio
 
 Before contributing, ensure you have the following installed:
 
-1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
-1. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using virtual environment with `pip install pre-commit` command, as OS package with `apt install pre-commit` / `brew install pre-commit` or any other method depending on your configuration.
-
-1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+1. **Docker**: Required for running the Nest instance - [Docker documentation](https://docs.docker.com/).
+1. **pre-commit**: Required to automate code checks - [pre-commit documentation](https://pre-commit.com/)
+1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL documentation](https://docs.microsoft.com/en-us/windows/wsl/).
    1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
       If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
-   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
+   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. You can enter the Linux environment by running `wsl`. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
    1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
+   1. Cloning or running the project under `/mnt/c` (the Windows C: drive) can lead to significant performance degradation and Docker permission issues.
 
 ## Starring the Project
 
@@ -405,6 +405,41 @@ make test
 
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
+
+### Running Security Scan
+
+Run the security scans for vulnerabilities and anti-patterns with the following command:
+
+```bash
+make security-scan
+```
+
+This command automatically:
+
+- Performs local Semgrep and Trivy scans
+- Outputs findings to the terminal for immediate review
+
+For addressing findings:
+
+- Review the output for specific file paths and line numbers
+- Follow the documentation links provided in the output for remediation guidance
+- Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
+
+#### Running Code Scans Only
+
+You can run code scan part separately via
+
+```bash
+make security-scan-code
+```
+
+#### Running Image Scans Only
+
+You can run image scan part separately via
+
+```bash
+make security-scan-images
+```
 
 ### Running e2e Tests
 

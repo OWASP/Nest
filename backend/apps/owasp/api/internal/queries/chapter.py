@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.utils import normalize_limit
 from apps.owasp.api.internal.nodes.chapter import ChapterNode
 from apps.owasp.models.chapter import Chapter
 
@@ -24,8 +25,7 @@ class ChapterQuery:
     @strawberry_django.field
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""
-        return (
-            Chapter.active_chapters.order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return Chapter.active_chapters.order_by("-created_at")[:normalized_limit]

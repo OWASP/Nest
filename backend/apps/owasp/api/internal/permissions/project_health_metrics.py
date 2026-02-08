@@ -13,7 +13,12 @@ class HasDashboardAccess(BasePermission):
         """Check if the user has dashboard access."""
         return (
             True
-            if settings.IS_E2E_ENVIRONMENT or settings.IS_FUZZ_ENVIRONMENT
+            # TODO(arkid15r): Remove the environment check when we have proper auth in place.
+            if (
+                settings.IS_E2E_ENVIRONMENT
+                or settings.IS_FUZZ_ENVIRONMENT
+                or settings.IS_STAGING_ENVIRONMENT
+            )
             else (
                 (user := info.context.request.user)
                 and user.is_authenticated

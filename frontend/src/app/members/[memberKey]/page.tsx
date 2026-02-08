@@ -3,24 +3,20 @@ import { useQuery } from '@apollo/client/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useTheme } from 'next-themes'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { FaCodeMerge, FaFolderOpen, FaPersonWalkingArrowRight, FaUserPlus } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 import { Badge } from 'types/badge'
 import { formatDate } from 'utils/dateFormatter'
-import { drawContributions, fetchHeatmapData, HeatmapData } from 'utils/helpers/githubHeatmap'
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
+import ContributionHeatmap from 'components/ContributionHeatmap'
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
-  const [data, setData] = useState<HeatmapData>({} as HeatmapData)
-  const [username, setUsername] = useState('')
-  const [isPrivateContributor, setIsPrivateContributor] = useState(false)
 
   const {
     data: graphQLData,
@@ -43,20 +39,25 @@ const UserDetailsPage: React.FC = () => {
     }
   }, [graphQLRequestError, memberKey])
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await fetchHeatmapData(memberKey)
-      if (!result) {
-        setIsPrivateContributor(true)
-        return
-      }
-      if (result?.contributions) {
-        setUsername(memberKey)
-        setData(result as HeatmapData)
-      }
+  const contributionData: Record<string, number> = useMemo(() => {
+    if (user?.contributionData && typeof user.contributionData === 'object') {
+      return user.contributionData as Record<string, number>
     }
-    fetchData()
-  }, [memberKey, user])
+    return {}
+  }, [user?.contributionData])
+
+  const dateRange = useMemo(() => {
+    const dates = Object.keys(contributionData).sort((a, b) => a.localeCompare(b))
+    if (dates.length === 0) {
+      return { startDate: '', endDate: '' }
+    }
+    return {
+      startDate: dates[0],
+      endDate: dates.at(-1) ?? '',
+    }
+  }, [contributionData])
+
+  const hasContributionData = Object.keys(contributionData).length > 0
 
   const formattedBio = user?.bio?.split(' ').map((word) => {
     const mentionMatch = word.match(/^@([\w-]+(?:\.[\w-]+)*)([^\w@])?$/)
@@ -128,61 +129,6 @@ const UserDetailsPage: React.FC = () => {
     { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
-  const Heatmap = () => {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null)
-    const [imgSrc, setImgSrc] = useState('')
-    const { resolvedTheme } = useTheme()
-    const isDarkMode = (resolvedTheme ?? 'light') === 'dark'
-
-    useEffect(() => {
-      if (canvasRef.current && data?.years?.length) {
-        drawContributions(canvasRef.current, {
-          data,
-          username,
-          themeName: isDarkMode ? 'dark' : 'light',
-        })
-        const imageURL = canvasRef.current.toDataURL()
-        setImgSrc(imageURL)
-      } else {
-        setImgSrc('')
-      }
-    }, [isDarkMode])
-
-    return (
-      <div className="overflow-hidden rounded-lg bg-white dark:bg-gray-800">
-        <div className="relative">
-          <canvas ref={canvasRef} style={{ display: 'none' }} tabIndex={-1}></canvas>
-          {imgSrc ? (
-            <div className="h-32">
-              <Image
-                width={100}
-                height={100}
-                src={imgSrc}
-                className="h-full w-full object-cover object-[54%_60%]"
-                alt="Contribution Heatmap"
-              />
-            </div>
-          ) : (
-            <div className="relative h-32 items-center justify-center">
-              <Image
-                height={100}
-                width={100}
-                src={
-                  isDarkMode
-                    ? '/img/heatmap-background-dark.png'
-                    : '/img/heatmap-background-light.png'
-                }
-                className="heatmap-background-loader h-full w-full border-none object-cover object-[54%_60%]"
-                alt="Heatmap Background"
-              />
-              <div className="heatmap-loader"></div>
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
   const UserSummary = () => (
     <div className="mt-4 flex flex-col items-center lg:flex-row">
       <Image
@@ -192,7 +138,7 @@ const UserDetailsPage: React.FC = () => {
         src={user?.avatarUrl || '/placeholder.svg'}
         alt={user?.name || user?.login || 'User Avatar'}
       />
-      <div className="w-full text-center lg:text-left">
+      <div className="w-full overflow-x-auto text-center lg:text-left">
         <div className="pl-0 lg:pl-4">
           <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
             <Link
@@ -217,9 +163,16 @@ const UserDetailsPage: React.FC = () => {
           </div>
           <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
         </div>
-        {!isPrivateContributor && (
-          <div className="hidden w-full lg:block">
-            <Heatmap />
+        {hasContributionData && dateRange.startDate && dateRange.endDate && (
+          <div className="w-full lg:block">
+            <div className="overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800">
+              <ContributionHeatmap
+                contributionData={contributionData}
+                startDate={dateRange.startDate}
+                endDate={dateRange.endDate}
+                variant="medium"
+              />
+            </div>
           </div>
         )}
       </div>

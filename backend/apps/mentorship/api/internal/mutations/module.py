@@ -8,7 +8,6 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import transaction
 from django.utils import timezone
 
-from apps.api.internal.extensions.cache import invalidate_module_cache, invalidate_program_cache
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -21,6 +20,7 @@ from apps.mentorship.models.task import Task
 from apps.nest.api.internal.permissions import IsAuthenticated
 from apps.owasp.models import Project
 
+ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
 
@@ -121,8 +121,6 @@ class ModuleMutation:
         mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
 
-        transaction.on_commit(lambda: invalidate_program_cache(program.key))
-
         return module
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
@@ -145,7 +143,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -155,11 +153,11 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(msg="Assignee not found.")
+            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
         issue.assignees.add(gh_user)
 
@@ -187,7 +185,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -197,11 +195,12 @@ class ModuleMutation:
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
-            raise ObjectDoesNotExist(msg="Assignee not found.")
+            raise ObjectDoesNotExist(ASSIGNEE_NOT_FOUND_MSG)
 
         issue = module.issues.filter(number=issue_number).first()
         if issue is None:
-            raise ObjectDoesNotExist(msg=f"Issue {issue_number} not found in this module.")
+            msg = f"Issue {issue_number} not found in this module."
+            raise ObjectDoesNotExist(msg)
 
         issue.assignees.remove(gh_user)
 
@@ -227,7 +226,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -242,7 +241,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -289,7 +288,7 @@ class ModuleMutation:
             .first()
         )
         if module is None:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
@@ -304,7 +303,7 @@ class ModuleMutation:
             .first()
         )
         if issue is None:
-            raise ObjectDoesNotExist(msg=ISSUE_NOT_FOUND_MSG)
+            raise ObjectDoesNotExist(ISSUE_NOT_FOUND_MSG)
 
         assignees = issue.assignees.all()
         if not assignees.exists():
@@ -334,9 +333,8 @@ class ModuleMutation:
             module = Module.objects.select_related("program").get(
                 key=input_data.key, program__key=input_data.program_key
             )
-            old_module_key = module.key
         except Module.DoesNotExist as e:
-            raise ObjectDoesNotExist(msg=MODULE_NOT_FOUND_MSG) from e
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
         try:
             creator_as_mentor = Mentor.objects.get(nest_user=user)
@@ -404,14 +402,5 @@ class ModuleMutation:
             module.program.experience_levels.remove(old_experience_level)
 
         module.program.save(update_fields=["experience_levels"])
-
-        program_key = module.program.key
-
-        def _invalidate():
-            invalidate_module_cache(old_module_key, program_key)
-            if module.key != old_module_key:
-                invalidate_module_cache(module.key, program_key)
-
-        transaction.on_commit(_invalidate)
 
         return module

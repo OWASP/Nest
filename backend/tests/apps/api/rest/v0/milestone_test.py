@@ -1,8 +1,17 @@
 from datetime import datetime
+from http import HTTPStatus
+from unittest.mock import MagicMock
 
 import pytest
+from ninja.responses import Response
 
-from apps.api.rest.v0.milestone import MilestoneDetail
+from apps.api.rest.v0.milestone import (
+    MilestoneDetail,
+    MilestoneFilter,
+    get_milestone,
+    list_milestones,
+)
+from apps.github.models.milestone import Milestone as MilestoneModel
 
 
 class TestMilestoneSchema:
@@ -87,3 +96,132 @@ class TestMilestoneSchema:
         assert milestone.open_issues_count == 0
         assert milestone.title == "Test Milestone"
         assert milestone.state == "open"
+
+
+class TestListMilestones:
+    """Tests for list_milestones view function."""
+
+    def test_list_milestones_no_filter(self, mocker):
+        """Test listing milestones without filters."""
+        mock_qs = MagicMock()
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.order_by.return_value = []
+        mocker.patch(
+            "apps.api.rest.v0.milestone.MilestoneModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        filters = MilestoneFilter()
+        list_milestones(request, filters, None)
+
+        mock_qs.order_by.assert_called_once_with("-created_at", "-updated_at")
+
+    def test_list_milestones_with_organization_filter(self, mocker):
+        """Test listing milestones with organization filter."""
+        mock_qs = MagicMock()
+        mock_filtered = MagicMock()
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.filter.return_value = mock_filtered
+        mock_filtered.order_by.return_value = []
+        mocker.patch(
+            "apps.api.rest.v0.milestone.MilestoneModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        filters = MilestoneFilter(organization="OWASP")
+        list_milestones(request, filters, None)
+
+        mock_qs.filter.assert_called_with(repository__organization__login__iexact="OWASP")
+
+    def test_list_milestones_with_repository_filter(self, mocker):
+        """Test listing milestones with repository filter."""
+        mock_qs = MagicMock()
+        mock_filtered = MagicMock()
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.filter.return_value = mock_filtered
+        mock_filtered.filter.return_value = mock_filtered
+        mock_filtered.order_by.return_value = []
+        mocker.patch(
+            "apps.api.rest.v0.milestone.MilestoneModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        filters = MilestoneFilter(organization="OWASP", repository="Nest")
+        list_milestones(request, filters, None)
+
+        mock_filtered.filter.assert_called_with(repository__name__iexact="Nest")
+
+    def test_list_milestones_with_state_filter(self, mocker):
+        """Test listing milestones with state filter."""
+        mock_qs = MagicMock()
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.filter.return_value = mock_qs
+        mock_qs.order_by.return_value = []
+        mocker.patch(
+            "apps.api.rest.v0.milestone.MilestoneModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        filters = MilestoneFilter(state="open")
+        list_milestones(request, filters, None)
+
+        mock_qs.filter.assert_called_with(state="open")
+
+    def test_list_milestones_with_ordering(self, mocker):
+        """Test listing milestones with custom ordering."""
+        mock_qs = MagicMock()
+        mock_qs.select_related.return_value = mock_qs
+        mock_qs.order_by.return_value = []
+        mocker.patch(
+            "apps.api.rest.v0.milestone.MilestoneModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        filters = MilestoneFilter()
+        list_milestones(request, filters, "updated_at")
+
+        mock_qs.order_by.assert_called_once_with("updated_at")
+
+
+class TestGetMilestone:
+    """Tests for get_milestone view function."""
+
+    def test_get_milestone_success(self, mocker):
+        """Test getting a specific milestone successfully."""
+        mock_milestone = MagicMock()
+        mock_qs = MagicMock()
+        mock_qs.get.return_value = mock_milestone
+        mocker.patch(
+            "apps.api.rest.v0.milestone.MilestoneModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        result = get_milestone(request, "OWASP", "Nest", 1)
+
+        assert result == mock_milestone
+        mock_qs.get.assert_called_once_with(
+            repository__organization__login__iexact="OWASP",
+            repository__name__iexact="Nest",
+            number=1,
+        )
+
+    def test_get_milestone_not_found(self, mocker):
+        """Test getting a non-existent milestone."""
+        mock_qs = MagicMock()
+        mock_qs.get.side_effect = MilestoneModel.DoesNotExist
+        mocker.patch(
+            "apps.api.rest.v0.milestone.MilestoneModel.objects",
+            mock_qs,
+        )
+
+        request = MagicMock()
+        result = get_milestone(request, "OWASP", "NonExistent", 999)
+
+        assert isinstance(result, Response)
+        assert result.status_code == HTTPStatus.NOT_FOUND

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, cast
 import strawberry
 from django.db.models import Prefetch
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models import Label
 from apps.github.models.user import User as GithubUser
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from apps.github.api.internal.nodes.issue import IssueNode
 
 logger = logging.getLogger(__name__)
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -97,6 +99,9 @@ class MentorshipQuery:
         offset: int = 0,
     ) -> list[IssueNode]:
         """Get issues assigned to a mentee in a specific module."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
         try:
             module = Module.objects.only("id").get(key=module_key, program__key=program_key)
 
@@ -122,7 +127,7 @@ class MentorshipQuery:
                 )
                 .order_by("-created_at")
             )
-            issues = issues_qs[offset : offset + limit]
+            issues = issues_qs[offset : offset + normalized_limit]
 
             return list(issues)
 

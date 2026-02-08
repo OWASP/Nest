@@ -43,8 +43,8 @@ class TestAddProjectCustomTags:
         capsys,
     ):
         mock_exists.return_value = file_exists
-        mock_open_func.side_effect = (
-            lambda *_args, **__kwargs: StringIO(file_content) if file_content else None
+        mock_open_func.side_effect = lambda *_args, **__kwargs: (
+            StringIO(file_content) if file_content else None
         )
 
         def mock_get_side_effect(key):
@@ -99,7 +99,7 @@ class TestAddProjectCustomTags:
             def save(self, update_fields=None):  # NOSONAR unused parameter.
                 projects[self.key] = self.custom_tags
 
-        mock_get.side_effect = lambda key: MockProject(key)
+        mock_get.side_effect = MockProject
         command = Command()
 
         command.handle(**{"file-name": "test-file.json"})

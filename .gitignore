@@ -22,8 +22,10 @@ backend/fuzzing_results/
 .python_history
 .python-version
 .ruff_cache
+.trivy-cache
 .venv/
 .vscode
+*.bak
 *.code-workspace
 *.key
 *.log
@@ -37,8 +39,8 @@ frontend/blob-report/
 frontend/coverage
 frontend/dist
 frontend/.next
-frontend/out
 frontend/npm-debug.log*
+frontend/out
 frontend/playwright-report/
 frontend/playwright/.cache/
 frontend/pnpm-debug.log*
@@ -47,9 +49,6 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 logs
 node_modules/
+semgrep-security-report.txt
 TODO
 venv/
-
-# Snyk Security Extension - AI Rules (auto-generated)
-.cursor/rules/snyk_rules.mdc
-semgrep-security-report.txt

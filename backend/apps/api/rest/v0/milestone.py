@@ -92,7 +92,12 @@ def list_milestones(
     if filters.state:
         milestones = milestones.filter(state=filters.state)
 
-    return milestones.order_by(ordering or "-created_at", "-updated_at")
+    primary_order = ordering or "-created_at"
+    order_fields = [primary_order]
+    if primary_order not in {"updated_at", "-updated_at"}:
+        order_fields.append("-updated_at")
+
+    return milestones.order_by(*order_fields)
 
 
 @router.get(

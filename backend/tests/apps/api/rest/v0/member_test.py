@@ -1,8 +1,10 @@
 from datetime import datetime
+from http import HTTPStatus
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.member import MemberDetail
+from apps.api.rest.v0.member import MemberDetail, get_member, list_members
 
 
 class TestMemberSchema:
@@ -47,3 +49,65 @@ class TestMemberSchema:
         assert member.url == member_data["url"]
 
         assert not hasattr(member, "email")
+
+
+class TestListMembers:
+    """Tests for list_members endpoint."""
+
+    @patch("apps.api.rest.v0.member.UserModel")
+    def test_list_members_no_ordering(self, mock_user_model):
+        """Test listing members without ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_ordered_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_user_model.objects.order_by.return_value = mock_ordered_queryset
+        mock_filters.filter.return_value = mock_filtered_queryset
+
+        result = list_members(mock_request, mock_filters, ordering=None)
+
+        mock_user_model.objects.order_by.assert_called_with("-created_at")
+        mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
+        assert result == mock_filtered_queryset
+
+    @patch("apps.api.rest.v0.member.UserModel")
+    def test_list_members_with_ordering(self, mock_user_model):
+        """Test listing members with custom ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_ordered_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_user_model.objects.order_by.return_value = mock_ordered_queryset
+        mock_filters.filter.return_value = mock_filtered_queryset
+
+        result = list_members(mock_request, mock_filters, ordering="updated_at")
+
+        mock_user_model.objects.order_by.assert_called_with("updated_at")
+        mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
+        assert result == mock_filtered_queryset
+
+
+class TestGetMember:
+    """Tests for get_member endpoint."""
+
+    @patch("apps.api.rest.v0.member.UserModel")
+    def test_get_member_success(self, mock_user_model):
+        """Test getting a member when found."""
+        mock_request = MagicMock()
+        mock_member = MagicMock()
+        mock_user_model.objects.filter.return_value.first.return_value = mock_member
+
+        result = get_member(mock_request, "johndoe")
+
+        mock_user_model.objects.filter.assert_called_with(login__iexact="johndoe")
+        assert result == mock_member
+
+    @patch("apps.api.rest.v0.member.UserModel")
+    def test_get_member_not_found(self, mock_user_model):
+        """Test getting a member when not found."""
+        mock_request = MagicMock()
+        mock_user_model.objects.filter.return_value.first.return_value = None
+
+        result = get_member(mock_request, "nonexistent")
+
+        assert result.status_code == HTTPStatus.NOT_FOUND

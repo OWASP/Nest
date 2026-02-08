@@ -156,7 +156,7 @@ const findMobileMenu = () => {
 // Helper function to check if mobile menu is open
 const isMobileMenuOpen = () => {
   const menu = findMobileMenu()
-  if (menu && menu.getAttribute('aria-expanded') === 'true') {
+  if (menu?.getAttribute('aria-expanded') === 'true') {
     return true
   }
   return menu?.className.includes('translate-x-0') || false
@@ -165,7 +165,7 @@ const isMobileMenuOpen = () => {
 // Helper function to check if mobile menu is closed
 const isMobileMenuClosed = () => {
   const menu = findMobileMenu()
-  if (menu && menu.getAttribute('aria-expanded') === 'false') {
+  if (menu?.getAttribute('aria-expanded') === 'false') {
     return true
   }
   return menu?.className.includes('-translate-x-full') || false

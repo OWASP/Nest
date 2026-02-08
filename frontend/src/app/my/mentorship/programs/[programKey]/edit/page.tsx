@@ -13,7 +13,6 @@ import {
   GetMyProgramsDocument,
   GetProgramDetailsDocument,
 } from 'types/__generated__/programsQueries.generated'
-import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -54,8 +53,13 @@ const EditProgramPage = () => {
       return
     }
 
+    const userLogin: string | undefined =
+      session?.user && 'login' in session.user
+        ? (session.user as { login?: string }).login
+        : undefined
+
     const isAdmin = data.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === (session as ExtendedSession)?.user?.login
+      (admin: { login: string }) => admin.login === userLogin
     )
 
     if (isAdmin) {

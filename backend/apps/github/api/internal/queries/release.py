@@ -5,6 +5,7 @@ import strawberry_django
 from django.db.models import F, Window
 from django.db.models.functions import Rank
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.models.release import Release
 
@@ -65,4 +66,7 @@ class ReleaseQuery:
                 .order_by("-published_at")
             )
 
-        return queryset[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return queryset[:normalized_limit]

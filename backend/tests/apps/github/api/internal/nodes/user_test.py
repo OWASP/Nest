@@ -25,6 +25,7 @@ class TestUserNode(GraphQLNodeBaseTest):
             "badges",
             "bio",
             "company",
+            "contribution_data",
             "contributions_count",
             "created_at",
             "email",

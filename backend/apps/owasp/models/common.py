@@ -95,7 +95,7 @@ class RepositoryBasedEntityModel(models.Model):
         EntityMember,
         content_type_field="entity_type",
         object_id_field="entity_id",
-        related_query_name="entity",
+        related_query_name="entity_member",
     )
 
     @cached_property

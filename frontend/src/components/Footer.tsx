@@ -52,9 +52,10 @@ export default function Footer() {
                       <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                     ) : (
                       <Link
-                        target="_blank"
                         className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                         href={link.href || '/'}
+                        rel="noopener noreferrer"
+                        target="_blank"
                       >
                         {link.text}
                       </Link>

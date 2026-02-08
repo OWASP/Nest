@@ -47,17 +47,18 @@ class TestOwaspEnrichChapters:
         mock_chapter.generate_suggested_location.side_effect = lambda: setattr(
             mock_chapter, "suggested_location", "Suggested location"
         )
-        mock_chapter.generate_geo_location.side_effect = lambda: setattr(
-            mock_chapter, "latitude", latitude
-        ) or setattr(mock_chapter, "longitude", longitude)
+        mock_chapter.generate_geo_location.side_effect = lambda: (
+            setattr(mock_chapter, "latitude", latitude)
+            or setattr(mock_chapter, "longitude", longitude)
+        )
 
         mock_chapters_list = [mock_chapter] * chapters
 
         mock_active_chapters = mock.MagicMock()
         mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
         mock_active_chapters.count.return_value = len(mock_chapters_list)
-        mock_active_chapters.__getitem__.side_effect = (
-            lambda idx: mock_chapters_list[idx.start : idx.stop]
+        mock_active_chapters.__getitem__.side_effect = lambda idx: (
+            mock_chapters_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_chapters_list[idx]
         )
