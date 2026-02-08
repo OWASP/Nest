@@ -85,6 +85,20 @@ class Message(TimestampedModel):
         return self.raw_data.get("text", "")
 
     @property
+    def text_with_images(self) -> str:
+        """Get message text combined with extracted image text."""
+        parts = [self.text] if self.text else []
+
+        if extractions := self.raw_data.get("image_extractions", []):
+            parts.extend(
+                f"\n[Image: {extraction.get('file_name', 'unnamed')}]\n"
+                f"{extraction['extracted_text']}"
+                for extraction in extractions
+                if extraction.get("status") == "success" and extraction.get("extracted_text")
+            )
+        return "\n\n".join(parts)
+
+    @property
     def ts(self) -> str:
         """Get the message timestamp."""
         return self.raw_data["ts"]
