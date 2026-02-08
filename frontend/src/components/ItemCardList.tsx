@@ -3,12 +3,58 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React, { JSX } from 'react'
 import type { IconType } from 'react-icons'
+import { FaUser } from 'react-icons/fa'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
 import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import SecondaryCard from 'components/SecondaryCard'
 import { TruncatedText } from 'components/TruncatedText'
+
+interface AuthorAvatarProps {
+  author: {
+    avatarUrl: string
+    login: string
+    name: string
+  }
+}
+
+const AuthorAvatar = ({ author }: AuthorAvatarProps): JSX.Element => {
+  const hasAuthorInfo = author?.name || author?.login
+  const hasLogin = author?.login
+  const hasAvatarUrl = Boolean(author?.avatarUrl)
+
+  const fallbackAvatar = (
+    <div className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-300 dark:bg-gray-600">
+      <FaUser className="h-4 w-4 text-gray-400" />
+    </div>
+  )
+
+  if (hasAuthorInfo) {
+    const avatarContent = hasAvatarUrl ? (
+      <Image
+        height={24}
+        width={24}
+        src={author.avatarUrl}
+        alt={`${author.name || author.login}'s avatar`}
+        className="mr-2 rounded-full"
+      />
+    ) : (
+      fallbackAvatar
+    )
+
+    if (hasLogin) {
+      return (
+        <Link className="shrink-0 text-blue-400 hover:underline" href={`/members/${author.login}`}>
+          {avatarContent}
+        </Link>
+      )
+    }
+    return <div className="shrink-0">{avatarContent}</div>
+  }
+
+  return <div className="shrink-0">{fallbackAvatar}</div>
+}
 
 const ItemCardList = ({
   title,
@@ -60,28 +106,14 @@ const ItemCardList = ({
                     placement="bottom"
                     showArrow
                   >
-                    <Link
-                      className="shrink-0 text-blue-400 hover:underline"
-                      href={`/members/${item?.author?.login}`}
-                    >
-                      <Image
-                        height={24}
-                        width={24}
-                        src={item?.author?.avatarUrl}
-                        alt={
-                          item.author && (item.author.name || item.author.login)
-                            ? `${item.author.name || item.author.login}'s avatar`
-                            : "Author's avatar"
-                        }
-                        className="mr-2 rounded-full"
-                      />
-                    </Link>
+                    <AuthorAvatar author={item.author} />
                   </Tooltip>
                 )}
                 <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
                   <Link
                     className="text-blue-400 hover:underline"
                     href={item?.url || ''}
+                    rel="noopener noreferrer"
                     target="_blank"
                   >
                     <TruncatedText text={item.title || item.name} />

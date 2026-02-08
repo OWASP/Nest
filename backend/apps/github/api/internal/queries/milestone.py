@@ -6,6 +6,7 @@ import strawberry
 import strawberry_django
 from django.db.models import OuterRef, Subquery
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone
@@ -14,7 +15,7 @@ MAX_LIMIT = 1000
 
 
 @strawberry.enum
-class MilestoneStateEnum(str, enum.Enum):
+class MilestoneStateEnum(enum.StrEnum):
     """Milestone state filter options."""
 
     CLOSED = GenericIssueModel.State.CLOSED.value
@@ -76,8 +77,7 @@ class MilestoneQuery:
                 id__in=Subquery(latest_milestone_per_author),
             )
 
-        return (
-            milestones.order_by("-created_at")[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return milestones.order_by("-created_at")[:normalized_limit]

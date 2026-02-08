@@ -22,7 +22,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Check PR linked issue and assignee
-        uses: arkid15r/check-pr-issue-action@6abc0af0d795f1ddec70fbe6225f41b45ac26f74
+        uses: arkid15r/check-pr-issue-action@09f681e4d30d66e3ba085dfbbf7e07e0b3e4e263
         with:
           check_issue_reference: 'true'
           close_pr_on_failure: 'true'
