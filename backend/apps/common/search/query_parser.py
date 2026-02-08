@@ -178,6 +178,10 @@ class QueryParser:
                     continue
 
                 field, raw_value = self._parse_token(token)
+
+                if not self.case_sensitive and raw_value:
+                    raw_value = raw_value.lower()
+
                 if field is None:
                     conditions.append(self._create_text_search_condition(raw_value))
                     continue

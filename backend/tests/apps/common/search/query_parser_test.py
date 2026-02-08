@@ -48,13 +48,17 @@ class TestQueryParser:
         ],
     )
     def test_basic_field_parsing_all_types(self, parser_type, expected_string):
+        """Test parsing across different parser configurations."""
         parser = getattr(self, parser_type)
+        expected_value = (
+            expected_string if "case_sensitive" in parser_type else expected_string.lower()
+        )
 
         assert parser.parse('Author:"John Doe"') == [
             {
                 "field": "author",
                 "type": "string",
-                "value": expected_string,
+                "value": expected_value,
             }
         ]
 
@@ -95,7 +99,7 @@ class TestQueryParser:
             (
                 'author:"John Doe" stars:>100 archived:false some "free text"',
                 [
-                    {"type": "string", "field": "author", "value": '"John Doe"'},
+                    {"type": "string", "field": "author", "value": '"john doe"'},
                     {"type": "number", "field": "stars", "op": ">", "value": 100},
                     {"type": "boolean", "field": "archived", "value": False},
                     {"type": "string", "field": "query", "value": "some"},
@@ -106,7 +110,7 @@ class TestQueryParser:
                 'project:"my-awesome-project" language:"C++"',
                 [
                     {"type": "string", "field": "project", "value": '"my-awesome-project"'},
-                    {"type": "string", "field": "language", "value": '"C++"'},
+                    {"type": "string", "field": "language", "value": '"c++"'},
                 ],
             ),
         ],
@@ -215,8 +219,8 @@ class TestQueryParser:
         results = self.parser.parse(query)
 
         assert len(results) == 2
-        assert results[0]["value"] == '"OWASP Nest"'
-        assert results[1]["value"] == '"John Doe"'
+        assert results[0]["value"] == '"owasp nest"'
+        assert results[1]["value"] == '"john doe"'
 
     def test_case_sensitivity_toggle(self):
         """Verify that the case_sensitive flag controls value normalization."""
