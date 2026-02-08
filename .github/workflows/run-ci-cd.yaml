@@ -324,6 +324,9 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
         with:
+          build-args: |
+            ENV_FILE=.env.e2e.example
+            NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
           cache-from: |
             type=gha
             type=registry,ref=owasp/nest:frontend-e2e-cache
@@ -331,9 +334,6 @@ jobs:
             type=gha,compression=zstd
           context: frontend
           file: docker/frontend/Dockerfile
-          build-args: |
-            ENV_FILE=.env.e2e.example
-            NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
           load: true
           platforms: linux/amd64
           tags: owasp/nest:frontend-e2e-latest
