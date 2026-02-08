@@ -10,8 +10,6 @@ class TestExtensionsModule:
         """Test that the extensions module can be imported."""
         try:
             import apps.api.internal.extensions  # noqa: F401
-
-            assert True
         except ImportError as e:
             pytest.fail(f"Failed to import extensions module: {e}")
 
@@ -26,8 +24,6 @@ class TestExtensionsModule:
         """Test that cache module is accessible from extensions package."""
         try:
             from apps.api.internal.extensions import cache  # noqa: F401
-
-            assert True
         except ImportError as e:
             pytest.fail(f"Failed to import cache from extensions: {e}")
 
@@ -35,7 +31,6 @@ class TestExtensionsModule:
         """Test that CacheExtension class is accessible."""
         from apps.api.internal.extensions.cache import CacheExtension
 
-        assert CacheExtension is not None
         assert hasattr(CacheExtension, "resolve")
         assert hasattr(CacheExtension, "ROLE_AWARE_FIELDS")
 
@@ -57,5 +52,4 @@ class TestExtensionsModule:
         """Test that cache constants are accessible."""
         from apps.api.internal.extensions.cache import CACHE_MISS
 
-        assert CACHE_MISS is not None
         assert isinstance(CACHE_MISS, object)

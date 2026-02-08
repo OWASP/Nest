@@ -31,7 +31,7 @@ class TestGenerateKey:
         key2 = generate_key("chapter", {"key": "germany"}, role=None)
 
         assert key1 == key2
-        assert key1.startswith("graphql-")
+        assert key1.startswith(f"{settings.GRAPHQL_RESOLVER_CACHE_PREFIX}-")
         assert len(key1.split("-")[-1]) == 64  # SHA256 hex digest length
 
     def test_differs_for_different_field_names(self):
@@ -264,8 +264,15 @@ class TestGetUserRole:
     @pytest.fixture
     def mock_info(self):
         """Return a mock GraphQL resolve info."""
+
+        class MockRequest:
+            """Mock request object that can store attributes."""
+
+            def __init__(self):
+                self.user = MagicMock()
+
         mock = MagicMock()
-        mock.context.request.user = MagicMock()
+        mock.context.request = MockRequest()
         return mock
 
     def test_returns_public_for_unauthenticated_user(self, mock_info):
@@ -341,6 +348,67 @@ class TestGetUserRole:
         role = _get_user_role(mock_info, field_args)
 
         assert role == "public"
+
+    @patch("apps.api.internal.extensions.cache.Program")
+    @patch("apps.api.internal.extensions.cache.Mentor")
+    def test_caches_role_on_request_object(self, mock_mentor_model, mock_program_model, mock_info):
+        """Test that _get_user_role caches the role on the request object."""
+        mock_info.context.request.user.is_authenticated = True
+        mock_info.context.request.user.github_user = MagicMock()
+        mock_mentor = MagicMock()
+        mock_mentor_model.objects.filter.return_value.first.return_value = mock_mentor
+        mock_program_model.objects.filter.return_value.exists.return_value = True
+        field_args = {"programKey": "test-program"}
+
+        # First call
+        role1 = _get_user_role(mock_info, field_args)
+        assert role1 == "admin"
+        assert mock_mentor_model.objects.filter.call_count == 1
+        assert mock_program_model.objects.filter.call_count == 1
+
+        # Second call - should use cached value
+        role2 = _get_user_role(mock_info, field_args)
+        assert role2 == "admin"
+        assert mock_mentor_model.objects.filter.call_count == 1  # No additional DB call
+        assert mock_program_model.objects.filter.call_count == 1  # No additional DB call
+
+    @patch("apps.api.internal.extensions.cache.Program")
+    @patch("apps.api.internal.extensions.cache.Mentor")
+    def test_cache_is_keyed_by_program(self, mock_mentor_model, mock_program_model, mock_info):
+        """Test that request cache is keyed by programKey."""
+        mock_info.context.request.user.is_authenticated = True
+        mock_info.context.request.user.github_user = MagicMock()
+        mock_mentor = MagicMock()
+        mock_mentor_model.objects.filter.return_value.first.return_value = mock_mentor
+
+        # First program: admin
+        mock_program_model.objects.filter.return_value.exists.return_value = True
+        role1 = _get_user_role(mock_info, {"programKey": "program-1"})
+        assert role1 == "admin"
+
+        # Second program: public
+        mock_program_model.objects.filter.return_value.exists.return_value = False
+        role2 = _get_user_role(mock_info, {"programKey": "program-2"})
+        assert role2 == "public"
+
+        # First program again - should return cached "admin"
+        role3 = _get_user_role(mock_info, {"programKey": "program-1"})
+        assert role3 == "admin"
+
+        # Verify DB queries: 2 calls (one for each unique program)
+        assert mock_program_model.objects.filter.call_count == 2
+
+    def test_caches_public_for_unauthenticated(self, mock_info):
+        """Test that public role is returned immediately for unauthenticated users."""
+        mock_info.context.request.user.is_authenticated = False
+        field_args = {"programKey": "test-program"}
+
+        role1 = _get_user_role(mock_info, field_args)
+        role2 = _get_user_role(mock_info, field_args)
+
+        assert role1 == "public"
+        assert role2 == "public"
+        # No cache needed for unauthenticated users as it returns immediately
 
 
 class TestInvalidateCache:
@@ -429,7 +497,7 @@ class TestCacheExtensionAdvanced:
     def test_does_not_cache_coroutines(self, mock_cache, extension, mock_info):
         """Test that async coroutines are not cached."""
 
-        async def async_resolver(*_args, **_kwargs):
+        async def async_resolver():
             return {"name": "Async OWASP"}
 
         mock_next = MagicMock(return_value=async_resolver())

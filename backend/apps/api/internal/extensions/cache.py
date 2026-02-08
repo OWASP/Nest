@@ -42,7 +42,7 @@ CACHE_MISS = object()
 
 
 def _get_user_role(info, field_args: dict) -> str:
-    """Determine user role.
+    """Determine user role with request-level caching.
 
     Args:
         info: GraphQL resolver info.
@@ -58,16 +58,29 @@ def _get_user_role(info, field_args: dict) -> str:
     if not user or not user.is_authenticated or not program_key:
         return "public"
 
+    # Check request-level cache to avoid redundant DB queries
+    request = info.context.request
+    if not hasattr(request, "graphql_user_role_cache"):
+        request.graphql_user_role_cache = {}
+
+    cache_key = f"program:{program_key}"
+    if cache_key in request.graphql_user_role_cache:
+        return request.graphql_user_role_cache[cache_key]
+
+    # Compute role with DB queries
     github_user = getattr(user, "github_user", None)
     mentor = Mentor.objects.filter(github_user=github_user).first() if github_user else None
     if not mentor:
+        request.graphql_user_role_cache[cache_key] = "public"
         return "public"
 
     is_admin_or_mentor = Program.objects.filter(
         Q(key=program_key) & (Q(admins=mentor) | Q(modules__mentors=mentor))
     ).exists()
 
-    return "admin" if is_admin_or_mentor else "public"
+    role = "admin" if is_admin_or_mentor else "public"
+    request.graphql_user_role_cache[cache_key] = role
+    return role
 
 
 def generate_key(field_name: str, field_args: dict, role: str | None = None) -> str:

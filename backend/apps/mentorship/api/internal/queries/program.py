@@ -3,7 +3,6 @@
 import logging
 
 import strawberry
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from apps.common.utils import normalize_limit
@@ -28,20 +27,16 @@ class ProgramQuery:
             program = Program.objects.prefetch_related(
                 "admins__github_user", "modules__mentors__github_user"
             ).get(key=program_key)
-
+        except Program.DoesNotExist:
+            logger.warning("Program with key '%s' not found.", program_key, exc_info=True)
+            return None
+        else:
             if program.status == Program.ProgramStatus.PUBLISHED:
                 return program
 
+            # For unpublished programs, check if user is authorized
             user = getattr(info.context.request, "user", None)
-            if user and user.is_authenticated:
-                if not user.github_user:
-                    msg = f"Program with key '{program_key}' not found."
-                    logger.warning(
-                        "Attempted public access to unpublished program '%s' (status: %s)",
-                        program_key,
-                        program.status,
-                    )
-                    raise ObjectDoesNotExist(msg)
+            if user and user.is_authenticated and user.github_user:
                 try:
                     mentor = Mentor.objects.get(github_user=user.github_user)
                     if program.admins.filter(id=mentor.id).exists():
@@ -63,17 +58,12 @@ class ProgramQuery:
                 except Mentor.DoesNotExist:
                     pass
 
-            msg = f"Program with key '{program_key}' not found."
+            # User is not authorized to access unpublished program
             logger.warning(
                 "Attempted public access to unpublished program '%s' (status: %s)",
                 program_key,
                 program.status,
             )
-            raise ObjectDoesNotExist(msg)
-
-        except Program.DoesNotExist:
-            msg = f"Program with key '{program_key}' not found."
-            logger.warning(msg, exc_info=True)
             return None
 
     @strawberry.field(permission_classes=[IsAuthenticated])
