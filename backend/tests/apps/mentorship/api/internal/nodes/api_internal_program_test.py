@@ -40,7 +40,7 @@ def mock_program_node():
     """Fixture returning a FakeProgramNode with a mocked admins manager."""
     node = FakeProgramNode()
 
-    node.admins.all.return_value = [
+    node.admins.order_by.return_value = [
         MagicMock(name="admin1"),
         MagicMock(name="admin2"),
     ]

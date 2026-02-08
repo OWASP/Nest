@@ -140,7 +140,9 @@ def test_process_issue_interests_new_interest(
 
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = []
 
-    mock_issue_user_interest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
+    mock_issue_user_interest.side_effect = lambda **kw: SimpleNamespace(
+        module=kw.get("module"), issue=kw.get("issue"), user=kw.get("user")
+    )
     mock_issue_user_interest.objects.bulk_create = MagicMock()
 
     command.process_issue_interests(mock_issue, mock_module)
@@ -171,7 +173,9 @@ def test_process_issue_interests_remove_interest(
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = [1]
     mock_issue_user_interest.objects.filter.return_value.delete.return_value = (1, {})
 
-    mock_issue_user_interest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
+    mock_issue_user_interest.side_effect = lambda **kw: SimpleNamespace(
+        module=kw.get("module"), issue=kw.get("issue"), user=kw.get("user")
+    )
     mock_issue_user_interest.objects.bulk_create = MagicMock()
 
     command.process_issue_interests(mock_issue, mock_module)
@@ -204,7 +208,9 @@ def test_process_issue_interests_existing_interest_removed(
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = [1]
     mock_issue_user_interest.objects.filter.return_value.delete.return_value = (1, {})
 
-    mock_issue_user_interest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
+    mock_issue_user_interest.side_effect = lambda **kw: SimpleNamespace(
+        module=kw.get("module"), issue=kw.get("issue"), user=kw.get("user")
+    )
     mock_issue_user_interest.objects.bulk_create = MagicMock()
 
     command.process_issue_interests(mock_issue, mock_module)
@@ -234,7 +240,9 @@ def test_process_issue_interests_multiple_comments_single_user(
 
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = []
 
-    mock_issue_user_interest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
+    mock_issue_user_interest.side_effect = lambda **kw: SimpleNamespace(
+        module=kw.get("module"), issue=kw.get("issue"), user=kw.get("user")
+    )
     mock_issue_user_interest.objects.bulk_create = MagicMock()
 
     command.process_issue_interests(mock_issue, mock_module)
@@ -272,7 +280,9 @@ def test_process_issue_interests_multiple_users(
     mock_issue_user_interest.objects.filter.return_value.values_list.return_value = [1]
     mock_issue_user_interest.objects.filter.return_value.delete.return_value = (1, {})
 
-    mock_issue_user_interest.side_effect = lambda **kwargs: SimpleNamespace(**kwargs)
+    mock_issue_user_interest.side_effect = lambda **kw: SimpleNamespace(
+        module=kw.get("module"), issue=kw.get("issue"), user=kw.get("user")
+    )
     mock_issue_user_interest.objects.bulk_create = MagicMock()
 
     command.process_issue_interests(mock_issue, mock_module)
