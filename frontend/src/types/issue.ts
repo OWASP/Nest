@@ -4,7 +4,7 @@ import type { RepositoryDetails, User } from 'types/user'
 export type Issue = {
   author?: User
   body?: string
-  createdAt: string | number
+  createdAt: number
   hint?: string
   labels?: string[]
   number?: string | number
@@ -19,6 +19,6 @@ export type Issue = {
   state?: string
   summary?: string
   title: string
-  updatedAt?: string | number
+  updatedAt?: number
   url: string
 }
