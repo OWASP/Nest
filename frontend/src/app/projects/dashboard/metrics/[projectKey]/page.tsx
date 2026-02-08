@@ -43,7 +43,7 @@ const ProjectHealthMetricsDetails: FC = () => {
       setMetricsLatest(data.project.healthMetricsLatest)
     }
     if (data?.project?.healthMetricsList) {
-      setMetricsList([...data.project.healthMetricsList].reverse())
+      setMetricsList(data.project.healthMetricsList)
     }
   }, [graphqlError, data])
 
