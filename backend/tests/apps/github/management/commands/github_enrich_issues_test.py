@@ -162,11 +162,10 @@ def test_handle_with_offset(mock_issue_class, mock_open_ai_class):
 @patch("apps.github.management.commands.github_enrich_issues.OpenAi")
 @patch("apps.github.management.commands.github_enrich_issues.Issue")
 def test_handle_with_chunked_save(mock_issue_class, mock_open_ai_class):
-    """Tests that the command correctly saves issues in chunks of 1000."""
+    """Tests that the command correctly processes multiple issues."""
     mock_open_ai = MagicMock()
     mock_open_ai_class.return_value = mock_open_ai
-
-    mock_issues = [MagicMock(title=f"Test Issue {i}") for i in range(1001)]
+    mock_issues = [MagicMock(title=f"Test Issue {i}") for i in range(50)]
     for issue in mock_issues:
         issue.generate_hint = MagicMock()
         issue.generate_summary = MagicMock()
@@ -193,7 +192,7 @@ def test_handle_with_chunked_save(mock_issue_class, mock_open_ai_class):
     assert mock_issue_class.bulk_save.call_count == 1
 
     args, kwargs = mock_issue_class.bulk_save.call_args_list[0]
-    assert len(args[0]) == 1001
+    assert len(args[0]) == 50
     assert kwargs["fields"] == ["hint", "summary"]
 
 

@@ -1,1 +1,1 @@
-FROM aquasec/trivy:0.69.0
+FROM aquasec/trivy:0.69.1
