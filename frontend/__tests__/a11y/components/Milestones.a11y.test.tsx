@@ -27,7 +27,7 @@ const createMockMilestone = (overrides: Partial<Milestone> = {}): Milestone => (
   author: createMockUser(),
   body: 'Test milestone description',
   closedIssuesCount: 5,
-  createdAt: '2023-01-01T00:00:00Z',
+  createdAt: 1672531200, // 2023-01-01T00:00:00Z
   openIssuesCount: 3,
   organizationName: 'test-org',
   progress: 75,

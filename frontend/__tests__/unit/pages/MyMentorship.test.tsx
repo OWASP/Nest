@@ -56,8 +56,8 @@ const mockProgramData = {
         name: 'Test Program',
         description: 'Test Description',
         status: 'draft',
-        startedAt: '2025-07-28',
-        endedAt: '2025-08-10',
+        startedAt: 1753660800, // 2025-07-28
+        endedAt: 1754784000, // 2025-08-10
         experienceLevels: ['beginner'],
         menteesLimit: 10,
         admins: [],

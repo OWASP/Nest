@@ -2,16 +2,16 @@ export const mockSnapshotDetailsData = {
   snapshot: {
     title: 'New Snapshot',
     key: '2024-12',
-    updatedAt: '2025-03-02T20:33:46.880330+00:00',
-    createdAt: '2025-03-01T22:00:34.361937+00:00',
-    startAt: '2024-12-01T00:00:00+00:00',
-    endAt: '2024-12-31T22:00:30+00:00',
+    updatedAt: 1740944026, // 2025-03-02T20:33:46Z
+    createdAt: 1740865234, // 2025-03-01T22:00:34Z
+    startAt: 1733011200,
+    endAt: 1735689630,
     status: 'completed',
     errorMessage: '',
     newReleases: [
       {
         name: 'v0.9.2',
-        publishedAt: '2024-12-13T14:43:46+00:00',
+        publishedAt: 1734101026, // 2024-12-13T14:43:46Z
         tagName: 'v0.9.2',
         projectName: 'test-project-1',
         organizationName: 'owasp',
@@ -25,7 +25,7 @@ export const mockSnapshotDetailsData = {
       },
       {
         name: 'Latest pre-release',
-        publishedAt: '2024-12-13T13:17:30+00:00',
+        publishedAt: 1734095850, // 2024-12-13T13:17:30Z
         tagName: 'pre-release',
         projectName: 'test-project-2',
         organizationName: 'owasp',
@@ -68,7 +68,7 @@ export const mockSnapshotDetailsData = {
       {
         key: 'sivagangai',
         name: 'OWASP Sivagangai',
-        createdAt: '2024-07-30T10:07:33+00:00',
+        createdAt: 1722334053, // 2024-07-30T10:07:33Z
         suggestedLocation: 'Sivagangai, Tamil Nadu, India',
         region: 'Asia',
         summary:
@@ -103,8 +103,8 @@ export const mockSnapshotData = {
     {
       title: 'New Snapshot',
       key: '2024-12',
-      startAt: '2024-12-01T00:00:00+00:00',
-      endAt: '2024-12-31T22:00:30+00:00',
+      startAt: 1733011200,
+      endAt: 1735689630,
     },
   ],
 }

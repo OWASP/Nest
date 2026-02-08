@@ -332,7 +332,7 @@ describe('Rendering', () => {
           objectID: 'event-1',
           key: 'js-conf',
           category: 'other',
-          startDate: '2024-01-01',
+          startDate: 1704067200, // 2024-01-01
         },
         {
           id: 'event-2',
@@ -341,7 +341,7 @@ describe('Rendering', () => {
           objectID: 'event-2',
           key: 'py-workshop',
           category: 'other',
-          startDate: '2024-02-01',
+          startDate: 1706745600, // 2024-02-01
         },
         {
           id: 'event-3',
@@ -350,7 +350,7 @@ describe('Rendering', () => {
           objectID: 'event-3',
           key: 'react-meetup',
           category: 'other',
-          startDate: '2024-03-01',
+          startDate: 1709251200, // 2024-03-01
         },
       ]
 

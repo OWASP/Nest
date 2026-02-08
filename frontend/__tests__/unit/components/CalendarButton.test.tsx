@@ -19,8 +19,8 @@ const mockEvent = {
   title: 'Test Event',
   description: 'Test description',
   location: 'Test Location',
-  startDate: '2025-12-01',
-  endDate: '2025-12-02',
+  startDate: 1764547200, // 2025-12-01
+  endDate: 1764633600, // 2025-12-02
 }
 
 describe('CalendarButton', () => {
@@ -302,8 +302,8 @@ describe('CalendarButton', () => {
             title: 'OWASP BeNeLux 2025',
             description: 'Annual conference',
             location: 'Belgium',
-            startDate: '2025-12-02',
-            endDate: '2025-12-03',
+            startDate: 1764633600, // 2025-12-02
+            endDate: 1764720000, // 2025-12-03
           }}
           className="text-gray-600 hover:text-gray-800 dark:text-gray-400"
           iconClassName="h-4 w-4"
@@ -319,7 +319,7 @@ describe('CalendarButton', () => {
         <CalendarButton
           event={{
             title: 'Poster Event',
-            startDate: '2025-12-15',
+            startDate: 1765756800, // 2025-12-15
           }}
           showLabel
           label="Save to Calendar"
@@ -340,8 +340,8 @@ describe('CalendarButton', () => {
         <CalendarButton
           event={{
             title: longTitle,
-            startDate: '2026-06-22',
-            endDate: '2026-06-26',
+            startDate: 1782086400, // 2026-06-22
+            endDate: 1782432000, // 2026-06-26
           }}
           className="flex-shrink-0"
         />
@@ -356,7 +356,7 @@ describe('CalendarButton', () => {
         <CalendarButton
           event={{
             title: 'Very Long Event Title That Could Potentially Cause Overflow Issues',
-            startDate: '2025-12-01',
+            startDate: 1764547200, // 2025-12-01
           }}
           className="flex-shrink-0 text-gray-600"
         />
@@ -375,7 +375,7 @@ describe('CalendarButton', () => {
           <CalendarButton
             event={{
               title: 'Event',
-              startDate: '2025-12-01',
+              startDate: 1764547200, // 2025-12-01
             }}
             className="flex-shrink-0"
           />

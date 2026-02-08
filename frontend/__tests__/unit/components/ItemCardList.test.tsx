@@ -137,7 +137,7 @@ const mockMilestone: Milestone = {
   },
   body: 'Milestone description',
   closedIssuesCount: 5,
-  createdAt: '2022-01-01T00:00:00Z',
+  createdAt: 1640995200, // 2022-01-01T00:00:00Z
   openIssuesCount: 3,
   organizationName: 'test-org',
   progress: 62.5,
@@ -157,7 +157,7 @@ const mockPullRequest: PullRequest = {
     avatarUrl: 'https://github.com/author3.png',
     url: 'https://github.com/author3',
   },
-  createdAt: '2022-01-01T00:00:00Z',
+  createdAt: 1640995200, // 2022-01-01T00:00:00Z
   organizationName: 'test-org',
   repositoryName: 'test-repo',
   title: 'Add new feature',
@@ -559,10 +559,10 @@ describe('ItemCardList Component', () => {
 
     it('renders custom renderDetails content', () => {
       const customRenderDetails = (item: {
-        createdAt: string
+        createdAt: number
         commentsCount: number
         organizationName: string
-        publishedAt: string
+        publishedAt: number
         repositoryName: string
         tagName: string
         openIssuesCount: number

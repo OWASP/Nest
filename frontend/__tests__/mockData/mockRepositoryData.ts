@@ -1,7 +1,7 @@
 export const mockRepositoryData = {
   repository: {
     name: 'Test Repo',
-    updatedAt: '2024-01-01T00:00:00Z',
+    updatedAt: 1704067200, // 2024-01-01T00:00:00Z
     license: 'MIT',
     size: 1200,
     url: 'https://github.com/test-repo',
@@ -13,11 +13,11 @@ export const mockRepositoryData = {
     languages: ['JavaScript', 'TypeScript'],
     topics: ['web', 'security'],
     description: 'A sample test repository',
-    createdAt: '2023-12-15T00:00:00Z',
+    createdAt: 1702598400, // 2023-12-15T00:00:00Z
     issues: [
       {
         title: 'Bug fix required',
-        createdAt: '2024-01-02T10:00:00Z',
+        createdAt: 1704189600, // 2024-01-02T10:00:00Z
         repositoryName: 'test-repo-2',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar.jpg',
@@ -35,7 +35,7 @@ export const mockRepositoryData = {
         name: 'v1.0.0',
         tagName: 'v1.0.0',
         isPreRelease: false,
-        publishedAt: '2024-01-01T12:00:00Z',
+        publishedAt: 1704110400, // 2024-01-01T12:00:00Z
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar.jpg',
           name: 'Test User 2',
@@ -55,7 +55,7 @@ export const mockRepositoryData = {
         closedIssuesCount: 15,
         repositoryName: 'Repo One',
         organizationName: 'OWASP',
-        createdAt: '2025-03-01T10:00:00Z',
+        createdAt: 1740826800, // 2025-03-01T10:00:00Z
         url: 'https://github.com/OWASP/repo-one/milestone/1',
       },
     ],

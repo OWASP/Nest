@@ -552,7 +552,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       body: 'Milestone description',
       closedIssuesCount: 5,
-      createdAt: new Date(Date.now() - 2592000000).toISOString(),
+      createdAt: 1672531200, // 2023-01-01T00:00:00Z
       openIssuesCount: 2,
       repositoryName: 'test-repo',
       state: 'open',
