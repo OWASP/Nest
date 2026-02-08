@@ -1,9 +1,21 @@
-export const formatDate = (input: number | string | Date) => {
+export const toUnixTimestamp = (input: string | number | Date): number => {
+  if (typeof input === 'number') return input
+  const date = typeof input === 'string' ? new Date(input) : input
+
+  if (!date || !(date instanceof Date) || Number.isNaN(date.getTime())) {
+    throw new Error('Invalid date')
+  }
+  return Math.floor(date.getTime() / 1000)
+}
+
+export const formatDate = (input: number | string | Date | null) => {
   if (!input) {
     return ''
   }
 
   const timestamp = toUnixTimestamp(input)
+  if (!Number.isFinite(timestamp)) return ''
+
   const date = new Date(timestamp * 1000)
 
   return date.toLocaleDateString('en-US', {
@@ -16,10 +28,18 @@ export const formatDate = (input: number | string | Date) => {
 
 export const formatDateRange = (
   startDate: number | string | Date,
-  endDate: number | string | Date
+  endDate?: number | string | Date | null
 ) => {
+  if (!endDate) {
+    return formatDate(startDate)
+  }
+
   const startTimestamp = toUnixTimestamp(startDate)
   const endTimestamp = toUnixTimestamp(endDate)
+
+  if (!Number.isFinite(startTimestamp) || !Number.isFinite(endTimestamp)) {
+    return ''
+  }
 
   const start = new Date(startTimestamp * 1000)
   const end = new Date(endTimestamp * 1000)
@@ -117,14 +137,4 @@ export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
     startDate: startDate.toISOString().split('T')[0],
     endDate: endDate.toISOString().split('T')[0],
   }
-}
-
-export const toUnixTimestamp = (input: string | number | Date): number => {
-  if (typeof input === 'number') return input
-  const date = typeof input === 'string' ? new Date(input) : input
-
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-    throw new Error('Invalid date')
-  }
-  return Math.floor(date.getTime() / 1000)
 }
