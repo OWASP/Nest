@@ -460,9 +460,7 @@ const DetailsCard = ({
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                           <div className="flex items-center">
                             <FaCalendar className="mr-2 h-4 w-4" />
-                            <span>
-                              {formatDate(new Date(milestone.createdAt).getTime() / 1000)}
-                            </span>
+                            <span>{formatDate(milestone.createdAt)}</span>
                           </div>
                           <div className="flex items-center">
                             <FaCircleCheck className="mr-2 h-4 w-4" />

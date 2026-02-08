@@ -10,7 +10,7 @@ export default function getIcsFileUrl(event: CalendarEvent): Promise<string> {
     const parseDate = (date: number): DateArray => {
       // Unix timestamp in seconds
       const d = new Date(date * 1000)
-      return [d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()]
+      return [d.getFullYear(), d.getMonth() + 1, d.getDate()]
     }
 
     const getEndDate = (start: DateArray, end: DateArray): DateArray => {

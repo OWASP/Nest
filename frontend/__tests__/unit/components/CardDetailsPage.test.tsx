@@ -552,7 +552,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       body: 'Milestone description',
       closedIssuesCount: 5,
-      createdAt: 1672531200, // 2023-01-01T00:00:00Z
+      createdAt: 1672531200,
       openIssuesCount: 2,
       repositoryName: 'test-repo',
       state: 'open',
@@ -1733,7 +1733,7 @@ describe('CardDetailsPage', () => {
           author: mockUser,
           body: `Milestone description ${i + 1}`,
           closedIssuesCount: 5,
-          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          createdAt: Math.floor((Date.now() - 10000000) / 1000),
           openIssuesCount: 2,
           repositoryName: `test-repo-${i}`,
           organizationName: 'test-org',

@@ -187,7 +187,7 @@ export default function Home() {
                           url: event.url,
                         }}
                         iconClassName="h-4 w-4 mr-2"
-                        label={formatDateRange(event.startDate as number, event.endDate as number)}
+                        label={formatDateRange(event.startDate, event.endDate)}
                         showLabel
                       />
                     </div>

@@ -103,11 +103,7 @@ const ModuleItem = ({ module }: { module: Module }) => {
         <TruncatedText text={module?.name} />
       </Link>
       <TextInfoItem icon={FaTurnUp} label="Level" value={capitalize(module.experienceLevel)} />
-      <TextInfoItem
-        icon={FaCalendar}
-        label="Start"
-        value={formatDate(new Date(module.startedAt).getTime() / 1000)}
-      />
+      <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem
         icon={FaHourglassHalf}
         label="Duration"
