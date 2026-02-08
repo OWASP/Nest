@@ -84,7 +84,9 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                   <span>#{issue.number}</span>
                   <span>Created: {formatDate(new Date(issue.createdAt).getTime() / 1000)}</span>
-                  {issue.updatedAt && <span>Updated: {formatDate(new Date(issue.updatedAt).getTime() / 1000)}</span>}
+                  {issue.updatedAt && (
+                    <span>Updated: {formatDate(new Date(issue.updatedAt).getTime() / 1000)}</span>
+                  )}
                 </div>
               </div>
 

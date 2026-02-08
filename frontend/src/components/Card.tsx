@@ -83,7 +83,12 @@ const Card = ({
         {timeline?.start && timeline?.end && (
           <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             <FaCalendar className="mr-2 h-4 w-4" />
-            <span>{formatDateRange(new Date(timeline.start).getTime() / 1000, new Date(timeline.end).getTime() / 1000)}</span>
+            <span>
+              {formatDateRange(
+                new Date(timeline.start).getTime() / 1000,
+                new Date(timeline.end).getTime() / 1000
+              )}
+            </span>
           </div>
         )}
       </div>

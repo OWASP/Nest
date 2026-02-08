@@ -70,10 +70,10 @@ const ItemCardList = ({
   showAvatar?: boolean
   showSingleColumn?: boolean
   renderDetails: (item: {
-    createdAt: string
+    createdAt: number
     commentsCount: number
     organizationName: string
-    publishedAt: string
+    publishedAt: number
     repositoryName: string
     tagName: string
     openIssuesCount: number

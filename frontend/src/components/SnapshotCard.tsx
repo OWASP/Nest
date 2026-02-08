@@ -19,7 +19,7 @@ const SnapshotCard = ({ title, button, startAt, endAt }: SnapshotCardProps) => {
         <div className="flex items-center">
           <FaCalendar className="mr-1 h-4 w-4" />
           <span>
-            {formatDate(new Date(startAt).getTime() / 1000)} - {formatDate(new Date(endAt).getTime() / 1000)}
+            {formatDate(startAt)} - {formatDate(endAt)}
           </span>
         </div>
       </div>
