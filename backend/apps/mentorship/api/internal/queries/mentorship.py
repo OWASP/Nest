@@ -9,7 +9,7 @@ import strawberry
 from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
-from apps.github.api.internal.nodes.issue import IssueNode
+from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH, IssueNode
 from apps.github.models import Label
 from apps.github.models.user import User as GithubUser
 from apps.mentorship.api.internal.nodes.mentee import MenteeNode
@@ -124,6 +124,7 @@ class MentorshipQuery:
                         "assignees",
                         queryset=GithubUser.objects.only("id", "login", "name", "avatar_url"),
                     ),
+                    MERGED_PULL_REQUESTS_PREFETCH,
                 )
                 .order_by("-created_at")
             )
