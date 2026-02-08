@@ -122,7 +122,11 @@ class ModuleNode:
         """Return a single issue by its GitHub number within this module's linked issues."""
         return (
             self.issues.select_related("repository", "author")
-            .prefetch_related("assignees", "labels", MERGED_PULL_REQUESTS_PREFETCH)
+            .prefetch_related(
+                "assignees",
+                "labels",
+                MERGED_PULL_REQUESTS_PREFETCH,
+            )
             .filter(number=number)
             .first()
         )

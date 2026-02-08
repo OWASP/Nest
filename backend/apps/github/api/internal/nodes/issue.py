@@ -12,8 +12,8 @@ from apps.github.models.pull_request import PullRequest
 MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
     "pull_requests",
     queryset=PullRequest.objects.filter(
-        state="closed",
         merged_at__isnull=False,
+        state="closed",
     ),
     to_attr="merged_pull_requests",
 )
@@ -59,10 +59,7 @@ class IssueNode(strawberry.relay.Node):
     @strawberry_django.field(prefetch_related=[MERGED_PULL_REQUESTS_PREFETCH])
     def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
-        merged = getattr(root, "merged_pull_requests", None)
-        if merged is None:
-            return False
-        return len(merged) > 0
+        return bool(getattr(root, "merged_pull_requests", None))
 
     @strawberry_django.field(prefetch_related=["participant_interests__user"])
     def interested_users(self, root: Issue) -> list[UserNode]:
