@@ -5,14 +5,14 @@ import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect } from 'react'
-import { FaCalendar, FaMapMarkerAlt, FaUsers } from 'react-icons/fa'
+import { FaMapMarkerAlt, FaUsers } from 'react-icons/fa'
 import { FaBuilding, FaCamera, FaLocationDot, FaPeopleGroup } from 'react-icons/fa6'
-import { HiUserGroup } from 'react-icons/hi'
+import { ErrorDisplay } from 'app/global-error'
 import { GetCommunityPageDataDocument } from 'types/__generated__/communityQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
-import LeadersList from 'components/LeadersList'
+import ChapterCard from 'components/ChapterCard'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MultiSearchBar from 'components/MultiSearch'
 import SecondaryCard from 'components/SecondaryCard'
@@ -56,8 +56,18 @@ export default function CommunityPage() {
     }
   }, [graphQLRequestError])
 
-  if (isLoading || !graphQLData) {
+  if (isLoading) {
     return <LoadingSpinner />
+  }
+
+  if (graphQLRequestError || !graphQLData) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading community data"
+        message="Unable to load community information. Please try again later."
+      />
+    )
   }
 
   const data = graphQLData
@@ -142,34 +152,14 @@ export default function CommunityPage() {
         >
           <div className="grid gap-4 md:grid-cols-2">
             {data.recentChapters?.map((chapter) => (
-              <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold">
-                  <Link href={`/chapters/${chapter.key}`} className="text-blue-400 hover:underline">
-                    <TruncatedText text={chapter.name} />
-                  </Link>
-                </h3>
-                <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
-                  <div className="mr-4 flex items-center">
-                    <FaCalendar className="mr-2 h-4 w-4" />
-                    <span>{formatDate(chapter.createdAt)}</span>
-                  </div>
-                  {chapter.suggestedLocation && (
-                    <div className="flex flex-1 items-center overflow-hidden">
-                      <FaMapMarkerAlt className="mr-2 h-4 w-4 shrink-0" />
-                      <TruncatedText text={chapter.suggestedLocation} />
-                    </div>
-                  )}
-                </div>
-                {chapter.leaders.length > 0 && (
-                  <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
-                    <HiUserGroup className="h-4 w-4 shrink-0" />
-                    <LeadersList
-                      entityKey={`${chapter.key}-leaders`}
-                      leaders={String(chapter.leaders)}
-                    />
-                  </div>
-                )}
-              </div>
+              <ChapterCard
+                key={chapter.key}
+                chapterKey={chapter.key}
+                name={chapter.name}
+                createdAt={chapter.createdAt}
+                suggestedLocation={chapter.suggestedLocation}
+                leaders={chapter.leaders}
+              />
             ))}
           </div>
         </SecondaryCard>
@@ -193,7 +183,7 @@ export default function CommunityPage() {
                   <div className="flex items-center gap-3">
                     {org.avatarUrl && (
                       <Image
-                        src={`${org.avatarUrl}&s=80`}
+                        src={`${org.avatarUrl}${org.avatarUrl.includes('?') ? '&' : '?'}s=80`}
                         alt={org.name || org.login}
                         width={40}
                         height={40}
