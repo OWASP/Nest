@@ -17,7 +17,7 @@ services:
 
   nest-nginx:
     container_name: nest-nginx
-    image: nginx:1.28.2-alpine
+    image: nginx:1.29.5-alpine
     networks:
       - production_nest-app-network
       - staging_nest-app-network
