@@ -89,6 +89,8 @@ class RepositoryNode(strawberry.relay.Node):
                 ).select_related(
                     "author__owasp_profile",
                     "repository__organization",
+                ).prefetch_related(
+                    "repository__project_set",
                 ).order_by("-published_at")[:RECENT_RELEASES_LIMIT],
                 to_attr="prefetched_releases",
             )
