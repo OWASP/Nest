@@ -4,6 +4,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -70,6 +71,10 @@ class ChapterFilter(LocationFilter):
 
     country: str | None = Field(None, description="Country of the chapter")
     q: str | None = Field(None, description="Structured search query")
+
+    def filter_q(self, queryset: QuerySet, value: str | None) -> Q:
+        """Filter by structured search query."""
+        return Q()
 
 
 @router.get(
