@@ -15,7 +15,7 @@ MAX_LIMIT = 1000
 
 
 @strawberry.enum
-class MilestoneStateEnum(str, enum.Enum):
+class MilestoneStateEnum(enum.StrEnum):
     """Milestone state filter options."""
 
     CLOSED = GenericIssueModel.State.CLOSED.value
