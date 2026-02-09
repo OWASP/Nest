@@ -1,8 +1,10 @@
 from datetime import datetime
+from http import HTTPStatus
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.chapter import ChapterDetail
+from apps.api.rest.v0.chapter import ChapterDetail, get_chapter, list_chapters
 
 
 @pytest.mark.parametrize(
@@ -65,3 +67,77 @@ def test_chapter_serializer_validation(chapter_data):
     assert chapter.name == chapter_data["name"]
     assert chapter.region == chapter_data["region"]
     assert chapter.updated_at == datetime.fromisoformat(chapter_data["updated_at"])
+
+
+class TestListChapters:
+    """Tests for list_chapters endpoint."""
+
+    @patch("apps.api.rest.v0.chapter.ChapterModel")
+    def test_list_chapters_no_filter(self, mock_chapter_model):
+        """Test listing chapters without filters."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+        mock_chapter_model.active_chapters.order_by.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_chapters(mock_request, mock_filters, ordering=None)
+
+        mock_chapter_model.active_chapters.order_by.assert_called_with("-created_at")
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.chapter.ChapterModel")
+    def test_list_chapters_with_ordering(self, mock_chapter_model):
+        """Test listing chapters with custom ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+        mock_chapter_model.active_chapters.order_by.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_chapters(mock_request, mock_filters, ordering="latitude")
+
+        mock_chapter_model.active_chapters.order_by.assert_called_with("latitude")
+        assert result == mock_queryset
+
+
+class TestGetChapter:
+    """Tests for get_chapter endpoint."""
+
+    @patch("apps.api.rest.v0.chapter.ChapterModel")
+    def test_get_chapter_success(self, mock_chapter_model):
+        """Test getting a chapter when found."""
+        mock_request = MagicMock()
+        mock_chapter = MagicMock()
+        mock_chapter_model.active_chapters.filter.return_value.first.return_value = mock_chapter
+
+        result = get_chapter(mock_request, "London")
+
+        mock_chapter_model.active_chapters.filter.assert_called_with(
+            key__iexact="www-chapter-London"
+        )
+        assert result == mock_chapter
+
+    @patch("apps.api.rest.v0.chapter.ChapterModel")
+    def test_get_chapter_with_prefix(self, mock_chapter_model):
+        """Test getting a chapter with www-chapter- prefix."""
+        mock_request = MagicMock()
+        mock_chapter = MagicMock()
+        mock_chapter_model.active_chapters.filter.return_value.first.return_value = mock_chapter
+
+        result = get_chapter(mock_request, "www-chapter-London")
+
+        mock_chapter_model.active_chapters.filter.assert_called_with(
+            key__iexact="www-chapter-London"
+        )
+        assert result == mock_chapter
+
+    @patch("apps.api.rest.v0.chapter.ChapterModel")
+    def test_get_chapter_not_found(self, mock_chapter_model):
+        """Test getting a chapter when not found."""
+        mock_request = MagicMock()
+        mock_chapter_model.active_chapters.filter.return_value.first.return_value = None
+
+        result = get_chapter(mock_request, "NonExistent")
+
+        assert result.status_code == HTTPStatus.NOT_FOUND
