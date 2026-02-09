@@ -2391,7 +2391,7 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...programProps} />)
 
       expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
-+      expect(screen.getByTestId('entity-actions')).toHaveTextContent('type=program')
+      expect(screen.getByTestId('entity-actions')).toHaveTextContent('type=program')
     })
 
     it('does not render program EntityActions when canUpdateStatus is false', () => {
