@@ -68,14 +68,6 @@ Senior GRC & Technology Risk Leader, CISSP
 
 Marie is a cybersecurity professional focused on Governance, Risk, and Compliance. She enjoys helping people navigate the sometimes confusing world of GRC, whether they are just starting out, prepping for their CISSP, or tackling real-world risk management challenges. She is happy to share what she has learned, answer questions, and help others build practical skills. She welcomes outreach on LinkedIn or Slack and is always happy to chat about security, risk, or career paths in this field.
 
-### Muhammad Salman
-
-Software Developer | GSoC'25 contributor at FOSSology
-
-[GitHub](https://github.com/SalmanDeveloperz/) • [LinkedIn](https://www.linkedin.com/in/msalman199/) • [Slack](https://owasp.slack.com/team/U0A7YV0SPNE) • [Pakistan (Pakistan Standard Time)](https://time-time.net/time/islamabad-pakistan.php)
-
-Muhammad Salman is a Linux-focused software engineer and GSoC'25 contributor at FOSSology (Linux Foundation). He works on infrastructure, backend reliability, and production debugging in cloud-native systems. For GSoC 2026, his focus is infrastructure reliability, observability, and operational best practices.
-
 ### Noland Crane
 
 Application Security Analyst at Bloomreach, CISSP
