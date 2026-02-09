@@ -71,7 +71,9 @@ class IssueNode(strawberry.relay.Node):
                 .prefetch_related(
                     Prefetch(
                         "user__user_badges",
-                        queryset=UserBadge.objects.filter(is_active=True).order_by(
+                        queryset=UserBadge.objects.filter(is_active=True)
+                        .select_related("badge")
+                        .order_by(
                             "badge__weight",
                             "badge__name",
                         ),

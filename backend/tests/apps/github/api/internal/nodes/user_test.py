@@ -101,7 +101,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_badges_queryset = Mock()
         mock_badges_queryset.filter.return_value.count.return_value = 3
         mock_user.user_badges = mock_badges_queryset
-        mock_user.user_badges_list = None 
+        mock_user.user_badges_list = None
 
         field = self._get_field_by_name("badge_count", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
@@ -117,7 +117,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_select_related = mock_filter.select_related.return_value
         mock_select_related.order_by.return_value = []
         mock_user.user_badges = mock_badges_queryset
-        mock_user.user_badges_list = None  
+        mock_user.user_badges_list = None
 
         field = self._get_field_by_name("badges", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
@@ -138,7 +138,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         mock_select_related = mock_filter.select_related.return_value
         mock_select_related.order_by.return_value = [mock_user_badge]
         mock_user.user_badges = mock_badges_queryset
-        mock_user.user_badges_list = None 
+        mock_user.user_badges_list = None
         field = self._get_field_by_name("badges", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == [mock_badge]
@@ -191,7 +191,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         ]
         mock_user = Mock()
         mock_user.user_badges = mock_badges_queryset
-        mock_user.user_badges_list = None 
+        mock_user.user_badges_list = None
 
         field = self._get_field_by_name("badges", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
