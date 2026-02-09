@@ -1,8 +1,10 @@
 from datetime import datetime
+from http import HTTPStatus
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.project import ProjectDetail
+from apps.api.rest.v0.project import ProjectDetail, get_project, list_projects
 
 
 @pytest.mark.parametrize(
@@ -59,3 +61,90 @@ def test_project_serializer_validation(project_data):
     assert project.level == project_data["level"]
     assert project.name == project_data["name"]
     assert project.updated_at == datetime.fromisoformat(project_data["updated_at"])
+
+
+class TestListProjects:
+    """Tests for list_projects endpoint."""
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_list_projects_without_level_filter(self, mock_project_model, mock_apply_search):
+        """Test list projects without level filter."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.level = None
+        mock_filters.q = None
+
+        mock_queryset = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.order_by.return_value = mock_queryset
+
+        result = list_projects(mock_request, mock_filters, ordering=None)
+
+        mock_queryset.order_by.assert_called_with("-level_raw", "-stars_count", "-forks_count")
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_list_projects_with_level_filter(self, mock_project_model, mock_apply_search):
+        """Test list projects with level filter."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.level = "flagship"
+        mock_filters.q = "name:security"
+
+        mock_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered_queryset
+        mock_filtered_queryset.order_by.return_value = mock_filtered_queryset
+
+        result = list_projects(mock_request, mock_filters, ordering="created_at")
+
+        mock_queryset.filter.assert_called_with(level="flagship")
+        mock_filtered_queryset.order_by.assert_called_with(
+            "created_at", "-stars_count", "-forks_count"
+        )
+        assert result == mock_filtered_queryset
+
+
+class TestGetProject:
+    """Tests for get_project endpoint."""
+
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_get_project_success(self, mock_project_model):
+        """Test get project when found."""
+        mock_request = MagicMock()
+        mock_project = MagicMock()
+        mock_project_model.active_projects.filter.return_value.first.return_value = mock_project
+
+        result = get_project(mock_request, "Nest")
+
+        mock_project_model.active_projects.filter.assert_called_with(
+            key__iexact="www-project-Nest"
+        )
+        assert result == mock_project
+
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_get_project_with_prefix(self, mock_project_model):
+        """Test get project with www-project- prefix."""
+        mock_request = MagicMock()
+        mock_project = MagicMock()
+        mock_project_model.active_projects.filter.return_value.first.return_value = mock_project
+
+        result = get_project(mock_request, "www-project-Nest")
+
+        mock_project_model.active_projects.filter.assert_called_with(
+            key__iexact="www-project-Nest"
+        )
+        assert result == mock_project
+
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_get_project_not_found(self, mock_project_model):
+        """Test get project when not found."""
+        mock_request = MagicMock()
+        mock_project_model.active_projects.filter.return_value.first.return_value = None
+
+        result = get_project(mock_request, "NonExistent")
+
+        assert result.status_code == HTTPStatus.NOT_FOUND
