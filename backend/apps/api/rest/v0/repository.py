@@ -12,7 +12,14 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import ValidationErrorSchema
+from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
 from apps.github.models.repository import Repository as RepositoryModel
+
+REPOSITORY_SEARCH_SCHEMA: dict[str, FieldConfig] = {
+    "name": {"type": "string", "field": "name", "lookup": "icontains"},
+    "stars": {"type": "number", "field": "stars_count"},
+    "forks": {"type": "number", "field": "forks_count"},
+}
 
 router = RouterPaginated(tags=["Repositories"])
 
@@ -54,6 +61,10 @@ class RepositoryFilter(FilterSchema):
         description="Organization that repositories belong to",
         example="OWASP",
     )
+    q: str | None = Field(
+        None,
+        description="Structured search query",
+    )
 
 
 @router.get(
@@ -78,6 +89,7 @@ def list_repository(
     if filters.organization_id:
         repositories = repositories.filter(organization__login__iexact=filters.organization_id)
 
+    repositories = apply_structured_search(repositories, filters.q, REPOSITORY_SEARCH_SCHEMA)
     return repositories.order_by(ordering or "-created_at", "-updated_at")
 
 

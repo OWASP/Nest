@@ -12,7 +12,13 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import ValidationErrorSchema
+from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
 from apps.github.models.organization import Organization as OrganizationModel
+
+ORGANIZATION_SEARCH_SCHEMA: dict[str, FieldConfig] = {
+    "name": {"type": "string", "field": "name", "lookup": "icontains"},
+    "location": {"type": "string", "field": "location", "lookup": "icontains"},
+}
 
 router = RouterPaginated(tags=["Community"])
 
@@ -51,6 +57,7 @@ class OrganizationFilter(FilterSchema):
         description="Location of the organization",
         example="United States of America",
     )
+    q: str | None = Field(None, description="Structured search query")
 
 
 @router.get(
@@ -70,11 +77,12 @@ def list_organization(
     ),
 ) -> list[Organization]:
     """Get organizations."""
-    return filters.filter(
-        OrganizationModel.objects.filter(
-            is_owasp_related_organization=True,
-        ).order_by(ordering or "-created_at")
+    queryset = apply_structured_search(
+        queryset=OrganizationModel.objects.filter(is_owasp_related_organization=True),
+        query=filters.q,
+        field_schema=ORGANIZATION_SEARCH_SCHEMA,
     )
+    return filters.filter(queryset).order_by(ordering or "-created_at")
 
 
 @router.get(
