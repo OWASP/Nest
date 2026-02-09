@@ -78,11 +78,11 @@ def list_committees(
     summary="Get committee",
 )
 @decorate_view(cache_response())
-def get_chapter(
+def get_committee(
     request: HttpRequest,
     committee_id: str = Path(example="project"),
 ) -> CommitteeDetail | CommitteeError:
-    """Get chapter."""
+    """Get committee."""
     if committee := CommitteeModel.active_committees.filter(
         is_active=True,
         key__iexact=(
