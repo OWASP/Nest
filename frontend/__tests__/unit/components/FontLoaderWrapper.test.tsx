@@ -135,15 +135,14 @@ describe('<FontLoaderWrapper />', () => {
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument()
   })
 
-  it('calls document.fonts.ready.then() on mount', async () => {
+  it('renders children after fonts promise resolves', async () => {
     render(
       <FontLoaderWrapper>
         <div>Content</div>
       </FontLoaderWrapper>
     )
 
-    // If the component properly calls .then() on the fonts.ready promise,
-    // it will show the content once the promise resolves
+    // Component calls .then() on document.fonts.ready and renders content once resolved
     if (fontsReadyResolve) fontsReadyResolve()
 
     await waitFor(() => {
