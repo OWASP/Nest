@@ -43,22 +43,18 @@ class TestQueryParser:
         [
             ("case_sensitive_parser", '"John Doe"'),
             ("case_sensitive_strict_parser", '"John Doe"'),
-            ("parser", '"John Doe"'),
-            ("strict_parser", '"John Doe"'),
+            ("parser", '"john doe"'),
+            ("strict_parser", '"john doe"'),
         ],
     )
     def test_basic_field_parsing_all_types(self, parser_type, expected_string):
-        """Test parsing across different parser configurations."""
         parser = getattr(self, parser_type)
-        expected_value = (
-            expected_string if "case_sensitive" in parser_type else expected_string.lower()
-        )
 
         assert parser.parse('Author:"John Doe"') == [
             {
                 "field": "author",
                 "type": "string",
-                "value": expected_value,
+                "value": expected_string,
             }
         ]
 
@@ -214,7 +210,6 @@ class TestQueryParser:
         assert e.value.error_type == "NUMBER_VALUE_ERROR"
 
     def test_quoted_multi_word_values(self):
-        """Test that multi-word values in quotes are parsed correctly without splitting."""
         query = 'project:"OWASP Nest" author:"John Doe"'
         results = self.parser.parse(query)
 
@@ -223,7 +218,6 @@ class TestQueryParser:
         assert results[1]["value"] == '"john doe"'
 
     def test_case_sensitivity_toggle(self):
-        """Verify that the case_sensitive flag controls value normalization."""
         query = "Author:OWASP"
         cs_result = self.case_sensitive_parser.parse(query)
         assert cs_result[0]["value"] == "OWASP"
