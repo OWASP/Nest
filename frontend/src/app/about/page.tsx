@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
@@ -82,7 +83,7 @@ const About = () => {
     .filter(Boolean)
     .map((user) => ({
       description: user?.login ? leaders[user.login as keyof typeof leaders] : '',
-      memberName: user?.name || user?.login || '',
+      memberName: user?.name || user?.login,
       member: user,
     }))
     .filter((leader) => leader.memberName) as Leader[]

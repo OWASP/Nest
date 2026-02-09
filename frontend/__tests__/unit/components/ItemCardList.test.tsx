@@ -537,11 +537,11 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      // When URL is missing, the title should render as plain text, not a link
+      // When URL is missing, the title should render as plain text, not a link.
       const titleText = screen.getByText('Test Issue Title')
       expect(titleText).toBeInTheDocument()
 
-      // Verify it's not wrapped in a link
+      // Verify it's not wrapped in a link.
       const titleLinks = screen.queryAllByTestId('link')
       const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
       expect(titleLink).toBeUndefined()

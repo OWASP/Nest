@@ -44,13 +44,5 @@
     "next-env.d.ts",
     "src"
   ],
-  "exclude": [
-    "node_modules",
-    "jest.setup.ts",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "__tests__/**"
-  ]
+  "exclude": ["__tests__/**/*", "jest.setup.ts", "node_modules"]
 }

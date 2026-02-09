@@ -25,7 +25,6 @@ const CommitteesPage = () => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(committee, params)
     const formattedUrls = handleSocialUrls(committee.relatedUrls)
-    const committeeId = committee.objectID ?? committee.key
     const handleButtonClick = () => {
       router.push(`/committees/${committee.key}`)
     }
@@ -38,16 +37,16 @@ const CommitteesPage = () => {
 
     return (
       <Card
-        key={committeeId}
-        cardKey={committeeId}
-        title={committee.name}
-        url={`/committees/${committee.key}`}
-        summary={committee.summary ?? ''}
-        icons={filteredIcons}
-        topContributors={committee.topContributors}
         button={submitButton}
+        cardKey={committee.key}
+        icons={filteredIcons}
+        key={committee.key}
         social={formattedUrls}
+        summary={committee.summary ?? ''}
+        title={committee.name}
         tooltipLabel={`Learn more about ${committee.name}`}
+        topContributors={committee.topContributors}
+        url={`/committees/${committee.key}`}
       />
     )
   }

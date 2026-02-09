@@ -77,17 +77,17 @@ const EditModulePage = () => {
     if (accessStatus === 'allowed' && data?.getModule) {
       const m = data.getModule
       setFormData({
-        name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
-        startedAt: formatDateForInput(m.startedAt),
-        endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
-        projectName: m.projectName || '',
-        tags: (m.tags || []).join(', '),
+        endedAt: formatDateForInput(m.endedAt),
+        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
         labels: (m.labels || []).join(', '),
-        projectId: m.projectId || '',
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
+        name: m.name || '',
+        projectId: m.projectId || '',
+        projectName: m.projectName || '',
+        startedAt: formatDateForInput(m.startedAt),
+        tags: (m.tags || []).join(', '),
       })
     }
   }, [accessStatus, data])

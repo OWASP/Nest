@@ -11,7 +11,7 @@ import {
 Sentry.init({
   debug: false,
   dsn: SENTRY_DSN,
-  environment: (ENVIRONMENT ?? 'production').toLowerCase(),
+  environment: (ENVIRONMENT ?? 'local').toLowerCase(),
   integrations: [Sentry.browserTracingIntegration, Sentry.replayIntegration],
   release: RELEASE_VERSION,
   replaysOnErrorSampleRate: 0.5,

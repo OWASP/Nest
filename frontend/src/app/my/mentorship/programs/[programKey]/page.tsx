@@ -49,22 +49,22 @@ const ProgramDetailsPage = () => {
   const updateStatus = async (newStatus: string) => {
     if (!Object.values(ProgramStatusEnum).includes(newStatus as ProgramStatusEnum)) {
       addToast({
-        title: 'Invalid Status',
-        description: 'The provided status is not valid.',
-        variant: 'solid',
         color: 'danger',
+        description: 'The provided status is not valid.',
         timeout: 3000,
+        title: 'Invalid Status',
+        variant: 'solid',
       })
       return
     }
 
     if (!program || !isAdmin) {
       addToast({
-        title: 'Permission Denied',
-        description: 'Only admins can update the program status.',
-        variant: 'solid',
         color: 'danger',
+        description: 'Only admins can update the program status.',
         timeout: 3000,
+        title: 'Permission Denied',
+        variant: 'solid',
       })
       return
     }

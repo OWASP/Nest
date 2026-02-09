@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -115,6 +116,7 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
+      pullRequests={recentPullRequests as PullRequest[]}
       recentIssues={recentIssues as Issue[]}
       recentReleases={
         recentReleases?.map((release) => ({
@@ -123,7 +125,6 @@ const OrganizationDetailsPage = () => {
         })) as Release[]
       }
       recentMilestones={recentMilestones as Milestone[]}
-      pullRequests={recentPullRequests as PullRequest[]}
       repositories={
         repositories?.map((repo) => ({
           ...repo,

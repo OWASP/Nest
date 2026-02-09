@@ -522,11 +522,10 @@ const DetailsCard = ({
           ['chapter', 'project', 'repository'].includes(type) &&
           (projectName || title) &&
           (() => {
-            const cardTitle = (projectName || title) as string
             return (
               <SponsorCard
                 target={entityKey}
-                title={cardTitle}
+                title={(projectName || title) as string}
                 type={type === 'chapter' ? 'chapter' : 'project'}
               />
             )
