@@ -249,5 +249,6 @@ class TestAlgoliaSearch:
             assert response_2.status_code == HTTPStatus.OK
             assert response_data_1 == expected_result
             assert response_data_2 == expected_result
-            #backend only called once = caching worked
+            # backend only called once = caching worked
             mock_get_search_results.assert_called_once()
+            
