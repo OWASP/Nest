@@ -419,7 +419,7 @@ describe('ProgramCard', () => {
       expect(screen.getByRole('button', { name: /Program actions menu/ })).toBeInTheDocument()
     })
 
-    it('stops propagation on mousedown for actions wrapper', () => {
+    it('handles mousedown event on actions wrapper', () => {
       render(
         <ProgramCard
           program={baseMockProgram}
@@ -434,11 +434,12 @@ describe('ProgramCard', () => {
         .closest('[role="none"]')
       expect(actionsWrapper).toBeInTheDocument()
 
-      const mockEvent = { stopPropagation: jest.fn() }
-      fireEvent.mouseDown(actionsWrapper!, mockEvent)
+      // Create a real mousedown event and spy on stopPropagation
+      const mousedownEvent = new MouseEvent('mousedown', { bubbles: true })
+      const stopPropagationSpy = jest.spyOn(mousedownEvent, 'stopPropagation')
 
-      // The handler should be called - we verify the element exists and handles the event
-      expect(actionsWrapper).toBeInTheDocument()
+      actionsWrapper!.dispatchEvent(mousedownEvent)
+      expect(stopPropagationSpy).toHaveBeenCalled()
     })
   })
 

@@ -609,7 +609,6 @@ describe('About Component', () => {
         return {
           loading: false,
           data: {
-            ...mockAboutData,
             project: {
               ...mockAboutData.project,
               recentMilestones: [
@@ -620,6 +619,10 @@ describe('About Component', () => {
                 },
               ],
             },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
           },
           error: null,
         }
@@ -640,7 +643,6 @@ describe('About Component', () => {
         return {
           loading: false,
           data: {
-            ...mockAboutData,
             project: {
               ...mockAboutData.project,
               recentMilestones: [
@@ -651,6 +653,10 @@ describe('About Component', () => {
                 },
               ],
             },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
           },
           error: null,
         }
@@ -671,7 +677,6 @@ describe('About Component', () => {
         return {
           loading: false,
           data: {
-            ...mockAboutData,
             project: {
               ...mockAboutData.project,
               recentMilestones: [
@@ -682,6 +687,10 @@ describe('About Component', () => {
                 },
               ],
             },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
           },
           error: null,
         }

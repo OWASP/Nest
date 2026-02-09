@@ -338,12 +338,14 @@ describe('CalendarButton', () => {
       const button = screen.getByRole('button')
 
       // Initially should show FaCalendar (not hovered)
+      const initialIconMarkup = button.querySelector('svg')?.outerHTML
 
       // Simulate mouse enter
       fireEvent.mouseEnter(button)
       await waitFor(() => {
         // After hover, FaCalendarPlus should be shown (different SVG)
-        expect(button).toBeInTheDocument()
+        const hoveredIconMarkup = button.querySelector('svg')?.outerHTML
+        expect(hoveredIconMarkup).not.toBe(initialIconMarkup)
       })
     })
 
@@ -351,14 +353,23 @@ describe('CalendarButton', () => {
       render(<CalendarButton event={mockEvent} />)
       const button = screen.getByRole('button')
 
+      // Capture initial icon (FaCalendar)
+      const initialIconHtml = button.innerHTML
+
       // Mouse enter - hover state true
       fireEvent.mouseEnter(button)
+
+      await waitFor(() => {
+        // Icon should change to FaCalendarPlus
+        expect(button.innerHTML).not.toEqual(initialIconHtml)
+      })
 
       // Mouse leave - hover state false
       fireEvent.mouseLeave(button)
 
       await waitFor(() => {
-        expect(button).toBeInTheDocument()
+        // Icon should revert to FaCalendar
+        expect(button.innerHTML).toEqual(initialIconHtml)
       })
     })
 

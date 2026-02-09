@@ -420,7 +420,18 @@ describe('ModuleForm', () => {
       const singleButton = screen.getByTestId('select-single')
       fireEvent.click(singleButton)
 
+      // Verify setFormData was called with a function (setter pattern)
       expect(mockSetFormData).toHaveBeenCalled()
+      const setterFn = mockSetFormData.mock.calls[0][0]
+      expect(typeof setterFn).toBe('function')
+
+      // Call the setter function with previous state and verify it returns correct data
+      const result = setterFn(defaultFormData)
+      expect(result).toEqual(
+        expect.objectContaining({
+          experienceLevel: 'INTERMEDIATE',
+        })
+      )
     })
   })
 
@@ -613,21 +624,29 @@ describe('ProjectSelector', () => {
         fireEvent.click(selectButton)
       })
 
-      // Since items array might not have project-1, the project won't be found
-      // This tests the code path where selectedProject is found
+      // Verify that selection via Set triggers onProjectChange with the selected project
+      await waitFor(() => {
+        expect(mockOnProjectChange).toHaveBeenCalledWith('project-1', 'Test Project 1')
+      })
     })
 
     it('handles "all" key selection (lines 405-406)', async () => {
-      renderProjectSelector()
+      mockQuery.mockResolvedValue({
+        data: {
+          searchProjects: [{ id: 'project-1', name: 'Test Project 1' }],
+        },
+      })
+
+      renderProjectSelector({ value: 'project-1', defaultName: 'Test Project 1' })
       const allButton = screen.getByTestId('autocomplete-select-all')
 
       await act(async () => {
         fireEvent.click(allButton)
       })
 
-      // 'all' creates an empty set, no project selected
-      // Verify button is still in the document
-      expect(allButton).toBeInTheDocument()
+      // 'all' creates an empty set, which clears the selection
+      // Verify onProjectChange is called with null and empty string
+      expect(mockOnProjectChange).toHaveBeenCalledWith(null, '')
     })
 
     it('handles single key selection (lines 407-408)', async () => {
@@ -655,6 +674,9 @@ describe('ProjectSelector', () => {
       await act(async () => {
         fireEvent.click(singleButton)
       })
+
+      // Verify onProjectChange is called with the selected project
+      expect(mockOnProjectChange).toHaveBeenCalledWith('project-1', 'Test Project 1')
     })
 
     it('clears selection when empty set is passed (lines 419-420)', async () => {
@@ -793,7 +815,16 @@ describe('ProjectSelector', () => {
         expect(mockQuery).toHaveBeenCalled()
       })
 
-      // The filtered results should not include project-1
+      // Verify filtering: only project-2 should be in the rendered results
+      const autocompleteItems = screen.getAllByTestId('autocomplete-item')
+      expect(autocompleteItems).toHaveLength(1)
+      expect(autocompleteItems[0]).toHaveAttribute('data-text-value', 'Test Project 2')
+
+      // Explicitly verify project-1 is not rendered
+      const project1Item = autocompleteItems.find(
+        (item) => item.getAttribute('data-text-value') === 'Test Project 1'
+      )
+      expect(project1Item).toBeUndefined()
     })
   })
 })

@@ -228,7 +228,7 @@ describe('CreateModulePage', () => {
     jest.useRealTimers()
   })
 
-  it('renders form with min and max dates when program has start and end dates', async () => {
+  it('renders form without error when program has start and end dates', async () => {
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',

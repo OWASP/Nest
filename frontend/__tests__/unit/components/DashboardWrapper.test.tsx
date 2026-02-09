@@ -136,18 +136,18 @@ describe('<DashboardWrapper />', () => {
   })
 
   it('handles status transitions correctly', () => {
-    const { rerender } = render(
-      <DashboardWrapper>
-        <div>Dashboard Content</div>
-      </DashboardWrapper>
-    )
-
     // Initially syncing
     mockUseDjangoSession.mockReturnValue({
       isSyncing: true,
       session: mockSession,
       status: 'loading',
     })
+
+    const { rerender } = render(
+      <DashboardWrapper>
+        <div>Dashboard Content</div>
+      </DashboardWrapper>
+    )
 
     rerender(
       <DashboardWrapper>

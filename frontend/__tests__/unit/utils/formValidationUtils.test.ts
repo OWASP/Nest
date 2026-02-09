@@ -17,8 +17,9 @@ describe('formValidationUtils', () => {
       expect(validateRequired('   ', 'Field')).toBe('Field is required')
     })
 
-    it('returns error message when value is null-like empty', () => {
-      expect(validateRequired('', 'Name')).toBe('Name is required')
+    it('returns error message when value is null or undefined', () => {
+      expect(validateRequired(null, 'Name')).toBe('Name is required')
+      expect(validateRequired(undefined, 'Name')).toBe('Name is required')
     })
 
     it('returns undefined when value is valid', () => {

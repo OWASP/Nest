@@ -261,20 +261,26 @@ describe('MyMentorshipPage', () => {
     })
 
     const scrollToMock = jest.fn()
+    const originalScrollTo = globalThis.scrollTo
     globalThis.scrollTo = scrollToMock
 
-    render(<MyMentorshipPage />)
+    try {
+      render(<MyMentorshipPage />)
 
-    await waitFor(() => {
-      expect(screen.getByText('My Mentorship')).toBeInTheDocument()
-    })
+      await waitFor(() => {
+        expect(screen.getByText('My Mentorship')).toBeInTheDocument()
+      })
 
-    const nextPageBtn = screen.getByTestId('next-page-btn')
-    fireEvent.click(nextPageBtn)
+      const nextPageBtn = screen.getByTestId('next-page-btn')
+      fireEvent.click(nextPageBtn)
 
-    await waitFor(() => {
-      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
-    })
+      await waitFor(() => {
+        expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
+      })
+    } finally {
+      // Restore original scrollTo to avoid leaking mock into other tests
+      globalThis.scrollTo = originalScrollTo
+    }
   })
 
   it('handles search callback', async () => {

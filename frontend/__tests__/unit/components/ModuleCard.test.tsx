@@ -725,7 +725,7 @@ describe('getSimpleDuration', () => {
 
   it('handles negative duration (end before start)', () => {
     const result = getSimpleDuration('2024-03-01T00:00:00Z', '2024-01-01T00:00:00Z')
-    // Negative days / 7, ceil would give 0 or negative, depending on implementation
-    expect(result).toMatch(/\d+ weeks?|0 weeks/)
+    // When end date is before start date, function returns negative weeks
+    expect(result).toBe('-8 weeks')
   })
 })

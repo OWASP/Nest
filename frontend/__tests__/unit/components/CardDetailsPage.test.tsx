@@ -457,12 +457,15 @@ jest.mock('components/Leaders', () => {
           <h3>Leaders</h3>
           {Array.isArray(usersList) &&
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            usersList.map((user: any) => (
-              <div key={user.login ? String(user.login) : Math.random().toString()}>
-                <div>{user.member?.name || user.memberName || 'Unknown'}</div>
-                <div>{user.description || ''}</div>
-              </div>
-            ))}
+            usersList.map((user: any, index: number) => {
+              const uniqueKey = `leader-${index}-${user.login || 'unknown'}`
+              return (
+                <div key={uniqueKey}>
+                  <div>{user.member?.name || user.memberName || 'Unknown'}</div>
+                  <div>{user.description || ''}</div>
+                </div>
+              )
+            })}
         </div>
       )
     },

@@ -183,9 +183,8 @@ describe('ProgramForm Component', () => {
         />
       )
 
-      const buttons = screen.getAllByRole('button')
-      // Component should render without errors
-      expect(buttons.length).toBeGreaterThanOrEqual(0)
+      const submitButton = screen.getByRole('button', { name: /saving|submit|save/i })
+      expect(submitButton).toBeDisabled()
     })
 
     test('enables submit button when not loading', () => {
@@ -199,9 +198,8 @@ describe('ProgramForm Component', () => {
         />
       )
 
-      const buttons = screen.getAllByRole('button')
-      // Component should render without errors
-      expect(buttons.length).toBeGreaterThanOrEqual(0)
+      const submitButton = screen.getByRole('button', { name: /submit|save/i })
+      expect(submitButton).not.toBeDisabled()
     })
   })
 
@@ -815,9 +813,9 @@ describe('ProgramForm Component', () => {
       )
 
       // Find start date input by label
-      const startDateLabel = screen.queryByText('Start Date')
+      const startDateLabel = screen.getByText('Start Date')
       // Component should render without errors
-      expect(startDateLabel).not.toBeUndefined()
+      expect(startDateLabel).toBeInTheDocument()
     })
 
     test('handles end date changes', () => {
@@ -832,9 +830,9 @@ describe('ProgramForm Component', () => {
       )
 
       // Find end date input by label
-      const endDateLabel = screen.queryByText('End Date')
+      const endDateLabel = screen.getByText('End Date')
       // Component should render without errors
-      expect(endDateLabel).not.toBeUndefined()
+      expect(endDateLabel).toBeInTheDocument()
     })
 
     test('handles mentees limit input with string value conversion', async () => {

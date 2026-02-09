@@ -78,6 +78,11 @@ jest.mock('components/ShowMoreButton', () => ({
   ),
 }))
 
+jest.mock('components/EntityActions', () => ({
+  __esModule: true,
+  default: () => <div data-testid="entity-actions" />,
+}))
+
 const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
 const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>
@@ -456,8 +461,7 @@ describe('SingleModuleCard', () => {
 
       render(<SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />)
 
-      // EntityActions should be rendered (we need to mock it to verify)
-      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
     })
 
     it('does not render EntityActions when user is not admin', () => {
@@ -474,7 +478,7 @@ describe('SingleModuleCard', () => {
 
       render(<SingleModuleCard module={mockModule} accessLevel="user" admins={mockAdmins} />)
 
-      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
     })
 
     it('does not render EntityActions when accessLevel is not admin', () => {
@@ -491,7 +495,7 @@ describe('SingleModuleCard', () => {
 
       render(<SingleModuleCard module={mockModule} accessLevel="viewer" admins={mockAdmins} />)
 
-      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
     })
   })
 

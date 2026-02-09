@@ -148,7 +148,14 @@ describe('SkeletonBase', () => {
       expect(userCards).toHaveLength(12)
 
       const gridContainer = userCards[0].parentElement
-      expect(gridContainer).toHaveClass('grid', 'grid-cols-1', 'gap-6')
+      expect(gridContainer).toHaveClass(
+        'grid',
+        'grid-cols-1',
+        'gap-6',
+        'sm:grid-cols-2',
+        'lg:grid-cols-3',
+        'xl:grid-cols-4'
+      )
     })
 
     it('renders snapshot skeletons for snapshots indexName', () => {

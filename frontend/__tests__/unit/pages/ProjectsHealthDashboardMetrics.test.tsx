@@ -49,11 +49,13 @@ jest.mock('@heroui/react', () => ({
 
 const graphQLError = new Error('GraphQL Error')
 
+const mockReplace = jest.fn()
+
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(() => new URLSearchParams()),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
-    replace: jest.fn(),
+    replace: mockReplace,
   })),
 }))
 
@@ -224,7 +226,7 @@ describe('MetricsPage', () => {
     fireEvent.click(healthyButton)
 
     await waitFor(() => {
-      expect(healthyButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=healthy'))
     })
   })
 
@@ -242,7 +244,7 @@ describe('MetricsPage', () => {
     fireEvent.click(needsAttentionButton)
 
     await waitFor(() => {
-      expect(needsAttentionButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=needsAttention'))
     })
   })
 
@@ -260,7 +262,7 @@ describe('MetricsPage', () => {
     fireEvent.click(unhealthyButton)
 
     await waitFor(() => {
-      expect(unhealthyButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=unhealthy'))
     })
   })
 
@@ -278,7 +280,7 @@ describe('MetricsPage', () => {
     fireEvent.click(incubatorButton)
 
     await waitFor(() => {
-      expect(incubatorButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=incubator'))
     })
   })
 
@@ -296,7 +298,7 @@ describe('MetricsPage', () => {
     fireEvent.click(labButton)
 
     await waitFor(() => {
-      expect(labButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=lab'))
     })
   })
 
@@ -314,7 +316,7 @@ describe('MetricsPage', () => {
     fireEvent.click(productionButton)
 
     await waitFor(() => {
-      expect(productionButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=production'))
     })
   })
 
@@ -332,7 +334,7 @@ describe('MetricsPage', () => {
     fireEvent.click(flagshipButton)
 
     await waitFor(() => {
-      expect(flagshipButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=flagship'))
     })
   })
 
@@ -350,7 +352,10 @@ describe('MetricsPage', () => {
     fireEvent.click(resetButton)
 
     await waitFor(() => {
-      expect(resetButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalled()
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      expect(lastCall).not.toContain('health=')
+      expect(lastCall).not.toContain('level=')
     })
   })
 
@@ -368,7 +373,7 @@ describe('MetricsPage', () => {
     fireEvent.click(scoreDescButton)
 
     await waitFor(() => {
-      expect(scoreDescButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=scoreDesc'))
     })
   })
 
@@ -386,7 +391,7 @@ describe('MetricsPage', () => {
     fireEvent.click(scoreAscButton)
 
     await waitFor(() => {
-      expect(scoreAscButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=scoreAsc'))
     })
   })
 
@@ -404,7 +409,7 @@ describe('MetricsPage', () => {
     fireEvent.click(starsDescButton)
 
     await waitFor(() => {
-      expect(starsDescButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=starsDesc'))
     })
   })
 
@@ -422,7 +427,7 @@ describe('MetricsPage', () => {
     fireEvent.click(starsAscButton)
 
     await waitFor(() => {
-      expect(starsAscButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=starsAsc'))
     })
   })
 
@@ -440,7 +445,7 @@ describe('MetricsPage', () => {
     fireEvent.click(forksDescButton)
 
     await waitFor(() => {
-      expect(forksDescButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=forksDesc'))
     })
   })
 
@@ -458,7 +463,7 @@ describe('MetricsPage', () => {
     fireEvent.click(forksAscButton)
 
     await waitFor(() => {
-      expect(forksAscButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=forksAsc'))
     })
   })
 
@@ -478,7 +483,7 @@ describe('MetricsPage', () => {
     fireEvent.click(contributorsDescButton)
 
     await waitFor(() => {
-      expect(contributorsDescButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=contributorsDesc'))
     })
   })
 
@@ -498,7 +503,7 @@ describe('MetricsPage', () => {
     fireEvent.click(contributorsAscButton)
 
     await waitFor(() => {
-      expect(contributorsAscButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=contributorsAsc'))
     })
   })
 
@@ -518,7 +523,7 @@ describe('MetricsPage', () => {
     fireEvent.click(createdAtDescButton)
 
     await waitFor(() => {
-      expect(createdAtDescButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=createdAtDesc'))
     })
   })
 
@@ -538,7 +543,7 @@ describe('MetricsPage', () => {
     fireEvent.click(createdAtAscButton)
 
     await waitFor(() => {
-      expect(createdAtAscButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=createdAtAsc'))
     })
   })
 
@@ -556,7 +561,9 @@ describe('MetricsPage', () => {
     fireEvent.click(resetSortButton)
 
     await waitFor(() => {
-      expect(resetSortButton).toBeInTheDocument()
+      expect(mockReplace).toHaveBeenCalled()
+      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
+      expect(lastCall).not.toContain('order=')
     })
   })
 
