@@ -668,6 +668,9 @@ jobs:
           NEXTAUTH_URL=$NEXTAUTH_URL
           EOF
 
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
+
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
@@ -703,6 +706,9 @@ jobs:
           cat > "$SSH_KEY_PATH" <<EOF
           $PROXY_SSH_PRIVATE_KEY
           EOF
+
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
 
       - name: Run proxy deploy
         working-directory: .github/ansible
@@ -1038,6 +1044,9 @@ jobs:
           "$NEST_GITHUB_APP_PRIVATE_KEY"
           EOF
 
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
+
       - name: Run Nest deploy
         working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
@@ -1073,6 +1082,9 @@ jobs:
           cat > "$SSH_KEY_PATH" <<EOF
           $PROXY_SSH_PRIVATE_KEY
           EOF
+
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
 
       - name: Run proxy deploy
         working-directory: .github/ansible

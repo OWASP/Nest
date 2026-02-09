@@ -20,7 +20,7 @@
             - '--include=*/**/**/Makefile'
             - '--exclude=*'
 
-      - name: Update Makefiles for production environment  # noqa: command-instead-of-module risky-shell-pipe
+      - name: Update Makefiles for staging environment  # noqa: command-instead-of-module risky-shell-pipe
         ansible.builtin.shell: |
           sed -i '/e2e-\|fuzz-/! s/\bnest-backend\b/staging-nest-backend/g' ~/backend/Makefile
           sed -i '/e2e-\|fuzz-/! s/\bnest-db\b/staging-nest-db/g' ~/backend/Makefile
