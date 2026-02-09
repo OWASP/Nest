@@ -24,7 +24,7 @@ Illia is a Senior DevOps Engineer with experience building and operating large-s
 
 Software Engineer | Application Security (in transition)
 
-[GitHub](https://github.com/emaybu) • [LinkedIn](https://linkedin.com/in/imeiyonsi/) • [Slack](https://owasp.slack.com/team/U06H942K9UY) • [United States (Eastern Time)](https://time-time.net/times/time-zones/usa-canada/current-eastern-time-est.php)
+[GitHub](https://github.com/emaybu/) • [LinkedIn](https://linkedin.com/in/imeiyonsi/) • [Slack](https://owasp.slack.com/team/U06H942K9UY) • [United States (Eastern Time)](https://time-time.net/times/time-zones/usa-canada/current-eastern-time-est.php)
 
 Ime (Emay) is a software engineer with experience building and supporting production applications. She is currently focusing more on application security, with interests in secure coding and application security fundamentals. She enjoys supporting and sharing knowledge with folks as they navigate real-world open-source projects.
 
