@@ -1,6 +1,7 @@
 """Image extraction service for Slack messages."""
 
 import base64
+import io
 import logging
 from datetime import UTC, datetime, timedelta
 
@@ -8,6 +9,7 @@ import openai
 import requests
 from django.conf import settings
 from django_rq import job
+from PIL import Image
 from requests.exceptions import RequestException
 
 from apps.ai.common.constants import QUEUE_RESPONSE_TIME_MINUTES
@@ -66,6 +68,15 @@ def extract_text_from_image(image_data: bytes) -> str:
     client = openai.OpenAI(api_key=api_key)
     base64_image = base64.b64encode(image_data).decode("utf-8")
 
+    # Detect actual MIME type from image data
+    try:
+        img = Image.open(io.BytesIO(image_data))
+        image_format = img.format.lower() if img.format else "jpeg"
+        mime_type = f"image/{image_format}"
+    except (OSError, ValueError):
+        logger.warning("Failed to detect image format, defaulting to image/jpeg")
+        mime_type = "image/jpeg"
+
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -84,7 +95,7 @@ def extract_text_from_image(image_data: bytes) -> str:
                     },
                     {
                         "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
+                        "image_url": {"url": f"data:{mime_type};base64,{base64_image}"},
                     },
                 ],
             }
@@ -93,7 +104,12 @@ def extract_text_from_image(image_data: bytes) -> str:
         temperature=0.0,
     )
 
-    return response.choices[0].message.content.strip()
+    # Guard against None content
+    content = response.choices[0].message.content
+    if content is None:
+        logger.warning("OpenAI returned None content for image extraction")
+        return ""
+    return content.strip()
 
 
 @job("ai")
@@ -104,12 +120,12 @@ def extract_images_then_maybe_reply(message_id: int, image_files: list[dict]) ->
     try:
         message = Message.objects.get(pk=message_id)
     except Message.DoesNotExist:
-        logger.exception("Message %s not found for image extraction", message_id)
+        logger.error("Message %s not found for image extraction", message_id)  # noqa: TRY400
         return
 
     logger.info("Extracting text from %s images for message %s", len(image_files), message_id)
 
-    bot_token = settings.SLACK_BOT_TOKEN
+    bot_token = message.conversation.workspace.bot_token
     if not bot_token or bot_token == "None":  # noqa: S105
         logger.error("No bot token available")
         django_rq.get_queue("ai").enqueue_in(
