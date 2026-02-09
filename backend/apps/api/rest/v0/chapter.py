@@ -12,7 +12,13 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Leader, LocationFilter, ValidationErrorSchema
+from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
 from apps.owasp.models.chapter import Chapter as ChapterModel
+
+CHAPTER_SEARCH_SCHEMA: dict[str, FieldConfig] = {
+    "name": {"type": "string", "field": "name", "lookup": "icontains"},
+    "country": {"type": "string", "field": "country", "lookup": "icontains"},
+}
 
 router = RouterPaginated(tags=["Chapters"])
 
@@ -63,6 +69,7 @@ class ChapterFilter(LocationFilter):
     """Filter for Chapter."""
 
     country: str | None = Field(None, description="Country of the chapter")
+    q: str | None = Field(None, description="Structured search query")
 
 
 @router.get(
@@ -92,7 +99,12 @@ def list_chapters(
     ),
 ) -> list[Chapter]:
     """Get chapters."""
-    return filters.filter(ChapterModel.active_chapters.order_by(ordering or "-created_at"))
+    queryset = apply_structured_search(
+        queryset=ChapterModel.active_chapters.all(),
+        query=filters.q,
+        field_schema=CHAPTER_SEARCH_SCHEMA,
+    )
+    return filters.filter(queryset).order_by(ordering or "-created_at")
 
 
 @router.get(

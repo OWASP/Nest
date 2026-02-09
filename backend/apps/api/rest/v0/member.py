@@ -12,7 +12,14 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import ValidationErrorSchema
+from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
 from apps.github.models.user import User as UserModel
+
+MEMBER_SEARCH_SCHEMA: dict[str, FieldConfig] = {
+    "company": {"type": "string", "field": "company", "lookup": "icontains"},
+    "followers": {"type": "number", "field": "followers_count"},
+    "location": {"type": "string", "field": "location", "lookup": "icontains"},
+}
 
 router = RouterPaginated(tags=["Community"])
 
@@ -59,6 +66,7 @@ class MemberFilter(FilterSchema):
         description="Company of the user",
     )
     location: str | None = Field(None, description="Location of the member")
+    q: str | None = Field(None, description="Structured search query")
 
 
 @router.get(
@@ -78,7 +86,12 @@ def list_members(
     ),
 ) -> list[Member]:
     """Get all members."""
-    return filters.filter(UserModel.objects.order_by(ordering or "-created_at"))
+    queryset = apply_structured_search(
+        queryset=UserModel.objects.all(),
+        query=filters.q,
+        field_schema=MEMBER_SEARCH_SCHEMA,
+    )
+    return filters.filter(queryset).order_by(ordering or "-created_at")
 
 
 @router.get(
