@@ -63,9 +63,6 @@ run:
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
 	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 
-lint-ansible:
-	pre-commit run ansible-lint --all-files
-
 security-scan: \
 	security-scan-code \
 	security-scan-images

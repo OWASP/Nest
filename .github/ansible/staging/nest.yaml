@@ -1,85 +1,94 @@
-  - name: Deploy Nest to Staging
-    hosts: staging_nest
-    tasks:
-      - name: Copy docker-compose.yaml
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/docker-compose/staging/compose.yaml'
-          dest: ~/docker-compose.yaml
-          mode: '0644'
+- name: Deploy Nest to Staging
+  hosts: staging_nest
+  tasks:
+    - name: Copy docker-compose.yaml
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/docker-compose/staging/compose.yaml'
+        dest: ~/docker-compose.yaml
+        mode: '0644'
 
-      - name: Sync Makefile structure
-        ansible.posix.synchronize:
-          src: '{{ github_workspace }}/'
-          dest: '~/'
-          recursive: yes
-          rsync_opts:
-            - '--include=*/'
-            - '--include=Makefile'
-            - '--include=*/Makefile'
-            - '--include=*/**/Makefile'
-            - '--include=*/**/**/Makefile'
-            - '--exclude=*'
+    - name: Sync Makefile structure
+      ansible.posix.synchronize:
+        src: '{{ github_workspace }}/'
+        dest: '~/'
+        recursive: true
+        rsync_opts:
+          - '--include=*/'
+          - '--include=Makefile'
+          - '--include=*/Makefile'
+          - '--include=*/**/Makefile'
+          - '--include=*/**/**/Makefile'
+          - '--exclude=*'
 
-      - name: Update Makefiles for staging environment  # noqa: command-instead-of-module risky-shell-pipe
-        ansible.builtin.shell: |
-          sed -i '/e2e-\|fuzz-/! s/\bnest-backend\b/staging-nest-backend/g' ~/backend/Makefile
-          sed -i '/e2e-\|fuzz-/! s/\bnest-db\b/staging-nest-db/g' ~/backend/Makefile
-          sed -i 's/\bnest-frontend\b/staging-nest-frontend/g' ~/frontend/Makefile
-        changed_when: false
+    - name: Update Makefiles for staging environment
+      ansible.builtin.command:
+        argv:
+          - sed
+          - -i
+          - "{{ item.sed_expr }}"
+          - "{{ item.path }}"
+      loop:
+        - sed_expr: '/e2e-\|fuzz-/! s/\bnest-backend\b/staging-nest-backend/g'
+          path: '{{ ansible_env.HOME }}/backend/Makefile'
+        - sed_expr: '/e2e-\|fuzz-/! s/\bnest-db\b/staging-nest-db/g'
+          path: '{{ ansible_env.HOME }}/backend/Makefile'
+        - sed_expr: 's/\bnest-frontend\b/staging-nest-frontend/g'
+          path: '{{ ansible_env.HOME }}/frontend/Makefile'
+      changed_when: false
 
-      - name: Ensure data directory exists
-        ansible.builtin.file:
-          path: ~/backend/data
-          state: directory
-          mode: '0755'
+    - name: Ensure data directory exists
+      ansible.builtin.file:
+        path: ~/backend/data
+        state: directory
+        mode: '0755'
 
-      - name: Copy secrets
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/{{ item }}'
-          dest: ~/
-          mode: '0400'
-        loop:
-          - .env.backend
-          - .env.cache
-          - .env.db
-          - .env.frontend
+    - name: Copy secrets
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/{{ item }}'
+        dest: ~/
+        mode: '0400'
+      loop:
+        - .env.backend
+        - .env.cache
+        - .env.db
+        - .env.frontend
 
-      - name: Clean up secrets  # noqa: run-once
-        delegate_to: localhost
-        ansible.builtin.file:
-          path: '{{ github_workspace }}/{{ item }}'
-          state: absent
-        loop:
-          - .env.backend
-          - .env.cache
-          - .env.db
-          - .env.frontend
-        run_once: true
+    - name: Clean up secrets
+      delegate_to: localhost
+      ansible.builtin.file:
+        path: '{{ github_workspace }}/{{ item }}'
+        state: absent
+      loop:
+        - .env.backend
+        - .env.cache
+        - .env.db
+        - .env.frontend
 
-      - name: Copy crontab
-        ansible.builtin.copy:
-          src: '{{ github_workspace }}/cron/staging'
-          dest: /tmp/staging_crontab
-          mode: '0600'
+    - name: Copy crontab
+      ansible.builtin.copy:
+        src: '{{ github_workspace }}/cron/staging'
+        dest: /tmp/staging_crontab
+        mode: '0600'
 
-      - name: Install crontab
-        ansible.builtin.command:
-          cmd: crontab /tmp/staging_crontab
-        changed_when: false
+    - name: Install crontab
+      ansible.builtin.command:
+        cmd: crontab /tmp/staging_crontab
+      changed_when: false
 
-      - name: Restart services
-        ansible.builtin.command:
-          cmd: docker compose up -d --pull always
-        changed_when: false
+    - name: Restart services
+      ansible.builtin.command:
+        cmd: docker compose up -d --pull always
+      changed_when: false
 
-      - name: Prune docker images
-        ansible.builtin.command:
-          cmd: docker image prune -f
-        changed_when: false
+    - name: Prune docker images
+      ansible.builtin.command:
+        cmd: docker image prune -f
+      changed_when: false
 
-      - name: Index data
-        async: 1800 # 30 minutes
-        poll: 0
-        ansible.builtin.shell: |
-          make index-data > /var/log/nest/staging/index-data.log 2>&1
-        changed_when: false
+    - name: Index data
+      async: 1800  # 30 minutes
+      poll: 0
+      # Shell required for stdout/stderr redirect to log file.
+      ansible.builtin.shell: |
+        make index-data > /var/log/nest/staging/index-data.log 2>&1
+      changed_when: false

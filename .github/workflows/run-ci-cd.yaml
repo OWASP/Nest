@@ -669,7 +669,8 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yml
+        run: ansible-galaxy collection install -r requirements.yaml
+        working-directory: .github/ansible
 
       - name: Run Nest deploy
         working-directory: .github/ansible
@@ -708,7 +709,8 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yml
+        run: ansible-galaxy collection install -r requirements.yaml
+        working-directory: .github/ansible
 
       - name: Run proxy deploy
         working-directory: .github/ansible
@@ -1045,7 +1047,8 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yml
+        run: ansible-galaxy collection install -r requirements.yaml
+        working-directory: .github/ansible
 
       - name: Run Nest deploy
         working-directory: .github/ansible
@@ -1084,7 +1087,8 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yml
+        run: ansible-galaxy collection install -r requirements.yaml
+        working-directory: .github/ansible
 
       - name: Run proxy deploy
         working-directory: .github/ansible

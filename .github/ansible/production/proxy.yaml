@@ -20,9 +20,18 @@
         dest: ~/docker-compose.yaml
         mode: '0644'
 
+    - name: Pull and start services
+      ansible.builtin.command:
+        cmd: docker compose up -d --pull always
+      args:
+        chdir: "{{ ansible_env.HOME }}"
+      changed_when: false
+
     - name: Restart services
-      ansible.builtin.shell:
-        cmd: docker compose up -d --pull always && docker compose restart
+      ansible.builtin.command:
+        cmd: docker compose restart
+      args:
+        chdir: "{{ ansible_env.HOME }}"
       changed_when: false
 
     - name: Prune docker images
