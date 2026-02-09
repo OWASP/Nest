@@ -822,7 +822,7 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...defaultProps} isActive={false} />)
 
       expect(screen.getByText('Inactive')).toBeInTheDocument()
-      // Updated classes for consistent badge styling
+      // Updated classes for consistent badge styling.
       expect(screen.getByText('Inactive')).toHaveClass('bg-red-50', 'text-red-800')
     })
 
