@@ -34,6 +34,7 @@ describe('useBreadcrumbs', () => {
 
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Members', path: '/members' },
       ])
     })
@@ -78,6 +79,7 @@ describe('useBreadcrumbs', () => {
       // Note: 'repositories' segment is hidden (in HIDDEN_SEGMENTS)
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Organizations', path: '/organizations' },
         { title: 'Test Organization', path: '/organizations/test-org' },
         { title: 'Test Repository', path: '/organizations/test-org/repositories/test-repo' },

@@ -43,6 +43,6 @@ test.describe('Organization Page', () => {
   })
 
   test('breadcrumb renders correct segments on /organizations', async ({ page }) => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Organizations'])
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Community', 'Organizations'])
   })
 })

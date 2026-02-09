@@ -61,6 +61,6 @@ test.describe('Users Page', () => {
     await expect(page.getByText('2k')).toBeVisible()
   })
   test('breadcrumb renders correct segments on /members', async ({ page }) => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Members'])
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Community', 'Members'])
   })
 })

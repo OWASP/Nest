@@ -48,3 +48,16 @@ class TestOrganizationQuery:
 
         assert result == mock_organization
         mock_get.assert_called_once_with(is_owasp_related_organization=True, login="test-org")
+
+    @patch("apps.github.models.organization.Organization.objects.filter")
+    def test_recent_organizations(self, mock_filter):
+        """Test fetching recent organizations."""
+        mock_qs = Mock()
+        mock_filter.return_value = mock_qs
+        mock_qs.order_by.return_value = ["org1", "org2"]
+
+        result = OrganizationQuery().recent_organizations(limit=2)
+
+        assert result == ["org1", "org2"]
+        mock_filter.assert_called_once_with(is_owasp_related_organization=True)
+        mock_qs.order_by.assert_called_once_with("-created_at")

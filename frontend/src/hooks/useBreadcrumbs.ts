@@ -6,13 +6,14 @@ import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 export type { BreadcrumbItem } from 'types/breadcrumb'
 
 const HIDDEN_SEGMENTS = new Set(['repositories', 'mentees', 'modules', 'programs'])
+const COMMUNITY_RELATED_PATHS = ['/chapters', '/members', '/organizations']
 
 function buildBreadcrumbItems(
   pathname: string | null,
   registeredItems: BreadcrumbItem[]
 ): BreadcrumbItem[] {
   const registeredMap = new Map<string, BreadcrumbItem>()
-  for (const item of registeredItems) {
+  for (const item of registeredItems || []) {
     registeredMap.set(item.path, item)
   }
 
@@ -20,6 +21,13 @@ function buildBreadcrumbItems(
 
   if (!pathname || pathname === '/') {
     return items
+  }
+
+  if (COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))) {
+    items.push({
+      title: 'Community',
+      path: '/community',
+    })
   }
 
   const segments = pathname.split('/').filter(Boolean)
