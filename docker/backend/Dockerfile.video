@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
 
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry install --no-root --without test && \
+    poetry install --no-root --verbose --without test && \
     python -m pip uninstall -y poetry
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \

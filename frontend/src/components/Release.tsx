@@ -68,14 +68,18 @@ const Release: React.FC<ReleaseProps> = ({
             </Tooltip>
           )}
           <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
-            <Link
-              className="text-blue-400 hover:underline"
-              href={`https://github.com/${release.organizationName}/${release.repositoryName}/releases/tag/${release.tagName}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            {release.organizationName && release.repositoryName ? (
+              <Link
+                className="text-blue-400 hover:underline"
+                href={`https://github.com/${release.organizationName}/${release.repositoryName}/releases/tag/${release.tagName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <TruncatedText text={release.name || release.tagName} />
+              </Link>
+            ) : (
               <TruncatedText text={release.name || release.tagName} />
-            </Link>
+            )}
           </h3>
         </div>
         <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
@@ -91,9 +95,9 @@ const Release: React.FC<ReleaseProps> = ({
               disabled={!release.organizationName || !release.repositoryName}
               onClick={handleClickRepository}
               onKeyDown={handleKeyDown}
-              aria-label={`View repository ${release.repositoryName}`}
+              aria-label={`View repository ${release.repositoryName ?? 'Unknown repository'}`}
             >
-              <TruncatedText text={release.repositoryName} />
+              <TruncatedText text={release.repositoryName ?? 'Unknown repository'} />
             </button>
           </div>
         </div>

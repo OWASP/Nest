@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { FaPlus, FaGraduationCap } from 'react-icons/fa6'
 
 import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
-import type { ExtendedSession } from 'types/auth'
+import { hasExtendedUser } from 'types/auth'
 
 import type { Program } from 'types/mentorship'
 import ActionButton from 'components/ActionButton'
@@ -22,8 +22,8 @@ const MyMentorshipPage: React.FC = () => {
   const searchParams = useSearchParams()
 
   const { data: session } = useSession()
-  const extendedSession = session as ExtendedSession | null
-  const userName = extendedSession?.user?.login
+
+  const userName = hasExtendedUser(session) ? session.user.login : undefined
 
   const initialQuery = searchParams.get('q') || ''
   const initialPage = Number.parseInt(searchParams.get('page') || '1', 10)
@@ -60,7 +60,8 @@ const MyMentorshipPage: React.FC = () => {
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-  const isProjectLeader = extendedSession?.user?.isLeader
+
+  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
 
   useEffect(() => {
     if (programData?.myPrograms) {

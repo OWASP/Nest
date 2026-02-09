@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -69,13 +70,13 @@ const ModuleDetailsPage = () => {
 
   return (
     <DetailsCard
-      admins={admins}
+      admins={admins ?? undefined}
       details={moduleDetails}
-      domains={programModule.domains}
+      domains={programModule.domains ?? undefined}
       mentors={programModule.mentors}
-      pullRequests={programModule.recentPullRequests || []}
+      pullRequests={(programModule.recentPullRequests as unknown as PullRequest[]) ?? []}
       summary={programModule.description}
-      tags={programModule.tags}
+      tags={programModule.tags ?? undefined}
       title={programModule.name}
       type="module"
     />

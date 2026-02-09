@@ -78,3 +78,21 @@ class TestEntityMetadataBase:
 
         model_class.objects.get.assert_called_once_with(key="unknown-key")
         assert "TestModel with key 'unknown-key' not found" in stderr.getvalue()
+
+    @patch("apps.owasp.management.commands.common.entity_metadata.validate_data")
+    @patch("apps.owasp.management.commands.common.entity_metadata.get_schema")
+    def test_handle_validation_failure(self, mock_get_schema, mock_validate):
+        """Test handle method when validation fails."""
+        mock_validate.return_value = "Validation error: missing required field"
+
+        command_instance = ConcreteTestCommand()
+        entity_instance = MagicMock()
+        command_instance.model.objects.get.return_value = entity_instance
+        command_instance.get_metadata.return_value = {"invalid": "data"}
+
+        stderr = io.StringIO()
+        call_command(command_instance, "test-key", stderr=stderr)
+
+        error_output = stderr.getvalue()
+        assert "Validation FAILED" in error_output
+        assert "Validation error: missing required field" in error_output

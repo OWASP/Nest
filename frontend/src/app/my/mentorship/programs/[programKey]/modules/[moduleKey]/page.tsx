@@ -60,16 +60,16 @@ const ModuleDetailsPage = () => {
   return (
     <DetailsCard
       accessLevel="admin"
-      admins={admins}
+      admins={admins ?? undefined}
       details={moduleDetails}
-      domains={mentorshipModule.domains}
+      domains={mentorshipModule.domains ?? undefined}
       entityKey={moduleKey}
-      labels={mentorshipModule.labels}
+      labels={mentorshipModule.labels ?? undefined}
       mentees={mentorshipModule.mentees}
       mentors={mentorshipModule.mentors}
       programKey={programKey}
       summary={mentorshipModule.description}
-      tags={mentorshipModule.tags}
+      tags={mentorshipModule.tags ?? undefined}
       title={mentorshipModule.name}
       type="module"
     />

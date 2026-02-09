@@ -577,7 +577,11 @@ describe('Rendering', () => {
 
       await user.click(screen.getByText('Test Event'))
 
-      expect(mockWindowOpen).toHaveBeenCalledWith('https://example.com/event', '_blank')
+      expect(mockWindowOpen).toHaveBeenCalledWith(
+        'https://example.com/event',
+        '_blank',
+        'noopener,noreferrer'
+      )
     })
 
     it('navigates to organization page when organization is clicked', async () => {

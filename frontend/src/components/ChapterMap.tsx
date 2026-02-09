@@ -104,8 +104,8 @@ const MapViewUpdater = ({
       const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(
         localChapters.map((chapter) => [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+          (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+          (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
         ])
       )
       const maxZoom = 7
@@ -113,8 +113,8 @@ const MapViewUpdater = ({
       const nearestChapter = validGeoLocData[0]
       map.setView(
         [
-          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
+          (nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat) as number,
+          (nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng) as number,
         ],
         maxZoom
       )
@@ -219,8 +219,8 @@ const ChapterMap = ({
                 <Marker
                   key={chapter.key}
                   position={[
-                    chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-                    chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+                    (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+                    (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
                   ]}
                   icon={chapterIcon}
                 >

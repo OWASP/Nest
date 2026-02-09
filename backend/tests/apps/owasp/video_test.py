@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, Mock, patch
 
+import ffmpeg
 import pytest
 
 from apps.owasp.video import (
@@ -106,18 +107,47 @@ class TestSlide:
     @patch("apps.owasp.video.ffmpeg")
     def test_generate_and_save_video_exception(self, mock_ffmpeg, mock_logger, slide):
         """Test generate_and_save_video logs exception on error."""
-        import ffmpeg as real_ffmpeg
-
-        mock_ffmpeg.input.return_value = Mock()
-        mock_ffmpeg.output.return_value.run.side_effect = real_ffmpeg.Error(
+        mock_ffmpeg.output.return_value.run.side_effect = ffmpeg.Error(
             "ffmpeg", "stdout", "stderr"
         )
-        mock_ffmpeg.Error = real_ffmpeg.Error
+        mock_ffmpeg.Error = ffmpeg.Error
 
-        with pytest.raises(real_ffmpeg.Error):
+        with pytest.raises(ffmpeg.Error):
             slide.generate_and_save_video()
 
         mock_logger.exception.assert_called_once()
+
+    @patch("apps.owasp.video.pdfium.PdfDocument")
+    @patch("apps.owasp.video.HTML")
+    @patch("apps.owasp.video.video_env")
+    def test_render_and_save_image_render_error(
+        self, mock_video_env, mock_html, mock_pdfium, slide
+    ):
+        """Test render_and_save_image handles render error."""
+        mock_template = Mock()
+        mock_video_env.get_template.return_value = mock_template
+        mock_html.return_value.write_pdf.side_effect = Exception("Render Error")
+
+        with pytest.raises(Exception, match="Render Error"):
+            slide.render_and_save_image()
+
+    @patch("apps.owasp.video.pdfium.PdfDocument")
+    @patch("apps.owasp.video.HTML")
+    @patch("apps.owasp.video.video_env")
+    def test_render_and_save_image_page_error_closes_pdf(
+        self, mock_video_env, mock_html, mock_pdfium, slide
+    ):
+        """Test render_and_save_image ensures PDF is closed on page error."""
+        mock_template = Mock()
+        mock_video_env.get_template.return_value = mock_template
+        mock_pdf = MagicMock()
+        mock_pdfium.return_value = mock_pdf
+        mock_pdf.__getitem__.side_effect = Exception("Page Error")
+
+        with pytest.raises(Exception, match="Page Error"):
+            slide.render_and_save_image()
+
+        mock_pdf.close.assert_called_once()
 
 
 class TestSlideBuilder:
@@ -313,6 +343,26 @@ class TestSlideBuilder:
         assert slide.name == "thank_you"
         assert slide.template_name == "slides/thank_you.jinja"
 
+    @patch("apps.owasp.video.Project.objects")
+    @patch("apps.owasp.video.Release.objects")
+    def test_add_releases_slide_edge_cases(
+        self, mock_release_objects, mock_project_objects, slide_builder
+    ):
+        """Test add_releases_slide edge cases (no repo, no project)."""
+        release_no_repo = Mock()
+        release_no_repo.repository = None
+        release_no_project = Mock()
+        release_no_project.repository = Mock()
+
+        mock_release_qs = MagicMock()
+        mock_release_qs.exists.return_value = True
+        mock_release_qs.count.return_value = 2
+        mock_release_qs.__iter__ = Mock(return_value=iter([release_no_repo, release_no_project]))
+        mock_release_objects.filter.return_value.distinct.return_value = mock_release_qs
+        mock_project_objects.filter.return_value.first.return_value = None
+        result = slide_builder.add_releases_slide()
+        assert result is None
+
 
 class TestVideoGenerator:
     @pytest.fixture
@@ -372,8 +422,6 @@ class TestVideoGenerator:
     @patch("apps.owasp.video.ffmpeg")
     def test_merge_videos_exception(self, mock_ffmpeg, mock_logger, generator, tmp_path):
         """Test merge_videos logs exception on error."""
-        import ffmpeg as real_ffmpeg
-
         slide = Mock()
         slide.video_path = tmp_path / "slide.mp4"
         generator.slides = [slide]
@@ -384,11 +432,28 @@ class TestVideoGenerator:
         mock_ffmpeg.input.return_value = mock_input
         mock_ffmpeg.concat.return_value = Mock()
         mock_ffmpeg.output.return_value.overwrite_output.return_value.run.side_effect = (
-            real_ffmpeg.Error("ffmpeg", "stdout", "stderr")
+            ffmpeg.Error("ffmpeg", "stdout", "stderr")
         )
-        mock_ffmpeg.Error = real_ffmpeg.Error
+        mock_ffmpeg.Error = ffmpeg.Error
 
-        with pytest.raises(real_ffmpeg.Error):
+        with pytest.raises(ffmpeg.Error):
             generator.merge_videos(tmp_path / "output.mp4")
 
         mock_logger.exception.assert_called_once()
+
+    def test_cleanup(self, generator, tmp_path):
+        """Test cleanup removes temporary files."""
+        slide = Mock()
+        slide.audio_path = Mock()
+        slide.image_path = Mock()
+        slide.video_path = Mock()
+        slide.audio_path.exists.return_value = True
+        slide.image_path.exists.return_value = True
+        slide.video_path.exists.return_value = False
+
+        generator.slides = [slide]
+        generator.cleanup()
+
+        slide.audio_path.unlink.assert_called_once()
+        slide.image_path.unlink.assert_called_once()
+        slide.video_path.unlink.assert_not_called()

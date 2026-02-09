@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -53,9 +53,12 @@ class TestOpenAi:
 
     @patch("apps.common.open_ai.logger")
     @patch("openai.OpenAI")
-    def test_complete_general_exception(self, mock_openai, mock_logger, openai_instance):
-        mock_openai.return_value.chat.completions.create.side_effect = Exception()
-
+    def test_complete_general_exception(self, mock_openai, mock_logger):
+        """Test that general exceptions are caught and logged."""
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.side_effect = Exception("API error")
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
         openai_instance.set_prompt("Test prompt").set_input("Test input")
         response = openai_instance.complete()
 

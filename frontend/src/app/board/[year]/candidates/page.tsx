@@ -30,18 +30,19 @@ type Candidate = {
   memberEmail: string
   description: string
   member?: {
+    __typename?: string
     avatarUrl: string
-    bio?: string
-    createdAt?: number
-    firstOwaspContributionAt?: number
+    bio: string
+    createdAt: number
+    firstOwaspContributionAt: number | null
     id: string
-    isFormerOwaspStaff?: boolean
-    isGsocMentor?: boolean
-    isOwaspBoardMember?: boolean
-    linkedinPageId?: string
+    isFormerOwaspStaff: boolean
+    isGsocMentor: boolean
+    isOwaspBoardMember: boolean
+    linkedinPageId: string
     login: string
     name: string
-  }
+  } | null
 }
 
 type MemberSnapshot = {
@@ -332,11 +333,13 @@ const BoardCandidatesPage = () => {
                   onClick={(e) => {
                     e.stopPropagation()
                     e.preventDefault()
-                    window.open(
-                      `https://linkedin.com/in/${candidate.member.linkedinPageId}`,
-                      '_blank',
-                      'noopener,noreferrer'
-                    )
+                    if (candidate.member?.linkedinPageId) {
+                      window.open(
+                        `https://linkedin.com/in/${candidate.member.linkedinPageId}`,
+                        '_blank',
+                        'noopener,noreferrer'
+                      )
+                    }
                   }}
                   className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                   aria-label={`${candidate.memberName}'s LinkedIn profile`}

@@ -5,7 +5,7 @@ export type Committee = {
   createdAt: number
   forksCount?: number
   issuesCount?: number
-  key?: string
+  key: string
   leaders: string[]
   name: string
   objectID?: string

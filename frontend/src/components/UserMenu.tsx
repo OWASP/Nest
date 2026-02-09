@@ -75,7 +75,7 @@ export default function UserMenu({
       >
         <div className="h-10 w-10 overflow-hidden rounded-full">
           <Image
-            src={session.user?.image ?? '/default-avatar.png'}
+            src={session?.user?.image ?? '/default-avatar.png'}
             alt="User avatar"
             width={40}
             height={40}
