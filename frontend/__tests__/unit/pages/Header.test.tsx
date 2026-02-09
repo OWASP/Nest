@@ -855,7 +855,7 @@ describe('Header Component', () => {
 
       // Create an outside element and simulate click
       const outsideElement = document.createElement('div')
-      document.body.appendChild(outsideElement)
+      document.body.append(outsideElement)
 
       await act(async () => {
         latestClickHandler({ target: outsideElement } as unknown as Event)
@@ -864,7 +864,7 @@ describe('Header Component', () => {
       // Menu should close
       expect(isMobileMenuClosed()).toBe(true)
 
-      document.body.removeChild(outsideElement)
+      outsideElement.remove()
       addEventListenerSpy.mockRestore()
     })
 
@@ -973,7 +973,7 @@ describe('Header Component', () => {
       // Menu should still be closed
       expect(isMobileMenuClosed()).toBe(true)
 
-      document.body.removeChild(outsideElement)
+      outsideElement.remove()
       addEventListenerSpy.mockRestore()
     })
   })

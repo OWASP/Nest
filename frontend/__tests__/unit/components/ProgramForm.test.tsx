@@ -224,6 +224,7 @@ describe('ProgramForm Component', () => {
     })
 
     test('calls setFormData when mentees limit changes', async () => {
+      const user = userEvent.setup()
       render(
         <ProgramForm
           formData={defaultFormData}
@@ -233,10 +234,10 @@ describe('ProgramForm Component', () => {
           title="Test"
         />
       )
-
-      const inputs = screen.getAllByDisplayValue('')
-      // Component should render inputs without errors
-      expect(inputs.length).toBeGreaterThanOrEqual(0)
+      const menteesInput = screen.getByPlaceholderText('Enter mentees limit (0 for unlimited)')
+      await user.clear(menteesInput)
+      await user.type(menteesInput, '5')
+      expect(mockSetFormData).toHaveBeenCalled()
     })
 
     test('calls setFormData when tags input changes', async () => {
@@ -290,12 +291,8 @@ describe('ProgramForm Component', () => {
         />
       )
 
-      const buttons = screen.getAllByRole('button')
-      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
-      if (submitButton) {
-        await user.click(submitButton)
-      }
-
+      const submitButton = screen.getByRole('button', { name: /save/i })
+      await user.click(submitButton)
       // onSubmit should not be called when required fields are empty
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
@@ -801,7 +798,8 @@ describe('ProgramForm Component', () => {
       expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    test('handles start date changes and triggers touched state', () => {
+    test('handles start date changes and triggers touched state', async () => {
+      const user = userEvent.setup()
       render(
         <ProgramForm
           formData={defaultFormData}
@@ -814,11 +812,17 @@ describe('ProgramForm Component', () => {
 
       // Find start date input by label
       const startDateLabel = screen.getByText('Start Date')
-      // Component should render without errors
       expect(startDateLabel).toBeInTheDocument()
+
+      // Find the date input element using getByLabelText
+      const startDateInput = screen.getByLabelText('Start Date') as HTMLInputElement
+      await user.type(startDateInput, '2024-01-15')
+
+      expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    test('handles end date changes', () => {
+    test('handles end date changes', async () => {
+      const user = userEvent.setup()
       render(
         <ProgramForm
           formData={defaultFormData}
@@ -831,8 +835,13 @@ describe('ProgramForm Component', () => {
 
       // Find end date input by label
       const endDateLabel = screen.getByText('End Date')
-      // Component should render without errors
       expect(endDateLabel).toBeInTheDocument()
+
+      // Find the date input element using getByLabelText
+      const endDateInput = screen.getByLabelText('End Date') as HTMLInputElement
+      await user.type(endDateInput, '2024-12-31')
+
+      expect(mockSetFormData).toHaveBeenCalled()
     })
 
     test('handles mentees limit input with string value conversion', async () => {

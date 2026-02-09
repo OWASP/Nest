@@ -108,7 +108,7 @@ describe('<StructuredDataScript />', () => {
 
   it('sanitizes malicious XSS content', () => {
     mockDOMPurify.mockImplementation((input: string) =>
-      input.replace(/<script[^>]*>.*?<\/script>/gi, '')
+      input.replaceAll(/<script[^>]*>.*?<\/script>/gi, '')
     )
 
     const maliciousData: ProfilePageStructuredData = {

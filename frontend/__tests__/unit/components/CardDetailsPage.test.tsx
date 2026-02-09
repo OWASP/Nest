@@ -2252,10 +2252,8 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...moduleProps} />)
 
-      // EntityActions component should be rendered based on the mock
-      // Since EntityActions is mocked to render a div with data-testid,
-      // we verify the component receives the correct props
-      expect(screen.getByText(/Test Project/)).toBeInTheDocument()
+      expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
+      expect(screen.getByTestId('entity-actions')).toHaveTextContent('type=module')
     })
 
     it('does not render EntityActions for module type when user is not an admin', () => {
@@ -2289,7 +2287,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...moduleProps} />)
 
-      expect(screen.getByText(/Test Project/)).toBeInTheDocument()
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
     })
 
     it('renders mentees section when mentees are provided', () => {
@@ -2327,11 +2325,9 @@ describe('CardDetailsPage', () => {
         ...defaultProps,
         mentees: [],
       }
-
       render(<CardDetailsPage {...propsWithoutMentees} />)
-
       // Make sure mentees section is not rendered
-      const allContributorsLists = screen.getAllByTestId('contributors-list')
+      const allContributorsLists = screen.queryAllByTestId('contributors-list')
       const menteesList = allContributorsLists.find((el) => el.textContent?.includes('Mentees'))
       expect(menteesList).toBeUndefined()
     })

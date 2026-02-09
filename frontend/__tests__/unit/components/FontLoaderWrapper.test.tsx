@@ -141,11 +141,15 @@ describe('<FontLoaderWrapper />', () => {
       return Promise.resolve()
     })
 
+    const readyPromise = Promise.resolve()
+    Object.defineProperty(readyPromise, 'then', {
+      value: thenSpy,
+      configurable: true,
+    })
+
     Object.defineProperty(document, 'fonts', {
       value: {
-        ready: {
-          then: thenSpy,
-        },
+        ready: readyPromise,
       },
       configurable: true,
     })

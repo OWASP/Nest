@@ -287,7 +287,7 @@ describe('MenteeProfilePage', () => {
 
   describe('handleIssueClick', () => {
     beforeEach(() => {
-      jest.spyOn(window, 'open').mockImplementation(() => null)
+      jest.spyOn(globalThis, 'open').mockImplementation(() => null)
     })
 
     afterEach(() => {

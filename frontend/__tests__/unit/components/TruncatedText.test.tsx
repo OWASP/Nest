@@ -21,7 +21,7 @@ class MockResizeObserver {
 }
 
 beforeAll(() => {
-  global.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver
+  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver
 })
 
 afterAll(() => {
@@ -94,7 +94,7 @@ describe('TruncatedText Component', () => {
   })
 
   test('cleans up ResizeObserver and event listener on unmount', () => {
-    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
+    const removeEventListenerSpy = jest.spyOn(globalThis, 'removeEventListener')
 
     const { unmount } = render(<TruncatedText text="Cleanup text" />)
     unmount()
@@ -106,7 +106,7 @@ describe('TruncatedText Component', () => {
   })
 
   test('adds window resize event listener on mount', () => {
-    const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+    const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
 
     render(<TruncatedText text="Resize text" />)
 
@@ -148,7 +148,7 @@ describe('TruncatedText Component', () => {
 
     // Trigger window resize event
     act(() => {
-      window.dispatchEvent(new Event('resize'))
+      globalThis.dispatchEvent(new Event('resize'))
     })
 
     const textElement = screen.getByText('Resize test')
@@ -164,7 +164,7 @@ describe('TruncatedText Component', () => {
   })
 
   test('handles null children gracefully', () => {
-    render(<TruncatedText text={undefined} children={null} />)
+    render(<TruncatedText text={undefined}>{null}</TruncatedText>)
     // Should render an empty span without crashing
     const spans = document.querySelectorAll('span.truncate')
     expect(spans.length).toBeGreaterThan(0)
@@ -208,7 +208,7 @@ describe('TruncatedText Component', () => {
 
     // Dispatch resize event - should not throw even with no mounted component
     act(() => {
-      window.dispatchEvent(new Event('resize'))
+      globalThis.dispatchEvent(new Event('resize'))
     })
 
     // If we reach here without errors, the null check worked

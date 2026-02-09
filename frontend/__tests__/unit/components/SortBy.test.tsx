@@ -145,4 +145,12 @@ describe('<SortBy />', () => {
     const orderButtons = screen.queryByLabelText(/Sort in ascending order/i)
     expect(orderButtons).not.toBeInTheDocument()
   })
+
+  it('does not render order button when selectedSortOption is default', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="default" />)
+    })
+    const sortOrderButton = screen.queryByLabelText(/Sort in/i)
+    expect(sortOrderButton).not.toBeInTheDocument()
+  })
 })

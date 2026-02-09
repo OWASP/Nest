@@ -9,8 +9,10 @@ jest.mock('next/dynamic', () => {
     importFn: () => Promise<{ default: React.ComponentType<unknown> }>,
     options?: { ssr?: boolean }
   ) {
-    // Ignore options for SSR: false
-    void options
+    // Ignore options for SSR: false — reference it without using `void`
+    if (options) {
+      /* intentionally unused */
+    }
     // Return a component that resolves the import synchronously for testing
     const Component = React.lazy(importFn)
     return function DynamicComponent(props: Record<string, unknown>): JSX.Element {
@@ -38,7 +40,7 @@ jest.mock('components/ChapterMap', () => {
       mockOnShareLocation.mockImplementation(props.onShareLocation)
     }
     return (
-      <div data-testid="chapter-map">
+      <div data-testid="chapter-map" style={props.style}>
         <span data-testid="geo-loc-data-length">{props.geoLocData.length}</span>
         <span data-testid="show-local">{String(props.showLocal)}</span>
         {props.userLocation && (
