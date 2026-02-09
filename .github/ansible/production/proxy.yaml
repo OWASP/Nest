@@ -2,7 +2,7 @@
   hosts: production_nest_proxy
   tasks:
     - name: Copy proxy configuration files
-      copy:
+      ansible.builtin.copy:
         src: '{{ github_workspace }}/proxy/{{ item }}'
         dest: ~/
         mode: '0644'
@@ -15,15 +15,26 @@
         - redirects.conf
 
     - name: Copy docker compose file
-      copy:
+      ansible.builtin.copy:
         src: '{{ github_workspace }}/docker-compose/proxy/compose.yaml'
         dest: ~/docker-compose.yaml
         mode: '0644'
 
+    - name: Pull and start services
+      ansible.builtin.command:
+        cmd: docker compose up -d --pull always
+      args:
+        chdir: "{{ ansible_env.HOME }}"
+      changed_when: false
+
     - name: Restart services
-      shell:
-        cmd: docker compose up -d --pull always && docker compose restart
+      ansible.builtin.command:
+        cmd: docker compose restart
+      args:
+        chdir: "{{ ansible_env.HOME }}"
+      changed_when: false
 
     - name: Prune docker images
-      shell:
+      ansible.builtin.command:
         cmd: docker image prune -f
+      changed_when: false
