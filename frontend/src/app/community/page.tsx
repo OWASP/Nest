@@ -72,24 +72,15 @@ export default function CommunityPage() {
 
   const data = graphQLData
 
-  const statsData = [
-    {
-      label: 'Active Chapters',
-      value: data.statsOverview.activeChaptersStats,
-    },
-    {
-      label: 'Active Projects',
-      value: data.statsOverview.activeProjectsStats,
-    },
-    {
-      label: 'Contributors',
-      value: data.statsOverview.contributorsStats,
-    },
-    {
-      label: 'Countries',
-      value: data.statsOverview.countriesStats,
-    },
-  ]
+  const statsOverview = data.statsOverview
+  const statsData = statsOverview
+    ? [
+      { label: 'Active Chapters', value: statsOverview.activeChaptersStats },
+      { label: 'Active Projects', value: statsOverview.activeProjectsStats },
+      { label: 'Contributors', value: statsOverview.contributorsStats },
+      { label: 'Countries', value: statsOverview.countriesStats },
+    ]
+    : []
 
   return (
     <div className="mt-6 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
