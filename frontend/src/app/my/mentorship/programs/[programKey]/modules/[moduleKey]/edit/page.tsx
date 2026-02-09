@@ -156,6 +156,8 @@ const EditModulePage = () => {
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      programKey={programKey}
+      currentModuleKey={moduleKey}
       minDate={
         data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
       }

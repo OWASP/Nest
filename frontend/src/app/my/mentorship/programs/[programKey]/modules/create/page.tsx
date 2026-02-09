@@ -163,6 +163,7 @@ const CreateModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       isEdit={false}
+      programKey={programKey}
       minDate={
         programData?.getProgram?.startedAt
           ? formatDateForInput(programData.getProgram.startedAt)
