@@ -87,17 +87,17 @@ class RepositoryNode(strawberry.relay.Node):
                     is_pre_release=False,
                     published_at__isnull=False,
                 ).select_related(
-                    "author",
-                    "repository",
+                    "author__owasp_profile",
                     "repository__organization",
-                ).order_by("-published_at"),
+                ).order_by("-published_at")[:RECENT_RELEASES_LIMIT],
                 to_attr="prefetched_releases",
             )
         ]
     )
     def releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
-        return root.prefetched_releases[:RECENT_RELEASES_LIMIT]
+        # TODO(arkid15r): rename this to recent_releases.
+        return root.prefetched_releases
 
     @strawberry_django.field
     def top_contributors(self, root: Repository) -> list[RepositoryContributorNode]:
