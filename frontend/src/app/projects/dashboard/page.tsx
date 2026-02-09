@@ -34,7 +34,7 @@ const ProjectsDashboardPage: FC = () => {
 
   useEffect(() => {
     if (data) {
-      setStats(data.projectHealthStats)
+      setStats(data.projectHealthStats as unknown as ProjectHealthStats)
     }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)

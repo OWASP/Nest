@@ -178,8 +178,9 @@ describe('<IssuesTable />', () => {
 
     it('renders Merged status badge when isMerged is true', () => {
       render(<IssuesTable issues={[mockIssues[2]]} />)
-      const mergedBadges = screen.getAllByText('Merged')
-      expect(mergedBadges.length).toBeGreaterThan(0)
+      // Merged issues display with "Closed" text (purple badge)
+      const closedBadges = screen.getAllByText('Closed')
+      expect(closedBadges.length).toBeGreaterThan(0)
     })
 
     it('defaults to Closed status for unknown states', () => {

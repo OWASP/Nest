@@ -28,6 +28,10 @@ const RepositoryDetailsPage = () => {
   const repository = data?.repository
   const topContributors = data?.topContributors ?? []
   const recentPullRequests = data?.recentPullRequests
+  const recentIssues = repository?.issues?.map((issue) => ({
+    ...issue,
+    author: issue.author ?? undefined,
+  }))
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -106,10 +110,10 @@ const RepositoryDetailsPage = () => {
       isArchived={repository.isArchived}
       languages={repository.languages}
       projectName={repository.project?.name}
-      pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentMilestones={repository.recentMilestones}
-      recentReleases={repository.releases}
+      pullRequests={recentPullRequests ?? []}
+      recentIssues={recentIssues ?? []}
+      recentMilestones={repository.recentMilestones ?? []}
+      recentReleases={repository.releases ?? []}
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}

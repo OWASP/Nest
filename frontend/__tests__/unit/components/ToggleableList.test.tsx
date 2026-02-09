@@ -201,4 +201,72 @@ describe('ToggleableList', () => {
       'hover:scale-105'
     )
   })
+
+  it('handles Enter key press on item button', () => {
+    render(<ToggleableList entityKey="test" items={['React', 'Vue', 'Angular']} label="Tags" />)
+    const button = screen.getByText('React')
+    fireEvent.keyDown(button, { key: 'Enter' })
+    expect(mockPush).toHaveBeenCalledWith('/projects?q=React')
+  })
+
+  it('handles Space key press on item button', () => {
+    render(<ToggleableList entityKey="test" items={['React', 'Vue', 'Angular']} label="Tags" />)
+    const button = screen.getByText('Vue')
+    fireEvent.keyDown(button, { key: ' ' })
+    expect(mockPush).toHaveBeenCalledWith('/projects?q=Vue')
+  })
+
+  it('prevents default behavior on keyboard event', () => {
+    render(<ToggleableList entityKey="test" items={['React']} label="Tags" />)
+    const button = screen.getByText('React')
+    fireEvent.keyDown(button, { key: 'Enter' })
+    expect(mockPush).toHaveBeenCalled()
+  })
+
+  it('does not navigate when button is disabled and clicked', () => {
+    render(
+      <ToggleableList entityKey="test" items={['React', 'Vue']} label="Tags" isDisabled={true} />
+    )
+    const button = screen.getByText('React')
+    fireEvent.click(button)
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when button is disabled and Enter key is pressed', () => {
+    render(<ToggleableList entityKey="test" items={['React']} label="Tags" isDisabled={true} />)
+    const button = screen.getByText('React')
+    fireEvent.keyDown(button, { key: 'Enter' })
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when button is disabled and Space key is pressed', () => {
+    render(<ToggleableList entityKey="test" items={['Vue']} label="Tags" isDisabled={true} />)
+    const button = screen.getByText('Vue')
+    fireEvent.keyDown(button, { key: ' ' })
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('has disabled attribute when isDisabled is true', () => {
+    render(<ToggleableList entityKey="test" items={['React']} label="Tags" isDisabled={true} />)
+    const button = screen.getByText('React')
+    expect(button).toBeDisabled()
+  })
+
+  it('does not have disabled attribute when isDisabled is false', () => {
+    render(<ToggleableList entityKey="test" items={['React']} label="Tags" isDisabled={false} />)
+    const button = screen.getByText('React')
+    expect(button).not.toBeDisabled()
+  })
+
+  it('applies cursor-default class when isDisabled is true', () => {
+    render(<ToggleableList entityKey="test" items={['React']} label="Tags" isDisabled={true} />)
+    const button = screen.getByText('React')
+    expect(button).toHaveClass('cursor-default')
+  })
+
+  it('applies cursor-pointer class when isDisabled is false', () => {
+    render(<ToggleableList entityKey="test" items={['React']} label="Tags" isDisabled={false} />)
+    const button = screen.getByText('React')
+    expect(button).toHaveClass('cursor-pointer')
+  })
 })

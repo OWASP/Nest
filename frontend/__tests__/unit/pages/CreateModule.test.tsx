@@ -50,7 +50,7 @@ describe('CreateModulePage', () => {
   })
 
   it('submits the form and navigates to programs page', async () => {
-    const user = userEvent.setup()
+    const user = userEvent.setup({ delay: null })
 
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
@@ -95,7 +95,7 @@ describe('CreateModulePage', () => {
       () => {
         expect(mockQuery).toHaveBeenCalled()
       },
-      { timeout: 2000 }
+      { timeout: 1000 }
     )
 
     const projectOption = await waitFor(

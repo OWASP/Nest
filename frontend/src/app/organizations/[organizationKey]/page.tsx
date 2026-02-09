@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -8,6 +9,11 @@ import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetOrganizationDataDocument } from 'types/__generated__/organizationQueries.generated'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
@@ -110,11 +116,21 @@ const OrganizationDetailsPage = () => {
   return (
     <DetailsCard
       details={organizationDetails}
-      recentIssues={recentIssues}
-      recentReleases={recentReleases}
-      recentMilestones={recentMilestones}
-      pullRequests={recentPullRequests}
-      repositories={repositories}
+      pullRequests={recentPullRequests as PullRequest[]}
+      recentIssues={recentIssues as Issue[]}
+      recentReleases={
+        recentReleases?.map((release) => ({
+          ...release,
+          publishedAt: release.publishedAt as number,
+        })) as Release[]
+      }
+      recentMilestones={recentMilestones as Milestone[]}
+      repositories={
+        repositories?.map((repo) => ({
+          ...repo,
+          organization: repo.organization ? { login: repo.organization.login } : undefined,
+        })) as RepositoryCardProps[]
+      }
       stats={organizationStats}
       summary={organization.description}
       title={organization.name}

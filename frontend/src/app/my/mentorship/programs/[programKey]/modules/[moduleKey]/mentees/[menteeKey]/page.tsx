@@ -153,7 +153,7 @@ const MenteeProfilePage = () => {
         </div>
 
         {/* Domains and Skills */}
-        {(menteeDetails.domains?.length > 0 || menteeDetails.tags?.length > 0) && (
+        {((menteeDetails.domains ?? []).length > 0 || (menteeDetails.tags ?? []).length > 0) && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {menteeDetails.domains && menteeDetails.domains.length > 0 && (
               <SecondaryCard title="Domains">

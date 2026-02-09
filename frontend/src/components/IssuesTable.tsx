@@ -51,7 +51,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
   const getStatusBadge = (state: string, isMerged?: boolean) => {
     const statusMap: Record<string, { text: string; class: string }> = {
       open: { text: 'Open', class: 'bg-[#238636]' },
-      merged: { text: 'Merged', class: 'bg-[#8657E5]' },
+      merged: { text: 'Closed', class: 'bg-[#8657E5]' },
       closed: { text: 'Closed', class: 'bg-[#DA3633]' },
     }
 
