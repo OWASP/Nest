@@ -8,7 +8,7 @@
           mode: '0644'
 
       - name: Sync Makefile structure
-        ansible.builtin.synchronize:
+        ansible.posix.synchronize:
           src: '{{ github_workspace }}/'
           dest: '~/'
           recursive: yes
@@ -20,11 +20,12 @@
             - '--include=*/**/**/Makefile'
             - '--exclude=*'
 
-      - name: Update Makefiles for staging environment
-        shell: |
+      - name: Update Makefiles for production environment  # noqa: command-instead-of-module risky-shell-pipe
+        ansible.builtin.shell: |
           sed -i '/e2e-\|fuzz-/! s/\bnest-backend\b/staging-nest-backend/g' ~/backend/Makefile
           sed -i '/e2e-\|fuzz-/! s/\bnest-db\b/staging-nest-db/g' ~/backend/Makefile
           sed -i 's/\bnest-frontend\b/staging-nest-frontend/g' ~/frontend/Makefile
+        changed_when: false
 
       - name: Ensure data directory exists
         ansible.builtin.file:
@@ -33,7 +34,7 @@
           mode: '0755'
 
       - name: Copy secrets
-        copy:
+        ansible.builtin.copy:
           src: '{{ github_workspace }}/{{ item }}'
           dest: ~/
           mode: '0400'
@@ -43,9 +44,9 @@
           - .env.db
           - .env.frontend
 
-      - name: Clean up secrets
+      - name: Clean up secrets  # noqa: run-once
         delegate_to: localhost
-        file:
+        ansible.builtin.file:
           path: '{{ github_workspace }}/{{ item }}'
           state: absent
         loop:
@@ -56,7 +57,7 @@
         run_once: true
 
       - name: Copy crontab
-        copy:
+        ansible.builtin.copy:
           src: '{{ github_workspace }}/cron/staging'
           dest: /tmp/staging_crontab
           mode: '0600'
@@ -64,17 +65,21 @@
       - name: Install crontab
         ansible.builtin.command:
           cmd: crontab /tmp/staging_crontab
+        changed_when: false
 
       - name: Restart services
-        shell:
+        ansible.builtin.command:
           cmd: docker compose up -d --pull always
+        changed_when: false
 
       - name: Prune docker images
-        shell:
+        ansible.builtin.command:
           cmd: docker image prune -f
+        changed_when: false
 
       - name: Index data
         async: 1800 # 30 minutes
         poll: 0
-        shell: |
+        ansible.builtin.shell: |
           make index-data > /var/log/nest/staging/index-data.log 2>&1
+        changed_when: false
