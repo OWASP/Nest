@@ -247,18 +247,20 @@ export default function CommunityPage() {
                 className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
               >
                 <div className="flex w-full items-center gap-2">
-                  <Image
-                    alt={contributor?.name ? `${contributor.name}'s avatar` : 'Contributor avatar'}
-                    className="rounded-full"
-                    height={24}
-                    src={`${contributor?.avatarUrl}${contributor?.avatarUrl?.includes('?') ? '&' : '?'}s=60`}
-                    title={contributor?.name || contributor?.login}
-                    width={24}
-                  />
+                  {contributor.avatarUrl && (
+                    <Image
+                      alt={contributor.name ? `${contributor.name}'s avatar` : 'Contributor avatar'}
+                      className="rounded-full"
+                      height={24}
+                      src={`${contributor.avatarUrl}${contributor.avatarUrl.includes('?') ? '&' : '?'}s=60`}
+                      title={contributor.name || contributor.login}
+                      width={24}
+                    />
+                  )}
                   <Link
                     className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
-                    href={getMemberUrl(contributor?.login)}
-                    title={contributor?.name || contributor?.login}
+                    href={getMemberUrl(contributor.login)}
+                    title={contributor.name || contributor.login}
                   >
                     {contributor.name || contributor.login}
                   </Link>
