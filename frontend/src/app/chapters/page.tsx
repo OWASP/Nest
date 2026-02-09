@@ -49,7 +49,7 @@ const ChaptersPage = () => {
   const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.relatedUrls)
+    const formattedUrls = handleSocialUrls(chapter.relatedUrls ?? [])
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
@@ -63,11 +63,11 @@ const ChaptersPage = () => {
 
     return (
       <Card
-        key={chapter.objectID}
-        cardKey={chapter.objectID}
+        key={chapter.objectID ?? chapter.key}
+        cardKey={chapter.objectID ?? chapter.key}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
-        summary={chapter.summary}
+        summary={chapter.summary ?? ''}
         icons={filteredIcons}
         topContributors={chapter.topContributors}
         button={submitButton}
@@ -102,7 +102,7 @@ const ChaptersPage = () => {
           }}
         />
       )}
-      {chapters && chapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
+      {chapters?.filter((chapter) => chapter.isActive).map(renderChapterCard)}
     </SearchPageLayout>
   )
 }

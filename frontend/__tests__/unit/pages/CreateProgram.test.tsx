@@ -160,19 +160,23 @@ describe('CreateProgramPage (comprehensive tests)', () => {
     fireEvent.submit(screen.getByText('Save').closest('form'))
 
     await waitFor(() => {
-      expect(mockCreateProgram).toHaveBeenCalledWith({
-        variables: {
-          input: {
-            name: 'Test Program',
-            description: 'A description',
-            menteesLimit: 0,
-            startedAt: '2025-01-01',
-            endedAt: '2025-12-31',
-            tags: ['tag1', 'tag2'],
-            domains: ['domain1', 'domain2'],
+      expect(mockCreateProgram).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: {
+            input: {
+              name: 'Test Program',
+              description: 'A description',
+              menteesLimit: 0,
+              startedAt: '2025-01-01',
+              endedAt: '2025-12-31',
+              tags: ['tag1', 'tag2'],
+              domains: ['domain1', 'domain2'],
+            },
           },
-        },
-      })
+          awaitRefetchQueries: true,
+          refetchQueries: expect.any(Array),
+        })
+      )
 
       expect(mockRouterPush).toHaveBeenCalledWith('/my/mentorship')
     })

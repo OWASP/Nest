@@ -100,7 +100,7 @@ def get_search_results(
         dict: The search results containing hits and number of pages.
 
     """
-    search_params = get_params_for_index(index_name.split("_")[0])
+    search_params = get_params_for_index(index_name.split("_", maxsplit=1)[0])
     search_params.update(
         {
             "hitsPerPage": hits_per_page,

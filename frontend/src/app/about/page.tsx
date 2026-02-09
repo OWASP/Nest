@@ -1,4 +1,5 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
@@ -11,11 +12,8 @@ import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } fro
 import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GetProjectMetadataDocument,
-  GetTopContributorsDocument,
-} from 'types/__generated__/projectQueries.generated'
-import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
+import { GetAboutPageDataDocument } from 'types/__generated__/aboutQueries.generated'
+import type { Leader } from 'types/leader'
 import {
   technologies,
   missionContent,
@@ -65,49 +63,41 @@ const getMilestoneIcon = (progress: number) => {
 }
 
 const About = () => {
-  const {
-    data: projectMetadataResponse,
-    loading: projectMetadataLoading,
-    error: projectMetadataRequestError,
-  } = useQuery(GetProjectMetadataDocument, {
-    variables: { key: projectKey },
-  })
-
-  const {
-    data: topContributorsResponse,
-    loading: topContributorsLoading,
-    error: topContributorsRequestError,
-  } = useQuery(GetTopContributorsDocument, {
+  const { data, loading, error } = useQuery(GetAboutPageDataDocument, {
     variables: {
+      projectKey,
       excludedUsernames: Object.keys(leaders),
       hasFullName: true,
-      key: projectKey,
       limit: 24,
+      leader1: 'arkid15r',
+      leader2: 'kasya',
+      leader3: 'mamicidal',
     },
   })
 
-  const { leadersData, isLoading: leadersLoading } = useLeadersData()
-
   // Derive data directly from response to prevent race conditions.
-  const projectMetadata = projectMetadataResponse?.project
-  const topContributors = topContributorsResponse?.topContributors
+  const projectMetadata = data?.project
+  const topContributors = data?.topContributors
+
+  const leadersData = [data?.leader1, data?.leader2, data?.leader3]
+    .filter(Boolean)
+    .map((user) => ({
+      description: user?.login ? leaders[user.login as keyof typeof leaders] : '',
+      memberName: user?.name || user?.login,
+      member: user,
+    }))
+    .filter((leader) => leader.memberName) as Leader[]
 
   const [showAllRoadmap, setShowAllRoadmap] = useState(false)
   const [showAllTimeline, setShowAllTimeline] = useState(false)
 
   useEffect(() => {
-    if (projectMetadataRequestError) {
-      handleAppError(projectMetadataRequestError)
+    if (error) {
+      handleAppError(error)
     }
-  }, [projectMetadataRequestError])
+  }, [error])
 
-  useEffect(() => {
-    if (topContributorsRequestError) {
-      handleAppError(topContributorsRequestError)
-    }
-  }, [topContributorsRequestError])
-
-  const isLoading = leadersLoading || projectMetadataLoading || topContributorsLoading
+  const isLoading = loading
 
   if (isLoading) {
     return <AboutSkeleton />
@@ -317,48 +307,6 @@ const About = () => {
       </div>
     </div>
   )
-}
-
-const useLeadersData = () => {
-  const {
-    data: leader1Data,
-    loading: loading1,
-    error: error1,
-  } = useQuery(GetLeaderDataDocument, {
-    variables: { key: 'arkid15r' },
-  })
-  const {
-    data: leader2Data,
-    loading: loading2,
-    error: error2,
-  } = useQuery(GetLeaderDataDocument, {
-    variables: { key: 'kasya' },
-  })
-  const {
-    data: leader3Data,
-    loading: loading3,
-    error: error3,
-  } = useQuery(GetLeaderDataDocument, {
-    variables: { key: 'mamicidal' },
-  })
-
-  const isLoading = loading1 || loading2 || loading3
-
-  useEffect(() => {
-    if (error1) handleAppError(error1)
-    if (error2) handleAppError(error2)
-    if (error3) handleAppError(error3)
-  }, [error1, error2, error3])
-
-  const leadersData = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
-    .filter(Boolean)
-    .map((user) => ({
-      description: leaders[user.login],
-      memberName: user.name || user.login,
-      member: user,
-    }))
-
-  return { leadersData, isLoading }
 }
 
 export default About

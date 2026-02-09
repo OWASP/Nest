@@ -5,6 +5,7 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useState } from 'react'
 import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay } from 'app/global-error'
@@ -14,11 +15,13 @@ import AnchorTitle from 'components/AnchorTitle'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import SecondaryCard from 'components/SecondaryCard'
-import { TruncatedText } from 'components/TruncatedText'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
+  const [showAllPRs, setShowAllPRs] = useState(false)
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
@@ -85,7 +88,7 @@ const ModuleIssueDetailsPage = () => {
   } = useIssueMutations({ programKey, moduleKey, issueId })
 
   const issue = data?.getModule?.issueByNumber
-  const taskDeadline = data?.getModule?.taskDeadline as string | undefined
+  const taskDeadline = (data?.getModule?.taskDeadline as string | undefined) ?? null
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
@@ -112,26 +115,10 @@ const ModuleIssueDetailsPage = () => {
     issueStatusLabel = 'Open'
   } else if (issue.isMerged) {
     issueStatusClass = 'bg-[#8657E5] text-white'
-    issueStatusLabel = 'Merged'
+    issueStatusLabel = 'Closed'
   } else {
     issueStatusClass = 'bg-[#DA3633] text-white'
     issueStatusLabel = 'Closed'
-  }
-
-  const getPRStatus = (pr: Exclude<typeof issue.pullRequests, undefined>[0]) => {
-    let backgroundColor: string
-    let label: string
-    if (pr.state === 'closed' && pr.mergedAt) {
-      backgroundColor = '#8657E5'
-      label = 'Merged'
-    } else if (pr.state === 'closed') {
-      backgroundColor = '#DA3633'
-      label = 'Closed'
-    } else {
-      backgroundColor = '#238636'
-      label = 'Open'
-    }
-    return { backgroundColor, label }
   }
 
   const getAssignButtonTitle = (assigning: boolean) => {
@@ -295,7 +282,7 @@ const ModuleIssueDetailsPage = () => {
                     {a.avatarUrl ? (
                       <Image
                         src={a.avatarUrl}
-                        alt={a.login}
+                        alt=""
                         width={32}
                         height={32}
                         className="rounded-full"
@@ -333,59 +320,14 @@ const ModuleIssueDetailsPage = () => {
 
         <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
           <div className="grid grid-cols-1 gap-3">
-            {issue.pullRequests?.length ? (
-              issue.pullRequests.map((pr) => (
-                <div
-                  key={pr.id}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
-                >
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    {pr.author?.avatarUrl ? (
-                      <Image
-                        src={pr.author.avatarUrl}
-                        alt={pr.author?.login || 'Unknown'}
-                        width={32}
-                        height={32}
-                        className="flex-shrink-0 rounded-full"
-                      />
-                    ) : (
-                      <div
-                        className="h-8 w-8 flex-shrink-0 rounded-full bg-gray-400"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={pr.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        <TruncatedText text={pr.title} />
-                      </Link>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        by {pr.author?.login || 'Unknown'} •{' '}
-                        {new Date(pr.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {(() => {
-                      const { backgroundColor, label } = getPRStatus(pr)
-                      return (
-                        <span
-                          className="inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium text-white"
-                          style={{ backgroundColor }}
-                        >
-                          {label}
-                        </span>
-                      )
-                    })()}
-                  </div>
-                </div>
-              ))
-            ) : (
+            {(issue.pullRequests || []).slice(0, showAllPRs ? undefined : 4).map((pr) => (
+              <MentorshipPullRequest key={pr.id} pr={pr} />
+            ))}
+            {(!issue.pullRequests || issue.pullRequests.length === 0) && (
               <span className="text-sm text-gray-400">No linked pull requests.</span>
+            )}
+            {issue.pullRequests && issue.pullRequests.length > 4 && (
+              <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
             )}
           </div>
         </SecondaryCard>
@@ -409,7 +351,7 @@ const ModuleIssueDetailsPage = () => {
                   {u.avatarUrl ? (
                     <Image
                       src={u.avatarUrl}
-                      alt={u.login}
+                      alt=""
                       width={32}
                       height={32}
                       className="rounded-full"

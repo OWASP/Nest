@@ -9,8 +9,18 @@ repos:
           - --strict
         exclude: (.github|pnpm-lock.yaml)
 
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v26.1.1
+    hooks:
+      - id: ansible-lint
+        args:
+          - .github/ansible
+        files: ^\.github/ansible/.*\.ya?ml$
+        language_version: python3
+        pass_filenames: true
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.13
+    rev: v0.15.0
     hooks:
       - id: ruff-check
         args:
@@ -84,6 +94,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.11.1
+    rev: v2.12.1
     hooks:
       - id: pyproject-fmt

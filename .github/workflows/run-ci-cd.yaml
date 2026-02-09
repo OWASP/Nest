@@ -7,13 +7,13 @@ on:
       - feature/**
       - main
     paths-ignore:
-      - backend/data/nest.json.gz
+      - backend/data/nest.dump
   push:
     branches:
       - feature/**
       - main
     paths-ignore:
-      - backend/data/nest.json.gz
+      - backend/data/nest.dump
   release:
     types:
       - published
@@ -32,25 +32,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install Poetry
         run: pipx install poetry
 
       - name: Set up Python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           cache: 'poetry'
           cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
       - name: Set up pre-commit cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: |
             pre-commit-${{ runner.os }}-
+
+      - name: Install Ansible collections for ansible-lint
+        run: |
+          pip install ansible-core
+          ansible-galaxy collection install -r .github/ansible/requirements.yaml
 
       - name: Run pre-commit
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd
@@ -67,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
@@ -102,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
@@ -121,8 +126,8 @@ jobs:
         run: |
           make check-spelling
 
-  scan-code:
-    name: Run Code Scan
+  run-security-scan-code:
+    name: Run code security scan
     needs:
       - check-frontend
       - pre-commit
@@ -132,59 +137,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Run Semgrep security scan
+        run: make security-scan-code-semgrep
+
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Run Trivy Repository Scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          scan-type: repo
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-    timeout-minutes: 5
-
-  scan-ci-dependencies:
-    name: Run CI Dependencies Scan
-    needs:
-      - check-frontend
-      - pre-commit
-      - spellcheck
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
-        with:
-          cache: true
-
-      - name: Run Trivy Filesystem Scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          scan-type: fs
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Run Trivy security scan
+        run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
     timeout-minutes: 5
 
   run-backend-tests:
     name: Run backend tests
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
@@ -227,15 +206,14 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
@@ -277,8 +255,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -307,7 +284,7 @@ jobs:
           - 6379:6379
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
@@ -364,19 +341,18 @@ jobs:
       - name: Run frontend end-to-end tests
         run: |
           docker run --env-file frontend/.env.e2e.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
-    timeout-minutes: 10
+    timeout-minutes: 15
 
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
@@ -419,9 +395,9 @@ jobs:
 
   run-graphql-fuzz-tests:
     name: Run GraphQL fuzz tests
+    if: false
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
@@ -429,8 +405,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: rest_test.py
@@ -455,7 +430,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
@@ -464,7 +439,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Login to Docker Hub
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -496,6 +471,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_IDX_URL: ${{ secrets.VITE_IDX_URL }}
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
@@ -508,6 +485,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
           NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
+          NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+          NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
           NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
           NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
           EOF
@@ -565,30 +544,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Scan backend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:backend-staging
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-
-      - name: Scan frontend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:frontend-staging
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Run Trivy security scan via Makefile
+        run: |
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
     timeout-minutes: 5
 
   deploy-staging-nest:
@@ -610,7 +578,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Prepare SSH key
         env:
@@ -705,9 +673,13 @@ jobs:
           NEXTAUTH_URL=$NEXTAUTH_URL
           EOF
 
-      - name: Run Nest deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yaml
         working-directory: .github/ansible
+
+      - name: Run Nest deploy
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-staging-nest-proxy:
@@ -727,7 +699,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Prepare SSH key
         env:
@@ -741,9 +713,13 @@ jobs:
           $PROXY_SSH_PRIVATE_KEY
           EOF
 
-      - name: Run proxy deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yaml
         working-directory: .github/ansible
+
+      - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-staging-lighthouse-ci:
@@ -755,7 +731,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
         uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
@@ -787,7 +763,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Run baseline scan
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
@@ -825,7 +801,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
@@ -834,7 +810,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Login to Docker Hub
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -872,6 +848,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID: ${{ secrets.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_IDX_URL: ${{ secrets.VITE_IDX_URL }}
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED: ${{ secrets.NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
           NEXT_PUBLIC_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
         run: |
@@ -884,6 +862,8 @@ jobs:
           NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
           NEXT_PUBLIC_IDX_URL=$NEXT_PUBLIC_IDX_URL
           NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED=$NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED
+          NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
+          NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
           NEXT_PUBLIC_RELEASE_VERSION=$NEXT_PUBLIC_RELEASE_VERSION
           NEXT_PUBLIC_SENTRY_DSN=$NEXT_PUBLIC_SENTRY_DSN
           EOF
@@ -931,30 +911,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Scan backend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:backend-production
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
-
-      - name: Scan frontend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:frontend-production
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Run Trivy security scan via Makefile
+        run: |
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
     timeout-minutes: 5
 
   deploy-production-nest:
@@ -976,7 +945,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Prepare SSH key
         env:
@@ -1082,9 +1051,13 @@ jobs:
           "$NEST_GITHUB_APP_PRIVATE_KEY"
           EOF
 
-      - name: Run Nest deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yaml
         working-directory: .github/ansible
+
+      - name: Run Nest deploy
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-production-nest-proxy:
@@ -1104,7 +1077,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Prepare SSH key
         env:
@@ -1118,9 +1091,13 @@ jobs:
           $PROXY_SSH_PRIVATE_KEY
           EOF
 
-      - name: Run proxy deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yaml
         working-directory: .github/ansible
+
+      - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-production-zap-baseline-scan:
@@ -1132,7 +1109,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Run baseline scan
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25

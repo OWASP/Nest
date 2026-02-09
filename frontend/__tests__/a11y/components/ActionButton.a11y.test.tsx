@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
 import ActionButton from 'components/ActionButton'
-
-expect.extend(toHaveNoViolations)
 
 describe('ActionButton Accessibility', () => {
   it('should not have any accessibility violations when no url is provided', async () => {

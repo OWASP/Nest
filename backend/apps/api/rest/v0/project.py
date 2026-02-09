@@ -12,8 +12,20 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Leader, ValidationErrorSchema
+from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
 from apps.owasp.models.enums.project import ProjectLevel
 from apps.owasp.models.project import Project as ProjectModel
+
+PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
+    "name": {
+        "type": "string",
+        "lookup": "icontains",
+    },
+    "stars": {
+        "type": "number",
+        "field": "stars_count",
+    },
+}
 
 router = RouterPaginated(tags=["Projects"])
 
@@ -65,6 +77,10 @@ class ProjectFilter(FilterSchema):
         None,
         description="Level of the project",
     )
+    q: str | None = Field(
+        None,
+        description="Structured search query (e.g. 'name:security stars:>100')",
+    )
 
 
 @router.get(
@@ -84,11 +100,16 @@ def list_projects(
     ),
 ) -> list[Project]:
     """Get projects."""
-    return filters.filter(
-        ProjectModel.active_projects.order_by(
-            ordering or "-level_raw", "-stars_count", "-forks_count"
-        )
+    queryset = apply_structured_search(
+        queryset=ProjectModel.active_projects,
+        query=filters.q,
+        field_schema=PROJECT_SEARCH_FIELDS,
     )
+
+    if filters.level is not None:
+        queryset = queryset.filter(level=filters.level)
+
+    return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 
 
 @router.get(

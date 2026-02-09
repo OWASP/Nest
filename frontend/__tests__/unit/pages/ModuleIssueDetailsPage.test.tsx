@@ -212,20 +212,20 @@ describe('ModuleIssueDetailsPage', () => {
 
   describe('Task Timeline and Deadline', () => {
     it.each([
-      { dayOffset: -1, expectedText: '(overdue)', expectedColor: 'text-[#DA3633]' },
-      { dayOffset: 2, expectedText: '(2 days left)', expectedColor: 'text-[#F59E0B]' },
+      { dayOffset: -1, expectedText: /\(overdue\)/, expectedColor: 'text-[#DA3633]' },
+      { dayOffset: 2, expectedText: /\(2 days left\)/, expectedColor: 'text-[#F59E0B]' },
       {
         dayOffset: 10,
-        expectedText: '(10 days left)',
+        expectedText: /\(10 days left\)/,
         expectedColor: 'text-gray-600 dark:text-gray-300',
       },
       {
         dayOffset: null,
-        expectedText: 'No deadline set',
+        expectedText: /No deadline set/,
         expectedColor: 'text-gray-600 dark:text-gray-300',
       },
     ])(
-      'renders deadline text "$expectedText" for deadline with offset $dayOffset',
+      'renders deadline text for deadline with offset $dayOffset',
       ({ dayOffset, expectedText, expectedColor }) => {
         const today = new Date()
         let deadline = null
@@ -241,9 +241,7 @@ describe('ModuleIssueDetailsPage', () => {
         }
         mockUseQuery.mockReturnValue({ data: dataWithDeadline, loading: false, error: undefined })
         render(<ModuleIssueDetailsPage />)
-        const deadlineElement = screen.getByText(
-          new RegExp(expectedText.replaceAll(/[()]/g, String.raw`\$&`))
-        )
+        const deadlineElement = screen.getByText(expectedText)
         expect(deadlineElement).toBeInTheDocument()
         expect(deadlineElement).toHaveClass(expectedColor)
       }
@@ -305,7 +303,7 @@ describe('ModuleIssueDetailsPage', () => {
 
   describe('issue states', () => {
     it.each([
-      { state: 'closed', isMerged: true, expectedText: 'Merged' },
+      { state: 'closed', isMerged: true, expectedText: 'Closed' },
       { state: 'closed', isMerged: false, expectedText: 'Closed' },
       { state: 'open', isMerged: false, expectedText: 'Open' },
     ])('renders issue state as "$expectedText"', ({ state, isMerged, expectedText }) => {
