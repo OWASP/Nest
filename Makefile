@@ -6,7 +6,7 @@ include frontend/Makefile
 .PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
 	security-scan-backend-image security-scan-frontend-image test update \
-	clean-trivy-cache lint-ansible
+	clean-trivy-cache
 
 MAKEFLAGS += --no-print-directory
 

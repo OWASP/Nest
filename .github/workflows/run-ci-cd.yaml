@@ -673,8 +673,8 @@ jobs:
         working-directory: .github/ansible
 
       - name: Run Nest deploy
-        working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-staging-nest-proxy:
@@ -713,8 +713,8 @@ jobs:
         working-directory: .github/ansible
 
       - name: Run proxy deploy
-        working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-staging-lighthouse-ci:
@@ -1051,8 +1051,8 @@ jobs:
         working-directory: .github/ansible
 
       - name: Run Nest deploy
-        working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-production-nest-proxy:
@@ -1091,8 +1091,8 @@ jobs:
         working-directory: .github/ansible
 
       - name: Run proxy deploy
-        working-directory: .github/ansible
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-production-zap-baseline-scan:
