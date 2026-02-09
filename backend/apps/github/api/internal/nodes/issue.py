@@ -67,7 +67,7 @@ class IssueNode(strawberry.relay.Node):
         prefetch_related=[
             Prefetch(
                 "participant_interests",
-                queryset=IssueUserInterest.objects.select_related("user")
+                queryset=IssueUserInterest.objects.select_related("user__owasp_profile")
                 .prefetch_related(
                     Prefetch(
                         "user__user_badges",
