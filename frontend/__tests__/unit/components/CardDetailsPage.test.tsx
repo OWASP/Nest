@@ -525,10 +525,10 @@ jest.mock('components/ShowMoreButton', () => {
   function ShowMoreButtonMock({
     onToggle,
     ...props
-  }: {
+  }: Readonly<{
     onToggle: () => void
     [key: string]: unknown
-  }) {
+  }>) {
     const [isExpanded, setIsExpanded] = React.useState(false)
     return (
       <button
@@ -2390,7 +2390,8 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...programProps} />)
 
-      expect(screen.getByText('Test Project')).toBeInTheDocument()
+      expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
++      expect(screen.getByTestId('entity-actions')).toHaveTextContent('type=program')
     })
 
     it('does not render program EntityActions when canUpdateStatus is false', () => {
@@ -2407,7 +2408,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...programProps} />)
 
-      expect(screen.getByText('Test Project')).toBeInTheDocument()
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
     })
 
     it('does not render program EntityActions when accessLevel is not admin', () => {
@@ -2424,7 +2425,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...programProps} />)
 
-      expect(screen.getByText('Test Project')).toBeInTheDocument()
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
     })
   })
 

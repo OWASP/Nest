@@ -100,7 +100,6 @@ describe('<SortBy />', () => {
       render(<SortBy {...defaultProps} selectedOrder="asc" />)
     })
     await act(async () => {
-      const orderButton = screen.getByLabelText(/Sort in ascending order/i)
       const buttons = screen.getAllByRole('button')
       const orderButton = buttons[1]
       fireEvent.keyDown(orderButton, { key: 'Enter' })
@@ -113,7 +112,6 @@ describe('<SortBy />', () => {
       render(<SortBy {...defaultProps} selectedOrder="desc" />)
     })
     await act(async () => {
-      const orderButton = screen.getByLabelText(/Sort in descending order/i)
       const buttons = screen.getAllByRole('button')
       const orderButton = buttons[1]
       fireEvent.keyDown(orderButton, { key: ' ' })

@@ -58,10 +58,6 @@ describe('formValidationUtils', () => {
       expect(validateName('Valid Name')).toBeUndefined()
     })
 
-    it('returns undefined when uniqueness error is undefined', () => {
-      expect(validateName('Valid Name', undefined)).toBeUndefined()
-    })
-
     it('prioritizes required error over length error', () => {
       expect(validateName('')).toBe('Name is required')
     })

@@ -198,34 +198,36 @@ describe('CreateModulePage', () => {
 
   it('shows access denied and redirects when user is not an admin', async () => {
     jest.useFakeTimers()
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin-user' } },
-      status: 'authenticated',
-    })
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: {
-        getProgram: {
-          admins: [{ login: 'admin-user' }],
+    try {
+      ;(useSession as jest.Mock).mockReturnValue({
+        data: { user: { login: 'non-admin-user' } },
+        status: 'authenticated',
+      })
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          getProgram: {
+            admins: [{ login: 'admin-user' }],
+          },
         },
-      },
-      loading: false,
-    })
-    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+        loading: false,
+      })
+      ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
 
-    render(<CreateModulePage />)
+      render(<CreateModulePage />)
 
-    await waitFor(() => {
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-    })
+      await waitFor(() => {
+        expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      })
 
-    // Fast-forward past the redirect timeout
-    jest.advanceTimersByTime(2000)
+      // Fast-forward past the redirect timeout
+      jest.advanceTimersByTime(2000)
 
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith('/my/mentorship')
-    })
-
-    jest.useRealTimers()
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith('/my/mentorship')
+      })
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   it('renders form without error when program has start and end dates', async () => {

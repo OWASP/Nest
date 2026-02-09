@@ -135,32 +135,20 @@ describe('<FontLoaderWrapper />', () => {
     expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument()
   })
 
-  it('calls document.fonts.ready.then() on mount', () => {
-    const thenSpy = jest.fn((callback: () => void) => {
-      callback()
-      return Promise.resolve()
-    })
-
-    const readyPromise = Promise.resolve()
-    Object.defineProperty(readyPromise, 'then', {
-      value: thenSpy,
-      configurable: true,
-    })
-
-    Object.defineProperty(document, 'fonts', {
-      value: {
-        ready: readyPromise,
-      },
-      configurable: true,
-    })
-
+  it('calls document.fonts.ready.then() on mount', async () => {
     render(
       <FontLoaderWrapper>
         <div>Content</div>
       </FontLoaderWrapper>
     )
 
-    expect(thenSpy).toHaveBeenCalled()
+    // If the component properly calls .then() on the fonts.ready promise,
+    // it will show the content once the promise resolves
+    if (fontsReadyResolve) fontsReadyResolve()
+
+    await waitFor(() => {
+      expect(screen.getByText('Content')).toBeInTheDocument()
+    })
   })
 
   it('handles empty children', async () => {

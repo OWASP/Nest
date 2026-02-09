@@ -850,7 +850,7 @@ describe('Header Component', () => {
       expect(menu?.className.includes('translate-x-0')).toBe(true)
 
       // Get the LATEST click handler (registered after menu opened)
-      const latestClickHandler = clickHandlers[clickHandlers.length - 1]
+      const latestClickHandler = clickHandlers.at(-1)
       expect(latestClickHandler).toBeDefined()
 
       // Create an outside element and simulate click
