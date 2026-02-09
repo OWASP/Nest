@@ -17,7 +17,7 @@ export type Program = {
   endedAt: string
   domains?: string[]
   tags?: string[]
-  userRole?: string
+  userRole?: string | null
   admins?: Contributor[]
   modules?: Module[]
   recentMilestones?: Milestone[]
@@ -99,7 +99,7 @@ export type MenteeDetails = {
   name: string
   avatarUrl: string
   email?: string
-  bio?: string
+  bio?: string | null
   domains?: string[] | null
   tags?: string[] | null
   experienceLevel?: string

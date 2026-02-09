@@ -95,23 +95,27 @@ describe('<SortBy />', () => {
     expect(hiddenSelect).toHaveAccessibleName(/Sort By/)
   })
 
-  it('toggles order when Enter key is pressed on order button', async () => {
+  it('toggles order when Enter key is pressed on sort order button', async () => {
     await act(async () => {
       render(<SortBy {...defaultProps} selectedOrder="asc" />)
     })
     await act(async () => {
       const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+      const buttons = screen.getAllByRole('button')
+      const orderButton = buttons[1]
       fireEvent.keyDown(orderButton, { key: 'Enter' })
     })
     expect(defaultProps.onOrderChange).toHaveBeenCalledWith('desc')
   })
 
-  it('toggles order when Space key is pressed on order button', async () => {
+  it('toggles order when Space key is pressed on sort order button', async () => {
     await act(async () => {
       render(<SortBy {...defaultProps} selectedOrder="desc" />)
     })
     await act(async () => {
       const orderButton = screen.getByLabelText(/Sort in descending order/i)
+      const buttons = screen.getAllByRole('button')
+      const orderButton = buttons[1]
       fireEvent.keyDown(orderButton, { key: ' ' })
     })
     expect(defaultProps.onOrderChange).toHaveBeenCalledWith('asc')

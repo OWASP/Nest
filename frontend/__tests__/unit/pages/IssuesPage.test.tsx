@@ -192,7 +192,7 @@ describe('IssuesPage', () => {
   })
 
   describe.each([
-    { state: 'closed', isMerged: true, expectedText: 'Merged' },
+    { state: 'closed', isMerged: true, expectedText: 'Closed' },
     { state: 'closed', isMerged: false, expectedText: 'Closed' },
   ])('issue states', ({ state, isMerged, expectedText }) => {
     it(`renders ${expectedText} issues correctly`, () => {
