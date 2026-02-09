@@ -31,11 +31,21 @@ class UserNode:
     @strawberry_django.field(prefetch_related=["user_badges"])
     def badge_count(self, root: User) -> int:
         """Resolve badge count."""
+        user_badges = getattr(root, "user_badges_list", None)
+
+        if user_badges is not None:
+            return len(user_badges)
+
         return root.user_badges.filter(is_active=True).count()
 
     @strawberry_django.field(prefetch_related=["user_badges__badge"])
     def badges(self, root: User) -> list[BadgeNode]:
         """Return user badges."""
+        user_badges = getattr(root, "user_badges_list", None)
+
+        if user_badges is not None:
+            return [user_badge.badge for user_badge in user_badges]
+
         user_badges = (
             root.user_badges.filter(
                 is_active=True,
@@ -46,6 +56,7 @@ class UserNode:
                 "badge__name",
             )
         )
+
         return [user_badge.badge for user_badge in user_badges]
 
     @strawberry_django.field
