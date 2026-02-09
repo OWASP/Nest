@@ -88,7 +88,7 @@ const ModuleIssueDetailsPage = () => {
   } = useIssueMutations({ programKey, moduleKey, issueId })
 
   const issue = data?.getModule?.issueByNumber
-  const taskDeadline = data?.getModule?.taskDeadline as string | undefined
+  const taskDeadline = (data?.getModule?.taskDeadline as string | undefined) ?? null
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
@@ -115,7 +115,7 @@ const ModuleIssueDetailsPage = () => {
     issueStatusLabel = 'Open'
   } else if (issue.isMerged) {
     issueStatusClass = 'bg-[#8657E5] text-white'
-    issueStatusLabel = 'Merged'
+    issueStatusLabel = 'Closed'
   } else {
     issueStatusClass = 'bg-[#DA3633] text-white'
     issueStatusLabel = 'Closed'

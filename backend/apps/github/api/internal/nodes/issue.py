@@ -2,13 +2,22 @@
 
 import strawberry
 import strawberry_django
-from django.db.models import Exists, OuterRef, Prefetch
+from django.db.models import Prefetch
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
+
+MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
+    "pull_requests",
+    queryset=PullRequest.objects.filter(
+        merged_at__isnull=False,
+        state="closed",
+    ),
+    to_attr="merged_pull_requests",
+)
 
 
 @strawberry_django.type(
@@ -48,20 +57,10 @@ class IssueNode(strawberry.relay.Node):
         """Resolve label names for the issue."""
         return [label.name for label in root.labels.all()]
 
-    @strawberry_django.field(
-        annotate={
-            "is_merged": Exists(
-                PullRequest.objects.filter(
-                    merged_at__isnull=False,
-                    related_issues=OuterRef("pk"),
-                    state="closed",
-                )
-            )
-        }
-    )
+    @strawberry_django.field(prefetch_related=[MERGED_PULL_REQUESTS_PREFETCH])
     def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
-        return root.is_merged
+        return bool(getattr(root, "merged_pull_requests", None))
 
     @strawberry_django.field(
         prefetch_related=[

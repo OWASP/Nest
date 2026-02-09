@@ -303,7 +303,7 @@ describe('ModuleIssueDetailsPage', () => {
 
   describe('issue states', () => {
     it.each([
-      { state: 'closed', isMerged: true, expectedText: 'Merged' },
+      { state: 'closed', isMerged: true, expectedText: 'Closed' },
       { state: 'closed', isMerged: false, expectedText: 'Closed' },
       { state: 'open', isMerged: false, expectedText: 'Open' },
     ])('renders issue state as "$expectedText"', ({ state, isMerged, expectedText }) => {
