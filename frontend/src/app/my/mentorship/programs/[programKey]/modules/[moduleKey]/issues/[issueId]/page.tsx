@@ -115,7 +115,7 @@ const ModuleIssueDetailsPage = () => {
     issueStatusLabel = 'Open'
   } else if (issue.isMerged) {
     issueStatusClass = 'bg-[#8657E5] text-white'
-    issueStatusLabel = 'Merged'
+    issueStatusLabel = 'Closed'
   } else {
     issueStatusClass = 'bg-[#DA3633] text-white'
     issueStatusLabel = 'Closed'
