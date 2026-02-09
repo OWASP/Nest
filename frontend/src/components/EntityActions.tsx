@@ -11,7 +11,7 @@ interface EntityActionsProps {
   programKey: string
   moduleKey?: string
   status?: string
-  setStatus?: (newStatus: string) => void
+  setStatus?: (newStatus: ProgramStatusEnum) => void | Promise<void>
 }
 
 const EntityActions: React.FC<EntityActionsProps> = ({
