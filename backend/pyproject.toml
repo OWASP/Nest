@@ -56,7 +56,7 @@ group.test.dependencies.python-dotenv = "^1.0.1"
 group.video.dependencies.elevenlabs = "^2.27.0"
 group.video.dependencies.ffmpeg-python = "^0.2.0"
 group.video.dependencies.pillow = "^12.1.0"
-group.video.dependencies.pypdfium2 = "^5.2.0"
+group.video.dependencies.pypdfium2 = "^5.4.0"
 group.video.dependencies.weasyprint = "^68.0"
 
 [tool.ruff]
