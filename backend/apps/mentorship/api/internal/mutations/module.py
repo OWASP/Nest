@@ -102,18 +102,19 @@ class ModuleMutation:
         )
 
         try:
-            module = Module.objects.create(
-                name=input_data.name,
-                description=input_data.description,
-                experience_level=input_data.experience_level.value,
-                started_at=started_at,
-                ended_at=ended_at,
-                domains=input_data.domains,
-                labels=input_data.labels,
-                tags=input_data.tags,
-                program=program,
-                project=project,
-            )
+            with transaction.atomic():
+                module = Module.objects.create(
+                    name=input_data.name,
+                    description=input_data.description,
+                    experience_level=input_data.experience_level.value,
+                    started_at=started_at,
+                    ended_at=ended_at,
+                    domains=input_data.domains,
+                    labels=input_data.labels,
+                    tags=input_data.tags,
+                    program=program,
+                    project=project,
+                )
         except IntegrityError as e:
             error_message = str(e)
             if "unique_module_key_in_program" in error_message:
@@ -393,7 +394,8 @@ class ModuleMutation:
             module.mentors.set(mentors_to_set)
 
         try:
-            module.save()
+            with transaction.atomic():
+                module.save()
         except IntegrityError as e:
             error_message = str(e)
             if "unique_module_key_in_program" in error_message:

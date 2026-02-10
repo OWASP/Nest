@@ -121,7 +121,7 @@ const ModuleForm = ({
     return validateRequired(value, 'Experience level')
   }
 
-  const checkNameUniquenessSync = useCallback(
+  const checkNameUniqueness = useCallback(
     async (name: string): Promise<string | undefined> => {
       if (!name.trim()) {
         return undefined
@@ -189,7 +189,7 @@ const ModuleForm = ({
 
     let uniquenessError: string | undefined
     if (formData.name.trim()) {
-      uniquenessError = await checkNameUniquenessSync(formData.name)
+      uniquenessError = await checkNameUniqueness(formData.name)
       setNameUniquenessError(uniquenessError)
       if (uniquenessError) {
         setTouched((prev) => ({ ...prev, name: true }))
