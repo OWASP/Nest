@@ -78,6 +78,9 @@ security-scan-frontend-image:
 .PHONY: sbom-frontend-image
 
 sbom-frontend-image:
+	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
+		$(MAKE) build-frontend-local-image; \
+	fi
 	@echo "Generating SBOM for image: $(FRONTEND_IMAGE_NAME)..."
 	@docker run \
 		--rm \
