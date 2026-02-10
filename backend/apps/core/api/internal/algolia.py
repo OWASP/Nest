@@ -51,11 +51,10 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
         limit = data.get("hitsPerPage", 25)
         page = data.get("page", 1)
         query = data.get("query", "")
-        cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
 
+        cache_key = f"{CACHE_PREFIX}:{index_name}:{query}:{page}:{limit}"
         if facet_filters:
-            filters_key = json.dumps(facet_filters, sort_keys=True)
-            cache_key = f"{cache_key}:{filters_key}"
+            cache_key = f"{cache_key}:{json.dumps(facet_filters, sort_keys=True)}"
 
         if index_name == "chapters":
             cache_key = f"{cache_key}:{ip_address}"

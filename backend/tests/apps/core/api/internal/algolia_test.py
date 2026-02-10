@@ -4,8 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.core.api.internal.algolia import CACHE_TTL_IN_SECONDS, algolia_search
-from apps.core.constants import CACHE_PREFIX
+from apps.core.api.internal.algolia import algolia_search
 
 MOCKED_SEARCH_RESULTS = {
     "hits": [
@@ -251,4 +250,3 @@ class TestAlgoliaSearch:
             assert response_data_2 == expected_result
             # backend only called once = caching worked
             mock_get_search_results.assert_called_once()
-            
