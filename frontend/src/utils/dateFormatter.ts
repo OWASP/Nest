@@ -9,7 +9,7 @@ export const toUnixTimestamp = (input: string | number | Date): number => {
 }
 
 export const formatDate = (input: number | string | Date | null) => {
-  if (!input) {
+  if (input === null) {
     return ''
   }
 
