@@ -21,7 +21,7 @@ const RecentReleases: React.FC<RecentReleasesProps> = ({
       icon={FaTag}
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle title="Recent Releases" className="flex items-center leading-none" />
+          <AnchorTitle title="Recent Releases" />
         </div>
       }
     >

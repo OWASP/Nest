@@ -202,11 +202,68 @@ describe('ToggleableList', () => {
     )
   })
 
+  it('navigates when Enter key is pressed on item button', () => {
+    render(
+      <ToggleableList
+        entityKey="test"
+        items={['React', 'Next.js', 'FastAPI']}
+        label="Tags"
+        limit={2}
+      />
+    )
+    const button = screen.getByText('Next.js')
+    fireEvent.keyDown(button, { key: 'Enter' })
+    expect(mockPush).toHaveBeenCalledWith('/projects?q=Next.js')
+  })
+
   it('handles Enter key press on item button', () => {
     render(<ToggleableList entityKey="test" items={['React', 'Vue', 'Angular']} label="Tags" />)
     const button = screen.getByText('React')
     fireEvent.keyDown(button, { key: 'Enter' })
     expect(mockPush).toHaveBeenCalledWith('/projects?q=React')
+  })
+
+  it('navigates when Space key is pressed on item button', () => {
+    render(
+      <ToggleableList
+        entityKey="test"
+        items={['React', 'Next.js', 'FastAPI']}
+        label="Tags"
+        limit={2}
+      />
+    )
+    const button = screen.getByText('Next.js')
+    fireEvent.keyDown(button, { key: ' ' })
+    expect(mockPush).toHaveBeenCalledWith('/projects?q=Next.js')
+  })
+
+  it('does not navigate when other keys are pressed on item button', () => {
+    render(
+      <ToggleableList
+        entityKey="test"
+        items={['React', 'Next.js', 'FastAPI']}
+        label="Tags"
+        limit={2}
+      />
+    )
+    const button = screen.getByText('React')
+    fireEvent.keyDown(button, { key: 'Tab' })
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when clicking disabled item button', () => {
+    render(
+      <ToggleableList
+        entityKey="test"
+        items={['React', 'Next.js', 'FastAPI']}
+        label="Tags"
+        limit={2}
+        isDisabled={true}
+      />
+    )
+    const button = screen.getByText('React')
+    fireEvent.click(button)
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
   it('handles Space key press on item button', () => {
@@ -232,11 +289,41 @@ describe('ToggleableList', () => {
     expect(mockPush).not.toHaveBeenCalled()
   })
 
+  it('does not navigate when pressing Enter key on disabled item button', () => {
+    render(
+      <ToggleableList
+        entityKey="test"
+        items={['React', 'Next.js', 'FastAPI']}
+        label="Tags"
+        limit={2}
+        isDisabled={true}
+      />
+    )
+    const button = screen.getByText('React')
+    fireEvent.keyDown(button, { key: 'Enter' })
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
   it('does not navigate when button is disabled and Enter key is pressed', () => {
     render(<ToggleableList entityKey="test" items={['React']} label="Tags" isDisabled={true} />)
     const button = screen.getByText('React')
     fireEvent.keyDown(button, { key: 'Enter' })
     expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('applies correct CSS classes when isDisabled is true', () => {
+    render(
+      <ToggleableList
+        entityKey="test"
+        items={['React', 'Vue', 'Angular']}
+        label="Disabled Buttons"
+        isDisabled={true}
+      />
+    )
+    const button = screen.getByText('React')
+    expect(button).toHaveClass('cursor-default')
+    expect(button).not.toHaveClass('cursor-pointer')
+    expect(button).toBeDisabled()
   })
 
   it('does not navigate when button is disabled and Space key is pressed', () => {

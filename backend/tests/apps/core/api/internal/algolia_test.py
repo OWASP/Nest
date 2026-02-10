@@ -27,6 +27,22 @@ def mock_redis_cache():
 
 
 class TestAlgoliaSearch:
+    def _build_request(self, *, facet_filters, hits_per_page, index_name, page, query):
+        """Build mock requests with consistent structure."""
+        mock_request = Mock()
+        mock_request.META = {"HTTP_X_FORWARDED_FOR": CLIENT_IP_ADDRESS}
+        mock_request.method = "POST"
+        mock_request.body = json.dumps(
+            {
+                "facetFilters": facet_filters,
+                "hitsPerPage": hits_per_page,
+                "indexName": index_name,
+                "page": page,
+                "query": query,
+            }
+        )
+        return mock_request
+
     @pytest.mark.parametrize(
         ("index_name", "query", "page", "hits_per_page", "facet_filters", "expected_result"),
         [
@@ -160,3 +176,77 @@ class TestAlgoliaSearch:
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
         assert response_data["error"] == error_message
+
+    def test_algolia_search_different_facet_filters_return_different_results(self):
+        """Test that same query with different facet filters returns different results."""
+        result_active = {
+            "hits": [{"id": 1, "name": "Active Item"}],
+            "nbPages": 1,
+        }
+        result_inactive = {
+            "hits": [{"id": 2, "name": "Inactive Item"}],
+            "nbPages": 1,
+        }
+        base_params = {
+            "index_name": "projects",
+            "query": "security",
+            "page": 1,
+            "hits_per_page": 10,
+        }
+
+        with patch(
+            "apps.core.api.internal.algolia.get_search_results",
+            side_effect=[result_active, result_inactive],
+        ):
+            mock_request_1 = self._build_request(
+                facet_filters=["idx_is_active:true"],
+                **base_params,
+            )
+            mock_request_2 = self._build_request(
+                facet_filters=["idx_is_active:false"],
+                **base_params,
+            )
+
+            response_1 = algolia_search(mock_request_1)
+            response_2 = algolia_search(mock_request_2)
+
+            response_data_1 = json.loads(response_1.content)
+            response_data_2 = json.loads(response_2.content)
+
+            assert response_1.status_code == HTTPStatus.OK
+            assert response_2.status_code == HTTPStatus.OK
+            assert response_data_1 == result_active
+            assert response_data_2 == result_inactive
+            assert response_data_1 != response_data_2
+
+    def test_algolia_search_same_query_same_keys_return_same_results(self, mock_redis_cache):
+        """Test that cache hit returns same results without re-querying backend."""
+        expected_result = MOCKED_SEARCH_RESULTS
+        facet_filters = ["idx_is_active:true"]
+        base_params = {
+            "facet_filters": facet_filters,
+            "index_name": "projects",
+            "query": "security",
+            "page": 1,
+            "hits_per_page": 10,
+        }
+
+        mock_redis_cache.get.side_effect = [None, expected_result]
+
+        with patch(
+            "apps.core.api.internal.algolia.get_search_results", return_value=expected_result
+        ) as mock_get_search_results:
+            mock_request = self._build_request(**base_params)
+
+            response_1 = algolia_search(mock_request)
+            response_2 = algolia_search(mock_request)
+
+            response_data_1 = json.loads(response_1.content)
+            response_data_2 = json.loads(response_2.content)
+
+            assert response_1.status_code == HTTPStatus.OK
+            assert response_2.status_code == HTTPStatus.OK
+            assert response_data_1 == expected_result
+            assert response_data_2 == expected_result
+            # backend only called once = caching worked
+            mock_get_search_results.assert_called_once()
