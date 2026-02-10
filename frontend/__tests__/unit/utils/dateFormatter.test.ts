@@ -1,4 +1,4 @@
-import { formatDate, formatDateRange } from 'utils/dateFormatter'
+import { formatDate, formatDateForInput, formatDateRange } from 'utils/dateFormatter'
 
 describe('formatDate function', () => {
   beforeEach(() => {
@@ -58,5 +58,19 @@ describe('formatDateRange function', () => {
 
   test('handles single-day ranges correctly', () => {
     expect(formatDateRange(1693526400, 1693526400)).toBe('Sep 1, 2023')
+  })
+})
+
+describe('formatDateForInput function', () => {
+  test('formats Unix timestamp correctly for input fields', () => {
+    expect(formatDateForInput(1630454400)).toBe('2021-09-01')
+  })
+
+  test('returns empty string for invalid input instead of throwing', () => {
+    expect(formatDateForInput('invalid-date')).toBe('')
+  })
+
+  test('treats 0 as a valid Unix timestamp', () => {
+    expect(formatDateForInput(0)).toBe('1970-01-01')
   })
 })

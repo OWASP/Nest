@@ -28,7 +28,7 @@ export const formatDate = (input: number | string | Date | null) => {
 
 export const formatDateRange = (
   startDate: number | string | Date,
-  endDate?: number | string | Date | null
+  endDate: number | string | Date
 ) => {
   if (!endDate) {
     return formatDate(startDate)
@@ -78,12 +78,11 @@ export const formatDateRange = (
   }
 }
 
-export const formatDateForInput = (dateStr: number) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr * 1000)
-  if (Number.isNaN(date.getTime())) {
-    throw new Error('Invalid date')
-  }
+export const formatDateForInput = (input: number | string | Date) => {
+  const timestamp = toUnixTimestamp(input)
+  if (!Number.isFinite(timestamp)) return ''
+
+  const date = new Date(timestamp * 1000)
   return date.toISOString().slice(0, 10)
 }
 
