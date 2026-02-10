@@ -1,3 +1,5 @@
+import os
+from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, patch
@@ -6,6 +8,17 @@ from django.core.management import CommandError
 from django.test import SimpleTestCase
 
 from apps.common.management.commands.generate_model_graphs import Command
+
+
+@contextmanager
+def temp_workdir():
+    with TemporaryDirectory() as tmpdir:
+        old_cwd = Path.cwd()
+        os.chdir(tmpdir)
+        try:
+            yield tmpdir
+        finally:
+            os.chdir(old_cwd)
 
 
 class GenerateModelGraphsCommandTests(SimpleTestCase):
