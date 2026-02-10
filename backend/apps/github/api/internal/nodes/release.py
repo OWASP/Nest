@@ -36,11 +36,12 @@ class ReleaseNode(strawberry.relay.Node):
     )
     def project_name(self, root: Release) -> str | None:
         """Resolve project name."""
-        return (
-            root.repository.project.name.lstrip(OWASP_ORGANIZATION_NAME)
-            if root.repository and root.repository.project
-            else None
-        )
+        if not root.repository:
+            return None
+        projects = root.repository.project_set.all()
+        project = projects[0] if projects else None
+
+        return project.name.lstrip(OWASP_ORGANIZATION_NAME) if project else None
 
     @strawberry_django.field(select_related=["repository"])
     def repository_name(self, root: Release) -> str | None:

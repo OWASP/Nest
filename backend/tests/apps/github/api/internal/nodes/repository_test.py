@@ -1,6 +1,6 @@
 """Test cases for RepositoryNode."""
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
@@ -153,17 +153,31 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         result = resolver(None, mock_repository)
         assert result == mock_releases
 
-    def test_releases_method_fallback(self):
+    @patch("apps.github.api.internal.nodes.repository.prefetch_related_objects")
+    def test_releases_method_fallback(self, mock_prefetch_related_objects):
         """Test releases method resolution without prefetched data."""
         mock_repository = Mock(spec=["published_releases"])
         mock_releases = Mock()
-        mock_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
+        mock_fetched_releases = [Mock(), Mock()]
+        (mock_releases.select_related.return_value.order_by.return_value.__getitem__) = Mock(
+            return_value=mock_fetched_releases
+        )
+
         mock_repository.published_releases = mock_releases
 
         field = self._get_field_by_name("releases", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
-        resolver(None, mock_repository)
-        mock_releases.order_by.assert_called_with("-published_at")
+        result = resolver(None, mock_repository)
+
+        assert result == mock_fetched_releases
+        mock_releases.select_related.assert_called_with(
+            "author__owasp_profile",
+            "repository__organization",
+        )
+        mock_releases.select_related.return_value.order_by.assert_called_with("-published_at")
+        mock_prefetch_related_objects.assert_called_with(
+            mock_fetched_releases, "repository__project_set"
+        )
 
     def test_top_contributors_method(self):
         """Test top_contributors method resolution."""
