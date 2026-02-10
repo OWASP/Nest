@@ -247,12 +247,31 @@ def validate_url(url: str | None) -> bool:
         bool: True if URL is valid, False otherwise.
 
     """
-    if not url:
+    max_url_length = 2048
+    if (
+        not url
+        or len(url) > max_url_length
+        # ASCII control characters.
+        or re.search(r"[\x00-\x1f\x7f]", url)
+    ):
         return False
 
     try:
         parsed = urlparse(url)
+
+        min_port = 1
+        max_port = 65535
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.netloc
+            or not re.search(r"[a-zA-Z0-9]", parsed.netloc)
+            or not (hostname := parsed.hostname)
+            or hostname.startswith((".", "-"))
+            or hostname.endswith("-")
+            or (parsed.port is not None and not (min_port <= parsed.port <= max_port))
+        ):
+            return False
     except ValueError:
         return False
 
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    return True
