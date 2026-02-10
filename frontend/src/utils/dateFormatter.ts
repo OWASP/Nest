@@ -30,10 +30,6 @@ export const formatDateRange = (
   startDate: number | string | Date,
   endDate: number | string | Date
 ) => {
-  if (!endDate) {
-    return formatDate(startDate)
-  }
-
   const startTimestamp = toUnixTimestamp(startDate)
   const endTimestamp = toUnixTimestamp(endDate)
 

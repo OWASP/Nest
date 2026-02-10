@@ -59,6 +59,10 @@ describe('formatDateRange function', () => {
   test('handles single-day ranges correctly', () => {
     expect(formatDateRange(1693526400, 1693526400)).toBe('Sep 1, 2023')
   })
+
+  test('treats 0 as a valid Unix timestamp for endDate', () => {
+    expect(formatDateRange(0, 0)).toBe('Jan 1, 1970')
+  })
 })
 
 describe('formatDateForInput function', () => {
