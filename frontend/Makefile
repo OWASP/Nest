@@ -75,6 +75,21 @@ security-scan-frontend-image:
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		image --config /trivy.yaml $(FRONTEND_IMAGE_NAME)
 
+.PHONY: sbom-frontend-image
+
+sbom-frontend-image:
+	@echo "Generating SBOM for image: $(FRONTEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		-v $(CURDIR):/work \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--format cyclonedx \
+		--output /work/frontend-sbom.cdx.json \
+		$(FRONTEND_IMAGE_NAME)
+
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 

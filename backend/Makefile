@@ -180,6 +180,21 @@ security-scan-backend-image:
 	    $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 	    image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
 
+.PHONY: sbom-backend-image
+
+sbom-backend-image:
+	@echo "Generating SBOM for image: $(BACKEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		-v $(CURDIR):/work \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--format cyclonedx \
+		--output /work/backend-sbom.cdx.json \
+		$(BACKEND_IMAGE_NAME)
+
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
