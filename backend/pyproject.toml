@@ -72,7 +72,6 @@ lint.ignore = [
   "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
   "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
   "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
-  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
   "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
   "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
   "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
@@ -121,6 +120,17 @@ lint.per-file-ignores."apps/api/rest/**/*.py" = [
   "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
 ]
+lint.per-file-ignores."apps/github/models/mixins/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/github/models/user.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/mentorship/apps.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/apps.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/commands/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/common/handlers/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/events/**/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/utils.py" = [ "PLC0415" ]
+lint.per-file-ignores."tests/apps/github/management/commands/github_get_installation_id_test.py" = [ "PLC0415" ]
+lint.per-file-ignores."tests/apps/slack/events/message_posted_test.py" = [ "PLC0415" ]
+lint.per-file-ignores."tests/apps/slack/views_test.py" = [ "PLC0415" ]
 
 [tool.pytest]
 ini_options.DJANGO_CONFIGURATION = "Test"
