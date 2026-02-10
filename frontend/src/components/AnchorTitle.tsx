@@ -5,10 +5,9 @@ import slugify from 'utils/slugify'
 
 interface AnchorTitleProps {
   title: string
-  className?: string
 }
 
-const AnchorTitle: React.FC<AnchorTitleProps> = ({ title, className }) => {
+const AnchorTitle: React.FC<AnchorTitleProps> = ({ title }) => {
   const id = slugify(title)
   const href = `#${id}`
 
@@ -40,7 +39,7 @@ const AnchorTitle: React.FC<AnchorTitleProps> = ({ title, className }) => {
   }, [id, scrollToElement])
 
   return (
-    <div id={id} className={`relative ${className || ''}`}>
+    <div id={id} className="relative">
       <div className="group relative flex items-center">
         <div className="flex items-center text-2xl font-semibold" data-anchor-title="true">
           {title}

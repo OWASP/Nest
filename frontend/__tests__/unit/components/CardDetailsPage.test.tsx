@@ -376,20 +376,20 @@ jest.mock('components/ContributorsList', () => ({
     maxInitialDisplay,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon,
-    label = 'Contributors',
+    title = 'Contributors',
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getUrl,
     ...props
   }: {
     contributors: unknown[]
     icon?: unknown
-    label?: string
+    title?: string
     maxInitialDisplay: number
     getUrl: (login: string) => string
     [key: string]: unknown
   }) => (
     <div data-testid="contributors-list" {...props}>
-      {label} ({contributors.length} items, max display: {maxInitialDisplay})
+      {title} ({contributors.length} items, max display: {maxInitialDisplay})
     </div>
   ),
 }))
