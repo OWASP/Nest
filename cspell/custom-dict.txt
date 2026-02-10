@@ -12,6 +12,7 @@ CISSP
 Cañón
 DRF
 ELEVENLABS
+Emay
 FOSS
 GBP
 GFKs
@@ -22,6 +23,8 @@ Golovanova
 Hackbright
 Héllo
 Illia
+Ime
+Iyonsi
 Kateryna
 Kerlyn
 Keshav
