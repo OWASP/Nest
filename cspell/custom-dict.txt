@@ -13,6 +13,7 @@ Cañón
 DRF
 ELB
 ELEVENLABS
+Emay
 FOSS
 GBP
 GFKs
@@ -23,6 +24,8 @@ Golovanova
 Hackbright
 Héllo
 Illia
+Ime
+Iyonsi
 Kateryna
 Kerlyn
 Keshav

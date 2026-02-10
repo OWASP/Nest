@@ -3,6 +3,7 @@ export const mockCommitteeDetailsData = {
     contributorsCount: 10,
     forksCount: 5,
     issuesCount: 3,
+    key: 'test_committee',
     leaders: ['Leader 1', 'Leader 2'],
     name: 'Test Committee',
     relatedUrls: ['https://twitter.com/testcommittee', 'https://github.com/testcommittee'],

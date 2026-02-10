@@ -1201,9 +1201,13 @@ jobs:
           "$NEST_GITHUB_APP_PRIVATE_KEY"
           EOF
 
-      - name: Run Nest deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run Nest deploy
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-production-nest-proxy:
@@ -1237,9 +1241,13 @@ jobs:
           $PROXY_SSH_PRIVATE_KEY
           EOF
 
-      - name: Run proxy deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-production-zap-baseline-scan:
