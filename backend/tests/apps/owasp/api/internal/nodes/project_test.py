@@ -1,6 +1,6 @@
 """Test cases for ProjectNode."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
@@ -9,7 +9,6 @@ from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
-from apps.owasp.models.project import Project
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 

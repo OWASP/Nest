@@ -1,10 +1,8 @@
-import contextlib
 from unittest import mock
 
 import pytest
 
 from apps.github.models.pull_request import PullRequest
-from apps.github.models.repository import Repository
 from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
 
 
@@ -141,9 +139,13 @@ class TestOwaspAggregateProjects:
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
+        mock_pull_requests = mock.MagicMock()
+        mock_pull_requests.filter.return_value = MockQuerySet([])
+
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch("builtins.print"),
+            mock.patch.object(PullRequest, "objects", mock_pull_requests),
         ):
             command.handle(offset=0)
 
@@ -184,9 +186,13 @@ class TestOwaspAggregateProjects:
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
+        mock_pull_requests = mock.MagicMock()
+        mock_pull_requests.filter.return_value = MockQuerySet([])
+
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
             mock.patch("builtins.print"),
+            mock.patch.object(PullRequest, "objects", mock_pull_requests),
         ):
             command.handle(offset=0)
         assert mock_bulk_save.called
