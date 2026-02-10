@@ -40,7 +40,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
                 className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                 onClick={() =>
                   router.push(
-                    `/organizations/${item.organizationName}/repositories/${item.repositoryName || ''}`
+                    `/organizations/${item.organizationName}/repositories/${item.repositoryName}`
                   )
                 }
               >
