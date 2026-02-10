@@ -34,7 +34,19 @@ const CreateModulePage = () => {
     fetchPolicy: 'network-only',
   })
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    description: string
+    domains: string
+    endedAt: string
+    experienceLevel: string
+    labels: string
+    mentorLogins: string
+    name: string
+    projectId: string
+    projectName: string
+    startedAt: string
+    tags: string
+  }>({
     description: '',
     domains: '',
     endedAt: '',
@@ -87,15 +99,15 @@ const CreateModulePage = () => {
       const input = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || null,
-        experienceLevel: formData.experienceLevel,
+        endedAt: formData.endedAt,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         labels: parseCommaSeparated(formData.labels),
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
         name: formData.name,
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        startedAt: formData.startedAt || null,
+        startedAt: formData.startedAt,
         tags: parseCommaSeparated(formData.tags),
       }
 
@@ -117,7 +129,10 @@ const CreateModulePage = () => {
     } catch (error) {
       addToast({
         title: 'Creation Failed',
-        description: error.message || 'Something went wrong while creating the module.',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Something went wrong while creating the module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,

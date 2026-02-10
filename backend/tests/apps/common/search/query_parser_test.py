@@ -208,3 +208,16 @@ class TestQueryParser:
             self.strict_parser.parse(f"stars:{overflow_number}")
 
         assert e.value.error_type == "NUMBER_VALUE_ERROR"
+
+    def test_quoted_multi_word_values(self):
+        query = 'project:"OWASP Nest" author:"John Doe"'
+        results = self.parser.parse(query)
+
+        assert len(results) == 2
+        assert results[0]["value"] == '"owasp nest"'
+        assert results[1]["value"] == '"john doe"'
+
+    def test_case_sensitivity_toggle(self):
+        query = "Author:OWASP"
+        cs_result = self.case_sensitive_parser.parse(query)
+        assert cs_result[0]["value"] == "OWASP"
