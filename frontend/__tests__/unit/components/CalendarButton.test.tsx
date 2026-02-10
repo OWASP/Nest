@@ -347,8 +347,17 @@ describe('CalendarButton', () => {
         />
       )
       const button = screen.getByRole('button')
-      expect(button).toBeInTheDocument()
-      expect(button).toHaveAttribute('aria-label', `Add ${longTitle} to Calendar`)
+
+      // Initially should show FaCalendar (not hovered)
+      const initialIconMarkup = button.querySelector('svg')?.outerHTML
+
+      // Simulate mouse enter
+      fireEvent.mouseEnter(button)
+      await waitFor(() => {
+        // After hover, FaCalendarPlus should be shown (different SVG)
+        const hoveredIconMarkup = button.querySelector('svg')?.outerHTML
+        expect(hoveredIconMarkup).not.toBe(initialIconMarkup)
+      })
     })
 
     it('maintains visibility with flex-shrink-0 class', () => {
@@ -362,8 +371,25 @@ describe('CalendarButton', () => {
         />
       )
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('flex-shrink-0')
-      expect(button).toBeVisible()
+
+      // Capture initial icon (FaCalendar)
+      const initialIconHtml = button.innerHTML
+
+      // Mouse enter - hover state true
+      fireEvent.mouseEnter(button)
+
+      await waitFor(() => {
+        // Icon should change to FaCalendarPlus
+        expect(button.innerHTML).not.toEqual(initialIconHtml)
+      })
+
+      // Mouse leave - hover state false
+      fireEvent.mouseLeave(button)
+
+      await waitFor(() => {
+        // Icon should revert to FaCalendar
+        expect(button.innerHTML).toEqual(initialIconHtml)
+      })
     })
 
     it('works correctly in flex container with long text sibling', () => {

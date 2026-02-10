@@ -537,10 +537,81 @@ describe('ItemCardList Component', () => {
         />
       )
 
+      // When URL is missing, the title should render as plain text, not a link.
+      const titleText = screen.getByText('Test Issue Title')
+      expect(titleText).toBeInTheDocument()
+
+      // Verify it's not wrapped in a link.
+      const titleLinks = screen.queryAllByTestId('link')
+      const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
+      expect(titleLink).toBeUndefined()
+    })
+
+    it('renders title as link when valid url is present', () => {
+      const itemWithUrl = { ...mockIssue, url: 'https://example.com/issue' }
+
+      render(
+        <ItemCardList
+          title="With URL"
+          data={[itemWithUrl]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
       const titleLinks = screen.getAllByTestId('link')
       const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
+      expect(titleLink).toHaveAttribute('href', 'https://example.com/issue')
+    })
 
-      expect(titleLink).toHaveAttribute('href', '')
+    it('uses id as key when objectID is not present', () => {
+      const itemWithId = { ...mockIssue, objectID: undefined, id: 'test-id-123' }
+
+      render(
+        <ItemCardList
+          title="With ID"
+          data={[itemWithId]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
+      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+    })
+
+    it('generates fallback key when no identifiers are present', () => {
+      const itemWithoutIds = {
+        ...mockIssue,
+        objectID: undefined,
+        id: undefined,
+        repositoryName: '',
+        title: '',
+        name: '',
+        url: '',
+      }
+
+      render(
+        <ItemCardList
+          title="Fallback Key"
+          data={[itemWithoutIds]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
+      // Component should render without crashing
+      expect(screen.getByText('Fallback Key')).toBeInTheDocument()
+    })
+
+    it('uses objectID as primary key identifier', () => {
+      const itemWithObjectId = { ...mockIssue, objectID: 'object-123' }
+
+      render(
+        <ItemCardList
+          title="With ObjectID"
+          data={[itemWithObjectId]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
+      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
     })
   })
 

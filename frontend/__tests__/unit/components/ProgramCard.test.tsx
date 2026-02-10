@@ -418,6 +418,29 @@ describe('ProgramCard', () => {
 
       expect(screen.getByRole('button', { name: /Program actions menu/ })).toBeInTheDocument()
     })
+
+    it('handles mousedown event on actions wrapper', () => {
+      render(
+        <ProgramCard
+          program={baseMockProgram}
+          isAdmin={true}
+          href="/test/path"
+          accessLevel="admin"
+        />
+      )
+
+      const actionsWrapper = screen
+        .getByRole('button', { name: /Program actions menu/ })
+        .closest('[role="none"]')
+      expect(actionsWrapper).toBeInTheDocument()
+
+      // Create a real mousedown event and spy on stopPropagation
+      const mousedownEvent = new MouseEvent('mousedown', { bubbles: true })
+      const stopPropagationSpy = jest.spyOn(mousedownEvent, 'stopPropagation')
+
+      actionsWrapper!.dispatchEvent(mousedownEvent)
+      expect(stopPropagationSpy).toHaveBeenCalled()
+    })
   })
 
   describe('Edge Cases', () => {

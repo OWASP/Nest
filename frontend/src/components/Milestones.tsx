@@ -30,7 +30,7 @@ const Milestones: React.FC<ProjectMilestonesProps> = ({
     <ItemCardList
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle title="Recent Milestones" className="flex items-center leading-none" />
+          <AnchorTitle title="Recent Milestones" />
         </div>
       }
       data={data}
