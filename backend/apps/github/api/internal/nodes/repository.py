@@ -7,13 +7,12 @@ import strawberry_django
 from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
-from apps.github.api.internal.nodes.issue import IssueNode
+from apps.github.api.internal.nodes.issue import LABELS_PREFETCH, IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.issue import Issue
-from apps.github.models.label import Label
 from apps.github.models.repository import Repository
 
 if TYPE_CHECKING:
@@ -53,9 +52,7 @@ class RepositoryNode(strawberry.relay.Node):
             Prefetch(
                 "issues",
                 queryset=Issue.objects.select_related("repository", "repository__organization")
-                .prefetch_related(
-                    Prefetch("labels", queryset=Label.objects.all(), to_attr="label_names")
-                )
+                .prefetch_related(LABELS_PREFETCH)
                 .order_by("-created_at")[:RECENT_ISSUES_LIMIT],
                 to_attr="recent_issues",
             )
