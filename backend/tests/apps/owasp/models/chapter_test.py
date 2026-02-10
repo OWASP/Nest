@@ -296,7 +296,11 @@ class TestChapterModel:
             mock_save.assert_not_called()
     
     def test_save_does_not_call_geo_location_on_zero_coords(self):
-        """Ensure that 0.0 latitude/longitude are treated as valid data and don't trigger unnecessary re-generation."""
+        """Verify 0.0 coordinates are treated as valid data.
+
+        Ensure that 0.0 latitude and longitude do not trigger 
+        unnecessary re-generation of geo-location data.
+        """
         with patch.object(self.chapter, 'generate_geo_location') as mock_geo:
             self.chapter.latitude = 0.0
             self.chapter.longitude = 0.0
