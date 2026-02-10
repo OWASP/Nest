@@ -86,12 +86,15 @@ class RepositoryNode(strawberry.relay.Node):
                     is_draft=False,
                     is_pre_release=False,
                     published_at__isnull=False,
-                ).select_related(
+                )
+                .select_related(
                     "author__owasp_profile",
                     "repository__organization",
-                ).prefetch_related(
+                )
+                .prefetch_related(
                     "repository__project_set",
-                ).order_by("-published_at")[:RECENT_RELEASES_LIMIT],
+                )
+                .order_by("-published_at")[:RECENT_RELEASES_LIMIT],
                 to_attr="prefetched_releases",
             )
         ]
@@ -99,7 +102,9 @@ class RepositoryNode(strawberry.relay.Node):
     def releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
         # TODO(arkid15r): rename this to recent_releases.
-        return root.prefetched_releases
+        if hasattr(root, "prefetched_releases"):
+            return root.prefetched_releases
+        return list(root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT])
 
     @strawberry_django.field
     def top_contributors(self, root: Repository) -> list[RepositoryContributorNode]:

@@ -143,8 +143,8 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         mock_milestones.order_by.assert_called_with("-created_at")
 
     def test_releases_method(self):
-        """Test releases method resolution."""
-        mock_repository = Mock()
+        """Test releases method resolution with prefetched data."""
+        mock_repository = Mock(spec=["prefetched_releases"])
         mock_releases = [Mock(), Mock()]
         mock_repository.prefetched_releases = mock_releases
 
@@ -152,6 +152,18 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         resolver = field.base_resolver.wrapped_func
         result = resolver(None, mock_repository)
         assert result == mock_releases
+
+    def test_releases_method_fallback(self):
+        """Test releases method resolution without prefetched data."""
+        mock_repository = Mock(spec=["published_releases"])
+        mock_releases = Mock()
+        mock_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
+        mock_repository.published_releases = mock_releases
+
+        field = self._get_field_by_name("releases", RepositoryNode)
+        resolver = field.base_resolver.wrapped_func
+        resolver(None, mock_repository)
+        mock_releases.order_by.assert_called_with("-published_at")
 
     def test_top_contributors_method(self):
         """Test top_contributors method resolution."""
