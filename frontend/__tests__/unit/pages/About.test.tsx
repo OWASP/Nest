@@ -602,4 +602,106 @@ describe('About Component', () => {
       })
     })
   })
+
+  test('renders milestone with progress 0 - Not Started', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            project: {
+              ...mockAboutData.project,
+              recentMilestones: [
+                {
+                  ...mockAboutData.project.recentMilestones[0],
+                  progress: 0,
+                  title: 'Not Started',
+                },
+              ],
+            },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+    await act(async () => {
+      render(<About />)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Not Started')).toBeInTheDocument()
+    })
+  })
+
+  test('renders milestone with progress 50 - In Progress', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            project: {
+              ...mockAboutData.project,
+              recentMilestones: [
+                {
+                  ...mockAboutData.project.recentMilestones[0],
+                  progress: 50,
+                  title: 'In Progress Milestone',
+                },
+              ],
+            },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+    await act(async () => {
+      render(<About />)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('In Progress Milestone')).toBeInTheDocument()
+    })
+  })
+
+  test('renders milestone with progress 100 - Completed', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            project: {
+              ...mockAboutData.project,
+              recentMilestones: [
+                {
+                  ...mockAboutData.project.recentMilestones[0],
+                  progress: 100,
+                  title: 'Completed',
+                },
+              ],
+            },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: mockAboutData.users['kasya'],
+            leader3: mockAboutData.users['mamicidal'],
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+    await act(async () => {
+      render(<About />)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Completed')).toBeInTheDocument()
+    })
+  })
 })

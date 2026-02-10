@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { screen, fireEvent } from '@testing-library/react'
 import { usePathname, useRouter } from 'next/navigation'
+import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
@@ -75,6 +76,11 @@ jest.mock('components/ShowMoreButton', () => ({
       Show more
     </button>
   ),
+}))
+
+jest.mock('components/EntityActions', () => ({
+  __esModule: true,
+  default: () => <div data-testid="entity-actions" />,
 }))
 
 const mockPush = jest.fn()
@@ -365,6 +371,143 @@ describe('SingleModuleCard', () => {
       // Contributors should be rendered inline
       const avatars = screen.getAllByTestId('contributor-avatar')
       expect(avatars.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Mentees Display and Show More Functionality', () => {
+    it('renders mentees section when mentees exist', () => {
+      const moduleWithMentees: Module = {
+        ...mockModule,
+        mentees: [
+          {
+            id: 'mentee-1',
+            name: 'mentee1',
+            login: 'mentee1',
+            avatarUrl: 'https://example.com/mentee1.jpg',
+          },
+          {
+            id: 'mentee-2',
+            name: 'mentee2',
+            login: 'mentee2',
+            avatarUrl: 'https://example.com/mentee2.jpg',
+          },
+        ],
+      }
+      render(<SingleModuleCard module={moduleWithMentees} />)
+
+      expect(screen.getByText('Mentees')).toBeInTheDocument()
+    })
+
+    it('renders show more button when more than 6 mentees', () => {
+      const moduleWithManyMentees: Module = {
+        ...mockModule,
+        mentors: [],
+        mentees: Array.from({ length: 10 }, (_, i) => ({
+          id: `mentee-${i + 1}`,
+          name: `mentee${i + 1}`,
+          login: `mentee${i + 1}`,
+          avatarUrl: `https://example.com/mentee${i + 1}.jpg`,
+        })),
+      }
+      render(<SingleModuleCard module={moduleWithManyMentees} />)
+
+      const showMoreButtons = screen.getAllByTestId('show-more-button')
+      expect(showMoreButtons.length).toBeGreaterThan(0)
+    })
+
+    it('toggles show all mentees when show more button is clicked', () => {
+      const moduleWithManyMentees: Module = {
+        ...mockModule,
+        mentors: [],
+        mentees: Array.from({ length: 10 }, (_, i) => ({
+          id: `mentee-${i + 1}`,
+          name: `mentee${i + 1}`,
+          login: `mentee${i + 1}`,
+          avatarUrl: `https://example.com/mentee${i + 1}.jpg`,
+        })),
+      }
+      render(<SingleModuleCard module={moduleWithManyMentees} />)
+
+      // Initially shows only 6
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(6)
+
+      // Click show more
+      fireEvent.click(screen.getByTestId('show-more-button'))
+
+      // Should now show all 10
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(10)
+    })
+
+    it('does not render mentees section when no mentees', () => {
+      const moduleWithoutMentees = { ...mockModule, mentees: [] }
+      render(<SingleModuleCard module={moduleWithoutMentees} />)
+
+      expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Admin Access and EntityActions', () => {
+    it('renders EntityActions when user is admin and logged in', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'admin1',
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        } as Session,
+        status: 'authenticated',
+        update: jest.fn(),
+      })
+
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />)
+
+      expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
+    })
+
+    it('does not render EntityActions when user is not admin', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'regular-user',
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        } as Session,
+        status: 'authenticated',
+        update: jest.fn(),
+      })
+
+      render(<SingleModuleCard module={mockModule} accessLevel="user" admins={mockAdmins} />)
+
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+
+    it('does not render EntityActions when accessLevel is not admin', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'admin1',
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        } as Session,
+        status: 'authenticated',
+        update: jest.fn(),
+      })
+
+      render(<SingleModuleCard module={mockModule} accessLevel="viewer" admins={mockAdmins} />)
+
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Mentor URL Handling', () => {
+    it('uses public member URL for mentors in public view', () => {
+      mockUsePathname.mockReturnValue('/programs/test-program')
+
+      render(<SingleModuleCard module={mockModule} />)
+
+      const allLinks = screen.getAllByRole('link')
+      const mentorLink = allLinks.find((link) => link.getAttribute('href') === '/members/user1')
+      expect(mentorLink).toBeInTheDocument()
     })
   })
 })
