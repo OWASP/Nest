@@ -3,33 +3,26 @@
 from pathlib import Path
 
 from django.apps import apps
-from django.conf import settings
-from django.core.management import call_command
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management import CommandError, call_command
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
     """Generate per-app and inter-app model graphs."""
 
-    help = "Generate per-app and inter-app model graphs"
+    help = "Generate per-app and inter-app model graphs for backend apps"
 
     def handle(self, *args, **options):
-        base_dir = Path(settings.BASE_DIR) / "model-graphs"
+        base_dir = Path("model-graphs")
         apps_dir = base_dir / "apps"
         inter_dir = base_dir / "inter-app"
 
         apps_dir.mkdir(parents=True, exist_ok=True)
         inter_dir.mkdir(parents=True, exist_ok=True)
 
-        self.stdout.write("Collecting app labels...")
+        self.stdout.write("Collecting project app labels...")
 
-        app_labels = [
-            app.label
-            for app in apps.get_app_configs()
-            if not app.name.startswith("django.")
-            and not app.name.startswith("django.contrib.")
-            and app.label != "django_extensions"
-        ]
+        app_labels = [app.label for app in apps.get_app_configs() if app.name.startswith("apps.")]
 
         failures: list[str] = []
 
@@ -58,28 +51,28 @@ class Command(BaseCommand):
                 self.stderr.write(f"[warn] relations graph failed for {label}: {exc}")
                 failures.append(f"{label} relations")
 
-        self.stdout.write("Generating inter-app graphs")
+        self.stdout.write("Generating inter-app graphs (project apps only)")
 
         try:
             call_command(
                 "graph_models",
-                "--all-applications",
+                *app_labels,
                 "--inheritance",
                 output=str(inter_dir / "backend_inheritance.svg"),
             )
         except (CommandError, OSError) as exc:
-            self.stderr.write(f"[warn] inter inheritance failed: {exc}")
+            self.stderr.write(f"[warn] inter-app inheritance failed: {exc}")
             failures.append("inter-app inheritance")
 
         try:
             call_command(
                 "graph_models",
-                "--all-applications",
+                *app_labels,
                 "--no-inheritance",
                 output=str(inter_dir / "backend_relations.svg"),
             )
         except (CommandError, OSError) as exc:
-            self.stderr.write(f"[warn] inter relations failed: {exc}")
+            self.stderr.write(f"[warn] inter-app relations failed: {exc}")
             failures.append("inter-app relations")
 
         if failures:
@@ -89,4 +82,4 @@ class Command(BaseCommand):
                 )
             )
         else:
-            self.stdout.write(self.style.SUCCESS("Model graph generation completed"))
+            self.stdout.write(self.style.SUCCESS("Model graph generation completed successfully"))
