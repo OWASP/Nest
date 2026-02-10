@@ -52,11 +52,6 @@ jobs:
           restore-keys: |
             pre-commit-${{ runner.os }}-
 
-      - name: Install Ansible collections for ansible-lint
-        run: |
-          pip install ansible-core
-          ansible-galaxy collection install -r .github/ansible/requirements.yaml
-
       - name: Run pre-commit
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd
 
@@ -674,7 +669,7 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yaml
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
 
       - name: Run Nest deploy
@@ -714,7 +709,7 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yaml
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
 
       - name: Run proxy deploy
@@ -1052,7 +1047,7 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yaml
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
 
       - name: Run Nest deploy
@@ -1092,7 +1087,7 @@ jobs:
           EOF
 
       - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yaml
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
 
       - name: Run proxy deploy

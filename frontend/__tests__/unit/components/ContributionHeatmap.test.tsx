@@ -170,6 +170,84 @@ describe('ContributionHeatmap', () => {
       )
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
     })
+
+    it('handles missing startDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap contributionData={mockData} startDate="" endDate="2024-01-31" />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      // Should render with default date range (1 year)
+      expect(screen.getByTestId('mock-heatmap-chart')).toHaveAttribute('data-series-length', '7')
+    })
+
+    it('handles missing endDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap contributionData={mockData} startDate="2024-01-01" endDate="" />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      expect(screen.getByTestId('mock-heatmap-chart')).toHaveAttribute('data-series-length', '7')
+    })
+
+    it('handles both missing startDate and endDate', () => {
+      renderWithTheme(<ContributionHeatmap contributionData={mockData} startDate="" endDate="" />)
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles invalid startDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="invalid-date"
+          endDate="2024-01-31"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles invalid endDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="2024-01-01"
+          endDate="not-a-date"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles both invalid startDate and endDate', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="garbage"
+          endDate="also-garbage"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles swapped dates (startDate > endDate) by swapping them', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="2024-01-31"
+          endDate="2024-01-01"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      expect(screen.getByTestId('mock-heatmap-chart')).toHaveAttribute('data-series-length', '7')
+    })
+
+    it('handles startDate after endDate and swaps them correctly', () => {
+      const data = {
+        '2024-01-15': 5,
+        '2024-01-20': 10,
+      }
+      renderWithTheme(
+        <ContributionHeatmap contributionData={data} startDate="2024-02-01" endDate="2024-01-01" />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
   })
 
   describe('Theme & Styling', () => {

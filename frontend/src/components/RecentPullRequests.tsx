@@ -19,7 +19,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
     <ItemCardList
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle title="Recent Pull Requests" className="flex items-center leading-none" />
+          <AnchorTitle title="Recent Pull Requests" />
         </div>
       }
       data={data}
@@ -40,7 +40,7 @@ const RecentPullRequests: React.FC<RecentPullRequestsProps> = ({ data, showAvata
                 className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
                 onClick={() =>
                   router.push(
-                    `/organizations/${item.organizationName}/repositories/${item.repositoryName || ''}`
+                    `/organizations/${item.organizationName}/repositories/${item.repositoryName}`
                   )
                 }
               >

@@ -1,7 +1,7 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ChaptersPage from 'app/chapters/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -17,7 +17,7 @@ const mockRouter = {
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
 jest.mock('components/Pagination', () =>
@@ -143,6 +143,22 @@ describe('ChaptersPage Component', () => {
         fireEvent.click(link)
         expect(mockRouter.push).toHaveBeenCalledWith(`/chapters/chapter_${index + 1}`)
       }
+    })
+  })
+
+  test('uses chapters data for map when searchQuery is present', async () => {
+    const searchParams = new URLSearchParams('q=test')
+    jest.mocked(useSearchParams).mockReturnValue(searchParams as never)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      totalPages: 2,
+    })
+
+    render(<ChaptersPage />)
+
+    // When searchQuery is present, chapters data should be used for the map instead of geoLocData
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
     })
   })
 })

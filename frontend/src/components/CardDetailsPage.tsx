@@ -337,7 +337,7 @@ const DetailsCard = ({
             contributors={topContributors}
             icon={HiUserGroup}
             maxInitialDisplay={12}
-            label="Top Contributors"
+            title="Top Contributors"
             getUrl={getMemberUrl}
           />
         )}
@@ -346,7 +346,7 @@ const DetailsCard = ({
             icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
-            label="Admins"
+            title="Admins"
             getUrl={getMemberUrl}
           />
         )}
@@ -355,7 +355,7 @@ const DetailsCard = ({
             icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
-            label="Mentors"
+            title="Mentors"
             getUrl={getMemberUrl}
           />
         )}
@@ -364,7 +364,7 @@ const DetailsCard = ({
             icon={HiUserGroup}
             contributors={mentees}
             maxInitialDisplay={6}
-            label="Mentees"
+            title="Mentees"
             getUrl={(login) => getMenteeUrl(programKey || '', entityKey || '', login)}
           />
         )}

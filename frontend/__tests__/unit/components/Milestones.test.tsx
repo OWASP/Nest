@@ -25,8 +25,8 @@ jest.mock('utils/dateFormatter', () => {
 })
 
 jest.mock('components/AnchorTitle', () => {
-  const MockAnchorTitle = ({ title, className }: { title: string; className?: string }) => {
-    return <h2 className={className}>{title}</h2>
+  const MockAnchorTitle = ({ title }: { title: string }) => {
+    return <h2>{title}</h2>
   }
 
   return {

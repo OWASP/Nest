@@ -773,4 +773,41 @@ describe('UserMenu Component', () => {
       removeEventListenerSpy.mockRestore()
     })
   })
+
+  describe('Project Leader and OWASP Staff links', () => {
+    it('closes dropdown when My Mentorship link is clicked', async () => {
+      const leaderSession: ExtendedSession = {
+        user: {
+          name: 'Leader User',
+          email: 'leader@example.com',
+          image: 'https://example.com/avatar.jpg',
+          isLeader: true,
+          isOwaspStaff: false,
+        },
+        expires: '2024-12-31',
+      }
+
+      mockUseSession.mockReturnValue({
+        session: leaderSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('My Mentorship')).toBeInTheDocument()
+      })
+
+      const mentorshipLink = screen.getByText('My Mentorship')
+      fireEvent.click(mentorshipLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+  })
 })

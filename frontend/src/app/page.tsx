@@ -159,7 +159,7 @@ export default function Home() {
           icon={FaCalendarAlt}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle title="Upcoming Events" className="flex items-center leading-none" />
+              <AnchorTitle title="Upcoming Events" />
             </div>
           }
           className="overflow-hidden"
@@ -220,7 +220,7 @@ export default function Home() {
             icon={FaMapMarkerAlt}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle title="New Chapters" className="flex items-center leading-none" />
+                <AnchorTitle title="New Chapters" />
               </div>
             }
             className="overflow-hidden"
@@ -266,7 +266,7 @@ export default function Home() {
             icon={FaFolder}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle title="New Projects" className="flex items-center leading-none" />
+                <AnchorTitle title="New Projects" />
               </div>
             }
             className="overflow-hidden"
@@ -309,7 +309,7 @@ export default function Home() {
         <div className="mb-20">
           <div className="mb-4 flex items-center gap-2">
             <FaGlobe className="h-4 w-4" style={{ verticalAlign: 'middle' }} />
-            <AnchorTitle title="Chapters Worldwide" className="flex items-center leading-none" />
+            <AnchorTitle title="Chapters Worldwide" />
           </div>
           <ChapterMapWrapper
             geoLocData={geoLocData}
@@ -328,7 +328,7 @@ export default function Home() {
           contributors={data?.topContributors ?? []}
           icon={HiUserGroup}
           maxInitialDisplay={20}
-          label="Top Contributors"
+          title="Top Contributors"
           getUrl={getMemberUrl}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
@@ -352,7 +352,7 @@ export default function Home() {
           icon={FaNewspaper}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle title="News & Opinions" className="flex items-center leading-none" />
+              <AnchorTitle title="News & Opinions" />
             </div>
           }
           className="overflow-hidden"

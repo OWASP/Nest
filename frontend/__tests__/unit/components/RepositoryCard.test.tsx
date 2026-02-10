@@ -339,4 +339,41 @@ describe('RepositoryCard', () => {
       expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
     })
   })
+
+  describe('Keyboard Navigation', () => {
+    it('navigates to repository page when Enter key is pressed', () => {
+      const repositories = [createMockRepository(0)]
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const repositoryButton = screen.getByText('Repository 0').closest('button')
+      fireEvent.keyDown(repositoryButton!, { key: 'Enter' })
+
+      expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    })
+
+    it('navigates to repository page when Space key is pressed', () => {
+      const repositories = [createMockRepository(0)]
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const repositoryButton = screen.getByText('Repository 0').closest('button')
+      fireEvent.keyDown(repositoryButton!, { key: ' ' })
+
+      expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    })
+
+    it('does not navigate when other keys are pressed', () => {
+      const repositories = [createMockRepository(0)]
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const repositoryButton = screen.getByText('Repository 0').closest('button')
+      fireEvent.keyDown(repositoryButton!, { key: 'Tab' })
+      fireEvent.keyDown(repositoryButton!, { key: 'Escape' })
+      fireEvent.keyDown(repositoryButton!, { key: 'a' })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+  })
 })
