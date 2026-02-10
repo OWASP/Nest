@@ -13,6 +13,7 @@ from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.github.models.issue import Issue
+from apps.github.models.label import Label
 from apps.github.models.repository import Repository
 
 if TYPE_CHECKING:
@@ -51,7 +52,11 @@ class RepositoryNode(strawberry.relay.Node):
         prefetch_related=[
             Prefetch(
                 "issues",
-                queryset=Issue.objects.order_by("-created_at"),
+                queryset=Issue.objects.select_related("repository", "repository__organization")
+                .prefetch_related(
+                    Prefetch("labels", queryset=Label.objects.all(), to_attr="label_names")
+                )
+                .order_by("-created_at")[:RECENT_ISSUES_LIMIT],
                 to_attr="recent_issues",
             )
         ]
@@ -59,7 +64,7 @@ class RepositoryNode(strawberry.relay.Node):
     def issues(self, root: Repository) -> list[IssueNode]:
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.
-        return getattr(root, "recent_issues", [])[:RECENT_ISSUES_LIMIT]
+        return getattr(root, "recent_issues", [])
 
     @strawberry_django.field
     def languages(self, root: Repository) -> list[str]:
