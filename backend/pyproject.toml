@@ -148,11 +148,11 @@ ini_options.log_level = "INFO"
 [tool.coverage]
 run.branch = true
 run.omit = [
-  "__init__.py",
   "**/admin.py",
   "**/apps.py",
-  "**/migrations/*",
   "**/mentorship/*", # TODO: work in progress
+  "**/migrations/*",
+  "__init__.py",
   "manage.py",
   "settings/*",
   "tests/*",
