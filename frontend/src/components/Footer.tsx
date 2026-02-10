@@ -93,18 +93,20 @@ export default function Footer() {
             </p>
             {RELEASE_VERSION && (
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                {ENVIRONMENT === 'production' ? (
-                  <Link
-                    className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-                    href={`https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <span>v{RELEASE_VERSION}</span>
-                  </Link>
-                ) : (
+                <Link
+                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                  href={
+                    ENVIRONMENT === 'production'
+                      ? `https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`
+                      : `https://github.com/OWASP/Nest/commit/${
+                          RELEASE_VERSION.split('-').pop() ?? RELEASE_VERSION
+                        }`
+                  }
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
                   <span>v{RELEASE_VERSION}</span>
-                )}
+                </Link>
               </p>
             )}
           </div>
