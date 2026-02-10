@@ -294,3 +294,15 @@ class TestChapterModel:
             assert result.key == "www-chapter-new"
             mock_from_github.assert_called_once_with(mock_repository)
             mock_save.assert_not_called()
+    
+    def test_save_does_not_call_geocoder_on_zero_coords(self):
+        """
+        Ensure that 0.0 latitude/longitude are treated as valid data 
+        and don't trigger unnecessary re-generation.
+        """
+        with patch.object(self.chapter, 'generate_geo_location') as mock_geo:
+            self.chapter.latitude = 0.0
+            self.chapter.longitude = 0.0
+            self.chapter.save()
+            
+            mock_geo.assert_not_called()
