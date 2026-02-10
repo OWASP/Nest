@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { mockProjectsDashboardMetricsDetailsData } from '@mockData/mockProjectsDashboardMetricsDetailsData'
 import { render, screen, waitFor } from '@testing-library/react'
+import React from 'react'
 import ProjectHealthMetricsDetails from 'app/projects/dashboard/metrics/[projectKey]/page'
 
 jest.mock('react-apexcharts', () => {
@@ -11,6 +12,15 @@ jest.mock('react-apexcharts', () => {
     },
   }
 })
+
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div title={content}>
+      {children}
+      <span style={{ display: 'none' }}>{content}</span>
+    </div>
+  ),
+}))
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
@@ -90,6 +100,58 @@ describe('ProjectHealthMetricsDetails', () => {
       }
       expect(screen.getByText(metrics.projectName)).toBeInTheDocument()
       expect(screen.getByText(metrics.score.toString())).toBeInTheDocument()
+    })
+  })
+
+  test('renders non-compliant status when funding requirements are not met', async () => {
+    const nonCompliantData = {
+      ...mockProjectsDashboardMetricsDetailsData,
+      project: {
+        ...mockProjectsDashboardMetricsDetailsData.project,
+        healthMetricsLatest: {
+          ...mockProjectsDashboardMetricsDetailsData.project.healthMetricsLatest,
+          isFundingRequirementsCompliant: false,
+          isLeaderRequirementsCompliant: true,
+        },
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: nonCompliantData,
+      loading: false,
+      error: null,
+    })
+
+    render(<ProjectHealthMetricsDetails />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Funding Requirements Not Compliant')).toBeInTheDocument()
+      expect(screen.getByText('Leader Requirements Compliant')).toBeInTheDocument()
+    })
+  })
+
+  test('renders non-compliant status when leader requirements are not met', async () => {
+    const nonCompliantData = {
+      ...mockProjectsDashboardMetricsDetailsData,
+      project: {
+        ...mockProjectsDashboardMetricsDetailsData.project,
+        healthMetricsLatest: {
+          ...mockProjectsDashboardMetricsDetailsData.project.healthMetricsLatest,
+          isFundingRequirementsCompliant: true,
+          isLeaderRequirementsCompliant: false,
+        },
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: nonCompliantData,
+      loading: false,
+      error: null,
+    })
+
+    render(<ProjectHealthMetricsDetails />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Funding Requirements Compliant')).toBeInTheDocument()
+      expect(screen.getByText('Leader Requirements Not Compliant')).toBeInTheDocument()
     })
   })
 })
