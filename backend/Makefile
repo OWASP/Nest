@@ -183,6 +183,9 @@ security-scan-backend-image:
 .PHONY: sbom-backend-image
 
 sbom-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
 	@echo "Generating SBOM for image: $(BACKEND_IMAGE_NAME)..."
 	@docker run \
 		--rm \
