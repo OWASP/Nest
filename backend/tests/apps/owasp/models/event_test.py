@@ -458,7 +458,7 @@ class TestEventSave:
             event.save()
 
             mock_gen_geo.assert_called_once()
-    def test_save_does_not_call_geocoder_on_zero_coords(self):
+    def test_save_does_not_call_geo_location_on_zero_coords(self):
         """
         Ensure that 0.0 latitude/longitude are treated as valid data 
         and don't trigger unnecessary re-generation.
