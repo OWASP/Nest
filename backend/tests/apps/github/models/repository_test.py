@@ -134,6 +134,30 @@ class TestRepositoryFromGithub:
 
         assert repository.is_empty
 
+    def test_from_github_with_non_409_github_exception(self, gh_repository_setup):
+        """Test from_github with GithubException where status is not 409."""
+        commits_mock = MagicMock()
+        type(commits_mock).totalCount = PropertyMock(
+            side_effect=GithubException(
+                status=500, data={"message": "Internal error", "status": "500"}
+            )
+        )
+
+        repository = Repository()
+        repository.from_github(gh_repository_setup, commits=commits_mock)
+
+        assert not repository.is_empty
+
+    def test_from_github_with_contributors(self, gh_repository_setup):
+        """Test from_github with contributors parameter."""
+        contributors_mock = MagicMock()
+        contributors_mock.totalCount = 42
+
+        repository = Repository()
+        repository.from_github(gh_repository_setup, contributors=contributors_mock)
+
+        assert repository.contributors_count == 42
+
     def test_from_github_calculates_languages(self, gh_repository_setup):
         """Test that from_github correctly calculates language percentages."""
         languages = {"Python": 300, "JavaScript": 600, "HTML": 100}
@@ -274,6 +298,11 @@ class TestRepositoryProperties:
         """Test the path property to ensure it returns the correct repository path."""
         _owner, repository = repository_setup
         assert repository.path == "test-owner/test-repo"
+
+    def test_str_method(self, repository_setup):
+        """Test __str__ returns the repository path."""
+        _owner, repository = repository_setup
+        assert str(repository) == "test-owner/test-repo"
 
     def test_project(self, repository_setup):
         """Test the project property to ensure it returns the associated project."""

@@ -14,6 +14,17 @@ class TestOwaspEnrichProjects:
     def command(self):
         return Command()
 
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        from argparse import ArgumentParser
+
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args([])
+        assert args.offset == 0
+        assert args.force_update_summary is False
+        assert args.update_summary is True
+
     @pytest.fixture
     def mock_project(self):
         project = mock.Mock(spec=Project)
