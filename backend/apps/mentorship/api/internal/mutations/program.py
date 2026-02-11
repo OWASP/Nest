@@ -75,7 +75,7 @@ class ProgramMutation:
         user = info.context.request.user
 
         try:
-            program = Program.objects.get(key=input_data.key)
+            program = Program.objects.select_for_update().get(key=input_data.key)
         except Program.DoesNotExist as err:
             msg = f"Program with key '{input_data.key}' not found."
             logger.warning(msg, exc_info=True)
@@ -144,7 +144,7 @@ class ProgramMutation:
         user = info.context.request.user
 
         try:
-            program = Program.objects.get(key=input_data.key)
+            program = Program.objects.select_for_update().get(key=input_data.key)
         except Program.DoesNotExist as e:
             msg = f"Program with key '{input_data.key}' not found."
             raise ObjectDoesNotExist(msg) from e
