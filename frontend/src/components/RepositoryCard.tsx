@@ -9,6 +9,7 @@ import InfoItem from 'components/InfoItem'
 import ShowMoreButton from 'components/ShowMoreButton'
 import StatusBadge from 'components/StatusBadge'
 import { TruncatedText } from 'components/TruncatedText'
+import { useCardState } from 'hooks/useCardState'
 
 const RepositoryCard: React.FC<RepositoryCardListProps> = ({
   maxInitialDisplay = 4,
@@ -40,7 +41,11 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
 
 const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
   const router = useRouter()
+  const cardKey = `${details.organization?.login ?? 'unknown'}-${details.key}`
+  const { handleCardClick, isCardActive, isCardVisited } = useCardState(cardKey)
+
   const handleClick = () => {
+    handleCardClick(cardKey)
     router.push(`/organizations/${details.organization?.login}/repositories/${details.key}`)
   }
 
@@ -51,16 +56,36 @@ const RepositoryItem = ({ details }: { details: RepositoryCardProps }) => {
     }
   }
 
+  const cardClasses = `
+    flex h-46 w-full flex-col gap-3 rounded-lg border-1 p-4 shadow-xs ease-in-out transition-all duration-150 ease-in-out cursor-pointer
+    ${isCardActive 
+      ? 'border-blue-400 bg-blue-50 shadow-md scale-[1.02] dark:border-blue-300 dark:bg-blue-900/20' 
+      : isCardVisited 
+        ? 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/50' 
+        : 'border-gray-200 dark:border-gray-700 dark:bg-gray-800'
+    }
+    hover:border-gray-300 hover:bg-gray-50 hover:shadow-md hover:scale-[1.01] dark:hover:border-gray-600 dark:hover:bg-gray-800/50
+  `
+
   return (
-    <div className="flex h-46 w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+    <div className={cardClasses}>
       <div className="flex items-start justify-between gap-2">
         <button
           type="button"
           onClick={handleClick}
           onKeyDown={handleKeyDown}
-          className="min-w-0 flex-1 cursor-pointer text-start font-semibold text-blue-400 hover:underline focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+          className={`
+            min-w-0 flex-1 cursor-pointer text-start font-semibold transition-all duration-200 ease-in-out focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500
+            ${isCardVisited 
+              ? 'text-blue-600 dark:text-blue-400' 
+              : 'text-blue-400 hover:text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300'
+            }
+          `}
         >
           <TruncatedText text={details?.name} />
+          {isCardVisited && (
+            <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-green-500" title="Visited" />
+          )}
         </button>
         {details.isArchived && (
           <div className="flex-shrink-0">

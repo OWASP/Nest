@@ -11,6 +11,7 @@ import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
 import { LabelList } from 'components/LabelList'
 import Markdown from 'components/MarkdownWrapper'
+import { useCardState } from 'hooks/useCardState'
 
 const Card = ({
   button,
@@ -28,8 +29,25 @@ const Card = ({
   topContributors,
   url,
 }: CardProps) => {
+  const { handleCardClick, isCardActive, isCardVisited } = useCardState(cardKey)
+
+  const handleCardInteraction = () => {
+    handleCardClick(cardKey)
+  }
+
+  const cardClasses = `
+    mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 p-4 md:max-w-6xl transition-all duration-150 ease-in-out
+    ${isCardActive 
+      ? 'border-blue-400 bg-blue-50 shadow-md scale-[1.02] dark:border-blue-300 dark:bg-blue-900/20' 
+      : isCardVisited 
+        ? 'border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/50' 
+        : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-[#212529]'
+    }
+    hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm hover:scale-[1.01] dark:hover:border-gray-600 dark:hover:bg-gray-800/50
+  `
+
   return (
-    <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
+    <div className={cardClasses}>
       {/* Card Header with Badge and Title */}
       <div className="w-full">
         <div className="flex items-center gap-3">
@@ -52,14 +70,29 @@ const Card = ({
             </Tooltip>
           )}
           {/* Project title and link */}
-          <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
+          <Link 
+            href={url} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex-1"
+            onClick={handleCardInteraction}
+          >
             <h1
-              className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
+              className={`
+                max-w-full text-base font-semibold break-words sm:text-lg sm:break-normal lg:text-2xl transition-all duration-200 ease-in-out
+                ${isCardVisited 
+                  ? 'text-blue-600 dark:text-blue-400' 
+                  : 'text-blue-400 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300'
+                }
+              `}
               style={{
                 transition: 'color 0.3s ease',
               }}
             >
               {title}
+              {isCardVisited && (
+                <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-green-500" title="Visited" />
+              )}
             </h1>
           </Link>
         </div>
@@ -95,6 +128,7 @@ const Card = ({
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 font-medium text-gray-700 hover:text-blue-500 dark:text-gray-300"
+          onClick={handleCardInteraction}
         >
           {projectName}
         </Link>
@@ -120,6 +154,7 @@ const Card = ({
                     rel="noopener noreferrer"
                     className="transition-colors"
                     aria-label={item.title || 'Social media link'}
+                    onClick={handleCardInteraction}
                   >
                     <SocialIcon className="h-5 w-5 text-blue-500 hover:text-gray-600 dark:hover:text-gray-400" />
                   </Link>
@@ -153,7 +188,10 @@ const Card = ({
             <ActionButton
               tooltipLabel={tooltipLabel}
               url={button.url}
-              onClick={button.onclick}
+              onClick={() => {
+                handleCardInteraction()
+                button.onclick?.()
+              }}
               onKeyDown={button.onkeydown}
             >
               {button.icon}
