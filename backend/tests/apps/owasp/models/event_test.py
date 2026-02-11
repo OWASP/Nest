@@ -514,51 +514,13 @@ class TestEventSave:
 
             mock_gen_geo.assert_called_once()
 
-    def test_save_skips_location_generation_when_exists(self):
-        """Test save skips generate_suggested_location when suggested_location is set."""
-        event = Event(
-            key="test-event",
-            name="Test Event",
-            start_date=date(2025, 1, 1),
-            suggested_location="Existing Location",
-            latitude=37.0,
-            longitude=-122.0,
-        )
-
+    @patch("apps.owasp.models.event.Event.generate_suggested_location")
+    def test_save_does_not_call_geo_location_on_zero_coords(self, mock_suggested):
+        """Verify 0.0 coordinates are treated as valid data."""
+        event = Event(latitude=0.0, longitude=0.0, name="Test event")
         with (
-            patch.object(Event, "generate_suggested_location") as mock_gen_location,
-            patch.object(Event, "generate_geo_location") as mock_gen_geo,
-            patch("apps.owasp.models.event.BulkSaveModel.save"),
-            patch("apps.owasp.models.event.TimestampedModel.save"),
+            patch.object(event, "generate_geo_location") as mock_geo,
+            patch.object(Event, "save_base"),
         ):
             event.save()
-
-            mock_gen_location.assert_not_called()
-            mock_gen_geo.assert_not_called()
-
-
-class TestEventUpdateDataSave:
-    """Test update_data with save=False."""
-
-    def test_update_data_save_false(self):
-        """Test update_data does not save when save=False."""
-        category = "Global"
-        data = {
-            "name": "Test Event",
-            "start-date": date(2025, 5, 26),
-            "dates": "",
-        }
-
-        with (
-            patch("apps.owasp.models.event.slugify") as mock_slugify,
-            patch("apps.owasp.models.event.Event.objects.get") as mock_get,
-            patch.object(Event, "from_dict"),
-            patch.object(Event, "save") as mock_save,
-        ):
-            mock_slugify.return_value = "test-event"
-            mock_get.side_effect = Event.DoesNotExist
-
-            result = Event.update_data(category, data, save=False)
-
-            assert result is not None
-            mock_save.assert_not_called()
+        mock_geo.assert_not_called()

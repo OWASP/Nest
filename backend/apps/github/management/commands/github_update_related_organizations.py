@@ -53,7 +53,7 @@ class Command(BaseCommand):
             organizations_count = organizations.count()
             for idx, organization in enumerate(organizations):
                 prefix = f"{idx + 1} of {organizations_count}"
-                print(f"{prefix:<10} {organization.url}\n")
+                self.stdout.write(f"{prefix:<10} {organization.url}\n")
 
                 if organization.related_projects.count() != 1:
                     logger.error(
@@ -76,7 +76,7 @@ class Command(BaseCommand):
                     repository_url = (
                         f"https://github.com/{organization.login}/{gh_repository.name.lower()}"
                     )
-                    print(f"{prefix:<12} {repository_url}")
+                    self.stdout.write(f"{prefix:<12} {repository_url}\n")
 
                     try:
                         _, repository = sync_repository(gh_repository)

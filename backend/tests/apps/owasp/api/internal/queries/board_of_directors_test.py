@@ -3,6 +3,7 @@
 from unittest.mock import Mock, patch
 
 from apps.owasp.api.internal.queries.board_of_directors import BoardOfDirectorsQuery
+from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 
 class TestBoardOfDirectorsQuery:
@@ -23,8 +24,6 @@ class TestBoardOfDirectorsQuery:
             assert result == mock_board
 
     def test_board_of_directors_not_found(self):
-        from apps.owasp.models.board_of_directors import BoardOfDirectors
-
         query = BoardOfDirectorsQuery()
 
         with patch(

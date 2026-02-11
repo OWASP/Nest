@@ -54,13 +54,13 @@ class TestOwaspScrapeProjects:
 
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
                 return_value=mock_scraper,
             ),
         ):
+            command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
         mock_bulk_save.assert_called_once()
@@ -110,17 +110,17 @@ class TestOwaspScrapeProjects:
 
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print") as mock_print,
             mock.patch("time.sleep", return_value=None),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
                 return_value=mock_scraper,
             ),
         ):
+            command.stdout = mock.MagicMock()
             command.handle(offset=offset)
 
         assert mock_bulk_save.called
-        assert mock_print.call_count == (project_count - offset)
+        assert command.stdout.write.call_count == (project_count - offset)
 
         last_project = mock_bulk_save.call_args[0][0][-1]
         assert last_project.invalid_urls == ["https://invalid.com/repo3"]

@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, Mock, patch
+from urllib.parse import urlparse as original_urlparse
 
 import pytest
 
@@ -590,8 +591,6 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
 
     def test_get_urls_with_domain_value_error(self):
         """Test get_urls handles ValueError during domain filtering."""
-        from urllib.parse import urlparse as original_urlparse
-
         model = EntityModel()
         repository = Repository()
         repository.name = "www-project-example"

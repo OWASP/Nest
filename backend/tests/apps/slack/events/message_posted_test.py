@@ -156,7 +156,7 @@ class TestMessagePosted:
         client.auth_test.return_value = {"user_id": "U987654"}
 
         with patch("apps.slack.events.message_posted.Conversation") as mock_conversation:
-            from apps.slack.models.conversation import Conversation
+            from apps.slack.models.conversation import Conversation  # noqa: PLC0415
 
             mock_conversation.DoesNotExist = Conversation.DoesNotExist
             mock_conversation.objects.get.side_effect = Conversation.DoesNotExist
@@ -188,7 +188,7 @@ class TestMessagePosted:
         client.auth_test.return_value = {"user_id": "U987654"}
 
         with patch("apps.slack.events.message_posted.Conversation") as mock_conversation:
-            from apps.slack.models.conversation import Conversation
+            from apps.slack.models.conversation import Conversation  # noqa: PLC0415
 
             mock_conversation.DoesNotExist = Conversation.DoesNotExist
             mock_conversation.objects.get.side_effect = Conversation.DoesNotExist
@@ -311,7 +311,7 @@ class TestMessagePosted:
         ):
             mock_conversation.objects.get.return_value = conversation_mock
 
-            from apps.slack.models.member import Member
+            from apps.slack.models.member import Member  # noqa: PLC0415
 
             mock_member.DoesNotExist = Member.DoesNotExist
             mock_member.objects.get.side_effect = Member.DoesNotExist
@@ -344,7 +344,7 @@ class TestMessagePosted:
         client.auth_test.return_value = {"user_id": "U987654"}
 
         with patch("apps.slack.events.message_posted.Conversation") as mock_conversation:
-            from apps.slack.models.conversation import Conversation
+            from apps.slack.models.conversation import Conversation  # noqa: PLC0415
 
             mock_conversation.DoesNotExist = Conversation.DoesNotExist
             mock_conversation.objects.get.side_effect = Conversation.DoesNotExist

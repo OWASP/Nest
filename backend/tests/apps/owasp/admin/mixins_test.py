@@ -8,6 +8,7 @@ from apps.owasp.admin.mixins import (
     GenericEntityAdminMixin,
     StandardOwaspAdminMixin,
 )
+from apps.owasp.admin.widgets import ChannelIdWidget
 from apps.owasp.models.project import Project
 
 
@@ -153,8 +154,6 @@ class TestEntityChannelInline:
 
     def test_formfield_for_dbfield_channel_id(self, mocker):
         """Test that channel_id field gets ChannelIdWidget."""
-        from apps.owasp.admin.widgets import ChannelIdWidget
-
         inline = EntityChannelInline(Project, mocker.Mock())
         mock_db_field = mocker.Mock()
         mock_db_field.name = "channel_id"
