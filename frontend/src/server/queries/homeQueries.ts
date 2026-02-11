@@ -1,7 +1,11 @@
 import { gql } from '@apollo/client'
 
 export const GET_MAIN_PAGE_DATA = gql`
-  query GetMainPageData($distinct: Boolean) {
+  query GetMainPageData(
+    $distinct: Boolean
+    $recentReleasesLimit: Int = 5
+    $topContributorsLimit: Int = 40
+  ) {
     recentProjects(limit: 3) {
       id
       createdAt
@@ -28,7 +32,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       name
       suggestedLocation
     }
-    topContributors(hasFullName: true, limit: 40) {
+    topContributors(hasFullName: true, limit: $topContributorsLimit) {
       id
       avatarUrl
       login
@@ -62,7 +66,7 @@ export const GET_MAIN_PAGE_DATA = gql`
       title
       url
     }
-    recentReleases(limit: 5, distinct: $distinct) {
+    recentReleases(limit: $recentReleasesLimit, distinct: $distinct) {
       id
       author {
         id
