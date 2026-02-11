@@ -535,7 +535,7 @@ jobs:
     needs:
       - build-staging-images
     permissions:
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -563,12 +563,11 @@ jobs:
         run: |
           make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
-      - name: Upload SBOM artifacts
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+      - name: Attach SBOMs to GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
+        if: github.event_name == 'release'
         with:
-          name: staging-sboms
-          path: |
+          files: |
             backend-sbom.cdx.json
             frontend-sbom.cdx.json
     timeout-minutes: 5
