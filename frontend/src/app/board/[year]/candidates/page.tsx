@@ -92,7 +92,6 @@ interface CandidateCardProps {
 
 const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
   const client = useApolloClient()
-  const [snapshot, setSnapshot] = useState<MemberSnapshot | null>(null)
   const [ledChapters, setLedChapters] = useState<Chapter[]>([])
   const [ledProjects, setLedProjects] = useState<Project[]>([])
 
@@ -110,7 +109,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
     return [...entries].sort(([, a], [, b]) => b - a)
   }
 
-  // Render a single repository link item
+  // Render a single channel link item
   const renderChannelLink = (channelName: string, messageCount: string | number) => (
     <a
       key={channelName}
@@ -213,12 +212,8 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
     },
     skip: !candidate.member?.login,
   })
-
-  useEffect(() => {
-    if (snapshotData?.memberSnapshot) {
-      setSnapshot(snapshotData.memberSnapshot)
-    }
-  }, [snapshotData])
+  // Derive snapshot directly from the query result to avoid an extra render
+  const snapshot: MemberSnapshot | null = snapshotData?.memberSnapshot ?? null
 
   // Fetch chapters based on chapterContributions keys
   useEffect(() => {
@@ -666,8 +661,6 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
 
 const BoardCandidatesPage = () => {
   const { year } = useParams<{ year: string }>()
-  const [candidates, setCandidates] = useState<CandidateWithSnapshot[]>([])
-
   const {
     data: graphQLData,
     error: graphQLRequestError,
@@ -676,14 +669,15 @@ const BoardCandidatesPage = () => {
     variables: { year: Number.parseInt(year) },
   })
 
+  // Derive candidates directly from GraphQL data to avoid an extra render
+  const candidates: CandidateWithSnapshot[] = graphQLData?.boardOfDirectors?.candidates ?? []
+
+  // Keep reporting errors as a side-effect only
   useEffect(() => {
-    if (graphQLData?.boardOfDirectors) {
-      setCandidates(graphQLData.boardOfDirectors.candidates || [])
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [graphQLData, graphQLRequestError])
+  }, [graphQLRequestError])
 
   if (loading) {
     return <LoadingSpinner />

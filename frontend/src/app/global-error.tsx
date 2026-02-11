@@ -102,12 +102,18 @@ export const SentryErrorFallback: React.FC<{
   error: unknown
   errorConfig?: ErrorDisplayProps
 }> = ({ error, errorConfig = ERROR_CONFIGS['500'] }) => {
-  Sentry.captureException(error instanceof Error ? error : new Error(String(error)))
+  React.useEffect(() => {
+    Sentry.captureException(error instanceof Error ? error : new Error(String(error)))
+  }, [error])
+
   return <ErrorDisplay {...errorConfig} />
 }
 
 export default function GlobalError({ error }: Readonly<{ error: Error }>) {
-  Sentry.captureException(error)
+  React.useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
   const errorConfig = ERROR_CONFIGS['500']
   return <ErrorDisplay {...errorConfig} />
 }

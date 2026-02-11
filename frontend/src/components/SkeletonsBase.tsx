@@ -1,5 +1,6 @@
 import { Skeleton } from '@heroui/skeleton'
 import React from 'react'
+import type { CardSkeletonProps } from 'types/skeleton'
 import LoadingSpinner from 'components/LoadingSpinner'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import CardSkeleton from 'components/skeletons/Card'
@@ -8,16 +9,7 @@ import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDe
 import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
 import UserCardSkeleton from 'components/skeletons/UserCard'
 
-type CardSkeletonComponentProps = {
-  showLevel?: boolean
-  showIcons?: boolean
-  showLink?: boolean
-  numIcons?: number
-  showContributors?: boolean
-  showSocial?: boolean
-}
-
-export const CardSkeletonComponent: React.FC<CardSkeletonComponentProps> = (props) => (
+export const CardSkeletonComponent: React.FC<CardSkeletonProps> = (props) => (
   <CardSkeleton {...props} />
 )
 function userCardRender() {
@@ -49,8 +41,8 @@ const SkeletonBase = ({
   indexName: string
   loadingImageUrl: string
 }) => {
-  let Component: React.FC<CardSkeletonComponentProps> = CardSkeletonComponent
-  let componentProps: CardSkeletonComponentProps = {}
+  let Component: React.FC<CardSkeletonProps>
+  let componentProps: CardSkeletonProps = {}
   switch (indexName) {
     case 'chapters':
       Component = CardSkeletonComponent
@@ -90,16 +82,18 @@ const SkeletonBase = ({
     default:
       return <LoadingSpinner imageUrl={loadingImageUrl} />
   }
+  const ResolvedComponent: React.FC<CardSkeletonProps> = Component ?? CardSkeletonComponent
+
   return (
     <div className="flex w-full flex-col items-center justify-center">
       {indexName == 'chapters' ? (
         <Skeleton className="mb-2 h-96 w-full max-w-6xl" />
       ) : (
-        <Component {...componentProps} />
+        <ResolvedComponent {...componentProps} />
       )}
-      <Component {...componentProps} />
-      <Component {...componentProps} />
-      <Component {...componentProps} />
+      <ResolvedComponent {...componentProps} />
+      <ResolvedComponent {...componentProps} />
+      <ResolvedComponent {...componentProps} />
     </div>
   )
 }
