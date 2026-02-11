@@ -28,6 +28,8 @@ class Chapter(
     active_chapters = ActiveChapterManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_chapters"
         indexes = [
             models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
