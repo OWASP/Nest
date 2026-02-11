@@ -461,13 +461,11 @@ class TestEventSave:
 
     @patch("apps.owasp.models.event.Event.generate_suggested_location")
     def test_save_does_not_call_geo_location_on_zero_coords(self, mock_suggested):
-        """Verify 0.0 coordinates are treated as valid data.
-
-        Ensure that 0.0 latitude and longitude do not trigger
-        unnecessary re-generation of geo-location data.
-        """
+        """Verify 0.0 coordinates are treated as valid data."""
         event = Event(latitude=0.0, longitude=0.0, name="Test event")
-        with patch.object(event, "generate_geo_location") as mock_geo:
-            with patch.object(Event, "save_base"):
-                event.save()
-            mock_geo.assert_not_called()
+        with (
+            patch.object(event, "generate_geo_location") as mock_geo,
+            patch.object(Event, "save_base"),
+        ):
+            event.save()
+        mock_geo.assert_not_called()
