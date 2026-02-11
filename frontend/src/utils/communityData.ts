@@ -29,7 +29,7 @@ export const exploreCards = [
     icon: FaCamera,
     title: 'Snapshots',
     description: 'View community snapshots and highlights',
-    href: '/snapshots',
+    href: '/community/snapshots',
     color: 'text-orange-500',
     bgColor: 'bg-orange-50 dark:bg-orange-900/20',
   },
