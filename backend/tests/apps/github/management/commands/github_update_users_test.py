@@ -65,9 +65,9 @@ class TestGithubUpdateUsersCommand:
         mock_rc_objects.exclude.return_value.values.return_value.annotate.assert_called_once()
 
         assert command.stdout.write.call_count == 3
-        command.stdout.write.assert_any_call("1 of 3     User 1")
-        command.stdout.write.assert_any_call("2 of 3     User 2")
-        command.stdout.write.assert_any_call("3 of 3     User 3")
+        command.stdout.write.assert_any_call("1 of 3     User 1\n")
+        command.stdout.write.assert_any_call("2 of 3     User 2\n")
+        command.stdout.write.assert_any_call("3 of 3     User 3\n")
 
         assert mock_user1.contributions_count == 10
         assert mock_user2.contributions_count == 20
@@ -106,8 +106,8 @@ class TestGithubUpdateUsersCommand:
         mock_users_queryset.__getitem__.assert_called_once_with(slice(1, None))
 
         assert command.stdout.write.call_count == 2
-        command.stdout.write.assert_any_call("2 of 2     User 2")
-        command.stdout.write.assert_any_call("3 of 2     User 3")
+        command.stdout.write.assert_any_call("2 of 2     User 2\n")
+        command.stdout.write.assert_any_call("3 of 2     User 3\n")
 
         assert mock_user1.contributions_count == 20
         assert mock_user2.contributions_count == 30
@@ -140,8 +140,8 @@ class TestGithubUpdateUsersCommand:
         command.handle(offset=0)
 
         assert command.stdout.write.call_count == 2
-        command.stdout.write.assert_any_call("1 of 2     User 1")
-        command.stdout.write.assert_any_call("2 of 2     User 2")
+        command.stdout.write.assert_any_call("1 of 2     User 1\n")
+        command.stdout.write.assert_any_call("2 of 2     User 2\n")
 
         assert mock_user1.contributions_count == 0
         assert mock_user2.contributions_count == 0
@@ -172,7 +172,7 @@ class TestGithubUpdateUsersCommand:
         command.stdout = MagicMock()
         command.handle(offset=0)
 
-        command.stdout.write.assert_called_once_with("1 of 1     User 1")
+        command.stdout.write.assert_called_once_with("1 of 1     User 1\n")
 
         assert mock_user1.contributions_count == 15
 
@@ -229,8 +229,8 @@ class TestGithubUpdateUsersCommand:
         command.handle(offset=0)
 
         assert command.stdout.write.call_count == 2
-        command.stdout.write.assert_any_call("1 of 2     User 1")
-        command.stdout.write.assert_any_call("2 of 2     User 2")
+        command.stdout.write.assert_any_call("1 of 2     User 1\n")
+        command.stdout.write.assert_any_call("2 of 2     User 2\n")
 
         assert mock_user1.contributions_count == 10
         assert mock_user2.contributions_count == 20

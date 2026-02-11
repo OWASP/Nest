@@ -73,7 +73,7 @@ class Command(BaseCommand):
                 prefix = f"{idx + offset + 1} of {gh_repositories_count}"
                 entity_key = gh_repository.name.lower()
                 repository_url = f"https://github.com/OWASP/{entity_key}"
-                self.stdout.write(f"{prefix:<12} {repository_url}")
+                self.stdout.write(f"{prefix:<12} {repository_url}\n")
 
                 try:
                     owasp_organization, owasp_repository = sync_repository(

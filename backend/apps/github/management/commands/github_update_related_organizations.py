@@ -76,7 +76,7 @@ class Command(BaseCommand):
                     repository_url = (
                         f"https://github.com/{organization.login}/{gh_repository.name.lower()}"
                     )
-                    self.stdout.write(f"{prefix:<12} {repository_url}")
+                    self.stdout.write(f"{prefix:<12} {repository_url}\n")
 
                     try:
                         _, repository = sync_repository(gh_repository)

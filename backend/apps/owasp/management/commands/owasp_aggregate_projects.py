@@ -26,7 +26,7 @@ class Command(BaseCommand):
         projects = []
         for idx, project in enumerate(active_projects[offset:]):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
-            self.stdout.write(f"{prefix:<10} {project.owasp_url}")
+            self.stdout.write(f"{prefix:<10} {project.owasp_url}\n")
 
             # Deactivate project with archived repositories.
             if project.owasp_repository.is_archived:

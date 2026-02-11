@@ -55,7 +55,7 @@ class Command(BaseCommand):
         update_fields += ["summary"] if (update_summary := options["update_summary"]) else []
         for idx, issue in enumerate(open_issues[offset:]):
             prefix = f"{idx + offset + 1} of {open_issues_count - offset}"
-            self.stdout.write(f"{prefix:<10} {issue.title}")
+            self.stdout.write(f"{prefix:<10} {issue.title}\n")
 
             if update_hint:
                 issue.generate_hint(open_ai=open_ai)
