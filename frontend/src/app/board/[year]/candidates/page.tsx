@@ -472,7 +472,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
             </h4>
             {ledChapters.length === 0 && ledProjects.length === 0 ? (
               <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-700/10 ring-inset dark:bg-orange-900/20 dark:text-orange-400 dark:ring-orange-400/30">
-                No chapters or projects are lead by this candidate
+                No chapters or projects are led by this candidate
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -586,7 +586,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
                     <div>
                       <div className="flex flex-wrap gap-2">
                         {sortedRepos
-                          .slice(1)
+                          .slice(1, 5)
                           .map(([repoName, count]) => renderRepositoryLink(repoName, count))}
                       </div>
                     </div>

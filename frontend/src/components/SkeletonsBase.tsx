@@ -82,18 +82,16 @@ const SkeletonBase = ({
     default:
       return <LoadingSpinner imageUrl={loadingImageUrl} />
   }
-  const ResolvedComponent: React.FC<CardSkeletonProps> = Component ?? CardSkeletonComponent
-
   return (
     <div className="flex w-full flex-col items-center justify-center">
       {indexName == 'chapters' ? (
         <Skeleton className="mb-2 h-96 w-full max-w-6xl" />
       ) : (
-        <ResolvedComponent {...componentProps} />
+        <Component {...componentProps} />
       )}
-      <ResolvedComponent {...componentProps} />
-      <ResolvedComponent {...componentProps} />
-      <ResolvedComponent {...componentProps} />
+      <Component {...componentProps} />
+      <Component {...componentProps} />
+      <Component {...componentProps} />
     </div>
   )
 }
