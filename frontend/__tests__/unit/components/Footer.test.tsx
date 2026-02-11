@@ -275,6 +275,57 @@ describe('Footer', () => {
     })
   })
 
+  describe('Version Link Behavior', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    test('renders version as commit link in non-production environment', () => {
+      const { ENVIRONMENT, RELEASE_VERSION } = jest.requireMock('utils/env.client')
+      const envModule = require('utils/env.client')
+      envModule.ENVIRONMENT = 'staging'
+      envModule.RELEASE_VERSION = '24.2.10-12c25c5'
+
+      const { render: localRender } = require('@testing-library/react')
+      const FooterComponent = require('components/Footer').default
+
+      const { container } = localRender(<FooterComponent />)
+
+      const versionLink = container.querySelector('a[href*="commit"]')
+      expect(versionLink).toBeInTheDocument()
+      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/12c25c5')
+      expect(versionLink).toHaveAttribute('target', '_blank')
+      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(versionLink).toHaveTextContent('v24.2.10-12c25c5')
+
+      // Restore original mocks
+      envModule.ENVIRONMENT = ENVIRONMENT
+      envModule.RELEASE_VERSION = RELEASE_VERSION
+    })
+
+    test('renders version as commit link when RELEASE_VERSION has no dash in non-production', () => {
+      const { ENVIRONMENT, RELEASE_VERSION } = jest.requireMock('utils/env.client')
+      const envModule = require('utils/env.client')
+      envModule.ENVIRONMENT = 'development'
+      envModule.RELEASE_VERSION = '1.2.3'
+
+      const { render: localRender } = require('@testing-library/react')
+      const FooterComponent = require('components/Footer').default
+
+      const { container } = localRender(<FooterComponent />)
+
+      const versionLink = container.querySelector('a[href*="commit"]')
+      expect(versionLink).toBeInTheDocument()
+      // When no dash exists, .split('-').pop() returns the full version
+      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/1.2.3')
+      expect(versionLink).toHaveTextContent('v1.2.3')
+
+      // Restore original mocks
+      envModule.ENVIRONMENT = ENVIRONMENT
+      envModule.RELEASE_VERSION = RELEASE_VERSION
+    })
+  })
+
   describe('Accessibility', () => {
     test('has correct ARIA attributes on buttons', () => {
       renderFooter()
