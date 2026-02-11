@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import logging
-import os
+import re
 
-import openai
-from django.core.exceptions import ObjectDoesNotExist
 from pgvector.django.functions import CosineDistance
 
+from apps.ai.common.llm_config import get_llm
 from apps.ai.embeddings.factory import get_embedder
 from apps.ai.models.chunk import Chunk
 from apps.core.models.prompt import Prompt
@@ -24,18 +23,9 @@ class QuestionDetector:
     CHAT_MODEL = "gpt-4o-mini"
     CHUNKS_RETRIEVAL_LIMIT = 10
 
-    def __init__(self):
-        """Initialize the question detector.
-
-        Raises:
-            ValueError: If the OpenAI API key is not set.
-
-        """
-        if not (openai_api_key := os.getenv("DJANGO_OPEN_AI_SECRET_KEY")):
-            error_msg = "DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
-            raise ValueError(error_msg)
-
-        self.openai_client = openai.OpenAI(api_key=openai_api_key)
+    def __init__(self) -> None:
+        """Initialize the question detector."""
+        self.llm = get_llm()
         self.embedder = get_embedder()
 
     def is_owasp_question(self, text: str) -> bool:
@@ -56,7 +46,7 @@ class QuestionDetector:
             limit=self.CHUNKS_RETRIEVAL_LIMIT,
         )
 
-        openai_result = self.is_owasp_question_with_openai(text, context_chunks)
+        openai_result = self.is_owasp_question_with_llm(text, context_chunks)
 
         if openai_result is None:
             logger.warning(
@@ -66,7 +56,7 @@ class QuestionDetector:
 
         return openai_result
 
-    def is_owasp_question_with_openai(self, text: str, context_chunks: list[dict]) -> bool | None:
+    def is_owasp_question_with_llm(self, text: str, context_chunks: list[dict]) -> bool | None:
         """Determine if the text is an OWASP-related question using retrieved context chunks.
 
         Args:
@@ -79,46 +69,70 @@ class QuestionDetector:
             - None: If the API call fails or the response is unexpected.
 
         """
+        from crewai import Agent, Crew, Task
+
         prompt = Prompt.get_slack_question_detector_prompt()
-
         if not prompt or not prompt.strip():
-            error_msg = "Prompt with key 'slack-question-detector-system-prompt' not found."
-            raise ObjectDoesNotExist(error_msg)
+            # Use a robust default if DB prompt is missing
+            prompt = (
+                "You are an expert OWASP assistant. Your task is to determine if a human question "
+                "is related to OWASP, its projects, chapters, events, or general web security. "
+                "Respond with 'YES' if it is related, and 'NO' otherwise. "
+                "Be extremely concise.\n\n"
+                "IMPORTANT: Simple greetings without questions "
+                "(e.g., 'Hello', 'Hi', 'Thanks', 'Thank you') "
+                "should be classified as 'NO' - they are not OWASP-related questions."
+            )
 
-        formatted_context = (
-            self.format_context_chunks(context_chunks)
-            if context_chunks
-            else "No context available"
+        formatted_context = self.format_context_chunks(context_chunks)
+        task_description = (
+            f"{prompt}\n\n"
+            f"CONTEXT CHUNKS:\n{formatted_context}\n\n"
+            f"USER QUESTION: {text}\n\n"
+            "Respond ONLY with 'YES' or 'NO'."
         )
-        system_prompt = prompt
-        user_prompt = f'Question: "{text}"\n\n Context: {formatted_context}'
+
+        agent = Agent(
+            role="OWASP Question Detector",
+            goal="Identify if a question is related to OWASP or web security",
+            backstory="You are a specialized filter for OWASP-related inquiries.",
+            llm=self.llm,
+            allow_delegation=False,
+            verbose=True,
+        )
+
+        task = Task(
+            description=task_description,
+            agent=agent,
+            expected_output="'YES' or 'NO'",
+        )
+
+        crew = Crew(
+            agents=[agent],
+            tasks=[task],
+            verbose=True,
+        )
 
         try:
-            response = self.openai_client.chat.completions.create(
-                model=self.CHAT_MODEL,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=self.TEMPERATURE,
-                max_tokens=self.MAX_TOKENS,
-            )
-        except openai.OpenAIError:
-            logger.exception("OpenAI API error during question detection")
-            return None
-        else:
-            answer = response.choices[0].message.content
-            if not answer:
-                logger.error("OpenAI returned an empty response")
-                return None
+            result = str(crew.kickoff()).strip().upper()
+            # Use precise matching with regex word boundaries to avoid false positives
+            # This prevents false matches like "I do not KNOW" matching "NO" or
+            # "YES, but..." being parsed incorrectly
+            # Check for "YES" or "NO" at word boundaries (start of string)
+            yes_pattern = re.compile(r"^YES\b")
+            no_pattern = re.compile(r"^NO\b")
 
-            clean_answer = answer.strip().upper()
-
-            if "YES" in clean_answer:
+            if yes_pattern.match(result):
                 return True
-            if "NO" in clean_answer:
+            if no_pattern.match(result):
                 return False
-            logger.warning("Unexpected OpenAI response")
+            logger.warning(
+                "Question Detector: Unexpected result format",
+                extra={"result": result},
+            )
+            return None
+        except Exception:
+            logger.exception("Agent-based detection failed")
             return None
 
     def format_context_chunks(self, context_chunks: list[dict]) -> str:

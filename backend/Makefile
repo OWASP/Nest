@@ -56,6 +56,7 @@ django-shell:
 dump-data:
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dumpdata \
+		core \
 		github \
 		owasp \
 		slack.Conversation \

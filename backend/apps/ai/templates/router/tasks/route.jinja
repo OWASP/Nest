@@ -1,5 +1,9 @@
 Classify this query: {{ query }}
 
+CRITICAL CLASSIFICATION GUIDELINES:
+- If the query is ONLY a simple greeting (e.g., "Hello", "Hi", "Thanks", "Thank you", "Goodbye") without any actual question or request, classify as 'rag' with very low confidence (0.1-0.2) - these will be handled specially before routing
+- If the query contains a greeting BUT also has an actual question or request, classify based on the question/request content, not the greeting
+
 CRITICAL CLASSIFICATION GUIDELINES FOR CONTRIBUTION INTENT:
 - If the message contains ANY of the following, classify as 'contribution':
   * Expressions of interest: 'interested in', 'excited to join', 'looking forward to contributing', 'want to contribute', 'would love to', 'keen on learning how to get involved'

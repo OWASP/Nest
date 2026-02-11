@@ -14,8 +14,11 @@ from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
 
 
-def create_project_agent() -> Agent:
+def create_project_agent(allow_delegation: bool = False) -> Agent:
     """Create Project Expert Agent.
+
+    Args:
+        allow_delegation (bool): Whether the agent can delegate tasks. Defaults to False.
 
     Returns:
         Agent: Project Expert Agent configured with project tools
@@ -39,6 +42,6 @@ def create_project_agent() -> Agent:
         ],
         llm=get_llm(),
         verbose=True,
-        allow_delegation=False,
+        allow_delegation=allow_delegation,
         memory=False,
     )

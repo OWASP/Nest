@@ -280,13 +280,18 @@ class Command(BaseCommand):
                             logger.warning("Message missing channel ID, skipping")
                             continue
 
-                        conversation, _ = Conversation.objects.get_or_create(
+                        conversation, created = Conversation.objects.get_or_create(
                             slack_channel_id=channel_id,
                             workspace=workspace,
                             defaults={
                                 "name": message_data.get("channel", {}).get("name", "unknown"),
+                                "is_nest_bot_assistant_enabled": True,
                             },
                         )
+                        # Auto-enable for existing conversations that aren't enabled
+                        if not created and not conversation.is_nest_bot_assistant_enabled:
+                            conversation.is_nest_bot_assistant_enabled = True
+                            conversation.save(update_fields=["is_nest_bot_assistant_enabled"])
 
                         # Create message - note: _create_message may return None if message
                         # already exists or fails validation

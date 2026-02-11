@@ -28,7 +28,7 @@ class Conversation(TimestampedModel):
     is_im = models.BooleanField(verbose_name="Is IM", default=False)
     is_mpim = models.BooleanField(verbose_name="Is MPIM", default=False)
     is_nest_bot_assistant_enabled = models.BooleanField(
-        verbose_name="Is Nest Bot Assistant Enabled", default=False
+        verbose_name="Is Nest Bot Assistant Enabled", default=True
     )
     is_private = models.BooleanField(verbose_name="Is private", default=False)
     is_shared = models.BooleanField(verbose_name="Is shared", default=False)
@@ -99,6 +99,8 @@ class Conversation(TimestampedModel):
             conversation = Conversation.objects.get(slack_channel_id=channel_id)
         except Conversation.DoesNotExist:
             conversation = Conversation(slack_channel_id=channel_id)
+            # Auto-enable assistant for new conversations
+            conversation.is_nest_bot_assistant_enabled = True
 
         conversation.from_slack(conversation_data, workspace)
         if save:

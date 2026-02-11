@@ -123,6 +123,7 @@ pdfium
 pentest
 pentesting
 pgvector
+pii
 pil
 pnpmrc
 psycopg
