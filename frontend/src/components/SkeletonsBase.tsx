@@ -1,4 +1,5 @@
 import { Skeleton } from '@heroui/skeleton'
+import React from 'react'
 import LoadingSpinner from 'components/LoadingSpinner'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 import CardSkeleton from 'components/skeletons/Card'
@@ -6,6 +7,19 @@ import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSke
 import OrganizationDetailsPageSkeleton from 'components/skeletons/OrganizationDetailsPageSkeleton'
 import SnapshotSkeleton from 'components/skeletons/SnapshotSkeleton'
 import UserCardSkeleton from 'components/skeletons/UserCard'
+
+type CardSkeletonComponentProps = {
+  showLevel?: boolean
+  showIcons?: boolean
+  showLink?: boolean
+  numIcons?: number
+  showContributors?: boolean
+  showSocial?: boolean
+}
+
+export const CardSkeletonComponent: React.FC<CardSkeletonComponentProps> = (props) => (
+  <CardSkeleton {...props} />
+)
 function userCardRender() {
   const cardCount = 12
   return (
@@ -35,31 +49,30 @@ const SkeletonBase = ({
   indexName: string
   loadingImageUrl: string
 }) => {
-  let Component
+  let Component: React.FC<CardSkeletonComponentProps> = CardSkeletonComponent
+  let componentProps: CardSkeletonComponentProps = {}
   switch (indexName) {
     case 'chapters':
-      Component = () => <CardSkeleton showLevel={false} showIcons={false} showLink={false} />
+      Component = CardSkeletonComponent
+      componentProps = { showLevel: false, showIcons: false, showLink: false }
       break
     case 'issues':
-      Component = () => (
-        <CardSkeleton
-          showLevel={false}
-          showIcons={true}
-          numIcons={2}
-          showContributors={false}
-          showSocial={false}
-        />
-      )
+      Component = CardSkeletonComponent
+      componentProps = {
+        showLevel: false,
+        showIcons: true,
+        numIcons: 2,
+        showContributors: false,
+        showSocial: false,
+      }
       break
     case 'projects':
-      Component = () => (
-        <CardSkeleton showLink={false} showSocial={false} showIcons={true} numIcons={3} />
-      )
+      Component = CardSkeletonComponent
+      componentProps = { showLink: false, showSocial: false, showIcons: true, numIcons: 3 }
       break
     case 'committees':
-      Component = () => (
-        <CardSkeleton showLink={false} showLevel={false} showIcons={true} numIcons={1} />
-      )
+      Component = CardSkeletonComponent
+      componentProps = { showLink: false, showLevel: false, showIcons: true, numIcons: 1 }
       break
     case 'users':
       return userCardRender()
@@ -82,11 +95,11 @@ const SkeletonBase = ({
       {indexName == 'chapters' ? (
         <Skeleton className="mb-2 h-96 w-full max-w-6xl" />
       ) : (
-        <Component />
+        <Component {...componentProps} />
       )}
-      <Component />
-      <Component />
-      <Component />
+      <Component {...componentProps} />
+      <Component {...componentProps} />
+      <Component {...componentProps} />
     </div>
   )
 }
