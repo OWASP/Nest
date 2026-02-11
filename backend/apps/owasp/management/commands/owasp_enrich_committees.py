@@ -49,7 +49,7 @@ class Command(BaseCommand):
         offset = options["offset"]
         for idx, committee in enumerate(active_committees[offset:]):
             prefix = f"{idx + offset + 1} of {active_committees_count - offset}"
-            print(f"{prefix:<10} {committee.owasp_url}")
+            self.stdout.write(f"{prefix:<10} {committee.owasp_url}")
 
             # Generate summary
             if update_summary and (prompt := Prompt.get_owasp_committee_summary()):

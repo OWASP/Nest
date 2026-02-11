@@ -73,7 +73,7 @@ class Command(BaseCommand):
                 prefix = f"{idx + offset + 1} of {gh_repositories_count}"
                 entity_key = gh_repository.name.lower()
                 repository_url = f"https://github.com/OWASP/{entity_key}"
-                print(f"{prefix:<12} {repository_url}")
+                self.stdout.write(f"{prefix:<12} {repository_url}")
 
                 try:
                     owasp_organization, owasp_repository = sync_repository(
@@ -117,7 +117,7 @@ class Command(BaseCommand):
                     local_owasp_repositories_count == remote_owasp_repositories_count
                 )
                 result = "==" if has_same_repositories_count else "!="
-                print(
+                self.stdout.write(
                     "\n"
                     f"OWASP GitHub repositories count {result} synced repositories count: "
                     f"{remote_owasp_repositories_count} {result} {local_owasp_repositories_count}"
