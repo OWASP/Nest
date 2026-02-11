@@ -50,7 +50,7 @@
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.23",
-    "markdown-it": "^14.1.0",
+    "markdown-it": "^14.1.1",
     "markdown-it-task-lists": "^2.1.1",
     "millify": "^6.1.0",
     "next": "^16.1.6",
