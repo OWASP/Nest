@@ -12,6 +12,7 @@ packages = [ { include = "apps" } ]
 dependencies.algoliasearch = "^4.13.2"
 dependencies.algoliasearch-django = "^4.0.0"
 dependencies.django = "^6.0"
+dependencies.cryptography = "^46.0.5"
 dependencies.django-configurations = "^2.5.1"
 dependencies.django-cors-headers = "^4.7.0"
 dependencies.django-ninja = "^1.5.3"
