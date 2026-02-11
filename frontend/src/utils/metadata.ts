@@ -24,6 +24,13 @@ export const METADATA_CONFIG = {
     pageTitle: 'Chapters',
     type: 'website',
   },
+  community: {
+    description:
+      'Connect, collaborate, and contribute to the OWASP community. Explore chapters, members, organizations, and community snapshots.',
+    keywords: ['OWASP community', 'chapters', 'members', 'organizations', 'snapshots'],
+    pageTitle: 'Community',
+    type: 'website',
+  },
   members: {
     description: 'Meet OWASP community members and contributors.',
     keywords: ['OWASP members', 'security professionals', 'contributors'],

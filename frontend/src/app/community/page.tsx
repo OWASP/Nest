@@ -1,0 +1,302 @@
+'use client'
+import { useQuery } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
+import millify from 'millify'
+import Image from 'next/image'
+import Link from 'next/link'
+import React, { useEffect } from 'react'
+import { FaArrowRight, FaMapMarkerAlt, FaUsers } from 'react-icons/fa'
+import { FaBuilding, FaCamera, FaLocationDot, FaPeopleGroup } from 'react-icons/fa6'
+import { ErrorDisplay } from 'app/global-error'
+import { GetCommunityPageDataDocument } from 'types/__generated__/communityQueries.generated'
+import { formatDate } from 'utils/dateFormatter'
+import { getMemberUrl } from 'utils/urlFormatter'
+import AnchorTitle from 'components/AnchorTitle'
+import ChapterCard from 'components/ChapterCard'
+import LoadingSpinner from 'components/LoadingSpinner'
+import MultiSearchBar from 'components/MultiSearch'
+import SecondaryCard from 'components/SecondaryCard'
+import { TruncatedText } from 'components/TruncatedText'
+
+export default function CommunityPage() {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetCommunityPageDataDocument)
+
+  useEffect(() => {
+    if (graphQLRequestError) {
+      addToast({
+        description: 'Unable to complete the requested operation.',
+        title: 'GraphQL Request Failed',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'danger',
+        variant: 'solid',
+      })
+    }
+  }, [graphQLRequestError])
+
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
+
+  if (graphQLRequestError || !graphQLData) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading community data"
+        message="Unable to load community information. Please try again later."
+      />
+    )
+  }
+
+  const data = graphQLData
+
+  const statsOverview = data.statsOverview
+  const statsData = statsOverview
+    ? [
+        { label: 'Active Chapters', value: statsOverview.activeChaptersStats },
+        { label: 'Active Projects', value: statsOverview.activeProjectsStats },
+        { label: 'Contributors', value: statsOverview.contributorsStats },
+        { label: 'Countries', value: statsOverview.countriesStats },
+      ]
+    : []
+
+  return (
+    <div className="mt-6 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+      <div className="mx-auto max-w-6xl">
+        <div className="text-center sm:mb-10">
+          <div className="flex flex-col items-center py-2">
+            <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
+              OWASP Community
+            </h1>
+            <p className="text-muted-foreground max-w-[700px] pt-6 md:text-xl">
+              Connect, collaborate, and contribute to the world&apos;s largest application security
+              community.
+            </p>
+          </div>
+          <div className="mx-auto mt-8 mb-8 flex max-w-2xl justify-center">
+            <MultiSearchBar
+              isLoaded={true}
+              placeholder="Search the OWASP community"
+              indexes={['chapters', 'organizations', 'projects', 'users']}
+            />
+          </div>
+        </div>
+
+        <h2 className="sr-only">Explore Community</h2>
+        {/* Quick Navigation */}
+        <div className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Link
+            href="/chapters"
+            className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800"
+          >
+            <div className="mb-4 inline-flex rounded-lg bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+              <FaLocationDot className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Chapters</h3>
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              Find OWASP chapters in your area and join local meetups
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 group-hover:gap-2 dark:text-blue-400">
+              Explore <FaArrowRight className="h-3 w-3 transition-transform" />
+            </span>
+          </Link>
+
+          <Link
+            href="/members"
+            className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800"
+          >
+            <div className="mb-4 inline-flex rounded-lg bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+              <FaPeopleGroup className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Members</h3>
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              Connect with security professionals and contributors
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 group-hover:gap-2 dark:text-blue-400">
+              Browse <FaArrowRight className="h-3 w-3 transition-transform" />
+            </span>
+          </Link>
+
+          <Link
+            href="/organizations"
+            className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800"
+          >
+            <div className="mb-4 inline-flex rounded-lg bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+              <FaBuilding className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+              Organizations
+            </h3>
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              Discover organizations supporting OWASP initiatives
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 group-hover:gap-2 dark:text-blue-400">
+              View All <FaArrowRight className="h-3 w-3 transition-transform" />
+            </span>
+          </Link>
+
+          <Link
+            href="/community/snapshots"
+            className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl dark:bg-gray-800"
+          >
+            <div className="mb-4 inline-flex rounded-lg bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+              <FaCamera className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Snapshots</h3>
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              View community activity highlights and milestones
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 group-hover:gap-2 dark:text-blue-400">
+              See Updates <FaArrowRight className="h-3 w-3 transition-transform" />
+            </span>
+          </Link>
+        </div>
+
+<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {statsData.map((stat) => (
+            <div key={stat.label}>
+              <SecondaryCard className="text-center">
+                <div className="mb-2 text-3xl font-bold text-blue-400">{millify(stat.value)}+</div>
+                <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+              </SecondaryCard>
+            </div>
+          ))}
+        </div>
+        <SecondaryCard
+          icon={FaMapMarkerAlt}
+          title={
+            <div className="flex items-center gap-2">
+              <AnchorTitle title="New Chapters" />
+            </div>
+          }
+          className="overflow-hidden"
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            {data.recentChapters?.map((chapter) => (
+              <ChapterCard
+                key={chapter.key}
+                chapterKey={chapter.key}
+                name={chapter.name}
+                createdAt={chapter.createdAt}
+                suggestedLocation={chapter.suggestedLocation}
+                leaders={chapter.leaders}
+              />
+            ))}
+          </div>
+        </SecondaryCard>
+
+        <div className="mb-8 grid items-stretch gap-4 md:grid-cols-2">
+          <SecondaryCard
+            icon={FaBuilding}
+            title={
+              <div className="flex items-center gap-2">
+                <AnchorTitle title="New Organizations" />
+              </div>
+            }
+            className="!mb-0 flex h-full flex-col overflow-hidden"
+          >
+            <div className="flex flex-1 flex-col justify-between gap-4">
+              {data.recentOrganizations?.map((org) => (
+                <div
+                  key={org.login}
+                  className="flex flex-1 items-center rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                >
+                  <div className="flex items-center gap-3">
+                    {org.avatarUrl && (
+                      <Image
+                        src={`${org.avatarUrl}${org.avatarUrl.includes('?') ? '&' : '?'}s=80`}
+                        alt={org.name || org.login}
+                        width={40}
+                        height={40}
+                        className="rounded"
+                      />
+                    )}
+                    <Link
+                      href={`/organizations/${org.login}`}
+                      className="font-semibold text-blue-400 hover:underline"
+                    >
+                      <TruncatedText text={org.name || org.login} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SecondaryCard>
+
+          <SecondaryCard
+            icon={FaCamera}
+            title={
+              <div className="flex items-center gap-2">
+                <AnchorTitle title="Snapshots" />
+              </div>
+            }
+            className="!mb-0 flex h-full flex-col overflow-hidden"
+          >
+            <div className="flex flex-1 flex-col justify-between gap-4">
+              {data.snapshots?.map((snapshot) => (
+                <div
+                  key={snapshot.key}
+                  className="flex flex-1 flex-col justify-center rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                >
+                  <Link
+                    href={`/community/snapshots/${snapshot.key}`}
+                    className="font-semibold text-blue-400 hover:underline"
+                  >
+                    <TruncatedText text={snapshot.title} />
+                  </Link>
+                  <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    {formatDate(snapshot.startAt)} - {formatDate(snapshot.endAt)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SecondaryCard>
+        </div>
+
+        <SecondaryCard
+          icon={FaUsers}
+          title={
+            <div className="flex items-center gap-2">
+              <AnchorTitle title="Top Contributors" />
+            </div>
+          }
+        >
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {data.topContributors?.map((contributor) => (
+              <div
+                key={contributor.login}
+                className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+              >
+                <div className="flex w-full items-center gap-2">
+                  {contributor.avatarUrl && (
+                    <Image
+                      alt={contributor.name ? `${contributor.name}'s avatar` : 'Contributor avatar'}
+                      className="rounded-full"
+                      height={24}
+                      src={`${contributor.avatarUrl}${contributor.avatarUrl.includes('?') ? '&' : '?'}s=60`}
+                      title={contributor.name || contributor.login}
+                      width={24}
+                    />
+                  )}
+                  <Link
+                    className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
+                    href={getMemberUrl(contributor.login)}
+                    title={contributor.name || contributor.login}
+                  >
+                    {contributor.name || contributor.login}
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SecondaryCard>
+
+
+      </div>
+    </div>
+  )
+}

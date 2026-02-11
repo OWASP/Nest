@@ -1,0 +1,49 @@
+import * as Types from './graphql';
+
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+export type GetCommunityPageDataQueryVariables = Types.Exact<{ [key: string]: never; }>;
+
+
+export type GetCommunityPageDataQuery = {
+  recentChapters: Array<{
+    __typename: 'ChapterNode',
+    id: string,
+    createdAt: number,
+    key: string,
+    leaders: Array<string>,
+    name: string,
+    suggestedLocation: string | null
+  }>,
+  recentOrganizations: Array<{
+    __typename: 'OrganizationNode',
+    id: string,
+    avatarUrl: string,
+    login: string,
+    name: string | null
+  }>,
+  snapshots: Array<{
+    __typename: 'SnapshotNode',
+    id: string,
+    key: string,
+    title: string,
+    startAt: any,
+    endAt: any
+  }>,
+  topContributors: Array<{
+    __typename: 'RepositoryContributorNode',
+    id: string,
+    avatarUrl: string,
+    login: string,
+    name: string
+  }>,
+  statsOverview: {
+    __typename: 'StatsNode',
+    activeChaptersStats: number,
+    activeProjectsStats: number,
+    contributorsStats: number,
+    countriesStats: number
+  }
+};
+
+
+export const GetCommunityPageDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCommunityPageData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"recentChapters"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"6"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"leaders"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"suggestedLocation"}}]}},{"kind":"Field","name":{"kind":"Name","value":"recentOrganizations"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"5"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"login"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"snapshots"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"5"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"startAt"}},{"kind":"Field","name":{"kind":"Name","value":"endAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"topContributors"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"hasFullName"},"value":{"kind":"BooleanValue","value":true}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"12"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"avatarUrl"}},{"kind":"Field","name":{"kind":"Name","value":"login"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"statsOverview"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"activeChaptersStats"}},{"kind":"Field","name":{"kind":"Name","value":"activeProjectsStats"}},{"kind":"Field","name":{"kind":"Name","value":"contributorsStats"}},{"kind":"Field","name":{"kind":"Name","value":"countriesStats"}}]}}]}}]} as unknown as DocumentNode<GetCommunityPageDataQuery, GetCommunityPageDataQueryVariables>;

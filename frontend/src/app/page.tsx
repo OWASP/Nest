@@ -34,6 +34,7 @@ import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import CalendarButton from 'components/CalendarButton'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ChapterCard from 'components/ChapterCard'
 import ContributorsList from 'components/ContributorsList'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -227,38 +228,14 @@ export default function Home() {
           >
             <div className="flex flex-col gap-4">
               {data?.recentChapters?.map((chapter) => (
-                <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <h3 className="mb-2 text-lg font-semibold">
-                    <Link
-                      href={`/chapters/${chapter.key}`}
-                      className="text-blue-400 hover:underline"
-                    >
-                      <TruncatedText text={chapter.name} />
-                    </Link>
-                  </h3>
-                  <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
-                    <div className="mr-4 flex items-center">
-                      <FaCalendar className="mr-2 h-4 w-4" />
-                      <span>{formatDate(chapter.createdAt)}</span>
-                    </div>
-                    {chapter.suggestedLocation && (
-                      <div className="flex flex-1 items-center overflow-hidden">
-                        <FaMapMarkerAlt className="mr-2 h-4 w-4 shrink-0" />
-                        <TruncatedText text={chapter.suggestedLocation} />
-                      </div>
-                    )}
-                  </div>
-
-                  {chapter.leaders.length > 0 && (
-                    <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      <HiUserGroup className="h-4 w-4 shrink-0" />
-                      <LeadersList
-                        entityKey={`${chapter.key}-leaders`}
-                        leaders={String(chapter.leaders)}
-                      />
-                    </div>
-                  )}
-                </div>
+               <ChapterCard
+                  key={chapter.key}
+                  chapterKey={chapter.key}
+                  name={chapter.name}
+                  createdAt={chapter.createdAt}
+                  suggestedLocation={chapter.suggestedLocation}
+                  leaders={chapter.leaders}
+                />
               ))}
             </div>
           </SecondaryCard>

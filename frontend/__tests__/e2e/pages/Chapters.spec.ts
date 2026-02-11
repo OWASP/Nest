@@ -56,7 +56,7 @@ test.describe('Chapters Page', () => {
     await expect(page).toHaveURL('chapters/chapter_1')
   })
 
-  test('breadcrumb renders correct segments on /chapters', async ({ page }) => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Chapters'])
+  test('breadcrumb renders correct segments on /chapters', async ({ page}) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Community', 'Chapters'])
   })
 })
