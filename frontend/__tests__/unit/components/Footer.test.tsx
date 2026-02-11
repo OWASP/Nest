@@ -294,7 +294,7 @@ describe('Footer', () => {
       }
     })
 
-    test('renders version as commit link in non-production environment', () => {
+    test('renders version as commit link in staging environment', () => {
       envModule.ENVIRONMENT = 'staging'
       envModule.RELEASE_VERSION = '24.2.10-12c25c5'
 
