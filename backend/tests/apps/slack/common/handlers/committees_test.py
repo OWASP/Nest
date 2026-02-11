@@ -180,3 +180,12 @@ class TestCommitteeHandler:
         assert len(action_blocks) > 0
         # Verify the pagination block was actually appended
         assert action_blocks[0] in blocks
+
+    def test_get_blocks_no_results_no_search_query(self, setup_mocks, mock_empty_committee_data):
+        """Test get_blocks with no results and no search query."""
+        setup_mocks["get_committees"].return_value = mock_empty_committee_data
+
+        blocks = get_blocks(search_query="")
+
+        assert len(blocks) == 1
+        assert "No committees found" in blocks[0]["text"]["text"]

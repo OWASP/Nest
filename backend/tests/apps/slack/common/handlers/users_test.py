@@ -181,3 +181,15 @@ class TestGetUsersBlocks:
         # Should not include search query text
         assert "OWASP users:" in blocks[0]["text"]["text"]
         assert "John Doe" in blocks[1]["text"]["text"]
+
+    def test_get_blocks_no_results_no_search_query(self, mocker):
+        """Test get_blocks with no results and no search query."""
+        mocker.patch(
+            "apps.github.index.search.user.get_users",
+            return_value={"hits": [], "nbPages": 0},
+        )
+
+        blocks = get_blocks(search_query="")
+
+        assert len(blocks) == 1
+        assert "No users found" in blocks[0]["text"]["text"]

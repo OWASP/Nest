@@ -418,7 +418,46 @@ class TestRetriever:
             assert "channel" not in result or result.get("channel") is None
             assert "thread_ts" not in result or result.get("thread_ts") is None
             assert "user" not in result or result.get("user") is None
+
+    def test_get_additional_context_message_with_falsy_conversation(self):
+        """Test getting additional context for message when conversation evaluates to False."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI"),
+        ):
+            retriever = Retriever()
+
+            content_object = MagicMock()
+            content_object.__class__.__name__ = "Message"
+            # Set conversation to exist but be falsy (e.g., empty string, 0, False)
+            content_object.conversation = 0
+            content_object.parent_message = False
+            content_object.author = ""
+            content_object.ts = "1234567891.123456"
+
+            result = retriever.get_additional_context(content_object)
+
+            # Should only have ts since conversation/parent_message/author are falsy
             assert result["ts"] == "1234567891.123456"
+            assert "channel" not in result or result.get("channel") is None
+            assert "thread_ts" not in result or result.get("thread_ts") is None
+            assert "user" not in result or result.get("user") is None
+            assert result["ts"] == "1234567891.123456"
+
+    def test_get_additional_context_unknown_content_type(self):
+        """Test getting additional context for an unknown content type returns empty dict."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI"),
+        ):
+            retriever = Retriever()
+
+            content_object = MagicMock()
+            content_object.__class__.__name__ = "User"
+
+            result = retriever.get_additional_context(content_object)
+
+            assert result == {}
 
     def test_extract_content_types_from_query_single_type(self):
         """Test extracting single content type from query."""

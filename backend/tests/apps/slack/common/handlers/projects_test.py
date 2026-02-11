@@ -231,3 +231,12 @@ class TestProjectHandler:
         # Should not include search query text  
         assert "OWASP projects:" in blocks[0]["text"]["text"]
         assert "Test Project" in blocks[1]["text"]["text"]
+
+    def test_get_blocks_no_results_no_search_query(self, setup_mocks, mock_empty_project_data):
+        """Test get_blocks with no results and no search query."""
+        setup_mocks["get_projects"].return_value = mock_empty_project_data
+
+        blocks = get_blocks(search_query="")
+
+        assert len(blocks) == 1
+        assert "No projects found" in blocks[0]["text"]["text"]

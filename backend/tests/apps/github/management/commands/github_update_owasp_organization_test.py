@@ -235,7 +235,9 @@ def test_handle_full_sync_with_errors_and_repo_linking(
     ):
         mock_project = mock.Mock()
         mock_project.owasp_repository = mock.Mock()
-        mock_project_objects.all.return_value = [mock_project]
+        mock_project_no_repo = mock.Mock()
+        mock_project_no_repo.owasp_repository = None
+        mock_project_objects.all.return_value = [mock_project, mock_project_no_repo]
         mock_repository_objects.filter.return_value.count.return_value = 2
         command.handle(repository=None, offset=0)
         assert mock_sync_repository.call_count == 3
@@ -247,3 +249,4 @@ def test_handle_full_sync_with_errors_and_repo_linking(
         )
         mock_project_objects.all.assert_called_once()
         mock_project.repositories.add.assert_called_once_with(mock_project.owasp_repository)
+        mock_project_no_repo.repositories.add.assert_not_called()

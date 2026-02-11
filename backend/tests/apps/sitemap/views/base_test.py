@@ -52,3 +52,7 @@ class TestBaseSitemap:
         obj = MagicMock()
 
         assert math.isclose(sitemap.priority(obj), 0.7)
+
+    def test_items(self, sitemap):
+        """Test items method returns empty list."""
+        assert sitemap.items() == []

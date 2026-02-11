@@ -100,3 +100,45 @@ class TestApiKeyModel:
         """Test the string representation of a revoked key."""
         key = ApiKey(name="My Revoked Key", is_revoked=True)
         assert str(key) == "My Revoked Key (revoked)"
+
+    @patch("apps.api.models.api_key.transaction")
+    @patch("apps.api.models.api_key.ApiKey.objects.create")
+    @patch(
+        "apps.api.models.api_key.ApiKey.generate_hash_key", return_value="hashed_key"
+    )
+    @patch(
+        "apps.api.models.api_key.ApiKey.generate_raw_key", return_value="raw_key_123"
+    )
+    def test_create_success(
+        self, mock_raw_key, mock_hash_key, mock_create, mock_transaction, mock_user
+    ):
+        """Test successful API key creation."""
+        mock_transaction.atomic = lambda: MagicMock(
+            __enter__=MagicMock(return_value=None),
+            __exit__=MagicMock(return_value=False),
+        )
+        mock_user.active_api_keys.select_for_update.return_value.count.return_value = 0
+        mock_instance = MagicMock(spec=ApiKey)
+        mock_create.return_value = mock_instance
+        expires_at = timezone.now() + timedelta(days=30)
+
+        result = ApiKey.create.__wrapped__(ApiKey, mock_user, "Test Key", expires_at)
+
+        assert result == (mock_instance, "raw_key_123")
+        mock_create.assert_called_once_with(
+            expires_at=expires_at,
+            hash="hashed_key",
+            name="Test Key",
+            user=mock_user,
+        )
+
+    def test_create_max_keys_exceeded(self, mock_user):
+        """Test API key creation fails when max active keys exceeded."""
+        mock_user.active_api_keys.select_for_update.return_value.count.return_value = (
+            100
+        )
+        expires_at = timezone.now() + timedelta(days=30)
+
+        result = ApiKey.create.__wrapped__(ApiKey, mock_user, "Test Key", expires_at)
+
+        assert result is None

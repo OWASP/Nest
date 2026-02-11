@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from apps.common.search.query_parser import QueryParser, QueryParserError
@@ -350,3 +352,41 @@ class TestQueryParser:
         result = self.parser.parse("created:invalid_date")
         # Should return empty list since the invalid date is dropped in non-strict mode
         assert result == []
+
+    def test_split_tokens_with_parse_exception(self):
+        """Test _split_tokens handles ParseException correctly."""
+        # Mock the parse_string method to raise ParseException
+        from pyparsing import ParseException
+        
+        with patch("apps.common.search.query_parser.ZeroOrMore") as mock_zero_or_more:
+            mock_parser = MagicMock()
+            mock_parser.parse_string.side_effect = ParseException("Mock parse error")
+            mock_zero_or_more.return_value = mock_parser
+            
+            with pytest.raises(QueryParserError) as e:
+                self.strict_parser.parse("any query")
+
+            # The error should be caught and re-raised as QueryParserError
+            assert e.value.error_type == "TOKENIZATION_ERROR"
+            assert "Failed to tokenize query" in e.value.message
+
+    def test_parse_skips_empty_tokens(self):
+        """Test that empty tokens are skipped during parsing (line 180)."""
+        with patch.object(QueryParser, "_split_tokens", return_value=["", '""', "author:test"]):
+            result = self.parser.parse("dummy")
+            assert len(result) == 1
+            assert result[0]["field"] == "author"
+
+    def test_to_dict_unmatched_field_type(self):
+        """Test to_dict when field type doesn't match any case (branch 231->239)."""
+        from apps.common.search.query_parser import FieldType
+
+        # Create a mock FieldType that doesn't match any case
+        mock_field_type = MagicMock(spec=FieldType)
+        mock_field_type.value = "unknown"
+
+        result = self.parser.to_dict("test_field", mock_field_type, "some_value")
+        assert result is not None
+        assert result["field"] == "test_field"
+        assert result["type"] == "unknown"
+        assert result["value"] == ""

@@ -229,3 +229,80 @@ def test_add_arguments(command):
         default=0,
         required=False,
     )
+
+
+@mock.patch("apps.github.management.commands.github_add_related_repositories.logger")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.get_github_client")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.sync_repository")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.get_repository_path")
+@mock.patch("apps.owasp.models.project.Project.active_projects")
+def test_handle_unknown_object_exception_non_404(
+    mock_active_projects,
+    mock_get_repository_path,
+    mock_sync_repository,
+    mock_get_github_client,
+    mock_logger,
+    command,
+    mock_project,
+):
+    """Test handling of a non-404 UnknownObjectException falls through (branch 58->64)."""
+    mock_projects_list = [mock_project]
+    mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+    mock_active_projects.count.return_value = len(mock_projects_list)
+    mock_active_projects.__getitem__.side_effect = lambda idx: mock_projects_list[idx]
+    mock_active_projects.order_by.return_value = mock_active_projects
+
+    mock_gh_client = mock.Mock()
+    mock_get_github_client.return_value = mock_gh_client
+
+    def raise_403(*a, **k):  # noqa: ARG001
+        raise UnknownObjectException(
+            status=403,
+            data={"message": "Forbidden", "status": "403"},
+            headers={},
+        )
+
+    mock_gh_client.get_repo.side_effect = raise_403
+    mock_get_repository_path.return_value = "OWASP/test-repo"
+
+    with mock.patch.object(Project, "bulk_save"):
+        command.handle(offset=0)
+
+    # Non-404 exception falls through, gh_repository is unbound, caught by generic handler
+    mock_logger.exception.assert_called_once()
+    mock_sync_repository.assert_not_called()
+    mock_project.invalid_urls.add.assert_not_called()
+
+
+@mock.patch("apps.github.management.commands.github_add_related_repositories.get_github_client")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.sync_repository")
+@mock.patch("apps.github.management.commands.github_add_related_repositories.get_repository_path")
+@mock.patch("apps.owasp.models.project.Project.active_projects")
+def test_handle_sync_repository_returns_none_organization(
+    mock_active_projects,
+    mock_get_repository_path,
+    mock_sync_repository,
+    mock_get_github_client,
+    command,
+    mock_project,
+):
+    """Test sync_repository returning None organization (branch 66->69)."""
+    mock_projects_list = [mock_project]
+    mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+    mock_active_projects.count.return_value = len(mock_projects_list)
+    mock_active_projects.__getitem__.side_effect = lambda idx: mock_projects_list[idx]
+    mock_active_projects.order_by.return_value = mock_active_projects
+
+    mock_gh_client = mock.Mock()
+    mock_get_github_client.return_value = mock_gh_client
+    mock_gh_repo = mock.Mock()
+    mock_gh_client.get_repo.return_value = mock_gh_repo
+
+    mock_repository = mock.Mock()
+    mock_sync_repository.return_value = (None, mock_repository)
+    mock_get_repository_path.return_value = "OWASP/test-repo"
+
+    with mock.patch.object(Project, "bulk_save"):
+        command.handle(offset=0)
+
+    mock_project.repositories.add.assert_called_once_with(mock_repository)

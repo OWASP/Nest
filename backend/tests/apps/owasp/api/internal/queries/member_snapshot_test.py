@@ -113,3 +113,48 @@ class TestMemberSnapshotQuery:
             result = query.member_snapshots(user_login="nonexistent")
 
             assert result == []
+
+    def test_member_snapshot_without_start_year(self):
+        """Test member_snapshot without start_year skips year filter (branch 41->44)."""
+        query = MemberSnapshotQuery()
+
+        mock_user = Mock()
+        mock_snapshot = Mock()
+
+        with (
+            patch("apps.owasp.api.internal.queries.member_snapshot.User") as mock_user_cls,
+            patch(
+                "apps.owasp.api.internal.queries.member_snapshot.MemberSnapshot"
+            ) as mock_snapshot_cls,
+        ):
+            mock_user_cls.objects.get.return_value = mock_user
+
+            mock_queryset = Mock()
+            mock_queryset.select_related.return_value = mock_queryset
+            mock_queryset.prefetch_related.return_value = mock_queryset
+            mock_queryset.filter.return_value = mock_queryset
+            mock_queryset.order_by.return_value = mock_queryset
+            mock_queryset.first.return_value = mock_snapshot
+
+            mock_snapshot_cls.objects = mock_queryset
+
+            result = query.member_snapshot(user_login="testuser")
+
+            # filter called once for github_user, NOT for start_at__year
+            mock_queryset.filter.assert_called_once_with(github_user=mock_user)
+            assert result == mock_snapshot
+
+    def test_member_snapshots_with_invalid_limit(self):
+        """Test member_snapshots with invalid limit returns empty list (line 72)."""
+        query = MemberSnapshotQuery()
+
+        with patch(
+            "apps.owasp.api.internal.queries.member_snapshot.MemberSnapshot"
+        ) as mock_snapshot_cls:
+            mock_queryset = Mock()
+            mock_queryset.select_related.return_value = mock_queryset
+            mock_snapshot_cls.objects.all.return_value = mock_queryset
+
+            result = query.member_snapshots(limit=0)
+
+            assert result == []

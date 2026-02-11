@@ -230,6 +230,22 @@ class TestGitHubAppAuth:
             with pytest.raises(ValueError, match="GitHub App configuration is incomplete"):
                 GitHubAppAuth()
 
+    def test_get_github_client_raises_bad_credentials_when_no_valid_auth(self):
+        """Test GitHub client raises BadCredentialsException when neither app nor PAT auth work."""
+        with (
+            mock.patch("apps.github.auth.settings") as mock_settings,
+            mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-pat"}),
+        ):
+            mock_settings.GITHUB_APP_ID = None
+            mock_settings.GITHUB_APP_INSTALLATION_ID = None
+            
+            auth = GitHubAppAuth()
+            # Set pat_token to None to simulate no valid credentials
+            auth.pat_token = None
+            
+            with pytest.raises(BadCredentialsException, match="Invalid GitHub credentials"):
+                auth.get_github_client()
+
 
 class TestGetGitHubClient:
     """Test the get_github_client function."""

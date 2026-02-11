@@ -473,6 +473,53 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         mock_open_ai.set_input.assert_not_called()
         assert model.summary == "existing"
 
+    def test_generate_summary_with_valid_prompt(self):
+        """Test generate_summary with a valid prompt generates summary."""
+        model = EntityModel()
+        model.summary = ""
+
+        repository = Repository()
+        repository.name = "www-project-example"
+        repository.key = "www-project-example"
+        repository.default_branch = "main"
+        model.owasp_repository = repository
+
+        mock_open_ai = MagicMock()
+        mock_open_ai.set_input.return_value = mock_open_ai
+        mock_open_ai.set_max_tokens.return_value = mock_open_ai
+        mock_open_ai.set_prompt.return_value = mock_open_ai
+        mock_open_ai.complete.return_value = "Generated summary"
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value="content"):
+            model.generate_summary(prompt="Generate a summary", open_ai=mock_open_ai)
+
+        assert model.summary == "Generated summary"
+        mock_open_ai.set_input.assert_called_once_with("content")
+        mock_open_ai.set_max_tokens.assert_called_once_with(500)
+        mock_open_ai.set_prompt.assert_called_once_with("Generate a summary")
+
+    def test_generate_summary_with_valid_prompt_returns_none(self):
+        """Test generate_summary sets empty string when OpenAI returns None."""
+        model = EntityModel()
+        model.summary = "old"
+
+        repository = Repository()
+        repository.name = "www-project-example"
+        repository.key = "www-project-example"
+        repository.default_branch = "main"
+        model.owasp_repository = repository
+
+        mock_open_ai = MagicMock()
+        mock_open_ai.set_input.return_value = mock_open_ai
+        mock_open_ai.set_max_tokens.return_value = mock_open_ai
+        mock_open_ai.set_prompt.return_value = mock_open_ai
+        mock_open_ai.complete.return_value = None
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value="content"):
+            model.generate_summary(prompt="Generate a summary", open_ai=mock_open_ai)
+
+        assert model.summary == ""
+
     def test_from_github_sets_values(self):
         """Test from_github properly sets field values."""
         model = EntityModel()
@@ -635,3 +682,48 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
             urls = model.get_urls()
 
         assert urls == []
+
+    def test_get_related_url_github_repository_url(self):
+        """Test get_related_url normalizes GitHub repository URLs."""
+        model = EntityModel()
+        result = model.get_related_url("https://github.com/OWASP/Project-Name")
+        assert result == "https://github.com/owasp/project-name"
+
+    def test_get_related_url_github_user_url(self):
+        """Test get_related_url normalizes GitHub user URLs."""
+        model = EntityModel()
+        result = model.get_related_url("https://github.com/SomeUser")
+        assert result == "https://github.com/someuser"
+
+    def test_get_related_url_regular_url(self):
+        """Test get_related_url returns regular URLs unchanged."""
+        model = EntityModel()
+        result = model.get_related_url("https://example.com/page")
+        assert result == "https://example.com/page"
+
+    def test_generate_summary_with_default_open_ai(self):
+        """Test generate_summary creates OpenAi instance when not provided."""
+        model = EntityModel()
+        model.summary = ""
+
+        repository = Repository()
+        repository.name = "www-project-example"
+        repository.key = "www-project-example"
+        repository.default_branch = "main"
+        model.owasp_repository = repository
+
+        with (
+            patch("apps.owasp.models.common.get_repository_file_content", return_value="content"),
+            patch("apps.owasp.models.common.OpenAi") as mock_openai_cls,
+        ):
+            mock_open_ai = MagicMock()
+            mock_openai_cls.return_value = mock_open_ai
+            mock_open_ai.set_input.return_value = mock_open_ai
+            mock_open_ai.set_max_tokens.return_value = mock_open_ai
+            mock_open_ai.set_prompt.return_value = mock_open_ai
+            mock_open_ai.complete.return_value = "AI summary"
+
+            model.generate_summary(prompt="Generate summary")
+
+        assert model.summary == "AI summary"
+        mock_openai_cls.assert_called_once()

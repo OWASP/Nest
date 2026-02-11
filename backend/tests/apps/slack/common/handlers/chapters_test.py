@@ -149,3 +149,12 @@ class TestChapterHandler:
         # Should not include search query text
         assert "OWASP chapters:" in blocks[0]["text"]["text"]
         assert "Test Chapter" in blocks[1]["text"]["text"]
+
+    def test_get_blocks_no_results_no_search_query(self, setup_mocks, mock_empty_chapter_data):
+        """Test get_blocks with no results and no search query."""
+        setup_mocks["get_chapters"].return_value = mock_empty_chapter_data
+
+        blocks = get_blocks(search_query="")
+
+        assert len(blocks) == 1
+        assert "No chapters found" in blocks[0]["text"]["text"]
