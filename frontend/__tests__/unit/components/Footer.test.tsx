@@ -299,8 +299,8 @@ describe('Footer', () => {
       envModule.RELEASE_VERSION = '24.2.10-12c25c5'
 
       const { container } = render(<Footer />)
-
       const versionLink = container.querySelector('a[href*="commit"]')
+
       expect(versionLink).toBeInTheDocument()
       expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/12c25c5')
       expect(versionLink).toHaveAttribute('target', '_blank')
@@ -308,18 +308,20 @@ describe('Footer', () => {
       expect(versionLink).toHaveTextContent('v24.2.10-12c25c5')
     })
 
-    test('renders version as release tag link when RELEASE_VERSION has no dash in non-production', () => {
-      envModule.ENVIRONMENT = 'development'
+    test('renders version as release tag link in production environment', () => {
+      envModule.ENVIRONMENT = 'production'
       envModule.RELEASE_VERSION = '1.2.3'
 
       const { container } = render(<Footer />)
-
       const versionLink = container.querySelector('a[href*="releases"]')
+
       expect(versionLink).toBeInTheDocument()
       expect(versionLink).toHaveAttribute(
         'href',
         'https://github.com/OWASP/Nest/releases/tag/1.2.3'
       )
+      expect(versionLink).toHaveAttribute('target', '_blank')
+      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
       expect(versionLink).toHaveTextContent('v1.2.3')
     })
   })
