@@ -66,3 +66,115 @@ class TestGetUsersBlocks:
             mock_get_pagination.assert_called_once_with("users", 1, 2)
         else:
             mock_get_pagination.assert_not_called()
+
+    def test_get_blocks_without_metadata(self, mocker):
+        """Test users without metadata fields."""
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "Jane Doe",
+                    "idx_login": "janedoe",
+                    "idx_url": "https://github.com/janedoe",
+                    "idx_bio": "",
+                    "idx_location": "",
+                    "idx_company": "",
+                    "idx_followers_count": 0,
+                    "idx_following_count": 0,
+                    "idx_public_repositories_count": 0,
+                }
+            ],
+            "nbPages": 1,
+        }
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_data)
+        presentation = EntityPresentation(include_metadata=False)
+
+        blocks = get_blocks(presentation=presentation)
+
+        user_block_text = blocks[1]["text"]["text"]
+        # Should not include metadata when include_metadata is False
+        assert "Company:" not in user_block_text
+        assert "Location:" not in user_block_text
+        assert "Followers:" not in user_block_text
+
+    def test_get_blocks_with_empty_metadata_fields(self, mocker):
+        """Test users with empty metadata fields."""
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "User NoMeta",
+                    "idx_login": "user_nometa",
+                    "idx_url": "https://github.com/user_nometa",
+                    "idx_bio": "",
+                    "idx_location": "",
+                    "idx_company": "",
+                    "idx_followers_count": 0,
+                    "idx_following_count": 0,
+                    "idx_public_repositories_count": 0,
+                }
+            ],
+            "nbPages": 1,
+        }
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_data)
+        presentation = EntityPresentation(include_metadata=True)
+
+        blocks = get_blocks(presentation=presentation)
+
+        user_block_text = blocks[1]["text"]["text"]
+        # Should not include empty fields in metadata
+        assert "Company:" not in user_block_text
+        assert "Location:" not in user_block_text
+        assert "Followers:" not in user_block_text
+
+    def test_get_blocks_with_no_name_uses_login(self, mocker):
+        """Test users with no name field uses login instead."""
+        mock_data = {
+            "hits": [
+                {
+                    "idx_login": "testuser",
+                    "idx_url": "https://github.com/testuser",
+                    "idx_bio": "Test bio",
+                    "idx_location": "Test City",
+                    "idx_company": "Test Corp",
+                    "idx_followers_count": 50,
+                    "idx_following_count": 25,
+                    "idx_public_repositories_count": 5,
+                }
+            ],
+            "nbPages": 1,
+        }
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_data)
+
+        blocks = get_blocks()
+
+        user_block_text = blocks[1]["text"]["text"]
+        assert "testuser" in user_block_text
+
+    def test_get_blocks_with_include_feedback(self, mocker, mock_users_data):
+        """Test that feedback block is included when include_feedback is True."""
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_users_data)
+        presentation = EntityPresentation(include_feedback=True)
+
+        blocks = get_blocks(presentation=presentation)
+
+        # Should have feedback message
+        assert any("Extended search over OWASP community users" in str(block) for block in blocks)
+
+    def test_get_blocks_with_pagination_on_page_2(self, mocker, mock_users_data):
+        """Test that pagination buttons are added on page 2."""
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_users_data)
+        presentation = EntityPresentation(include_pagination=True)
+
+        blocks = get_blocks(page=2, presentation=presentation)
+
+        # Should have actions block with pagination buttons on page 2
+        assert any(block.get("type") == "actions" for block in blocks)
+
+    def test_get_blocks_no_search_query(self, mocker, mock_users_data):
+        """Test get_blocks without search query."""
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_users_data)
+
+        blocks = get_blocks(search_query="")
+
+        # Should not include search query text
+        assert "OWASP users:" in blocks[0]["text"]["text"]
+        assert "John Doe" in blocks[1]["text"]["text"]

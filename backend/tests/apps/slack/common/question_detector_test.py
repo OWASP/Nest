@@ -433,3 +433,42 @@ class TestQuestionDetector:
         """Test formatting of None context chunks."""
         formatted = detector.format_context_chunks(None)
         assert formatted == "No context provided"
+
+    def test_format_context_chunks_without_additional_context(self, detector):
+        """Test formatting of context chunks without additional_context."""
+        chunks = [
+            {
+                "source_name": "Test Source",
+                "text": "Some content here",
+            }
+        ]
+        formatted = detector.format_context_chunks(chunks)
+
+        assert "Source Name: Test Source" in formatted
+        assert "Content: Some content here" in formatted
+        assert "Additional Context:" not in formatted
+
+    def test_initialization_without_api_key(self, monkeypatch):
+        """Test QuestionDetector initialization without API key."""
+        monkeypatch.delenv("DJANGO_OPEN_AI_SECRET_KEY", raising=False)
+
+        with pytest.raises(
+            ValueError, match="DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
+        ):
+            QuestionDetector()
+
+    def test_is_owasp_question_with_openai_none_logs_warning(
+        self, detector, sample_context_chunks, monkeypatch
+    ):
+        """Test that None result from OpenAI logs a warning."""
+        # Mock OpenAI to return None
+        mock_openai_method = MagicMock(return_value=None)
+        monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
+
+        # Mock logger to capture warning
+        with patch("apps.slack.common.question_detector.logger") as mock_logger:
+            result = detector.is_owasp_question("What is OWASP?")
+
+            # Should log warning when OpenAI detection returns None
+            mock_logger.warning.assert_called_with("OpenAI detection failed.")
+            assert result is False

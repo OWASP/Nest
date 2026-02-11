@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 
+from apps.github.models.pull_request import PullRequest
 from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
 
 

@@ -147,3 +147,43 @@ class TestCommitteeHandler:
 
         # First item should be numbered 11 (offset + 1)
         assert "11. " in blocks[1]["text"]["text"]
+
+    def test_get_blocks_no_search_query(self, setup_mocks, mock_committee_data):
+        """Test get_blocks without search query."""
+        setup_mocks["get_committees"].return_value = mock_committee_data
+
+        blocks = get_blocks(search_query="")
+
+        # Should not include search query text
+        assert "OWASP committees:" in blocks[0]["text"]["text"]
+        assert "Test Committee" in blocks[1]["text"]["text"]
+
+    def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_committee_data):
+        """Test that no pagination buttons are added when include_pagination is False."""
+        setup_mocks["get_committees"].return_value = mock_committee_data
+        presentation = EntityPresentation(include_pagination=False)
+
+        blocks = get_blocks(page=1, presentation=presentation)
+
+        # Should not have actions block
+        assert not any(block.get("type") == "actions" for block in blocks)
+
+    def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_committee_data):
+        """Test that pagination buttons are added on page 2."""
+        setup_mocks["get_committees"].return_value = mock_committee_data
+        presentation = EntityPresentation(include_pagination=True)
+
+        blocks = get_blocks(page=2, presentation=presentation)
+
+        # Should have actions block with pagination buttons on page 2
+        assert any(block.get("type") == "actions" for block in blocks)
+
+    def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_committee_data):
+        """Test that no pagination buttons are added when include_pagination is False."""
+        setup_mocks["get_committees"].return_value = mock_committee_data
+        presentation = EntityPresentation(include_pagination=False)
+
+        blocks = get_blocks(page=1, presentation=presentation)
+
+        # Should not have actions block
+        assert not any(block.get("type") == "actions" for block in blocks)
