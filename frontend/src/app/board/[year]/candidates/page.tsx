@@ -24,6 +24,12 @@ import LoadingSpinner from 'components/LoadingSpinner'
 
 dayjs.extend(relativeTime)
 
+const sortByName = <T extends { name: string }>(items: T[]): T[] =>
+  [...items].sort((a, b) => a.name.localeCompare(b.name))
+
+const sortByCount = (entries: Array<[string, number]>): Array<[string, number]> =>
+  [...entries].sort(([, a], [, b]) => b - a)
+
 type Candidate = {
   id: string
   memberName: string
@@ -95,20 +101,6 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
   const [ledChapters, setLedChapters] = useState<Chapter[]>([])
   const [ledProjects, setLedProjects] = useState<Project[]>([])
 
-  const sortByName = <T extends { name: string }>(items: T[]): T[] => {
-    return [...items].sort((a, b) => a.name.localeCompare(b.name))
-  }
-
-  const sortByContributionCount = (entries: Array<[string, number]>): Array<[string, number]> => {
-    return [...entries].sort(([, a], [, b]) => b - a)
-  }
-
-  const sortChannelsByMessageCount = (
-    entries: Array<[string, number]>
-  ): Array<[string, number]> => {
-    return [...entries].sort(([, a], [, b]) => b - a)
-  }
-
   // Render a single channel link item
   const renderChannelLink = (channelName: string, messageCount: string | number) => (
     <a
@@ -165,9 +157,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
       )
     }
 
-    const sortedChannels = sortChannelsByMessageCount(
-      Object.entries(snapshot.channelCommunications)
-    )
+    const sortedChannels = sortByCount(Object.entries(snapshot.channelCommunications))
 
     if (sortedChannels.length === 0) return null
 
@@ -557,9 +547,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
           {snapshot.repositoryContributions &&
             Object.keys(snapshot.repositoryContributions).length > 0 &&
             (() => {
-              const sortedRepos = sortByContributionCount(
-                Object.entries(snapshot.repositoryContributions)
-              )
+              const sortedRepos = sortByCount(Object.entries(snapshot.repositoryContributions))
               const topRepo = sortedRepos[0]
               const [topRepoName, topRepoCount] = topRepo
 
