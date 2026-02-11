@@ -276,20 +276,31 @@ describe('Footer', () => {
   })
 
   describe('Version Link Behavior', () => {
+    let originalEnvironment: string
+    let originalReleaseVersion: string
+    let envModule: typeof import('utils/env.client')
+
     beforeEach(() => {
       jest.clearAllMocks()
+      envModule = require('utils/env.client')
+      originalEnvironment = envModule.ENVIRONMENT
+      originalReleaseVersion = envModule.RELEASE_VERSION
+    })
+
+    afterEach(() => {
+      // Restore original mock values to prevent test pollution
+      if (envModule) {
+        envModule.ENVIRONMENT = originalEnvironment
+        envModule.RELEASE_VERSION = originalReleaseVersion
+      }
     })
 
     test('renders version as commit link in non-production environment', () => {
-      const { ENVIRONMENT, RELEASE_VERSION } = jest.requireMock('utils/env.client')
-      const envModule = require('utils/env.client')
       envModule.ENVIRONMENT = 'staging'
       envModule.RELEASE_VERSION = '24.2.10-12c25c5'
 
-      const { render: localRender } = require('@testing-library/react')
       const FooterComponent = require('components/Footer').default
-
-      const { container } = localRender(<FooterComponent />)
+      const { container } = render(<FooterComponent />)
 
       const versionLink = container.querySelector('a[href*="commit"]')
       expect(versionLink).toBeInTheDocument()
@@ -297,32 +308,23 @@ describe('Footer', () => {
       expect(versionLink).toHaveAttribute('target', '_blank')
       expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
       expect(versionLink).toHaveTextContent('v24.2.10-12c25c5')
-
-      // Restore original mocks
-      envModule.ENVIRONMENT = ENVIRONMENT
-      envModule.RELEASE_VERSION = RELEASE_VERSION
     })
 
-    test('renders version as commit link when RELEASE_VERSION has no dash in non-production', () => {
-      const { ENVIRONMENT, RELEASE_VERSION } = jest.requireMock('utils/env.client')
-      const envModule = require('utils/env.client')
+    test('renders version as release tag link when RELEASE_VERSION has no dash in non-production', () => {
       envModule.ENVIRONMENT = 'development'
       envModule.RELEASE_VERSION = '1.2.3'
 
-      const { render: localRender } = require('@testing-library/react')
       const FooterComponent = require('components/Footer').default
+      const { container } = render(<FooterComponent />)
 
-      const { container } = localRender(<FooterComponent />)
-
-      const versionLink = container.querySelector('a[href*="commit"]')
+      const versionLink = container.querySelector('a[href*="releases"]')
       expect(versionLink).toBeInTheDocument()
-      // When no dash exists, .split('-').pop() returns the full version
-      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/1.2.3')
+      // When no dash exists, falls back to release tag URL
+      expect(versionLink).toHaveAttribute(
+        'href',
+        'https://github.com/OWASP/Nest/releases/tag/1.2.3'
+      )
       expect(versionLink).toHaveTextContent('v1.2.3')
-
-      // Restore original mocks
-      envModule.ENVIRONMENT = ENVIRONMENT
-      envModule.RELEASE_VERSION = RELEASE_VERSION
     })
   })
 

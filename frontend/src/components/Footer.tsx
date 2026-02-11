@@ -96,11 +96,9 @@ export default function Footer() {
                 <Link
                   className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                   href={
-                    ENVIRONMENT === 'production'
+                    ENVIRONMENT === 'production' || !RELEASE_VERSION.includes('-')
                       ? `https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`
-                      : `https://github.com/OWASP/Nest/commit/${
-                          RELEASE_VERSION.split('-').pop() ?? RELEASE_VERSION
-                        }`
+                      : `https://github.com/OWASP/Nest/commit/${RELEASE_VERSION.split('-').pop()}`
                   }
                   rel="noopener noreferrer"
                   target="_blank"
