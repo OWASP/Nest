@@ -2,13 +2,12 @@
 
 from unittest.mock import Mock, patch
 
+from apps.github.models.user import User
 from apps.owasp.api.internal.queries.member_snapshot import MemberSnapshotQuery
 
 
 class TestMemberSnapshotQuery:
     def test_member_snapshot_user_not_found(self):
-        from apps.github.models.user import User
-
         query = MemberSnapshotQuery()
 
         with patch("apps.owasp.api.internal.queries.member_snapshot.User.objects.get") as mock_get:
@@ -103,8 +102,6 @@ class TestMemberSnapshotQuery:
             assert result == mock_snapshots
 
     def test_member_snapshots_user_not_found_returns_empty(self):
-        from apps.github.models.user import User
-
         query = MemberSnapshotQuery()
 
         with patch("apps.owasp.api.internal.queries.member_snapshot.User.objects.get") as mock_get:

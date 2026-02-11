@@ -2,7 +2,7 @@
 
 import logging
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -87,8 +87,6 @@ class Command(BaseCommand):
             dict: Mapping of date strings (YYYY-MM-DD) to contribution counts.
 
         """
-        from datetime import timedelta
-
         # Initialize all dates in range with 0
         heatmap_data: dict[str, int] = {}
         current_date = start_at.date()
@@ -250,8 +248,6 @@ class Command(BaseCommand):
             dict: Mapping of date strings (YYYY-MM-DD) to message counts (all dates initialized).
 
         """
-        from datetime import timedelta
-
         # Initialize all dates in range with 0
         heatmap_data: dict[str, int] = {}
         current_date = start_at.date()
