@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block footer %}
+<footer class="md-footer">
+  <div class="md-footer__inner">
+    <div class="md-footer__content">
+      <div class="md-footer__left">
+        <p>&copy; {{ config.copyright }} - OWASP Nest</p>
+        <p>
+          Release version: 
+          {% if config.repo_url %}
+            <a href="{{ config.repo_url }}/releases" target="_blank" rel="noopener">
+              <span id="release-version">{{ config.extra.version }}</span>
+            </a>
+          {% else %}
+            <span id="release-version">{{ config.extra.version }}</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="md-footer__right">
+        <p>
+          <a href="https://github.com/OWASP/Nest" target="_blank" rel="noopener">
+            View on GitHub
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  #release-version {
+    color: var(--md-code-fg-color);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+  }
+  
+  #release-version:hover {
+    color: var(--md-accent-fg-color);
+    text-decoration: underline;
+  }
+  
+  .md-footer {
+    background: var(--md-default-bg-color);
+    border-top: 1px solid var(--md-default-fg-color);
+  }
+  
+  .md-footer__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .md-footer__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .md-footer__left, .md-footer__right {
+    flex: 1;
+  }
+  
+  .md-footer__left p, .md-footer__right p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--md-default-fg-color);
+  }
+  
+  .md-footer__right a {
+    color: var(--md-accent-fg-color);
+    text-decoration: none;
+  }
+  
+  .md-footer__right a:hover {
+    text-decoration: underline;
+  }
+  
+  @media (max-width: 768px) {
+    .md-footer__inner {
+      flex-direction: column;
+      text-align: center;
+      gap: 10px;
+    }
+    
+    .md-footer__content {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+</style>
+{% endblock %}
