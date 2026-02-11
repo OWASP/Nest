@@ -221,3 +221,118 @@ class TestQueryParser:
         query = "Author:OWASP"
         cs_result = self.case_sensitive_parser.parse(query)
         assert cs_result[0]["value"] == "OWASP"
+
+    def test_query_parser_error_str_with_query_and_field(self):
+        """Test QueryParserError __str__ method with query and field set."""
+        error = QueryParserError(
+            message="Test error",
+            error_type="TEST_ERROR",
+            field="test_field",
+            query="test query",
+        )
+
+        error_str = str(error)
+        assert "[TEST_ERROR] Test error" in error_str
+        assert "Query: 'test query'" in error_str
+        assert "Field: 'test_field'" in error_str
+
+    def test_query_parser_error_to_dict(self):
+        """Test QueryParserError to_dict method."""
+        error = QueryParserError(
+            message="Test error",
+            error_type="TEST_ERROR",
+            field="test_field",
+            query="test query",
+        )
+
+        error_dict = error.to_dict()
+        assert error_dict["error_type"] == "TEST_ERROR"
+        assert error_dict["error"] is True
+        assert error_dict["field"] == "test_field"
+        assert error_dict["message"] == "Test error"
+        assert error_dict["query"] == "test query"
+
+    def test_invalid_default_field_type(self):
+        """Test configuration error when default_field is not string type."""
+        with pytest.raises(QueryParserError) as e:
+            QueryParser(
+                field_schema={"test": "number"},
+                default_field="test",
+            )
+
+        assert e.value.error_type == "CONFIGURATION_ERROR"
+        assert "default_field must be of type 'string'" in e.value.message
+
+    def test_parse_boolean_value_invalid(self):
+        """Test parsing invalid boolean value."""
+        with pytest.raises(QueryParserError) as e:
+            self.strict_parser.parse("archived:maybe")
+
+        assert e.value.error_type == "BOOLEAN_VALUE_ERROR"
+
+    def test_parse_string_value_with_parse_exception(self):
+        """Test parsing string value that causes ParseException."""
+        result = self.parser.parse('author:valid_value')
+        assert len(result) == 1
+
+    def test_query_parser_error_str_without_query_and_field(self):
+        """Test QueryParserError __str__ method without query and field."""
+        error = QueryParserError(
+            message="Test error without context",
+            error_type="TEST_ERROR",
+        )
+
+        error_str = str(error)
+        assert error_str == "[TEST_ERROR] Test error without context"
+        assert "Query:" not in error_str
+        assert "Field:" not in error_str
+
+    def test_query_parser_error_to_dict_without_query_and_field(self):
+        """Test QueryParserError to_dict method without query and field."""
+        error = QueryParserError(
+            message="Test error",
+            error_type="TEST_ERROR",
+        )
+
+        error_dict = error.to_dict()
+        assert error_dict["error_type"] == "TEST_ERROR"
+        assert error_dict["error"] is True
+        assert error_dict.get("field") == ""
+        assert error_dict["message"] == "Test error"
+        assert error_dict.get("query") == ""
+
+    def test_parse_with_empty_string(self):
+        """Test parsing with empty strings in query."""
+        result = self.parser.parse('author:"test"    language:"python"')
+        assert len(result) == 2
+        assert result[0]["field"] == "author"
+        assert result[1]["field"] == "language"
+
+    def test_to_dict_strict_mode_reraise_exception(self):
+        """Test to_dict in strict mode re-raises exceptions with field context."""
+        with pytest.raises(QueryParserError) as e:
+            self.strict_parser.parse("stars:invalid_number")
+
+        assert e.value.error_type == "NUMBER_VALUE_ERROR"
+        assert e.value.field == "stars"
+
+    def test_parse_string_value_with_control_characters_strict(self):
+        """Test parsing string value with control characters in strict mode."""
+        # Using unicode control characters that cause string value parsing to fail
+        invalid_query = "author:\x00\x01\x02"
+
+        with pytest.raises(QueryParserError) as e:
+            self.strict_parser.parse(invalid_query)
+
+        # This triggers STRING_VALUE_ERROR because tokenization succeeds but value parsing fails
+        assert e.value.error_type == "STRING_VALUE_ERROR"
+        assert e.value.field == "author"
+
+    def test_parse_with_strict_mode_reraise_in_condition_creation(self):
+        """Test strict mode re-raises QueryParserError with field context."""
+        with pytest.raises(QueryParserError) as e:
+            self.strict_parser.parse("created:invalid_date")
+        
+        # Should have field set and error re-raised
+        assert e.value.field == "created"
+        assert e.value.error_type in ["DATE_VALUE_ERROR", "TOKENIZATION_ERROR"]

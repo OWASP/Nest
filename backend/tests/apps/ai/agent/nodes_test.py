@@ -54,6 +54,28 @@ class TestAgentNodes:
         new_state = nodes.retrieve(state)
         assert new_state == state
 
+    def test_retrieve_with_existing_metadata(self, nodes, mocker):
+        """Test retrieve when extracted_metadata already exists in state."""
+        state = {
+            "query": "test query",
+            "extracted_metadata": {"entity_types": ["chapter"], "filters": {}, "requested_fields": []},
+        }
+
+        nodes.retriever.retrieve.return_value = [{"text": "chunk1", "similarity": 0.9}]
+        nodes.filter_chunks_by_metadata = mocker.Mock(
+            return_value=[{"text": "chunk1", "similarity": 0.9}]
+        )
+
+        new_state = nodes.retrieve(state)
+
+        assert "context_chunks" in new_state
+        nodes.retriever.retrieve.assert_called_with(
+            query="test query",
+            limit=DEFAULT_CHUNKS_RETRIEVAL_LIMIT,
+            similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD,
+            content_types=["chapter"],
+        )
+
     def test_generate_logic(self, nodes):
         state = {"query": "test query", "context_chunks": []}
         nodes.generator.generate_answer.return_value = "Generated answer"

@@ -593,3 +593,56 @@ class TestRetriever:
             mock_logger.warning.assert_called_once_with(
                 "Content object is None for chunk %s. Skipping.", 1
             )
+
+    def test_get_additional_context_message(self):
+        """Test getting additional context for message content type."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI"),
+        ):
+            retriever = Retriever()
+
+            conversation = MagicMock()
+            conversation.slack_channel_id = "C123456"
+
+            parent_message = MagicMock()
+            parent_message.ts = "1234567890.123456"
+
+            author = MagicMock()
+            author.name = "John Doe"
+
+            content_object = MagicMock()
+            content_object.__class__.__name__ = "Message"
+            content_object.conversation = conversation
+            content_object.parent_message = parent_message
+            content_object.ts = "1234567890.654321"
+            content_object.author = author
+
+            result = retriever.get_additional_context(content_object)
+
+            assert result["channel"] == "C123456"
+            assert result["thread_ts"] == "1234567890.123456"
+            assert result["ts"] == "1234567890.654321"
+            assert result["user"] == "John Doe"
+
+    def test_get_additional_context_message_no_conversation(self):
+        """Test getting additional context for message with no conversation."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI"),
+        ):
+            retriever = Retriever()
+
+            content_object = MagicMock()
+            content_object.__class__.__name__ = "Message"
+            content_object.conversation = None
+            content_object.parent_message = None
+            content_object.ts = "1234567890.654321"
+            content_object.author = None
+
+            result = retriever.get_additional_context(content_object)
+
+            assert result.get("channel") is None
+            assert result.get("thread_ts") is None
+            assert result["ts"] == "1234567890.654321"
+            assert result.get("user") is None

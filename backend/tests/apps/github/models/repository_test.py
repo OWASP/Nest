@@ -329,3 +329,25 @@ class TestRepositoryProperties:
         """Test the url property to ensure it returns the correct GitHub URL."""
         _owner, repository = repository_setup
         assert repository.url == "https://github.com/test-owner/test-repo"
+
+    def test_latest_pull_request_property(self, mocker):
+        """Test latest_pull_request property returns the most recent pull request."""
+        repository = Repository()
+        repository.pk = 1
+        
+        mock_pr = Mock()
+        mock_pr.created_at = "2023-01-01"
+        
+        mock_manager = Mock()
+        mock_manager.order_by.return_value.first.return_value = mock_pr
+        
+        mocker.patch.object(
+            Repository,
+            "pull_requests",
+            new_callable=PropertyMock,
+            return_value=mock_manager
+        )
+        
+        assert repository.latest_pull_request == mock_pr
+        mock_manager.order_by.assert_called_with("-created_at")
+

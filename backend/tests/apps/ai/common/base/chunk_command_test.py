@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand
 from apps.ai.common.base.chunk_command import BaseChunkCommand
 from apps.ai.models.chunk import Chunk
 from apps.ai.models.context import Context
-
+from datetime import UTC, datetime
 
 class ConcreteChunkCommand(BaseChunkCommand):
     """Concrete implementation of BaseChunkCommand for testing."""
@@ -494,3 +494,113 @@ class TestBaseChunkCommand:
                     call("No content to chunk for test_entity test-key-123"),
                 ]
                 mock_write.assert_has_calls(expected_calls)
+
+    @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
+    @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
+    @patch("apps.ai.models.chunk.Chunk.split_text")
+    @patch("apps.ai.common.base.chunk_command.create_chunks_and_embeddings")
+    @patch("apps.ai.models.chunk.Chunk.bulk_save")
+    def test_process_chunks_batch_deletes_stale_chunks(
+        self,
+        mock_bulk_save,
+        mock_create_chunks,
+        mock_split_text,
+        mock_context_filter,
+        mock_get_content_type,
+        command,
+        mock_entity,
+        mock_context,
+        mock_content_type,
+    ):
+        """Test that stale chunks are deleted when context is updated."""
+        mock_get_content_type.return_value = mock_content_type
+        
+        latest_timestamp = datetime(2024, 1, 1, tzinfo=UTC)
+        mock_context.nest_updated_at = datetime(2024, 1, 2, tzinfo=UTC)
+        mock_context.chunks.aggregate.return_value = {"latest_created": latest_timestamp}
+        
+        mock_delete_qs = Mock()
+        mock_delete_qs.delete.return_value = (5, {})
+        mock_context.chunks.all.return_value = mock_delete_qs
+        
+        mock_context_filter.return_value.first.return_value = mock_context
+        mock_split_text.return_value = ["new chunk"]
+        mock_create_chunks.return_value = [Mock()]
+        command.openai_client = Mock()
+
+        with patch.object(command.stdout, "write") as mock_write:
+            result = command.process_chunks_batch([mock_entity])
+
+            assert result == 1
+            mock_delete_qs.delete.assert_called_once()
+            mock_write.assert_any_call("Deleted 5 stale chunks for test-key-123")
+            mock_bulk_save.assert_called_once()
+
+    @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
+    @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
+    @patch("apps.ai.models.chunk.Chunk.split_text")
+    @patch("apps.ai.common.base.chunk_command.create_chunks_and_embeddings")
+    @patch("apps.ai.models.chunk.Chunk.bulk_save")
+    @patch("apps.ai.common.base.chunk_command.is_valid_json")
+    def test_process_chunks_batch_with_valid_json_content(
+        self,
+        mock_is_valid_json,
+        mock_bulk_save,
+        mock_create_chunks,
+        mock_split_text,
+        mock_context_filter,
+        mock_get_content_type,
+        command,
+        mock_entity,
+        mock_context,
+        mock_content_type,
+    ):
+        """Test processing chunks when content is valid JSON."""
+        mock_get_content_type.return_value = mock_content_type
+        mock_context_filter.return_value.first.return_value = mock_context
+        
+        json_content = '{"key": "value", "data": "test"}'
+        mock_is_valid_json.return_value = True
+        mock_split_text.return_value = ["chunk1"]
+        mock_create_chunks.return_value = [Mock()]
+        command.openai_client = Mock()
+
+        with patch.object(command, "extract_content", return_value=(json_content, "metadata")):
+            with patch.object(command.stdout, "write"):
+                result = command.process_chunks_batch([mock_entity])
+
+                assert result == 1
+                mock_split_text.assert_called_once_with(json_content)
+                mock_bulk_save.assert_called_once()
+
+    @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
+    @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
+    @patch("apps.ai.models.chunk.Chunk.split_text")
+    @patch("apps.ai.common.base.chunk_command.create_chunks_and_embeddings")
+    def test_process_chunks_batch_creates_chunks_returns_none(
+        self,
+        mock_create_chunks,
+        mock_split_text,
+        mock_context_filter,
+        mock_get_content_type,
+        command,
+        mock_entity,
+        mock_context,
+        mock_content_type,
+    ):
+        """Test when create_chunks_and_embeddings returns None or empty list."""
+        mock_get_content_type.return_value = mock_content_type
+        mock_context_filter.return_value.first.return_value = mock_context
+        mock_split_text.return_value = ["chunk1"]
+        mock_create_chunks.return_value = None
+        command.openai_client = Mock()
+
+        with patch.object(command.stdout, "write") as mock_write:
+            result = command.process_chunks_batch([mock_entity])
+
+            assert result == 0
+            success_calls = [
+                call for call in mock_write.call_args_list
+                if "Created" in str(call) and "new chunks" in str(call)
+            ]
+            assert len(success_calls) == 0

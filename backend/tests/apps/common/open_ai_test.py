@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock, patch
+import openai as openai_module
 
 import pytest
 
@@ -66,4 +67,25 @@ class TestOpenAi:
 
         mock_logger.exception.assert_called_once_with(
             "An error occurred during OpenAI API request."
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_complete_api_connection_error(self, mock_openai, mock_logger):
+        """Test that APIConnectionError is caught and logged."""
+        import openai as openai_module
+
+        mock_client = MagicMock()
+        mock_request = MagicMock()
+        api_error = openai_module.APIConnectionError(request=mock_request)
+        mock_client.chat.completions.create.side_effect = api_error
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response is None
+
+        mock_logger.exception.assert_called_once_with(
+            "A connection error occurred during OpenAI API request."
         )

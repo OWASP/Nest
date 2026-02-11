@@ -114,3 +114,8 @@ class TestAlgoliaValidators:
 
     def test_valid_facet_filters(self):
         validate_facet_filters([])
+
+    def test_empty_query(self):
+        """Test that empty query doesn't raise ValidationError."""
+        validate_query("")  # Should not raise
+        validate_query(None)  # Should not raise

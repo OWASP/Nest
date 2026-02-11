@@ -278,3 +278,17 @@ class TestUtils:
         assert normalize_limit(1500) == 1000
         assert normalize_limit(-1) is None
         assert normalize_limit(0) is None
+
+
+    def test_slugify_multiple_hyphens(self):
+        """Test slugify removes multiple consecutive hyphens."""
+        from apps.common.utils import slugify
+        assert slugify("test---multiple--hyphens") == "test-multiple-hyphens"
+        assert slugify("test-single-hyphens") == "test-single-hyphens"
+
+    @patch("apps.common.utils.settings")
+    def test_get_nest_user_agent(self, mock_settings):
+        """Test get_nest_user_agent replaces spaces with dashes and lowercases."""
+        from apps.common.utils import get_nest_user_agent
+        mock_settings.APP_NAME = "Test App Name"
+        assert get_nest_user_agent() == "test-app-name"

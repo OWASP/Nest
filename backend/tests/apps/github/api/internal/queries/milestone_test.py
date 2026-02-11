@@ -105,3 +105,15 @@ class TestMilestoneQuery:
         get_queryset.filter.assert_any_call(author__login="testuser")
         get_queryset.filter.assert_any_call(repository__organization__login="owasp")
         get_queryset.__getitem__.assert_called_with(slice(None, 10))
+
+    def test_recent_milestones_invalid_limit(self):
+        """Test recent_milestones returns empty list for invalid limit."""
+        with patch.object(Milestone, "open_milestones", new_callable=Mock) as mock_manager:
+            mock_manager.all.return_value = MagicMock()
+
+            result = MilestoneQuery().recent_milestones(
+                state=MilestoneStateEnum.OPEN,
+                limit=0
+            )
+
+            assert result == []

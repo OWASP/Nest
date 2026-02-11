@@ -57,3 +57,26 @@ class TestMemberModel:
         mock_get.assert_called_once_with(slack_user_id="U123EXISTING")
         mock_existing_member.from_slack.assert_called_once_with(updated_data, workspace)
         mock_existing_member.save.assert_called_once()
+
+    def test_bulk_save(self):
+        """Test bulk_save calls BulkSaveModel.bulk_save."""
+        mock_members = [MagicMock(), MagicMock()]
+        
+        with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
+            Member.bulk_save(mock_members, fields=["username"])
+        
+        mock_bulk_save.assert_called_once_with(Member, mock_members, fields=["username"])
+
+    def test_update_data_no_save(self):
+        """Test update_data with save=False doesn't call save."""
+        slack_data = {"id": "U123NOSAVE", "name": "nosaveuser", "is_bot": False}
+        workspace = Workspace()
+
+        with (
+            patch.object(Member, "save") as mock_save,
+            patch.object(Member.objects, "get", side_effect=Member.DoesNotExist),
+        ):
+            member = Member.update_data(slack_data, workspace, save=False)
+
+        mock_save.assert_not_called()
+        assert member.username == "nosaveuser"
