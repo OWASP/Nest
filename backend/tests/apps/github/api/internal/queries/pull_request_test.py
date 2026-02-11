@@ -197,7 +197,7 @@ class TestPullRequestQuery:
         """Test recent_pull_requests returns empty queryset when project doesn't exist."""
         mock_project_objects.filter.return_value.first.return_value = None
         mock_pr_objects.exclude.return_value = mock_queryset
-        
+
         # Mock queryset.none() to return a queryset that returns empty list when sliced
         mock_none_queryset = MagicMock()
         mock_none_queryset.__getitem__.return_value = []
@@ -206,13 +206,13 @@ class TestPullRequestQuery:
         result = PullRequestQuery().recent_pull_requests(project="nonexistent-project")
 
         assert result == []
-        mock_project_objects.filter.assert_called_once_with(key__iexact="www-project-nonexistent-project")
+        mock_project_objects.filter.assert_called_once_with(
+            key__iexact="www-project-nonexistent-project"
+        )
         mock_queryset.none.assert_called_once()
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
-    def test_recent_pull_requests_invalid_limit(
-        self, mock_objects, mock_queryset
-    ):
+    def test_recent_pull_requests_invalid_limit(self, mock_objects, mock_queryset):
         """Test recent_pull_requests returns empty list for invalid limit."""
         mock_objects.exclude.return_value = mock_queryset
 

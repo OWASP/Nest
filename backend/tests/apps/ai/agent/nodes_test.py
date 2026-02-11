@@ -58,7 +58,11 @@ class TestAgentNodes:
         """Test retrieve when extracted_metadata already exists in state."""
         state = {
             "query": "test query",
-            "extracted_metadata": {"entity_types": ["chapter"], "filters": {}, "requested_fields": []},
+            "extracted_metadata": {
+                "entity_types": ["chapter"],
+                "filters": {},
+                "requested_fields": [],
+            },
         }
 
         nodes.retriever.retrieve.return_value = [{"text": "chunk1", "similarity": 0.9}]

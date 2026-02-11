@@ -363,20 +363,17 @@ class TestRepositoryProperties:
         """Test latest_pull_request property returns the most recent pull request."""
         repository = Repository()
         repository.pk = 1
-        
+
         mock_pr = Mock()
         mock_pr.created_at = "2023-01-01"
-        
+
         mock_manager = Mock()
         mock_manager.order_by.return_value.first.return_value = mock_pr
-        
+
         mocker.patch.object(
-            Repository,
-            "pull_requests",
-            new_callable=PropertyMock,
-            return_value=mock_manager
+            Repository, "pull_requests", new_callable=PropertyMock, return_value=mock_manager
         )
-        
+
         assert repository.latest_pull_request == mock_pr
         mock_manager.order_by.assert_called_with("-created_at")
 
@@ -409,7 +406,7 @@ class TestRepositoryProperties:
 
         mocker.patch(
             "apps.github.models.repository.Repository.objects.get",
-            side_effect=Repository.DoesNotExist
+            side_effect=Repository.DoesNotExist,
         )
         mock_from_github = mocker.patch("apps.github.models.repository.Repository.from_github")
         mock_save = mocker.patch("apps.github.models.repository.Repository.save")
@@ -419,4 +416,3 @@ class TestRepositoryProperties:
         assert repository.node_id == "new_repo_node"
         mock_from_github.assert_called_once()
         mock_save.assert_called_once()
-

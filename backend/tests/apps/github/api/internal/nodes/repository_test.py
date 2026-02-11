@@ -105,7 +105,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
     def test_recent_milestones_with_invalid_limit(self):
         """Test recent_milestones returns empty list for invalid limit."""
         mock_repository = Mock()
-        
+
         field = self._get_field_by_name("recent_milestones", RepositoryNode)
         result = field.base_resolver.wrapped_func(None, mock_repository, limit=0)
         assert result == []

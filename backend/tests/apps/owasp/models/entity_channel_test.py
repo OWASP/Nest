@@ -1,10 +1,6 @@
 """Tests for EntityChannel model."""
 
-from unittest.mock import Mock, PropertyMock, patch
-from unittest.mock import MagicMock
-
-import pytest
-from django.contrib.contenttypes.models import ContentType
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 from apps.owasp.models.entity_channel import EntityChannel
 
@@ -18,17 +14,23 @@ class TestEntityChannelModel:
         mock_conversation = MagicMock()
         mock_conversation.name = "test-channel"
         mock_conversation.__str__ = Mock(return_value="test-channel")
-        
+
         channel = EntityChannel()
         channel.platform = "slack"
-        
+
         # Mock the entity property
         mock_entity = Mock()
         mock_entity.__str__ = Mock(return_value="Test Entity")
-        
+
         # Use PropertyMock to mock the GenericForeignKey relationships
-        with patch.object(type(channel), 'channel', new_callable=PropertyMock, return_value=mock_conversation), \
-             patch.object(type(channel), 'entity', new_callable=PropertyMock, return_value=mock_entity):
+        with (
+            patch.object(
+                type(channel), "channel", new_callable=PropertyMock, return_value=mock_conversation
+            ),
+            patch.object(
+                type(channel), "entity", new_callable=PropertyMock, return_value=mock_entity
+            ),
+        ):
             result = str(channel)
 
         assert result == "Test Entity - test-channel (slack)"

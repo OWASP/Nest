@@ -166,19 +166,14 @@ class TestIndexBase:
         """Test configure_replicas when all replicas are not indexable (empty dict)."""
         replicas = {"replica1": ["asc"], "replica2": ["desc"]}
         index_name = "index_name"
+        is_local = False
 
         with (
-            patch("apps.common.index.settings.IS_LOCAL_ENVIRONMENT", False),
+            patch("apps.common.index.settings.IS_LOCAL_ENVIRONMENT", is_local),
             patch("apps.common.index.is_indexable") as mock_is_indexable,
         ):
             # Make all replicas non-indexable (returns False for replica names)
-            def mock_is_indexable_func(name):
-                if name == index_name:
-                    return True
-                # Return False for all replica names
-                return False
-
-            mock_is_indexable.side_effect = mock_is_indexable_func
+            mock_is_indexable.side_effect = lambda name: name == index_name
 
             IndexBase.configure_replicas(index_name, replicas)
 

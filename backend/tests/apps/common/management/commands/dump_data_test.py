@@ -1,11 +1,9 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from psycopg2 import ProgrammingError
 from django.core.management import call_command
 from django.test import override_settings
-from psycopg2 import OperationalError
-from psycopg2 import sql
+from psycopg2 import OperationalError, ProgrammingError, sql
 
 DATABASES = {
     "default": {
@@ -106,11 +104,8 @@ class TestDumpDataCommand:
     @patch("apps.common.management.commands.dump_data.run")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
-    def test_dump_data_drop_db_fails_programming_error(
-        self, mock_path, mock_connect, mock_run
-    ):
+    def test_dump_data_drop_db_fails_programming_error(self, mock_path, mock_connect, mock_run):
         """Test dump_data handles ProgrammingError when dropping temp DB."""
-
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
@@ -119,7 +114,8 @@ class TestDumpDataCommand:
 
         def side_effect_execute(query):
             if "DROP DATABASE" in str(query):
-                raise ProgrammingError("Database does not exist")
+                msg = "Database does not exist"
+                raise ProgrammingError(msg)
 
         mock_cursor.execute.side_effect = side_effect_execute
 
@@ -132,11 +128,8 @@ class TestDumpDataCommand:
     @patch("apps.common.management.commands.dump_data.run")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
-    def test_dump_data_drop_db_fails_operational_error(
-        self, mock_path, mock_connect, mock_run
-    ):
+    def test_dump_data_drop_db_fails_operational_error(self, mock_path, mock_connect, mock_run):
         """Test dump_data handles OperationalError when dropping temp DB."""
-
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
@@ -145,7 +138,8 @@ class TestDumpDataCommand:
 
         def side_effect_execute(query):
             if "DROP DATABASE" in str(query):
-                raise OperationalError("Cannot connect to database")
+                msg = "Cannot connect to database"
+                raise OperationalError(msg)
 
         mock_cursor.execute.side_effect = side_effect_execute
 

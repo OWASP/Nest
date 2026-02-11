@@ -61,7 +61,7 @@ class TestEntityChannelAdmin:
     def test_channel_search_display_conversation_not_found(self, admin_instance, mocker):
         """Test channel_search_display when conversation doesn't exist."""
         from apps.slack.models import Conversation
-        
+
         mock_conversation = mocker.patch(f"{self.target_module}.Conversation")
         mock_conversation.DoesNotExist = Conversation.DoesNotExist
         mock_conversation.objects.get.side_effect = Conversation.DoesNotExist
@@ -89,7 +89,7 @@ class TestEntityChannelAdmin:
         assert result == "-"
 
     def test_channel_search_display_non_conversation_model(self, admin_instance):
-        """Test channel_search_display when channel_type model is not conversation (branch 87->92)."""
+        """Test channel_search_display for non-conversation model (branch 87->92)."""
         mock_channel_type = MagicMock()
         mock_channel_type.model = "other_model"
 

@@ -103,12 +103,8 @@ class TestApiKeyModel:
 
     @patch("apps.api.models.api_key.transaction")
     @patch("apps.api.models.api_key.ApiKey.objects.create")
-    @patch(
-        "apps.api.models.api_key.ApiKey.generate_hash_key", return_value="hashed_key"
-    )
-    @patch(
-        "apps.api.models.api_key.ApiKey.generate_raw_key", return_value="raw_key_123"
-    )
+    @patch("apps.api.models.api_key.ApiKey.generate_hash_key", return_value="hashed_key")
+    @patch("apps.api.models.api_key.ApiKey.generate_raw_key", return_value="raw_key_123")
     def test_create_success(
         self, mock_raw_key, mock_hash_key, mock_create, mock_transaction, mock_user
     ):
@@ -134,9 +130,7 @@ class TestApiKeyModel:
 
     def test_create_max_keys_exceeded(self, mock_user):
         """Test API key creation fails when max active keys exceeded."""
-        mock_user.active_api_keys.select_for_update.return_value.count.return_value = (
-            100
-        )
+        mock_user.active_api_keys.select_for_update.return_value.count.return_value = 100
         expires_at = timezone.now() + timedelta(days=30)
 
         result = ApiKey.create.__wrapped__(ApiKey, mock_user, "Test Key", expires_at)

@@ -40,7 +40,7 @@ def issue_index_mixin_instance():
     mock_label1.name = "bug"
     mock_label2 = MagicMock()
     mock_label2.name = "feature"
-    
+
     instance.labels = MagicMock()
     instance.labels.all.return_value = [mock_label1, mock_label2]
 

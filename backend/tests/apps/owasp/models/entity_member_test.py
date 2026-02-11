@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, PropertyMock, patch
 
-import pytest
 from django.contrib.contenttypes.models import ContentType
 
 from apps.owasp.models.entity_member import EntityMember
@@ -110,17 +109,23 @@ class TestEntityMemberModel:
             member_name="Different Name",
             role=EntityMember.Role.LEADER,
         )
-        
+
         # Mock member property
         mock_member = MagicMock()
         mock_member.login = "test_user"
-        
-        # Mock entity property  
+
+        # Mock entity property
         mock_entity = MagicMock()
         mock_entity.__str__ = MagicMock(return_value="Test Entity")
-        
-        with patch.object(type(entity_member), 'member', new_callable=PropertyMock, return_value=mock_member), \
-             patch.object(type(entity_member), 'entity', new_callable=PropertyMock, return_value=mock_entity):
+
+        with (
+            patch.object(
+                type(entity_member), "member", new_callable=PropertyMock, return_value=mock_member
+            ),
+            patch.object(
+                type(entity_member), "entity", new_callable=PropertyMock, return_value=mock_entity
+            ),
+        ):
             result = str(entity_member)
 
         assert "test_user" in result
@@ -133,13 +138,19 @@ class TestEntityMemberModel:
             member_name="John Doe",
             role=EntityMember.Role.MEMBER,
         )
-        
+
         # Mock entity property
         mock_entity = MagicMock()
         mock_entity.__str__ = MagicMock(return_value="Test Entity")
-        
-        with patch.object(type(entity_member), 'member', new_callable=PropertyMock, return_value=None), \
-             patch.object(type(entity_member), 'entity', new_callable=PropertyMock, return_value=mock_entity):
+
+        with (
+            patch.object(
+                type(entity_member), "member", new_callable=PropertyMock, return_value=None
+            ),
+            patch.object(
+                type(entity_member), "entity", new_callable=PropertyMock, return_value=mock_entity
+            ),
+        ):
             result = str(entity_member)
 
         assert "John Doe" in result
@@ -175,7 +186,7 @@ class TestEntityMemberModel:
         mock_content_type = MagicMock(spec=ContentType)
         mock_content_type._state = MagicMock()
         mock_content_type._state.db = "default"
-        
+
         entity_member = EntityMember()
 
         data = {

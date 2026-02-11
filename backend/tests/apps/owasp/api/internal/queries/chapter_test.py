@@ -73,9 +73,7 @@ class TestChapterResolution:
         """Test recent_chapters with valid limit returns chapters (line 31)."""
         mock_chapters = [Mock(), Mock()]
         query = ChapterQuery()
-        with patch.object(
-            Chapter, "active_chapters"
-        ) as mock_active:
+        with patch.object(Chapter, "active_chapters") as mock_active:
             mock_qs = Mock()
             mock_active.order_by.return_value = mock_qs
             mock_qs.__getitem__ = Mock(return_value=mock_chapters)

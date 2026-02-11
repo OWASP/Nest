@@ -28,7 +28,7 @@ class TestWorkspaceModel:
         """Test get_default_workspace returns None when default workspace doesn't exist."""
         with patch.object(Workspace.objects, "filter") as mock_filter:
             mock_filter.return_value.first.return_value = None
-            
+
             result = Workspace.get_default_workspace()
-            
+
             assert result is None

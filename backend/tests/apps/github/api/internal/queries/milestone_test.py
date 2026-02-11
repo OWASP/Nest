@@ -111,9 +111,6 @@ class TestMilestoneQuery:
         with patch.object(Milestone, "open_milestones", new_callable=Mock) as mock_manager:
             mock_manager.all.return_value = MagicMock()
 
-            result = MilestoneQuery().recent_milestones(
-                state=MilestoneStateEnum.OPEN,
-                limit=0
-            )
+            result = MilestoneQuery().recent_milestones(state=MilestoneStateEnum.OPEN, limit=0)
 
             assert result == []

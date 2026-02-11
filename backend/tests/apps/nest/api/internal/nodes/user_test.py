@@ -23,19 +23,23 @@ class TestGitHubAuthResult:
 
     def test_is_owasp_staff_with_no_github_user(self):
         """Test is_owasp_staff returns False when github_user is None."""
+
         # Create a simple object to act as self
         class FakeNode:
             github_user = None
 
         node = FakeNode()
-        
+
         # Get the raw function from the strawberry field
-        raw_func = AuthUserNode.__strawberry_definition__.get_field("is_owasp_staff").base_resolver.wrapped_func
+        raw_func = AuthUserNode.__strawberry_definition__.get_field(
+            "is_owasp_staff"
+        ).base_resolver.wrapped_func
         result = raw_func(node)
         assert result is False
 
     def test_is_owasp_staff_with_github_user_true(self):
         """Test is_owasp_staff returns True when github_user.is_owasp_staff is True."""
+
         class FakeNode:
             pass
 
@@ -46,12 +50,15 @@ class TestGitHubAuthResult:
         node.github_user = mock_github_user
 
         # Get the raw function from the strawberry field
-        raw_func = AuthUserNode.__strawberry_definition__.get_field("is_owasp_staff").base_resolver.wrapped_func
+        raw_func = AuthUserNode.__strawberry_definition__.get_field(
+            "is_owasp_staff"
+        ).base_resolver.wrapped_func
         result = raw_func(node)
         assert result is True
 
     def test_is_owasp_staff_with_github_user_false(self):
         """Test is_owasp_staff returns False when github_user.is_owasp_staff is False."""
+
         class FakeNode:
             pass
 
@@ -62,6 +69,8 @@ class TestGitHubAuthResult:
         node.github_user = mock_github_user
 
         # Get the raw function from the strawberry field
-        raw_func = AuthUserNode.__strawberry_definition__.get_field("is_owasp_staff").base_resolver.wrapped_func
+        raw_func = AuthUserNode.__strawberry_definition__.get_field(
+            "is_owasp_staff"
+        ).base_resolver.wrapped_func
         result = raw_func(node)
         assert result is False

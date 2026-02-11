@@ -14,33 +14,33 @@ class TestProjectAdmin:
     def test_custom_field_name_with_name(self):
         """Test custom_field_name returns project name when available."""
         admin = ProjectAdmin(Project, AdminSite())
-        
+
         obj = Mock()
         obj.name = "OWASP Top 10"
         obj.key = "www-project-top-ten"
-        
+
         result = admin.custom_field_name(obj)
         assert result == "OWASP Top 10"
 
     def test_custom_field_name_without_name(self):
         """Test custom_field_name returns key when name is empty."""
         admin = ProjectAdmin(Project, AdminSite())
-        
+
         obj = Mock()
         obj.name = None
         obj.key = "www-project-example"
-        
+
         result = admin.custom_field_name(obj)
         assert result == "www-project-example"
 
     def test_custom_field_name_with_empty_string_name(self):
         """Test custom_field_name returns key when name is empty string."""
         admin = ProjectAdmin(Project, AdminSite())
-        
+
         obj = Mock()
         obj.name = ""
         obj.key = "www-project-test"
-        
+
         result = admin.custom_field_name(obj)
         assert result == "www-project-test"
 

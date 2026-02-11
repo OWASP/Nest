@@ -97,11 +97,15 @@ class TestHomeActions:
 
         for action in registered_actions:
             # The action should be in the registered listeners
-            assert action in [
-                listener.matchers[0].action_id
-                for listener in SlackConfig.app._listeners
-                if listener.matchers and hasattr(listener.matchers[0], "action_id")
-            ] or True  # Skip if we can't verify registration structure
+            assert (
+                action
+                in [
+                    listener.matchers[0].action_id
+                    for listener in SlackConfig.app._listeners
+                    if listener.matchers and hasattr(listener.matchers[0], "action_id")
+                ]
+                or True
+            )  # Skip if we can't verify registration structure
 
     def test_all_action_constants_covered(self):
         """Test that all action constants in the registration tuple are defined."""
@@ -119,7 +123,7 @@ class TestHomeActions:
             VIEW_PROJECTS_ACTION_NEXT,
             VIEW_PROJECTS_ACTION_PREV,
         )
-        
+
         # Verify all constants are strings (not None)
         actions = (
             VIEW_CHAPTERS_ACTION_NEXT,
@@ -135,7 +139,7 @@ class TestHomeActions:
             VIEW_PROJECTS_ACTION_PREV,
             VIEW_PROJECTS_ACTION,
         )
-        
+
         for action in actions:
             assert isinstance(action, str)
             assert len(action) > 0

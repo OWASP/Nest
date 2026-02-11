@@ -274,7 +274,7 @@ class TestQueryParser:
 
     def test_parse_string_value_with_parse_exception(self):
         """Test parsing string value that causes ParseException."""
-        result = self.parser.parse('author:valid_value')
+        result = self.parser.parse("author:valid_value")
         assert len(result) == 1
 
     def test_query_parser_error_str_without_query_and_field(self):
@@ -334,7 +334,7 @@ class TestQueryParser:
         """Test strict mode re-raises QueryParserError with field context."""
         with pytest.raises(QueryParserError) as e:
             self.strict_parser.parse("created:invalid_date")
-        
+
         # Should have field set and error re-raised
         assert e.value.field == "created"
         assert e.value.error_type in ["DATE_VALUE_ERROR", "TOKENIZATION_ERROR"]
@@ -357,12 +357,12 @@ class TestQueryParser:
         """Test _split_tokens handles ParseException correctly."""
         # Mock the parse_string method to raise ParseException
         from pyparsing import ParseException
-        
+
         with patch("apps.common.search.query_parser.ZeroOrMore") as mock_zero_or_more:
             mock_parser = MagicMock()
             mock_parser.parse_string.side_effect = ParseException("Mock parse error")
             mock_zero_or_more.return_value = mock_parser
-            
+
             with pytest.raises(QueryParserError) as e:
                 self.strict_parser.parse("any query")
 

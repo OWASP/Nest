@@ -111,6 +111,8 @@ class TestReleaseModel:
 
         release = Release.update_data(gh_release_mock, save=False)
 
-        mock_release.from_github.assert_called_once_with(gh_release_mock, author=None, repository=None)
+        mock_release.from_github.assert_called_once_with(
+            gh_release_mock, author=None, repository=None
+        )
         mock_release.save.assert_not_called()
         assert release == mock_release

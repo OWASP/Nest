@@ -29,9 +29,9 @@ class TestIsAuthenticated:
     def test_on_unauthorized(self):
         """Test on_unauthorized returns GraphQLError."""
         permission = IsAuthenticated()
-        
+
         result = permission.on_unauthorized()
-        
+
         assert isinstance(result, GraphQLError)
         assert result.message == "You must be logged in to perform this action."
         assert result.extensions == {"code": "UNAUTHORIZED"}

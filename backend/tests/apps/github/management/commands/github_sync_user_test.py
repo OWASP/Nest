@@ -506,7 +506,7 @@ class TestGithubSyncUserCommand:
             "commit-repo", "OWASP/commit-repo", datetime(2025, 1, 15, tzinfo=UTC), commit=True
         )
         mock_gh.search_commits.return_value = MockPaginatedList([mock_commit_obj])
-        
+
         # PR search fails (lines 136-137)
         mock_gh.search_issues.side_effect = [
             GithubException(500, "Server Error"),
@@ -532,7 +532,7 @@ class TestGithubSyncUserCommand:
             "pr-repo", "OWASP/pr-repo", datetime(2025, 1, 1, tzinfo=UTC)
         )
         mock_gh.search_commits.return_value = MockPaginatedList([])
-        
+
         # Issue search fails (lines 152-153)
         mock_gh.search_issues.side_effect = [
             MockPaginatedList([mock_pr_obj]),
@@ -609,7 +609,10 @@ class TestGithubSyncUserCommand:
         mock_repo.filter.return_value.select_related.return_value = []
         mock_gh.search_commits.return_value = MockPaginatedList([])
         mock_gh_pr = MagicMock(repository=MagicMock(full_name="OWASP/uncached-repo"), number=1)
-        mock_gh.search_issues.side_effect = [MockPaginatedList([mock_gh_pr]), MockPaginatedList([])]
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([mock_gh_pr]),
+            MockPaginatedList([]),
+        ]
 
         command.handle(**default_options)
 
@@ -648,8 +651,11 @@ class TestGithubSyncUserCommand:
 
         mock_gh.search_commits.return_value = MockPaginatedList([])
         mock_gh_pr = MagicMock(repository=MagicMock(full_name="OWASP/test-repo"), number=1)
-        mock_gh.search_issues.side_effect = [MockPaginatedList([mock_gh_pr]), MockPaginatedList([])]
-        
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([mock_gh_pr]),
+            MockPaginatedList([]),
+        ]
+
         # get_repo or get_pull fails (lines 343-350, 368-370)
         mock_gh.get_repo.side_effect = GithubException(500, "Server Error")
 
@@ -686,7 +692,10 @@ class TestGithubSyncUserCommand:
         mock_repo.filter.return_value.select_related.return_value = []
         mock_gh.search_commits.return_value = MockPaginatedList([])
         mock_gh_issue = MagicMock(repository=MagicMock(full_name="OWASP/uncached-repo"), number=2)
-        mock_gh.search_issues.side_effect = [MockPaginatedList([]), MockPaginatedList([mock_gh_issue])]
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([]),
+            MockPaginatedList([mock_gh_issue]),
+        ]
 
         command.handle(**default_options)
 

@@ -628,14 +628,14 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
 
         model = EntityModel()
         model.id = 1
-        
+
         # Mock the entity_members relationship
         mock_queryset = Mock()
         mock_queryset.filter.return_value.order_by.return_value = [Mock(), Mock()]
-        
-        with patch.object(type(model), 'entity_members', new_callable=lambda: mock_queryset):
-            leaders = model.entity_leaders
-            
+
+        with patch.object(type(model), "entity_members", new_callable=lambda: mock_queryset):
+            _ = model.entity_leaders
+
         mock_queryset.filter.assert_called_once_with(role=EntityMember.Role.LEADER)
         mock_queryset.filter.return_value.order_by.assert_called_once_with("order")
 

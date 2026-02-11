@@ -228,7 +228,7 @@ class TestProjectHandler:
 
         blocks = get_blocks(search_query="")
 
-        # Should not include search query text  
+        # Should not include search query text
         assert "OWASP projects:" in blocks[0]["text"]["text"]
         assert "Test Project" in blocks[1]["text"]["text"]
 

@@ -1,7 +1,7 @@
 """Tests for MemberSnapshot admin."""
 
+from unittest import mock
 from unittest.mock import MagicMock, Mock
-import unittest.mock as mock
 
 from django.contrib.admin.sites import AdminSite
 
@@ -102,18 +102,20 @@ class TestMemberSnapshotAdmin:
     def test_get_queryset(self):
         """Test get_queryset applies select_related for github_user."""
         admin = MemberSnapshotAdmin(MemberSnapshot, AdminSite())
-        
+
         # Mock the request
         mock_request = Mock()
-        
+
         # Create a mock queryset that tracks select_related calls
         admin_queryset = MagicMock()
         result_queryset = MagicMock()
         admin_queryset.select_related.return_value = result_queryset
-        
+
         # Mock super().get_queryset to return our mock
-        with mock.patch.object(admin.__class__.__bases__[0], 'get_queryset', return_value=admin_queryset):
+        with mock.patch.object(
+            admin.__class__.__bases__[0], "get_queryset", return_value=admin_queryset
+        ):
             result = admin.get_queryset(mock_request)
-            
+
             admin_queryset.select_related.assert_called_once_with("github_user")
             assert result == result_queryset

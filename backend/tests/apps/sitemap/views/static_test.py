@@ -52,13 +52,14 @@ class TestStaticSitemap:
 
     def test_lastmod_unmapped_path_returns_current_time(self, sitemap):
         """Test lastmod returns current time for paths not in path_to_model."""
-        from datetime import UTC, datetime as dt
+        from datetime import UTC
+        from datetime import datetime as dt
         from unittest.mock import Mock
-        
+
         current_time = dt.now(UTC)
         mock_datetime = Mock()
         mock_datetime.now.return_value = current_time
-        
+
         with patch("apps.sitemap.views.static.datetime", mock_datetime):
             # Test with a path that's not in the path_to_model mapping
             item = {"path": "/unknown-path"}

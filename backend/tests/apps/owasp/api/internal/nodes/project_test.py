@@ -116,8 +116,6 @@ class TestProjectNode(GraphQLNodeBaseTest):
 
     def test_contribution_stats_transforms_snake_case_to_camel_case(self):
         """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
-        from unittest.mock import Mock
-
         mock_project = Mock()
         mock_project.contribution_stats = {
             "commits": 100,
@@ -274,7 +272,9 @@ class TestProjectNodeResolvers:
         resolver = self._get_resolver("recent_releases")
         mock_project = MagicMock()
         mock_releases = [MagicMock(), MagicMock()]
-        mock_project.published_releases.order_by.return_value.__getitem__.return_value = mock_releases
+        mock_project.published_releases.order_by.return_value.__getitem__.return_value = (
+            mock_releases
+        )
 
         result = resolver(None, mock_project)
 
@@ -318,7 +318,6 @@ class TestProjectNodeResolvers:
         mock_project.repositories.all.return_value = mock_repos
 
         mock_milestones = [MagicMock(), MagicMock()]
-        mock_queryset = MagicMock()
 
         with patch("apps.owasp.api.internal.nodes.project.Milestone") as mock_milestone_cls:
             mock_filter = MagicMock()

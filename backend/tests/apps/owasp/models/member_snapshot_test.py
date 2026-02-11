@@ -135,8 +135,10 @@ class TestMemberSnapshotModel:
             end_at=datetime(2025, 1, 31, tzinfo=UTC),
         )
         snapshot.id = 1
-        
-        with patch.object(type(snapshot), "commits_count", new_callable=PropertyMock, return_value=10):
+
+        with patch.object(
+            type(snapshot), "commits_count", new_callable=PropertyMock, return_value=10
+        ):
             assert snapshot.commits_count == 10
 
     def test_pull_requests_count_property(self):
@@ -150,8 +152,10 @@ class TestMemberSnapshotModel:
             end_at=datetime(2025, 1, 31, tzinfo=UTC),
         )
         snapshot.id = 1
-        
-        with patch.object(type(snapshot), "pull_requests_count", new_callable=PropertyMock, return_value=5):
+
+        with patch.object(
+            type(snapshot), "pull_requests_count", new_callable=PropertyMock, return_value=5
+        ):
             assert snapshot.pull_requests_count == 5
 
     def test_issues_count_property(self):
@@ -165,8 +169,10 @@ class TestMemberSnapshotModel:
             end_at=datetime(2025, 1, 31, tzinfo=UTC),
         )
         snapshot.id = 1
-        
-        with patch.object(type(snapshot), "issues_count", new_callable=PropertyMock, return_value=3):
+
+        with patch.object(
+            type(snapshot), "issues_count", new_callable=PropertyMock, return_value=3
+        ):
             assert snapshot.issues_count == 3
 
     def test_messages_count_property(self):
@@ -180,8 +186,10 @@ class TestMemberSnapshotModel:
             end_at=datetime(2025, 1, 31, tzinfo=UTC),
         )
         snapshot.id = 1
-        
-        with patch.object(type(snapshot), "messages_count", new_callable=PropertyMock, return_value=20):
+
+        with patch.object(
+            type(snapshot), "messages_count", new_callable=PropertyMock, return_value=20
+        ):
             assert snapshot.messages_count == 20
 
     def test_total_contributions_property(self):
@@ -195,10 +203,18 @@ class TestMemberSnapshotModel:
             end_at=datetime(2025, 1, 31, tzinfo=UTC),
         )
         snapshot.id = 1
-        
-        with patch.object(type(snapshot), "commits_count", new_callable=PropertyMock, return_value=10), \
-             patch.object(type(snapshot), "pull_requests_count", new_callable=PropertyMock, return_value=5), \
-             patch.object(type(snapshot), "issues_count", new_callable=PropertyMock, return_value=3):
+
+        with (
+            patch.object(
+                type(snapshot), "commits_count", new_callable=PropertyMock, return_value=10
+            ),
+            patch.object(
+                type(snapshot), "pull_requests_count", new_callable=PropertyMock, return_value=5
+            ),
+            patch.object(
+                type(snapshot), "issues_count", new_callable=PropertyMock, return_value=3
+            ),
+        ):
             # Total should be sum of commits + pull_requests + issues
             assert snapshot.total_contributions == 18
 

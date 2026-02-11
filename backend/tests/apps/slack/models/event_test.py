@@ -97,6 +97,6 @@ class TestEventModel:
         }
         event = Event()
         event.from_slack(context, payload)
-        
+
         assert event.command == "owasp"
         assert event.text == ""

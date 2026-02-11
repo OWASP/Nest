@@ -14,21 +14,21 @@ class TestProjectHealthMetricsAdmin:
     def test_project_display_with_project(self):
         """Test project method returns project name when project exists."""
         admin = ProjectHealthMetricsAdmin(ProjectHealthMetrics, AdminSite())
-        
+
         obj = Mock()
         obj.project = Mock()
         obj.project.name = "OWASP Top 10"
-        
+
         result = admin.project(obj)
         assert result == "OWASP Top 10"
 
     def test_project_display_without_project(self):
         """Test project method returns 'N/A' when project is None."""
         admin = ProjectHealthMetricsAdmin(ProjectHealthMetrics, AdminSite())
-        
+
         obj = Mock()
         obj.project = None
-        
+
         result = admin.project(obj)
         assert result == "N/A"
 

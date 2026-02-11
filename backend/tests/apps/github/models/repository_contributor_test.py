@@ -369,13 +369,15 @@ class TestRepositoryContributor(TestCase):
         """Test the organization filtering logic in get_top_contributors."""
         with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
             mock_queryset = self._setup_mock_queryset(mock_objects)
-            
+
             # Mock the select_related to return a queryset that tracks filter calls
             mock_after_select = MagicMock()
             mock_queryset.select_related.return_value = mock_after_select
             mock_after_select.filter.return_value = mock_queryset
-            
+
             RepositoryContributor.get_top_contributors(organization="test-org")
             # Check that select_related and filter were called with organization
             mock_queryset.select_related.assert_called_with("repository__organization")
-            mock_after_select.filter.assert_called_once_with(repository__organization__login="test-org")
+            mock_after_select.filter.assert_called_once_with(
+                repository__organization__login="test-org"
+            )

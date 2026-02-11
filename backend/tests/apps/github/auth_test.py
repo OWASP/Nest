@@ -238,11 +238,11 @@ class TestGitHubAppAuth:
         ):
             mock_settings.GITHUB_APP_ID = None
             mock_settings.GITHUB_APP_INSTALLATION_ID = None
-            
+
             auth = GitHubAppAuth()
             # Set pat_token to None to simulate no valid credentials
             auth.pat_token = None
-            
+
             with pytest.raises(BadCredentialsException, match="Invalid GitHub credentials"):
                 auth.get_github_client()
 

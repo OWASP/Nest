@@ -236,16 +236,16 @@ class TestIssueModel:
     def test_latest_comment_property(self, mock_repository):
         """Test latest_comment property returns the expected query result."""
         issue = Issue(repository=mock_repository)
-        
+
         # Mock the comments queryset
         mock_comments = MagicMock()
         mock_ordered = MagicMock()
         mock_comments.order_by.return_value = mock_ordered
         mock_ordered.first.return_value = None
-        
+
         # Temporarily replace the comments attribute
-        issue._state.db = 'default'
-        with patch.object(type(issue), 'comments', PropertyMock(return_value=mock_comments)):
+        issue._state.db = "default"
+        with patch.object(type(issue), "comments", PropertyMock(return_value=mock_comments)):
             result = issue.latest_comment
             assert result is None
             mock_comments.order_by.assert_called_once_with("-nest_created_at")
@@ -256,7 +256,7 @@ class TestIssueModel:
         """Test update_data with save=False."""
         existing_issue = Issue(node_id="12345")
         mock_get.return_value = existing_issue
-        
+
         gh_issue_mock = Mock()
         gh_issue_mock.raw_data = {"node_id": "12345"}
         gh_issue_mock.title = "Test Issue"
@@ -278,7 +278,7 @@ class TestIssueModel:
             patch.object(Issue, "save") as mock_save,
         ):
             result = Issue.update_data(gh_issue_mock, save=False)
-            
+
             mock_from_github.assert_called_once()
             mock_save.assert_not_called()
             assert result == existing_issue

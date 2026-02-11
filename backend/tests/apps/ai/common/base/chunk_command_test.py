@@ -1,5 +1,6 @@
 """Tests for the BaseChunkCommand class."""
 
+from datetime import UTC, datetime
 from typing import Any
 from unittest.mock import Mock, call, patch
 
@@ -10,7 +11,7 @@ from django.core.management.base import BaseCommand
 from apps.ai.common.base.chunk_command import BaseChunkCommand
 from apps.ai.models.chunk import Chunk
 from apps.ai.models.context import Context
-from datetime import UTC, datetime
+
 
 class ConcreteChunkCommand(BaseChunkCommand):
     """Concrete implementation of BaseChunkCommand for testing."""
@@ -199,10 +200,12 @@ class TestBaseChunkCommand:
     ):
         """Test process_chunks_batch when chunks are already up to date."""
         mock_get_content_type.return_value = mock_content_type
-        
+
         # Simulate that we have existing chunks with current timestamp
         mock_context.nest_updated_at = datetime(2024, 1, 1, tzinfo=UTC)
-        mock_context.chunks.aggregate.return_value = {"latest_created": datetime(2024, 1, 2, tzinfo=UTC)}
+        mock_context.chunks.aggregate.return_value = {
+            "latest_created": datetime(2024, 1, 2, tzinfo=UTC)
+        }
         mock_context_filter.return_value.first.return_value = mock_context
 
         with patch.object(command.stdout, "write") as mock_write:
@@ -541,15 +544,15 @@ class TestBaseChunkCommand:
     ):
         """Test that stale chunks are deleted when context is updated."""
         mock_get_content_type.return_value = mock_content_type
-        
+
         latest_timestamp = datetime(2024, 1, 1, tzinfo=UTC)
         mock_context.nest_updated_at = datetime(2024, 1, 2, tzinfo=UTC)
         mock_context.chunks.aggregate.return_value = {"latest_created": latest_timestamp}
-        
+
         mock_delete_qs = Mock()
         mock_delete_qs.delete.return_value = (5, {})
         mock_context.chunks.all.return_value = mock_delete_qs
-        
+
         mock_context_filter.return_value.first.return_value = mock_context
         mock_split_text.return_value = ["new chunk"]
         mock_create_chunks.return_value = [Mock()]
@@ -585,20 +588,22 @@ class TestBaseChunkCommand:
         """Test processing chunks when content is valid JSON."""
         mock_get_content_type.return_value = mock_content_type
         mock_context_filter.return_value.first.return_value = mock_context
-        
+
         json_content = '{"key": "value", "data": "test"}'
         mock_is_valid_json.return_value = True
         mock_split_text.return_value = ["chunk1"]
         mock_create_chunks.return_value = [Mock()]
         command.openai_client = Mock()
 
-        with patch.object(command, "extract_content", return_value=(json_content, "metadata")):
-            with patch.object(command.stdout, "write"):
-                result = command.process_chunks_batch([mock_entity])
+        with (
+            patch.object(command, "extract_content", return_value=(json_content, "metadata")),
+            patch.object(command.stdout, "write"),
+        ):
+            result = command.process_chunks_batch([mock_entity])
 
-                assert result == 1
-                mock_split_text.assert_called_once_with(json_content)
-                mock_bulk_save.assert_called_once()
+            assert result == 1
+            mock_split_text.assert_called_once_with(json_content)
+            mock_bulk_save.assert_called_once()
 
     @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
     @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
@@ -627,7 +632,8 @@ class TestBaseChunkCommand:
 
             assert result == 0
             success_calls = [
-                call for call in mock_write.call_args_list
+                call
+                for call in mock_write.call_args_list
                 if "Created" in str(call) and "new chunks" in str(call)
             ]
             assert len(success_calls) == 0

@@ -61,10 +61,10 @@ class TestMemberModel:
     def test_bulk_save(self):
         """Test bulk_save calls BulkSaveModel.bulk_save."""
         mock_members = [MagicMock(), MagicMock()]
-        
+
         with patch("apps.common.models.BulkSaveModel.bulk_save") as mock_bulk_save:
             Member.bulk_save(mock_members, fields=["username"])
-        
+
         mock_bulk_save.assert_called_once_with(Member, mock_members, fields=["username"])
 
     def test_update_data_no_save(self):

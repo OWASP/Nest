@@ -391,7 +391,7 @@ class TestRetriever:
             assert result["ts"] == "1234567891.123456"
 
     def test_get_additional_context_message_with_conversation_but_no_attributes(self):
-        """Test getting additional context for message with conversation lacking slack_channel_id."""
+        """Test additional context for message with conversation lacking slack_channel_id."""
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI"),
@@ -663,8 +663,8 @@ class TestRetriever:
                 "Content object is None for chunk %s. Skipping.", 1
             )
 
-    def test_get_additional_context_message(self):
-        """Test getting additional context for message content type."""
+    def test_get_additional_context_message_with_author(self):
+        """Test getting additional context for message with named author."""
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI"),
@@ -694,8 +694,8 @@ class TestRetriever:
             assert result["ts"] == "1234567890.654321"
             assert result["user"] == "John Doe"
 
-    def test_get_additional_context_message_no_conversation(self):
-        """Test getting additional context for message with no conversation."""
+    def test_get_additional_context_message_none_fields(self):
+        """Test getting additional context for message with None fields."""
         with (
             patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
             patch("openai.OpenAI"),

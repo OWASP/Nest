@@ -261,13 +261,9 @@ class TestRepositoryContentExtractor:
     def test_extract_repository_content_with_null_fields(self, mock_get_content, mock_sleep):
         """Test extraction when repository has None for optional fields."""
         mock_get_content.return_value = "[]"
-        
+
         repository = create_mock_repository(
-            name=None,
-            key=None,
-            description=None,
-            organization=None,
-            owner=None
+            name=None, key=None, description=None, organization=None, owner=None
         )
 
         json_content, metadata = extract_repository_content(repository)
@@ -278,7 +274,7 @@ class TestRepositoryContentExtractor:
         assert "key" not in data
         assert "description" not in data
         assert metadata == ""
-        
+
     @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_tab_files_with_non_dict_items(self, mock_get_content, mock_sleep):
@@ -294,25 +290,22 @@ class TestRepositoryContentExtractor:
             None,  # leaders.md
             "Tab file content",  # tab_test.md
         ]
-        
+
         owner = MagicMock()
         owner.login = "test-owner"
-        
+
         repository = create_mock_repository(
-            name="test-repo",
-            key="test-key",
-            owner=owner,
-            default_branch="main"
+            name="test-repo", key="test-key", owner=owner, default_branch="main"
         )
 
         json_content, _ = extract_repository_content(repository)
         data = json.loads(json_content)
-        
+
         # Should have extracted tab file
         assert "markdown_content" in data
         assert "tab_test.md" in data["markdown_content"]
         assert data["markdown_content"]["tab_test.md"] == "Tab file content"
-        
+
     @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_tab_files_without_tab_prefix(self, mock_get_content, mock_sleep):
@@ -321,27 +314,25 @@ class TestRepositoryContentExtractor:
         # Only tab_valid.md should be extracted as a tab file
         # File fetch order: README.md, index.md, info.md, leaders.md, tab_valid.md
         mock_get_content.side_effect = [
-            '[{"name": "readme.md"}, {"name": "notab.md"}, {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]',  # directory listing
+            '[{"name": "readme.md"}, {"name": "notab.md"},'
+            ' {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]',  # directory listing
             "README content",  # README.md
             None,  # index.md
             None,  # info.md
             None,  # leaders.md
             "Valid tab file",  # tab_valid.md
         ]
-        
+
         owner = MagicMock()
         owner.login = "test-owner"
-        
+
         repository = create_mock_repository(
-            name="test-repo",
-            key="test-key",
-            owner=owner,
-            default_branch="main"
+            name="test-repo", key="test-key", owner=owner, default_branch="main"
         )
 
         json_content, _ = extract_repository_content(repository)
         data = json.loads(json_content)
-        
+
         # Should only have tab_valid.md, not the others
         assert "markdown_content" in data
         assert "tab_valid.md" in data["markdown_content"]
@@ -726,7 +717,7 @@ class TestRepositoryMarkdownContentExtractor:
             description=None,
         )
 
-        json_content, metadata = extract_repository_content(repository)
+        json_content, _metadata = extract_repository_content(repository)
 
         data = json.loads(json_content)
         assert data["name"] == "test-repo"

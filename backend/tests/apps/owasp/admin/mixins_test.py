@@ -201,9 +201,9 @@ class TestEntityChannelInline:
         ) as mock_parent:
             mock_result = mocker.Mock()
             mock_parent.return_value = mock_result
-            
+
             result = inline.formfield_for_dbfield(mock_db_field, mock_request)
-            
+
             # Should call parent with unmodified kwargs
             assert result == mock_result
             mock_parent.assert_called_once()

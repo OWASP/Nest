@@ -79,9 +79,7 @@ class TestHasDashboardAccess:
         settings.IS_FUZZ_ENVIRONMENT = False
         settings.IS_STAGING_ENVIRONMENT = False
 
-        result = permission.has_permission(
-            source=None, info=mock_info_with_authenticated_staff
-        )
+        result = permission.has_permission(source=None, info=mock_info_with_authenticated_staff)
 
         assert result is True
 
@@ -107,9 +105,7 @@ class TestHasDashboardAccess:
         settings.IS_FUZZ_ENVIRONMENT = False
         settings.IS_STAGING_ENVIRONMENT = False
 
-        result = permission.has_permission(
-            source=None, info=mock_info_with_unauthenticated_user
-        )
+        result = permission.has_permission(source=None, info=mock_info_with_unauthenticated_user)
 
         assert result is False
 

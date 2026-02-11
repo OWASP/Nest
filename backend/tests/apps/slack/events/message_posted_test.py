@@ -134,7 +134,6 @@ class TestMessagePosted:
             patch("apps.slack.events.message_posted.Message") as mock_message,
             patch("apps.slack.events.message_posted.logger") as mock_logger,
         ):
-
             mock_message.DoesNotExist = Message.DoesNotExist
             mock_queryset = Mock()
             mock_queryset.update.side_effect = Message.DoesNotExist

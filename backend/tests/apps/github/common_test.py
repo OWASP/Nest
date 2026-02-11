@@ -304,13 +304,13 @@ class TestSyncRepository:
         """Tests that milestone syncing stops when an older milestone is reached."""
         recent_time = timezone.now()
         old_time = timezone.now() - td(days=60)
-        
+
         gh_milestone_recent = gh_item_factory(updated_at=recent_time)
         gh_milestone_old = gh_item_factory(updated_at=old_time)
         mock_gh_repository.get_milestones.return_value = [gh_milestone_recent, gh_milestone_old]
-        
+
         sync_repository(mock_gh_repository)
-        
+
         # Should only sync the recent one, break on the old one (line 87)
         assert mock_common_deps["Milestone"].update_data.call_count == 1
 
@@ -320,13 +320,13 @@ class TestSyncRepository:
         """Tests that pull request syncing stops when an older PR is reached."""
         recent_time = timezone.now()
         old_time = timezone.now() - td(days=60)
-        
+
         gh_pr_recent = gh_item_factory(updated_at=recent_time)
         gh_pr_old = gh_item_factory(updated_at=old_time)
         mock_gh_repository.get_pulls.return_value = [gh_pr_recent, gh_pr_old]
-        
+
         sync_repository(mock_gh_repository)
-        
+
         # Should only sync the recent one, break on the old one (line 171)
         assert mock_common_deps["PullRequest"].update_data.call_count == 1
 
@@ -338,20 +338,20 @@ class TestSyncRepository:
         gh_assignee_invalid = MagicMock()
         gh_issue = gh_item_factory(assignees=[gh_assignee_valid, gh_assignee_invalid])
         mock_gh_repository.get_issues.return_value = [gh_issue]
-        
+
         mock_issue_instance = mock_common_deps["Issue"].update_data.return_value
         valid_user = MagicMock()
-        
+
         # First call for repo owner, then issue author, then for assignees
         mock_common_deps["User"].update_data.side_effect = [
             MagicMock(),  # repository owner
             MagicMock(),  # issue author
-            valid_user,   # first assignee - valid
-            None,         # second assignee - None, should be skipped (line 145->144)
+            valid_user,  # first assignee - valid
+            None,  # second assignee - None, should be skipped (line 145->144)
         ]
-        
+
         sync_repository(mock_gh_repository)
-        
+
         # Only the valid assignee should be added
         mock_issue_instance.assignees.add.assert_called_once_with(valid_user)
 
@@ -363,20 +363,20 @@ class TestSyncRepository:
         gh_assignee_invalid = MagicMock()
         gh_pr = gh_item_factory(assignees=[gh_assignee_valid, gh_assignee_invalid])
         mock_gh_repository.get_pulls.return_value = [gh_pr]
-        
+
         mock_pr_instance = mock_common_deps["PullRequest"].update_data.return_value
         valid_user = MagicMock()
-        
+
         # First call for repo owner, then PR author, then for assignees
         mock_common_deps["User"].update_data.side_effect = [
             MagicMock(),  # repository owner
             MagicMock(),  # PR author
-            valid_user,   # first assignee - valid
-            None,         # second assignee - None, should be skipped (line 193->192)
+            valid_user,  # first assignee - valid
+            None,  # second assignee - None, should be skipped (line 193->192)
         ]
-        
+
         sync_repository(mock_gh_repository)
-        
+
         # Only the valid assignee should be added
         mock_pr_instance.assignees.add.assert_called_once_with(valid_user)
 

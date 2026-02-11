@@ -292,7 +292,7 @@ def test_get_news_data_with_missing_anchor(monkeypatch):
     get_news_data.cache_clear()
 
     result = get_news_data()
-    
+
     assert len(result) == 1
     assert result[0]["title"] == "Title with anchor"
 

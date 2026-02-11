@@ -27,15 +27,13 @@ class TestCommandBase:
         mock_slack_config.app = None
         CommandBase.configure_commands()
         mock_logger.warning.assert_called_once()
-        assert (
-            "SlackConfig.app is None" in mock_logger.warning.call_args[0][0]
-        )
+        assert "SlackConfig.app is None" in mock_logger.warning.call_args[0][0]
 
     @patch("apps.slack.commands.command.SlackConfig")
     def test_configure_commands_returns_early_when_app_is_none(self, mock_slack_config):
         """Tests that configure_commands returns early when app is None."""
         mock_slack_config.app = None
-        
+
         # Create a mock command subclass
         with patch.object(CommandBase, "get_commands", return_value=[]):
             result = CommandBase.configure_commands()
@@ -93,9 +91,9 @@ class TestCommandBase:
         mock_client.conversations_open.return_value = {"channel": {"id": "D123XYZ"}}
         mock_client.chat_postMessage.side_effect = [Exception("API Error"), {"ok": True}]
         mocker.patch.object(command_instance, "render_blocks", return_value=[{"type": "section"}])
-        
+
         command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
-        
+
         ack.assert_called_once()
         mock_logger.exception.assert_called_once()
         # Verify retry occurred and eventually succeeded
@@ -103,7 +101,7 @@ class TestCommandBase:
         mock_logger.exception.assert_called_with(
             "Failed to handle command '%s'", command_instance.command_name
         )
-        
+
         # Verify conversations_open was called in both try and except blocks
         assert mock_client.conversations_open.call_count == 2
 
@@ -117,14 +115,14 @@ class TestCommandBase:
         mock_client = MagicMock()
         mock_client.conversations_open.return_value = {"channel": {"id": "D123XYZ"}}
         mock_client.chat_postMessage.return_value = {"ok": True}
-        
+
         # Make render_blocks raise an exception
         mocker.patch.object(
             command_instance, "render_blocks", side_effect=Exception("Render error")
         )
-        
+
         command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
-        
+
         ack.assert_called_once()
         mock_logger.exception.assert_called_once()
         # Verify error message was sent

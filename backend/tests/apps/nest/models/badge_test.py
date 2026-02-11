@@ -19,7 +19,7 @@ class TestBadgeModel:
             "Community Member",
             "🏆 Champion",
         ]
-        
+
         for name in test_cases:
             badge = Badge(name=name)
             assert str(badge) == name

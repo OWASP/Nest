@@ -124,12 +124,12 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_user1.login = "user1"
         mock_user2 = Mock()
         mock_user2.login = "user2"
-        
+
         mock_interest1 = Mock()
         mock_interest1.user = mock_user1
         mock_interest2 = Mock()
         mock_interest2.user = mock_user2
-        
+
         mock_queryset = Mock()
         mock_queryset.select_related.return_value.order_by.return_value = [
             mock_interest1,

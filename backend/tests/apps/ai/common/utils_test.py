@@ -5,8 +5,8 @@ import openai
 
 from apps.ai.common.utils import (
     create_chunks_and_embeddings,
-    regenerate_chunks_for_context,
     extract_json_from_markdown,
+    regenerate_chunks_for_context,
 )
 
 
@@ -356,35 +356,30 @@ class TestExtractJsonFromMarkdown:
 
     def test_extract_json_from_markdown_with_json_marker(self):
         """Test extraction when content has ```json marker."""
-        
         content = '```json\n{"key": "value", "number": 42}\n```'
         result = extract_json_from_markdown(content)
         assert result == '{"key": "value", "number": 42}'
 
     def test_extract_json_from_markdown_with_generic_marker(self):
         """Test extraction when content has generic ``` marker."""
-
         content = '```\n{"key": "value", "number": 42}\n```'
         result = extract_json_from_markdown(content)
         assert result == '{"key": "value", "number": 42}'
 
     def test_extract_json_from_markdown_no_markers(self):
         """Test extraction when content has no markdown markers."""
-
         content = '{"key": "value", "number": 42}'
         result = extract_json_from_markdown(content)
         assert result == '{"key": "value", "number": 42}'
 
     def test_extract_json_from_markdown_json_marker_priority(self):
         """Test that ```json marker takes priority over generic ```."""
-
         content = '```\nignore me\n```\n```json\n{"extracted": true}\n```'
         result = extract_json_from_markdown(content)
         assert result == '{"extracted": true}'
 
     def test_extract_json_from_markdown_strips_whitespace(self):
         """Test that extracted content is stripped of whitespace."""
-
         content = '```json\n\n  {"key": "value"}  \n\n```'
         result = extract_json_from_markdown(content)
         assert result == '{"key": "value"}'

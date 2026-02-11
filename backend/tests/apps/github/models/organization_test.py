@@ -46,16 +46,18 @@ class TestOrganizationModel:
         ):
             mock_project = Mock()
             mock_queryset = Mock()
-            mock_queryset.select_related.return_value.prefetch_related.return_value.filter.return_value.distinct.return_value = [mock_project]
+            (
+                mock_queryset.select_related.return_value.prefetch_related.return_value.filter.return_value.distinct.return_value
+            ) = [mock_project]
             mock_get_model.return_value.objects = mock_queryset
 
             organization = Organization()
-            
+
             # Mock the repositories.all() return value
             mock_repo_manager = Mock()
             mock_repo_manager.all.return_value = [Mock()]
-            
-            with patch.object(Organization, 'repositories', mock_repo_manager, create=True):
+
+            with patch.object(Organization, "repositories", mock_repo_manager, create=True):
                 projects = organization.related_projects
                 assert list(projects) == [mock_project]
 
@@ -90,18 +92,18 @@ class TestOrganizationModel:
         organization = Organization()
         original_description = organization.description
         organization.from_github(gh_organization_mock)
-    
+
         # None values shouldn't update the field
         assert organization.description == original_description
 
     @patch("apps.github.models.organization.Organization.objects.values_list")
-    def test_get_logins(self, mock_values_list):
-        """Test get_logins static method."""
+    def test_get_logins_with_cache_clear(self, mock_values_list):
+        """Test get_logins static method with cache cleared."""
         mock_values_list.return_value = ["org1", "org2", "org3"]
-        
+
         # Clear the cache before testing
         Organization.get_logins.cache_clear()
-        
+
         logins = Organization.get_logins()
         assert logins == {"org1", "org2", "org3"}
         mock_values_list.assert_called_once_with("login", flat=True)

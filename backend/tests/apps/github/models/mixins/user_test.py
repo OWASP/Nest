@@ -55,12 +55,12 @@ def user_index_mixin_instance():
         )
     ]
     instance.releases.count.return_value = 3
-    
+
     instance.user_badges = MagicMock()
     instance.user_badges.filter.return_value.count.return_value = 2
-    
+
     instance.contributions_count = 150
-    
+
     return instance
 
 
@@ -133,9 +133,9 @@ class TestUserIndexMixin:
     def test_idx_releases_with_tag_name(self):
         """Test idx_releases includes tag_name in release dict."""
         from apps.github.models.mixins.user import UserIndexMixin
-        
+
         instance = UserIndexMixin()
-        
+
         mock_release = MagicMock()
         mock_release.is_pre_release = False
         mock_release.name = "Release Name"
@@ -143,10 +143,10 @@ class TestUserIndexMixin:
         mock_release.tag_name = "v1.0.0"
         mock_release.repository.key = "repo_key"
         mock_release.repository.owner.login = "owner_login"
-        
+
         instance.releases = MagicMock()
         instance.releases.select_related.return_value.order_by.return_value = [mock_release]
-        
+
         releases = instance.idx_releases
         assert len(releases) == 1
         assert releases[0]["tag_name"] == "v1.0.0"

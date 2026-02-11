@@ -11,8 +11,8 @@ from apps.api.internal.mutations.api_key import (
     CreateApiKeyResult,
     RevokeApiKeyResult,
 )
-from apps.api.models.api_key import MAX_ACTIVE_KEYS, ApiKey
-from apps.api.models.api_key import MAX_WORD_LENGTH
+from apps.api.models.api_key import MAX_ACTIVE_KEYS, MAX_WORD_LENGTH, ApiKey
+
 
 def mock_info() -> MagicMock:
     """Return a mocked Info object."""
@@ -140,6 +140,7 @@ class TestApiKeyMutations:
         assert not result.ok
         assert result.code == "NOT_FOUND"
         assert result.message == "API key not found."
+
     def test_create_api_key_empty_name(self, api_key_mutations):
         """Test creating an API key with empty name."""
         info = mock_info()
@@ -172,7 +173,6 @@ class TestApiKeyMutations:
 
     def test_create_api_key_name_too_long(self, api_key_mutations):
         """Test creating an API key with name exceeding maximum length."""
-
         info = mock_info()
         name = "a" * (MAX_WORD_LENGTH + 1)
         expires_at = timezone.now() + timedelta(days=30)
