@@ -1,5 +1,7 @@
 """Unit tests for Nest app's custom User model."""
 
+from unittest.mock import Mock, patch, PropertyMock
+
 from django.db import models
 
 from apps.github.models.user import User as GithubUser
@@ -40,3 +42,27 @@ class TestUserModel:
         """Test __str__ returns the username."""
         user = User(username="testuser")
         assert str(user) == "testuser"
+
+    def test_active_api_keys_property(self):
+        """Test active_api_keys property returns filtered queryset."""
+
+        user = User(username="testuser")
+        
+        # Mock the api_keys manager
+        mock_api_keys = Mock()
+        mock_filter_result = Mock()
+        mock_api_keys.filter.return_value = mock_filter_result
+        
+        # Use PropertyMock to mock the api_keys relationship
+        with patch.object(type(user), 'api_keys', new_callable=PropertyMock) as mock_prop:
+            mock_prop.return_value = mock_api_keys
+            
+            # Call the property
+            result = user.active_api_keys
+            
+            # Verify filter was called
+            assert mock_api_keys.filter.called
+            call_kwargs = mock_api_keys.filter.call_args[1]
+            assert "expires_at__gte" in call_kwargs
+            assert call_kwargs["is_revoked"] is False
+            assert result == mock_filter_result

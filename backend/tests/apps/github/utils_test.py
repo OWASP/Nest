@@ -77,6 +77,8 @@ class TestUtils:
             ("https://example.com", "https://example.com"),
             ("https://example.com/path/", "https://example.com/path"),
             ("https://example.com/path#fragment", "https://example.com/path"),
+            ("http://example.com", "https://example.com"),
+            ("http://example.com/path", "https://example.com/path"),
         ],
     )
     def test_normalize_url(self, url, expected):

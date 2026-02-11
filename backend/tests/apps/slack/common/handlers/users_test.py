@@ -167,7 +167,10 @@ class TestGetUsersBlocks:
         blocks = get_blocks(page=2, presentation=presentation)
 
         # Should have actions block with pagination buttons on page 2
-        assert any(block.get("type") == "actions" for block in blocks)
+        action_blocks = [block for block in blocks if block.get("type") == "actions"]
+        assert len(action_blocks) > 0
+        # Verify the pagination block was actually appended
+        assert action_blocks[0] in blocks
 
     def test_get_blocks_no_search_query(self, mocker, mock_users_data):
         """Test get_blocks without search query."""

@@ -336,3 +336,17 @@ class TestQueryParser:
         # Should have field set and error re-raised
         assert e.value.field == "created"
         assert e.value.error_type in ["DATE_VALUE_ERROR", "TOKENIZATION_ERROR"]
+
+    def test_parse_with_empty_token_in_middle(self):
+        """Test parsing ignores empty tokens during iteration."""
+        # This should test line 180 where empty tokens are skipped
+        result = self.parser.parse('   author:"test"       ')
+        assert len(result) == 1
+        assert result[0]["field"] == "author"
+
+    def test_to_dict_non_strict_mode_returns_none_on_error(self):
+        """Test to_dict returns None on error in non-strict mode - covers lines 231-239."""
+        # Call parse with invalid date in non-strict mode
+        result = self.parser.parse("created:invalid_date")
+        # Should return empty list since the invalid date is dropped in non-strict mode
+        assert result == []

@@ -246,3 +246,10 @@ class TestUserModel:
         user.contribution_data = {"2025-01-01": 15, "2025-01-02": 5}
         assert user.contribution_data["2025-01-01"] == 15
         assert user.contribution_data["2025-01-02"] == 5
+
+    def test_releases_property(self):
+        """Test the releases property."""
+        user = User(login="test-user")
+        with patch.object(User, "created_releases", all=Mock(return_value=["release1", "release2"])):
+            releases = user.releases
+            assert releases == ["release1", "release2"]

@@ -217,6 +217,19 @@ class TestGitHubAppAuth:
             with pytest.raises(BadCredentialsException):
                 auth.get_github_client()
 
+    def test_get_github_client_no_credentials(self):
+        """Test GitHub client creation when no credentials are available."""
+        with (
+            mock.patch("apps.github.auth.settings") as mock_settings,
+            mock.patch.dict(os.environ, {}, clear=True),
+            mock.patch.object(GitHubAppAuth, "_load_private_key", return_value=None),
+        ):
+            mock_settings.GITHUB_APP_ID = None
+            mock_settings.GITHUB_APP_INSTALLATION_ID = None
+            mock_settings.GITHUB_TOKEN = None
+            with pytest.raises(ValueError, match="GitHub App configuration is incomplete"):
+                GitHubAppAuth()
+
 
 class TestGetGitHubClient:
     """Test the get_github_client function."""

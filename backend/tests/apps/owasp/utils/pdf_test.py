@@ -9,6 +9,11 @@ from apps.owasp.utils.pdf import generate_latest_metrics_pdf, generate_metrics_o
 
 
 class TestGenerateMetricsPDF:
+    def test_generate_latest_metrics_pdf_with_none_metrics(self):
+        """Test generate_latest_metrics_pdf returns None when metrics is None."""
+        result = generate_latest_metrics_pdf(None)
+        assert result is None
+
     @patch("apps.owasp.utils.pdf.ProjectHealthMetrics.get_stats")
     @patch("apps.owasp.utils.pdf.Canvas")
     @patch("apps.owasp.utils.pdf.Table")

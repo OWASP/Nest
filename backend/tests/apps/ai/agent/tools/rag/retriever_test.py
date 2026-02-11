@@ -390,6 +390,36 @@ class TestRetriever:
 
             assert result["ts"] == "1234567891.123456"
 
+    def test_get_additional_context_message_with_conversation_but_no_attributes(self):
+        """Test getting additional context for message with conversation lacking slack_channel_id."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI"),
+        ):
+            retriever = Retriever()
+
+            # Create conversation without slack_channel_id attribute
+            conversation = MagicMock(spec=[])
+
+            parent_message = MagicMock(spec=[])
+
+            author = MagicMock(spec=[])
+
+            content_object = MagicMock()
+            content_object.__class__.__name__ = "Message"
+            content_object.conversation = conversation
+            content_object.parent_message = parent_message
+            content_object.ts = "1234567891.123456"
+            content_object.author = author
+
+            result = retriever.get_additional_context(content_object)
+
+            # Channel, thread_ts, and user should be None when attributes don't exist
+            assert "channel" not in result or result.get("channel") is None
+            assert "thread_ts" not in result or result.get("thread_ts") is None
+            assert "user" not in result or result.get("user") is None
+            assert result["ts"] == "1234567891.123456"
+
     def test_extract_content_types_from_query_single_type(self):
         """Test extracting single content type from query."""
         with (

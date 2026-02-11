@@ -574,3 +574,64 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         assert model.index_md_url is None
         assert model.info_md_url is None
         assert model.leaders_md_url is None
+
+    def test_entity_leaders_property(self):
+        """Test entity_leaders returns filtered and ordered leaders."""
+        from apps.owasp.models.entity_member import EntityMember
+
+        model = EntityModel()
+        model.id = 1
+        
+        # Mock the entity_members relationship
+        mock_queryset = Mock()
+        mock_queryset.filter.return_value.order_by.return_value = [Mock(), Mock()]
+        
+        with patch.object(type(model), 'entity_members', new_callable=lambda: mock_queryset):
+            leaders = model.entity_leaders
+            
+        mock_queryset.filter.assert_called_once_with(role=EntityMember.Role.LEADER)
+        mock_queryset.filter.return_value.order_by.assert_called_once_with("order")
+
+    def test_get_audience_no_content(self):
+        """Test get_audience returns empty list when content is None."""
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=None):
+            audience = model.get_audience()
+
+        assert audience == []
+
+    def test_get_leaders_emails_name_without_email(self):
+        """Test get_leaders_emails handles names without emails."""
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        content = """### Leaders
+        - [Leader With Email](mailto:email@example.com)
+        - [Another Leader](https://example.com)
+        """
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=content):
+            leaders = model.get_leaders_emails()
+
+        assert "Leader With Email" in leaders
+        assert leaders["Leader With Email"] == "email@example.com"
+        assert "Another Leader" in leaders
+        assert leaders["Another Leader"] == "https://example.com"
+
+    def test_get_urls_no_content(self):
+        """Test get_urls returns empty list when content is None."""
+        model = EntityModel()
+        repository = Repository()
+        repository.name = "www-project-example"
+        model.owasp_repository = repository
+
+        with patch("apps.owasp.models.common.get_repository_file_content", return_value=None):
+            urls = model.get_urls()
+
+        assert urls == []

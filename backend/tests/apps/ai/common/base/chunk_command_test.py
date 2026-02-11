@@ -188,6 +188,33 @@ class TestBaseChunkCommand:
 
     @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
     @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
+    def test_process_chunks_batch_already_up_to_date(
+        self,
+        mock_context_filter,
+        mock_get_content_type,
+        command,
+        mock_entity,
+        mock_context,
+        mock_content_type,
+    ):
+        """Test process_chunks_batch when chunks are already up to date."""
+        mock_get_content_type.return_value = mock_content_type
+        
+        # Simulate that we have existing chunks with current timestamp
+        mock_context.nest_updated_at = datetime(2024, 1, 1, tzinfo=UTC)
+        mock_context.chunks.aggregate.return_value = {"latest_created": datetime(2024, 1, 2, tzinfo=UTC)}
+        mock_context_filter.return_value.first.return_value = mock_context
+
+        with patch.object(command.stdout, "write") as mock_write:
+            result = command.process_chunks_batch([mock_entity])
+
+            assert result == 0
+            # Should write that chunks are already up to date
+            calls = [str(call) for call in mock_write.call_args_list]
+            assert any("already up to date" in str(call) for call in calls)
+
+    @patch("apps.ai.common.base.chunk_command.ContentType.objects.get_for_model")
+    @patch("apps.ai.common.base.chunk_command.Context.objects.filter")
     @patch("apps.ai.models.chunk.Chunk.split_text")
     @patch("apps.ai.common.base.chunk_command.create_chunks_and_embeddings")
     @patch("apps.ai.models.chunk.Chunk.bulk_save")

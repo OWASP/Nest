@@ -55,6 +55,12 @@ def user_index_mixin_instance():
         )
     ]
     instance.releases.count.return_value = 3
+    
+    instance.user_badges = MagicMock()
+    instance.user_badges.filter.return_value.count.return_value = 2
+    
+    instance.contributions_count = 150
+    
     return instance
 
 
@@ -106,8 +112,41 @@ class TestUserIndexMixin:
                 ],
             ),
             ("idx_issues_count", 5),
+            ("idx_contributions_count", 150),
             ("idx_releases_count", 3),
         ],
     )
     def test_user_index_fields(self, user_index_mixin_instance, attr, expected):
         assert getattr(user_index_mixin_instance, attr) == expected
+
+    def test_idx_badge_count(self, user_index_mixin_instance):
+        """Test idx_badge_count property."""
+        assert user_index_mixin_instance.idx_badge_count == 2
+        user_index_mixin_instance.user_badges.filter.assert_called_once_with(is_active=True)
+
+    def test_idx_releases_with_owner_key(self, user_index_mixin_instance):
+        """Test idx_releases includes owner_key in repository dict."""
+        releases = user_index_mixin_instance.idx_releases
+        assert len(releases) == 1
+        assert releases[0]["repository"]["owner_key"] == "owner_login"
+
+    def test_idx_releases_with_tag_name(self):
+        """Test idx_releases includes tag_name in release dict."""
+        from apps.github.models.mixins.user import UserIndexMixin
+        
+        instance = UserIndexMixin()
+        
+        mock_release = MagicMock()
+        mock_release.is_pre_release = False
+        mock_release.name = "Release Name"
+        mock_release.published_at = datetime(2021, 1, 1, tzinfo=UTC)
+        mock_release.tag_name = "v1.0.0"
+        mock_release.repository.key = "repo_key"
+        mock_release.repository.owner.login = "owner_login"
+        
+        instance.releases = MagicMock()
+        instance.releases.select_related.return_value.order_by.return_value = [mock_release]
+        
+        releases = instance.idx_releases
+        assert len(releases) == 1
+        assert releases[0]["tag_name"] == "v1.0.0"

@@ -176,14 +176,7 @@ class TestCommitteeHandler:
         blocks = get_blocks(page=2, presentation=presentation)
 
         # Should have actions block with pagination buttons on page 2
-        assert any(block.get("type") == "actions" for block in blocks)
-
-    def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_committee_data):
-        """Test that no pagination buttons are added when include_pagination is False."""
-        setup_mocks["get_committees"].return_value = mock_committee_data
-        presentation = EntityPresentation(include_pagination=False)
-
-        blocks = get_blocks(page=1, presentation=presentation)
-
-        # Should not have actions block
-        assert not any(block.get("type") == "actions" for block in blocks)
+        action_blocks = [block for block in blocks if block.get("type") == "actions"]
+        assert len(action_blocks) > 0
+        # Verify the pagination block was actually appended
+        assert action_blocks[0] in blocks

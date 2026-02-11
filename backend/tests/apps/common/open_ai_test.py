@@ -89,3 +89,20 @@ class TestOpenAi:
         mock_logger.exception.assert_called_once_with(
             "A connection error occurred during OpenAI API request."
         )
+
+    @patch("openai.OpenAI")
+    def test_complete_success(self, mock_openai):
+        """Test successful completion returns the message content."""
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = "Generated response content"
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response == "Generated response content"
+        mock_client.chat.completions.create.assert_called_once()

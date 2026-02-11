@@ -462,3 +462,38 @@ class TestProjectProperties:
         project.save()
 
         mock_generate.assert_not_called()
+
+    @patch("apps.owasp.models.project.Project.objects.filter")
+    def test_active_projects_count(self, mock_filter):
+        """Test active_projects_count returns correct count."""
+        mock_queryset = Mock()
+        mock_queryset.count.return_value = 42
+        mock_filter.return_value = mock_queryset
+
+        result = Project.active_projects_count()
+
+        mock_filter.assert_called_once_with(has_active_repositories=True, is_active=True)
+        mock_queryset.count.assert_called_once()
+        assert result == 42
+
+    def test_bulk_save(self):
+        """Test bulk_save method."""
+        mock_projects = [Mock(id=None), Mock(id=1)]
+        with patch("apps.owasp.models.project.BulkSaveModel.bulk_save") as mock_bulk_save:
+            Project.bulk_save(mock_projects, fields=["name"])
+            mock_bulk_save.assert_called_once_with(Project, mock_projects, fields=["name"])
+
+    @patch("apps.owasp.models.project.Project.objects.get")
+    def test_update_data_with_save_false(self, mock_get):
+        """Test update_data with save=False doesn't call save."""
+        mock_get.side_effect = Project.DoesNotExist
+        gh_repository_mock = Mock()
+        gh_repository_mock.name = "test_repo"
+        repository_mock = Mock()
+
+        with patch.object(Project, "from_github"):
+            project = Project.update_data(gh_repository_mock, repository_mock, save=False)
+
+        assert project.key == "test_repo"
+        # Verify save was not called by checking the project doesn't have a pk
+        assert project.pk is None

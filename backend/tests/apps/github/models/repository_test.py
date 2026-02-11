@@ -351,3 +351,43 @@ class TestRepositoryProperties:
         assert repository.latest_pull_request == mock_pr
         mock_manager.order_by.assert_called_with("-created_at")
 
+    def test_path_property(self, mocker):
+        """Test the path property returns the repository path."""
+        owner = Mock(spec=User, login="test-owner", _state=Mock(db=None))
+        repository = Repository(owner=owner, name="test-repo")
+        assert repository.path == "test-owner/test-repo"
+
+    def test_update_data_without_save(self, mocker):
+        """Test update_data with save=False."""
+        gh_repository_mock = MagicMock()
+        gh_repository_mock.raw_data = {"node_id": "repo_node_123"}
+
+        mock_repository = mocker.Mock(spec=Repository)
+        mocker.patch(
+            "apps.github.models.repository.Repository.objects.get", return_value=mock_repository
+        )
+
+        repository = Repository.update_data(gh_repository_mock, save=False)
+
+        mock_repository.from_github.assert_called_once()
+        mock_repository.save.assert_not_called()
+        assert repository == mock_repository
+
+    def test_update_data_creates_new_repository(self, mocker):
+        """Test update_data creates a new repository when it doesn't exist."""
+        gh_repository_mock = MagicMock()
+        gh_repository_mock.raw_data = {"node_id": "new_repo_node"}
+
+        mocker.patch(
+            "apps.github.models.repository.Repository.objects.get",
+            side_effect=Repository.DoesNotExist
+        )
+        mock_from_github = mocker.patch("apps.github.models.repository.Repository.from_github")
+        mock_save = mocker.patch("apps.github.models.repository.Repository.save")
+
+        repository = Repository.update_data(gh_repository_mock)
+
+        assert repository.node_id == "new_repo_node"
+        mock_from_github.assert_called_once()
+        mock_save.assert_called_once()
+
