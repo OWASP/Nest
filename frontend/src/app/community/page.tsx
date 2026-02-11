@@ -1,13 +1,12 @@
 'use client'
 import Link from 'next/link'
 import { FaArrowRight, FaSlack } from 'react-icons/fa'
-import SecondaryCard from 'components/SecondaryCard'
 import { exploreCards, engagementWays, journeySteps } from 'utils/communityData'
+import SecondaryCard from 'components/SecondaryCard'
 
 export default function CommunityPage() {
-
   return (
-    <div className="min-h-screen w-full px-8 pb-8 pt-24 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen w-full px-8 pt-24 pb-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
@@ -61,11 +60,8 @@ export default function CommunityPage() {
         {/* Ways to Engage Section */}
         <SecondaryCard title="Ways to Engage">
           <div className="grid gap-6 md:grid-cols-2">
-            {engagementWays.map((way, index) => (
-              <div
-                key={index}
-                className="rounded-lg bg-gray-200 p-5 dark:bg-gray-700"
-              >
+            {engagementWays.map((way) => (
+              <div key={way.title} className="rounded-lg bg-gray-200 p-5 dark:bg-gray-700">
                 <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
                   {way.title}
                 </h3>
@@ -80,16 +76,16 @@ export default function CommunityPage() {
           <div className="relative">
             {/* Desktop view - horizontal */}
             <div className="hidden items-center justify-between md:flex">
-              {journeySteps.map((step, index) => (
-                <div key={index} className="flex flex-1 items-center">
+              {journeySteps.map((step, idx) => (
+                <div key={step.label} className="flex flex-1 items-center">
                   <div className="flex flex-col items-center text-center">
                     <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-500 text-xl font-bold text-white">
-                      {index + 1}
+                      {idx + 1}
                     </div>
                     <h3 className="mb-1 text-lg font-semibold">{step.label}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{step.description}</p>
                   </div>
-                  {index < journeySteps.length - 1 && (
+                  {idx < journeySteps.length - 1 && (
                     <div className="mx-4 flex-1 border-t-2 border-dashed border-gray-400" />
                   )}
                 </div>
@@ -98,10 +94,10 @@ export default function CommunityPage() {
 
             {/* Mobile view - vertical */}
             <div className="flex flex-col gap-6 md:hidden">
-              {journeySteps.map((step, index) => (
-                <div key={index} className="flex items-start gap-4">
+              {journeySteps.map((step, idx) => (
+                <div key={step.label} className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-500 text-lg font-bold text-white">
-                    {index + 1}
+                    {idx + 1}
                   </div>
                   <div className="flex-1">
                     <h3 className="mb-1 text-lg font-semibold">{step.label}</h3>
@@ -120,14 +116,14 @@ export default function CommunityPage() {
               <FaSlack className="h-8 w-8 text-blue-500" aria-hidden="true" />
             </div>
             <p className="mb-8 text-lg text-gray-600 dark:text-gray-400">
-              Connect with fellow security professionals, ask questions, share ideas, and collaborate
-              with the global OWASP community on Slack.
+              Connect with fellow security professionals, ask questions, share ideas, and
+              collaborate with the global OWASP community on Slack.
             </p>
             <a
               href="https://owasp.org/slack/invite"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-8 py-3 text-lg font-semibold text-white transition-colors hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
               aria-label="Join OWASP Community Slack workspace"
             >
               Join Slack
