@@ -2,7 +2,7 @@ services:
   nest-certbot:
     container_name: nest-certbot
     entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'
-    image: certbot/certbot
+    image: certbot/certbot:v5.3.1
     restart: unless-stopped
     volumes:
       - ./blocked_ips.conf:/etc/nginx/blocked_ips.conf
@@ -17,7 +17,7 @@ services:
 
   nest-nginx:
     container_name: nest-nginx
-    image: nginx:latest
+    image: nginx:1.29.5-alpine
     networks:
       - production_nest-app-network
       - staging_nest-app-network

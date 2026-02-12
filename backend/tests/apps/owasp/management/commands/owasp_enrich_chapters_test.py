@@ -69,19 +69,19 @@ class TestOwaspEnrichChapters:
             mock.patch.object(
                 Prompt, "get_owasp_chapter_summary", mock_prompt.get_owasp_chapter_summary
             ),
-            mock.patch("builtins.print") as mock_print,
             mock.patch("time.sleep", return_value=None),
         ):
+            command.stdout = mock.MagicMock()
             command.handle(offset=offset)
 
         mock_active_chapters.count.assert_called_once()
 
         assert mock_bulk_save.called
 
-        assert mock_print.call_count == len(mock_chapters_list) - offset
+        assert command.stdout.write.call_count == len(mock_chapters_list) - offset
 
-        for call in mock_print.call_args_list:
-            args, _ = call
+        for call in command.stdout.write.call_args_list:
+            args = call[0]
             assert "https://owasp.org/www-chapter-test" in args[0]
 
         for chapter in mock_chapters_list:

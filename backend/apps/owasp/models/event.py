@@ -29,6 +29,8 @@ class Event(BulkSaveModel, TimestampedModel):
     """Event model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_events"
         indexes = [
             models.Index(fields=["-start_date"], name="event_start_date_desc_idx"),

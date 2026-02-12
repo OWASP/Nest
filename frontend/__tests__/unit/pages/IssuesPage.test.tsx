@@ -192,7 +192,7 @@ describe('IssuesPage', () => {
   })
 
   describe.each([
-    { state: 'closed', isMerged: true, expectedText: 'Merged' },
+    { state: 'closed', isMerged: true, expectedText: 'Closed' },
     { state: 'closed', isMerged: false, expectedText: 'Closed' },
   ])('issue states', ({ state, isMerged, expectedText }) => {
     it(`renders ${expectedText} issues correctly`, () => {
@@ -260,5 +260,82 @@ describe('IssuesPage', () => {
     render(<IssuesPage />)
     const plusOneElements = screen.getAllByText(/\+1/)
     expect(plusOneElements.length).toBeGreaterThan(0)
+  })
+
+  it('extracts labels from issues when availableLabels is empty', async () => {
+    const dataWithoutAvailableLabels = {
+      getModule: {
+        ...mockModuleData.getModule,
+        availableLabels: [],
+        issues: [
+          {
+            ...mockModuleData.getModule.issues[0],
+            labels: ['extracted-label-1', 'extracted-label-2'],
+          },
+        ],
+      },
+    }
+    mockUseQuery.mockReturnValue({
+      data: dataWithoutAvailableLabels,
+      loading: false,
+      error: undefined,
+    })
+    render(<IssuesPage />)
+
+    // Open the label dropdown to verify extracted labels are present
+    const selectTrigger = screen.getByRole('button', { name: /Label/i })
+    fireEvent.click(selectTrigger)
+
+    const listbox = await screen.findByRole('listbox')
+    expect(within(listbox).getByText('extracted-label-1')).toBeInTheDocument()
+    expect(within(listbox).getByText('extracted-label-2')).toBeInTheDocument()
+  })
+
+  it('extracts labels from issues when availableLabels is null', async () => {
+    const dataWithNullAvailableLabels = {
+      getModule: {
+        ...mockModuleData.getModule,
+        availableLabels: null,
+        issues: [
+          {
+            ...mockModuleData.getModule.issues[0],
+            labels: ['label-from-issue'],
+          },
+        ],
+      },
+    }
+    mockUseQuery.mockReturnValue({
+      data: dataWithNullAvailableLabels,
+      loading: false,
+      error: undefined,
+    })
+    render(<IssuesPage />)
+
+    const selectTrigger = screen.getByRole('button', { name: /Label/i })
+    fireEvent.click(selectTrigger)
+
+    const listbox = await screen.findByRole('listbox')
+    expect(within(listbox).getByText('label-from-issue')).toBeInTheDocument()
+  })
+
+  it('handles issues with null labels and assignees', () => {
+    const issueWithNullFields = {
+      ...mockModuleData.getModule.issues[0],
+      labels: null,
+      assignees: null,
+    }
+    mockUseQuery.mockReturnValue({
+      data: {
+        getModule: {
+          ...mockModuleData.getModule,
+          issues: [issueWithNullFields],
+        },
+      },
+      loading: false,
+      error: undefined,
+    })
+    render(<IssuesPage />)
+    expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
+    expect(screen.getAllByText('First Issue Title')[0]).toBeInTheDocument()
   })
 })
