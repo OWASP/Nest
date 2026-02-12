@@ -359,30 +359,6 @@ class TestRepositoryProperties:
         _owner, repository = repository_setup
         assert repository.url == "https://github.com/test-owner/test-repo"
 
-    def test_latest_pull_request_property(self, mocker):
-        """Test latest_pull_request property returns the most recent pull request."""
-        repository = Repository()
-        repository.pk = 1
-
-        mock_pr = Mock()
-        mock_pr.created_at = "2023-01-01"
-
-        mock_manager = Mock()
-        mock_manager.order_by.return_value.first.return_value = mock_pr
-
-        mocker.patch.object(
-            Repository, "pull_requests", new_callable=PropertyMock, return_value=mock_manager
-        )
-
-        assert repository.latest_pull_request == mock_pr
-        mock_manager.order_by.assert_called_with("-created_at")
-
-    def test_path_property(self, mocker):
-        """Test the path property returns the repository path."""
-        owner = Mock(spec=User, login="test-owner", _state=Mock(db=None))
-        repository = Repository(owner=owner, name="test-repo")
-        assert repository.path == "test-owner/test-repo"
-
     def test_update_data_without_save(self, mocker):
         """Test update_data with save=False."""
         gh_repository_mock = MagicMock()

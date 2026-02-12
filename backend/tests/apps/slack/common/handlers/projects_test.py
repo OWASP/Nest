@@ -169,7 +169,9 @@ class TestProjectHandler:
 
         action_blocks = [block for block in blocks if block.get("type") == "actions"]
         assert len(action_blocks) > 0
-        assert action_blocks[0] in blocks
+        elements = action_blocks[0].get("elements", [])
+        assert len(elements) > 0
+        assert all(elem.get("type") == "button" for elem in elements)
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_project_data):
         """Test that no pagination buttons are added when include_pagination is False."""

@@ -106,7 +106,8 @@ class TestComment:
 
         comment.from_github(gh_comment)
 
-        assert comment.body is None or hasattr(comment, "body")
+        assert comment.body == ""
+        assert comment.created_at is None
         assert comment.updated_at == "2023-01-01"
 
     def test_str_representation(self):

@@ -34,10 +34,15 @@ class TestSponsorModel:
             "description": "A new sponsor",
         }
 
-        with patch.object(Sponsor, "from_dict"), patch.object(Sponsor, "save"):
+        with (
+            patch.object(Sponsor, "from_dict") as mock_from_dict,
+            patch.object(Sponsor, "save") as mock_save,
+        ):
             result = Sponsor.update_data(data)
 
         mock_get.assert_called_once()
+        mock_from_dict.assert_called_once_with(data)
+        mock_save.assert_called_once()
         assert isinstance(result, Sponsor)
 
     @patch("apps.owasp.models.sponsor.Sponsor.objects.get")

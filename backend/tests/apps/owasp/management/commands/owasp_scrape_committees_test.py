@@ -192,3 +192,7 @@ class TestOwaspScrapeCommittees:
             ),
         ):
             command.handle(offset=0)
+
+        assert mock_committee.related_urls == []
+        assert mock_committee.invalid_urls == []
+        assert mock_committee.get_related_url.call_count == 2

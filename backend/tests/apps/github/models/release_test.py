@@ -97,6 +97,8 @@ class TestReleaseModel:
 
         assert release.description == "Description"
         assert release.tag_name == "v1.0.0"
+        assert release.name == ""
+        assert not hasattr(release, "created_at") or release.created_at is None
 
     def test_update_data_without_save(self, mocker):
         """Test update_data with save=False."""

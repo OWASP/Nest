@@ -79,25 +79,16 @@ class TestMemberProfileAdmin:
     def test_get_queryset(self):
         """Test get_queryset applies select_related for github_user."""
         admin = MemberProfileAdmin(MemberProfile, AdminSite())
-
         mock_request = Mock()
 
-        mock_queryset = MagicMock()
-        mock_related_queryset = MagicMock()
-        mock_queryset.select_related.return_value = mock_related_queryset
+        admin_queryset = MagicMock()
+        result_queryset = MagicMock()
+        admin_queryset.select_related.return_value = result_queryset
 
-        with MagicMock() as mock_super:
-            mock_super.return_value = mock_queryset
-            admin.__class__.__bases__[0].get_queryset = mock_super
+        with mock.patch.object(
+            admin.__class__.__bases__[0], "get_queryset", return_value=admin_queryset
+        ):
+            result = admin.get_queryset(mock_request)
 
-            admin_queryset = MagicMock()
-            result_queryset = MagicMock()
-            admin_queryset.select_related.return_value = result_queryset
-
-            with mock.patch.object(
-                admin.__class__.__bases__[0], "get_queryset", return_value=admin_queryset
-            ):
-                result = admin.get_queryset(mock_request)
-
-                admin_queryset.select_related.assert_called_once_with("github_user")
-                assert result == result_queryset
+            admin_queryset.select_related.assert_called_once_with("github_user")
+            assert result == result_queryset

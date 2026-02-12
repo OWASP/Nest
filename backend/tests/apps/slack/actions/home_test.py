@@ -104,15 +104,12 @@ class TestHomeActions:
         ]
 
         for action in registered_actions:
-            assert (
-                action
-                in [
-                    listener.matchers[0].action_id
-                    for listener in SlackConfig.app._listeners
-                    if listener.matchers and hasattr(listener.matchers[0], "action_id")
-                ]
-                or True
-            )
+            registered_action_ids = [
+                listener.matchers[0].action_id
+                for listener in SlackConfig.app._listeners
+                if listener.matchers and hasattr(listener.matchers[0], "action_id")
+            ]
+            assert action in registered_action_ids, f"Action {action} not registered"
 
     def test_all_action_constants_covered(self):
         """Test that all action constants in the registration tuple are defined."""

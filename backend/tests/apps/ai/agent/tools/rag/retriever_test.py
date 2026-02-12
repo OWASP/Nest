@@ -336,60 +336,6 @@ class TestRetriever:
             for key in expected_keys:
                 assert key in result
 
-    def test_get_additional_context_message(self):
-        """Test getting additional context for message content type."""
-        with (
-            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
-            patch("openai.OpenAI"),
-        ):
-            retriever = Retriever()
-
-            conversation = MagicMock()
-            conversation.slack_channel_id = "C1234567890"
-
-            parent_message = MagicMock()
-            parent_message.ts = "1234567890.123456"
-
-            author = MagicMock()
-            author.name = "testuser"
-
-            content_object = MagicMock()
-            content_object.__class__.__name__ = "Message"
-            content_object.conversation = conversation
-            content_object.parent_message = parent_message
-            content_object.ts = "1234567891.123456"
-            content_object.author = author
-
-            result = retriever.get_additional_context(content_object)
-
-            expected_keys = ["channel", "thread_ts", "ts", "user"]
-            for key in expected_keys:
-                assert key in result
-
-            assert result["channel"] == "C1234567890"
-            assert result["thread_ts"] == "1234567890.123456"
-            assert result["ts"] == "1234567891.123456"
-            assert result["user"] == "testuser"
-
-    def test_get_additional_context_message_no_conversation(self):
-        """Test getting additional context for message with no conversation."""
-        with (
-            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
-            patch("openai.OpenAI"),
-        ):
-            retriever = Retriever()
-
-            content_object = MagicMock()
-            content_object.__class__.__name__ = "Message"
-            content_object.conversation = None
-            content_object.parent_message = None
-            content_object.ts = "1234567891.123456"
-            content_object.author = None
-
-            result = retriever.get_additional_context(content_object)
-
-            assert result["ts"] == "1234567891.123456"
-
     def test_get_additional_context_message_with_conversation_but_no_attributes(self):
         """Test additional context for message with conversation lacking slack_channel_id."""
         with (

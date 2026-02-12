@@ -118,4 +118,3 @@ class TestAlgoliaValidators:
     def test_empty_query(self):
         """Test that empty query doesn't raise ValidationError."""
         validate_query("")
-        validate_query(None)

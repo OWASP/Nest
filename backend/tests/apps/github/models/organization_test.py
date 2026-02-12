@@ -96,11 +96,20 @@ class TestOrganizationModel:
 
     @patch("apps.github.models.organization.Organization.objects.values_list")
     def test_get_logins_with_cache_clear(self, mock_values_list):
-        """Test get_logins static method with cache cleared."""
-        mock_values_list.return_value = ["org1", "org2", "org3"]
-
+        """Test get_logins returns fresh results after cache_clear."""
+        mock_values_list.return_value = ["org1", "org2"]
         Organization.get_logins.cache_clear()
+        first_result = Organization.get_logins()
+        assert first_result == {"org1", "org2"}
 
-        logins = Organization.get_logins()
-        assert logins == {"org1", "org2", "org3"}
-        mock_values_list.assert_called_once_with("login", flat=True)
+        mock_values_list.return_value = ["org1", "org2", "org3"]
+        # Without cache_clear, should still return cached result
+        cached_result = Organization.get_logins()
+        assert cached_result == {"org1", "org2"}
+        assert mock_values_list.call_count == 1
+
+        # After cache_clear, should fetch fresh data
+        Organization.get_logins.cache_clear()
+        fresh_result = Organization.get_logins()
+        assert fresh_result == {"org1", "org2", "org3"}
+        assert mock_values_list.call_count == 2

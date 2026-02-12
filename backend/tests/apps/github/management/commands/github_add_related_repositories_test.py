@@ -268,7 +268,9 @@ def test_handle_unknown_object_exception_non_404(
     with mock.patch.object(Project, "bulk_save"):
         command.handle(offset=0)
 
-    mock_logger.exception.assert_called_once()
+    mock_logger.exception.assert_called_once_with(
+        "Unexpected error fetching repository %s", "https://github.com/OWASP/test-repo"
+    )
     mock_sync_repository.assert_not_called()
     mock_project.invalid_urls.add.assert_not_called()
 

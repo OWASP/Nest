@@ -206,7 +206,9 @@ class TestEntityChannelInline:
             assert result == mock_result
             mock_parent.assert_called_once()
             call_kwargs = mock_parent.call_args[1]
-            assert "widget" not in call_kwargs or not isinstance(call_kwargs.get("widget"), type)
+            assert "widget" not in call_kwargs
+            assert "queryset" not in call_kwargs
+            assert "initial" not in call_kwargs
 
 
 class TestStandardOwaspAdminMixin:

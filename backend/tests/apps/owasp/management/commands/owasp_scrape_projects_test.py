@@ -143,9 +143,9 @@ class TestOwaspScrapeProjects:
         mock_active_projects.__getitem__.return_value = mock_projects_list
         mock_active_projects.order_by.return_value = mock_active_projects
 
+        command.stdout = mock.MagicMock()
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
@@ -175,9 +175,9 @@ class TestOwaspScrapeProjects:
         mock_active_projects.__getitem__.return_value = mock_projects_list
         mock_active_projects.order_by.return_value = mock_active_projects
 
+        command.stdout = mock.MagicMock()
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
@@ -218,9 +218,9 @@ class TestOwaspScrapeProjects:
         mock_active_projects.__getitem__.return_value = mock_projects_list
         mock_active_projects.order_by.return_value = mock_active_projects
 
+        command.stdout = mock.MagicMock()
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
@@ -260,9 +260,9 @@ class TestOwaspScrapeProjects:
         mock_active_projects.__getitem__.return_value = mock_projects_list
         mock_active_projects.order_by.return_value = mock_active_projects
 
+        command.stdout = mock.MagicMock()
         with (
             mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print"),
             mock.patch("time.sleep"),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
@@ -270,3 +270,7 @@ class TestOwaspScrapeProjects:
             ),
         ):
             command.handle(offset=0)
+
+        assert mock_project.related_urls == []
+        assert mock_project.invalid_urls == []
+        assert mock_project.get_related_url.call_count == 2

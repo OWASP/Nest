@@ -22,7 +22,7 @@ def test_add_arguments(command):
         "--organization",
         required=False,
         type=str,
-        help="The organization name (e.g. juice-shop, DefectDojo')",
+        help="The organization name (e.g. juice-shop, DefectDojo)",
     )
 
 

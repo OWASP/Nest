@@ -192,3 +192,7 @@ class TestOwaspScrapeChapters:
             ),
         ):
             command.handle(offset=0)
+
+        assert mock_chapter.related_urls == []
+        assert mock_chapter.invalid_urls == []
+        assert mock_chapter.get_related_url.call_count == 2

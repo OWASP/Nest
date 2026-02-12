@@ -58,6 +58,7 @@ class TestBoardOfDirectorsModel:
         call_kwargs = mock_entity_member.objects.filter.call_args[1]
         assert call_kwargs["entity_type"] == mock_ct
         assert call_kwargs["entity_id"] == 1
+        assert call_kwargs["role"] == mock_entity_member.Role.CANDIDATE
         assert call_kwargs["is_active"] is True
         assert call_kwargs["is_reviewed"] is True
         mock_entity_member.objects.filter.return_value.order_by.assert_called_once_with(
@@ -83,6 +84,7 @@ class TestBoardOfDirectorsModel:
         call_kwargs = mock_entity_member.objects.filter.call_args[1]
         assert call_kwargs["entity_type"] == mock_ct
         assert call_kwargs["entity_id"] == 1
+        assert call_kwargs["role"] == mock_entity_member.Role.MEMBER
         assert call_kwargs["is_active"] is True
         assert call_kwargs["is_reviewed"] is True
         mock_entity_member.objects.filter.return_value.order_by.assert_called_once_with(
