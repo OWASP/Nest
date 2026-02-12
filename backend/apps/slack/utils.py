@@ -30,6 +30,11 @@ def download_file(url: str, token: str) -> bytes | None:
         bytes or None: The downloaded file content, or None if download failed.
 
     """
+    if not url:
+        return None
+    if not token:
+        return None
+
     try:
         response = requests.get(url, headers={"Authorization": f"Bearer {token}"}, timeout=30)
         response.raise_for_status()
