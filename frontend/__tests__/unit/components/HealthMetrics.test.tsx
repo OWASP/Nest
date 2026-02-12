@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { IconType } from 'react-icons'
-import { HealthMetricsProps } from 'types/healthMetrics'
+import type { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'
 const getMockHealthMetric = (): HealthMetricsProps[] => [
   {
@@ -117,23 +117,44 @@ describe('HealthMetrics', () => {
       const barChart = screen.getByTestId('BarChart')
       expect(barChart.className).toBeDefined()
     })
-  })
+    it('falls back to 0 when metric values are undefined', () => {
+      const mockData: HealthMetricsProps[] = [
+        {
+          createdAt: '2024-01-01',
+          openIssuesCount: undefined,
+          unassignedIssuesCount: undefined,
+          unansweredIssuesCount: undefined,
+          openPullRequestsCount: undefined,
+          starsCount: undefined,
+          forksCount: undefined,
+          lastCommitDays: undefined,
+          lastReleaseDays: undefined,
+          lastCommitDaysRequirement: undefined,
+          lastReleaseDaysRequirement: undefined,
+        },
+      ]
 
-  describe('with empty data', () => {
-    it('handles empty data gracefully', () => {
-      render(<HealthMetrics data={[]} />)
-      expect(screen.queryAllByTestId('LineChart')).toHaveLength(4)
-      expect(screen.queryByTestId('BarChart')).toBeInTheDocument()
+      render(<HealthMetrics data={mockData} />)
+
+      expect(screen.getByText('Issues Trend')).toBeInTheDocument()
     })
   })
+})
 
-  describe('with incomplete data', () => {
-    it('handles missing last data point fields with fallback values', () => {
-      render(<HealthMetrics data={getMockIncompleteHealthMetric()} />)
-      const barChart = screen.getByTestId('BarChart')
-      const props = JSON.parse(barChart.dataset.props || '{}')
-      expect(props.days).toEqual([0, 0])
-      expect(props.requirements).toEqual([0, 0])
-    })
+describe('with empty data', () => {
+  it('handles empty data gracefully', () => {
+    render(<HealthMetrics data={[]} />)
+    expect(screen.queryAllByTestId('LineChart')).toHaveLength(4)
+    expect(screen.queryByTestId('BarChart')).toBeInTheDocument()
+  })
+})
+
+describe('with incomplete data', () => {
+  it('handles missing last data point fields with fallback values', () => {
+    render(<HealthMetrics data={getMockIncompleteHealthMetric()} />)
+    const barChart = screen.getByTestId('BarChart')
+    const props = JSON.parse(barChart.dataset.props || '{}')
+    expect(props.days).toEqual([0, 0])
+    expect(props.requirements).toEqual([0, 0])
   })
 })

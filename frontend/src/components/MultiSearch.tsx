@@ -36,6 +36,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
 
+  const [highlightedIndex, setHighlightedIndex] = useState<{
+    index: number
+    subIndex: number
+  } | null>(null)
+
   const inputRef = useRef<HTMLInputElement>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
 
@@ -102,10 +107,62 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     triggerSearch(value)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!suggestions.length) return
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+
+      if (!highlightedIndex) {
+        setHighlightedIndex({ index: 0, subIndex: 0 })
+        return
+      }
+
+      const { index, subIndex } = highlightedIndex
+      const currentGroup = suggestions[index]
+
+      if (subIndex < currentGroup.hits.length - 1) {
+        setHighlightedIndex({ index, subIndex: subIndex + 1 })
+      } else if (index < suggestions.length - 1) {
+        setHighlightedIndex({ index: index + 1, subIndex: 0 })
+      }
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+
+      if (!highlightedIndex) return
+
+      const { index, subIndex } = highlightedIndex
+
+      if (subIndex > 0) {
+        setHighlightedIndex({ index, subIndex: subIndex - 1 })
+      } else if (index > 0) {
+        const prevGroup = suggestions[index - 1]
+        setHighlightedIndex({
+          index: index - 1,
+          subIndex: prevGroup.hits.length - 1,
+        })
+      }
+    }
+
+    if (e.key === 'Enter' && highlightedIndex) {
+      e.preventDefault()
+      const group = suggestions[highlightedIndex.index]
+      const hit = group.hits[highlightedIndex.subIndex]
+      handleSuggestionClick(hit, group.indexName)
+    }
+
+    if (e.key === 'Escape') {
+      setShowSuggestions(false)
+    }
+  }
+
   const handleClearSearch = () => {
     setSearchQuery('')
     setSuggestions([])
     setShowSuggestions(false)
+    setHighlightedIndex(null)
     inputRef.current?.focus()
   }
 
@@ -173,6 +230,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           placeholder={placeholder}
           aria-label={placeholder || 'Search'}
           className="h-12 w-full rounded-lg border border-gray-300 bg-white pr-10 pl-10 text-lg"
+          onKeyDown={handleKeyDown}
         />
 
         {searchQuery && (
@@ -188,16 +246,20 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
         {showSuggestions && (
           <div className="absolute top-14 left-0 z-50 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
-            {suggestions.map((group) => (
+            {suggestions.map((group, groupIndex) => (
               <div key={group.indexName}>
-                {group.hits.map((hit) => {
+                {group.hits.map((hit, hitIndex) => {
                   const safeHit = hit as HitMeta
 
                   return (
                     <button
                       key={safeHit.key || safeHit.login || safeHit.url}
                       onClick={() => handleSuggestionClick(hit, group.indexName)}
-                      className="flex w-full items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                      className={`flex w-full items-center px-4 py-3 text-left text-gray-700 dark:text-gray-200 ${highlightedIndex?.index === groupIndex &&
+                          highlightedIndex?.subIndex === hitIndex
+                          ? 'bg-gray-100 dark:bg-gray-700'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                        }`}
                     >
                       {getIconForIndex(group.indexName)}
                       <span className="truncate">{safeHit.name || safeHit.login}</span>

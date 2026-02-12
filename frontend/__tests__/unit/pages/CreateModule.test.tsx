@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/create/page'
+import { it } from 'node:test'
 
 // Mock dependencies to isolate the component
 jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
@@ -50,7 +51,7 @@ describe('CreateModulePage', () => {
   })
 
   it('submits the form and navigates to programs page', async () => {
-    const user = userEvent.setup({ delay: null })
+    const user = userEvent.setup()
 
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },

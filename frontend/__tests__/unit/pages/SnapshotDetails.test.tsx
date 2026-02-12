@@ -1,7 +1,8 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { mockSnapshotDetailsData } from '@mockData/mockSnapshotData'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { render } from 'wrappers/testUtil'
 import SnapshotDetailsPage from 'app/community/snapshots/[id]/page'
 
@@ -36,7 +37,7 @@ jest.mock('@/components/MarkdownWrapper', () => {
 
 describe('SnapshotDetailsPage', () => {
   beforeEach(() => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       loading: false,
       error: null,
@@ -48,7 +49,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -63,7 +64,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders snapshot details when data is available', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
       error: null,
     })
@@ -80,7 +81,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: mockError,
       loading: false,
@@ -101,7 +102,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('displays "Snapshot not found" when data is null without error', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
       loading: false,
@@ -114,7 +115,7 @@ describe('SnapshotDetailsPage', () => {
   })
 
   test('navigates to project page when project card is clicked', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockSnapshotDetailsData,
     })
 
@@ -124,68 +125,70 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
     })
 
+    const user = userEvent.setup()
+
     const projectCardButton = screen.getAllByRole('button', { name: /View Details/i })[1]
-    fireEvent.click(projectCardButton)
+    await user.click(projectCardButton)
 
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/projects/nest')
     })
-  })
 
-  test('navigates to chapter page when chapter card is clicked', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockSnapshotDetailsData,
+    test('navigates to chapter page when chapter card is clicked', async () => {
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockSnapshotDetailsData,
+      })
+
+      render(<SnapshotDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
+      })
+
+      const user = userEvent.setup()
+
+      const chapterCardButton = screen.getAllByRole('button', { name: /View Details/i })[0]
+      await user.click(chapterCardButton)
+
+      await waitFor(() => {
+        expect(mockRouter.push).toHaveBeenCalledWith('/chapters/sivagangai')
+      })
+
+      test('renders new releases correctly', async () => {
+        ; (useQuery as unknown as jest.Mock).mockReturnValue({
+          data: mockSnapshotDetailsData,
+        })
+
+        render(<SnapshotDetailsPage />)
+
+        await waitFor(() => {
+          expect(screen.getByText('New Snapshot')).toBeInTheDocument()
+          expect(screen.getByText('Latest pre-release')).toBeInTheDocument()
+        })
+
+        expect(screen.getByText('test-project-1')).toBeInTheDocument()
+        expect(screen.getByText('test-project-2')).toBeInTheDocument()
+      })
+
+      test('handles missing data gracefully', async () => {
+        ; (useQuery as unknown as jest.Mock).mockReturnValue({
+          data: {
+            snapshot: {
+              ...mockSnapshotDetailsData.snapshot,
+              newChapters: [],
+              newProjects: [],
+              newReleases: [],
+            },
+          },
+          error: null,
+        })
+
+        render(<SnapshotDetailsPage />)
+
+        await waitFor(() => {
+          expect(screen.queryByText('New Chapters')).not.toBeInTheDocument()
+          expect(screen.queryByText('New Projects')).not.toBeInTheDocument()
+          expect(screen.queryByText('New Releases')).not.toBeInTheDocument()
+        })
+      })
     })
-
-    render(<SnapshotDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
-    })
-
-    const chapterCardButton = screen.getAllByRole('button', { name: /View Details/i })[0]
-    fireEvent.click(chapterCardButton)
-
-    await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith('/chapters/sivagangai')
-    })
-  })
-
-  test('renders new releases correctly', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockSnapshotDetailsData,
-    })
-
-    render(<SnapshotDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('New Snapshot')).toBeInTheDocument()
-      expect(screen.getByText('Latest pre-release')).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('test-project-1')).toBeInTheDocument()
-    expect(screen.getByText('test-project-2')).toBeInTheDocument()
-  })
-
-  test('handles missing data gracefully', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: {
-        snapshot: {
-          ...mockSnapshotDetailsData.snapshot,
-          newChapters: [],
-          newProjects: [],
-          newReleases: [],
-        },
-      },
-      error: null,
-    })
-
-    render(<SnapshotDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.queryByText('New Chapters')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Projects')).not.toBeInTheDocument()
-      expect(screen.queryByText('New Releases')).not.toBeInTheDocument()
-    })
-  })
-})

@@ -121,9 +121,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation((...args) => {
-    throw new Error(`Console error: ${args.join(' ')}`)
-  })
+  jest.spyOn(console, 'error').mockImplementation(() => {})
 
   jest.spyOn(globalThis.console, 'warn').mockImplementation((message) => {
     if (

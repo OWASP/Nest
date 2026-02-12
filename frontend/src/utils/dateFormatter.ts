@@ -3,10 +3,21 @@ export const formatDate = (input: number | string) => {
     return ''
   }
 
+  let parsedInput = input
+  if (typeof parsedInput === 'string') {
+    // Normalize slash-delimited dates to ISO 8601 (YYYY-MM-DD) for consistent UTC parsing
+    const mmddyyyy = parsedInput.match(/^(\d{1,2})[/](\d{1,2})[/](\d{4})$/)
+    if (mmddyyyy) {
+      parsedInput = `${mmddyyyy[3]}-${mmddyyyy[1].padStart(2, '0')}-${mmddyyyy[2].padStart(2, '0')}`
+    } else {
+      parsedInput = parsedInput.replace(/\//g, '-')
+    }
+  }
+
   const date =
-    typeof input === 'number'
-      ? new Date(input * 1000) // Unix timestamp in seconds
-      : new Date(input) // ISO date string
+    typeof parsedInput === 'number'
+      ? new Date(parsedInput * 1000) // Unix timestamp in seconds
+      : new Date(parsedInput) // ISO date string
 
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')

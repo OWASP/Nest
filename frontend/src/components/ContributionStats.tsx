@@ -8,7 +8,7 @@ interface ContributionStatsProps {
 
 export default function ContributionStats({ title, stats }: Readonly<ContributionStatsProps>) {
   const formatNumber = (value?: number) => {
-    return typeof value === 'number' ? value.toLocaleString() : '0'
+    return typeof value === 'number' ? value.toLocaleString('en-US') : '0'
   }
 
   return (
