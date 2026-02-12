@@ -48,7 +48,11 @@ INTENT_TO_AGENT = {
 
 
 def process_query(  # noqa: PLR0911
-    query: str, channel_id: str | None = None, *, is_app_mention: bool = False
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
 ) -> str | None:
     """Process query using multi-agent architecture.
 
@@ -56,6 +60,7 @@ def process_query(  # noqa: PLR0911
 
     Args:
         query: User's question
+        images (list[str] | None): A list of base64 encoded image data URIs.
         channel_id: Optional Slack channel ID where the query originated
         is_app_mention: Whether this is an explicit app mention (vs channel monitored message)
 
@@ -64,12 +69,12 @@ def process_query(  # noqa: PLR0911
         (for channel monitored messages with low confidence)
 
     """
+    _ = images
     try:
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
         intent = router_result["intent"]
         confidence = router_result["confidence"]
-
         logger.info(
             "Query routed",
             extra={

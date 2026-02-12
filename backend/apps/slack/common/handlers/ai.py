@@ -12,12 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 def get_blocks(
-    query: str, channel_id: str | None = None, *, is_app_mention: bool = False
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
 ) -> list[dict]:
     """Get AI response blocks.
 
     Args:
         query (str): The user's question.
+        images (list[str] | None): A list of base64 encoded image data URIs.
         channel_id (str | None): The Slack channel ID where the query originated.
         is_app_mention (bool): Whether this is an explicit app mention.
 
@@ -26,7 +31,7 @@ def get_blocks(
 
     """
     ai_response = process_ai_query(
-        query.strip(), channel_id=channel_id, is_app_mention=is_app_mention
+        query.strip(), images=images, channel_id=channel_id, is_app_mention=is_app_mention
     )
 
     if ai_response:
@@ -37,12 +42,17 @@ def get_blocks(
 
 
 def process_ai_query(
-    query: str, channel_id: str | None = None, *, is_app_mention: bool = False
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
 ) -> str | None:
     """Process the AI query using CrewAI flow.
 
     Args:
         query (str): The user's question.
+        images (list[str] | None): A list of base64 encoded image data URIs.
         channel_id (str | None): The Slack channel ID where the query originated.
         is_app_mention (bool): Whether this is an explicit app mention.
 
@@ -51,7 +61,9 @@ def process_ai_query(
 
     """
     try:
-        return process_query(query, channel_id=channel_id, is_app_mention=is_app_mention)
+        return process_query(
+            query, images=images, channel_id=channel_id, is_app_mention=is_app_mention
+        )
     except Exception:
         logger.exception("Failed to process AI query")
         return None

@@ -1,12 +1,17 @@
 """Slack app mention event handler."""
 
+import base64
 import logging
 
 from apps.slack.common.handlers.ai import get_blocks
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
+from apps.slack.utils import download_file
 
 logger = logging.getLogger(__name__)
+
+ALLOWED_MIMETYPES = ("image/jpeg", "image/png", "image/webp")
+MAX_IMAGE_SIZE = 2 * 1024 * 1024  # 2 MB
 
 
 class AppMention(EventBase):
@@ -17,6 +22,7 @@ class AppMention(EventBase):
     def handle_event(self, event, client):
         """Handle an incoming app mention event."""
         channel_id = event.get("channel")
+        files = event.get("files", [])
         text = event.get("text", "")
 
         if not Conversation.objects.filter(
@@ -25,6 +31,12 @@ class AppMention(EventBase):
         ).exists():
             logger.warning("NestBot AI Assistant is not enabled for this conversation.")
             return
+
+        images_raw = [
+            file
+            for file in files
+            if file.get("mimetype") in ALLOWED_MIMETYPES and file.get("size") <= MAX_IMAGE_SIZE
+        ]
 
         query = text
         for mention in event.get("blocks", []):
@@ -82,8 +94,19 @@ class AppMention(EventBase):
                 },
             )
 
+        image_uris = []
+        for image in images_raw:
+            content = download_file(image.get("url_private"), client.token)
+            if content:
+                image_uri = (
+                    f"data:{image.get('mimetype')};base64,{base64.b64encode(content).decode()}"
+                )
+                image_uris.append(image_uri)
+
         # Get AI response and post it
-        reply_blocks = get_blocks(query=query, channel_id=channel_id, is_app_mention=True)
+        reply_blocks = get_blocks(
+            query=query, images=image_uris, channel_id=channel_id, is_app_mention=True
+        )
         client.chat_postMessage(
             channel=channel_id,
             blocks=reply_blocks,
