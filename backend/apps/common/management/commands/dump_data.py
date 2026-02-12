@@ -95,12 +95,7 @@ class Command(BaseCommand):
             dump_process.wait()
             if dump_process.returncode != 0 or psql_process.returncode != 0:
                 message = f"Failed to sync data from {DB_NAME} to {temp_db}"
-                raise CommandError(
-                    message,
-                    dump_process.returncode
-                    if dump_process.returncode != 0
-                    else psql_process.returncode,
-                )
+                raise CommandError(message)
             self.stdout.write(self.style.SUCCESS(f"Synced data from {DB_NAME} to {temp_db}"))
             table_list = self._execute_sql(temp_db, [self._table_list_query()])
             self._execute_sql(temp_db, self._remove_emails([row[0] for row in table_list]))
