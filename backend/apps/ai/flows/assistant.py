@@ -13,7 +13,7 @@ from apps.ai.agents.community import create_community_agent
 from apps.ai.agents.contribution import create_contribution_agent
 from apps.ai.agents.project import create_project_agent
 from apps.ai.agents.rag import create_rag_agent
-from apps.ai.common.constants import DEFAULT_VISION_MODEL
+from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
 from apps.ai.common.intent import Intent
 from apps.ai.router import route
 from apps.common.open_ai import OpenAi
@@ -87,7 +87,7 @@ def process_query(  # noqa: PLR0911
                 .complete()
             )
             if image_context:
-                query = f"{query}\n\nImage context: {image_context}"
+                query = f"{query}{DELIMITER}Image context: {image_context}"
 
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
