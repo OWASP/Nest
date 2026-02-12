@@ -859,13 +859,15 @@ export type QueryRecentMilestonesArgs = {
 };
 
 
+export type QueryRecentOrganizationsArgs = {
+  limit?: Scalars['Int']['input'];
+};
+
+
 export type QueryRecentPostsArgs = {
   limit?: Scalars['Int']['input'];
 };
 
-export type QueryRecentOrganizationsArgs = {
-  limit?: Scalars['Int']['input'];
-};
 
 export type QueryRecentProjectsArgs = {
   limit?: Scalars['Int']['input'];

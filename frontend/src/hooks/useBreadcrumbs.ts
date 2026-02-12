@@ -23,6 +23,11 @@ function buildBreadcrumbItems(
     return items
   }
 
+  if (pathname === '/community') {
+    items.push({ title: 'Community', path: '/community' })
+    return items
+  }
+
   if (
     !pathname.startsWith('/community') &&
     COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))

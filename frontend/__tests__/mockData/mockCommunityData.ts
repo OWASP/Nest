@@ -53,14 +53,12 @@ export const mockCommunityGraphQLData = {
       avatarUrl: 'https://example.com/user1.png',
       login: 'user1',
       name: 'User 1',
-      bio: 'Bio 1',
     },
     {
       id: 'user2',
       avatarUrl: 'https://example.com/user2.png',
       login: 'user2',
       name: 'User 2',
-      bio: 'Bio 2',
     },
   ],
   statsOverview: {

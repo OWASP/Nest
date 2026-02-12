@@ -4,7 +4,7 @@ import { addToast } from '@heroui/toast'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { FaArrowRight, FaMapMarkerAlt, FaUsers } from 'react-icons/fa'
 import { FaBuilding, FaCamera, FaLocationDot, FaPeopleGroup } from 'react-icons/fa6'
 import { ErrorDisplay } from 'app/global-error'
@@ -156,7 +156,7 @@ export default function CommunityPage() {
           </Link>
         </div>
 
-<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {statsData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
@@ -294,8 +294,6 @@ export default function CommunityPage() {
             ))}
           </div>
         </SecondaryCard>
-
-
       </div>
     </div>
   )

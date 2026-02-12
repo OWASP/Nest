@@ -33,8 +33,8 @@ import { formatDate, formatDateRange } from 'utils/dateFormatter'
 import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
 import CalendarButton from 'components/CalendarButton'
-import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import ChapterCard from 'components/ChapterCard'
+import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import ContributorsList from 'components/ContributorsList'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -228,7 +228,7 @@ export default function Home() {
           >
             <div className="flex flex-col gap-4">
               {data?.recentChapters?.map((chapter) => (
-               <ChapterCard
+                <ChapterCard
                   key={chapter.key}
                   chapterKey={chapter.key}
                   name={chapter.name}
