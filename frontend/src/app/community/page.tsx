@@ -15,8 +15,7 @@ import {
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
-import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generated'
-import { Release as ReleaseType } from 'types/release'
+import { GetCommunityPageDataDocument } from 'types/__generated__/communityQueries.generated'
 import AnchorTitle from 'components/AnchorTitle'
 import ContributorsList from 'components/ContributorsList'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -69,10 +68,9 @@ const NAV_SECTIONS = [
 ]
 
 const CommunityPage = () => {
-  const { data, loading, error } = useQuery(GetMainPageDataDocument, {
+  const { data, loading, error } = useQuery(GetCommunityPageDataDocument, {
     variables: {
-      recentReleasesLimit: 10,
-      topContributorsLimit: 10,
+      distinct: true,
     },
   })
 
@@ -194,13 +192,8 @@ const CommunityPage = () => {
                 </p>
               </div>
               <div className="flex flex-col gap-4">
-                {data?.recentReleases?.slice(0, 6).map((release, index) => (
-                  <Release
-                    key={release.tagName}
-                    release={release as ReleaseType}
-                    index={index}
-                    showAvatar={true}
-                  />
+                {data?.recentReleases?.map((release, index) => (
+                  <Release key={release.id} release={release} index={index} showAvatar={true} />
                 ))}
               </div>
               <div className="mt-4 text-center">
@@ -232,7 +225,12 @@ const CommunityPage = () => {
         <div className="border-t border-gray-200 pt-5 text-center dark:border-gray-800">
           <p className="mb-1 text-gray-500">Want to get more involved?</p>
           <div className="flex justify-center gap-2 text-sm font-medium text-gray-500">
-            <Link href="https://github.com/owasp" className="hover:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+            <Link
+              href="https://github.com/owasp"
+              className="hover:text-blue-500 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Github
             </Link>
             <span>&middot;</span>
