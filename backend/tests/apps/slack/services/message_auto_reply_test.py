@@ -76,8 +76,13 @@ class TestMessageAutoReply:
             ts=mock_message.slack_message_id,
             limit=1,
         )
-        mock_process_ai_query.assert_called_once_with(query=mock_message.text)
-        mock_get_blocks.assert_called_once_with("OWASP is a security organization...")
+        mock_process_ai_query.assert_called_once_with(
+            query=mock_message.text, channel_id=mock_message.conversation.slack_channel_id
+        )
+        mock_get_blocks.assert_called_once_with(
+            "OWASP is a security organization...",
+            channel_id=mock_message.conversation.slack_channel_id,
+        )
         mock_client.chat_postMessage.assert_called_once_with(
             channel=mock_message.conversation.slack_channel_id,
             blocks=[
