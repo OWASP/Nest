@@ -15,6 +15,8 @@ class PullRequest(GenericIssueModel):
     open_pull_requests = OpenPullRequestManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_pull_requests"
         indexes = [
             models.Index(fields=["-created_at"]),

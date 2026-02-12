@@ -86,7 +86,7 @@ class Command(BaseCommand):
             dump_cmd += [f"--table={table}" for table in tables]
             dump_cmd += ["-f", str(output_path)]
 
-            run(dump_cmd, check=True, env=env)
+            run(dump_cmd, check=True, env=env)  # noqa: S603
             self.stdout.write(self.style.SUCCESS(f"Created dump: {output_path}"))
         except CalledProcessError as e:
             message = f"Command failed: {e.cmd}"

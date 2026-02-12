@@ -17,6 +17,8 @@ class BoardOfDirectors(models.Model):
     """Model representing OWASP Board of Directors."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_board_of_directors"
         verbose_name_plural = "Board of Directors"
 

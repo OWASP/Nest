@@ -8,6 +8,8 @@ class GenericUserModel(models.Model):
     """Generic user model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     name = models.CharField(verbose_name="Name", max_length=200, blank=True, default="")
@@ -77,6 +79,8 @@ class NodeModel(models.Model):
     """Node model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     node_id = models.CharField(verbose_name="Node ID", unique=True)

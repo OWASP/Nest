@@ -12,6 +12,8 @@ class MenteeProgram(ExperienceLevel, StartEndRange, TimestampedModel):
     """Mentee program enrollment."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_mentee_programs"
         verbose_name_plural = "Mentee programs"
         unique_together = ("mentee", "program")

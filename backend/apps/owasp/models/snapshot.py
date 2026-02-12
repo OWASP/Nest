@@ -8,6 +8,8 @@ class Snapshot(models.Model):
     """Model representing a snapshot of data processing."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_snapshots"
         verbose_name_plural = "Snapshots"
 
@@ -17,6 +19,8 @@ class Snapshot(models.Model):
         ]
 
     class Status(models.TextChoices):
+        """Snapshot processing status choices."""
+
         PENDING = "pending", "Pending"
         PROCESSING = "processing", "Processing"
         COMPLETED = "completed", "Completed"

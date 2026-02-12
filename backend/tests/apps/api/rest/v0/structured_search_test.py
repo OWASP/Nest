@@ -1,8 +1,8 @@
 """Tests for structured search utility."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-from apps.api.rest.v0.structured_search import apply_structured_search
+from apps.api.rest.v0.structured_search import QueryParserError, apply_structured_search
 
 FIELD_SCHEMA = {
     "name": {"type": "string", "lookup": "icontains"},
@@ -141,10 +141,6 @@ def test_multiple_conditions():
 
 def test_query_parser_error_returns_original_queryset():
     """Test that QueryParserError returns original queryset."""
-    from unittest.mock import patch
-
-    from apps.api.rest.v0.structured_search import QueryParserError
-
     qs = make_queryset()
     with patch("apps.api.rest.v0.structured_search.QueryParser") as mock_parser_class:
         mock_parser_class.side_effect = QueryParserError("Test error")
@@ -156,8 +152,6 @@ def test_query_parser_error_returns_original_queryset():
 
 def test_condition_field_not_in_schema_is_skipped():
     """Test that condition with field not in field_schema is skipped."""
-    from unittest.mock import patch
-
     qs = make_queryset()
     with patch("apps.api.rest.v0.structured_search.QueryParser") as mock_parser_class:
         mock_parser = MagicMock()
@@ -170,8 +164,6 @@ def test_condition_field_not_in_schema_is_skipped():
 
 def test_boolean_field_uses_no_lookup_suffix():
     """Test boolean field uses empty lookup suffix."""
-    from unittest.mock import patch
-
     schema_with_boolean = {
         "active": {"type": "boolean", "field": "is_active"},
     }
@@ -189,8 +181,6 @@ def test_boolean_field_uses_no_lookup_suffix():
 
 def test_number_field_with_none_value_is_skipped():
     """Test that number field with None value is skipped."""
-    from unittest.mock import patch
-
     qs = make_queryset()
     with patch("apps.api.rest.v0.structured_search.QueryParser") as mock_parser_class:
         mock_parser = MagicMock()

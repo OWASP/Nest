@@ -9,9 +9,13 @@ class EntityChannel(models.Model):
     """Model representing a link between an entity and a channel."""
 
     class Platform(models.TextChoices):
+        """Channel platform choices."""
+
         SLACK = "slack", "Slack"
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_entity_channels"
         unique_together = (
             "channel_id",

@@ -62,7 +62,6 @@ class TestOwaspScrapeChapters:
 
         with (
             mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
-            mock.patch("builtins.print") as mock_print,
             mock.patch("time.sleep", return_value=None),
             mock.patch(
                 "apps.owasp.management.commands.owasp_scrape_chapters.OwaspScraper",
@@ -73,16 +72,17 @@ class TestOwaspScrapeChapters:
                 side_effect=normalize_url,
             ),
         ):
+            command.stdout = mock.MagicMock()
             command.handle(offset=offset)
 
         mock_active_chapters.count.assert_called_once()
 
         assert mock_bulk_save.called
 
-        assert mock_print.call_count == (chapters - offset)
+        assert command.stdout.write.call_count == (chapters - offset)
 
-        for call in mock_print.call_args_list:
-            args, _ = call
+        for call in command.stdout.write.call_args_list:
+            args = call[0]
             assert "https://owasp.org/www-chapter-test" in args[0]
 
         for chapter in mock_chapters_list:

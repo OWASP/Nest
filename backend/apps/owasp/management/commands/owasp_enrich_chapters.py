@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
         for idx, chapter in enumerate(active_chapters[offset:]):
             prefix = f"{idx + offset + 1} of {active_chapters_count}"
-            print(f"{prefix:<10} {chapter.owasp_url}")
+            self.stdout.write(f"{prefix:<10} {chapter.owasp_url}\n")
 
             # Summary.
             if not chapter.summary and (prompt := Prompt.get_owasp_chapter_summary()):

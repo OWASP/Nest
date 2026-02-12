@@ -83,8 +83,8 @@ class TestOwaspEnrichCommittees:
             mock.patch.object(
                 Prompt, "get_owasp_committee_summary", mock_prompt.get_owasp_committee_summary
             ),
-            mock.patch("builtins.print") as mock_print,
         ):
+            command.stdout = mock.MagicMock()
             command.handle(
                 offset=offset,
                 force_update_summary=force_update_summary,
@@ -98,10 +98,10 @@ class TestOwaspEnrichCommittees:
 
         assert mock_bulk_save.called
 
-        assert mock_print.call_count == committees - offset
+        assert command.stdout.write.call_count == committees - offset
 
-        for call in mock_print.call_args_list:
-            args, _ = call
+        for call in command.stdout.write.call_args_list:
+            args = call[0]
             assert "https://owasp.org/www-committee-test" in args[0]
 
         if update_summary:

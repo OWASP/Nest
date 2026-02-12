@@ -4,7 +4,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.management.commands.ai_update_committee_context import Command
+from apps.owasp.models.committee import Committee
 
 
 @pytest.fixture
@@ -30,8 +32,6 @@ class TestAiCreateCommitteeContextCommand:
 
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
-        from apps.ai.common.base.context_command import BaseContextCommand
-
         assert isinstance(command, BaseContextCommand)
 
     def test_command_help_text(self, command):
@@ -40,8 +40,6 @@ class TestAiCreateCommitteeContextCommand:
 
     def test_model_class_method(self, command):
         """Test the model_class method returns Committee."""
-        from apps.owasp.models.committee import Committee
-
         assert command.model_class == Committee
 
     def test_entity_name_method(self, command):

@@ -29,4 +29,4 @@ class Command(BaseCommand):
                             sql.Identifier(model._meta.db_table)
                         )
                     )
-                    print(f"Purged {nest_app}.{model.__name__}")
+                    self.stdout.write(f"Purged {nest_app}.{model.__name__}")

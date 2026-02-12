@@ -1,4 +1,4 @@
-from datetime import UTC
+from datetime import UTC, datetime
 from unittest.mock import Mock
 
 from apps.github.models.release import Release
@@ -73,8 +73,6 @@ class TestReleaseModel:
 
     def test_summary_property(self):
         """Tests the summary property returns the correct format."""
-        from datetime import datetime
-
         release = Release(tag_name="v1.0", published_at=datetime(2023, 1, 1, tzinfo=UTC))
         assert release.summary == "v1.0 on Jan 01, 2023"
 

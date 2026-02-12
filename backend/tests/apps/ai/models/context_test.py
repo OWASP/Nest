@@ -4,6 +4,7 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 
 from apps.ai.models.context import Context
 from apps.common.models import TimestampedModel
@@ -107,8 +108,6 @@ class TestContextModel:
 
     @patch("apps.ai.models.context.Context.full_clean")
     def test_context_validation_source_too_long(self, mock_full_clean):
-        from django.core.exceptions import ValidationError
-
         mock_full_clean.side_effect = ValidationError("Source too long")
 
         context = Context()
@@ -299,9 +298,7 @@ class TestContextModel:
     @patch("apps.ai.models.context.Context.__init__")
     def test_update_data_new_context_with_save(self, mock_init, mock_get):
         """Test update_data creating a new context with save=True."""
-        from apps.ai.models.context import Context as ContextModel
-
-        mock_get.side_effect = ContextModel.DoesNotExist
+        mock_get.side_effect = Context.DoesNotExist
         mock_init.return_value = None  # __init__ should return None
 
         content = "New test content"
@@ -317,7 +314,7 @@ class TestContextModel:
             mock_get_for_model.return_value = mock_content_type
 
             # Mock the context instance and its save method
-            with patch.object(ContextModel, "save") as mock_save:
+            with patch.object(Context, "save") as mock_save:
                 result = Context.update_data(
                     content, mock_content_object, source=source, save=True
                 )
@@ -340,9 +337,7 @@ class TestContextModel:
     @patch("apps.ai.models.context.Context.__init__")
     def test_update_data_new_context_without_save(self, mock_init, mock_get):
         """Test update_data creating a new context with save=False."""
-        from apps.ai.models.context import Context as ContextModel
-
-        mock_get.side_effect = ContextModel.DoesNotExist
+        mock_get.side_effect = Context.DoesNotExist
         mock_init.return_value = None  # __init__ should return None
 
         content = "New test content"
@@ -358,7 +353,7 @@ class TestContextModel:
             mock_get_for_model.return_value = mock_content_type
 
             # Mock the context instance and its save method
-            with patch.object(ContextModel, "save") as mock_save:
+            with patch.object(Context, "save") as mock_save:
                 result = Context.update_data(
                     content, mock_content_object, source=source, save=False
                 )

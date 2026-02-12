@@ -16,6 +16,8 @@ class Message(TimestampedModel):
     """Slack Message model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "slack_messages"
         verbose_name_plural = "Messages"
         unique_together = ("conversation", "slack_message_id")

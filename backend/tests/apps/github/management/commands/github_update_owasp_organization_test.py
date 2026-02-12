@@ -135,7 +135,6 @@ def test_handle(
         mock.patch.object(Chapter, "objects") as mock_chapter_objects,
         mock.patch.object(Committee, "objects") as mock_committee_objects,
         mock.patch.object(Repository, "objects") as mock_repository_objects,
-        mock.patch("builtins.print") as mock_print,
     ):
         mock_project_update.return_value = mock_repository
         mock_chapter_update.return_value = mock_repository
@@ -146,6 +145,7 @@ def test_handle(
         mock_committee_objects.all.return_value = []
         mock_repository_objects.filter.return_value.count.return_value = 1
 
+        command.stdout = mock.MagicMock()
         command.handle(repository=repository_name, offset=offset)
 
         mock_get_github_client.assert_called_once()
@@ -166,7 +166,7 @@ def test_handle(
             elif repository_name.startswith("www-committee-"):
                 assert mock_committee_update.call_count == expected_calls["committee"]
         else:
-            assert mock_print.call_count > 0
+            assert command.stdout.write.call_count > 0
 
         mock_project_bulk_save.assert_called_once()
         mock_chapter_bulk_save.assert_called_once()
@@ -231,18 +231,18 @@ def test_handle_full_sync_with_errors_and_repo_linking(
         mock.patch.object(Committee, "update_data"),
         mock.patch.object(Project, "objects") as mock_project_objects,
         mock.patch.object(Repository, "objects") as mock_repository_objects,
-        mock.patch("builtins.print") as mock_print,
     ):
         mock_project = mock.Mock()
         mock_project.owasp_repository = mock.Mock()
         mock_project_objects.all.return_value = [mock_project]
         mock_repository_objects.filter.return_value.count.return_value = 2
+        command.stdout = mock.MagicMock()
         command.handle(repository=None, offset=0)
         assert mock_sync_repository.call_count == 3
         mock_logger.exception.assert_called_once_with(
             "Error syncing repository %s", "https://github.com/OWASP/www-chapter-error"
         )
-        mock_print.assert_any_call(
+        command.stdout.write.assert_any_call(
             "\nOWASP GitHub repositories count != synced repositories count: 3 != 2"
         )
         mock_project_objects.all.assert_called_once()

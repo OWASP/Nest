@@ -13,6 +13,8 @@ class Post(BulkSaveModel, TimestampedModel):
     """Post model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_posts"
         indexes = [
             models.Index(fields=["-published_at"], name="post_published_at_desc_idx"),

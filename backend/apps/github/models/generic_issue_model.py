@@ -13,9 +13,13 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     objects = models.Manager()
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     class State(models.TextChoices):
+        """Issue state choices."""
+
         OPEN = "open", "Open"
         CLOSED = "closed", "Closed"
 
