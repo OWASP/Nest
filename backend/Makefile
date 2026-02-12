@@ -7,6 +7,8 @@ include backend/apps/slack/Makefile
 
 SHELL := /bin/bash
 
+.PHONY: sbom-backend-image
+
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
 		--no-cache \
@@ -180,7 +182,7 @@ security-scan-backend-image:
 	    $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 	    image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
 
-.PHONY: sbom-backend-image
+SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
 
 sbom-backend-image:
 	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
@@ -195,7 +197,7 @@ sbom-backend-image:
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		image \
 		--format cyclonedx \
-		--output /work/backend-sbom.cdx.json \
+		--output /work/backend-sbom-$(SBOM_VERSION).cdx.json \
 		$(BACKEND_IMAGE_NAME)
 
 shell-backend:

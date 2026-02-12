@@ -534,6 +534,9 @@ jobs:
     name: Scan Staging Images
     needs:
       - build-staging-images
+      - set-release-version
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -554,22 +557,20 @@ jobs:
           make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
       - name: Generate SBOM for backend image
-        continue-on-error: true
         run: |
           make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
 
       - name: Generate SBOM for frontend image
-        continue-on-error: true
         run: |
           make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
-      - name: Attach SBOMs to GitHub Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
-        if: github.event_name == 'release'
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          files: |
-            backend-sbom.cdx.json
-            frontend-sbom.cdx.json
+          name: staging-sbom-${{ env.RELEASE_VERSION }}
+          path: |
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
   deploy-staging-nest:
@@ -919,8 +920,11 @@ jobs:
     name: Scan Production Images
     needs:
       - build-production-images
+      - set-release-version
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -937,6 +941,22 @@ jobs:
         run: |
           make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
           make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
+
+      - name: Generate SBOM for backend image
+        run: |
+          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
+
+      - name: Generate SBOM for frontend image
+        run: |
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
+
+      - name: Upload SBOMs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json \
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
   deploy-production-nest:
