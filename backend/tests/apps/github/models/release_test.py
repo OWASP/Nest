@@ -95,7 +95,6 @@ class TestReleaseModel:
         release = Release()
         release.from_github(gh_release_mock)
 
-        # None values shouldn't be set, only non-None values
         assert release.description == "Description"
         assert release.tag_name == "v1.0.0"
 

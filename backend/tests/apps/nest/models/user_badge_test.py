@@ -12,13 +12,11 @@ class TestUserBadgeModel:
         """Test __str__ returns user login and badge name."""
         user_badge = UserBadge()
 
-        # Mock the user and badge relationships
         mock_user = Mock()
         mock_user.login = "testuser"
         mock_badge = Mock()
         mock_badge.name = "Contributor"
 
-        # Use PropertyMock to mock the relationships
         with (
             patch.object(type(user_badge), "user", new_callable=PropertyMock) as mock_user_prop,
             patch.object(type(user_badge), "badge", new_callable=PropertyMock) as mock_badge_prop,
@@ -43,7 +41,6 @@ class TestUserBadgeModel:
             mock_badge = Mock()
             mock_badge.name = badge_name
 
-            # Use PropertyMock to mock the relationships
             with (
                 patch.object(
                     type(user_badge), "user", new_callable=PropertyMock

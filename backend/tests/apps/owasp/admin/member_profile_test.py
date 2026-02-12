@@ -1,5 +1,6 @@
 """Tests for MemberProfile admin."""
 
+from unittest import mock
 from unittest.mock import MagicMock, Mock
 
 from django.contrib.admin.sites import AdminSite
@@ -79,26 +80,19 @@ class TestMemberProfileAdmin:
         """Test get_queryset applies select_related for github_user."""
         admin = MemberProfileAdmin(MemberProfile, AdminSite())
 
-        # Mock the request
         mock_request = Mock()
 
-        # Mock the parent get_queryset to return a mock queryset
         mock_queryset = MagicMock()
         mock_related_queryset = MagicMock()
         mock_queryset.select_related.return_value = mock_related_queryset
 
-        # Patch the parent get_queryset
         with MagicMock() as mock_super:
             mock_super.return_value = mock_queryset
             admin.__class__.__bases__[0].get_queryset = mock_super
 
-            # Create a new queryset mock that tracks select_related calls
             admin_queryset = MagicMock()
             result_queryset = MagicMock()
             admin_queryset.select_related.return_value = result_queryset
-
-            # Mock super().get_queryset to return our mock
-            from unittest import mock
 
             with mock.patch.object(
                 admin.__class__.__bases__[0], "get_queryset", return_value=admin_queryset

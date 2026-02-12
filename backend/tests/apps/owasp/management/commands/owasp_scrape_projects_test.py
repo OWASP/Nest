@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 from unittest import mock
 
 import pytest
@@ -18,8 +19,6 @@ class TestOwaspScrapeProjects:
 
     def test_add_arguments(self, command):
         """Test add_arguments adds expected arguments."""
-        from argparse import ArgumentParser
-
         parser = ArgumentParser()
         command.add_arguments(parser)
         args = parser.parse_args([])

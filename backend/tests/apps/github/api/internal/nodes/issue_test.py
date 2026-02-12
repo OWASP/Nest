@@ -102,7 +102,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
     def test_is_merged_true(self):
         """Test is_merged field when issue has merged pull requests."""
         mock_issue = Mock()
-        mock_issue.merged_pull_requests = [Mock()]  # Has at least one merged PR
+        mock_issue.merged_pull_requests = [Mock()]
 
         field = self._get_field_by_name("is_merged", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)

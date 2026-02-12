@@ -53,7 +53,6 @@ class TestOrganizationModel:
 
             organization = Organization()
 
-            # Mock the repositories.all() return value
             mock_repo_manager = Mock()
             mock_repo_manager.all.return_value = [Mock()]
 
@@ -93,7 +92,6 @@ class TestOrganizationModel:
         original_description = organization.description
         organization.from_github(gh_organization_mock)
 
-        # None values shouldn't update the field
         assert organization.description == original_description
 
     @patch("apps.github.models.organization.Organization.objects.values_list")
@@ -101,7 +99,6 @@ class TestOrganizationModel:
         """Test get_logins static method with cache cleared."""
         mock_values_list.return_value = ["org1", "org2", "org3"]
 
-        # Clear the cache before testing
         Organization.get_logins.cache_clear()
 
         logins = Organization.get_logins()

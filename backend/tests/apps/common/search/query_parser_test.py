@@ -1,8 +1,9 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pyparsing import ParseException
 
-from apps.common.search.query_parser import QueryParser, QueryParserError
+from apps.common.search.query_parser import FieldType, QueryParser, QueryParserError
 
 
 class TestQueryParser:
@@ -320,13 +321,11 @@ class TestQueryParser:
 
     def test_parse_string_value_with_control_characters_strict(self):
         """Test parsing string value with control characters in strict mode."""
-        # Using unicode control characters that cause string value parsing to fail
         invalid_query = "author:\x00\x01\x02"
 
         with pytest.raises(QueryParserError) as e:
             self.strict_parser.parse(invalid_query)
 
-        # This triggers STRING_VALUE_ERROR because tokenization succeeds but value parsing fails
         assert e.value.error_type == "STRING_VALUE_ERROR"
         assert e.value.field == "author"
 
@@ -334,30 +333,22 @@ class TestQueryParser:
         """Test strict mode re-raises QueryParserError with field context."""
         with pytest.raises(QueryParserError) as e:
             self.strict_parser.parse("created:invalid_date")
-
-        # Should have field set and error re-raised
         assert e.value.field == "created"
         assert e.value.error_type in ["DATE_VALUE_ERROR", "TOKENIZATION_ERROR"]
 
     def test_parse_with_empty_token_in_middle(self):
         """Test parsing ignores empty tokens during iteration."""
-        # This should test line 180 where empty tokens are skipped
         result = self.parser.parse('   author:"test"       ')
         assert len(result) == 1
         assert result[0]["field"] == "author"
 
     def test_to_dict_non_strict_mode_returns_none_on_error(self):
         """Test to_dict returns None on error in non-strict mode - covers lines 231-239."""
-        # Call parse with invalid date in non-strict mode
         result = self.parser.parse("created:invalid_date")
-        # Should return empty list since the invalid date is dropped in non-strict mode
         assert result == []
 
     def test_split_tokens_with_parse_exception(self):
         """Test _split_tokens handles ParseException correctly."""
-        # Mock the parse_string method to raise ParseException
-        from pyparsing import ParseException
-
         with patch("apps.common.search.query_parser.ZeroOrMore") as mock_zero_or_more:
             mock_parser = MagicMock()
             mock_parser.parse_string.side_effect = ParseException("Mock parse error")
@@ -366,7 +357,6 @@ class TestQueryParser:
             with pytest.raises(QueryParserError) as e:
                 self.strict_parser.parse("any query")
 
-            # The error should be caught and re-raised as QueryParserError
             assert e.value.error_type == "TOKENIZATION_ERROR"
             assert "Failed to tokenize query" in e.value.message
 
@@ -379,9 +369,6 @@ class TestQueryParser:
 
     def test_to_dict_unmatched_field_type(self):
         """Test to_dict when field type doesn't match any case (branch 231->239)."""
-        from apps.common.search.query_parser import FieldType
-
-        # Create a mock FieldType that doesn't match any case
         mock_field_type = MagicMock(spec=FieldType)
         mock_field_type.value = "unknown"
 

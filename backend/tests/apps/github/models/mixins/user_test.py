@@ -132,8 +132,6 @@ class TestUserIndexMixin:
 
     def test_idx_releases_with_tag_name(self):
         """Test idx_releases includes tag_name in release dict."""
-        from apps.github.models.mixins.user import UserIndexMixin
-
         instance = UserIndexMixin()
 
         mock_release = MagicMock()

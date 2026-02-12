@@ -133,7 +133,6 @@ class TestCacheResponse:
         mock_cache.get.return_value = None
         view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
 
-        # Call decorator without TTL or prefix to use defaults
         decorated_view = cache_response()(view_func)
 
         response = decorated_view(mock_request)
@@ -147,15 +146,12 @@ class TestCacheResponse:
         """Test cache_response with custom prefix."""
         mock_cache.get.return_value = None
         view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
-
-        # Call decorator with custom prefix
         decorated_view = cache_response(ttl=60, prefix="custom_prefix")(view_func)
 
         response = decorated_view(mock_request)
 
         assert response.status_code == HTTPStatus.OK
 
-        # Verify the cache key includes the custom prefix
         cache_key_call = mock_cache.get.call_args[0][0]
         assert cache_key_call.startswith("custom_prefix:")
         mock_cache.set.assert_called_once()

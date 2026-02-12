@@ -1,14 +1,25 @@
+import importlib
 from unittest.mock import MagicMock, patch
 
 import pytest
 from slack_sdk.errors import SlackApiError
 
+import apps.slack.actions.home as home_module
 from apps.slack.actions.home import handle_home_actions
+from apps.slack.apps import SlackConfig
 from apps.slack.constants import (
     VIEW_CHAPTERS_ACTION,
+    VIEW_CHAPTERS_ACTION_NEXT,
+    VIEW_CHAPTERS_ACTION_PREV,
     VIEW_COMMITTEES_ACTION,
+    VIEW_COMMITTEES_ACTION_NEXT,
+    VIEW_COMMITTEES_ACTION_PREV,
     VIEW_CONTRIBUTE_ACTION,
+    VIEW_CONTRIBUTE_ACTION_NEXT,
+    VIEW_CONTRIBUTE_ACTION_PREV,
     VIEW_PROJECTS_ACTION,
+    VIEW_PROJECTS_ACTION_NEXT,
+    VIEW_PROJECTS_ACTION_PREV,
 )
 
 
@@ -82,12 +93,9 @@ class TestHomeActions:
 
     def test_action_registration(self):
         """Test that actions are registered with SlackConfig.app."""
-        from apps.slack.apps import SlackConfig
-
         if SlackConfig.app is None:
             pytest.skip("SlackConfig.app is None - cannot test registration")
 
-        # Verify that the actions are registered
         registered_actions = [
             VIEW_CHAPTERS_ACTION,
             VIEW_COMMITTEES_ACTION,
@@ -96,7 +104,6 @@ class TestHomeActions:
         ]
 
         for action in registered_actions:
-            # The action should be in the registered listeners
             assert (
                 action
                 in [
@@ -105,26 +112,10 @@ class TestHomeActions:
                     if listener.matchers and hasattr(listener.matchers[0], "action_id")
                 ]
                 or True
-            )  # Skip if we can't verify registration structure
+            )
 
     def test_all_action_constants_covered(self):
         """Test that all action constants in the registration tuple are defined."""
-        from apps.slack.constants import (
-            VIEW_CHAPTERS_ACTION,
-            VIEW_CHAPTERS_ACTION_NEXT,
-            VIEW_CHAPTERS_ACTION_PREV,
-            VIEW_COMMITTEES_ACTION,
-            VIEW_COMMITTEES_ACTION_NEXT,
-            VIEW_COMMITTEES_ACTION_PREV,
-            VIEW_CONTRIBUTE_ACTION,
-            VIEW_CONTRIBUTE_ACTION_NEXT,
-            VIEW_CONTRIBUTE_ACTION_PREV,
-            VIEW_PROJECTS_ACTION,
-            VIEW_PROJECTS_ACTION_NEXT,
-            VIEW_PROJECTS_ACTION_PREV,
-        )
-
-        # Verify all constants are strings (not None)
         actions = (
             VIEW_CHAPTERS_ACTION_NEXT,
             VIEW_CHAPTERS_ACTION_PREV,
@@ -146,20 +137,13 @@ class TestHomeActions:
 
     def test_module_registration_code(self):
         """Test the module-level registration code path by reloading with a mock app."""
-        import importlib
-
-        import apps.slack.actions.home as home_module
-
         mock_app = MagicMock()
         mock_app.action.return_value = MagicMock(return_value=lambda f: f)
 
-        # Patch at the source so that when the module re-imports SlackConfig, it gets our mock
         with patch("apps.slack.apps.SlackConfig") as mock_config:
             mock_config.app = mock_app
             importlib.reload(home_module)
 
-        # Verify all 12 actions were registered
         assert mock_app.action.call_count == 12
 
-        # Restore module to original state
         importlib.reload(home_module)

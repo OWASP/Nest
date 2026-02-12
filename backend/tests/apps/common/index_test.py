@@ -172,12 +172,9 @@ class TestIndexBase:
             patch("apps.common.index.settings.IS_LOCAL_ENVIRONMENT", is_local),
             patch("apps.common.index.is_indexable") as mock_is_indexable,
         ):
-            # Make all replicas non-indexable (returns False for replica names)
             mock_is_indexable.side_effect = lambda name: name == index_name
 
             IndexBase.configure_replicas(index_name, replicas)
-
-            # set_settings should not be called since indexable_replicas is empty
             self.mock_client.set_settings.assert_not_called()
 
     def test_parse_synonyms_file_empty(self):

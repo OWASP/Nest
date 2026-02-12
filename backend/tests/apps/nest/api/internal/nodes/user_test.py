@@ -24,13 +24,11 @@ class TestGitHubAuthResult:
     def test_is_owasp_staff_with_no_github_user(self):
         """Test is_owasp_staff returns False when github_user is None."""
 
-        # Create a simple object to act as self
         class FakeNode:
             github_user = None
 
         node = FakeNode()
 
-        # Get the raw function from the strawberry field
         raw_func = AuthUserNode.__strawberry_definition__.get_field(
             "is_owasp_staff"
         ).base_resolver.wrapped_func
@@ -49,7 +47,6 @@ class TestGitHubAuthResult:
         node = FakeNode()
         node.github_user = mock_github_user
 
-        # Get the raw function from the strawberry field
         raw_func = AuthUserNode.__strawberry_definition__.get_field(
             "is_owasp_staff"
         ).base_resolver.wrapped_func
@@ -68,7 +65,6 @@ class TestGitHubAuthResult:
         node = FakeNode()
         node.github_user = mock_github_user
 
-        # Get the raw function from the strawberry field
         raw_func = AuthUserNode.__strawberry_definition__.get_field(
             "is_owasp_staff"
         ).base_resolver.wrapped_func

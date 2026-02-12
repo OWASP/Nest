@@ -23,7 +23,7 @@ class TestUserModel:
         username_field = User._meta.get_field("username")
         assert isinstance(username_field, models.CharField)
         assert username_field.max_length > 0
-        assert username_field.unique  # Comes from AbstractUser
+        assert username_field.unique
 
     def test_meta_options(self):
         """Test Meta class options like db_table and ordering."""
@@ -47,19 +47,15 @@ class TestUserModel:
         """Test active_api_keys property returns filtered queryset."""
         user = User(username="testuser")
 
-        # Mock the api_keys manager
         mock_api_keys = Mock()
         mock_filter_result = Mock()
         mock_api_keys.filter.return_value = mock_filter_result
 
-        # Use PropertyMock to mock the api_keys relationship
         with patch.object(type(user), "api_keys", new_callable=PropertyMock) as mock_prop:
             mock_prop.return_value = mock_api_keys
 
-            # Call the property
             result = user.active_api_keys
 
-            # Verify filter was called
             assert mock_api_keys.filter.called
             call_kwargs = mock_api_keys.filter.call_args[1]
             assert "expires_at__gte" in call_kwargs

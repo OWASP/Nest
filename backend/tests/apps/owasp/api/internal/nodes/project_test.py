@@ -1,6 +1,6 @@
 """Test cases for ProjectNode."""
 
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
@@ -310,8 +310,6 @@ class TestProjectNodeResolvers:
 
     def test_recent_milestones_with_valid_limit(self):
         """Test recent_milestones returns milestones with valid limit."""
-        from unittest.mock import patch
-
         resolver = self._get_resolver("recent_milestones")
         mock_project = MagicMock()
         mock_repos = [MagicMock()]

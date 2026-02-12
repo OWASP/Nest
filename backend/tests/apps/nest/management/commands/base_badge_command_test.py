@@ -56,7 +56,6 @@ class TestBaseBadgeCommand(SimpleTestCase):
         """Test that a new badge is created and logged."""
         badge = MagicMock()
         badge.name = "New Badge"
-        # created=True indicates a new badge was created
         mock_badge.objects.get_or_create.return_value = (badge, True)
 
         qs = MagicMock()
@@ -86,7 +85,6 @@ class TestBaseBadgeCommand(SimpleTestCase):
         eligible_users.exclude.return_value = []
         MockCommand.get_eligible_users = MagicMock(return_value=eligible_users)
 
-        # Simulate 3 users having their badges removed
         users_to_remove = MagicMock()
         users_to_remove.count.return_value = 3
         users_to_remove.update.return_value = 3

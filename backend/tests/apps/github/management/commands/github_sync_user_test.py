@@ -533,7 +533,6 @@ class TestGithubSyncUserCommand:
         )
         mock_gh.search_commits.return_value = MockPaginatedList([])
 
-        # Issue search fails (lines 152-153)
         mock_gh.search_issues.side_effect = [
             MockPaginatedList([mock_pr_obj]),
             GithubException(500, "Server Error"),
@@ -541,7 +540,6 @@ class TestGithubSyncUserCommand:
 
         command.populate_first_contribution_only("testuser", MagicMock(spec=User), mock_gh)
 
-        # PR should be chosen as earliest
         expected_date = datetime(2025, 1, 1, tzinfo=UTC)
         assert mock_profile.first_contribution_at == expected_date
         mock_logger.warning.assert_any_call("Error searching issues: %s", mock.ANY)
@@ -579,7 +577,6 @@ class TestGithubSyncUserCommand:
 
         command.handle(**default_options)
 
-        # update_data should be called once for the commit author, not for committer
         assert mock_user.update_data.call_count >= 1
         mock_commit.bulk_save.assert_called_once()
 
@@ -656,7 +653,6 @@ class TestGithubSyncUserCommand:
             MockPaginatedList([]),
         ]
 
-        # get_repo or get_pull fails (lines 343-350, 368-370)
         mock_gh.get_repo.side_effect = GithubException(500, "Server Error")
 
         command.handle(**default_options)
@@ -796,7 +792,6 @@ class TestGithubSyncUserCommand:
         mock_repository.name = "test-repo"
         mock_repo.filter.return_value.select_related.return_value = [mock_repository]
 
-        # Create TWO commits with the SAME committer (same node_id) for duplicate branch
         mock_gh_repo = MagicMock(spec=Repository, full_name="OWASP/test-repo")
         mock_gh_committer = MagicMock()
         mock_gh_commit_1 = MagicMock(
@@ -810,37 +805,31 @@ class TestGithubSyncUserCommand:
         )
         mock_gh.search_issues.return_value = MockPaginatedList([])
 
-        # Mock committer with node_id - same user returned for both commits
         mock_committer_user = MagicMock()
         mock_committer_user.node_id = "committer_node_123"
         mock_author_user = MagicMock()
         mock_author_user.node_id = "author_node_456"
-        # update_data called for: author (once), committer1, committer2
         mock_user.update_data.side_effect = [
             mock_author_user,
             mock_committer_user,
             mock_committer_user,
         ]
 
-        # Mock Commit.update_data to return commits with committer
         mock_commit_obj_1 = MagicMock()
         mock_commit_obj_1.committer = mock_committer_user
         mock_commit_obj_2 = MagicMock()
         mock_commit_obj_2.committer = mock_committer_user
         mock_commit.update_data.side_effect = [mock_commit_obj_1, mock_commit_obj_2]
 
-        # Mock User.objects.filter to return saved committer for reload
         mock_saved_committer = MagicMock()
         mock_saved_committer.node_id = "committer_node_123"
         mock_user.objects.filter.return_value = [mock_saved_committer]
 
         command.handle(**default_options)
 
-        # Should call User.bulk_save for committers (deduplicated to 1)
         mock_user.bulk_save.assert_called_once()
         saved_committers = mock_user.bulk_save.call_args[0][0]
         assert len(saved_committers) == 1
         mock_commit.bulk_save.assert_called_once()
-        # Verify commit committers were reassigned (line 434)
         assert mock_commit_obj_1.committer == mock_saved_committer
         assert mock_commit_obj_2.committer == mock_saved_committer

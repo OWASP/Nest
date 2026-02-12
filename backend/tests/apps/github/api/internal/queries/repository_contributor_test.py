@@ -152,5 +152,4 @@ class TestRepositoryContributorQuery:
         result = RepositoryContributorQuery().top_contributors(limit=0)
 
         assert result == []
-        # Should not call get_top_contributors when limit is invalid
         mock_get_top_contributors.assert_not_called()

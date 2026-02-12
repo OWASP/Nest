@@ -6,6 +6,7 @@ import pytest
 from apps.common.utils import clean_url, validate_url
 from apps.github.models.repository import Repository
 from apps.owasp.models.common import RepositoryBasedEntityModel
+from apps.owasp.models.entity_member import EntityMember
 
 
 class EntityModel(RepositoryBasedEntityModel):
@@ -244,14 +245,12 @@ class TestRepositoryBasedEntityModel:
                 "example.com",
                 [],
             ),
-            # Test markdown link with self-referencing URL
             (
                 """Website: [https://mltop10.info](https://mltop10.info)
 Edition: 2023""",
                 None,
                 ["https://mltop10.info"],
             ),
-            # Test mixed content with markdown links and standalone URLs
             (
                 """Website: [https://mltop10.info](https://mltop10.info)
 [Source Code](https://github.com/OWASP/www-project-machine-learning-security-top-10/tree/master/docs/2023)
@@ -265,27 +264,23 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
                     "https://mltop10.info/OWASP-Machine-Learning-Security-Top-10.pdf",
                 ],
             ),
-            # Test markdown links with text
             (
                 """* [Project Homepage](https://example.com)
 * [Documentation](https://docs.example.com)""",
                 None,
                 ["https://docs.example.com", "https://example.com"],
             ),
-            # Test URLs with trailing punctuation
             (
                 """Check out https://example.com, and also https://test.org!""",
                 None,
                 ["https://example.com", "https://test.org"],
             ),
-            # Test malformed URLs (should be filtered out)
             (
                 """* [Broken](https://)
 * [Valid](https://example.com)""",
                 None,
                 ["https://example.com"],
             ),
-            # Test empty and None content
             ("This test contains no URLs.", None, []),
             ("", None, []),
             (None, None, []),
@@ -623,12 +618,9 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
 
     def test_entity_leaders_property(self):
         """Test entity_leaders returns filtered and ordered leaders."""
-        from apps.owasp.models.entity_member import EntityMember
-
         model = EntityModel()
         model.id = 1
 
-        # Mock the entity_members relationship
         mock_queryset = Mock()
         mock_queryset.filter.return_value.order_by.return_value = [Mock(), Mock()]
 

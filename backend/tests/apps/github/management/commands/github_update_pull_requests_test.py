@@ -91,7 +91,6 @@ class TestGithubUpdatePullRequests:
         mock_pr.repository = mock_repo
         mock_pr.body = "This closes #123"
         mock_pr.related_issues = mocker.Mock()
-        # Issue already linked (ID 10 already in values_list)
         mock_pr.related_issues.values_list.return_value = [10]
 
         mock_pr_qs = mocker.Mock()
@@ -113,6 +112,5 @@ class TestGithubUpdatePullRequests:
         command.stdout = mocker.Mock()
         command.handle()
 
-        # Issue should be queried but not added (since it's already linked)
         mock_issue_qs.filter.assert_called_with(repository=mock_repo, number__in={123})
         mock_pr.related_issues.add.assert_not_called()

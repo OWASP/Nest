@@ -268,7 +268,6 @@ def test_handle_unknown_object_exception_non_404(
     with mock.patch.object(Project, "bulk_save"):
         command.handle(offset=0)
 
-    # Non-404 exception falls through, gh_repository is unbound, caught by generic handler
     mock_logger.exception.assert_called_once()
     mock_sync_repository.assert_not_called()
     mock_project.invalid_urls.add.assert_not_called()

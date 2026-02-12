@@ -149,7 +149,6 @@ class TestBaseChunkCommand:
             result = command.process_chunks_batch([mock_entity])
 
             assert result == 0
-            # Check that it wrote the initial message and the empty content message
             expected_calls = [
                 call("Context for test-key-123 requires chunk creation/update"),
                 call("No content to chunk for test_entity test-key-123"),
@@ -178,7 +177,6 @@ class TestBaseChunkCommand:
             result = command.process_chunks_batch([mock_entity])
 
             assert result == 0
-            # Check that both messages were written
             expected_calls = [
                 call("Context for test-key-123 requires chunk creation/update"),
                 call("No chunks created for test_entity test-key-123"),
@@ -201,7 +199,6 @@ class TestBaseChunkCommand:
         """Test process_chunks_batch when chunks are already up to date."""
         mock_get_content_type.return_value = mock_content_type
 
-        # Simulate that we have existing chunks with current timestamp
         mock_context.nest_updated_at = datetime(2024, 1, 1, tzinfo=UTC)
         mock_context.chunks.aggregate.return_value = {
             "latest_created": datetime(2024, 1, 2, tzinfo=UTC)
@@ -212,7 +209,6 @@ class TestBaseChunkCommand:
             result = command.process_chunks_batch([mock_entity])
 
             assert result == 0
-            # Should write that chunks are already up to date
             calls = [str(call) for call in mock_write.call_args_list]
             assert any("already up to date" in str(call) for call in calls)
 

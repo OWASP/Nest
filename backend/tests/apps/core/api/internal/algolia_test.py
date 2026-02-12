@@ -3,8 +3,9 @@ from http import HTTPStatus
 from unittest.mock import Mock, patch
 
 import pytest
+from algoliasearch.http.exceptions import AlgoliaException
 
-from apps.core.api.internal.algolia import algolia_search
+from apps.core.api.internal.algolia import algolia_search, get_search_results
 
 MOCKED_SEARCH_RESULTS = {
     "hits": [
@@ -248,13 +249,10 @@ class TestAlgoliaSearch:
             assert response_2.status_code == HTTPStatus.OK
             assert response_data_1 == expected_result
             assert response_data_2 == expected_result
-            # backend only called once = caching worked
             mock_get_search_results.assert_called_once()
 
     def test_algolia_search_handles_algolia_exception(self):
         """Test that AlgoliaException is caught and proper error returned."""
-        from algoliasearch.http.exceptions import AlgoliaException
-
         with patch(
             "apps.core.api.internal.algolia.get_search_results",
             side_effect=AlgoliaException("Algolia API error"),
@@ -292,9 +290,6 @@ class TestAlgoliaSearch:
         self, mock_get_params, mock_deep_camelize, mock_get_client
     ):
         """Test the get_search_results function directly."""
-        from apps.core.api.internal.algolia import get_search_results
-
-        # Setup mocks
         mock_get_params.return_value = {"attributesToRetrieve": ["name", "id"]}
         mock_client = Mock()
         mock_get_client.return_value = mock_client
@@ -310,7 +305,6 @@ class TestAlgoliaSearch:
 
         mock_deep_camelize.return_value = [{"id": 1, "name": "Test"}]
 
-        # Call function
         result = get_search_results(
             index_name="projects",
             query="test",
@@ -320,7 +314,6 @@ class TestAlgoliaSearch:
             ip_address="127.0.0.1",
         )
 
-        # Assertions
         mock_get_params.assert_called_once_with("projects")
         mock_get_client.assert_called_once_with(ip_address="127.0.0.1")
         mock_client.search.assert_called_once()

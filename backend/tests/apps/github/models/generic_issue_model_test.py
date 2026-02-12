@@ -13,7 +13,6 @@ class TestGenericIssueModel:
         mock_repository = Mock()
         mock_repository.id = 12345
 
-        # Create a test instance that inherits from GenericIssueModel
         class TestModel(GenericIssueModel):
             class Meta:
                 app_label = "github"

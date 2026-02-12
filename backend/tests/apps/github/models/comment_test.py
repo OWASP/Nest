@@ -106,7 +106,6 @@ class TestComment:
 
         comment.from_github(gh_comment)
 
-        # None values should not be set
         assert comment.body is None or hasattr(comment, "body")
         assert comment.updated_at == "2023-01-01"
 

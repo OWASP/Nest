@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from apps.github.models.user import User
 from apps.owasp.models.member_snapshot import MemberSnapshot
@@ -67,7 +68,6 @@ class TestMemberSnapshotModel:
         )
         snapshot.id = 1
 
-        # The property should only sum commits + PRs + issues (not messages)
         assert "messages_count" not in str(
             MemberSnapshot.total_contributions.fget.__code__.co_names
         )
@@ -126,8 +126,6 @@ class TestMemberSnapshotModel:
 
     def test_commits_count_property(self):
         """Test commits_count property returns correct count."""
-        from unittest.mock import PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -143,8 +141,6 @@ class TestMemberSnapshotModel:
 
     def test_pull_requests_count_property(self):
         """Test pull_requests_count property returns correct count."""
-        from unittest.mock import PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -160,8 +156,6 @@ class TestMemberSnapshotModel:
 
     def test_issues_count_property(self):
         """Test issues_count property returns correct count."""
-        from unittest.mock import PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -177,8 +171,6 @@ class TestMemberSnapshotModel:
 
     def test_messages_count_property(self):
         """Test messages_count property returns correct count."""
-        from unittest.mock import PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -194,8 +186,6 @@ class TestMemberSnapshotModel:
 
     def test_total_contributions_property(self):
         """Test total_contributions property calculates correctly."""
-        from unittest.mock import PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -215,13 +205,10 @@ class TestMemberSnapshotModel:
                 type(snapshot), "issues_count", new_callable=PropertyMock, return_value=3
             ),
         ):
-            # Total should be sum of commits + pull_requests + issues
             assert snapshot.total_contributions == 18
 
     def test_commits_count_executes_m2m_count(self):
         """Test commits_count actually calls self.commits.count()."""
-        from unittest.mock import MagicMock, PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -241,8 +228,6 @@ class TestMemberSnapshotModel:
 
     def test_pull_requests_count_executes_m2m_count(self):
         """Test pull_requests_count actually calls self.pull_requests.count()."""
-        from unittest.mock import MagicMock, PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -265,8 +250,6 @@ class TestMemberSnapshotModel:
 
     def test_issues_count_executes_m2m_count(self):
         """Test issues_count actually calls self.issues.count()."""
-        from unittest.mock import MagicMock, PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,
@@ -286,8 +269,6 @@ class TestMemberSnapshotModel:
 
     def test_messages_count_executes_m2m_count(self):
         """Test messages_count actually calls self.messages.count()."""
-        from unittest.mock import MagicMock, PropertyMock, patch
-
         user = User(login="testuser")
         snapshot = MemberSnapshot(
             github_user=user,

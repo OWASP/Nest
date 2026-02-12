@@ -1,5 +1,7 @@
 import math
-from unittest.mock import ANY, patch
+from datetime import UTC
+from datetime import datetime as dt
+from unittest.mock import ANY, Mock, patch
 
 import pytest
 from django.utils import timezone
@@ -52,10 +54,6 @@ class TestStaticSitemap:
 
     def test_lastmod_unmapped_path_returns_current_time(self, sitemap):
         """Test lastmod returns current time for paths not in path_to_model."""
-        from datetime import UTC
-        from datetime import datetime as dt
-        from unittest.mock import Mock
-
         current_time = dt.now(UTC)
         mock_datetime = Mock()
         mock_datetime.now.return_value = current_time

@@ -1,5 +1,7 @@
 """Test cases for the ProjectHealthMetricsFilter."""
 
+from django.db.models import Q
+
 from apps.owasp.api.internal.filters.project_health_metrics import ProjectHealthMetricsFilter
 from apps.owasp.models.enums.project import ProjectLevel
 
@@ -27,9 +29,6 @@ class TestProjectHealthMetricsFilter:
 
     def test_level_filter_with_none_value(self):
         """Test level filter returns empty Q() when value is None."""
-        from django.db.models import Q
-
-        # Get the filter method from the Strawberry definition
         level_field = None
         for field in ProjectHealthMetricsFilter.__strawberry_definition__.fields:
             if field.name == "level":
@@ -38,10 +37,8 @@ class TestProjectHealthMetricsFilter:
 
         assert level_field is not None
 
-        # Access the wrapped function and call it with self, value, and prefix
         filter_instance = ProjectHealthMetricsFilter()
         result = level_field.base_resolver.wrapped_func(filter_instance, value=None, prefix="")
 
-        # Empty Q() should be returned when value is None
         assert result == Q()
         assert result.children == []

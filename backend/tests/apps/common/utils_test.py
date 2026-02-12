@@ -9,12 +9,14 @@ from apps.common.utils import (
     convert_to_camel_case,
     convert_to_snake_case,
     get_absolute_url,
+    get_nest_user_agent,
     get_user_ip_address,
     join_values,
     natural_date,
     natural_number,
     normalize_limit,
     round_down,
+    slugify,
     validate_url,
 )
 
@@ -281,15 +283,11 @@ class TestUtils:
 
     def test_slugify_multiple_hyphens(self):
         """Test slugify removes multiple consecutive hyphens."""
-        from apps.common.utils import slugify
-
         assert slugify("test---multiple--hyphens") == "test-multiple-hyphens"
         assert slugify("test-single-hyphens") == "test-single-hyphens"
 
     @patch("apps.common.utils.settings")
     def test_get_nest_user_agent(self, mock_settings):
         """Test get_nest_user_agent replaces spaces with dashes and lowercases."""
-        from apps.common.utils import get_nest_user_agent
-
         mock_settings.APP_NAME = "Test App Name"
         assert get_nest_user_agent() == "test-app-name"

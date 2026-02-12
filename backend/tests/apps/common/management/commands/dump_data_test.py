@@ -1,7 +1,8 @@
+from subprocess import CalledProcessError
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.test import override_settings
 from psycopg2 import OperationalError, ProgrammingError, sql
 
@@ -17,13 +18,13 @@ DATABASES = {
 }
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 class TestDumpDataCommand:
     @override_settings(DATABASES=DATABASES)
     @patch("apps.common.management.commands.dump_data.run")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
     def test_dump_data(self, mock_path, mock_connect, mock_run):
-        # Mock psycopg2 connection/cursor
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
@@ -37,7 +38,6 @@ class TestDumpDataCommand:
             "data/dump.dump",
         )
 
-        # Verify temp DB created from template
         expected_temp_db = "temp_db-name"
         mock_connect.assert_any_call(
             dbname="postgres",
@@ -91,7 +91,6 @@ class TestDumpDataCommand:
             "-f",
             str(mock_resolve),
         ] == mock_run.call_args[0][0]
-        # Ensure DROP DATABASE executed at the end
         mock_cursor.execute.assert_any_call(
             sql.SQL("DROP DATABASE IF EXISTS {temp_db};").format(
                 temp_db=sql.Identifier(expected_temp_db)
@@ -154,8 +153,6 @@ class TestDumpDataCommand:
     @patch("apps.common.management.commands.dump_data.Path")
     def test_dump_data_called_process_error(self, mock_path, mock_connect, mock_run):
         """Test dump_data handles CalledProcessError from pg_dump."""
-        from subprocess import CalledProcessError
-
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
@@ -165,12 +162,9 @@ class TestDumpDataCommand:
         mock_resolve = MagicMock()
         mock_path.return_value.resolve.return_value = mock_resolve
 
-        # Make run() raise CalledProcessError
         mock_run.side_effect = CalledProcessError(
             returncode=1, cmd=["pg_dump", "test"], output="pg_dump failed"
         )
-
-        from django.core.management import CommandError
 
         with pytest.raises(CommandError) as exc_info:
             call_command("dump_data", "--output", "data/dump.dump")

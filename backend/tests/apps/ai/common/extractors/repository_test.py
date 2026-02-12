@@ -269,7 +269,6 @@ class TestRepositoryContentExtractor:
         json_content, metadata = extract_repository_content(repository)
 
         data = json.loads(json_content)
-        # When name/key/description are None, they should not be in the JSON
         assert "name" not in data
         assert "key" not in data
         assert "description" not in data
@@ -279,16 +278,13 @@ class TestRepositoryContentExtractor:
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_tab_files_with_non_dict_items(self, mock_get_content, mock_sleep):
         """Test that non-dict items are skipped when extracting tab files."""
-        # Return list with non-dict item, regular file, and tab file
-        # Then return content for each markdown file in order:
-        # README.md, index.md, info.md, leaders.md, tab_test.md
         mock_get_content.side_effect = [
-            '["not_a_dict", {"name": "regular.md"}, {"name": "tab_test.md"}]',  # directory listing
-            None,  # README.md
-            None,  # index.md
-            None,  # info.md
-            None,  # leaders.md
-            "Tab file content",  # tab_test.md
+            '["not_a_dict", {"name": "regular.md"}, {"name": "tab_test.md"}]',
+            None,
+            None,
+            None,
+            None,
+            "Tab file content",
         ]
 
         owner = MagicMock()
@@ -301,7 +297,6 @@ class TestRepositoryContentExtractor:
         json_content, _ = extract_repository_content(repository)
         data = json.loads(json_content)
 
-        # Should have extracted tab file
         assert "markdown_content" in data
         assert "tab_test.md" in data["markdown_content"]
         assert data["markdown_content"]["tab_test.md"] == "Tab file content"
@@ -310,17 +305,14 @@ class TestRepositoryContentExtractor:
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_tab_files_without_tab_prefix(self, mock_get_content, mock_sleep):
         """Test that files without tab_ prefix are not added to tab_files."""
-        # Return list with files that don't match tab_ pattern
-        # Only tab_valid.md should be extracted as a tab file
-        # File fetch order: README.md, index.md, info.md, leaders.md, tab_valid.md
         mock_get_content.side_effect = [
             '[{"name": "readme.md"}, {"name": "notab.md"},'
-            ' {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]',  # directory listing
-            "README content",  # README.md
-            None,  # index.md
-            None,  # info.md
-            None,  # leaders.md
-            "Valid tab file",  # tab_valid.md
+            ' {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]',
+            "README content",
+            None,
+            None,
+            None,
+            "Valid tab file",
         ]
 
         owner = MagicMock()
@@ -333,15 +325,12 @@ class TestRepositoryContentExtractor:
         json_content, _ = extract_repository_content(repository)
         data = json.loads(json_content)
 
-        # Should only have tab_valid.md, not the others
         assert "markdown_content" in data
         assert "tab_valid.md" in data["markdown_content"]
         assert data["markdown_content"]["tab_valid.md"] == "Valid tab file"
-        # Files without proper tab_ pattern should not be included as tab files
         assert "tab_missing_ext" not in data["markdown_content"]
         assert "notab.md" not in data["markdown_content"]
-        assert "readme.md" not in data["markdown_content"]  # lowercase readme.md not fetched
-        # README.md should be there as a regular markdown file
+        assert "readme.md" not in data["markdown_content"]
         assert "README.md" in data["markdown_content"]
         assert data["markdown_content"]["README.md"] == "README content"
 

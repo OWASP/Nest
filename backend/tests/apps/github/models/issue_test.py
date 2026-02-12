@@ -221,7 +221,6 @@ class TestIssueModel:
 
     def test_save_method_when_issue_not_open(self, mock_repository):
         """Test save method when issue is not open (is_open=False)."""
-        # Create issue with CLOSED state so is_open returns False
         issue = Issue(repository=mock_repository, state=Issue.State.CLOSED)
         issue.generate_hint = Mock()
         issue.generate_summary = Mock()
@@ -229,7 +228,6 @@ class TestIssueModel:
         with patch("apps.github.models.issue.BulkSaveModel.save"):
             issue.save()
 
-        # Should not call generate methods when issue is not open
         issue.generate_hint.assert_not_called()
         issue.generate_summary.assert_not_called()
 
@@ -237,13 +235,11 @@ class TestIssueModel:
         """Test latest_comment property returns the expected query result."""
         issue = Issue(repository=mock_repository)
 
-        # Mock the comments queryset
         mock_comments = MagicMock()
         mock_ordered = MagicMock()
         mock_comments.order_by.return_value = mock_ordered
         mock_ordered.first.return_value = None
 
-        # Temporarily replace the comments attribute
         issue._state.db = "default"
         with patch.object(type(issue), "comments", PropertyMock(return_value=mock_comments)):
             result = issue.latest_comment

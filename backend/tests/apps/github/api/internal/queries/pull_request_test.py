@@ -109,7 +109,7 @@ class TestPullRequestQuery:
         assert result == [mock_pull_request]
         mock_queryset.annotate.assert_called_once()
         mock_queryset.filter.assert_called()
-        assert mock_queryset.order_by.call_count == 2  # Once initially, once after filter
+        assert mock_queryset.order_by.call_count == 2
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
     def test_recent_pull_requests_with_limit(self, mock_objects, mock_queryset, mock_pull_request):
@@ -135,7 +135,6 @@ class TestPullRequestQuery:
         )
 
         assert result == [mock_pull_request]
-        # login+organization applied together, repository applied separately = 2 calls
         assert mock_queryset.filter.call_count == 2
         mock_queryset.__getitem__.assert_called_with(slice(None, 2))
 
@@ -153,7 +152,6 @@ class TestPullRequestQuery:
 
         assert result == [mock_pull_request]
         mock_queryset.annotate.assert_called_once()
-        # One filter for login+organization combined, one for rank=1
         assert mock_queryset.filter.call_count == 2
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
@@ -169,7 +167,6 @@ class TestPullRequestQuery:
         )
 
         assert result == [mock_pull_request]
-        # Verify filters were applied: login+organization together, repository separately
         assert mock_queryset.filter.call_count == 2
 
     @patch("apps.github.models.pull_request.PullRequest.objects")
@@ -186,7 +183,6 @@ class TestPullRequestQuery:
 
         assert result == [mock_pull_request]
         mock_queryset.annotate.assert_called_once()
-        # One filter for login+organization, one for repository, one for rank=1
         assert mock_queryset.filter.call_count == 3
 
     @patch("apps.owasp.models.project.Project.objects")
@@ -198,7 +194,6 @@ class TestPullRequestQuery:
         mock_project_objects.filter.return_value.first.return_value = None
         mock_pr_objects.exclude.return_value = mock_queryset
 
-        # Mock queryset.none() to return a queryset that returns empty list when sliced
         mock_none_queryset = MagicMock()
         mock_none_queryset.__getitem__.return_value = []
         mock_queryset.none.return_value = mock_none_queryset

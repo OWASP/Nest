@@ -397,14 +397,9 @@ class TestRetriever:
             patch("openai.OpenAI"),
         ):
             retriever = Retriever()
-
-            # Create conversation without slack_channel_id attribute
             conversation = MagicMock(spec=[])
-
             parent_message = MagicMock(spec=[])
-
             author = MagicMock(spec=[])
-
             content_object = MagicMock()
             content_object.__class__.__name__ = "Message"
             content_object.conversation = conversation
@@ -414,7 +409,6 @@ class TestRetriever:
 
             result = retriever.get_additional_context(content_object)
 
-            # Channel, thread_ts, and user should be None when attributes don't exist
             assert "channel" not in result or result.get("channel") is None
             assert "thread_ts" not in result or result.get("thread_ts") is None
             assert "user" not in result or result.get("user") is None
@@ -429,7 +423,6 @@ class TestRetriever:
 
             content_object = MagicMock()
             content_object.__class__.__name__ = "Message"
-            # Set conversation to exist but be falsy (e.g., empty string, 0, False)
             content_object.conversation = 0
             content_object.parent_message = False
             content_object.author = ""
@@ -437,7 +430,6 @@ class TestRetriever:
 
             result = retriever.get_additional_context(content_object)
 
-            # Should only have ts since conversation/parent_message/author are falsy
             assert result["ts"] == "1234567891.123456"
             assert "channel" not in result or result.get("channel") is None
             assert "thread_ts" not in result or result.get("thread_ts") is None
