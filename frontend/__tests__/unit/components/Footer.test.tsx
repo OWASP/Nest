@@ -283,6 +283,25 @@ describe('Footer', () => {
       expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
 
+    test('renders version as commit link in non-production environment', () => {
+      // Set non-production environment with commit hash
+      mockEnv.ENVIRONMENT = 'staging'
+      mockEnv.RELEASE_VERSION = '24.2.10-12c25c5'
+
+      renderFooter()
+
+      const versionText = screen.getByText('v24.2.10-12c25c5')
+      const versionLink = versionText.closest('a')
+      expect(versionLink).toBeInTheDocument()
+      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/12c25c5')
+      expect(versionLink).toHaveAttribute('target', '_blank')
+      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
+
+      // Reset to defaults to avoid leaking state
+      mockEnv.ENVIRONMENT = 'production'
+      mockEnv.RELEASE_VERSION = '1.2.3'
+    })
+
     test('handles span elements correctly', () => {
       renderFooter()
 
