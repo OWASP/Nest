@@ -5,7 +5,7 @@ import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 
 export type { BreadcrumbItem } from 'types/breadcrumb'
 
-const HIDDEN_SEGMENTS = new Set(['repositories', 'mentees', 'modules', 'programs'])
+const HIDDEN_SEGMENTS = new Set(['repositories', 'mentees', 'modules', 'programs', 'community'])
 const COMMUNITY_RELATED_PATHS = ['/chapters', '/members', '/organizations']
 
 function buildBreadcrumbItems(
@@ -23,7 +23,10 @@ function buildBreadcrumbItems(
     return items
   }
 
-  if (COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))) {
+  if (
+    !pathname.startsWith('/community') &&
+    COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))
+  ) {
     items.push({
       title: 'Community',
       path: '/community',

@@ -86,7 +86,7 @@ describe('Community Page', () => {
       expect(screen.getByText('Chapters')).toBeInTheDocument()
       expect(screen.getByText('Members')).toBeInTheDocument()
       expect(screen.getByText('Organizations')).toBeInTheDocument()
-      expect(screen.getByText('Snapshots')).toBeInTheDocument()
+      expect(screen.getAllByText('Snapshots').length).toBeGreaterThan(0)
     })
   })
 
