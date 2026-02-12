@@ -154,4 +154,106 @@ describe('ProjectHealthMetricsDetails', () => {
       expect(screen.getByText('Leader Requirements Not Compliant')).toBeInTheDocument()
     })
   })
+
+  test('handles null createdAt in metrics list gracefully', async () => {
+    const dataWithNullCreatedAt = {
+      ...mockProjectsDashboardMetricsDetailsData,
+      project: {
+        ...mockProjectsDashboardMetricsDetailsData.project,
+        healthMetricsList: [
+          {
+            ...mockProjectsDashboardMetricsDetailsData.project.healthMetricsList[0],
+            createdAt: null,
+          },
+        ],
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullCreatedAt,
+      loading: false,
+      error: null,
+    })
+
+    render(<ProjectHealthMetricsDetails />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Stars')).toBeInTheDocument()
+    })
+  })
+
+  test('handles null score and compliance flags gracefully', async () => {
+    const dataWithNullValues = {
+      ...mockProjectsDashboardMetricsDetailsData,
+      project: {
+        ...mockProjectsDashboardMetricsDetailsData.project,
+        healthMetricsLatest: {
+          ...mockProjectsDashboardMetricsDetailsData.project.healthMetricsLatest,
+          score: null,
+          isFundingRequirementsCompliant: null,
+          isLeaderRequirementsCompliant: null,
+        },
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullValues,
+      loading: false,
+      error: null,
+    })
+
+    render(<ProjectHealthMetricsDetails />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Funding Requirements Not Compliant')).toBeInTheDocument()
+      expect(screen.getByText('Leader Requirements Not Compliant')).toBeInTheDocument()
+    })
+  })
+
+  test('handles null metric counts gracefully', async () => {
+    const dataWithNullCounts = {
+      ...mockProjectsDashboardMetricsDetailsData,
+      project: {
+        ...mockProjectsDashboardMetricsDetailsData.project,
+        healthMetricsList: [
+          {
+            ...mockProjectsDashboardMetricsDetailsData.project.healthMetricsList[0],
+            starsCount: null,
+            forksCount: null,
+            openIssuesCount: null,
+            unassignedIssuesCount: null,
+            unansweredIssuesCount: null,
+            totalIssuesCount: null,
+            openPullRequestsCount: null,
+            recentReleasesCount: null,
+            totalReleasesCount: null,
+            contributorsCount: null,
+          },
+        ],
+        healthMetricsLatest: {
+          ...mockProjectsDashboardMetricsDetailsData.project.healthMetricsLatest,
+          ageDays: null,
+          lastCommitDays: null,
+          lastReleaseDays: null,
+          lastPullRequestDays: null,
+          owaspPageLastUpdateDays: null,
+          ageDaysRequirement: null,
+          lastCommitDaysRequirement: null,
+          lastReleaseDaysRequirement: null,
+          lastPullRequestDaysRequirement: null,
+          owaspPageLastUpdateDaysRequirement: null,
+        },
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullCounts,
+      loading: false,
+      error: null,
+    })
+
+    render(<ProjectHealthMetricsDetails />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Days Metrics')).toBeInTheDocument()
+      expect(screen.getByText('Stars')).toBeInTheDocument()
+    })
+  })
 })

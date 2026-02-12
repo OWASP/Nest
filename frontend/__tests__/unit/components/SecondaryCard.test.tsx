@@ -94,6 +94,12 @@ describe('SecondaryCard Component', () => {
       expect(titleElement).toBeInTheDocument()
       expect(cardElement.childNodes.length).toBe(1)
     })
+
+    it('renders correctly when called directly as a function (default props)', () => {
+      // This covers the default parameter `= {}` in the component signature
+      const { container } = render(SecondaryCard())
+      expect(container.querySelector('.mb-8')).toBeInTheDocument()
+    })
   })
 
   describe('Accessibility roles and labels', () => {

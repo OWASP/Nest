@@ -46,6 +46,7 @@ jest.mock('utils/constants', () => ({
       links: [
         { text: 'About', href: '/about' },
         { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
+        { text: 'Empty Href Link', href: '' }, // Empty href to test fallback
       ],
     },
     {
@@ -71,9 +72,19 @@ jest.mock('utils/constants', () => ({
   ],
 }))
 
-jest.mock('utils/env.client', () => ({
+// Create a mutable mock for environment variables
+let mockEnv = {
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
+}
+
+jest.mock('utils/env.client', () => ({
+  get ENVIRONMENT() {
+    return mockEnv.ENVIRONMENT
+  },
+  get RELEASE_VERSION() {
+    return mockEnv.RELEASE_VERSION
+  },
 }))
 
 import { FaGithub, FaSlack } from 'react-icons/fa6'
@@ -93,6 +104,10 @@ describe('Footer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockEnv = {
+      ENVIRONMENT: 'production',
+      RELEASE_VERSION: '1.2.3',
+    }
   })
 
   afterEach(() => {
@@ -132,10 +147,11 @@ describe('Footer', () => {
           }
         }
       }
+
       for (const link of regularLinks) {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
-        expect(linkElement).toHaveAttribute('href', link.href)
+        expect(linkElement).toHaveAttribute('href', link.href || '/')
         expect(linkElement).toHaveAttribute('target', '_blank')
       }
 
@@ -369,12 +385,34 @@ describe('Footer', () => {
       expect(aboutLink).toHaveAttribute('href', '/about')
     })
 
+    test('handles empty href with fallback to root path', () => {
+      renderFooter()
+
+      const emptyHrefLink = screen.getByRole('link', { name: 'Empty Href Link' })
+      expect(emptyHrefLink).toHaveAttribute('href', '/')
+    })
+
     test('handles sections with span elements', () => {
       renderFooter()
 
       const spanElement = screen.getByText('Plain Text')
       expect(spanElement.tagName).toBe('SPAN')
       expect(spanElement.closest('a')).toBeNull()
+    })
+
+    test('renders version as span in non-production environment', () => {
+      // Change environment to development using mutable mock
+      mockEnv.ENVIRONMENT = 'development'
+
+      // Re-render
+      renderFooter()
+
+      const versionText = screen.getByText('v1.2.3')
+      const versionSpan = versionText.closest('span')
+      expect(versionSpan).toBeInTheDocument()
+      // Should not be wrapped in a link
+      const versionLink = versionText.closest('a')
+      expect(versionLink).toBeNull()
     })
   })
 

@@ -99,4 +99,20 @@ describe('MetricsCard component', () => {
     expect(screen.getByText(/Score:/).textContent).toContain('55')
     expect(screen.getByRole('link')).toHaveAttribute('href', '/projects/dashboard/metrics/another')
   })
+
+  it('handles undefined optional props using defaults', () => {
+    const metric = makeMetric({
+      score: undefined,
+      createdAt: undefined,
+    })
+    render(<MetricsCard metric={metric} />)
+
+    // Score defaults to 0, so it should be red (< 50)
+    const scoreText = screen.getByText(/Score: 0/)
+    expect(scoreText).toBeInTheDocument()
+    expect(scoreText.closest('div')).toHaveClass('bg-red-500')
+
+    // createdAt defaults to "N/A"
+    expect(screen.getByText('N/A')).toBeInTheDocument()
+  })
 })

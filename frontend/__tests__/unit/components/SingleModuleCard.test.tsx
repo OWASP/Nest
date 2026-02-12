@@ -323,6 +323,48 @@ describe('SingleModuleCard', () => {
 
       expect(screen.getByText('No description available.')).toBeInTheDocument()
     })
+
+    it('renders contributor fallback details when name is missing', () => {
+      const moduleWithoutNames: Module = {
+        ...mockModule,
+        mentors: [
+          {
+            id: 'mentor-1',
+            name: '', // Empty name
+            login: 'mentor1',
+            avatarUrl: 'https://example.com/avatar.jpg',
+          },
+        ],
+      }
+      render(<SingleModuleCard module={moduleWithoutNames} />)
+
+      // Alt text fallback
+      const avatar = screen.getByTestId('contributor-avatar')
+      expect(avatar).toHaveAttribute('alt', 'Mentors avatar')
+
+      // Title/text fallback to login
+      expect(screen.getByText('Mentor1')).toBeInTheDocument() // upperFirst('mentor1')
+      const links = screen.getAllByRole('link')
+      // Filter for the specific link to avoid ambiguity
+      const link = links.find((l) => l.getAttribute('href')?.includes('/members/mentor1'))
+      expect(link).toHaveAttribute('title', 'mentor1')
+    })
+
+    it('handles pathname without program key gracefully', () => {
+      mockUsePathname.mockReturnValue('/')
+      render(<SingleModuleCard module={mockModule} />)
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
+    })
+
+    it('renders Unknown for missing detail values', () => {
+      const moduleWithEmptyDetails = {
+        ...mockModule,
+        experienceLevel: '' as unknown as ExperienceLevelEnum,
+      }
+      render(<SingleModuleCard module={moduleWithEmptyDetails} />)
+      // Expect at least one 'Unknown' for the empty experience level
+      expect(screen.getAllByText('Unknown').length).toBeGreaterThan(0)
+    })
   })
 
   describe('Accessibility', () => {

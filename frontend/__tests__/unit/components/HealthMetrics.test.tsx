@@ -135,5 +135,45 @@ describe('HealthMetrics', () => {
       expect(props.days).toEqual([0, 0])
       expect(props.requirements).toEqual([0, 0])
     })
+
+    it('handles completely null/undefined optional fields', () => {
+      const nullData = [
+        {
+          createdAt: null,
+          openIssuesCount: null,
+          unassignedIssuesCount: undefined,
+          unansweredIssuesCount: null,
+          openPullRequestsCount: undefined,
+          starsCount: null,
+          forksCount: undefined,
+          id: 'null-test',
+          projectKey: 'null-project',
+        },
+      ]
+      // @ts-expect-error - testing specific edge case with mocked data
+      render(<HealthMetrics data={nullData} />)
+
+      // Verify LineCharts have 0s for data
+      const lineCharts = screen.getAllByTestId('LineChart')
+
+      // Issues Trend
+      const issuesProps = JSON.parse(lineCharts[0].dataset.props || '{}')
+      expect(issuesProps.series[0].data).toEqual([0]) // openIssuesCount
+      expect(issuesProps.series[1].data).toEqual([0]) // unassignedIssuesCount
+      expect(issuesProps.series[2].data).toEqual([0]) // unansweredIssuesCount
+      expect(issuesProps.labels).toEqual(['']) // createdAt
+
+      // Pull Requests Trend
+      const prProps = JSON.parse(lineCharts[1].dataset.props || '{}')
+      expect(prProps.series[0].data).toEqual([0]) // openPullRequestsCount
+
+      // Stars Trend
+      const starsProps = JSON.parse(lineCharts[2].dataset.props || '{}')
+      expect(starsProps.series[0].data).toEqual([0]) // starsCount
+
+      // Forks Trend
+      const forksProps = JSON.parse(lineCharts[3].dataset.props || '{}')
+      expect(forksProps.series[0].data).toEqual([0]) // forksCount
+    })
   })
 })

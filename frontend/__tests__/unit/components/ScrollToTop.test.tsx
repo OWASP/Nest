@@ -1,4 +1,4 @@
-import { render, fireEvent, waitFor } from '@testing-library/react'
+import { render, fireEvent, waitFor, act } from '@testing-library/react'
 import ScrollToTop from 'components/ScrollToTop'
 
 describe('ScrollToTop component test', () => {
@@ -85,6 +85,36 @@ describe('ScrollToTop component test', () => {
 
     expect(clearTimeoutSpy).toHaveBeenCalled()
     clearTimeoutSpy.mockRestore()
+    jest.useRealTimers()
+  })
+
+  test('Should throttle repeated scroll events', () => {
+    jest.useFakeTimers()
+    const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout')
+
+    render(<ScrollToTop />)
+
+    // First scroll event - should set a timeout
+    Object.defineProperty(globalThis, 'scrollY', { value: 400, writable: true })
+    globalThis.dispatchEvent(new Event('scroll'))
+
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(1)
+
+    // Immediate second scroll event - should NOT set a new timeout due to throttling
+    globalThis.dispatchEvent(new Event('scroll'))
+
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(1) // Still 1
+
+    // Fast forward time to clear the timeout
+    act(() => {
+      jest.advanceTimersByTime(100)
+    })
+
+    // Third scroll event - should set a new timeout now
+    globalThis.dispatchEvent(new Event('scroll'))
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(2)
+
+    setTimeoutSpy.mockRestore()
     jest.useRealTimers()
   })
 })

@@ -135,4 +135,35 @@ describe('Organization', () => {
     expect(screen.getByText('@no-optional-org')).toBeInTheDocument()
     expect(screen.getByText('@empty-strings-org')).toBeInTheDocument()
   })
+
+  test('renders organization card with null avatarUrl using fallback', async () => {
+    const mockDataWithNullAvatar = {
+      hits: [
+        {
+          objectID: 'org-null-avatar',
+          avatarUrl: null,
+          collaboratorsCount: 5,
+          company: 'Test Company',
+          createdAt: 1596744799,
+          description: 'Organization with null avatar',
+          email: 'test@example.com',
+          followersCount: 50,
+          location: 'Test Location',
+          login: 'null-avatar-org',
+          name: 'Null Avatar Org',
+          publicRepositoriesCount: 25,
+          updatedAt: 1727390473,
+          url: 'https://github.com/null-avatar-org',
+        },
+      ],
+      totalPages: 1,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockDataWithNullAvatar)
+
+    render(<Organization />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Null Avatar Org')).toBeInTheDocument()
+    })
+  })
 })

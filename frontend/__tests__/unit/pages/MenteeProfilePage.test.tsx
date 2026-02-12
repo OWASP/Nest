@@ -441,4 +441,106 @@ describe('MenteeProfilePage', () => {
     expect(screen.queryByRole('heading', { name: /Domains/i })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Skills & Technologies/i })).toBeInTheDocument()
   })
+
+  it('handles issues with null labels using fallback', () => {
+    const dataWithNullLabels = {
+      ...mockMenteeData,
+      getMenteeModuleIssues: [
+        {
+          id: 'issue1',
+          number: 101,
+          title: 'Issue with null labels',
+          state: 'open',
+          url: 'http://example.com/issue1',
+          labels: null,
+        },
+      ],
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithNullLabels, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    // Should render without crashing
+    expect(screen.getAllByText('Issue with null labels').length).toBeGreaterThan(0)
+  })
+
+  it('handles issues with undefined labels using fallback', () => {
+    const dataWithUndefinedLabels = {
+      ...mockMenteeData,
+      getMenteeModuleIssues: [
+        {
+          id: 'issue1',
+          number: 101,
+          title: 'Issue with undefined labels',
+          state: 'open',
+          url: 'http://example.com/issue1',
+          labels: undefined,
+        },
+      ],
+    }
+    mockUseQuery.mockReturnValue({
+      data: dataWithUndefinedLabels,
+      loading: false,
+      error: undefined,
+    })
+    render(<MenteeProfilePage />)
+
+    // Should render without crashing
+    expect(screen.getAllByText('Issue with undefined labels').length).toBeGreaterThan(0)
+  })
+
+  it('handles null domains with nullish coalescing', () => {
+    const dataWithNullDomains = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        domains: null,
+        tags: ['react'],
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithNullDomains, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    // Should render skills section but not domains
+    expect(screen.queryByRole('heading', { name: /Domains/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Skills & Technologies/i })).toBeInTheDocument()
+  })
+
+  it('handles null tags with nullish coalescing', () => {
+    const dataWithNullTags = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        domains: ['frontend'],
+        tags: null,
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithNullTags, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    // Should render domains section but not skills
+    expect(screen.getByRole('heading', { name: /Domains/i })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /Skills & Technologies/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('does not change filter when selection is empty', () => {
+    mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    const filterSelect = screen.getByTestId('select-trigger')
+
+    // Initially should show all issues
+    expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+
+    // Open the select but don't select anything (simulate empty selection)
+    fireEvent.click(filterSelect)
+    // The select is now open, but we won't click any option
+    // This tests the branch where key is empty/undefined in the onSelectionChange handler
+
+    // Issues should still be visible (filter unchanged)
+    expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+  })
 })

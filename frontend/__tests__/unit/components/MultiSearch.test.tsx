@@ -541,6 +541,117 @@ describe('Rendering', () => {
 
         expect(mockPush).toHaveBeenCalledWith('/chapters/test-chapter')
       })
+
+      it('moves highlight to next category on ArrowDown from last item', async () => {
+        const user = userEvent.setup()
+        render(<MultiSearchBar {...defaultProps} />)
+
+        const input = screen.getByPlaceholderText('Search...')
+        await user.type(input, 'test')
+        await waitFor(expectListItemsExist)
+
+        // Mock returns 2 hits per index. Indexes: chapters, users, projects.
+        // Index 0 (chapters), Hit 0
+        await user.keyboard('{ArrowDown}')
+        // Index 0, Hit 1 (Last of chapters)
+        await user.keyboard('{ArrowDown}')
+        // Should move to Index 1 (users), Hit 0
+        await user.keyboard('{ArrowDown}')
+
+        const listItems = screen.getAllByRole('listitem')
+        // Total items: 2 chapters + 2 users + 2 projects = 6 items.
+        // Index 0 (ch0), 1 (ch1), 2 (u0).
+        expect(listItems[2]).toHaveClass('bg-gray-100')
+      })
+
+      it('moves highlight to previous category last item on ArrowUp from first item', async () => {
+        const user = userEvent.setup()
+        render(<MultiSearchBar {...defaultProps} />)
+
+        const input = screen.getByPlaceholderText('Search...')
+        await user.type(input, 'test')
+        await waitFor(expectListItemsExist)
+
+        // Navigate to Index 1 (users), Hit 0
+        await user.keyboard('{ArrowDown}') // 0,0
+        await user.keyboard('{ArrowDown}') // 0,1
+        await user.keyboard('{ArrowDown}') // 1,0
+
+        // Now move UP
+        await user.keyboard('{ArrowUp}')
+
+        // Should be at Index 0 (chapters), Hit 1 (last item)
+        const listItems = screen.getAllByRole('listitem')
+        expect(listItems[1]).toHaveClass('bg-gray-100')
+      })
+
+      it('triggers click on suggestion button KeyDown (Enter/Space)', async () => {
+        const user = userEvent.setup()
+        render(<MultiSearchBar {...defaultProps} />)
+
+        const input = screen.getByPlaceholderText('Search...')
+        await user.type(input, 'test')
+        await waitFor(expectListItemsExist)
+
+        const suggestionBtns = screen.getAllByRole('button', { name: /Test Chapter/i })
+        // Use the first one found, or be more specific if possible.
+        // Given the failing test output, there are multiple buttons with the same text
+        // because we are rendering results for multiple indexes (chapters, users, projects)
+        // and using 'Test Chapter' name for mockChapter.
+        const suggestionBtn = suggestionBtns[0]
+        suggestionBtn.focus()
+        await user.keyboard('{Enter}')
+        expect(mockPush).toHaveBeenCalledWith('/chapters/test-chapter')
+      })
+
+      it('does not move selection when pressing ArrowDown at the end of the list', async () => {
+        const user = userEvent.setup()
+        render(<MultiSearchBar {...defaultProps} />)
+
+        const input = screen.getByPlaceholderText('Search...')
+        await user.type(input, 'test')
+        await waitFor(expectListItemsExist)
+
+        // There are 3 categories (chapters, users, projects) with 2 items each. Total 6 items.
+        // Navigate to the last item.
+        for (let i = 0; i < 6; i++) {
+          await user.keyboard('{ArrowDown}')
+        }
+
+        const listItems = screen.getAllByRole('listitem')
+        // Verify last item is highlighted
+        expect(listItems[5]).toHaveClass('bg-gray-100')
+
+        // Press ArrowDown again
+        await user.keyboard('{ArrowDown}')
+
+        // Should still be at last item (no wrap, no crash)
+        expect(listItems[5]).toHaveClass('bg-gray-100')
+        expect(listItems[0]).not.toHaveClass('bg-gray-100')
+      })
+
+      it('does not move selection when pressing ArrowUp at the start of the list', async () => {
+        const user = userEvent.setup()
+        render(<MultiSearchBar {...defaultProps} />)
+
+        const input = screen.getByPlaceholderText('Search...')
+        await user.type(input, 'test')
+        await waitFor(expectListItemsExist)
+
+        // Navigate to first item
+        await user.keyboard('{ArrowDown}')
+        const listItems = screen.getAllByRole('listitem')
+        expect(listItems[0]).toHaveClass('bg-gray-100')
+
+        // Press ArrowUp
+        await user.keyboard('{ArrowUp}')
+
+        // Should still be at first item (or index null if logic allows, but here check it doesn't crash or go weird)
+        // Actually MultiSearch logic: if index>0 OR subIndex>0 decrement.
+        // If index=0 and subIndex=0, nothing happens in the `if/else if`.
+        // So state remains { index: 0, subIndex: 0 }
+        expect(listItems[0]).toHaveClass('bg-gray-100')
+      })
     })
   })
   describe('Navigation Handling', () => {
