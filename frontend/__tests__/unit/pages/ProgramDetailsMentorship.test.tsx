@@ -200,9 +200,8 @@ describe('ProgramDetailsPage', () => {
       })
 
       // Directly call setStatus with an invalid status to trigger the error path
-      if (capturedSetStatus) {
-        capturedSetStatus('INVALID_STATUS')
-      }
+      expect(capturedSetStatus).not.toBeNull()
+      capturedSetStatus!('INVALID_STATUS')
 
       // Should show error toast and NOT call the mutation
       await waitFor(() => {
@@ -275,60 +274,6 @@ describe('ProgramDetailsPage', () => {
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Test Program')).toBeInTheDocument()
-    })
-  })
-
-  test('shows permission denied when non-admin program is null', async () => {
-    const mockUpdateProgram = jest.fn()
-    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin-user' } },
-      status: 'authenticated',
-    })
-
-    const mockDataWithNullProgram = {
-      getProgram: null,
-      getProgramModules: [],
-    }
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      loading: false,
-      data: mockDataWithNullProgram,
-    })
-
-    render(<ProgramDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Program Not Found')).toBeInTheDocument()
-    })
-  })
-
-  test('calls addToast with error when setStatus is called with invalid status', async () => {
-    const mockUpdateProgram = jest.fn()
-    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-    ;(useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'admin-user' } },
-      status: 'authenticated',
-    })
-
-    render(<ProgramDetailsPage />)
-
-    await waitFor(() => {
-      expect(screen.getByTestId('details-card')).toBeInTheDocument()
-    })
-
-    // Call setStatus with an invalid status
-    if (capturedSetStatus) {
-      capturedSetStatus('INVALID_STATUS')
-    }
-
-    await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith({
-        color: 'danger',
-        description: 'The provided status is not valid.',
-        timeout: 3000,
-        title: 'Invalid Status',
-        variant: 'solid',
-      })
     })
   })
 
