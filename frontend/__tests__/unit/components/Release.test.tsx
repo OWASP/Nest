@@ -296,4 +296,75 @@ describe('Release Component', () => {
       )
     ).toBeInTheDocument()
   })
+
+  it('navigates to repository page when Enter key is pressed', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: 'Enter' })
+
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/organizations/our-org/repositories/our-awesome-project'
+    )
+  })
+
+  it('navigates to repository page when Space key is pressed', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: ' ' })
+
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/organizations/our-org/repositories/our-awesome-project'
+    )
+  })
+
+  it('does not navigate when other keys are pressed', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: 'Tab' })
+    fireEvent.keyDown(repoButton, { key: 'Escape' })
+    fireEvent.keyDown(repoButton, { key: 'a' })
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when clicking repository button with missing org', () => {
+    const releaseWithoutOrg = { ...mockReleases[0], organizationName: '' }
+    render(<Release release={releaseWithoutOrg} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.click(repoButton)
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when clicking repository button with missing repo', () => {
+    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: '' }
+    render(<Release release={releaseWithoutRepo} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.click(repoButton)
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('renders author avatar link with correct href', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const avatarLink = screen.getByRole('link', { name: /Test User's avatar/i })
+    expect(avatarLink).toHaveAttribute('href', '/members/testuser')
+  })
+
+  it('renders author avatar link with # when login is missing', () => {
+    const releaseWithoutLogin = {
+      ...mockReleases[0],
+      author: { ...mockReleases[0].author, login: '', name: '' },
+    }
+    render(<Release release={releaseWithoutLogin} />)
+
+    const avatarLink = screen.getByAltText('Release author avatar').closest('a')
+    expect(avatarLink).toHaveAttribute('href', '#')
+  })
 })

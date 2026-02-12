@@ -31,14 +31,16 @@ backend/fuzzing_results/
 *.log
 *.pdf
 *.pem
+backend-sbom-local.cdx.json
 backend/data/backup*
 backend/generated_videos/
 backend/staticfiles
 design/
+frontend-sbom-local.cdx.json
+frontend/.next
 frontend/blob-report/
 frontend/coverage
 frontend/dist
-frontend/.next
 frontend/npm-debug.log*
 frontend/out
 frontend/playwright-report/

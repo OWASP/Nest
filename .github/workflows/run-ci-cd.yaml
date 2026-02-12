@@ -575,8 +575,11 @@ jobs:
     name: Scan Staging Images
     needs:
       - build-staging-images
+      - set-release-version
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -593,6 +596,22 @@ jobs:
         run: |
           make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
           make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
+
+      - name: Generate SBOM for backend image
+        run: |
+          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+
+      - name: Generate SBOM for frontend image
+        run: |
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: staging-sbom-${{ env.RELEASE_VERSION }}
+          path: |
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
   deploy-staging-nest:
@@ -709,9 +728,13 @@ jobs:
           NEXTAUTH_URL=$NEXTAUTH_URL
           EOF
 
-      - name: Run Nest deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run Nest deploy
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-staging-nest-proxy:
@@ -745,9 +768,13 @@ jobs:
           $PROXY_SSH_PRIVATE_KEY
           EOF
 
-      - name: Run proxy deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-staging-lighthouse-ci:
@@ -934,8 +961,11 @@ jobs:
     name: Scan Production Images
     needs:
       - build-production-images
+      - set-release-version
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -952,6 +982,22 @@ jobs:
         run: |
           make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
           make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
+
+      - name: Generate SBOM for backend image
+        run: |
+          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
+
+      - name: Generate SBOM for frontend image
+        run: |
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
+
+      - name: Upload SBOMs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json \
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
   deploy-production-nest:
@@ -1079,9 +1125,13 @@ jobs:
           "$NEST_GITHUB_APP_PRIVATE_KEY"
           EOF
 
-      - name: Run Nest deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run Nest deploy
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-production-nest-proxy:
@@ -1115,9 +1165,13 @@ jobs:
           $PROXY_SSH_PRIVATE_KEY
           EOF
 
-      - name: Run proxy deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-production-zap-baseline-scan:

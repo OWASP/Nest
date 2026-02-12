@@ -51,25 +51,23 @@ RUN --mount=type=secret,id=RELEASE_VERSION \
 
 # Production image, copy all the files and run next.
 FROM base AS runner
-WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+WORKDIR /tmp
+
 # Fix CVE-2026-23745: Update npm's bundled tar to 7.5.7 in runner stage
+# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
-RUN cd /tmp && \
-    npm pack tar@7.5.7 && \
+RUN npm pack tar@7.5.7 && \
     tar -xzf tar-7.5.7.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
     rm -rf package tar-7.5.7.tgz && \
-    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json"
-
-# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1 in runner stage
-RUN cd /tmp && \
+    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json" && \
     npm pack @isaacs/brace-expansion@5.0.1 && \
     tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
     BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
@@ -78,10 +76,12 @@ RUN cd /tmp && \
     cp -r package "${BRACE_DIR}" && \
     chmod -R 755 "${BRACE_DIR}" && \
     rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
-    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json"
-
-RUN addgroup --system --gid 1001 nodejs && \
+    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json" && \
+    addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
+
+WORKDIR /app
+
 # Copying files with root as owner, so that executing user cannot change the container.
 COPY --from=builder --chown=root:root --chmod=555 /app/public public
 

@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+.PHONY: sbom-frontend-image
+
 build-frontend-local-image:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 	    --build-arg FORCE_STANDALONE=yes \
@@ -80,6 +82,24 @@ security-scan-frontend-image:
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		image --config /trivy.yaml $(FRONTEND_IMAGE_NAME)
+
+SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
+
+sbom-frontend-image:
+	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
+		$(MAKE) build-frontend-local-image; \
+	fi
+	@echo "Generating SBOM for image: $(FRONTEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR):/work \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--format cyclonedx \
+		--output /work/frontend-sbom-$(SBOM_VERSION).cdx.json \
+		$(FRONTEND_IMAGE_NAME)
 
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it

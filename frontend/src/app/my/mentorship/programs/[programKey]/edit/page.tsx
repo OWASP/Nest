@@ -32,16 +32,26 @@ const EditProgramPage = () => {
     skip: !programKey,
     fetchPolicy: 'network-only',
   })
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    menteesLimit: 0,
-    startedAt: '',
-    endedAt: '',
-    tags: '',
-    domains: '',
+  const [formData, setFormData] = useState<{
+    adminLogins?: string
+    description: string
+    domains: string
+    endedAt: string
+    menteesLimit: number
+    name: string
+    startedAt: string
+    status?: string
+    tags: string
+  }>({
     adminLogins: '',
+    description: '',
+    domains: '',
+    endedAt: '',
+    menteesLimit: 0,
+    name: '',
+    startedAt: '',
     status: ProgramStatusEnum.Draft,
+    tags: '',
   })
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
   useEffect(() => {
@@ -100,16 +110,16 @@ const EditProgramPage = () => {
     e.preventDefault()
     try {
       const input = {
-        key: programKey,
-        name: formData.name,
-        description: formData.description,
-        menteesLimit: Number(formData.menteesLimit),
-        startedAt: formData.startedAt,
-        endedAt: formData.endedAt,
-        tags: parseCommaSeparated(formData.tags),
-        domains: parseCommaSeparated(formData.domains),
         adminLogins: parseCommaSeparated(formData.adminLogins),
-        status: formData.status,
+        description: formData.description,
+        domains: parseCommaSeparated(formData.domains),
+        endedAt: formData.endedAt,
+        key: programKey,
+        menteesLimit: Number(formData.menteesLimit),
+        name: formData.name,
+        startedAt: formData.startedAt,
+        status: (formData.status as ProgramStatusEnum) || ProgramStatusEnum.Draft,
+        tags: parseCommaSeparated(formData.tags),
       }
 
       const result = await updateProgram({
