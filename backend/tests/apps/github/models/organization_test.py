@@ -63,6 +63,7 @@ class TestOrganizationModel:
     @patch("apps.github.models.organization.Organization.objects.values_list")
     def test_get_logins(self, mock_values_list):
         """Test get_logins static method."""
+        Organization.get_logins.cache_clear()
         mock_values_list.return_value = ["org1", "org2", "org3"]
         logins = Organization.get_logins()
         assert logins == {"org1", "org2", "org3"}

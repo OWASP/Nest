@@ -141,6 +141,7 @@ class TestHomeActions:
             mock_config.app = mock_app
             importlib.reload(home_module)
 
-        assert mock_app.action.call_count == 12
-
-        importlib.reload(home_module)
+        try:
+            assert mock_app.action.call_count == 12
+        finally:
+            importlib.reload(home_module)
