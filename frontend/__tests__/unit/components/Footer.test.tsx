@@ -292,6 +292,57 @@ describe('Footer', () => {
     })
   })
 
+  describe('Version Link Behavior', () => {
+    let originalEnvironment: string
+    let originalReleaseVersion: string
+    let envModule: typeof import('utils/env.client')
+
+    beforeEach(() => {
+      jest.clearAllMocks()
+      envModule = jest.requireMock<typeof import('utils/env.client')>('utils/env.client')
+      originalEnvironment = envModule.ENVIRONMENT
+      originalReleaseVersion = envModule.RELEASE_VERSION
+    })
+
+    afterEach(() => {
+      if (envModule) {
+        envModule.ENVIRONMENT = originalEnvironment
+        envModule.RELEASE_VERSION = originalReleaseVersion
+      }
+    })
+
+    test('renders version as commit link in staging environment', () => {
+      envModule.ENVIRONMENT = 'staging'
+      envModule.RELEASE_VERSION = '24.2.10-12c25c5'
+
+      const { container } = render(<Footer />)
+      const versionLink = container.querySelector('a[href*="commit"]')
+
+      expect(versionLink).toBeInTheDocument()
+      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/12c25c5')
+      expect(versionLink).toHaveAttribute('target', '_blank')
+      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(versionLink).toHaveTextContent('v24.2.10-12c25c5')
+    })
+
+    test('renders version as release tag link in production environment', () => {
+      envModule.ENVIRONMENT = 'production'
+      envModule.RELEASE_VERSION = '1.2.3'
+
+      const { container } = render(<Footer />)
+      const versionLink = container.querySelector('a[href*="releases"]')
+
+      expect(versionLink).toBeInTheDocument()
+      expect(versionLink).toHaveAttribute(
+        'href',
+        'https://github.com/OWASP/Nest/releases/tag/1.2.3'
+      )
+      expect(versionLink).toHaveAttribute('target', '_blank')
+      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(versionLink).toHaveTextContent('v1.2.3')
+    })
+  })
+
   describe('Accessibility', () => {
     test('has correct ARIA attributes on buttons', () => {
       renderFooter()
