@@ -33,19 +33,9 @@ class RepositoryQuery:
 
         """
         try:
-            return (
-                Repository.objects.select_related("organization")
-                .prefetch_related(
-                    Prefetch(
-                        "issues",
-                        queryset=Issue.objects.order_by("-created_at"),
-                        to_attr="recent_issues",
-                    )
-                )
-                .get(
-                    key__iexact=repository_key,
-                    organization__login__iexact=organization_key,
-                )
+            return Repository.objects.select_related("organization").get(
+                key__iexact=repository_key,
+                organization__login__iexact=organization_key,
             )
         except Repository.DoesNotExist:
             return None
