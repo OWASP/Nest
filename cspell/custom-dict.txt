@@ -10,6 +10,7 @@ Birda
 CCSP
 CISSP
 Cañón
+DLQ
 DRF
 ELEVENLABS
 Emay
@@ -87,6 +88,7 @@ cyclonedx
 defectdojo
 demojize
 dismissable
+dlq
 dockerhub
 dsn
 elevenlabs
@@ -149,6 +151,7 @@ owasppcitoolkit
 owtf
 pdfgen
 pdfium
+pel
 pentest
 pentesting
 pgvector
@@ -190,11 +193,16 @@ vcodec
 webgoat
 winsrdf
 wsgi
+xack
 xapp
+xautoclaim
+xdel
 xdg
 xdist
+xgroup
 xoxb
 xoxp
+xreadgroup
 xsser
 xzf
 zapconfig

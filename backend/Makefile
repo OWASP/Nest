@@ -158,6 +158,9 @@ run-backend-fuzz:
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
 	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
 
+run-notification-worker:
+	@CMD="python manage.py owasp_run_notification_worker" $(MAKE) exec-backend-command
+
 save-backup:
 	@echo "Saving Nest backup"
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
