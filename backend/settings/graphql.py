@@ -45,7 +45,7 @@ class Query(
 
 
 extensions = [
-    CacheExtension,
+    CacheExtension(),
     QueryDepthLimiter(max_depth=5),
     DjangoOptimizerExtension(),
 ]
