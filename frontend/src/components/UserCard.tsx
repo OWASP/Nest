@@ -35,11 +35,7 @@ const UserCard = ({
               style={{ objectFit: 'cover' }}
             />
           ) : (
-            <div
-              className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700"
-              role="img"
-              aria-label="Default profile picture"
-            >
+            <div className="flex h-full w-full items-center justify-center bg-gray-200 dark:bg-gray-700">
               <FaUser className="h-12 w-12 text-gray-400 dark:text-gray-500" />
             </div>
           )}

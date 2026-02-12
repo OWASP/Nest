@@ -4,10 +4,10 @@ import mockProgramDetailsData from '@mockData/mockProgramData'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
+import { handleAppError } from 'app/global-error'
 import ProgramDetailsPage from 'app/my/mentorship/programs/[programKey]/page'
 import '@testing-library/jest-dom'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
-import { handleAppError } from 'app/global-error'
 
 let capturedSetStatus: ((status: string) => void) | null = null
 
@@ -69,17 +69,17 @@ jest.mock('app/global-error', () => ({
 describe('ProgramDetailsPage', () => {
   beforeEach(() => {
     capturedSetStatus = null
-      ; (addToast as jest.Mock).mockClear()
-      ; (handleAppError as jest.Mock).mockClear()
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        data: mockProgramDetailsData,
-        loading: false,
-        refetch: jest.fn(),
-      })
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'test-user' } },
-        status: 'authenticated',
-      })
+    ;(addToast as jest.Mock).mockClear()
+    ;(handleAppError as jest.Mock).mockClear()
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockProgramDetailsData,
+      loading: false,
+      refetch: jest.fn(),
+    })
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'test-user' } },
+      status: 'authenticated',
+    })
   })
 
   afterEach(() => {
@@ -87,11 +87,11 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders loading spinner when loading', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: true,
       data: null,
     })
-      ; (useSession as jest.Mock).mockReturnValue({ data: null, status: 'loading' })
+    ;(useSession as jest.Mock).mockReturnValue({ data: null, status: 'loading' })
 
     render(<ProgramDetailsPage />)
 
@@ -101,7 +101,7 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders 404 if no program found', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: { program: null },
     })
@@ -128,7 +128,7 @@ describe('ProgramDetailsPage', () => {
   })
 
   test('renders program details correctly for a non-admin', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'non-admin' } },
       status: 'authenticated',
     })
@@ -145,10 +145,10 @@ describe('ProgramDetailsPage', () => {
     const mockDataWithoutLevels = {
       getProgram: { ...mockProgramDetailsData.getProgram, experienceLevels: null },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: mockDataWithoutLevels,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutLevels,
+    })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('N/A')).toBeInTheDocument()
@@ -159,14 +159,14 @@ describe('ProgramDetailsPage', () => {
     const mockUpdateProgram = jest.fn()
 
     beforeEach(() => {
-      ; (useSession as jest.Mock).mockReturnValue({
+      ;(useSession as jest.Mock).mockReturnValue({
         data: { user: { login: 'admin-user' } }, // Matches admin in mock data
         status: 'authenticated',
       })
-        ; (useMutation as unknown as jest.Mock).mockReturnValue([
-          mockUpdateProgram,
-          { loading: false },
-        ])
+      ;(useMutation as unknown as jest.Mock).mockReturnValue([
+        mockUpdateProgram,
+        { loading: false },
+      ])
     })
 
     test('successfully updates status from Draft to Published', async () => {
@@ -195,33 +195,25 @@ describe('ProgramDetailsPage', () => {
     test('shows error toast when trying to update with invalid status', async () => {
       render(<ProgramDetailsPage />)
 
-      const actionsButton = await screen.findByRole('button', { name: /Program actions menu/ })
-      fireEvent.click(actionsButton)
-
-      // Simulate clicking an invalid status option
-      const invalidStatusButton = await screen.findByRole('menuitem', { name: 'Publish' })
-      // Mock the updateStatus function to be called with invalid status
-      fireEvent.click(invalidStatusButton)
-
-      // The component should handle this internally
       await waitFor(() => {
-        expect(mockUpdateProgram).toHaveBeenCalled()
-      })
-    })
-
-    test('shows permission denied toast when non-admin tries to update status', async () => {
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'non-admin-user' } },
-        status: 'authenticated',
+        expect(screen.getByTestId('details-card')).toBeInTheDocument()
       })
 
-      render(<ProgramDetailsPage />)
+      // Directly call setStatus with an invalid status to trigger the error path
+      if (capturedSetStatus) {
+        capturedSetStatus('INVALID_STATUS')
+      }
 
-      // Non-admin should not see the actions button
+      // Should show error toast and NOT call the mutation
       await waitFor(() => {
-        expect(
-          screen.queryByRole('button', { name: /Program actions menu/ })
-        ).not.toBeInTheDocument()
+        expect(addToast).toHaveBeenCalledWith({
+          color: 'danger',
+          description: 'The provided status is not valid.',
+          timeout: 3000,
+          title: 'Invalid Status',
+          variant: 'solid',
+        })
+        expect(mockUpdateProgram).not.toHaveBeenCalled()
       })
     })
 
@@ -248,10 +240,10 @@ describe('ProgramDetailsPage', () => {
     const mockDataWithoutAdmins = {
       getProgram: { ...mockProgramDetailsData.getProgram, admins: null },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: mockDataWithoutAdmins,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutAdmins,
+    })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Test Program')).toBeInTheDocument()
@@ -262,10 +254,10 @@ describe('ProgramDetailsPage', () => {
     const mockDataWithoutDomains = {
       getProgram: { ...mockProgramDetailsData.getProgram, domains: null },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: mockDataWithoutDomains,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutDomains,
+    })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Test Program')).toBeInTheDocument()
@@ -276,10 +268,10 @@ describe('ProgramDetailsPage', () => {
     const mockDataWithoutTags = {
       getProgram: { ...mockProgramDetailsData.getProgram, tags: null },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: mockDataWithoutTags,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutTags,
+    })
     render(<ProgramDetailsPage />)
     await waitFor(() => {
       expect(screen.getByText('Test Program')).toBeInTheDocument()
@@ -288,20 +280,20 @@ describe('ProgramDetailsPage', () => {
 
   test('shows permission denied when non-admin program is null', async () => {
     const mockUpdateProgram = jest.fn()
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'non-admin-user' } },
-        status: 'authenticated',
-      })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'non-admin-user' } },
+      status: 'authenticated',
+    })
 
     const mockDataWithNullProgram = {
       getProgram: null,
       getProgramModules: [],
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: mockDataWithNullProgram,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithNullProgram,
+    })
 
     render(<ProgramDetailsPage />)
 
@@ -312,11 +304,11 @@ describe('ProgramDetailsPage', () => {
 
   test('calls addToast with error when setStatus is called with invalid status', async () => {
     const mockUpdateProgram = jest.fn()
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin-user' } },
-        status: 'authenticated',
-      })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
 
     render(<ProgramDetailsPage />)
 
@@ -342,11 +334,11 @@ describe('ProgramDetailsPage', () => {
 
   test('calls addToast with permission denied when non-admin calls setStatus', async () => {
     const mockUpdateProgram = jest.fn()
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'non-admin-user' } },
-        status: 'authenticated',
-      })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'non-admin-user' } },
+      status: 'authenticated',
+    })
 
     render(<ProgramDetailsPage />)
 
@@ -372,11 +364,11 @@ describe('ProgramDetailsPage', () => {
 
   test('calls addToast with success when admin successfully updates status', async () => {
     const mockUpdateProgram = jest.fn().mockResolvedValue({})
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin-user' } },
-        status: 'authenticated',
-      })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
 
     render(<ProgramDetailsPage />)
 
@@ -412,11 +404,11 @@ describe('ProgramDetailsPage', () => {
   test('calls handleAppError when mutation fails', async () => {
     const mockError = new Error('Mutation failed')
     const mockUpdateProgram = jest.fn().mockRejectedValue(mockError)
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin-user' } },
-        status: 'authenticated',
-      })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
 
     render(<ProgramDetailsPage />)
 
@@ -450,10 +442,10 @@ describe('ProgramDetailsPage', () => {
       getProgramModules: [],
     }
 
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: mockDataWithNullFields,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithNullFields,
+    })
 
     render(<ProgramDetailsPage />)
 

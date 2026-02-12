@@ -118,7 +118,7 @@ describe('ModuleDetailsPage', () => {
     expect(screen.getByTestId('details-card')).toHaveTextContent('A beginner friendly module.')
   })
 
-  it('renders module without admins (uses null fallback)', async () => {
+  it('renders module without admins (uses undefined fallback)', async () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
@@ -134,7 +134,7 @@ describe('ModuleDetailsPage', () => {
     expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
   })
 
-  it('renders module without domains (uses null fallback)', async () => {
+  it('renders module without domains (uses undefined fallback)', async () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
@@ -150,7 +150,7 @@ describe('ModuleDetailsPage', () => {
     expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
   })
 
-  it('renders module without tags (uses null fallback)', async () => {
+  it('renders module without tags (uses undefined fallback)', async () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {

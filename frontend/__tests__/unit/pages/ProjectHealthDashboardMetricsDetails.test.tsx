@@ -43,7 +43,7 @@ const mockError = {
 
 describe('ProjectHealthMetricsDetails', () => {
   beforeEach(() => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProjectsDashboardMetricsDetailsData,
       loading: false,
       error: null,
@@ -55,7 +55,7 @@ describe('ProjectHealthMetricsDetails', () => {
   })
 
   test('renders loading state', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -68,7 +68,7 @@ describe('ProjectHealthMetricsDetails', () => {
   })
 
   test('renders error state', async () => {
-    ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: false,
       error: mockError,
@@ -115,11 +115,11 @@ describe('ProjectHealthMetricsDetails', () => {
         },
       },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        data: nonCompliantData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: nonCompliantData,
+      loading: false,
+      error: null,
+    })
 
     render(<ProjectHealthMetricsDetails />)
 
@@ -141,11 +141,11 @@ describe('ProjectHealthMetricsDetails', () => {
         },
       },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        data: nonCompliantData,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: nonCompliantData,
+      loading: false,
+      error: null,
+    })
 
     render(<ProjectHealthMetricsDetails />)
 
@@ -168,11 +168,11 @@ describe('ProjectHealthMetricsDetails', () => {
         ],
       },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithNullCreatedAt,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullCreatedAt,
+      loading: false,
+      error: null,
+    })
 
     render(<ProjectHealthMetricsDetails />)
 
@@ -201,11 +201,11 @@ describe('ProjectHealthMetricsDetails', () => {
         },
       },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithNullValues,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullValues,
+      loading: false,
+      error: null,
+    })
 
     render(<ProjectHealthMetricsDetails />)
 
@@ -250,11 +250,11 @@ describe('ProjectHealthMetricsDetails', () => {
         },
       },
     }
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        data: dataWithNullCounts,
-        loading: false,
-        error: null,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullCounts,
+      loading: false,
+      error: null,
+    })
 
     render(<ProjectHealthMetricsDetails />)
 

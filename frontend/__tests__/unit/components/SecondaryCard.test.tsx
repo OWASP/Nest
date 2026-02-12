@@ -94,7 +94,6 @@ describe('SecondaryCard Component', () => {
       expect(titleElement).toBeInTheDocument()
       expect(cardElement.childNodes.length).toBe(1)
     })
-
   })
 
   describe('Accessibility roles and labels', () => {

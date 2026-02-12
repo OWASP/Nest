@@ -145,7 +145,7 @@ describe('FormDateInput Component', () => {
       render(<FormDateInput {...defaultProps} />)
 
       const input = screen.getByLabelText('Test Date')
-      const classNames = JSON.parse(input.getAttribute('data-class-names') || '{}')
+      const classNames = JSON.parse(input.dataset.classNames || '{}')
 
       expect(classNames).toEqual(
         expect.objectContaining({
