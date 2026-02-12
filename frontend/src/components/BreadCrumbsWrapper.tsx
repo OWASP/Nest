@@ -8,6 +8,7 @@ import { FaChevronRight } from 'react-icons/fa6'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function BreadCrumbsWrapper() {
+  
   const pathname = usePathname()
   const items = useBreadcrumbs()
 
