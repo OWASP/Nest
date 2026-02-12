@@ -309,7 +309,7 @@ class Event(BulkSaveModel, TimestampedModel):
         if not self.suggested_location:
             self.generate_suggested_location()
 
-        if not self.latitude or not self.longitude:
+        if self.latitude is None or self.longitude is None:
             self.generate_geo_location()
 
         super().save(*args, **kwargs)
