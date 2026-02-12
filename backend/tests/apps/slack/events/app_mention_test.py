@@ -91,7 +91,9 @@ class TestAppMention:
             timestamp="1234567890.123456",
             name="eyes",
         )
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", channel_id="C123456", is_app_mention=True
+        )
         mock_client.chat_postMessage.assert_called_once_with(
             channel="C123456",
             blocks=[{"type": "section", "text": {"text": "Response"}}],
@@ -154,7 +156,9 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", channel_id="C123456", is_app_mention=True
+        )
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
@@ -187,7 +191,9 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", channel_id="C123456", is_app_mention=True
+        )
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
@@ -212,7 +218,9 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", channel_id="C123456", is_app_mention=True
+        )
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")

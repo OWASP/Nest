@@ -1,18 +1,16 @@
-"""Image extraction service for Slack messages."""
+"""Image extraction orchestration for Slack messages."""
 
-import base64
 import io
 import logging
 from datetime import UTC, datetime, timedelta
 
-import openai
 import requests
-from django.conf import settings
 from django_rq import job
 from PIL import Image
 from requests.exceptions import RequestException
 
 from apps.ai.common.constants import QUEUE_RESPONSE_TIME_MINUTES
+from apps.common.open_ai import OpenAi
 from apps.slack.models import Message
 from apps.slack.services.message_auto_reply import generate_ai_reply_if_unanswered
 
@@ -22,9 +20,28 @@ MAX_IMAGES_PER_MESSAGE = 3
 SUPPORTED_IMAGE_TYPES = ("image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp")
 MAX_IMAGE_SIZE_MB = 20
 
+# OpenAI supported formats
+OPENAI_SUPPORTED_FORMATS = {"PNG", "JPEG", "GIF", "WEBP"}
+# Map PIL formats to MIME types
+FORMAT_TO_MIME = {
+    "PNG": "image/png",
+    "JPEG": "image/jpeg",
+    "JPG": "image/jpeg",
+    "GIF": "image/gif",
+    "WEBP": "image/webp",
+}
+
 
 def is_valid_image_file(file_data: dict) -> bool:
-    """Check if file is a valid image for extraction."""
+    """Check if file is a valid image for extraction.
+
+    Args:
+        file_data: Dictionary containing file metadata from Slack
+
+    Returns:
+        True if file is valid for extraction, False otherwise
+
+    """
     mimetype = file_data.get("mimetype", "")
     size_bytes = file_data.get("size", 0)
 
@@ -46,7 +63,16 @@ def is_valid_image_file(file_data: dict) -> bool:
 
 
 def download_slack_image(url: str, bot_token: str) -> bytes | None:
-    """Download image from Slack."""
+    """Download image from Slack using bot token authentication.
+
+    Args:
+        url: Slack file URL (url_private or url_private_download)
+        bot_token: Slack bot token for authentication
+
+    Returns:
+        Image bytes if successful, None if download fails
+
+    """
     try:
         headers = {"Authorization": f"Bearer {bot_token}"}
         response = requests.get(url, headers=headers, timeout=30)
@@ -58,63 +84,110 @@ def download_slack_image(url: str, bot_token: str) -> bytes | None:
         return response.content
 
 
-def extract_text_from_image(image_data: bytes) -> str:
-    """Extract text from image using GPT-4o."""
-    api_key = settings.OPEN_AI_SECRET_KEY
-    if not api_key:
-        msg = "DJANGO_OPEN_AI_SECRET_KEY not set"
-        raise ValueError(msg)
+def validate_and_get_image_format(image_data: bytes) -> str | None:
+    """Validate image and return MIME type if supported by OpenAI.
 
-    client = openai.OpenAI(api_key=api_key)
-    base64_image = base64.b64encode(image_data).decode("utf-8")
+    Args:
+        image_data: Raw image bytes
 
-    # Detect actual MIME type from image data
+    Returns:
+        MIME type string if valid, None if unsupported or invalid
+
+    """
     try:
         img = Image.open(io.BytesIO(image_data))
-        image_format = img.format.lower() if img.format else "jpeg"
-        mime_type = f"image/{image_format}"
-    except (OSError, ValueError):
-        logger.warning("Failed to detect image format, defaulting to image/jpeg")
-        mime_type = "image/jpeg"
+        img.verify()  # Verify it's actually a valid image
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": (
-                            "Extract all text from this image. "
-                            "If there's code, preserve formatting. "
-                            "If it's a screenshot of an error, include the full error message. "
-                            "If it's a diagram or chart, describe the key information. "
-                            "Return only the extracted text without any preamble."
-                        ),
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:{mime_type};base64,{base64_image}"},
-                    },
-                ],
-            }
-        ],
-        max_tokens=1000,
-        temperature=0.0,
+        # Re-open after verify (verify() closes the file)
+        img = Image.open(io.BytesIO(image_data))
+        image_format = img.format
+
+        if not image_format:
+            logger.warning("Could not detect image format from data")
+            return None
+
+        # Check if format is supported by OpenAI
+        if image_format.upper() not in OPENAI_SUPPORTED_FORMATS:
+            logger.warning(
+                "Unsupported image format: %s (supported: %s)",
+                image_format,
+                ", ".join(OPENAI_SUPPORTED_FORMATS),
+            )
+            return None
+
+        # Return proper MIME type
+        mime_type = FORMAT_TO_MIME.get(image_format.upper())
+        if not mime_type:
+            logger.warning("No MIME type mapping for format: %s", image_format)
+            return None
+
+    except (OSError, ValueError) as e:
+        logger.warning("Failed to validate image: %s", e)
+        return None
+    except Exception:
+        logger.exception("Unexpected error validating image")
+        return None
+    else:
+        logger.debug("Detected valid image format: %s -> %s", image_format, mime_type)
+        return mime_type
+
+
+def extract_text_from_image(image_data: bytes) -> str:
+    """Extract text from image using GPT-4o Vision API.
+
+    Args:
+        image_data: Raw image bytes
+
+    Returns:
+        Extracted text from the image
+
+    Raises:
+        ValueError: If image format is invalid or unsupported
+
+    """
+    # Validate image format first
+    mime_type = validate_and_get_image_format(image_data)
+    if not mime_type:
+        msg = (
+            "Invalid or unsupported image format. "
+            f"Supported formats: {', '.join(OPENAI_SUPPORTED_FORMATS)}"
+        )
+        raise ValueError(msg)
+
+    # Use the OpenAi class with vision support
+    open_ai = OpenAi(model="gpt-4o", max_tokens=1000, temperature=0.0)
+
+    prompt = (
+        "Extract all text from this image. "
+        "If there's code, preserve formatting. "
+        "If it's a screenshot of an error, include the full error message. "
+        "If it's a diagram or chart, describe the key information."
     )
 
-    # Guard against None content
-    content = response.choices[0].message.content
-    if content is None:
+    result = (
+        open_ai.set_prompt("You are a helpful assistant that extracts text from images.")
+        .set_input(prompt)
+        .set_image(image_data, mime_type)
+        .complete()
+    )
+
+    # Handle None response
+    if result is None:
         logger.warning("OpenAI returned None content for image extraction")
         return ""
-    return content.strip()
+
+    return result.strip()
 
 
 @job("ai")
 def extract_images_then_maybe_reply(message_id: int, image_files: list[dict]) -> None:
-    """Extract text from images, store results, then queue AI reply."""
+    """Extract text from images, store results, then queue AI reply.
+
+    Args:
+        message_id: Primary key of the Slack message
+        image_files: List of file metadata dictionaries from Slack
+
+    """
     import django_rq
 
     try:
@@ -174,9 +247,10 @@ def extract_images_then_maybe_reply(message_id: int, image_files: list[dict]) ->
                 "Successfully extracted text from %s (%s chars)", file_name, len(extracted_text)
             )
 
-        except openai.OpenAIError:
-            logger.exception("OpenAI API error for %s", file_name)
-            extraction_result.update({"status": "failed", "error": "OpenAI API error"})
+        except ValueError as e:
+            # Image format validation error from ai service
+            logger.warning("Invalid image format for %s: %s", file_name, e)
+            extraction_result.update({"status": "failed", "error": f"Invalid image format: {e}"})
 
         except Exception:
             logger.exception("Failed to extract text from %s", file_name)

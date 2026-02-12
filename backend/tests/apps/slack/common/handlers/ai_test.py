@@ -29,7 +29,9 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), channel_id=None, is_app_mention=False
+        )
         mock_markdown.assert_called_once_with(ai_response)
         assert result == [expected_block]
 
@@ -45,7 +47,9 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), channel_id=None, is_app_mention=False
+        )
         mock_get_error_blocks.assert_called_once()
         assert result == error_blocks
 
@@ -61,7 +65,9 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), channel_id=None, is_app_mention=False
+        )
         mock_get_error_blocks.assert_called_once()
         assert result == error_blocks
 
@@ -75,7 +81,7 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(query, channel_id=None, is_app_mention=False)
         assert result == expected_response
 
     @patch("apps.slack.common.handlers.ai.process_query")
@@ -87,7 +93,7 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(query, channel_id=None, is_app_mention=False)
         assert result is None
 
     @patch("apps.slack.common.handlers.ai.process_query")
@@ -99,7 +105,7 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(query, channel_id=None, is_app_mention=False)
         assert result is None
 
     @patch("apps.slack.common.handlers.ai.process_query")
@@ -111,7 +117,7 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(query, channel_id=None, is_app_mention=False)
         assert result == get_default_response()
 
     @patch("apps.slack.common.handlers.ai.markdown")
@@ -142,4 +148,6 @@ class TestAiHandler:
                 query_with_whitespace = "  What is OWASP?  "
                 get_blocks(query_with_whitespace)
 
-                mock_process_ai_query.assert_called_once_with("What is OWASP?")
+                mock_process_ai_query.assert_called_once_with(
+                    "What is OWASP?", channel_id=None, is_app_mention=False
+                )

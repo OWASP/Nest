@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import logging
 
 import openai
@@ -32,6 +33,8 @@ class OpenAi:
         self.max_tokens = max_tokens
         self.model = model
         self.temperature = temperature
+        self.image_data: bytes | None = None
+        self.image_mime_type: str | None = None
 
     def set_input(self, content: str) -> OpenAi:
         """Set system role content.
@@ -75,6 +78,22 @@ class OpenAi:
 
         return self
 
+    def set_image(self, image_data: bytes, mime_type: str) -> OpenAi:
+        """Set image data for vision API.
+
+        Args:
+            image_data (bytes): Raw image bytes.
+            mime_type (str): MIME type of the image (e.g., "image/png").
+
+        Returns:
+            OpenAi: The current instance.
+
+        """
+        self.image_data = image_data
+        self.image_mime_type = mime_type
+
+        return self
+
     def complete(self) -> str | None:
         """Get API response.
 
@@ -87,11 +106,27 @@ class OpenAi:
 
         """
         try:
+            # Build user message content
+            user_content: str | list[dict[str, object]]
+            if self.image_data and self.image_mime_type:
+                # Vision API with image
+                base64_image = base64.b64encode(self.image_data).decode("utf-8")
+                user_content = [
+                    {"type": "text", "text": self.input},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:{self.image_mime_type};base64,{base64_image}"},
+                    },
+                ]
+            else:
+                # Text-only
+                user_content = self.input
+
             response = self.client.chat.completions.create(
                 max_tokens=self.max_tokens,
                 messages=[
                     {"role": "system", "content": self.prompt},
-                    {"role": "user", "content": self.input},
+                    {"role": "user", "content": user_content},
                 ],
                 model=self.model,
                 temperature=self.temperature,
