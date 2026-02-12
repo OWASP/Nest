@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import openai
 from django.conf import settings
-from openai.types.chat import ChatCompletionContentPartParam
 
 if TYPE_CHECKING:
     from openai.types.chat import ChatCompletionContentPartParam
@@ -100,7 +99,7 @@ class OpenAi:
         """User message content.
 
         Returns:
-            list[dict]: User message content.
+            list[ChatCompletionContentPartParam]: User message content.
 
         """
         content: list[ChatCompletionContentPartParam] = [{"type": "text", "text": self.input}]
