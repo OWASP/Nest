@@ -35,7 +35,8 @@ class AppMention(EventBase):
         images_raw = [
             file
             for file in files
-            if file.get("mimetype") in ALLOWED_MIMETYPES and file.get("size", 0) <= MAX_IMAGE_SIZE
+            if file.get("mimetype") in ALLOWED_MIMETYPES
+            and file.get("size", float("inf")) <= MAX_IMAGE_SIZE
         ]
 
         query = text
