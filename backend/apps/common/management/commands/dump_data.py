@@ -3,7 +3,7 @@
 import contextlib
 import os
 from pathlib import Path
-from subprocess import CalledProcessError, run
+from subprocess import PIPE, CalledProcessError, Popen, run
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS(f"Created temporary DB: {temp_db}"))
             # Getting data
-            data = run(  # noqa: S603
+            dump_process = Popen(  # noqa: S603
                 [  # noqa: S607
                     "pg_dump",
                     "-h",
@@ -71,11 +71,10 @@ class Command(BaseCommand):
                     "-d",
                     DB_NAME,
                 ],
-                check=True,
-                capture_output=True,
+                stdout=PIPE,
                 env=env,
             )
-            run(  # noqa: S603
+            psql_process = Popen(  # noqa: S603
                 [  # noqa: S607
                     "psql",
                     "-h",
@@ -87,11 +86,21 @@ class Command(BaseCommand):
                     "-d",
                     temp_db,
                 ],
-                check=True,
                 env=env,
-                input=data.stdout,
+                stdin=dump_process.stdout,
             )
 
+            dump_process.stdout.close()
+            psql_process.communicate()
+            dump_process.wait()
+            if dump_process.returncode != 0 or psql_process.returncode != 0:
+                message = f"Failed to sync data from {DB_NAME} to {temp_db}"
+                raise CommandError(
+                    message,
+                    dump_process.returncode
+                    if dump_process.returncode != 0
+                    else psql_process.returncode,
+                )
             self.stdout.write(self.style.SUCCESS(f"Synced data from {DB_NAME} to {temp_db}"))
             table_list = self._execute_sql(temp_db, [self._table_list_query()])
             self._execute_sql(temp_db, self._remove_emails([row[0] for row in table_list]))
