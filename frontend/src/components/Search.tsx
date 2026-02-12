@@ -5,6 +5,7 @@ import { debounce } from 'lodash'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { FaSearch, FaTimes } from 'react-icons/fa'
+import { SEARCH_DEBOUNCE_DELAY_MS } from 'utils/constants'
 
 interface SearchProps {
   isLoaded: boolean
@@ -46,35 +47,34 @@ const SearchBar: React.FC<SearchProps> = ({
     }
   }, [pathname, isLoaded, shouldAutoFocus])
 
-  const debouncedSearch = useMemo(
+  const performSearch = useMemo(
     () =>
       debounce((query: string) => {
         onSearch(query)
-        if (query && query.trim() !== '') {
+
+        if (query.trim()) {
           sendGTMEvent({
             event: 'search',
             path: globalThis.location.pathname,
             value: query,
           })
         }
-      }, 750),
+      }, SEARCH_DEBOUNCE_DELAY_MS),
     [onSearch]
   )
 
   useEffect(() => {
-    return () => {
-      debouncedSearch.cancel()
-    }
-  }, [debouncedSearch])
+    return () => performSearch.cancel()
+  }, [performSearch])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
     setSearchQuery(newQuery)
-    debouncedSearch(newQuery)
+    performSearch(newQuery)
   }
 
   const handleClearSearch = () => {
-    debouncedSearch.cancel()
+    performSearch.cancel()
     setSearchQuery('')
     onSearch('')
     if (shouldAutoFocus) {
@@ -100,6 +100,7 @@ const SearchBar: React.FC<SearchProps> = ({
               className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
               aria-hidden="true"
             />
+
             <input
               ref={inputRef}
               type="text"
@@ -108,6 +109,7 @@ const SearchBar: React.FC<SearchProps> = ({
               placeholder={placeholder}
               className={`box-border h-12 w-full rounded-lg border-1 border-gray-300 bg-white py-0 pr-10 pl-10 text-sm leading-12 text-black placeholder:leading-12 placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:focus:ring-blue-300 ${className}`}
             />
+
             {searchQuery && (
               <button
                 type="button"
