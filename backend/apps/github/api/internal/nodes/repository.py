@@ -51,7 +51,7 @@ class RepositoryNode(strawberry.relay.Node):
         prefetch_related=[
             Prefetch(
                 "issues",
-                queryset=Issue.objects.select_related("repository__organization")
+                queryset=Issue.objects.select_related("author", "repository__organization")
                 .prefetch_related(LABELS_PREFETCH)
                 .order_by("-created_at")[:RECENT_ISSUES_LIMIT],
                 to_attr="recent_issues",
@@ -62,8 +62,12 @@ class RepositoryNode(strawberry.relay.Node):
         """Resolve recent issues."""
         # TODO(arkid15r): rename this to recent_issues.
         if hasattr(root, "recent_issues"):
-            return getattr(root, "recent_issues", [])
-        return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+            return root.recent_issues
+        return (
+            root.issues.select_related("author", "repository__organization")
+            .prefetch_related(LABELS_PREFETCH)
+            .order_by("-created_at")[:RECENT_ISSUES_LIMIT]
+        )
 
     @strawberry_django.field
     def languages(self, root: Repository) -> list[str]:

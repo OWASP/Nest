@@ -21,7 +21,6 @@ class TestRepositoryQuery:
     def test_resolve_repository_existing(self, mock_repository):
         """Test resolving an existing repository."""
         mock_queryset = MagicMock()
-        mock_queryset.prefetch_related.return_value = mock_queryset
         mock_queryset.select_related.return_value = mock_queryset
         mock_queryset.get.return_value = mock_repository
 
@@ -35,7 +34,6 @@ class TestRepositoryQuery:
             )
 
             assert result == mock_repository
-            mock_queryset.prefetch_related.assert_called_once()
             mock_queryset.select_related.assert_called_once_with("organization")
             mock_queryset.get.assert_called_once_with(
                 organization__login__iexact="test-org",
@@ -45,7 +43,6 @@ class TestRepositoryQuery:
     def test_resolve_repository_not_found(self):
         """Test resolving a non-existent repository."""
         mock_queryset = MagicMock()
-        mock_queryset.prefetch_related.return_value = mock_queryset
         mock_queryset.select_related.return_value = mock_queryset
         mock_queryset.get.side_effect = Repository.DoesNotExist
         with patch(
@@ -58,7 +55,6 @@ class TestRepositoryQuery:
             )
 
             assert result is None
-            mock_queryset.prefetch_related.assert_called_once()
             mock_queryset.select_related.assert_called_once_with("organization")
             mock_queryset.get.assert_called_once_with(
                 organization__login__iexact="non-existent-org",
