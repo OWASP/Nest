@@ -13,6 +13,7 @@ from apps.ai.agents.community import create_community_agent
 from apps.ai.agents.contribution import create_contribution_agent
 from apps.ai.agents.project import create_project_agent
 from apps.ai.agents.rag import create_rag_agent
+from apps.ai.common.constants import DEFAULT_VISION_MODEL
 from apps.ai.common.intent import Intent
 from apps.ai.router import route
 from apps.common.open_ai import OpenAi
@@ -79,7 +80,7 @@ def process_query(  # noqa: PLR0911
     try:
         if images:
             image_context = (
-                OpenAi(model="gpt-4o")
+                OpenAi(model=DEFAULT_VISION_MODEL)
                 .set_prompt(IMAGE_DESCRIPTION_PROMPT)
                 .set_input(query)
                 .set_images(images)
@@ -92,6 +93,7 @@ def process_query(  # noqa: PLR0911
         router_result = route(query)
         intent = router_result["intent"]
         confidence = router_result["confidence"]
+
         logger.info(
             "Query routed",
             extra={
