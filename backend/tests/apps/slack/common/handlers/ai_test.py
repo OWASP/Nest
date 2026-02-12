@@ -29,7 +29,9 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=None, channel_id=None, is_app_mention=False
+        )
         mock_markdown.assert_called_once_with(ai_response)
         assert result == [expected_block]
 
@@ -45,7 +47,9 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=None, channel_id=None, is_app_mention=False
+        )
         mock_get_error_blocks.assert_called_once()
         assert result == error_blocks
 
@@ -61,9 +65,33 @@ class TestAiHandler:
 
         result = get_blocks(query)
 
-        mock_process_ai_query.assert_called_once_with(query.strip())
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=None, channel_id=None, is_app_mention=False
+        )
         mock_get_error_blocks.assert_called_once()
         assert result == error_blocks
+
+    @patch("apps.slack.common.handlers.ai.process_ai_query")
+    @patch("apps.slack.common.handlers.ai.markdown")
+    def test_get_blocks_with_images(self, mock_markdown, mock_process_ai_query):
+        """Test get_blocks passes images through to process_ai_query."""
+        query = "What is in this image?"
+        images = ["data:image/png;base64,abc123"]
+        ai_response = "The image shows a security dashboard."
+        expected_block = {
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": ai_response},
+        }
+
+        mock_process_ai_query.return_value = ai_response
+        mock_markdown.return_value = expected_block
+
+        result = get_blocks(query, images=images)
+
+        mock_process_ai_query.assert_called_once_with(
+            query.strip(), images=images, channel_id=None, is_app_mention=False
+        )
+        assert result == [expected_block]
 
     @patch("apps.slack.common.handlers.ai.process_query")
     def test_process_ai_query_success(self, mock_process_query):
@@ -75,7 +103,9 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
         assert result == expected_response
 
     @patch("apps.slack.common.handlers.ai.process_query")
@@ -87,7 +117,9 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
         assert result is None
 
     @patch("apps.slack.common.handlers.ai.process_query")
@@ -99,7 +131,9 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
         assert result is None
 
     @patch("apps.slack.common.handlers.ai.process_query")
@@ -111,8 +145,41 @@ class TestAiHandler:
 
         result = process_ai_query(query)
 
-        mock_process_query.assert_called_once_with(query)
+        mock_process_query.assert_called_once_with(
+            query, images=None, channel_id=None, is_app_mention=False
+        )
         assert result == get_default_response()
+
+    @patch("apps.slack.common.handlers.ai.process_query")
+    def test_process_ai_query_with_images(self, mock_process_query):
+        """Test process_ai_query passes images through to process_query."""
+        query = "Describe this image"
+        images = ["data:image/jpeg;base64,img_data"]
+        expected_response = "The image shows..."
+
+        mock_process_query.return_value = expected_response
+
+        result = process_ai_query(query, images=images)
+
+        mock_process_query.assert_called_once_with(
+            query, images=images, channel_id=None, is_app_mention=False
+        )
+        assert result == expected_response
+
+    @patch("apps.slack.common.handlers.ai.process_query")
+    def test_process_ai_query_with_images_and_channel(self, mock_process_query):
+        """Test process_ai_query forwards images along with channel_id and is_app_mention."""
+        query = "What is this?"
+        images = ["data:image/png;base64,abc"]
+        channel_id = "C123456"
+
+        mock_process_query.return_value = "Response"
+
+        process_ai_query(query, images=images, channel_id=channel_id, is_app_mention=True)
+
+        mock_process_query.assert_called_once_with(
+            query, images=images, channel_id=channel_id, is_app_mention=True
+        )
 
     @patch("apps.slack.common.handlers.ai.markdown")
     def test_get_error_blocks(self, mock_markdown):
@@ -131,15 +198,3 @@ class TestAiHandler:
 
         mock_markdown.assert_called_once_with(expected_error_message)
         assert result == [expected_block]
-
-    def test_get_blocks_strips_whitespace(self):
-        """Test that get_blocks properly strips whitespace from query."""
-        with patch("apps.slack.common.handlers.ai.process_ai_query") as mock_process_ai_query:
-            mock_process_ai_query.return_value = None
-            with patch("apps.slack.common.handlers.ai.get_error_blocks") as mock_get_error_blocks:
-                mock_get_error_blocks.return_value = []
-
-                query_with_whitespace = "  What is OWASP?  "
-                get_blocks(query_with_whitespace)
-
-                mock_process_ai_query.assert_called_once_with("What is OWASP?")

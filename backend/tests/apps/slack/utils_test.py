@@ -8,6 +8,7 @@ from apps.owasp.utils.gsoc import get_gsoc_projects
 from apps.owasp.utils.news import get_news_data
 from apps.owasp.utils.staff import get_staff_data
 from apps.slack.utils import (
+    download_file,
     escape,
     get_text,
     strip_markdown,
@@ -137,6 +138,64 @@ def test_process_mrkdwn(input_text, expected_output):
 def test_blocks_to_text(input_blocks, expected_output):
     """Test the blocks_to_text function."""
     assert get_text(input_blocks) == expected_output
+
+
+def test_download_file_success(monkeypatch):
+    """Test successful file download."""
+    mock_response = Mock()
+    mock_response.content = b"image-bytes"
+    mock_response.raise_for_status = Mock()
+
+    monkeypatch.setattr("apps.slack.utils.requests.get", Mock(return_value=mock_response))
+
+    result = download_file("https://files.slack.com/image.png", "xoxb-token")
+
+    assert result == b"image-bytes"
+
+
+def test_download_file_http_error(monkeypatch):
+    """Test download returns None on HTTP error."""
+    import requests as req
+
+    mock_response = Mock()
+    mock_response.raise_for_status.side_effect = req.HTTPError("404")
+
+    monkeypatch.setattr("apps.slack.utils.requests.get", Mock(return_value=mock_response))
+
+    result = download_file("https://files.slack.com/image.png", "xoxb-token")
+
+    assert result is None
+
+
+def test_download_file_request_exception(monkeypatch):
+    """Test download returns None on request exception."""
+    import requests as req
+
+    monkeypatch.setattr(
+        "apps.slack.utils.requests.get", Mock(side_effect=req.ConnectionError("timeout"))
+    )
+
+    result = download_file("https://files.slack.com/image.png", "xoxb-token")
+
+    assert result is None
+
+
+def test_download_file_sends_auth_header(monkeypatch):
+    """Test that download_file sends the correct authorization header."""
+    mock_response = Mock()
+    mock_response.content = b"image-bytes"
+    mock_response.raise_for_status = Mock()
+    mock_get = Mock(return_value=mock_response)
+
+    monkeypatch.setattr("apps.slack.utils.requests.get", mock_get)
+
+    download_file("https://files.slack.com/image.png", "xoxb-test-token")
+
+    mock_get.assert_called_once_with(
+        "https://files.slack.com/image.png",
+        headers={"Authorization": "Bearer xoxb-test-token"},
+        timeout=30,
+    )
 
 
 @pytest.mark.parametrize(

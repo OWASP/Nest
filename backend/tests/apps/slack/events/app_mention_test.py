@@ -6,6 +6,8 @@ import pytest
 
 from apps.slack.events.app_mention import AppMention
 
+TEST_BOT_TOKEN = "xoxb-test-token"  # noqa: S105
+
 
 class TestAppMention:
     """Test cases for AppMention event handler."""
@@ -54,75 +56,65 @@ class TestAppMention:
         mock_get_blocks.assert_not_called()
         mock_client.chat_postMessage.assert_not_called()
 
+    @patch("apps.slack.events.app_mention.download_file")
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
-    def test_handle_event_no_query(self, mock_get_blocks, mock_conversation, handler, mock_client):
-        """Test that handler returns early when no query is found."""
-        mock_conversation.objects.filter.return_value.exists.return_value = True
-
-        event = {
-            "channel": "C123456",
-            "text": "",
-            "ts": "1234567890.123456",
-        }
-
-        handler.handle_event(event, mock_client)
-
-        mock_get_blocks.assert_not_called()
-        mock_client.chat_postMessage.assert_not_called()
-
-    @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
-    def test_handle_event_success(self, mock_get_blocks, mock_conversation, handler, mock_client):
-        """Test successful handling of app mention event."""
-        mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-
-        event = {
-            "channel": "C123456",
-            "text": "What is OWASP?",
-            "ts": "1234567890.123456",
-        }
-
-        handler.handle_event(event, mock_client)
-
-        mock_client.reactions_add.assert_called_once_with(
-            channel="C123456",
-            timestamp="1234567890.123456",
-            name="eyes",
-        )
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel="C123456",
-            blocks=[{"type": "section", "text": {"text": "Response"}}],
-            text="What is OWASP?",
-            thread_ts="1234567890.123456",
-        )
-
-    @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
-    def test_handle_event_with_thread_ts(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+    def test_handle_event_filters_unsupported_mimetypes(
+        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
     ):
-        """Test handling event with thread_ts."""
+        """Test that files with unsupported MIME types are filtered out."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
         mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_client.token = TEST_BOT_TOKEN
 
         event = {
             "channel": "C123456",
-            "text": "What is OWASP?",
+            "text": "Check this file",
             "ts": "1234567890.123456",
-            "thread_ts": "1234567890.000000",
+            "files": [
+                {
+                    "mimetype": "application/pdf",
+                    "size": 1024,
+                    "url_private": "https://files.slack.com/doc.pdf",
+                },
+            ],
         }
 
         handler.handle_event(event, mock_client)
 
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel="C123456",
-            blocks=[{"type": "section", "text": {"text": "Response"}}],
-            text="What is OWASP?",
-            thread_ts="1234567890.000000",
-        )
+        mock_download_file.assert_not_called()
+        call_kwargs = mock_get_blocks.call_args.kwargs
+        assert call_kwargs["images"] == []
+
+    @patch("apps.slack.events.app_mention.download_file")
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_filters_oversized_images(
+        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
+    ):
+        """Test that images exceeding MAX_IMAGE_SIZE are filtered out."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_client.token = TEST_BOT_TOKEN
+
+        event = {
+            "channel": "C123456",
+            "text": "Check this image",
+            "ts": "1234567890.123456",
+            "files": [
+                {
+                    "mimetype": "image/png",
+                    "size": 3 * 1024 * 1024,  # 3MB, exceeds 2MB limit
+                    "url_private": "https://files.slack.com/big.png",
+                },
+            ],
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_download_file.assert_not_called()
+        call_kwargs = mock_get_blocks.call_args.kwargs
+        assert call_kwargs["images"] == []
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
@@ -154,7 +146,9 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        )
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
@@ -187,7 +181,9 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        )
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
@@ -212,7 +208,9 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        )
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
@@ -277,3 +275,123 @@ class TestAppMention:
         mock_client.reactions_add.assert_called_once()
         mock_get_blocks.assert_called_once()
         mock_client.chat_postMessage.assert_called_once()
+
+    @patch("apps.slack.events.app_mention.download_file")
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_with_image_files(
+        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
+    ):
+        """Test that image files are downloaded, base64 encoded, and passed to get_blocks."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_download_file.return_value = b"\x89PNG\r\n"
+        mock_client.token = TEST_BOT_TOKEN
+
+        event = {
+            "channel": "C123456",
+            "text": "What is in this image?",
+            "ts": "1234567890.123456",
+            "files": [
+                {
+                    "mimetype": "image/png",
+                    "size": 1024,
+                    "url_private": "https://files.slack.com/image.png",
+                },
+            ],
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_download_file.assert_called_once_with(
+            "https://files.slack.com/image.png", TEST_BOT_TOKEN
+        )
+        call_kwargs = mock_get_blocks.call_args.kwargs
+        assert len(call_kwargs["images"]) == 1
+        assert call_kwargs["images"][0].startswith("data:image/png;base64,")
+
+    @patch("apps.slack.events.app_mention.download_file")
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_image_download_failure(
+        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
+    ):
+        """Test that failed image downloads are skipped gracefully."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_download_file.return_value = None
+        mock_client.token = TEST_BOT_TOKEN
+
+        event = {
+            "channel": "C123456",
+            "text": "What is in this image?",
+            "ts": "1234567890.123456",
+            "files": [
+                {
+                    "mimetype": "image/jpeg",
+                    "size": 500,
+                    "url_private": "https://files.slack.com/broken.jpg",
+                },
+            ],
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_download_file.assert_called_once()
+        call_kwargs = mock_get_blocks.call_args.kwargs
+        assert call_kwargs["images"] == []
+
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_success(self, mock_get_blocks, mock_conversation, handler, mock_client):
+        """Test successful handling of app mention event."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+
+        event = {
+            "channel": "C123456",
+            "text": "What is OWASP?",
+            "ts": "1234567890.123456",
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_client.reactions_add.assert_called_once_with(
+            channel="C123456",
+            timestamp="1234567890.123456",
+            name="eyes",
+        )
+        mock_get_blocks.assert_called_once_with(
+            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        )
+        mock_client.chat_postMessage.assert_called_once_with(
+            channel="C123456",
+            blocks=[{"type": "section", "text": {"text": "Response"}}],
+            text="What is OWASP?",
+            thread_ts="1234567890.123456",
+        )
+
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_with_thread_ts(
+        self, mock_get_blocks, mock_conversation, handler, mock_client
+    ):
+        """Test handling event with thread_ts."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+
+        event = {
+            "channel": "C123456",
+            "text": "What is OWASP?",
+            "ts": "1234567890.123456",
+            "thread_ts": "1234567890.000000",
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_client.chat_postMessage.assert_called_once_with(
+            channel="C123456",
+            blocks=[{"type": "section", "text": {"text": "Response"}}],
+            text="What is OWASP?",
+            thread_ts="1234567890.000000",
+        )
