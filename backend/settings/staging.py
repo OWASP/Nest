@@ -1,6 +1,8 @@
 """OWASP Nest staging configuration."""
+
 import sentry_sdk
 from configurations import values
+
 from settings.base import Base
 
 
@@ -45,10 +47,3 @@ class Staging(Base):
     IS_STAGING_ENVIRONMENT = True
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
-
-    # Security
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_SSL_REDIRECT = True

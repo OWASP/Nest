@@ -12,5 +12,9 @@ class Fuzz(Base):
     SITE_URL = "http://localhost:9500"
 
     IS_FUZZ_ENVIRONMENT = True
+
     LOGGING = {}
     PUBLIC_IP_ADDRESS = values.Value()
+    SECURE_HSTS_SECONDS = 0
+    SECURE_PROXY_SSL_HEADER = None  # type: ignore[assignment]  # Django accepts None to disable.
+    SECURE_SSL_REDIRECT = False

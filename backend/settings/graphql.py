@@ -48,11 +48,7 @@ extensions = [
     DjangoOptimizerExtension(),
 ]
 
-if not settings.DEBUG and not getattr(settings, "IS_FUZZ_ENVIRONMENT", False):
+if not settings.DEBUG and not settings.IS_FUZZ_ENVIRONMENT:
     extensions.append(DisableIntrospection())
 
-schema = strawberry.Schema(
-    mutation=Mutation,
-    query=Query,
-    extensions=extensions,
-)
+schema = strawberry.Schema(extensions=extensions, mutation=Mutation, query=Query)
