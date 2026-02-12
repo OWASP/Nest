@@ -54,15 +54,45 @@ class Command(BaseCommand):
         try:
             self._execute_sql(
                 "postgres",
-                [
-                    sql.SQL("CREATE DATABASE {temp_db} TEMPLATE {DB_NAME};").format(
-                        temp_db=sql.Identifier(temp_db), DB_NAME=sql.Identifier(DB_NAME)
-                    )
-                ],
+                [sql.SQL("CREATE DATABASE {temp_db}").format(temp_db=sql.Identifier(temp_db))],
             )
 
             self.stdout.write(self.style.SUCCESS(f"Created temporary DB: {temp_db}"))
+            # Getting data
+            data = run(  # noqa: S603
+                [  # noqa: S607
+                    "pg_dump",
+                    "-h",
+                    DB_HOST,
+                    "-p",
+                    DB_PORT,
+                    "-U",
+                    DB_USER,
+                    "-d",
+                    DB_NAME,
+                ],
+                check=True,
+                capture_output=True,
+                env=env,
+            )
+            run(  # noqa: S603
+                [  # noqa: S607
+                    "psql",
+                    "-h",
+                    DB_HOST,
+                    "-p",
+                    DB_PORT,
+                    "-U",
+                    DB_USER,
+                    "-d",
+                    temp_db,
+                ],
+                check=True,
+                env=env,
+                input=data.stdout,
+            )
 
+            self.stdout.write(self.style.SUCCESS(f"Synced data from {DB_NAME} to {temp_db}"))
             table_list = self._execute_sql(temp_db, [self._table_list_query()])
             self._execute_sql(temp_db, self._remove_emails([row[0] for row in table_list]))
             self.stdout.write(self.style.SUCCESS("Removed emails from temporary DB"))
