@@ -1,5 +1,5 @@
 import { sendGAEvent } from '@next/third-parties/google'
-import { screen, render, waitFor } from '@testing-library/react'
+import { screen, render, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -594,13 +594,28 @@ describe('Rendering', () => {
         await waitFor(expectListItemsExist)
 
         const suggestionBtns = screen.getAllByRole('button', { name: /Test Chapter/i })
-        // Use the first one found, or be more specific if possible.
-        // Given the failing test output, there are multiple buttons with the same text
-        // because we are rendering results for multiple indexes (chapters, users, projects)
-        // and using 'Test Chapter' name for mockChapter.
         const suggestionBtn = suggestionBtns[0]
+
+        // Test Enter key
         suggestionBtn.focus()
         await user.keyboard('{Enter}')
+        expect(mockPush).toHaveBeenCalledWith('/chapters/test-chapter')
+
+        // Reset mock and test Space key
+        mockPush.mockClear()
+
+        // Re-render suggestions
+        await user.clear(input)
+        await user.type(input, 'test')
+        await waitFor(expectListItemsExist)
+
+        const suggestionBtnsAfterRetype = screen.getAllByRole('button', { name: /Test Chapter/i })
+        const suggestionBtnForSpace = suggestionBtnsAfterRetype[0]
+
+        // Focus and trigger Space key using fireEvent for more direct control
+        suggestionBtnForSpace.focus()
+        fireEvent.keyDown(suggestionBtnForSpace, { key: ' ', code: 'Space' })
+
         expect(mockPush).toHaveBeenCalledWith('/chapters/test-chapter')
       })
 

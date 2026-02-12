@@ -31,12 +31,12 @@ jest.mock('components/Pagination', () =>
 describe('Organization', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockOrganizationData.hits,
       totalPages: 2,
     })
     mockRouter = { push: jest.fn() }
-    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+      ; (useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -55,10 +55,10 @@ describe('Organization', () => {
 
   test('handles page change correctly', async () => {
     window.scrollTo = jest.fn()
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: mockOrganizationData.hits,
-      totalPages: 2,
-    })
+      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+        hits: mockOrganizationData.hits,
+        totalPages: 2,
+      })
     render(<Organization />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
@@ -122,7 +122,7 @@ describe('Organization', () => {
       ],
       totalPages: 1,
     }
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockDataWithMissingFields)
+      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue(mockDataWithMissingFields)
 
     render(<Organization />)
 
@@ -158,12 +158,16 @@ describe('Organization', () => {
       ],
       totalPages: 1,
     }
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockDataWithNullAvatar)
+      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue(mockDataWithNullAvatar)
 
     render(<Organization />)
 
     await waitFor(() => {
       expect(screen.getByText('Null Avatar Org')).toBeInTheDocument()
+      // Verify fallback is shown
+      expect(screen.getByRole('img', { name: 'Default profile picture' })).toBeInTheDocument()
+      // Verify image is NOT shown
+      expect(screen.queryByAltText("Null Avatar Org's profile picture")).not.toBeInTheDocument()
     })
   })
 })

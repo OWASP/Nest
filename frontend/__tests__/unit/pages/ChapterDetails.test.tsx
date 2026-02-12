@@ -169,7 +169,7 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
-    // Should render without crashing even when suggestedLocation is null
+    expect(screen.queryByText('Test City, Test Country')).not.toBeInTheDocument()
   })
 
   test('handles missing region gracefully', async () => {

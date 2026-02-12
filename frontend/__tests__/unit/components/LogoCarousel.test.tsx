@@ -448,8 +448,8 @@ describe('MovingLogos (LogoCarousel)', () => {
       const sponsor: Sponsor = {
         id: undefined as unknown as string,
         name: 'Name',
-        imageUrl: 'http://img.com',
-        url: 'http://url.com',
+        imageUrl: 'https://img.com',
+        url: 'https://url.com',
         sponsorType: 'Gold',
       }
       render(<MovingLogos sponsors={[sponsor]} />)
@@ -460,7 +460,7 @@ describe('MovingLogos (LogoCarousel)', () => {
       const sponsor: Sponsor = {
         id: undefined as unknown as string,
         name: 'Name',
-        imageUrl: 'http://img.com',
+        imageUrl: 'https://img.com',
         url: '',
         sponsorType: 'Gold',
       }
@@ -472,7 +472,7 @@ describe('MovingLogos (LogoCarousel)', () => {
       const sponsor: Sponsor = {
         id: undefined as unknown as string,
         name: '',
-        imageUrl: 'http://img.com',
+        imageUrl: 'https://img.com',
         url: '',
         sponsorType: 'Gold',
       }
@@ -485,7 +485,7 @@ describe('MovingLogos (LogoCarousel)', () => {
         id: '1',
         name: '',
         imageUrl: '',
-        url: 'http://url.com',
+        url: 'https://url.com',
         sponsorType: 'Gold',
       }
       render(<MovingLogos sponsors={[sponsor]} />)

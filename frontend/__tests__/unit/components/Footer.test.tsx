@@ -151,7 +151,8 @@ describe('Footer', () => {
       for (const link of regularLinks) {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
-        expect(linkElement).toHaveAttribute('href', link.href || '/')
+        const expectedHref = link.href || '/'
+        expect(linkElement).toHaveAttribute('href', expectedHref)
         expect(linkElement).toHaveAttribute('target', '_blank')
       }
 

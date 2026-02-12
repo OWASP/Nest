@@ -99,6 +99,14 @@ jest.mock('@heroui/select', () => {
           >
             {selectedKey}
           </button>
+          <button
+            type="button"
+            data-testid="select-trigger-empty"
+            onClick={() => onSelectionChange?.(new Set())}
+            style={{ display: 'none' }}
+          >
+            Trigger Empty Selection
+          </button>
           {isOpen && (
             <div id="select-popover" data-testid="select-popover" aria-label="Options">
               {React.Children.map(children, (child: React.ReactElement) => {
@@ -528,16 +536,13 @@ describe('MenteeProfilePage', () => {
     mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
     render(<MenteeProfilePage />)
 
-    const filterSelect = screen.getByTestId('select-trigger')
-
     // Initially should show all issues
     expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
 
-    // Open the select but don't select anything (simulate empty selection)
-    fireEvent.click(filterSelect)
-    // The select is now open, but we won't click any option
-    // This tests the branch where key is empty/undefined in the onSelectionChange handler
+    // Trigger empty selection by clicking the hidden test button
+    const emptyTrigger = screen.getByTestId('select-trigger-empty')
+    fireEvent.click(emptyTrigger)
 
     // Issues should still be visible (filter unchanged)
     expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)

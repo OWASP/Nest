@@ -38,6 +38,6 @@ describe('LabelList', () => {
     render(<LabelList entityKey="test-6" labels={['1', '2']} maxVisible={5} />)
     expect(screen.getByText('1')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
-    expect(screen.queryByText(/\+.*more/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/\+\d+ more/)).not.toBeInTheDocument()
   })
 })

@@ -263,11 +263,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
                       key={`multi-search-${suggestion.indexName}-${(hit as unknown as Record<string, string | undefined>).key || (hit as unknown as Record<string, string | undefined>).login || (hit as unknown as Record<string, string | undefined>).url}`}
-                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
-                          ? 'bg-gray-100 dark:bg-gray-700'
-                          : ''
-                      }`}
+                      className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
+                        ? 'bg-gray-100 dark:bg-gray-700'
+                        : ''
+                        }`}
                     >
                       <button
                         type="button"
