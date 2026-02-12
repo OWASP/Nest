@@ -1,6 +1,6 @@
 """Test cases for ProjectNode."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
@@ -116,8 +116,6 @@ class TestProjectNode(GraphQLNodeBaseTest):
 
     def test_contribution_stats_transforms_snake_case_to_camel_case(self):
         """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
-        from unittest.mock import Mock
-
         mock_project = Mock()
         mock_project.contribution_stats = {
             "commits": 100,
