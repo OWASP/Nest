@@ -502,10 +502,10 @@ class TestGithubSyncUserCommand:
         mock_profile = MagicMock(spec=MemberProfile, first_contribution_at=None)
         mock_member_profile.get_or_create.return_value = (mock_profile, True)
 
-        mock_commit_obj = _create_mock_contribution(
+        mock_commit = _create_mock_contribution(
             "commit-repo", "OWASP/commit-repo", datetime(2025, 1, 15, tzinfo=UTC), commit=True
         )
-        mock_gh.search_commits.return_value = MockPaginatedList([mock_commit_obj])
+        mock_gh.search_commits.return_value = MockPaginatedList([mock_commit])
 
         mock_gh.search_issues.side_effect = [
             GithubException(500, "Server Error"),
@@ -526,13 +526,13 @@ class TestGithubSyncUserCommand:
         mock_profile = MagicMock(spec=MemberProfile, first_contribution_at=None)
         mock_member_profile.get_or_create.return_value = (mock_profile, True)
 
-        mock_pr_obj = _create_mock_contribution(
+        mock_pr = _create_mock_contribution(
             "pr-repo", "OWASP/pr-repo", datetime(2025, 1, 1, tzinfo=UTC)
         )
         mock_gh.search_commits.return_value = MockPaginatedList([])
 
         mock_gh.search_issues.side_effect = [
-            MockPaginatedList([mock_pr_obj]),
+            MockPaginatedList([mock_pr]),
             GithubException(500, "Server Error"),
         ]
 

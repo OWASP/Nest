@@ -21,8 +21,8 @@ class TestOwaspEnrichProjects:
         command.add_arguments(parser)
         args = parser.parse_args([])
         assert args.offset == 0
-        assert args.force_update_summary is False
-        assert args.update_summary is True
+        assert not args.force_update_summary
+        assert args.update_summary
 
     @pytest.fixture
     def mock_project(self):

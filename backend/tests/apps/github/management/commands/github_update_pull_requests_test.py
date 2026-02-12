@@ -80,7 +80,7 @@ class TestGithubUpdatePullRequests:
         mock_issue_objects.filter.assert_not_called()
 
     def test_handle_no_new_issues_to_link(self, mocker):
-        """Test that PRs with all issues already linked don't get updated - covers line 45->29."""
+        """Test that PRs with all issues already linked don't get updated."""
         mock_repo = mocker.Mock(name="Repository", id=1)
         mock_repo.name = "test-repo"
 

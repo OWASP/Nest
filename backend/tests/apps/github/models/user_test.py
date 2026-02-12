@@ -253,5 +253,4 @@ class TestUserModel:
         with patch.object(
             User, "created_releases", all=Mock(return_value=["release1", "release2"])
         ):
-            releases = user.releases
-            assert releases == ["release1", "release2"]
+            assert user.releases == ["release1", "release2"]

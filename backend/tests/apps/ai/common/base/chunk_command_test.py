@@ -632,4 +632,4 @@ class TestBaseChunkCommand:
                 for call in mock_write.call_args_list
                 if "Created" in str(call) and "new chunks" in str(call)
             ]
-            assert len(success_calls) == 0
+            assert not success_calls
