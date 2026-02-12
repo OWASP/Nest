@@ -15,6 +15,7 @@ from apps.ai.agents.project import create_project_agent
 from apps.ai.agents.rag import create_rag_agent
 from apps.ai.common.intent import Intent
 from apps.ai.router import route
+from apps.common.open_ai import OpenAi
 from apps.slack.constants import (
     OWASP_COMMUNITY_CHANNEL_ID,
 )
@@ -22,6 +23,12 @@ from apps.slack.constants import (
 logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.7
+
+IMAGE_DESCRIPTION_PROMPT = (
+    "Describe what is shown in these images. Focus on any text, "
+    "error messages, code snippets, UI elements, or technical details. "
+    "Be concise."
+)
 
 
 def normalize_channel_id(channel_id: str) -> str:
@@ -69,8 +76,18 @@ def process_query(  # noqa: PLR0911
         (for channel monitored messages with low confidence)
 
     """
-    _ = images
     try:
+        if images:
+            image_context = (
+                OpenAi(model="gpt-4o")
+                .set_prompt(IMAGE_DESCRIPTION_PROMPT)
+                .set_input(query)
+                .set_images(images)
+                .complete()
+            )
+            if image_context:
+                query = f"{query}\n\nImage context: {image_context}"
+
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
         intent = router_result["intent"]
