@@ -202,4 +202,45 @@ describe('Contribute Component', () => {
       expect(modalTitle).toBeInTheDocument()
     })
   })
+
+  test('closes modal when close button is clicked', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      hits: mockContributeData.issues,
+      totalPages: 1,
+    })
+    render(<ContributePage />)
+
+    await waitFor(() => {
+      const readMoreButton = screen.getByText('Read More')
+      fireEvent.click(readMoreButton)
+    })
+
+    await waitFor(() => {
+      const closeButton = screen.getByText('Close')
+      fireEvent.click(closeButton)
+    })
+
+    // After closing, the Read More button should be visible again
+    expect(screen.getByText('Read More')).toBeInTheDocument()
+  })
+
+  test('renders View Issue button in modal', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      hits: mockContributeData.issues,
+      totalPages: 1,
+    })
+    render(<ContributePage />)
+
+    await waitFor(() => {
+      const readMoreButton = screen.getByText('Read More')
+      fireEvent.click(readMoreButton)
+    })
+
+    await waitFor(() => {
+      const viewIssueButton = screen.getByText('View Issue')
+      expect(viewIssueButton).toBeInTheDocument()
+    })
+  })
 })

@@ -13,7 +13,11 @@ repos:
     rev: v26.1.1
     hooks:
       - id: ansible-lint
+        additional_dependencies:
+          - ansible-core
         args:
+          - -c
+          - .github/ansible/.ansible-lint.yaml
           - .github/ansible
         files: ^\.github/ansible/.*\.ya?ml$
         language_version: python3
@@ -94,6 +98,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.12.1
+    rev: v2.15.2
     hooks:
       - id: pyproject-fmt

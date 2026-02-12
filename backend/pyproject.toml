@@ -8,67 +8,59 @@ version = "0.0.0"
 description = "Your gateway to OWASP"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
-
 packages = [ { include = "apps" } ]
-
-[tool.poetry.dependencies]
-algoliasearch = "^4.13.2"
-algoliasearch-django = "^4.0.0"
-django = "^6.0"
-django-configurations = "^2.5.1"
-django-cors-headers = "^4.7.0"
-django-ninja = "^1.4.3"
-django-redis = "^6.0.0"
-django-rq = "^3.1"
-django-storages = { extras = [ "s3" ], version = "^1.14.4" }
-emoji = "^2.14.1"
-geopy = "^2.4.1"
-gunicorn = "^25.0.0"
-humanize = "^4.11.0"
-jinja2 = "^3.1.6"
-langchain = "^0.3.26"
-langchain-community = "^0.3.26"
-langgraph = "^1.0.1"
-lxml = "^6.0.0"
-markdown = "^3.7"
-openai = "^2.0.1"
-owasp-schema = "^0.1.46"
-pgvector = "^0.4.1"
-psycopg2-binary = "^2.9.9"
-pydantic = "^2.11.1"
-pydantic-core = "^2.33.0"
-pygithub = "^2.5.0"
-python = "^3.13"
-python-dateutil = "^2.9.0.post0"
-pyyaml = "^6.0.2"
-reportlab = "^4.4.2"
-requests = "^2.32.5"
-sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
-slack-bolt = "^1.22.0"
-slack-sdk = "^3.37.0"
-strawberry-graphql = { extras = [ "django" ], version = "^0.291.0" }
-strawberry-graphql-django = "^0.75.0"
-thefuzz = "^0.22.1"
-pyparsing = "^3.2.3"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^9.0.1"
-pytest-cov = "^7.0"
-pytest-django = "^4.5"
-pytest-mock = "^3.0"
-pytest-xdist = "^3.0"
-python-dotenv = "^1.0.1"
-
-[tool.poetry.group.video.dependencies]
-elevenlabs = "^2.27.0"
-ffmpeg-python = "^0.2.0"
-pillow = "^12.1.0"
-pypdfium2 = "^5.2.0"
-weasyprint = "^68.0"
+dependencies.algoliasearch = "^4.13.2"
+dependencies.algoliasearch-django = "^4.0.0"
+dependencies.django = "^6.0"
+dependencies.django-configurations = "^2.5.1"
+dependencies.django-cors-headers = "^4.7.0"
+dependencies.django-ninja = "^1.5.3"
+dependencies.django-redis = "^6.0.0"
+dependencies.django-rq = "^3.1"
+dependencies.django-storages = { extras = [ "s3" ], version = "^1.14.4" }
+dependencies.emoji = "^2.14.1"
+dependencies.geopy = "^2.4.1"
+dependencies.gunicorn = "^25.0.0"
+dependencies.humanize = "^4.11.0"
+dependencies.jinja2 = "^3.1.6"
+dependencies.langchain = "^0.3.26"
+dependencies.langchain-community = "^0.3.26"
+dependencies.langgraph = "^1.0.1"
+dependencies.lxml = "^6.0.0"
+dependencies.markdown = "^3.7"
+dependencies.openai = "^2.0.1"
+dependencies.owasp-schema = "^0.1.46"
+dependencies.pgvector = "^0.4.1"
+dependencies.psycopg2-binary = "^2.9.9"
+dependencies.pydantic = "^2.11.1"
+dependencies.pydantic-core = "^2.33.0"
+dependencies.pygithub = "^2.5.0"
+dependencies.python = "^3.13"
+dependencies.python-dateutil = "^2.9.0.post0"
+dependencies.pyyaml = "^6.0.2"
+dependencies.reportlab = "^4.4.2"
+dependencies.requests = "^2.32.5"
+dependencies.sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
+dependencies.slack-bolt = "^1.22.0"
+dependencies.slack-sdk = "^3.37.0"
+dependencies.strawberry-graphql = { extras = [ "django" ], version = "^0.291.0" }
+dependencies.strawberry-graphql-django = "^0.75.0"
+dependencies.thefuzz = "^0.22.1"
+dependencies.pyparsing = "^3.2.3"
+group.test.dependencies.pytest = "^9.0.1"
+group.test.dependencies.pytest-cov = "^7.0"
+group.test.dependencies.pytest-django = "^4.5"
+group.test.dependencies.pytest-mock = "^3.0"
+group.test.dependencies.pytest-xdist = "^3.0"
+group.test.dependencies.python-dotenv = "^1.0.1"
+group.video.dependencies.elevenlabs = "^2.27.0"
+group.video.dependencies.ffmpeg-python = "^0.2.0"
+group.video.dependencies.pillow = "^12.1.0"
+group.video.dependencies.pypdfium2 = "^5.4.0"
+group.video.dependencies.weasyprint = "^68.0"
 
 [tool.ruff]
 target-version = "py313"
-
 line-length = 99
 lint.select = [ "ALL" ]
 lint.extend-select = [ "I" ]
@@ -80,7 +72,6 @@ lint.ignore = [
   "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
   "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
   "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
-  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
   "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
   "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
   "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
@@ -91,34 +82,35 @@ lint.per-file-ignores."**/__init__.py" = [
   "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
 ]
-lint.per-file-ignores."**/management/commands/*.py" = [
+lint.per-file-ignores."apps/**/management/commands/*.py" = [
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D102",   # https://docs.astral.sh/ruff/rules/undocumented-public-method/
   "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
-  "T201",   # https://docs.astral.sh/ruff/rules/print/
 ]
-lint.per-file-ignores."**/management/commands/dump_data.py" = [
-  "S603", # https://docs.astral.sh/ruff/rules/subprocess-without-shell-equals-true/,
-  "S607", # https://docs.astral.sh/ruff/rules/start-process-with-partial-path/,
-]
-lint.per-file-ignores."**/migrations/*.py" = [
+lint.per-file-ignores."apps/**/migrations/*.py" = [
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
-lint.per-file-ignores."**/models/*.py" = [
-  "D106", # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
+lint.per-file-ignores."apps/api/rest/**/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
 ]
-lint.per-file-ignores."**/settings/*.py" = [
+lint.per-file-ignores."apps/github/models/mixins/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/commands/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/common/handlers/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/events/**/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."settings/*.py" = [
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
-lint.per-file-ignores."**/tests/**/*.py" = [
+lint.per-file-ignores."tests/**/*.py" = [
   "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",    # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D102",    # https://docs.astral.sh/ruff/rules/undocumented-public-method/
   "D103",    # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+  "D106",    # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
   "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
   "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
   "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
@@ -126,17 +118,12 @@ lint.per-file-ignores."**/tests/**/*.py" = [
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
 
-lint.per-file-ignores."apps/api/rest/**/*.py" = [
-  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
-  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-]
-
-[tool.pytest.ini_options]
-DJANGO_CONFIGURATION = "Test"
-DJANGO_SETTINGS_MODULE = "settings.test"
-addopts = [
+[tool.pytest]
+ini_options.DJANGO_CONFIGURATION = "Test"
+ini_options.DJANGO_SETTINGS_MODULE = "settings.test"
+ini_options.addopts = [
   "--cov-config=pyproject.toml",
-  "--cov-fail-under=80",
+  "--cov-fail-under=90",
   "--cov-precision=2",
   "--cov-report=term-missing",
   "--cov-report=xml",
@@ -147,21 +134,21 @@ addopts = [
   "--no-cov-on-fail",
   "--numprocesses=auto",
 ]
-filterwarnings = [
+ini_options.filterwarnings = [
   "ignore::DeprecationWarning:pytest_cov",
   "ignore::DeprecationWarning:xdist",
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
-log_level = "INFO"
+ini_options.log_level = "INFO"
 
-[tool.coverage.run]
-branch = true
-omit = [
-  "__init__.py",
+[tool.coverage]
+run.branch = true
+run.omit = [
   "**/admin.py",
   "**/apps.py",
-  "**/migrations/*",
   "**/mentorship/*", # TODO: work in progress
+  "**/migrations/*",
+  "__init__.py",
   "manage.py",
   "settings/*",
   "tests/*",
