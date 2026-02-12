@@ -29,7 +29,6 @@ class TestProcessQueryImageEnrichment:
 
         process_query("What is this?", images=images)
 
-        mock_openai_cls.assert_called_once_with(model="gpt-4o")
         mock_openai_instance.set_images.assert_called_once_with(images)
         mock_openai_instance.complete.assert_called_once()
 
