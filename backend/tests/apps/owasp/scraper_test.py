@@ -352,5 +352,4 @@ class TestOwaspScraper:
         scraper = OwaspScraper("https://test.org")
         audience = scraper.get_audience()
 
-        # Should only find "builder", skipping empty components
         assert audience == ["builder"]

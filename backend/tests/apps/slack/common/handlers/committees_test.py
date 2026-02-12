@@ -80,8 +80,8 @@ class TestCommitteeHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        assert "Leader: John Doe" in blocks[1]["text"]["text"]  # Singular form
-        assert "Leaders:" not in blocks[1]["text"]["text"]  # Not plural
+        assert "Leader: John Doe" in blocks[1]["text"]["text"]
+        assert "Leaders:" not in blocks[1]["text"]["text"]
 
     def test_get_blocks_text_truncation(self, setup_mocks):
         long_name = "Very Long Committee Name That Should Be Truncated"
@@ -145,7 +145,6 @@ class TestCommitteeHandler:
 
         blocks = get_blocks(page=page, limit=limit)
 
-        # First item should be numbered 11 (offset + 1)
         assert "11. " in blocks[1]["text"]["text"]
 
     def test_get_blocks_no_search_query(self, setup_mocks, mock_committee_data):
@@ -154,7 +153,6 @@ class TestCommitteeHandler:
 
         blocks = get_blocks(search_query="")
 
-        # Should not include search query text
         assert "OWASP committees:" in blocks[0]["text"]["text"]
         assert "Test Committee" in blocks[1]["text"]["text"]
 
@@ -165,7 +163,6 @@ class TestCommitteeHandler:
 
         blocks = get_blocks(page=1, presentation=presentation)
 
-        # Should not have actions block
         assert not any(block.get("type") == "actions" for block in blocks)
 
     def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_committee_data):
@@ -175,10 +172,8 @@ class TestCommitteeHandler:
 
         blocks = get_blocks(page=2, presentation=presentation)
 
-        # Should have actions block with pagination buttons on page 2
         action_blocks = [block for block in blocks if block.get("type") == "actions"]
         assert len(action_blocks) > 0
-        # Verify the pagination block was actually appended
         assert action_blocks[0] in blocks
 
     def test_get_blocks_no_results_no_search_query(self, setup_mocks, mock_empty_committee_data):

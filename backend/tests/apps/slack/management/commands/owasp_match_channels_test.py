@@ -263,7 +263,6 @@ class TestOwaspMatchChannels:
         command.stdout = mocker.Mock()
         command.handle(dry_run=True, threshold=50)
 
-        # Since existing=True, created_count should not increment
         mock_ec_qs.get_or_create.assert_not_called()
 
     def test_handle_non_dry_run_entity_not_created(self, mocker):
@@ -309,5 +308,4 @@ class TestOwaspMatchChannels:
         command.stdout = mocker.Mock()
         command.handle(dry_run=False, threshold=50)
 
-        # get_or_create called but created=False so count stays 0
         mock_ec_qs.get_or_create.assert_called_once()

@@ -34,10 +34,8 @@ class TestCommandBase:
         """Tests that configure_commands returns early when app is None."""
         mock_slack_config.app = None
 
-        # Create a mock command subclass
         with patch.object(CommandBase, "get_commands", return_value=[]):
             result = CommandBase.configure_commands()
-            # Should return early, so get_commands should not be called
             assert result is None
 
     def test_command_name_property(self, command_instance):
@@ -96,13 +94,11 @@ class TestCommandBase:
 
         ack.assert_called_once()
         mock_logger.exception.assert_called_once()
-        # Verify retry occurred and eventually succeeded
         assert mock_client.chat_postMessage.call_count == 2
         mock_logger.exception.assert_called_with(
             "Failed to handle command '%s'", command_instance.command_name
         )
 
-        # Verify conversations_open was called in both try and except blocks
         assert mock_client.conversations_open.call_count == 2
 
     def test_handler_render_blocks_exception(
@@ -116,7 +112,6 @@ class TestCommandBase:
         mock_client.conversations_open.return_value = {"channel": {"id": "D123XYZ"}}
         mock_client.chat_postMessage.return_value = {"ok": True}
 
-        # Make render_blocks raise an exception
         mocker.patch.object(
             command_instance, "render_blocks", side_effect=Exception("Render error")
         )
@@ -125,7 +120,6 @@ class TestCommandBase:
 
         ack.assert_called_once()
         mock_logger.exception.assert_called_once()
-        # Verify error message was sent
         mock_client.chat_postMessage.assert_called_once()
         call_kwargs = mock_client.chat_postMessage.call_args[1]
         assert ":warning:" in call_kwargs["blocks"][0]["text"]["text"]

@@ -507,7 +507,6 @@ class TestGithubSyncUserCommand:
         )
         mock_gh.search_commits.return_value = MockPaginatedList([mock_commit_obj])
 
-        # PR search fails (lines 136-137)
         mock_gh.search_issues.side_effect = [
             GithubException(500, "Server Error"),
             MockPaginatedList([]),
@@ -515,7 +514,6 @@ class TestGithubSyncUserCommand:
 
         command.populate_first_contribution_only("testuser", MagicMock(spec=User), mock_gh)
 
-        # Commit should be chosen as earliest
         expected_date = datetime(2025, 1, 15, tzinfo=UTC)
         assert mock_profile.first_contribution_at == expected_date
         mock_logger.warning.assert_any_call("Error searching PRs: %s", mock.ANY)

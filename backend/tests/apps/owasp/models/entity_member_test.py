@@ -110,11 +110,9 @@ class TestEntityMemberModel:
             role=EntityMember.Role.LEADER,
         )
 
-        # Mock member property
         mock_member = MagicMock()
         mock_member.login = "test_user"
 
-        # Mock entity property
         mock_entity = MagicMock()
         mock_entity.__str__ = MagicMock(return_value="Test Entity")
 
@@ -139,7 +137,6 @@ class TestEntityMemberModel:
             role=EntityMember.Role.MEMBER,
         )
 
-        # Mock entity property
         mock_entity = MagicMock()
         mock_entity.__str__ = MagicMock(return_value="Test Entity")
 

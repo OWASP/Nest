@@ -19,7 +19,7 @@ class TestProjectHandler:
                     "idx_leaders": ["John Doe", "Jane Smith"],
                     "idx_summary": "This is a test project summary",
                     "idx_url": "https://example.com/project",
-                    "idx_updated_at": "1704067200",  # 2024-01-01
+                    "idx_updated_at": "1704067200",
                 }
             ],
             "nbPages": 2,
@@ -132,7 +132,6 @@ class TestProjectHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        # Should not include metadata when include_metadata is False
         assert "Contributors:" not in blocks[1]["text"]["text"]
         assert "Forks:" not in blocks[1]["text"]["text"]
         assert "Stars:" not in blocks[1]["text"]["text"]
@@ -159,7 +158,6 @@ class TestProjectHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        # Should not include leaders text when empty
         assert "Leaders:" not in blocks[1]["text"]["text"]
 
     def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_project_data):
@@ -169,10 +167,8 @@ class TestProjectHandler:
 
         blocks = get_blocks(page=2, presentation=presentation)
 
-        # Should have actions block with pagination buttons on page 2
         action_blocks = [block for block in blocks if block.get("type") == "actions"]
         assert len(action_blocks) > 0
-        # Verify the pagination block was actually appended
         assert action_blocks[0] in blocks
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_project_data):
@@ -182,7 +178,6 @@ class TestProjectHandler:
 
         blocks = get_blocks(page=1, presentation=presentation)
 
-        # Should not have actions block
         assert not any(block.get("type") == "actions" for block in blocks)
 
     def test_get_blocks_without_timestamps(self, setup_mocks, mock_project_data):
@@ -192,7 +187,6 @@ class TestProjectHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        # Should not include "Updated" text
         assert "Updated" not in blocks[1]["text"]["text"]
 
     def test_get_blocks_with_zero_metadata_values(self, setup_mocks):
@@ -217,7 +211,6 @@ class TestProjectHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        # Should not include zero metadata values
         assert "Contributors:" not in blocks[1]["text"]["text"]
         assert "Forks:" not in blocks[1]["text"]["text"]
         assert "Stars:" not in blocks[1]["text"]["text"]
@@ -228,7 +221,6 @@ class TestProjectHandler:
 
         blocks = get_blocks(search_query="")
 
-        # Should not include search query text
         assert "OWASP projects:" in blocks[0]["text"]["text"]
         assert "Test Project" in blocks[1]["text"]["text"]
 

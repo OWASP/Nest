@@ -43,7 +43,6 @@ class TestMemberSnapshotQuery:
             result = query.member_snapshot(user_login="testuser", start_year=2025)
 
             mock_user_cls.objects.get.assert_called_once_with(login="testuser")
-            # select_related and prefetch_related are called, then filter twice
             mock_queryset.select_related.assert_called_once()
             mock_queryset.prefetch_related.assert_called_once()
             assert mock_queryset.filter.call_count == 2
@@ -137,7 +136,6 @@ class TestMemberSnapshotQuery:
 
             result = query.member_snapshot(user_login="testuser")
 
-            # filter called once for github_user, NOT for start_at__year
             mock_queryset.filter.assert_called_once_with(github_user=mock_user)
             assert result == mock_snapshot
 

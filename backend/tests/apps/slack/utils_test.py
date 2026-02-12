@@ -142,11 +142,11 @@ def test_format_links_for_slack(input_text, expected_output):
                     "elements": [
                         {"type": "button", "text": {"text": "Button 1", "type": "plain_text"}},
                         {"type": "button", "text": {"text": "Button 2", "type": "plain_text"}},
-                        {"type": "overflow", "options": []},  # Non-button element
+                        {"type": "overflow", "options": []},
                     ],
                 }
             ],
-            "Button 1\nButton 2",  # Only buttons are extracted, joined by newline
+            "Button 1\nButton 2",
         ),
         (
             [
@@ -164,7 +164,7 @@ def test_format_links_for_slack(input_text, expected_output):
                     "text": {"type": "mrkdwn", "text": "Markdown header"},
                 }
             ],
-            "",  # Only plain_text headers are extracted
+            "",
         ),
         (
             [
@@ -172,7 +172,7 @@ def test_format_links_for_slack(input_text, expected_output):
                     "type": "header",
                 }
             ],
-            "",  # No text field
+            "",
         ),
         (
             [

@@ -91,7 +91,6 @@ class TestGetUsersBlocks:
         blocks = get_blocks(presentation=presentation)
 
         user_block_text = blocks[1]["text"]["text"]
-        # Should not include metadata when include_metadata is False
         assert "Company:" not in user_block_text
         assert "Location:" not in user_block_text
         assert "Followers:" not in user_block_text
@@ -120,7 +119,6 @@ class TestGetUsersBlocks:
         blocks = get_blocks(presentation=presentation)
 
         user_block_text = blocks[1]["text"]["text"]
-        # Should not include empty fields in metadata
         assert "Company:" not in user_block_text
         assert "Location:" not in user_block_text
         assert "Followers:" not in user_block_text
@@ -156,7 +154,6 @@ class TestGetUsersBlocks:
 
         blocks = get_blocks(presentation=presentation)
 
-        # Should have feedback message
         assert any("Extended search over OWASP community users" in str(block) for block in blocks)
 
     def test_get_blocks_with_pagination_on_page_2(self, mocker, mock_users_data):
@@ -166,10 +163,8 @@ class TestGetUsersBlocks:
 
         blocks = get_blocks(page=2, presentation=presentation)
 
-        # Should have actions block with pagination buttons on page 2
         action_blocks = [block for block in blocks if block.get("type") == "actions"]
         assert len(action_blocks) > 0
-        # Verify the pagination block was actually appended
         assert action_blocks[0] in blocks
 
     def test_get_blocks_no_search_query(self, mocker, mock_users_data):
@@ -178,7 +173,6 @@ class TestGetUsersBlocks:
 
         blocks = get_blocks(search_query="")
 
-        # Should not include search query text
         assert "OWASP users:" in blocks[0]["text"]["text"]
         assert "John Doe" in blocks[1]["text"]["text"]
 

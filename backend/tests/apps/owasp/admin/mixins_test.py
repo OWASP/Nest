@@ -203,11 +203,9 @@ class TestEntityChannelInline:
 
             result = inline.formfield_for_dbfield(mock_db_field, mock_request)
 
-            # Should call parent with unmodified kwargs
             assert result == mock_result
             mock_parent.assert_called_once()
             call_kwargs = mock_parent.call_args[1]
-            # Should not have widget, queryset, or initial in kwargs for other fields
             assert "widget" not in call_kwargs or not isinstance(call_kwargs.get("widget"), type)
 
 

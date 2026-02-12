@@ -59,7 +59,6 @@ class TestStaticSitemap:
         mock_datetime.now.return_value = current_time
 
         with patch("apps.sitemap.views.static.datetime", mock_datetime):
-            # Test with a path that's not in the path_to_model mapping
             item = {"path": "/unknown-path"}
             result = sitemap.lastmod(item)
 

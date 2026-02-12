@@ -101,10 +101,8 @@ class TestChapterHandler:
 
         blocks = get_blocks(page=2, presentation=presentation)
 
-        # Should have actions block with pagination buttons on page 2
         action_blocks = [block for block in blocks if block.get("type") == "actions"]
         assert len(action_blocks) > 0
-        # Verify the pagination block was actually appended
         assert action_blocks[0] in blocks
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_chapter_data):
@@ -114,7 +112,6 @@ class TestChapterHandler:
 
         blocks = get_blocks(page=1, presentation=presentation)
 
-        # Should not have actions block
         assert not any(block.get("type") == "actions" for block in blocks)
 
     def test_get_blocks_with_empty_leaders(self, setup_mocks):
@@ -137,7 +134,6 @@ class TestChapterHandler:
 
         blocks = get_blocks(presentation=presentation)
 
-        # Should not include leaders text when empty list
         assert "Leaders:" not in blocks[1]["text"]["text"]
 
     def test_get_blocks_no_search_query(self, setup_mocks, mock_chapter_data):
@@ -146,7 +142,6 @@ class TestChapterHandler:
 
         blocks = get_blocks(search_query="")
 
-        # Should not include search query text
         assert "OWASP chapters:" in blocks[0]["text"]["text"]
         assert "Test Chapter" in blocks[1]["text"]["text"]
 

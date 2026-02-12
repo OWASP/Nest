@@ -10,7 +10,6 @@ class TestEntityChannelModel:
 
     def test_str_representation(self):
         """Test __str__ method returns correct format."""
-        # Mock the Conversation object
         mock_conversation = MagicMock()
         mock_conversation.name = "test-channel"
         mock_conversation.__str__ = Mock(return_value="test-channel")
@@ -18,11 +17,9 @@ class TestEntityChannelModel:
         channel = EntityChannel()
         channel.platform = "slack"
 
-        # Mock the entity property
         mock_entity = Mock()
         mock_entity.__str__ = Mock(return_value="Test Entity")
 
-        # Use PropertyMock to mock the GenericForeignKey relationships
         with (
             patch.object(
                 type(channel), "channel", new_callable=PropertyMock, return_value=mock_conversation

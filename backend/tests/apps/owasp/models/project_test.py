@@ -495,5 +495,4 @@ class TestProjectProperties:
             project = Project.update_data(gh_repository_mock, repository_mock, save=False)
 
         assert project.key == "test_repo"
-        # Verify save was not called by checking the project doesn't have a pk
         assert project.pk is None
