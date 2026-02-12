@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import type { IconType } from 'react-icons'
+import { twMerge } from 'tailwind-merge'
 import type { Contributor } from 'types/contributor'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
@@ -14,6 +15,8 @@ interface ContributorsListProps {
   maxInitialDisplay?: number
   icon?: IconType
   getUrl: (login: string) => string
+  className?: string
+  gridClassName?: string
 }
 
 const ContributorsList = ({
@@ -22,6 +25,8 @@ const ContributorsList = ({
   maxInitialDisplay = 12,
   icon,
   getUrl,
+  className,
+  gridClassName,
 }: ContributorsListProps) => {
   const [showAllContributors, setShowAllContributors] = useState(false)
 
@@ -43,8 +48,15 @@ const ContributorsList = ({
           <AnchorTitle title={label} />
         </div>
       }
+      className={className}
     >
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+      <div
+        className={twMerge(
+          'grid gap-4',
+          !gridClassName && 'sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4',
+          gridClassName
+        )}
+      >
         {displayContributors.map((item) => (
           <div
             key={item.login}

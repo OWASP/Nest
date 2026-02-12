@@ -18,7 +18,7 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generated'
 import { Release as ReleaseType } from 'types/release'
 import AnchorTitle from 'components/AnchorTitle'
-import CommunityContributorsList from 'components/CommunityContributorsList'
+import ContributorsList from 'components/ContributorsList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Release from 'components/Release'
 import SecondaryCard from 'components/SecondaryCard'
@@ -216,13 +216,14 @@ const CommunityPage = () => {
 
           {/* Sidebar: Top Contributors (Spotlight Removed) */}
           <div className="md:col-span-1">
-            <CommunityContributorsList
+            <ContributorsList
               contributors={data?.topContributors || []}
               icon={HiUserGroup}
               maxInitialDisplay={10}
               title="Top Contributors"
               getUrl={(login: string) => `/members/${login}`}
               className="!mb-0 h-full"
+              gridClassName="grid-cols-1 gap-4"
             />
           </div>
         </div>
@@ -231,7 +232,7 @@ const CommunityPage = () => {
         <div className="border-t border-gray-200 pt-5 text-center dark:border-gray-800">
           <p className="mb-1 text-gray-500">Want to get more involved?</p>
           <div className="flex justify-center gap-2 text-sm font-medium text-gray-500">
-            <Link href="https://github.com/owasp" className="hover:text-blue-500 hover:underline">
+            <Link href="https://github.com/owasp" className="hover:text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
               Github
             </Link>
             <span>&middot;</span>
