@@ -376,6 +376,7 @@ class TestRetriever:
 
             result = retriever.get_additional_context(content_object)
 
+            assert result["ts"] == "1234567891.123456"
             for key in ["channel", "thread_ts", "user"]:
                 assert result.get(key) is None
 

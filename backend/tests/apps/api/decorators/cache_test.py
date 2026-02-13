@@ -138,9 +138,7 @@ class TestCacheResponse:
         mock_cache.get.assert_called_once()
         cache_key = mock_cache.get.call_args[0][0]
         assert cache_key.startswith("test_prefix:")
-        mock_cache.set.assert_called_once_with(
-            cache_key, response, timeout=300
-        )
+        mock_cache.set.assert_called_once_with(cache_key, response, timeout=300)
 
     @patch("apps.api.decorators.cache.cache")
     def test_cache_response_with_custom_prefix(self, mock_cache, mock_request):
