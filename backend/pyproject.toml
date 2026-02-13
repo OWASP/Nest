@@ -146,7 +146,6 @@ run.branch = true
 run.omit = [
   "**/admin.py",
   "**/apps.py",
-  "**/mentorship/*", # TODO: work in progress
   "**/migrations/*",
   "__init__.py",
   "manage.py",
