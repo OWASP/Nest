@@ -10,6 +10,8 @@ class Label(BulkSaveModel, NodeModel, TimestampedModel):
     """Label model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "github_labels"
         verbose_name_plural = "Labels"
 

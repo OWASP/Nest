@@ -37,7 +37,7 @@ const OrganizationPage = () => {
 
     return (
       <UserCard
-        avatar={organization.avatarUrl}
+        avatar={organization.avatarUrl ?? ''}
         button={submitButton}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={organization.company || ''}

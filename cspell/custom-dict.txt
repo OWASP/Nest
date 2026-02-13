@@ -12,6 +12,7 @@ CISSP
 Cañón
 DRF
 ELEVENLABS
+Emay
 FOSS
 GBP
 GFKs
@@ -22,6 +23,8 @@ Golovanova
 Hackbright
 Héllo
 Illia
+Ime
+Iyonsi
 Kateryna
 Kerlyn
 Keshav
@@ -71,6 +74,7 @@ bangbang
 boardofdirectors
 bsky
 carryforward
+cdx
 certbot
 collectstatic
 coraza
@@ -79,6 +83,7 @@ csrfguard
 csrfprotector
 csrftoken
 cva
+cyclonedx
 defectdojo
 demojize
 dismissable
@@ -164,6 +169,7 @@ rsc
 saft
 sakanashi
 samm
+sbom
 schemathesis
 semgrep
 seo
