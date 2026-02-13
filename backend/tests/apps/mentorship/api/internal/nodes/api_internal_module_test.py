@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import strawberry
 
+from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -228,7 +229,7 @@ def test_module_node_issue_by_number(mock_module_node):
     assert issue is not None
     mock_module_node.issues.select_related.assert_called_once_with("repository", "author")
     mock_module_node.issues.select_related.return_value.prefetch_related.assert_called_once_with(
-        "assignees", "labels"
+        "assignees", "labels", MERGED_PULL_REQUESTS_PREFETCH
     )
     mock_module_node_qs_related = mock_module_node.issues.select_related.return_value
     mock_module_node_qs_related.prefetch_related.return_value.filter.assert_called_once_with(
