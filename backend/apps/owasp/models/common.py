@@ -30,6 +30,8 @@ class RepositoryBasedEntityModel(models.Model):
     """Repository based entity model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     name = models.CharField(verbose_name="Name", max_length=100)

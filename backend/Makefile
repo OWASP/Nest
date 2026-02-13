@@ -11,6 +11,8 @@ else
 SHELL := /bin/bash
 endif
 
+.PHONY: sbom-backend-image
+
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
 		--no-cache \
@@ -191,6 +193,24 @@ security-scan-backend-image:
 	    -v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 	    $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 	    image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
+
+SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
+
+sbom-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
+	@echo "Generating SBOM for image: $(BACKEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		-v $(CURDIR):/work \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--format cyclonedx \
+		--output /work/backend-sbom-$(SBOM_VERSION).cdx.json \
+		$(BACKEND_IMAGE_NAME)
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it

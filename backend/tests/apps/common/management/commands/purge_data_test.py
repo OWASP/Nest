@@ -22,8 +22,7 @@ from apps.common.management.commands.purge_data import Command
 class TestPurgeDataCommand:
     @patch("apps.common.management.commands.purge_data.apps.get_app_config")
     @patch("apps.common.management.commands.purge_data.connection.cursor")
-    @patch("builtins.print")
-    def test_handle(self, mock_print, mock_cursor, mock_get_app_config, nest_apps, mock_models):
+    def test_handle(self, mock_cursor, mock_get_app_config, nest_apps, mock_models):
         mock_cursor.return_value.__enter__.return_value = MagicMock()
         cursor_instance = mock_cursor.return_value.__enter__.return_value
 
@@ -44,6 +43,7 @@ class TestPurgeDataCommand:
         mock_get_app_config.side_effect = get_app_config_side_effect
 
         command = Command()
+        command.stdout = MagicMock()
         command.handle()
 
         for app_name in nest_apps:
@@ -53,4 +53,4 @@ class TestPurgeDataCommand:
                     sql.Identifier(table_name)
                 )
                 cursor_instance.execute.assert_any_call(expected_query)
-                mock_print.assert_any_call(f"Purged {app_name}.{model_name}")
+                command.stdout.write.assert_any_call(f"Purged {app_name}.{model_name}")
