@@ -70,7 +70,7 @@ class TestChapterResolution:
         assert result == []
 
     def test_recent_chapters_with_valid_limit(self, mock_info):
-        """Test recent_chapters with valid limit returns chapters (line 31)."""
+        """Test recent_chapters with valid limit returns chapters."""
         mock_chapters = [Mock(), Mock()]
         query = ChapterQuery()
         with patch.object(Chapter, "active_chapters") as mock_active:

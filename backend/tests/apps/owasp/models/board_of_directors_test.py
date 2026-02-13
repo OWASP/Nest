@@ -16,7 +16,7 @@ class TestBoardOfDirectorsModel:
     def test_year_field_unique(self):
         field = BoardOfDirectors._meta.get_field("year")
 
-        assert field.unique is True
+        assert field.unique
 
     def test_has_timestamp_fields(self):
         assert hasattr(BoardOfDirectors, "created_at")
@@ -59,8 +59,8 @@ class TestBoardOfDirectorsModel:
         assert call_kwargs["entity_type"] == mock_ct
         assert call_kwargs["entity_id"] == 1
         assert call_kwargs["role"] == mock_entity_member.Role.CANDIDATE
-        assert call_kwargs["is_active"] is True
-        assert call_kwargs["is_reviewed"] is True
+        assert call_kwargs["is_active"]
+        assert call_kwargs["is_reviewed"]
         mock_entity_member.objects.filter.return_value.order_by.assert_called_once_with(
             "member_name"
         )
@@ -85,8 +85,8 @@ class TestBoardOfDirectorsModel:
         assert call_kwargs["entity_type"] == mock_ct
         assert call_kwargs["entity_id"] == 1
         assert call_kwargs["role"] == mock_entity_member.Role.MEMBER
-        assert call_kwargs["is_active"] is True
-        assert call_kwargs["is_reviewed"] is True
+        assert call_kwargs["is_active"]
+        assert call_kwargs["is_reviewed"]
         mock_entity_member.objects.filter.return_value.order_by.assert_called_once_with(
             "member_name"
         )

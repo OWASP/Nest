@@ -47,7 +47,7 @@ class TestGenericEntityNode:
         assert math.isclose(result, 1234567890.0)
 
     def test_top_contributors_resolver(self):
-        """Test top_contributors returns list of RepositoryContributorNodes (line 32)."""
+        """Test top_contributors returns list of RepositoryContributorNodes."""
         mock_entity = Mock()
         mock_entity.idx_top_contributors = [
             {

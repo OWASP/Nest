@@ -16,7 +16,7 @@ class TestIsAuthenticated:
         info = MagicMock()
         info.context.request.user.is_authenticated = True
 
-        assert permission.has_permission(None, info) is True
+        assert permission.has_permission(None, info)
 
     def test_has_permission_unauthenticated_user(self):
         """Test has_permission returns False for unauthenticated users."""
@@ -24,7 +24,7 @@ class TestIsAuthenticated:
         info = MagicMock()
         info.context.request.user.is_authenticated = False
 
-        assert permission.has_permission(None, info) is False
+        assert not permission.has_permission(None, info)
 
     def test_on_unauthorized(self):
         """Test on_unauthorized returns GraphQLError."""

@@ -150,7 +150,7 @@ class TestUserModel:
             mock_save.assert_not_called()
         else:
             if "is_staff" in update_kwargs:
-                assert result.is_staff is True
+                assert result.is_staff
             if expect_save:
                 mock_save.assert_called_once()
             else:

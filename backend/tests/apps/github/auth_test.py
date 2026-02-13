@@ -25,7 +25,7 @@ class TestGitHubAppAuth:
             assert auth.app_id == "12345"
             assert auth.private_key == "test-key"
             assert auth.app_installation_id == "67890"
-            assert auth._is_app_configured() is True
+            assert auth._is_app_configured()
 
     def test_init_with_pat_fallback(self):
         """Test initialization with PAT fallback."""
@@ -37,7 +37,7 @@ class TestGitHubAppAuth:
             mock_settings.GITHUB_APP_INSTALLATION_ID = None
             auth = GitHubAppAuth()
             assert auth.pat_token == "test-pat"  # noqa: S105
-            assert auth._is_app_configured() is False
+            assert not auth._is_app_configured()
 
     def test_init_with_no_config(self):
         """Test initialization with no configuration."""

@@ -59,5 +59,5 @@ class TestUserModel:
             assert mock_api_keys.filter.called
             call_kwargs = mock_api_keys.filter.call_args[1]
             assert "expires_at__gte" in call_kwargs
-            assert call_kwargs["is_revoked"] is False
+            assert not call_kwargs["is_revoked"]
             assert result == mock_filter_result

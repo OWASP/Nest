@@ -111,7 +111,7 @@ class TestMemberSnapshotQuery:
             assert result == []
 
     def test_member_snapshot_without_start_year(self):
-        """Test member_snapshot without start_year skips year filter (branch 41->44)."""
+        """Test member_snapshot without start_year skips year filter."""
         query = MemberSnapshotQuery()
 
         mock_user = Mock()
@@ -140,7 +140,7 @@ class TestMemberSnapshotQuery:
             assert result == mock_snapshot
 
     def test_member_snapshots_with_invalid_limit(self):
-        """Test member_snapshots with invalid limit returns empty list (line 72)."""
+        """Test member_snapshots with invalid limit returns empty list."""
         query = MemberSnapshotQuery()
 
         with patch(

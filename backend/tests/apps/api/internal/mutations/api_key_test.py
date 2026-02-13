@@ -150,11 +150,17 @@ class TestApiKeyMutations:
         result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
 
         assert isinstance(result, CreateApiKeyResult)
-        assert not result.ok
-        assert result.code == "INVALID_NAME"
-        assert result.message == "Name is required"
-        assert result.api_key is None
-        assert result.raw_key is None
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_NAME",
+            "message": "Name is required",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for key, value in expected.items():
+            assert getattr(result, key) == value
 
     def test_create_api_key_whitespace_only_name(self, api_key_mutations):
         """Test creating an API key with whitespace-only name."""
@@ -165,11 +171,17 @@ class TestApiKeyMutations:
         result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
 
         assert isinstance(result, CreateApiKeyResult)
-        assert not result.ok
-        assert result.code == "INVALID_NAME"
-        assert result.message == "Name is required"
-        assert result.api_key is None
-        assert result.raw_key is None
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_NAME",
+            "message": "Name is required",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for field, value in expected.items():
+            assert getattr(result, field) == value
 
     def test_create_api_key_name_too_long(self, api_key_mutations):
         """Test creating an API key with name exceeding maximum length."""
@@ -180,11 +192,17 @@ class TestApiKeyMutations:
         result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
 
         assert isinstance(result, CreateApiKeyResult)
-        assert not result.ok
-        assert result.code == "INVALID_NAME"
-        assert result.message == "Name too long"
-        assert result.api_key is None
-        assert result.raw_key is None
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_NAME",
+            "message": "Name too long",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for field, value in expected.items():
+            assert getattr(result, field) == value
 
     def test_create_api_key_expires_in_past(self, api_key_mutations):
         """Test creating an API key with expiry date in the past."""
@@ -195,8 +213,14 @@ class TestApiKeyMutations:
         result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
 
         assert isinstance(result, CreateApiKeyResult)
-        assert not result.ok
-        assert result.code == "INVALID_DATE"
-        assert result.message == "Expiry date must be in future"
-        assert result.api_key is None
-        assert result.raw_key is None
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_DATE",
+            "message": "Expiry date must be in future",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for field, value in expected.items():
+            assert getattr(result, field) == value

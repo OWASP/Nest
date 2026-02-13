@@ -104,12 +104,10 @@ class TestOrganizationModel:
         assert first_result == {"org1", "org2"}
 
         mock_values_list.return_value = ["org1", "org2", "org3"]
-        # Without cache_clear, should still return cached result
         cached_result = Organization.get_logins()
         assert cached_result == {"org1", "org2"}
         assert mock_values_list.call_count == 1
 
-        # After cache_clear, should fetch fresh data
         Organization.get_logins.cache_clear()
         fresh_result = Organization.get_logins()
         assert fresh_result == {"org1", "org2", "org3"}

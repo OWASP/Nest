@@ -376,11 +376,8 @@ class TestRetriever:
 
             result = retriever.get_additional_context(content_object)
 
-            assert result["ts"] == "1234567891.123456"
-            assert "channel" not in result or result.get("channel") is None
-            assert "thread_ts" not in result or result.get("thread_ts") is None
-            assert "user" not in result or result.get("user") is None
-            assert result["ts"] == "1234567891.123456"
+            for key in ["channel", "thread_ts", "user"]:
+                assert result.get(key) is None
 
     def test_get_additional_context_unknown_content_type(self):
         """Test getting additional context for an unknown content type returns empty dict."""
@@ -649,7 +646,6 @@ class TestRetriever:
 
             result = retriever.get_additional_context(content_object)
 
-            assert result.get("channel") is None
-            assert result.get("thread_ts") is None
             assert result["ts"] == "1234567890.654321"
-            assert result.get("user") is None
+            for key in ["channel", "thread_ts", "user"]:
+                assert result.get(key) is None

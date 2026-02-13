@@ -106,7 +106,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
 
         field = self._get_field_by_name("is_merged", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)
-        assert result is True
+        assert result
 
     def test_is_merged_false(self):
         """Test is_merged field when issue has no merged pull requests."""
@@ -115,7 +115,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
 
         field = self._get_field_by_name("is_merged", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)
-        assert result is False
+        assert not result
 
     def test_interested_users(self):
         """Test interested_users field returns list of users."""

@@ -32,7 +32,7 @@ class TestIsMentor:
         is_mentor = api_mentorship_queries.is_mentor
         result = is_mentor(login="testuser")
 
-        assert result is True
+        assert result
         mock_github_user_get.assert_called_once_with(login="testuser")
         mock_mentor_filter.assert_called_once()
         mock_mentor_filter.return_value.exists.assert_called_once()
@@ -52,7 +52,7 @@ class TestIsMentor:
         is_mentor = api_mentorship_queries.is_mentor
         result = is_mentor(login="testuser")
 
-        assert result is False
+        assert not result
         mock_github_user_get.assert_called_once_with(login="testuser")
         mock_mentor_filter.assert_called_once()
         mock_mentor_filter.return_value.exists.assert_called_once()
@@ -67,7 +67,7 @@ class TestIsMentor:
         is_mentor = api_mentorship_queries.is_mentor
         result = is_mentor(login="non_existent_user")
 
-        assert result is False
+        assert not result
         mock_github_user_get.assert_called_once_with(login="non_existent_user")
 
     @pytest.mark.parametrize("login", ["", "   ", None])
@@ -76,7 +76,7 @@ class TestIsMentor:
         is_mentor = api_mentorship_queries.is_mentor
         result = is_mentor(login=login)
 
-        assert result is False
+        assert not result
 
 
 class TestGetMenteeDetails:

@@ -498,7 +498,7 @@ class TestGithubSyncUserCommand:
     def test_populate_first_contribution_pr_search_error(
         self, mock_logger, command, mock_member_profile, mock_owasp_org, mock_gh
     ):
-        """Test that PR search errors are handled gracefully - covers lines 136-137."""
+        """Test that PR search errors are handled gracefully."""
         mock_profile = MagicMock(spec=MemberProfile, first_contribution_at=None)
         mock_member_profile.get_or_create.return_value = (mock_profile, True)
 
@@ -522,7 +522,7 @@ class TestGithubSyncUserCommand:
     def test_populate_first_contribution_issue_search_error(
         self, mock_logger, command, mock_member_profile, mock_owasp_org, mock_gh
     ):
-        """Test that issue search errors are handled gracefully - covers lines 152-153."""
+        """Test that issue search errors are handled gracefully."""
         mock_profile = MagicMock(spec=MemberProfile, first_contribution_at=None)
         mock_member_profile.get_or_create.return_value = (mock_profile, True)
 
@@ -557,7 +557,7 @@ class TestGithubSyncUserCommand:
         mock_gh,
         default_options,
     ):
-        """Test handling commits where gh_commit.committer is None - covers line 291->295."""
+        """Test handling commits where gh_commit.committer is None."""
         (
             mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
         ) = True
@@ -595,7 +595,7 @@ class TestGithubSyncUserCommand:
         mock_gh,
         default_options,
     ):
-        """Test PR skipped when repository not in cache - covers lines 332-335."""
+        """Test PR skipped when repository not in cache."""
         (
             mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
         ) = True
@@ -633,7 +633,7 @@ class TestGithubSyncUserCommand:
         mock_gh,
         default_options,
     ):
-        """Test PR fetch error handling - covers lines 343-350, 368-370."""
+        """Test PR fetch error handling."""
         (
             mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
         ) = True
@@ -677,7 +677,7 @@ class TestGithubSyncUserCommand:
         mock_gh,
         default_options,
     ):
-        """Test issue skipped when repository not in cache - covers lines 388-391."""
+        """Test issue skipped when repository not in cache."""
         (
             mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
         ) = True
@@ -713,7 +713,7 @@ class TestGithubSyncUserCommand:
         mock_gh,
         default_options,
     ):
-        """Test handling GithubException during PR search - covers lines 409-411."""
+        """Test handling GithubException during PR search."""
         (
             mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
         ) = True
@@ -746,7 +746,7 @@ class TestGithubSyncUserCommand:
         mock_gh,
         default_options,
     ):
-        """Test handling GithubException during issue search - covers second exception block."""
+        """Test handling GithubException during issue search."""
         (
             mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
         ) = True
@@ -779,7 +779,7 @@ class TestGithubSyncUserCommand:
         mock_gh,
         default_options,
     ):
-        """Test commit committer reference update - covers lines 419->418, 434."""
+        """Test commit committer reference update."""
         (
             mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
         ) = True

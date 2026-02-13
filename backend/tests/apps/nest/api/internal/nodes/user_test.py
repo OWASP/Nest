@@ -33,7 +33,7 @@ class TestGitHubAuthResult:
             "is_owasp_staff"
         ).base_resolver.wrapped_func
         result = raw_func(node)
-        assert result is False
+        assert not result
 
     def test_is_owasp_staff_with_github_user_true(self):
         """Test is_owasp_staff returns True when github_user.is_owasp_staff is True."""

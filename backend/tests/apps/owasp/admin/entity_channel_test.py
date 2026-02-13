@@ -88,7 +88,7 @@ class TestEntityChannelAdmin:
         assert result == "-"
 
     def test_channel_search_display_non_conversation_model(self, admin_instance):
-        """Test channel_search_display for non-conversation model (branch 87->92)."""
+        """Test channel_search_display for non-conversation model."""
         mock_channel_type = MagicMock()
         mock_channel_type.model = "other_model"
 

@@ -245,7 +245,7 @@ class TestGitHubGetInstallationId(SimpleTestCase):
     @mock.patch("apps.github.management.commands.github_get_installation_id.GithubIntegration")
     @mock.patch("apps.github.management.commands.github_get_installation_id.Auth.AppAuth")
     def test_get_installation_id_no_account(self, mock_app_auth, mock_github_integration):
-        """Test installation without account attribute (branch 104->108)."""
+        """Test installation without account attribute."""
         mock_installation = mock.MagicMock(spec=["id"])
         mock_installation.id = 99999
 

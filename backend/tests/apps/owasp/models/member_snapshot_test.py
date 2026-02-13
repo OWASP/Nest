@@ -42,7 +42,7 @@ class TestMemberSnapshotModel:
         field = MemberSnapshot._meta.get_field("contribution_heatmap_data")
 
         assert field.get_internal_type() == "JSONField"
-        assert field.blank is True
+        assert field.blank
         assert callable(field.default)
 
     def test_has_m2m_fields(self):
@@ -75,53 +75,53 @@ class TestMemberSnapshotModel:
     def test_m2m_field_configuration(self):
         commits_field = MemberSnapshot._meta.get_field("commits")
         assert commits_field.remote_field.related_name == "member_snapshots"
-        assert commits_field.blank is True
+        assert commits_field.blank
 
         prs_field = MemberSnapshot._meta.get_field("pull_requests")
         assert prs_field.remote_field.related_name == "member_snapshots"
-        assert prs_field.blank is True
+        assert prs_field.blank
 
         issues_field = MemberSnapshot._meta.get_field("issues")
         assert issues_field.remote_field.related_name == "member_snapshots"
-        assert issues_field.blank is True
+        assert issues_field.blank
 
         messages_field = MemberSnapshot._meta.get_field("messages")
         assert messages_field.remote_field.related_name == "member_snapshots"
-        assert messages_field.blank is True
+        assert messages_field.blank
 
     def test_has_communication_heatmap_data_field(self):
         field = MemberSnapshot._meta.get_field("communication_heatmap_data")
 
         assert field.get_internal_type() == "JSONField"
-        assert field.blank is True
+        assert field.blank
         assert callable(field.default)
 
     def test_has_channel_communications_field(self):
         field = MemberSnapshot._meta.get_field("channel_communications")
 
         assert field.get_internal_type() == "JSONField"
-        assert field.blank is True
+        assert field.blank
         assert callable(field.default)
 
     def test_has_chapter_contributions_field(self):
         field = MemberSnapshot._meta.get_field("chapter_contributions")
 
         assert field.get_internal_type() == "JSONField"
-        assert field.blank is True
+        assert field.blank
         assert callable(field.default)
 
     def test_has_project_contributions_field(self):
         field = MemberSnapshot._meta.get_field("project_contributions")
 
         assert field.get_internal_type() == "JSONField"
-        assert field.blank is True
+        assert field.blank
         assert callable(field.default)
 
     def test_has_repository_contributions_field(self):
         field = MemberSnapshot._meta.get_field("repository_contributions")
 
         assert field.get_internal_type() == "JSONField"
-        assert field.blank is True
+        assert field.blank
         assert callable(field.default)
 
     def test_commits_count_property(self):

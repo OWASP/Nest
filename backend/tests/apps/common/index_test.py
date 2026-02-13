@@ -163,7 +163,7 @@ class TestIndexBase:
                 )
 
     def test_configure_replicas_empty_indexable_replicas(self):
-        """Test configure_replicas when all replicas are not indexable (empty dict)."""
+        """Test configure_replicas when all replicas are non-indexable."""
         replicas = {"replica1": ["asc"], "replica2": ["desc"]}
         index_name = "index_name"
         is_local = False

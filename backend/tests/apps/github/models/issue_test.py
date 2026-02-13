@@ -179,7 +179,7 @@ class TestIssueModel:
         assert issue.comments_count == 0
         assert issue.closed_at is None
         assert issue.created_at is None
-        assert issue.is_locked is False
+        assert not issue.is_locked
         assert issue.lock_reason == ""
         assert issue.number == 0
         assert issue.sequence_id == 0
@@ -220,7 +220,7 @@ class TestIssueModel:
             issue.generate_summary.assert_called_once()
 
     def test_save_method_when_issue_not_open(self, mock_repository):
-        """Test save method when issue is not open (is_open=False)."""
+        """Test save method when issue is not open."""
         issue = Issue(repository=mock_repository, state=Issue.State.CLOSED)
         issue.generate_hint = Mock()
         issue.generate_summary = Mock()

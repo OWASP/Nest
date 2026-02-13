@@ -226,7 +226,7 @@ class TestQueryParser:
         assert cs_result[0]["value"] == "OWASP"
 
     def test_query_parser_error_str_with_query_and_field(self):
-        """Test QueryParserError __str__ method with query and field set."""
+        """Test QueryParserError string output with query and field."""
         error = QueryParserError(
             message="Test error",
             error_type="TEST_ERROR",
@@ -250,7 +250,7 @@ class TestQueryParser:
 
         error_dict = error.to_dict()
         assert error_dict["error_type"] == "TEST_ERROR"
-        assert error_dict["error"] is True
+        assert error_dict["error"]
         assert error_dict["field"] == "test_field"
         assert error_dict["message"] == "Test error"
         assert error_dict["query"] == "test query"
@@ -299,7 +299,7 @@ class TestQueryParser:
 
         error_dict = error.to_dict()
         assert error_dict["error_type"] == "TEST_ERROR"
-        assert error_dict["error"] is True
+        assert error_dict["error"]
         assert error_dict.get("field") == ""
         assert error_dict["message"] == "Test error"
         assert error_dict.get("query") == ""
@@ -343,7 +343,7 @@ class TestQueryParser:
         assert result[0]["field"] == "author"
 
     def test_to_dict_non_strict_mode_returns_none_on_error(self):
-        """Test to_dict returns None on error in non-strict mode - covers lines 231-239."""
+        """Test to_dict returns None on error in non-strict mode."""
         result = self.parser.parse("created:invalid_date")
         assert result == []
 
@@ -361,14 +361,14 @@ class TestQueryParser:
             assert "Failed to tokenize query" in e.value.message
 
     def test_parse_skips_empty_tokens(self):
-        """Test that empty tokens are skipped during parsing (line 180)."""
+        """Test that empty tokens are skipped during parsing."""
         with patch.object(QueryParser, "_split_tokens", return_value=["", '""', "author:test"]):
             result = self.parser.parse("dummy")
             assert len(result) == 1
             assert result[0]["field"] == "author"
 
     def test_to_dict_unmatched_field_type(self):
-        """Test to_dict when field type doesn't match any case (branch 231->239)."""
+        """Test to_dict when field type doesn't match any case."""
         mock_field_type = MagicMock(spec=FieldType)
         mock_field_type.value = "unknown"
 

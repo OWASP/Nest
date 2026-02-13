@@ -47,7 +47,7 @@ class TestHasDashboardAccess:
         info = Mock()
         result = permission.has_permission(source=None, info=info)
 
-        assert result is True
+        assert result
 
     def test_permission_in_fuzz_environment(self, permission, settings):
         """Test permission is granted in Fuzz environment."""
@@ -58,7 +58,7 @@ class TestHasDashboardAccess:
         info = Mock()
         result = permission.has_permission(source=None, info=info)
 
-        assert result is True
+        assert result
 
     def test_permission_in_staging_environment(self, permission, settings):
         """Test permission is granted in Staging environment."""
@@ -69,7 +69,7 @@ class TestHasDashboardAccess:
         info = Mock()
         result = permission.has_permission(source=None, info=info)
 
-        assert result is True
+        assert result
 
     def test_permission_with_authenticated_staff(
         self, permission, settings, mock_info_with_authenticated_staff
@@ -81,7 +81,7 @@ class TestHasDashboardAccess:
 
         result = permission.has_permission(source=None, info=mock_info_with_authenticated_staff)
 
-        assert result is True
+        assert result
 
     def test_permission_with_authenticated_non_staff(
         self, permission, settings, mock_info_with_authenticated_non_staff
@@ -95,7 +95,7 @@ class TestHasDashboardAccess:
             source=None, info=mock_info_with_authenticated_non_staff
         )
 
-        assert result is False
+        assert not result
 
     def test_permission_with_unauthenticated_user(
         self, permission, settings, mock_info_with_unauthenticated_user
@@ -107,7 +107,7 @@ class TestHasDashboardAccess:
 
         result = permission.has_permission(source=None, info=mock_info_with_unauthenticated_user)
 
-        assert result is False
+        assert not result
 
     def test_permission_message(self, permission):
         """Test permission has correct message."""

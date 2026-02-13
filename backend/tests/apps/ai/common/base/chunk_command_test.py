@@ -251,7 +251,7 @@ class TestBaseChunkCommand:
             assert set(kwargs["chunk_texts"]) == {"chunk1", "chunk2", "chunk3"}
             assert kwargs["context"] == mock_context
             assert kwargs["openai_client"] == command.openai_client
-            assert kwargs["save"] is False
+            assert not kwargs["save"]
             mock_bulk_save.assert_called_once_with(mock_chunks)
             mock_write.assert_has_calls(
                 [
@@ -490,7 +490,7 @@ class TestBaseChunkCommand:
             assert set(kwargs["chunk_texts"]) == {"chunk1", "chunk2", "chunk3"}
             assert kwargs["context"] == mock_context
             assert kwargs["openai_client"] == command.openai_client
-            assert kwargs["save"] is False
+            assert not kwargs["save"]
             mock_bulk_save.assert_called_once_with(mock_chunks)
 
     def test_process_chunks_batch_whitespace_only_content(

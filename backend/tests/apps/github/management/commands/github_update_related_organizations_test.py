@@ -15,7 +15,7 @@ def command():
 
 
 def test_add_arguments(command):
-    """Test that the command's arguments are correctly added (line 27)."""
+    """Test that the command's arguments are correctly added."""
     parser = mock.Mock()
     command.add_arguments(parser)
     parser.add_argument.assert_called_once_with(

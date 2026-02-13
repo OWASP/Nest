@@ -237,7 +237,7 @@ class TestQuestionDetector:
                 "What is OWASP?", sample_context_chunks
             )
 
-            assert result is True
+            assert result
 
     def test_is_owasp_question_with_openai_success_no(self, sample_context_chunks):
         """Test OpenAI question detection with NO response."""
@@ -261,7 +261,7 @@ class TestQuestionDetector:
                 "What is Python?", sample_context_chunks
             )
 
-            assert result is False
+            assert not result
 
     def test_is_owasp_question_with_openai_empty_response(self, sample_context_chunks):
         """Test OpenAI question detection with empty response."""
@@ -378,7 +378,7 @@ class TestQuestionDetector:
                 "What is OWASP?", sample_context_chunks
             )
 
-            assert result is True
+            assert result
 
     def test_is_owasp_question_with_openai_no_in_response(self, sample_context_chunks):
         """Test OpenAI question detection with 'no' in response."""
@@ -402,7 +402,7 @@ class TestQuestionDetector:
                 "What is Python?", sample_context_chunks
             )
 
-            assert result is False
+            assert not result
 
     def test_format_context_chunks(self, detector, sample_context_chunks):
         """Test formatting of context chunks."""
@@ -458,4 +458,4 @@ class TestQuestionDetector:
             result = detector.is_owasp_question("What is OWASP?")
 
             mock_logger.warning.assert_called_with("OpenAI detection failed.")
-            assert result is False
+            assert not result

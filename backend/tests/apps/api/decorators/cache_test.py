@@ -116,9 +116,7 @@ class TestCacheResponse:
         view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
         decorated_view = cache_response(ttl=60)(view_func)
 
-        response = decorated_view(mock_request)
-
-        assert response.status_code == HTTPStatus.OK
+        assert decorated_view(mock_request).status_code == HTTPStatus.OK
         mock_cache.get.assert_called_once()
         mock_cache.set.assert_called_once()
 
@@ -136,12 +134,13 @@ class TestCacheResponse:
         decorated_view = cache_response()(view_func)
 
         response = decorated_view(mock_request)
-
         assert response.status_code == HTTPStatus.OK
         mock_cache.get.assert_called_once()
         cache_key = mock_cache.get.call_args[0][0]
         assert cache_key.startswith("test_prefix:")
-        mock_cache.set.assert_called_once_with(cache_key, response, timeout=300)
+        mock_cache.set.assert_called_once_with(
+            cache_key, response, timeout=300
+        )
 
     @patch("apps.api.decorators.cache.cache")
     def test_cache_response_with_custom_prefix(self, mock_cache, mock_request):
@@ -150,9 +149,7 @@ class TestCacheResponse:
         view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
         decorated_view = cache_response(ttl=60, prefix="custom_prefix")(view_func)
 
-        response = decorated_view(mock_request)
-
-        assert response.status_code == HTTPStatus.OK
+        assert decorated_view(mock_request).status_code == HTTPStatus.OK
 
         cache_key_call = mock_cache.get.call_args[0][0]
         assert cache_key_call.startswith("custom_prefix:")

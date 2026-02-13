@@ -245,7 +245,7 @@ def test_handle_unknown_object_exception_non_404(
     command,
     mock_project,
 ):
-    """Test handling of a non-404 UnknownObjectException falls through (branch 58->64)."""
+    """Test handling of a non-404 UnknownObjectException falls through."""
     mock_projects_list = [mock_project]
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
     mock_active_projects.count.return_value = len(mock_projects_list)
@@ -287,7 +287,7 @@ def test_handle_sync_repository_returns_none_organization(
     command,
     mock_project,
 ):
-    """Test sync_repository returning None organization (branch 66->69)."""
+    """Test sync_repository returning None organization."""
     mock_projects_list = [mock_project]
     mock_active_projects.__iter__.return_value = iter(mock_projects_list)
     mock_active_projects.count.return_value = len(mock_projects_list)
