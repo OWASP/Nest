@@ -1,38 +1,46 @@
 import { sendGAEvent } from '@next/third-parties/google'
 import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
-import type React from 'react'
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { FaTimes, FaSearch } from 'react-icons/fa'
-import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
-import { SiAlgolia } from 'react-icons/si'
+import {
+  FaUser,
+  FaCalendar,
+  FaFolder,
+  FaBuilding,
+  FaLocationDot,
+} from 'react-icons/fa6'
+
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { MultiSearchBarProps, Suggestion } from 'types/search'
 import type { User } from 'types/user'
+
 import { SEARCH_DEBOUNCE_DELAY_MS } from 'utils/constants'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 
+type HitMeta = {
+  key?: string
+  login?: string
+  url?: string
+  name?: string
+}
+
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
-  isLoaded,
   placeholder,
   indexes,
   initialValue = '',
-  eventData,
 }) => {
+  const router = useRouter()
+
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [highlightedIndex, setHighlightedIndex] = useState<{
-    index: number
-    subIndex: number
-  } | null>(null)
-
-  const router = useRouter()
 
   const inputRef = useRef<HTMLInputElement>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
@@ -42,52 +50,51 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const pageCount = 1
   const suggestionCount = 3
 
-  const triggerSearch = useMemo(
-    () =>
-      debounce(async (query: string) => {
-        if (!query.trim()) {
-          setSuggestions([])
-          setShowSuggestions(false)
-          return
-        }
+  const triggerSearch = useMemo(() => {
+    return debounce(async (query: string) => {
+      if (!query.trim()) {
+        setSuggestions([])
+        setShowSuggestions(false)
+        return
+      }
 
-        sendGAEvent({
-          event: 'homepageSearch',
-          path: globalThis.location.pathname,
-          value: query,
+      sendGAEvent({
+        event: 'homepageSearch',
+        path: globalThis.location.pathname,
+        value: query,
+      })
+
+      activeRequest.current?.abort()
+
+      const controller = new AbortController()
+      activeRequest.current = controller
+
+      const results: Suggestion[] = await Promise.all(
+        indexes.map(async (index) => {
+          const data = await fetchAlgoliaData<SearchHit>(
+            index,
+            query,
+            pageCount,
+            suggestionCount,
+            [],
+            controller.signal
+          )
+
+          return {
+            indexName: index,
+            hits: data.hits as Suggestion['hits'], 
+            totalPages: data.totalPages ?? 0,
+          }
         })
+      )
 
-        activeRequest.current?.abort()
-        const controller = new AbortController()
-        activeRequest.current = controller
 
-        const results: Suggestion[] = await Promise.all(
-          indexes.map(async (index) => {
-            const data = await fetchAlgoliaData<SearchHit>(
-              index,
-              query,
-              pageCount,
-              suggestionCount,
-              [],
-              controller.signal
-            )
+      if (controller.signal.aborted) return
 
-            return {
-              indexName: index,
-              hits: data.hits as Suggestion['hits'],
-              totalPages: data.totalPages ?? 0,
-            }
-          })
-        )
-
-        if (controller.signal.aborted) return
-
-        setSuggestions(results.filter((r) => r.hits.length > 0))
-        setShowSuggestions(true)
-      }, SEARCH_DEBOUNCE_DELAY_MS),
-    [indexes, eventData]
-  )
-
+      setSuggestions(results.filter((r) => r.hits.length > 0))
+      setShowSuggestions(true)
+    }, SEARCH_DEBOUNCE_DELAY_MS)
+  }, [indexes])
 
   useEffect(() => {
     return () => {
@@ -97,17 +104,16 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [triggerSearch])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = e.target.value
-    setSearchQuery(newQuery)
-    triggerSearch(newQuery)
-    setHighlightedIndex(null)
+    const value = e.target.value
+    setSearchQuery(value)
+    triggerSearch(value)
   }
 
   const handleClearSearch = () => {
     setSearchQuery('')
     setSuggestions([])
     setShowSuggestions(false)
-    setHighlightedIndex(null)
+    inputRef.current?.focus()
   }
 
   const handleSuggestionClick = useCallback(
@@ -118,18 +124,21 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
         case 'chapters':
           router.push(`/chapters/${suggestion.key}`)
           break
+
         case 'events':
           window.open((suggestion as Event).url, '_blank')
           break
+
         case 'organizations':
-          // Use type guard to safely access login property
           if ('login' in suggestion && suggestion.login) {
             router.push(`/organizations/${suggestion.login}`)
           }
           break
+
         case 'projects':
           router.push(`/projects/${suggestion.key}`)
           break
+
         case 'users':
           router.push(`/members/${suggestion.key}`)
           break
@@ -166,33 +175,41 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder={placeholder}
-          className="h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg"
+          className="h-12 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-10 text-lg"
         />
 
         {searchQuery && (
           <button
             type="button"
             onClick={handleClearSearch}
-            className="absolute top-1/2 right-2 -translate-y-1/2"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
           >
             <FaTimes />
           </button>
         )}
 
         {showSuggestions && (
-          <div className="absolute top-14 left-0 z-50 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
-            {suggestions.map((s) => (
-              <div key={s.indexName}>
-                {s.hits.map((hit: any) => (
-                  <button
-                    key={hit.key || hit.login || hit.url}
-                    onClick={() => handleSuggestionClick(hit, s.indexName)}
-                    className="flex w-full items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                  >
-                    {getIconForIndex(s.indexName)}
-                    <span className="truncate">{hit.name || hit.login}</span>
-                  </button>
-                ))}
+          <div className="absolute left-0 top-14 z-50 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+            {suggestions.map((group) => (
+              <div key={group.indexName}>
+                {group.hits.map((hit) => {
+                  const safeHit = hit as HitMeta
+
+                  return (
+                    <button
+                      key={safeHit.key || safeHit.login || safeHit.url}
+                      onClick={() =>
+                        handleSuggestionClick(hit, group.indexName)
+                      }
+                      className="flex w-full items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                    >
+                      {getIconForIndex(group.indexName)}
+                      <span className="truncate">
+                        {safeHit.name || safeHit.login}
+                      </span>
+                    </button>
+                  )
+                })}
               </div>
             ))}
           </div>
