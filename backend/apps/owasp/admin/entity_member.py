@@ -93,9 +93,11 @@ class EntityMemberAdmin(admin.ModelAdmin):
 
         """
         entity = obj.entity
-        if entity and hasattr(entity, "owasp_url"):
-            return format_html('<a href="{}" target="_blank">↗️</a>', entity.owasp_url)
-        return "-"
+        return (
+            format_html('<a href="{}" target="_blank">↗️</a>', entity.owasp_url)
+            if entity and hasattr(entity, "owasp_url")
+            else "-"
+        )
 
     def get_search_results(self, request, queryset, search_term) -> tuple[models.QuerySet, bool]:
         """Extend search results to include entity name or key matches.
