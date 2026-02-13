@@ -144,8 +144,6 @@ ini_options.log_level = "INFO"
 [tool.coverage]
 run.branch = true
 run.omit = [
-  "**/admin.py",
-  "**/apps.py",
   "**/migrations/*",
   "__init__.py",
   "manage.py",
