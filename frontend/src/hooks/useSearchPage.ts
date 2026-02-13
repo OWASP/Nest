@@ -45,59 +45,55 @@ export function useSearchPage<T>({
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
-  // Sync state with URL changes
-useEffect(() => {
-  setIsLoaded(false)
+  useEffect(() => {
+    setIsLoaded(false)
 
-  const controller = new AbortController()
+    const controller = new AbortController()
 
-  const fetchData = async () => {
-    try {
-      let computedIndexName = indexName
-      // Check if valid sort option is selected
-      const hasValidSort = sortBy && sortBy !== 'default'
+    const fetchData = async () => {
+      try {
+        let computedIndexName = indexName
+        const hasValidSort = sortBy && sortBy !== 'default'
 
-      if (hasValidSort) {
-        // if sorting is active then appends the sort field and order to the base index name.
-        const orderSuffix = order && order !== '' ? `_${order}` : ''
-        computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
+        if (hasValidSort) {
+          const orderSuffix = order && order !== '' ? `_${order}` : ''
+          computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
+        }
+
+        const response = await fetchAlgoliaData<T>(
+          computedIndexName,
+          searchQuery,
+          currentPage,
+          hitsPerPage,
+          [],
+          controller.signal
+        )
+
+        if (controller.signal.aborted) return
+
+        if ('hits' in response) {
+          setItems(response.hits)
+          setTotalPages(response.totalPages ?? 0)
+        } else {
+          handleAppError(response)
+        }
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          handleAppError(error)
+        }
       }
 
-      const response = await fetchAlgoliaData<T>(
-        computedIndexName,
-        searchQuery,
-        currentPage,
-        hitsPerPage,
-        [],
-        controller.signal 
-      )
-
-      if (controller.signal.aborted) return 
-
-      if ('hits' in response) {
-        setItems(response.hits)
-        setTotalPages(response.totalPages ?? 0)
-      } else {
-        handleAppError(response)
-      }
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        handleAppError(error)
+      if (!controller.signal.aborted) {
+        setIsLoaded(true)
       }
     }
 
-    if (!controller.signal.aborted) {
-      setIsLoaded(true)
+    fetchData()
+
+    return () => {
+      controller.abort()
     }
-  }
-
-  fetchData()
-
-  return () => {
-    controller.abort() 
-  }
-}, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
-
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
