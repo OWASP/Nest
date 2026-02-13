@@ -5,7 +5,7 @@ import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 
 export type { BreadcrumbItem } from 'types/breadcrumb'
 
-const HIDDEN_SEGMENTS = new Set(['repositories', 'mentees', 'modules', 'programs'])
+const HIDDEN_SEGMENTS = new Set(['repositories', 'mentees', 'modules', 'programs', 'community'])
 const COMMUNITY_RELATED_PATHS = ['/chapters', '/members', '/organizations']
 
 function buildBreadcrumbItems(
@@ -13,7 +13,7 @@ function buildBreadcrumbItems(
   registeredItems: BreadcrumbItem[]
 ): BreadcrumbItem[] {
   const registeredMap = new Map<string, BreadcrumbItem>()
-  for (const item of registeredItems) {
+  for (const item of registeredItems || []) {
     registeredMap.set(item.path, item)
   }
 
@@ -23,16 +23,16 @@ function buildBreadcrumbItems(
     return items
   }
 
-if (
-  pathname.startsWith('/community') ||
-  COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))
-) {
-  items.push({
-    title: 'Community',
-    path: '/community',
-  })
-}
+  const isCommunityLogicalParent =
+    !pathname.startsWith('/community') &&
+    COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))
 
+  if (isCommunityLogicalParent) {
+    items.push({
+      title: 'Community',
+      path: '/community',
+    })
+  }
 
   const segments = pathname.split('/').filter(Boolean)
   let currentPath = ''
@@ -40,9 +40,7 @@ if (
   for (const segment of segments) {
     currentPath = `${currentPath}/${segment}`
 
-if (HIDDEN_SEGMENTS.has(segment)) continue
-
-
+    if (HIDDEN_SEGMENTS.has(segment)) continue
 
     const registeredItem = registeredMap.get(currentPath)
     if (registeredItem) {
