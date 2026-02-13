@@ -3,13 +3,7 @@ import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { FaTimes, FaSearch } from 'react-icons/fa'
-import {
-  FaUser,
-  FaCalendar,
-  FaFolder,
-  FaBuilding,
-  FaLocationDot,
-} from 'react-icons/fa6'
+import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
 
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
@@ -82,12 +76,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
           return {
             indexName: index,
-            hits: data.hits as Suggestion['hits'], 
+            hits: data.hits as Suggestion['hits'],
             totalPages: data.totalPages ?? 0,
           }
         })
       )
-
 
       if (controller.signal.aborted) return
 
@@ -175,21 +168,21 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder={placeholder}
-          className="h-12 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-10 text-lg"
+          className="h-12 w-full rounded-lg border border-gray-300 bg-white pr-10 pl-10 text-lg"
         />
 
         {searchQuery && (
           <button
             type="button"
             onClick={handleClearSearch}
-            className="absolute right-2 top-1/2 -translate-y-1/2"
+            className="absolute top-1/2 right-2 -translate-y-1/2"
           >
             <FaTimes />
           </button>
         )}
 
         {showSuggestions && (
-          <div className="absolute left-0 top-14 z-50 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="absolute top-14 left-0 z-50 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
             {suggestions.map((group) => (
               <div key={group.indexName}>
                 {group.hits.map((hit) => {
@@ -198,15 +191,11 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                   return (
                     <button
                       key={safeHit.key || safeHit.login || safeHit.url}
-                      onClick={() =>
-                        handleSuggestionClick(hit, group.indexName)
-                      }
+                      onClick={() => handleSuggestionClick(hit, group.indexName)}
                       className="flex w-full items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
                     >
                       {getIconForIndex(group.indexName)}
-                      <span className="truncate">
-                        {safeHit.name || safeHit.login}
-                      </span>
+                      <span className="truncate">{safeHit.name || safeHit.login}</span>
                     </button>
                   )
                 })}

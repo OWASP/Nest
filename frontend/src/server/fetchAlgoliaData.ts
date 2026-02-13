@@ -11,10 +11,9 @@ export const fetchAlgoliaData = async <T>(
   signal?: AbortSignal
 ): Promise<AlgoliaResponse<T>> => {
   try {
-    const filters =
-      ['projects', 'chapters'].includes(indexName)
-        ? [...facetFilters, 'idx_is_active:true']
-        : facetFilters
+    const filters = ['projects', 'chapters'].includes(indexName)
+      ? [...facetFilters, 'idx_is_active:true']
+      : facetFilters
 
     if (!IDX_URL) {
       return { hits: [], totalPages: 0 }
@@ -34,7 +33,7 @@ export const fetchAlgoliaData = async <T>(
         page: currentPage,
         query,
       }),
-      signal, 
+      signal,
     })
 
     if (!response.ok) {
