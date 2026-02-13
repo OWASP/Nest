@@ -12,6 +12,16 @@ from apps.mentorship.api.internal.nodes.module import (
 )
 
 
+def _call_module_resolver(instance: object, name: str, *args: object, **kwargs: object) -> object:
+    """Call a ModuleNode field resolver by name without invoking StrawberryField.__call__."""
+    definition = getattr(ModuleNode, "__strawberry_definition__", None)
+    assert definition is not None
+    field = next((f for f in definition.fields if f.name == name), None)
+    assert field is not None
+    assert field.base_resolver is not None
+    return field.base_resolver.wrapped_func(instance, *args, **kwargs)
+
+
 class FakeModuleNode:
     """Minimal ModuleNode-like object for testing."""
 
@@ -38,37 +48,37 @@ class FakeModuleNode:
         self.project.name = "Test Project"
 
     def mock_mentors(self):
-        return ModuleNode.mentors(self)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "mentors")
 
     def mock_mentees(self):
-        return ModuleNode.mentees(self)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "mentees")
 
     def mock_issue_mentees(self, issue_number: int):
-        return ModuleNode.issue_mentees(self, issue_number)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "issue_mentees", issue_number=issue_number)
 
     def mock_project_name(self):
-        return ModuleNode.project_name(self)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "project_name")
 
     def mock_issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
-        return ModuleNode.issues(self, limit, offset, label)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "issues", limit=limit, offset=offset, label=label)
 
     def mock_issues_count(self, label: str | None = None):
-        return ModuleNode.issues_count(self, label)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "issues_count", label=label)
 
     def mock_available_labels(self):
-        return ModuleNode.available_labels(self)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "available_labels")
 
     def mock_issue_by_number(self, number: int):
-        return ModuleNode.issue_by_number(self, number)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "issue_by_number", number=number)
 
     def mock_interested_users(self, issue_number: int):
-        return ModuleNode.interested_users(self, issue_number)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "interested_users", issue_number=issue_number)
 
     def mock_task_deadline(self, issue_number: int):
-        return ModuleNode.task_deadline(self, issue_number)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "task_deadline", issue_number=issue_number)
 
     def mock_task_assigned_at(self, issue_number: int):
-        return ModuleNode.task_assigned_at(self, issue_number)  # type: ignore[call-arg, arg-type]
+        return _call_module_resolver(self, "task_assigned_at", issue_number=issue_number)
 
 
 @pytest.fixture
