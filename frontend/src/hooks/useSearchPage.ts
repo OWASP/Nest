@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -33,7 +33,6 @@ export function useSearchPage<T>({
   defaultOrder = '',
   hitsPerPage,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
-  const router = useRouter()
   const searchParams = useSearchParams()
 
   const [items, setItems] = useState<T[]>([])
