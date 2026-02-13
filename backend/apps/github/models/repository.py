@@ -24,6 +24,8 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     """Repository model."""
 
     class Meta:
+        """Model options."""
+
         constraints = [
             models.UniqueConstraint(fields=("key", "owner"), name="unique_key_owner"),
         ]
@@ -209,7 +211,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             user (User, optional): The user instance.
 
         """
-        from github.GithubException import GithubException
+        from github.GithubException import GithubException  # noqa: PLC0415
 
         field_mapping = {
             "created_at": "created_at",

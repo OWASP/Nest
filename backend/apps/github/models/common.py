@@ -7,6 +7,8 @@ class GenericUserModel(models.Model):
     """Generic user model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     name = models.CharField(verbose_name="Name", max_length=200, blank=True, default="")
@@ -76,6 +78,8 @@ class NodeModel(models.Model):
     """Node model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     node_id = models.CharField(verbose_name="Node ID", unique=True)
@@ -83,7 +87,7 @@ class NodeModel(models.Model):
     @staticmethod
     def get_node_id(node):
         """Extract node_id."""
-        from github.GithubException import UnknownObjectException
+        from github.GithubException import UnknownObjectException  # noqa: PLC0415
 
         try:
             return node.raw_data["node_id"]
