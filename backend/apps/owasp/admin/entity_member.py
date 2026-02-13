@@ -92,11 +92,10 @@ class EntityMemberAdmin(admin.ModelAdmin):
             str: HTML link to the entity's OWASP website or '-' if entity is missing.
 
         """
-        return (
-            format_html('<a href="{}" target="_blank">↗️</a>', obj.entity.owasp_url)
-            if obj.entity
-            else "-"
-        )
+        entity = obj.entity
+        if entity and hasattr(entity, "owasp_url"):
+            return format_html('<a href="{}" target="_blank">↗️</a>', entity.owasp_url)
+        return "-"
 
     def get_search_results(self, request, queryset, search_term) -> tuple[models.QuerySet, bool]:
         """Extend search results to include entity name or key matches.
