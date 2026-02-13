@@ -162,6 +162,7 @@ def extract_text_from_image(image_data: bytes) -> str:
         "If there's code, preserve formatting. "
         "If it's a screenshot of an error, include the full error message. "
         "If it's a diagram or chart, describe the key information."
+        "Return only the extracted text without any preamble."
     )
 
     result = (
