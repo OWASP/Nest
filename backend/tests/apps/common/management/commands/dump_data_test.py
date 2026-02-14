@@ -352,15 +352,27 @@ class TestDumpDataCommand:
 
     @override_settings(DATABASES=DATABASES)
     @patch("apps.common.management.commands.dump_data.run")
+    @patch("apps.common.management.commands.dump_data.Popen")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
-    def test_dump_data_drop_db_fails_programming_error(self, mock_path, mock_connect, mock_run):
+    def test_dump_data_drop_db_fails_programming_error(
+        self, mock_path, mock_connect, mock_popen, mock_run
+    ):
         """Test dump_data handles ProgrammingError when dropping temp DB."""
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
         mock_cursor.fetchall.return_value = [("public.users",)]
+
+        mock_dump_process = MagicMock()
+        mock_dump_process.stdout = MagicMock()
+        mock_dump_process.returncode = 0
+
+        mock_psql_process = MagicMock()
+        mock_psql_process.returncode = 0
+
+        mock_popen.side_effect = [mock_dump_process, mock_psql_process]
 
         def side_effect_execute(query):
             if "DROP DATABASE" in str(query):
@@ -376,15 +388,27 @@ class TestDumpDataCommand:
 
     @override_settings(DATABASES=DATABASES)
     @patch("apps.common.management.commands.dump_data.run")
+    @patch("apps.common.management.commands.dump_data.Popen")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
-    def test_dump_data_drop_db_fails_operational_error(self, mock_path, mock_connect, mock_run):
+    def test_dump_data_drop_db_fails_operational_error(
+        self, mock_path, mock_connect, mock_popen, mock_run
+    ):
         """Test dump_data handles OperationalError when dropping temp DB."""
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
         mock_cursor.fetchall.return_value = [("public.users",)]
+
+        mock_dump_process = MagicMock()
+        mock_dump_process.stdout = MagicMock()
+        mock_dump_process.returncode = 0
+
+        mock_psql_process = MagicMock()
+        mock_psql_process.returncode = 0
+
+        mock_popen.side_effect = [mock_dump_process, mock_psql_process]
 
         def side_effect_execute(query):
             if "DROP DATABASE" in str(query):
@@ -400,15 +424,25 @@ class TestDumpDataCommand:
 
     @override_settings(DATABASES=DATABASES)
     @patch("apps.common.management.commands.dump_data.run")
+    @patch("apps.common.management.commands.dump_data.Popen")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
-    def test_dump_data_called_process_error(self, mock_path, mock_connect, mock_run):
+    def test_dump_data_called_process_error(self, mock_path, mock_connect, mock_popen, mock_run):
         """Test dump_data handles CalledProcessError from pg_dump."""
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
         mock_cursor.fetchall.return_value = [("public.users",)]
+
+        mock_dump_process = MagicMock()
+        mock_dump_process.stdout = MagicMock()
+        mock_dump_process.returncode = 0
+
+        mock_psql_process = MagicMock()
+        mock_psql_process.returncode = 0
+
+        mock_popen.side_effect = [mock_dump_process, mock_psql_process]
 
         mock_resolve = MagicMock()
         mock_path.return_value.resolve.return_value = mock_resolve
