@@ -81,3 +81,18 @@ class TestRepositoryQuery:
             assert result[0] == mock_repository
             mock_queryset.filter.assert_called_once_with(organization__login__iexact="test-org")
             mock_queryset.filter.return_value.order_by.assert_called_once_with("-stars_count")
+
+    def test_resolve_repositories_invalid_limit(self):
+        """Test repositories returns empty list for invalid limit."""
+        mock_queryset = MagicMock()
+
+        with patch(
+            "apps.github.models.repository.Repository.objects",
+            mock_queryset,
+        ):
+            result = RepositoryQuery().repositories(
+                organization="test-org",
+                limit=0,
+            )
+
+            assert result == []

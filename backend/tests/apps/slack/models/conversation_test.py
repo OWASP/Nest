@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 from apps.slack.models.conversation import Conversation
 from apps.slack.models.workspace import Workspace
@@ -137,3 +137,19 @@ class TestConversationModel:
 
         # Check __str__ returns the name
         assert str(conversation) == "test-workspace #test-channel"
+
+    def test_latest_message_property(self, mocker):
+        """Test latest_message property returns the most recent message."""
+        conversation = Conversation()
+        mock_message = mocker.Mock()
+        mock_queryset = mocker.Mock()
+        mock_queryset.order_by.return_value.first.return_value = mock_message
+
+        mocker.patch.object(
+            Conversation, "messages", new_callable=PropertyMock, return_value=mock_queryset
+        )
+
+        result = conversation.latest_message
+
+        mock_queryset.order_by.assert_called_once_with("-created_at")
+        assert result == mock_message
