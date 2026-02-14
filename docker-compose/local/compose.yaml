@@ -4,7 +4,7 @@ services:
     command: >
       sh -c '
         python manage.py migrate &&
-        python manage.py runserver 0.0.0.0:8000
+        exec python manage.py runserver 0.0.0.0:8000
       '
     image: nest-local-backend
     build:
@@ -17,6 +17,7 @@ services:
         condition: service_healthy
     env_file: ../../backend/.env
     environment:
+      PYTHONUNBUFFERED: 1
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
@@ -28,11 +29,11 @@ services:
       DJANGO_SLACK_BOT_TOKEN: None
       DJANGO_SLACK_SIGNING_SECRET: None
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/status/"]
+      test: ["CMD", "python", "manage.py", "check"]
       interval: 5s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 20
+      start_period: 60s
     networks:
       - nest-network
     ports:
@@ -45,7 +46,7 @@ services:
     container_name: nest-nestbot
     command: >
       sh -c '
-        python manage.py runserver 0.0.0.0:8001
+        exec python manage.py runserver 0.0.0.0:8001
       '
     image: nest-local-backend
     depends_on:
@@ -57,6 +58,7 @@ services:
         condition: service_healthy
     env_file: ../../backend/.env
     environment:
+      PYTHONUNBUFFERED: 1
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
@@ -65,6 +67,12 @@ services:
       DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
       DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
       # Slack tokens inherited from .env file (not overridden here)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/status/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - nest-network
     ports:
@@ -158,7 +166,7 @@ services:
     image: nest-local-backend
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
       cache:
         condition: service_healthy
       db:
@@ -170,7 +178,7 @@ services:
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
       DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
-      DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-cache}
+      DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
       DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
       # Worker needs Slack tokens for SlackConfig.app.client (inherited from .env)
     networks:
