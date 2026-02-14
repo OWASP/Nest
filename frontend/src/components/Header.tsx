@@ -61,7 +61,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         <Link
           href="/"
           onClick={() => setMobileMenuOpen(false)}
-          className="group rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <div className="flex h-full items-center">
             <div className="flex h-16 w-16 items-center justify-center py-2">
@@ -157,7 +157,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="group rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <div className="flex h-full items-center">
                 <div className="flex h-16 w-16 items-center justify-center py-2">

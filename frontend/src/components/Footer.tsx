@@ -96,7 +96,7 @@ export default function Footer() {
             {RELEASE_VERSION && (
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 <Link
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                  className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                   href={
                     ENVIRONMENT === 'production'
                       ? `https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`
