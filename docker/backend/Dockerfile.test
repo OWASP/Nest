@@ -29,14 +29,14 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose
 
 COPY .env.example .env.example
+COPY apps apps
 COPY manage.py wsgi.py ./
 COPY settings settings
 COPY static static
 COPY templates templates
+COPY tests/apps tests/apps
 COPY tests/__init__.py tests/__init__.py
 COPY tests/conftest.py tests/conftest.py
-COPY tests/apps tests/apps
-COPY apps apps
 
 FROM python:3.13.11-alpine3.23
 

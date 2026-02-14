@@ -36,9 +36,9 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --without test --without video
 
 COPY entrypoint.sh manage.py wsgi.py ./
-COPY settings settings
 COPY static static
 COPY templates templates
+COPY settings settings
 COPY apps apps
 
 FROM python:3.13.11-alpine3.23
