@@ -23,11 +23,47 @@ services:
       DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
       DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
-      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_HOST:-nest-cache-password}
+      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
+      # Disable Slack in backend - routes won't be registered
+      DJANGO_SLACK_BOT_TOKEN: None
+      DJANGO_SLACK_SIGNING_SECRET: None
+
     networks:
       - nest-network
     ports:
       - 8000:8000
+    volumes:
+      - ../../backend:/home/owasp
+      - backend-venv:/home/owasp/.venv
+
+  nestbot:
+    container_name: nest-nestbot
+    command: >
+      sh -c '
+        python manage.py runserver 0.0.0.0:8001
+      '
+    image: nest-local-backend
+    depends_on:
+      backend:
+        condition: service_started
+      cache:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    env_file: ../../backend/.env
+    environment:
+      DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
+      DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
+      DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
+      DJANGO_DB_PORT: ${DJANGO_DB_PORT:-5432}
+      DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
+      DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-nest-cache}
+      DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
+      # Slack tokens inherited from .env file (not overridden here)
+    networks:
+      - nest-network
+    ports:
+      - 8001:8001
     volumes:
       - ../../backend:/home/owasp
       - backend-venv:/home/owasp/.venv
@@ -80,7 +116,7 @@ services:
     networks:
       - nest-network
     ports:
-      - 8001:8001
+      - 8002:8001
     volumes:
       - ../../docs:/home/owasp/docs
       - docs-venv:/home/owasp/.venv
@@ -131,6 +167,7 @@ services:
       DJANGO_DB_USER: ${DJANGO_DB_USER:-nest_user_dev}
       DJANGO_REDIS_HOST: ${DJANGO_REDIS_HOST:-cache}
       DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
+      # Worker needs Slack tokens for SlackConfig.app.client (inherited from .env)
     networks:
       - nest-network
     volumes:

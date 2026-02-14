@@ -1,6 +1,5 @@
-# Docker Hardened Images (DHI) - requires: docker login dhi.io
-# Use -dev variant for builder stage (includes build tools and shell)
-FROM dhi.io/python:3.13-dev AS builder
+# python:slim is used as base image to keep the image size small
+FROM python:3.13-slim AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -15,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libffi-dev \
         libssl-dev \
+        libpq-dev \
         passwd \
         && rm -rf /var/lib/apt/lists/* && \
     groupadd -g ${OWASP_GID} owasp && \
@@ -28,43 +28,33 @@ RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
 USER owasp
 WORKDIR /home/owasp
 
-# Copy files as root first, then fix ownership and permissions
-USER root
-COPY --chown=${OWASP_UID}:${OWASP_GID} poetry.lock pyproject.toml ./
-RUN chmod 644 poetry.lock pyproject.toml
-
-USER owasp
-
-# Update lock file if pyproject.toml changed (e.g., Python version upgrade)
+COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     --mount=type=cache,target=${PIP_CACHE_DIR} \
     poetry install --no-root --without dev --without test --without video
 
-# Use -dev variant for runtime stage to allow installing runtime dependencies
-# Still hardened, just includes shell and package manager for flexibility
-FROM dhi.io/python:3.13-dev
+# Runtime stage using python:slim
+FROM python:3.13-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV FORCE_COLOR=1 \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
-    PATH="/home/owasp/.venv/bin:/usr/local/bin:$PATH" \
-    PYTHONPATH="/home/owasp:/home/owasp/.venv/lib/python3.13/site-packages" \
-    VIRTUAL_ENV="/home/owasp/.venv" \
+    PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         postgresql-client \
+        libpq5 \
         passwd \
         curl \
         && rm -rf /var/lib/apt/lists/* && \
     groupadd -g 1000 owasp && \
     useradd -u 1000 -g owasp -m -s /bin/bash owasp
 
-# Install poetry for runtime (needed for volume-based development setup)
-RUN --mount=type=cache,target=/root/.cache/pip \
-    python3 -m pip install poetry --cache-dir /root/.cache/pip
+RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+    python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
 EXPOSE 8000
 
@@ -72,18 +62,3 @@ USER owasp
 WORKDIR /home/owasp
 
 COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
-
-# Fix ownership and permissions for volume compatibility
-# Also backup .venv to /tmp for volume initialization
-USER root
-RUN if [ -d /home/owasp/.venv ]; then \
-        chown -R 1000:1000 /home/owasp/.venv && \
-        chmod -R u+w /home/owasp/.venv && \
-        cp -r /home/owasp/.venv /tmp/.venv-backup && \
-        chown -R 1000:1000 /tmp/.venv-backup; \
-    fi && \
-    mkdir -p /home/owasp/.local/share && \
-    chown -R 1000:1000 /home/owasp/.local && \
-    chmod -R u+w /home/owasp/.local
-
-USER owasp
