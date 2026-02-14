@@ -1,6 +1,6 @@
 """Test cases for RepositoryNode."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
