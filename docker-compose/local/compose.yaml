@@ -29,7 +29,7 @@ services:
       DJANGO_SLACK_BOT_TOKEN: None
       DJANGO_SLACK_SIGNING_SECRET: None
     healthcheck:
-      test: ["CMD", "python", "manage.py", "check"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status/"]
       interval: 5s
       timeout: 5s
       retries: 20
