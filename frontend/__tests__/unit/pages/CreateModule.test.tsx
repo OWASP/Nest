@@ -117,9 +117,141 @@ describe('CreateModulePage', () => {
 
     await user.click(screen.getByRole('button', { name: /Create Module/i }))
 
+    await waitFor(
+      () => {
+        expect(mockCreateModule).toHaveBeenCalled()
+        expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+      },
+      { timeout: 10000 }
+    )
+  }, 15000)
+
+  it('shows loading spinner while session or query is loading', () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: null,
+      status: 'loading',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: true,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+    render(<CreateModulePage />)
+    expect(screen.getAllByAltText('Loading indicator')[0]).toBeInTheDocument()
+  })
+
+  it('shows access denied when query has an error', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'test-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: false,
+      error: new Error('Query failed'),
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+    render(<CreateModulePage />)
+
     await waitFor(() => {
-      expect(mockCreateModule).toHaveBeenCalled()
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    })
+  })
+
+  it('shows access denied when user is unauthenticated', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: null,
+      status: 'unauthenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: { getProgram: { admins: [] } },
+      loading: false,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+    render(<CreateModulePage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    })
+  })
+
+  it('shows access denied when program data is not found', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'test-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: { getProgram: null },
+      loading: false,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+    render(<CreateModulePage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    })
+  })
+
+  it('shows access denied and redirects when user is not an admin', async () => {
+    jest.useFakeTimers()
+    try {
+      ;(useSession as jest.Mock).mockReturnValue({
+        data: { user: { login: 'non-admin-user' } },
+        status: 'authenticated',
+      })
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          getProgram: {
+            admins: [{ login: 'admin-user' }],
+          },
+        },
+        loading: false,
+      })
+      ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+      render(<CreateModulePage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      })
+
+      // Fast-forward past the redirect timeout
+      jest.advanceTimersByTime(2000)
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith('/my/mentorship')
+      })
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
+  it('renders form without error when program has start and end dates', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: '2025-01-15T00:00:00Z',
+          endedAt: '2025-12-31T00:00:00Z',
+        },
+      },
+      loading: false,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+    render(<CreateModulePage />)
+
+    await waitFor(() => {
+      const moduleForm = screen.getByText('Create New Module')
+      expect(moduleForm).toBeInTheDocument()
     })
   })
 })

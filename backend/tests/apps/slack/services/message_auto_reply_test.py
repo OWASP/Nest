@@ -101,6 +101,19 @@ class TestMessageAutoReply:
         generate_ai_reply_if_unanswered(99999)
 
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
+    @patch("apps.slack.services.message_auto_reply.logger")
+    def test_generate_ai_reply_slack_app_not_configured(
+        self, mock_logger, mock_message_get, mock_message
+    ):
+        """Test when Slack app is not configured."""
+        mock_message_get.return_value = mock_message
+        SlackConfig.app = None
+
+        generate_ai_reply_if_unanswered(mock_message.id)
+
+        mock_logger.warning.assert_called_once_with("Slack app is not configured")
+
+    @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
     def test_generate_ai_reply_assistant_disabled(
         self, mock_process_ai_query, mock_message_get, mock_message

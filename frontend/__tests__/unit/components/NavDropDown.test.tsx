@@ -294,6 +294,38 @@ describe('NavDropdown Component', () => {
       })
     })
 
+    it('closes dropdown when Escape is pressed on submenu item', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard('{Escape}')
+      await waitFor(() => {
+        expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+      })
+    })
+
+    it('closes dropdown when Space is pressed on submenu item', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard(' ')
+      await waitFor(() => {
+        expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+      })
+    })
+
     it('handles space key to toggle dropdown', async () => {
       const user = userEvent.setup()
       render(<NavDropdown {...defaultProps} />)

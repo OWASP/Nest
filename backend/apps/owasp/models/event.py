@@ -29,6 +29,8 @@ class Event(BulkSaveModel, TimestampedModel):
     """Event model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_events"
         indexes = [
             models.Index(fields=["-start_date"], name="event_start_date_desc_idx"),
@@ -307,7 +309,7 @@ class Event(BulkSaveModel, TimestampedModel):
         if not self.suggested_location:
             self.generate_suggested_location()
 
-        if not self.latitude or not self.longitude:
+        if self.latitude is None or self.longitude is None:
             self.generate_geo_location()
 
         super().save(*args, **kwargs)
