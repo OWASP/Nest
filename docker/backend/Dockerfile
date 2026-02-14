@@ -36,18 +36,20 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
     poetry install --no-root --verbose --without test --without video
 
 COPY apps apps
-COPY entrypoint.sh manage.py wsgi.py ./
+COPY Makefile entrypoint.sh manage.py wsgi.py ./
 COPY settings settings
 COPY static static
 COPY templates templates
+
+# Required to run make targets
+RUN ln -s . backend
 
 FROM python:3.13.11-alpine3.23
 
 ARG OWASP_GID
 ARG OWASP_UID
 
-RUN apk update && \
-    apk add --no-cache postgresql16-client && \
+RUN apk update && apk --no-cache add make && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
