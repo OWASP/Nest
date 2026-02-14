@@ -16,6 +16,9 @@ DB_USER = DEFAULT_DATABASE.get("USER", "")
 DB_PASSWORD = DEFAULT_DATABASE.get("PASSWORD", "")
 DB_NAME = DEFAULT_DATABASE.get("NAME", "")
 
+PG_DUMP = "/usr/bin/pg_dump"
+PSQL = "/usr/bin/psql"
+
 
 class Command(BaseCommand):
     help = "Create a dump of selected db tables."
@@ -58,10 +61,11 @@ class Command(BaseCommand):
             )
 
             self.stdout.write(self.style.SUCCESS(f"Created temporary DB: {temp_db}"))
-            # Getting data
+
+            # Getting data.
             dump_process = Popen(  # noqa: S603
-                [  # noqa: S607
-                    "pg_dump",
+                [
+                    PG_DUMP,
                     "-h",
                     DB_HOST,
                     "-p",
@@ -75,8 +79,8 @@ class Command(BaseCommand):
                 env=env,
             )
             psql_process = Popen(  # noqa: S603
-                [  # noqa: S607
-                    "psql",
+                [
+                    PSQL,
                     "-h",
                     DB_HOST,
                     "-p",
@@ -93,16 +97,17 @@ class Command(BaseCommand):
             dump_process.stdout.close()
             psql_process.communicate()
             dump_process.wait()
-            if dump_process.returncode != 0 or psql_process.returncode != 0:
+            if dump_process.returncode or psql_process.returncode:
                 message = f"Failed to sync data from {DB_NAME} to {temp_db}"
                 raise CommandError(message)
+
             self.stdout.write(self.style.SUCCESS(f"Synced data from {DB_NAME} to {temp_db}"))
             table_list = self._execute_sql(temp_db, [self._table_list_query()])
             self._execute_sql(temp_db, self._remove_emails([row[0] for row in table_list]))
             self.stdout.write(self.style.SUCCESS("Removed emails from temporary DB"))
 
             dump_cmd = [
-                "pg_dump",
+                PG_DUMP,
                 "-h",
                 DB_HOST,
                 "-p",

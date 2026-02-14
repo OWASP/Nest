@@ -31,7 +31,6 @@ class TestDumpDataCommand:
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
         mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        # Return table list for _table_list_query
         mock_cursor.fetchall.return_value = [("users",), ("members",)]
         mock_resolve = MagicMock()
         mock_path.return_value.resolve.return_value = mock_resolve
@@ -162,7 +161,7 @@ class TestDumpDataCommand:
             str(mock_resolve),
         ]
 
-        # Ensure DROP DATABASE executed at the end
+        # Ensure DROP DATABASE executed at the end.
         assert (
             str(
                 sql.SQL("DROP DATABASE IF EXISTS {temp_db};").format(
@@ -190,7 +189,7 @@ class TestDumpDataCommand:
         mock_resolve = MagicMock()
         mock_path.return_value.resolve.return_value = mock_resolve
 
-        # Mock Popen for pg_dump and psql processes
+        # Mock Popen for pg_dump and psql processes.
         mock_dump_process = MagicMock()
         mock_dump_process.stdout = MagicMock()
         mock_dump_process.returncode = 0
@@ -247,10 +246,10 @@ class TestDumpDataCommand:
 
         assert mock_run.call_count == 1
 
-        # No UPDATE email queries should be in executed SQL
+        # No UPDATE email queries should be in executed SQL.
         executed_sql = [str(c.args[0]) for c in mock_cursor.execute.call_args_list]
         update_queries = [q for q in executed_sql if "UPDATE" in q and "email" in q]
-        assert len(update_queries) == 0
+        assert not update_queries
 
     @override_settings(DATABASES=DATABASES)
     @patch("apps.common.management.commands.dump_data.run")
@@ -282,8 +281,7 @@ class TestDumpDataCommand:
             "data/dump.dump",
         )
 
-        assert mock_conn.autocommit is True
-        # Verify connections were closed
+        assert mock_conn.autocommit
         assert mock_conn.close.call_count >= 1
 
     @override_settings(DATABASES=DATABASES)
@@ -303,7 +301,7 @@ class TestDumpDataCommand:
 
         mock_dump_process = MagicMock()
         mock_dump_process.stdout = MagicMock()
-        mock_dump_process.returncode = 1  # Failure
+        mock_dump_process.returncode = 1  # Failure.
 
         mock_psql_process = MagicMock()
         mock_psql_process.returncode = 0
@@ -339,7 +337,7 @@ class TestDumpDataCommand:
         mock_dump_process.returncode = 0
 
         mock_psql_process = MagicMock()
-        mock_psql_process.returncode = 1  # Failure
+        mock_psql_process.returncode = 1  # Failure.
 
         mock_popen.side_effect = [mock_dump_process, mock_psql_process]
 
