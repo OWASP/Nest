@@ -1,5 +1,8 @@
 """Tests for MemberProfile admin."""
 
+from unittest import mock
+from unittest.mock import MagicMock, Mock
+
 from django.contrib.admin.sites import AdminSite
 
 from apps.owasp.admin.member_profile import MemberProfileAdmin
@@ -72,3 +75,20 @@ class TestMemberProfileAdmin:
         assert admin.fieldsets[1][0] == "Contribution Information"
         assert admin.fieldsets[2][0] == "Membership Flags"
         assert admin.fieldsets[3][0] == "Timestamps"
+
+    def test_get_queryset(self):
+        """Test get_queryset applies select_related for github_user."""
+        admin = MemberProfileAdmin(MemberProfile, AdminSite())
+        mock_request = Mock()
+
+        admin_queryset = MagicMock()
+        result_queryset = MagicMock()
+        admin_queryset.select_related.return_value = result_queryset
+
+        with mock.patch.object(
+            admin.__class__.__bases__[0], "get_queryset", return_value=admin_queryset
+        ):
+            result = admin.get_queryset(mock_request)
+
+            admin_queryset.select_related.assert_called_once_with("github_user")
+            assert result == result_queryset

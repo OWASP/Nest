@@ -25,18 +25,15 @@ class TestGitHubGetInstallationId(SimpleTestCase):
     @mock.patch("apps.github.management.commands.github_get_installation_id.Auth.AppAuth")
     def test_get_installation_id_success(self, mock_app_auth, mock_github_integration):
         """Test successful retrieval of installation ID."""
-        # Mock the installation
         mock_installation = mock.MagicMock()
         mock_installation.id = 12345
         mock_installation.account.type = "Organization"
         mock_installation.account.login = "test-org"
 
-        # Mock the GithubIntegration
         mock_gi_instance = mock.MagicMock()
         mock_gi_instance.get_installations.return_value = [mock_installation]
         mock_github_integration.return_value = mock_gi_instance
 
-        # Mock the AppAuth
         mock_auth_instance = mock.MagicMock()
         mock_app_auth.return_value = mock_auth_instance
 
@@ -244,3 +241,29 @@ class TestGitHubGetInstallationId(SimpleTestCase):
         _, kwargs = mock_app_auth.call_args
         assert kwargs["app_id"] == 123456
         assert isinstance(kwargs["private_key"], str)
+
+    @mock.patch("apps.github.management.commands.github_get_installation_id.GithubIntegration")
+    @mock.patch("apps.github.management.commands.github_get_installation_id.Auth.AppAuth")
+    def test_get_installation_id_no_account(self, mock_app_auth, mock_github_integration):
+        """Test installation without account attribute."""
+        mock_installation = mock.MagicMock(spec=["id"])
+        mock_installation.id = 99999
+
+        mock_gi_instance = mock.MagicMock()
+        mock_gi_instance.get_installations.return_value = [mock_installation]
+        mock_github_integration.return_value = mock_gi_instance
+
+        mock_auth_instance = mock.MagicMock()
+        mock_app_auth.return_value = mock_auth_instance
+
+        with (
+            mock.patch("sys.stdout", new_callable=io.StringIO) as mock_stdout,
+            mock.patch("pathlib.Path.open", mock.mock_open(read_data=self.test_private_key)),
+            mock.patch("pathlib.Path.exists", return_value=True),
+        ):
+            command = Command()
+            command.handle(app_id=123456)
+
+        output = mock_stdout.getvalue()
+        assert "Installation ID: 99999" in output
+        assert "Account:" not in output

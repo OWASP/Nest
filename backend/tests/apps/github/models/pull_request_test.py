@@ -147,3 +147,50 @@ def test_update_data_new_pr(mock_from_github, mock_get, mock_get_node_id, gh_pul
     )
     mock_save.assert_called_once()
     assert pr.node_id == "pr_node_id_123"
+
+
+def test_pr_save_method():
+    """Test the save method."""
+    with patch("apps.github.models.generic_issue_model.GenericIssueModel.save") as mock_super_save:
+        pr = PullRequest()
+        pr.save()
+        mock_super_save.assert_called_once_with()
+
+
+def test_repository_id():
+    """Test the repository_id property inherited from GenericIssueModel."""
+    repository = Mock(spec=Repository, _state=Mock(db=None))
+    repository.id = 999
+    pr = PullRequest(repository=repository)
+    assert pr.repository_id == 999
+
+
+@patch("apps.github.models.pull_request.PullRequest.get_node_id")
+@patch("apps.github.models.pull_request.PullRequest.objects.get")
+def test_update_data_without_save(mock_get, mock_get_node_id, gh_pull_request_mock):
+    """Test update_data with save=False."""
+    mock_get_node_id.return_value = "pr_node_id_123"
+    mock_pr = Mock(spec=PullRequest)
+    mock_get.return_value = mock_pr
+
+    author = Mock(spec=User, _state=Mock(db=None))
+    milestone = Mock(spec=Milestone, _state=Mock(db=None))
+    repository = Mock(spec=Repository, _state=Mock(db=None))
+
+    pr = PullRequest.update_data(
+        gh_pull_request_mock,
+        author=author,
+        milestone=milestone,
+        repository=repository,
+        save=False,
+    )
+
+    mock_get.assert_called_once_with(node_id="pr_node_id_123")
+    mock_pr.from_github.assert_called_once_with(
+        gh_pull_request_mock,
+        author=author,
+        milestone=milestone,
+        repository=repository,
+    )
+    mock_pr.save.assert_not_called()
+    assert pr == mock_pr
