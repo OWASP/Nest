@@ -102,7 +102,7 @@ class TestDumpDataCommand:
 
         first_popen_call = mock_popen.call_args_list[0]
         assert first_popen_call[0][0] == [
-            "pg_dump",
+            "/usr/bin/pg_dump",
             "-h",
             "db-host",
             "-p",
@@ -115,7 +115,7 @@ class TestDumpDataCommand:
 
         second_popen_call = mock_popen.call_args_list[1]
         assert second_popen_call[0][0] == [
-            "psql",
+            "/usr/bin/psql",
             "-h",
             "db-host",
             "-p",
@@ -137,7 +137,7 @@ class TestDumpDataCommand:
 
         run_call = mock_run.call_args_list[0]
         assert run_call[0][0] == [
-            "pg_dump",
+            "/usr/bin/pg_dump",
             "-h",
             "db-host",
             "-p",
