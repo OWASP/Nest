@@ -75,11 +75,11 @@ export default function CommunityPage() {
   const statsOverview = data.statsOverview
   const statsData = statsOverview
     ? [
-      { label: 'Active Chapters', value: statsOverview.activeChaptersStats },
-      { label: 'Active Projects', value: statsOverview.activeProjectsStats },
-      { label: 'Contributors', value: statsOverview.contributorsStats },
-      { label: 'Countries', value: statsOverview.countriesStats },
-    ]
+        { label: 'Active Chapters', value: statsOverview.activeChaptersStats },
+        { label: 'Active Projects', value: statsOverview.activeProjectsStats },
+        { label: 'Contributors', value: statsOverview.contributorsStats },
+        { label: 'Countries', value: statsOverview.countriesStats },
+      ]
     : []
 
   return (
@@ -136,7 +136,7 @@ export default function CommunityPage() {
           icon={FaMapMarkerAlt}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle title="New Chapters" className="flex items-center leading-none" />
+              <AnchorTitle title="New Chapters" />
             </div>
           }
           className="overflow-hidden"
@@ -160,7 +160,7 @@ export default function CommunityPage() {
             icon={FaBuilding}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle title="New Organizations" className="flex items-center leading-none" />
+                <AnchorTitle title="New Organizations" />
               </div>
             }
             className="!mb-0 flex h-full flex-col overflow-hidden"
@@ -197,7 +197,7 @@ export default function CommunityPage() {
             icon={FaCamera}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle title="Snapshots" className="flex items-center leading-none" />
+                <AnchorTitle title="Snapshots" />
               </div>
             }
             className="!mb-0 flex h-full flex-col overflow-hidden"
@@ -227,7 +227,7 @@ export default function CommunityPage() {
           icon={FaUsers}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle title="Top Contributors" className="flex items-center leading-none" />
+              <AnchorTitle title="Top Contributors" />
             </div>
           }
         >

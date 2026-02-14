@@ -15,6 +15,8 @@ class Prompt(TimestampedModel):
     """Prompt model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "nest_prompts"
         verbose_name_plural = "Prompts"
 

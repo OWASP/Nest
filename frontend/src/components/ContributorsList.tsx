@@ -10,7 +10,7 @@ import ShowMoreButton from 'components/ShowMoreButton'
 
 interface ContributorsListProps {
   contributors: Contributor[]
-  label?: string
+  title?: string
   maxInitialDisplay?: number
   icon?: IconType
   getUrl: (login: string) => string
@@ -18,7 +18,7 @@ interface ContributorsListProps {
 
 const ContributorsList = ({
   contributors,
-  label = 'Contributors',
+  title: label = 'Contributors',
   maxInitialDisplay = 12,
   icon,
   getUrl,
@@ -40,7 +40,7 @@ const ContributorsList = ({
       icon={icon}
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle title={label} className="flex items-center" />
+          <AnchorTitle title={label} />
         </div>
       }
     >

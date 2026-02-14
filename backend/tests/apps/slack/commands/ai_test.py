@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from apps.slack.commands.ai import Ai
+from apps.slack.commands.command import CommandBase
 
 
 class TestAiCommand:
@@ -156,8 +157,6 @@ class TestAiCommand:
 
     def test_ai_command_inheritance(self):
         """Test that Ai command inherits from CommandBase."""
-        from apps.slack.commands.command import CommandBase
-
         ai_command = Ai()
         assert isinstance(ai_command, CommandBase)
 

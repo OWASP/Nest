@@ -5,7 +5,7 @@ import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 
 export type { BreadcrumbItem } from 'types/breadcrumb'
 
-const HIDDEN_SEGMENTS = new Set(['repositories', 'mentees', 'modules', 'programs'])
+const HIDDEN_SEGMENTS = new Set(['mentees', 'modules', 'programs', 'repositories'])
 const COMMUNITY_RELATED_PATHS = ['/chapters', '/members', '/organizations']
 
 function buildBreadcrumbItems(

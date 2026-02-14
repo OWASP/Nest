@@ -1,8 +1,10 @@
+from subprocess import CalledProcessError
 from unittest.mock import MagicMock, patch
 
-from django.core.management import call_command
+import pytest
+from django.core.management import CommandError, call_command
 from django.test import override_settings
-from psycopg2 import sql
+from psycopg2 import OperationalError, ProgrammingError, sql
 
 DATABASES = {
     "default": {
@@ -16,13 +18,13 @@ DATABASES = {
 }
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 class TestDumpDataCommand:
     @override_settings(DATABASES=DATABASES)
     @patch("apps.common.management.commands.dump_data.run")
     @patch("apps.common.management.commands.dump_data.connect")
     @patch("apps.common.management.commands.dump_data.Path")
     def test_dump_data(self, mock_path, mock_connect, mock_run):
-        # Mock psycopg2 connection/cursor
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_connect.return_value = mock_conn
@@ -36,7 +38,6 @@ class TestDumpDataCommand:
             "data/dump.dump",
         )
 
-        # Verify temp DB created from template
         expected_temp_db = "temp_db-name"
         mock_connect.assert_any_call(
             dbname="postgres",
@@ -90,7 +91,6 @@ class TestDumpDataCommand:
             "-f",
             str(mock_resolve),
         ] == mock_run.call_args[0][0]
-        # Ensure DROP DATABASE executed at the end
         mock_cursor.execute.assert_any_call(
             sql.SQL("DROP DATABASE IF EXISTS {temp_db};").format(
                 temp_db=sql.Identifier(expected_temp_db)
@@ -98,3 +98,75 @@ class TestDumpDataCommand:
         )
         mock_path.return_value.resolve.assert_called_once()
         mock_resolve.parent.mkdir.assert_called_once_with(parents=True, exist_ok=True)
+
+    @override_settings(DATABASES=DATABASES)
+    @patch("apps.common.management.commands.dump_data.run")
+    @patch("apps.common.management.commands.dump_data.connect")
+    @patch("apps.common.management.commands.dump_data.Path")
+    def test_dump_data_drop_db_fails_programming_error(self, mock_path, mock_connect, mock_run):
+        """Test dump_data handles ProgrammingError when dropping temp DB."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_cursor.fetchall.return_value = [("public.users",)]
+
+        def side_effect_execute(query):
+            if "DROP DATABASE" in str(query):
+                msg = "Database does not exist"
+                raise ProgrammingError(msg)
+
+        mock_cursor.execute.side_effect = side_effect_execute
+
+        mock_resolve = MagicMock()
+        mock_path.return_value.resolve.return_value = mock_resolve
+
+        call_command("dump_data", "--output", "data/dump.dump")
+
+    @override_settings(DATABASES=DATABASES)
+    @patch("apps.common.management.commands.dump_data.run")
+    @patch("apps.common.management.commands.dump_data.connect")
+    @patch("apps.common.management.commands.dump_data.Path")
+    def test_dump_data_drop_db_fails_operational_error(self, mock_path, mock_connect, mock_run):
+        """Test dump_data handles OperationalError when dropping temp DB."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_cursor.fetchall.return_value = [("public.users",)]
+
+        def side_effect_execute(query):
+            if "DROP DATABASE" in str(query):
+                msg = "Cannot connect to database"
+                raise OperationalError(msg)
+
+        mock_cursor.execute.side_effect = side_effect_execute
+
+        mock_resolve = MagicMock()
+        mock_path.return_value.resolve.return_value = mock_resolve
+
+        call_command("dump_data", "--output", "data/dump.dump")
+
+    @override_settings(DATABASES=DATABASES)
+    @patch("apps.common.management.commands.dump_data.run")
+    @patch("apps.common.management.commands.dump_data.connect")
+    @patch("apps.common.management.commands.dump_data.Path")
+    def test_dump_data_called_process_error(self, mock_path, mock_connect, mock_run):
+        """Test dump_data handles CalledProcessError from pg_dump."""
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+        mock_connect.return_value = mock_conn
+        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_cursor.fetchall.return_value = [("public.users",)]
+
+        mock_resolve = MagicMock()
+        mock_path.return_value.resolve.return_value = mock_resolve
+
+        mock_run.side_effect = CalledProcessError(
+            returncode=1, cmd=["pg_dump", "test"], output="pg_dump failed"
+        )
+
+        with pytest.raises(CommandError) as exc_info:
+            call_command("dump_data", "--output", "data/dump.dump")
+
+        assert "Command failed:" in str(exc_info.value)
