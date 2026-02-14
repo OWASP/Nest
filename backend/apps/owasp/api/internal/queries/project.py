@@ -74,7 +74,35 @@ class ProjectQuery:
         except GithubUser.DoesNotExist:
             return False
 
-        return Project.objects.filter(
-            Q(leaders_raw__icontains=github_user.login)
-            | Q(leaders_raw__icontains=(github_user.name or ""))
-        ).exists()
+        user_tokens = {
+            normalized_token
+            for token in (github_user.login, github_user.name)
+            if (normalized_token := self._normalize_leader_token(token))
+        }
+        if not user_tokens:
+            return False
+
+        leaders_raw_filter = Q()
+        for token in user_tokens:
+            leaders_raw_filter |= Q(leaders_raw__icontains=token)
+
+        for leaders_raw in Project.objects.filter(leaders_raw_filter).values_list(
+            "leaders_raw", flat=True
+        ):
+            leader_tokens = {
+                normalized_token
+                for leader in (leaders_raw or [])
+                if (normalized_token := self._normalize_leader_token(leader))
+            }
+            if user_tokens & leader_tokens:
+                return True
+
+        return False
+
+    @staticmethod
+    def _normalize_leader_token(value: str | None) -> str:
+        """Normalize a leader token for case-insensitive exact matching."""
+        if not value:
+            return ""
+
+        return value.strip().lstrip("@").casefold()

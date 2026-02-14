@@ -173,7 +173,7 @@ class TestIsProjectLeaderResolution:
             patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
         ):
             mock_get_user.return_value = mock_user
-            mock_filter.return_value.exists.return_value = True
+            mock_filter.return_value.values_list.return_value = [["testuser"], ["other-leader"]]
 
             query = ProjectQuery()
             result = query.__class__.__dict__["is_project_leader"](
@@ -182,11 +182,11 @@ class TestIsProjectLeaderResolution:
 
             assert result
 
-    def test_is_project_leader_user_not_leader(self, mock_info):
-        """Test is_project_leader returns False when user is not a leader."""
+    def test_is_project_leader_partial_substring_does_not_match(self, mock_info):
+        """Test is_project_leader avoids false positives from substring matches."""
         mock_user = Mock()
-        mock_user.login = "testuser"
-        mock_user.name = "Test User"
+        mock_user.login = "ann"
+        mock_user.name = None
 
         with (
             patch(
@@ -195,11 +195,33 @@ class TestIsProjectLeaderResolution:
             patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
         ):
             mock_get_user.return_value = mock_user
-            mock_filter.return_value.exists.return_value = False
+            mock_filter.return_value.values_list.return_value = [["joann"]]
 
             query = ProjectQuery()
             result = query.__class__.__dict__["is_project_leader"](
-                query, info=mock_info, login="testuser"
+                query, info=mock_info, login="ann"
             )
 
             assert not result
+
+    def test_is_project_leader_case_insensitive_exact_match(self, mock_info):
+        """Test is_project_leader supports case-insensitive exact token matching."""
+        mock_user = Mock()
+        mock_user.login = "joann"
+        mock_user.name = None
+
+        with (
+            patch(
+                "apps.owasp.api.internal.queries.project.GithubUser.objects.get"
+            ) as mock_get_user,
+            patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
+        ):
+            mock_get_user.return_value = mock_user
+            mock_filter.return_value.values_list.return_value = [["JoAnn"]]
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="joann"
+            )
+
+            assert result
