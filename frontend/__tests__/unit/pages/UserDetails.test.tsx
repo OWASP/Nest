@@ -850,4 +850,161 @@ describe('UserDetailsPage', () => {
       })
     })
   })
+
+  describe('User Not Found Edge Cases', () => {
+    test('renders 404 when graphQLData exists but user is null', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          user: null,
+          recentIssues: [],
+          topContributedRepositories: [],
+          recentMilestones: [],
+          recentPullRequests: [],
+          recentReleases: [],
+        },
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('User not found')).toBeInTheDocument()
+        expect(
+          screen.getByText("Sorry, the user you're looking for doesn't exist")
+        ).toBeInTheDocument()
+      })
+    })
+
+    test('renders 404 when graphQLData is undefined', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: undefined,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('User not found')).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('User Fallback Values', () => {
+    test('renders with login as title when name is null', async () => {
+      const dataWithNullName = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          name: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullName,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        // The page title should use login when name is null
+        const loginLink = screen.getByRole('link', { name: '@testuser' })
+        expect(loginLink).toBeInTheDocument()
+      })
+    })
+
+    test('renders placeholder avatar when avatarUrl is null', async () => {
+      const dataWithNullAvatar = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          avatarUrl: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullAvatar,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const avatar = screen.getByRole('img')
+        expect(avatar).toHaveAttribute('src', expect.stringContaining('placeholder.svg'))
+      })
+    })
+
+    test('renders with login as alt text when name is null', async () => {
+      const dataWithNullName = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          name: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullName,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const avatar = screen.getByAltText('testuser')
+        expect(avatar).toBeInTheDocument()
+      })
+    })
+
+    test('renders with hash link when url is null', async () => {
+      const dataWithNullUrl = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          url: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullUrl,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const loginLink = screen.getByRole('link', { name: '@testuser' })
+        expect(loginLink).toHaveAttribute('href', '#')
+      })
+    })
+
+    test('renders with publicRepositoriesCount as null using fallback', async () => {
+      const dataWithNullRepoCount = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          publicRepositoriesCount: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullRepoCount,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('No Repositories')).toBeInTheDocument()
+      })
+    })
+  })
 })

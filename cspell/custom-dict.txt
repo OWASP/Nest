@@ -1,3 +1,4 @@
+AVD
 Agentic
 Agsoc
 Aichi
@@ -11,6 +12,7 @@ CISSP
 Cañón
 DRF
 ELEVENLABS
+Emay
 FOSS
 GBP
 GFKs
@@ -21,6 +23,8 @@ Golovanova
 Hackbright
 Héllo
 Illia
+Ime
+Iyonsi
 Kateryna
 Kerlyn
 Keshav
@@ -70,6 +74,7 @@ bangbang
 boardofdirectors
 bsky
 carryforward
+cdx
 certbot
 collectstatic
 coraza
@@ -78,6 +83,7 @@ csrfguard
 csrfprotector
 csrftoken
 cva
+cyclonedx
 defectdojo
 demojize
 dismissable
@@ -102,6 +108,7 @@ ics
 igoat
 inlinehilite
 isanori
+janedoe
 jumpstart
 kasya
 langgraph
@@ -127,6 +134,7 @@ menteemodule_set
 mentees
 mern
 millify
+misconfig
 mkv
 mpim
 navlink
@@ -162,6 +170,7 @@ rsc
 saft
 sakanashi
 samm
+sbom
 schemathesis
 semgrep
 seo
@@ -186,6 +195,7 @@ xapp
 xdg
 xdist
 xoxb
+xoxp
 xsser
 xzf
 zapconfig

@@ -116,3 +116,58 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_normalize_limit.return_value = None
         result = field.base_resolver.wrapped_func(mock_issue, limit=999999)
         assert result == []
+
+    def test_labels(self):
+        """Test labels field returns list of label names."""
+        mock_issue = Mock()
+        mock_label1 = Mock()
+        mock_label1.name = "bug"
+        mock_label2 = Mock()
+        mock_label2.name = "enhancement"
+        mock_issue.labels.all.return_value = [mock_label1, mock_label2]
+
+        field = self._get_field_by_name("labels", IssueNode)
+        result = field.base_resolver.wrapped_func(None, mock_issue)
+        assert result == ["bug", "enhancement"]
+
+    def test_is_merged_true(self):
+        """Test is_merged field when issue has merged pull requests."""
+        mock_issue = Mock()
+        mock_issue.merged_pull_requests = [Mock()]
+
+        field = self._get_field_by_name("is_merged", IssueNode)
+        result = field.base_resolver.wrapped_func(None, mock_issue)
+        assert result
+
+    def test_is_merged_false(self):
+        """Test is_merged field when issue has no merged pull requests."""
+        mock_issue = Mock()
+        mock_issue.merged_pull_requests = None
+
+        field = self._get_field_by_name("is_merged", IssueNode)
+        result = field.base_resolver.wrapped_func(None, mock_issue)
+        assert not result
+
+    def test_interested_users(self):
+        """Test interested_users field returns list of users."""
+        mock_issue = Mock()
+        mock_user1 = Mock()
+        mock_user1.login = "user1"
+        mock_user2 = Mock()
+        mock_user2.login = "user2"
+
+        mock_interest1 = Mock()
+        mock_interest1.user = mock_user1
+        mock_interest2 = Mock()
+        mock_interest2.user = mock_user2
+
+        mock_queryset = Mock()
+        mock_queryset.select_related.return_value.order_by.return_value = [
+            mock_interest1,
+            mock_interest2,
+        ]
+        mock_issue.participant_interests = mock_queryset
+
+        field = self._get_field_by_name("interested_users", IssueNode)
+        result = field.base_resolver.wrapped_func(None, mock_issue)
+        assert result == [mock_user1, mock_user2]

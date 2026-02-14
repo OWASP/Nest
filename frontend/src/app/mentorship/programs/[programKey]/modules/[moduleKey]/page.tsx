@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
+import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -85,14 +86,17 @@ const ModuleDetailsPage = () => {
 
   return (
     <DetailsCard
-      admins={admins}
+      admins={admins ?? undefined}
       details={moduleDetails}
-      domains={programModule.domains}
+      domains={programModule.domains ?? undefined}
       mentors={programModule.mentors}
       isFetchingMore={isFetchingMore}
-      pullRequests={(programModule.recentPullRequests || []).slice(0, visibleCount)}
+      pullRequests={((programModule.recentPullRequests as unknown as PullRequest[]) || []).slice(
+        0,
+        visibleCount
+      )}
       summary={programModule.description}
-      tags={programModule.tags}
+      tags={programModule.tags ?? undefined}
       title={programModule.name}
       type="module"
       onLoadMorePullRequests={
@@ -117,7 +121,7 @@ const ModuleDetailsPage = () => {
                     return {
                       ...prevResult,
                       getModule: {
-                        ...prevResult.getModule,
+                        ...prevResult.getModule!,
                         recentPullRequests: [
                           ...(prevResult.getModule?.recentPullRequests || []),
                           ...newPRs,

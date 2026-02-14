@@ -67,13 +67,15 @@ const ProgramDetailsPage = () => {
 
   return (
     <DetailsCard
-      admins={program.admins}
+      admins={program.admins ?? undefined}
       details={programDetails}
-      domains={program.domains}
+      domains={program.domains ?? undefined}
       modules={modules}
-      recentMilestones={program.recentMilestones}
+      recentMilestones={
+        (program.recentMilestones as unknown as import('types/milestone').Milestone[]) ?? undefined
+      }
       summary={program.description}
-      tags={program.tags}
+      tags={program.tags ?? undefined}
       title={program.name}
       type="program"
     />

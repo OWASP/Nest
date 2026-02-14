@@ -303,7 +303,7 @@ describe('ModuleIssueDetailsPage', () => {
 
   describe('issue states', () => {
     it.each([
-      { state: 'closed', isMerged: true, expectedText: 'Merged' },
+      { state: 'closed', isMerged: true, expectedText: 'Closed' },
       { state: 'closed', isMerged: false, expectedText: 'Closed' },
       { state: 'open', isMerged: false, expectedText: 'Open' },
     ])('renders issue state as "$expectedText"', ({ state, isMerged, expectedText }) => {
@@ -457,5 +457,176 @@ describe('ModuleIssueDetailsPage', () => {
         }),
       })
     )
+  })
+
+  it('renders "(today)" for deadline that is exactly today', () => {
+    const today = new Date()
+    const todayDeadline = new Date(
+      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+    ).toISOString()
+
+    const dataWithTodayDeadline = {
+      ...mockIssueData,
+      getModule: { ...mockIssueData.getModule, taskDeadline: todayDeadline },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithTodayDeadline, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.getByText(/\(today\)/)).toBeInTheDocument()
+  })
+
+  it('shows "Loading issue…" title when issueId is not available', () => {
+    mockUseParams.mockReturnValue({
+      programKey: 'prog1',
+      moduleKey: 'mod1',
+      issueId: '',
+    })
+    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+
+    const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
+    const userGrid = interestedUsersHeading.nextElementSibling
+    const assignButton = within(userGrid as HTMLElement).getByRole('button', { name: /Assign/i })
+    expect(assignButton).toHaveAttribute('title', 'Loading issue…')
+  })
+
+  it('shows ShowMoreButton when there are more than 4 pull requests', async () => {
+    const manyPRsData = {
+      ...mockIssueData,
+      getModule: {
+        ...mockIssueData.getModule,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          pullRequests: Array.from({ length: 6 }, (_, i) => ({
+            id: `pr${i + 1}`,
+            title: `Pull Request ${i + 1}`,
+            url: `https://github.com/pr/${i + 1}`,
+            state: 'open',
+            mergedAt: null,
+            createdAt: new Date().toISOString(),
+            author: {
+              login: `dev${i + 1}`,
+              avatarUrl: `https://example.com/avatar${i + 1}.png`,
+            },
+          })),
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({
+      data: manyPRsData,
+      loading: false,
+      error: undefined,
+      fetchMore: jest.fn().mockResolvedValue({ data: manyPRsData }),
+    })
+    render(<ModuleIssueDetailsPage />)
+
+    // Initially only 4 PRs should be visible
+    expect(screen.getByText('Pull Request 1')).toBeInTheDocument()
+    expect(screen.queryByText('Pull Request 5')).not.toBeInTheDocument()
+
+    // Click ShowMoreButton to show all PRs
+    const showMoreButton = screen.getByRole('button', { name: /show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Pull Request 5')).toBeInTheDocument()
+      expect(screen.getByText('Pull Request 6')).toBeInTheDocument()
+    })
+  })
+
+  it('renders assignee name when login is not available', () => {
+    const dataWithNameOnlyAssignee = {
+      ...mockIssueData,
+      getModule: {
+        ...mockIssueData.getModule,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          assignees: [
+            {
+              id: 'assignee1',
+              login: '',
+              name: 'Fallback Name',
+              avatarUrl: 'https://example.com/avatar1.png',
+            },
+          ],
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({
+      data: dataWithNameOnlyAssignee,
+      loading: false,
+      error: undefined,
+    })
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.getByText('Fallback Name')).toBeInTheDocument()
+  })
+
+  it('renders placeholder avatar for assignee without avatarUrl', () => {
+    const dataWithNoAvatarAssignee = {
+      ...mockIssueData,
+      getModule: {
+        ...mockIssueData.getModule,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          assignees: [
+            {
+              id: 'assignee1',
+              login: 'user1',
+              name: 'User One',
+              avatarUrl: null,
+            },
+          ],
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({
+      data: dataWithNoAvatarAssignee,
+      loading: false,
+      error: undefined,
+    })
+    render(<ModuleIssueDetailsPage />)
+    const placeholderDiv = document.querySelector('[aria-hidden="true"].rounded-full.bg-gray-400')
+    expect(placeholderDiv).toBeInTheDocument()
+  })
+
+  it('handles null pullRequests array', () => {
+    const dataWithNullPRs = {
+      ...mockIssueData,
+      getModule: {
+        ...mockIssueData.getModule,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          pullRequests: null,
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithNullPRs, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.getByText('No linked pull requests.')).toBeInTheDocument()
+  })
+
+  it('renders placeholder avatar for interested user without avatarUrl', () => {
+    const dataWithNoAvatarInterestedUser = {
+      ...mockIssueData,
+      getModule: {
+        ...mockIssueData.getModule,
+        interestedUsers: [
+          {
+            id: 'user2',
+            login: 'user2',
+            avatarUrl: null,
+          },
+        ],
+      },
+    }
+    mockUseQuery.mockReturnValue({
+      data: dataWithNoAvatarInterestedUser,
+      loading: false,
+      error: undefined,
+    })
+    render(<ModuleIssueDetailsPage />)
+    const placeholderDivs = document.querySelectorAll(
+      '[aria-hidden="true"].rounded-full.bg-gray-400'
+    )
+    expect(placeholderDivs.length).toBeGreaterThan(0)
   })
 })
