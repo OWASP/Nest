@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Annotated
 
 import strawberry
 import strawberry_django
-from django.db.models import Prefetch, prefetch_related_objects
+from django.db.models import Prefetch
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -104,15 +104,8 @@ class RepositoryNode(strawberry.relay.Node):
         # TODO(arkid15r): rename this to recent_releases.
         if hasattr(root, "prefetched_releases"):
             return root.prefetched_releases
-
-        releases = list(
-            root.published_releases.select_related(
-                "author__owasp_profile",
-                "repository__organization",
-            ).order_by("-published_at")[:RECENT_RELEASES_LIMIT]
-        )
-        prefetch_related_objects(releases, "repository__project_set")
-        return releases
+        # Fallback for the `repository` query
+        return root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
     @strawberry_django.field
     def top_contributors(self, root: Repository) -> list[RepositoryContributorNode]:
