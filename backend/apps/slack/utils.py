@@ -30,9 +30,7 @@ def download_file(url: str, token: str) -> bytes | None:
         bytes or None: The downloaded file content, or None if download failed.
 
     """
-    if not url:
-        return None
-    if not token:
+    if not url or not token:
         return None
 
     try:

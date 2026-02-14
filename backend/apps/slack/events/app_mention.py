@@ -10,7 +10,7 @@ from apps.slack.utils import download_file
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_MIMETYPES = ("image/jpeg", "image/png", "image/webp")
+ALLOWED_MIMETYPES = {"image/jpeg", "image/png", "image/webp"}
 MAX_IMAGE_SIZE = 2 * 1024 * 1024  # 2 MB
 
 
@@ -104,7 +104,7 @@ class AppMention(EventBase):
                 )
                 image_uris.append(image_uri)
 
-        # Get AI response and post it
+        # Get AI response and post it.
         reply_blocks = get_blocks(
             query=query, images=image_uris, channel_id=channel_id, is_app_mention=True
         )

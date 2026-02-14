@@ -104,6 +104,7 @@ class OpenAi:
         """
         content: list[ChatCompletionContentPartParam] = [{"type": "text", "text": self.input}]
         content.extend({"type": "image_url", "image_url": {"url": uri}} for uri in self.images)
+
         return content
 
     def complete(self) -> str | None:

@@ -92,10 +92,13 @@ class TestOpenAi:
 
         assert isinstance(content, list)
         assert len(content) == 2
-        assert content[0] == {"type": "text", "text": "What is in this image?"}
+        assert content[0] == {
+            "text": "What is in this image?",
+            "type": "text",
+        }
         assert content[1] == {
-            "type": "image_url",
             "image_url": {"url": "data:image/png;base64,abc123"},
+            "type": "image_url",
         }
 
     def test_user_content_with_multiple_images(self, openai_instance):
@@ -112,6 +115,9 @@ class TestOpenAi:
 
         assert isinstance(content, list)
         assert len(content) == 3
-        assert content[0] == {"type": "text", "text": "Describe these images"}
+        assert content[0] == {
+            "text": "Describe these images",
+            "type": "text",
+        }
         assert content[1]["type"] == "image_url"
         assert content[2]["type"] == "image_url"

@@ -79,8 +79,8 @@ class TestAiHandler:
         images = ["data:image/png;base64,abc123"]
         ai_response = "The image shows a security dashboard."
         expected_block = {
-            "type": "section",
             "text": {"type": "mrkdwn", "text": ai_response},
+            "type": "section",
         }
 
         mock_process_ai_query.return_value = ai_response
