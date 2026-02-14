@@ -13,8 +13,10 @@ from apps.ai.agents.community import create_community_agent
 from apps.ai.agents.contribution import create_contribution_agent
 from apps.ai.agents.project import create_project_agent
 from apps.ai.agents.rag import create_rag_agent
+from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
 from apps.ai.common.intent import Intent
 from apps.ai.router import route
+from apps.common.open_ai import OpenAi
 from apps.slack.constants import (
     OWASP_COMMUNITY_CHANNEL_ID,
 )
@@ -22,6 +24,12 @@ from apps.slack.constants import (
 logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.7
+
+IMAGE_DESCRIPTION_PROMPT = (
+    "Describe what is shown in these images. Focus on any text, "
+    "error messages, code snippets, UI elements, or technical details. "
+    "Be concise."
+)
 
 
 def normalize_channel_id(channel_id: str) -> str:
@@ -48,7 +56,11 @@ INTENT_TO_AGENT = {
 
 
 def process_query(  # noqa: PLR0911
-    query: str, channel_id: str | None = None, *, is_app_mention: bool = False
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
 ) -> str | None:
     """Process query using multi-agent architecture.
 
@@ -56,6 +68,7 @@ def process_query(  # noqa: PLR0911
 
     Args:
         query: User's question
+        images (list[str] | None): A list of base64 encoded image data URIs.
         channel_id: Optional Slack channel ID where the query originated
         is_app_mention: Whether this is an explicit app mention (vs channel monitored message)
 
@@ -65,6 +78,17 @@ def process_query(  # noqa: PLR0911
 
     """
     try:
+        if images:
+            image_context = (
+                OpenAi(model=DEFAULT_VISION_MODEL)
+                .set_prompt(IMAGE_DESCRIPTION_PROMPT)
+                .set_input(query)
+                .set_images(images)
+                .complete()
+            )
+            if image_context:
+                query = f"{query}{DELIMITER}Image context: {image_context}"
+
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
         intent = router_result["intent"]

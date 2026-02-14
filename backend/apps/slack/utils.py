@@ -8,6 +8,8 @@ from functools import lru_cache
 from html import escape as escape_html
 from typing import TYPE_CHECKING
 
+import requests
+
 if TYPE_CHECKING:  # pragma: no cover
     from django.db.models import QuerySet
 
@@ -15,6 +17,30 @@ if TYPE_CHECKING:  # pragma: no cover
 from apps.common.constants import NL
 
 logger: logging.Logger = logging.getLogger(__name__)
+
+
+def download_file(url: str, token: str) -> bytes | None:
+    """Download Slack file.
+
+    Args:
+        url (str): The url of the file.
+        token (str): The slack bot token.
+
+    Returns:
+        bytes or None: The downloaded file content, or None if download failed.
+
+    """
+    if not url or not token:
+        return None
+
+    try:
+        response = requests.get(url, headers={"Authorization": f"Bearer {token}"}, timeout=30)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        logger.exception("Failed to download Slack file", extra={"error": str(e)})
+        return None
+
+    return response.content
 
 
 def escape(content: str) -> str:

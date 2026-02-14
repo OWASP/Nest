@@ -30,6 +30,14 @@ class TestOpenAi:
         assert instance.model == DEFAULT_MODEL
         assert instance.temperature == DEFAULT_TEMPERATURE
 
+    def test_set_images(self, openai_instance):
+        """Test set_images stores images and returns self for chaining."""
+        images = ["data:image/png;base64,abc123"]
+        result = openai_instance.set_images(images)
+
+        assert result is openai_instance
+        assert openai_instance.images == images
+
     @pytest.mark.parametrize(
         ("input_content", "expected_input"), [("Test input content", "Test input content")]
     )
@@ -64,3 +72,52 @@ class TestOpenAi:
         mock_logger.exception.assert_called_once_with(
             "An error occurred during OpenAI API request."
         )
+
+    def test_user_content_text_only(self, openai_instance):
+        """Test user_content returns text-only content when no images."""
+        openai_instance.set_input("What is OWASP?")
+
+        content = openai_instance.user_content
+
+        assert isinstance(content, list)
+        assert len(content) == 1
+        assert content[0] == {"type": "text", "text": "What is OWASP?"}
+
+    def test_user_content_with_images(self, openai_instance):
+        """Test user_content returns multimodal content list with images."""
+        openai_instance.set_input("What is in this image?")
+        openai_instance.set_images(["data:image/png;base64,abc123"])
+
+        content = openai_instance.user_content
+
+        assert isinstance(content, list)
+        assert len(content) == 2
+        assert content[0] == {
+            "text": "What is in this image?",
+            "type": "text",
+        }
+        assert content[1] == {
+            "image_url": {"url": "data:image/png;base64,abc123"},
+            "type": "image_url",
+        }
+
+    def test_user_content_with_multiple_images(self, openai_instance):
+        """Test user_content with multiple images."""
+        openai_instance.set_input("Describe these images")
+        openai_instance.set_images(
+            [
+                "data:image/png;base64,img1",
+                "data:image/jpeg;base64,img2",
+            ]
+        )
+
+        content = openai_instance.user_content
+
+        assert isinstance(content, list)
+        assert len(content) == 3
+        assert content[0] == {
+            "text": "Describe these images",
+            "type": "text",
+        }
+        assert content[1]["type"] == "image_url"
+        assert content[2]["type"] == "image_url"

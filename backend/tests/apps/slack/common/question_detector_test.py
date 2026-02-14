@@ -24,12 +24,20 @@ class TestQuestionDetector:
 
         monkeypatch.setattr("openai.OpenAI", MagicMock(return_value=mock_client))
 
-        # Mock the Retriever class
-        mock_retriever = MagicMock()
-        mock_retriever.retrieve.return_value = []
+        # Mock the embedder
+        mock_embedder = MagicMock()
+        mock_embedder.embed_query.return_value = [0.0] * 1536
         monkeypatch.setattr(
-            "apps.slack.common.question_detector.Retriever", MagicMock(return_value=mock_retriever)
+            "apps.slack.common.question_detector.get_embedder",
+            MagicMock(return_value=mock_embedder),
         )
+
+        # Mock Chunk.objects for _retrieve_chunks
+        mock_chunk_qs = MagicMock()
+        mock_chunk_qs.annotate.return_value.order_by.return_value.__getitem__ = MagicMock(
+            return_value=[]
+        )
+        monkeypatch.setattr("apps.slack.common.question_detector.Chunk.objects", mock_chunk_qs)
 
         monkeypatch.setattr(
             "apps.slack.common.question_detector.Prompt.get_slack_question_detector_prompt",
@@ -70,7 +78,7 @@ class TestQuestionDetector:
         # Test that detector initializes properly
         assert detector is not None
         assert hasattr(detector, "openai_client")
-        assert hasattr(detector, "retriever")
+        assert hasattr(detector, "embedder")
 
     def test_is_owasp_question_true_cases(self, detector, sample_context_chunks, monkeypatch):
         """Test cases that should be detected as OWASP questions."""
@@ -178,7 +186,7 @@ class TestQuestionDetector:
             # Test that detector initializes properly
             assert detector is not None
             assert hasattr(detector, "openai_client")
-            assert hasattr(detector, "retriever")
+            assert hasattr(detector, "embedder")
 
     def test_class_constants(self, detector):
         """Test that class constants are properly defined."""

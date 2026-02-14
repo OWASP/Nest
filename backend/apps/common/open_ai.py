@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 import openai
 from django.conf import settings
+
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionContentPartParam
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -29,9 +33,24 @@ class OpenAi:
             timeout=30,  # In seconds.
         )
 
+        self.images: list[str] = []
         self.max_tokens = max_tokens
         self.model = model
         self.temperature = temperature
+
+    def set_images(self, images: list[str]) -> OpenAi:
+        """Set images data URI.
+
+        Args:
+            images (list[str]): A list of base64 encoded image data URIs.
+
+        Returns:
+            OpenAi: The current instance.
+
+        """
+        self.images = images
+
+        return self
 
     def set_input(self, content: str) -> OpenAi:
         """Set system role content.
@@ -75,6 +94,19 @@ class OpenAi:
 
         return self
 
+    @property
+    def user_content(self) -> list[ChatCompletionContentPartParam]:
+        """User message content.
+
+        Returns:
+            list[ChatCompletionContentPartParam]: User message content.
+
+        """
+        content: list[ChatCompletionContentPartParam] = [{"type": "text", "text": self.input}]
+        content.extend({"type": "image_url", "image_url": {"url": uri}} for uri in self.images)
+
+        return content
+
     def complete(self) -> str | None:
         """Get API response.
 
@@ -91,7 +123,7 @@ class OpenAi:
                 max_tokens=self.max_tokens,
                 messages=[
                     {"role": "system", "content": self.prompt},
-                    {"role": "user", "content": self.input},
+                    {"role": "user", "content": self.user_content},
                 ],
                 model=self.model,
                 temperature=self.temperature,
