@@ -5,6 +5,7 @@ import strawberry_django
 
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
+from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
 
 
 @strawberry.type
@@ -15,7 +16,12 @@ class GenericEntityNode(strawberry.relay.Node):
     def entity_leaders(self, root) -> list[EntityMemberNode]:
         """Resolve entity leaders."""
         return root.entity_leaders
-
+    
+    @strawberry_django.field(prefetch_related=["entity_channels"])
+    def entity_channels(self, root) -> list[EntityChannelNode]:
+        """Resolve entity channels."""
+        return list(root.entity_channels.filter(is_active=True))
+    
     @strawberry_django.field
     def leaders(self, root) -> list[str]:
         """Resolve leaders."""

@@ -55,6 +55,9 @@ export default function ChapterDetailsPage() {
     )
   }
 
+  const slackChannelUrl = (slackChannelId: string) =>
+    `https://owasp.slack.com/archives/${slackChannelId}`
+
   const details = [
     { label: 'Last Updated', value: formatDate(chapter.updatedAt) ?? '' },
     { label: 'Location', value: chapter.suggestedLocation ?? '' },
@@ -67,6 +70,28 @@ export default function ChapterDetailsPage() {
         </Link>
       ),
     },
+    ...(chapter.entityChannels && chapter.entityChannels.length > 0
+      ? [
+        {
+          label: 'Slack',
+          value: (
+            <div className="inline-flex flex-wrap gap-3">
+              {chapter.entityChannels.map((ch) => (
+                <Link
+                  key={ch.slackChannelId}
+                  href={slackChannelUrl(ch.slackChannelId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
+                  #{ch.name}
+                </Link>
+              ))}
+            </div>
+          ),
+        },
+      ]
+      : []),
   ]
 
   const { startDate, endDate } = getDateRange({ years: 1 })

@@ -8,6 +8,7 @@ from functools import cached_property
 from urllib.parse import urlparse
 
 import yaml
+
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -21,6 +22,7 @@ from apps.github.constants import (
 )
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.entity_member import EntityMember
+from apps.owasp.models.entity_channel import EntityChannel
 from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
@@ -98,6 +100,13 @@ class RepositoryBasedEntityModel(models.Model):
         content_type_field="entity_type",
         object_id_field="entity_id",
         related_query_name="entity_member",
+    )
+
+    entity_channels = GenericRelation(
+        EntityChannel,
+        content_type_field="entity_type",
+        object_id_field="entity_id",
+        related_query_name="entity_channel",
     )
 
     @cached_property

@@ -16,6 +16,10 @@ slack-set-conversation-sync-messages-flags:
 	@echo "Setting conversation sync messages flags"
 	@CMD="python manage.py slack_set_conversation_sync_messages_flags" $(MAKE) exec-backend-command
 
+slack-match-channels:
+	@echo "Matching Slack channels to OWASP chapters, committees, and projects"
+	@CMD="python manage.py owasp_match_channels" $(MAKE) exec-backend-command
+
 slack-sync-data:
 	@echo "Syncing Slack data"
 	@CMD="python manage.py slack_sync_data" $(MAKE) exec-backend-command
