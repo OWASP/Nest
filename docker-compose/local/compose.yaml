@@ -27,7 +27,12 @@ services:
       # Disable Slack in backend - routes won't be registered
       DJANGO_SLACK_BOT_TOKEN: None
       DJANGO_SLACK_SIGNING_SECRET: None
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - nest-network
     ports:
@@ -45,7 +50,7 @@ services:
     image: nest-local-backend
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
       cache:
         condition: service_healthy
       db:
