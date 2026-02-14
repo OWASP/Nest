@@ -99,10 +99,9 @@ describe('useBreadcrumbs', () => {
 
       const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
 
-      const titles = result.current.map((item) => item.title)
-      expect(titles).not.toContain('Community')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Forum', path: '/community/forum' },
       ])
     })
@@ -111,11 +110,9 @@ describe('useBreadcrumbs', () => {
 
       const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
 
-      const titles = result.current.map((item) => item.title)
-      expect(titles).not.toContain('Community')
-      expect(titles).not.toContain('Mentees')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Profile', path: '/community/mentees/profile' },
       ])
     })

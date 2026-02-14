@@ -23,18 +23,20 @@ function buildBreadcrumbItems(
     return items
   }
 
-  const isCommunityLogicalParent =
-    !pathname.startsWith('/community') &&
+  const segments = pathname.split('/').filter(Boolean)
+
+  const shouldShowCommunity =
+    pathname === '/community' ||
+    pathname.startsWith('/community/') ||
     COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))
 
-  if (isCommunityLogicalParent) {
+  if (shouldShowCommunity) {
     items.push({
       title: 'Community',
       path: '/community',
     })
   }
 
-  const segments = pathname.split('/').filter(Boolean)
   let currentPath = ''
 
   for (const segment of segments) {
