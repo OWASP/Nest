@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from apps.slack.events.message_posted import MessagePosted
+from apps.slack.models.message import Message
 
 TEST_BOT_TOKEN = "xoxb-test-token"  # noqa: S105
 
@@ -94,6 +95,53 @@ class TestMessagePosted:
             message_handler.handle_event(event, client)
 
         client.chat_postMessage.assert_not_called()
+
+    def test_handle_event_thread_message_updates_parent(self, message_handler):
+        """Test that thread messages update parent message has_replies flag."""
+        event = {
+            "thread_ts": "1234567890.123455",
+            "channel": "C123456",
+            "user": "U123456",
+            "text": "This is a reply",
+            "ts": "1234567890.123456",
+        }
+        client = Mock()
+
+        with patch("apps.slack.events.message_posted.Message") as mock_message:
+            mock_queryset = Mock()
+            mock_message.objects.filter.return_value = mock_queryset
+
+            message_handler.handle_event(event, client)
+
+            mock_message.objects.filter.assert_called_once_with(
+                slack_message_id="1234567890.123455",
+                conversation__slack_channel_id="C123456",
+            )
+            mock_queryset.update.assert_called_once_with(has_replies=True)
+
+    def test_handle_event_thread_message_not_found_warning(self, message_handler):
+        """Test logger warning when thread parent message is not found."""
+        event = {
+            "thread_ts": "1234567890.123455",
+            "channel": "C123456",
+            "user": "U123456",
+            "text": "This is a reply",
+            "ts": "1234567890.123456",
+        }
+        client = Mock()
+
+        with (
+            patch("apps.slack.events.message_posted.Message") as mock_message,
+            patch("apps.slack.events.message_posted.logger") as mock_logger,
+        ):
+            mock_message.DoesNotExist = Message.DoesNotExist
+            mock_queryset = Mock()
+            mock_queryset.update.side_effect = Message.DoesNotExist
+            mock_message.objects.filter.return_value = mock_queryset
+
+            message_handler.handle_event(event, client)
+
+            mock_logger.warning.assert_called_once_with("Thread message not found.")
 
     def test_handle_event_conversation_not_found(self, message_handler):
         """Test handling when conversation is not found."""

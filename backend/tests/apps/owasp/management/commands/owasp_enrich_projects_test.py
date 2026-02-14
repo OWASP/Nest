@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from unittest import mock
 
 import pytest
@@ -13,6 +14,15 @@ class TestOwaspEnrichProjects:
     @pytest.fixture
     def command(self):
         return Command()
+
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args([])
+        assert args.offset == 0
+        assert not args.force_update_summary
+        assert args.update_summary
 
     @pytest.fixture
     def mock_project(self):

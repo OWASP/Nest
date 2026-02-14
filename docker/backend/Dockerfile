@@ -35,11 +35,12 @@ COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --no-root --verbose --without test --without video
 
-COPY apps apps
+# Less likely to cause cache invalidation items go first.
 COPY entrypoint.sh manage.py wsgi.py ./
 COPY settings settings
-COPY static static
 COPY templates templates
+COPY static static
+COPY apps apps
 
 FROM python:3.13.11-alpine3.23
 

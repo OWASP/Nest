@@ -443,6 +443,56 @@ describe('MovingLogos (LogoCarousel)', () => {
     })
   })
 
+  describe('Coverage Edge Cases', () => {
+    it('uses url for key generation when id is missing', () => {
+      const sponsor: Sponsor = {
+        id: undefined as unknown as string,
+        name: 'Name',
+        imageUrl: 'https://img.com',
+        url: 'https://url.com',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByTestId('sponsor-link')).toHaveLength(4)
+    })
+
+    it('uses name for key generation when id and url are missing', () => {
+      const sponsor: Sponsor = {
+        id: undefined as unknown as string,
+        name: 'Name',
+        imageUrl: 'https://img.com',
+        url: '',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByTestId('sponsor-link')).toHaveLength(4)
+    })
+
+    it('uses generic fallback for key generation when id, url, and name are missing', () => {
+      const sponsor: Sponsor = {
+        id: undefined as unknown as string,
+        name: '',
+        imageUrl: 'https://img.com',
+        url: '',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByTestId('sponsor-link')).toHaveLength(4)
+    })
+
+    it('renders generic "Sponsor" text when name and image are missing', () => {
+      const sponsor: Sponsor = {
+        id: '1',
+        name: '',
+        imageUrl: '',
+        url: 'https://url.com',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByText('Sponsor')).toHaveLength(2)
+    })
+  })
+
   describe('Accessibility Roles and Labels', () => {
     it('provides proper alt text for images', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
