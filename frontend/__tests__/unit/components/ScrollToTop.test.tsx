@@ -94,23 +94,19 @@ describe('ScrollToTop component test', () => {
 
     render(<ScrollToTop />)
 
-    // First scroll event - should set a timeout
     Object.defineProperty(globalThis, 'scrollY', { value: 400, writable: true })
     globalThis.dispatchEvent(new Event('scroll'))
 
     expect(setTimeoutSpy).toHaveBeenCalledTimes(1)
 
-    // Immediate second scroll event - should NOT set a new timeout due to throttling
     globalThis.dispatchEvent(new Event('scroll'))
 
     expect(setTimeoutSpy).toHaveBeenCalledTimes(1) // Still 1
 
-    // Fast forward time to clear the timeout
     act(() => {
       jest.advanceTimersByTime(100)
     })
 
-    // Third scroll event - should set a new timeout now
     globalThis.dispatchEvent(new Event('scroll'))
     expect(setTimeoutSpy).toHaveBeenCalledTimes(2)
 

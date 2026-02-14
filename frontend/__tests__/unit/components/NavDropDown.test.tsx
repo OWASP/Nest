@@ -304,7 +304,6 @@ describe('NavDropdown Component', () => {
       const submenuItem = screen.getByText('Getting Started')
       submenuItem.focus()
 
-      // Close with Escape key on submenu item
       await user.keyboard('{Escape}')
       await waitFor(() => {
         expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
@@ -321,7 +320,6 @@ describe('NavDropdown Component', () => {
       const submenuItem = screen.getByText('Getting Started')
       submenuItem.focus()
 
-      // Close with Space key on submenu item
       await user.keyboard(' ')
       await waitFor(() => {
         expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()

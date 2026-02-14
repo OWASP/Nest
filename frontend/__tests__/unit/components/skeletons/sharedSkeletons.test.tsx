@@ -9,7 +9,6 @@ import {
   CardSection,
 } from 'components/skeletons/sharedSkeletons'
 
-// Mock the Skeleton component from @heroui/skeleton
 jest.mock('@heroui/skeleton', () => ({
   Skeleton: ({ className, ...props }: { className?: string; [key: string]: unknown }) => (
     <div data-testid="skeleton" className={className} {...props} />
@@ -21,19 +20,11 @@ describe('sharedSkeletons', () => {
     it('renders with correct title width', () => {
       render(<ItemCardSkeleton titleWidth="w-1/2" />)
       const skeletons = screen.getAllByTestId('skeleton')
-      // First skeleton is the title
       expect(skeletons[0]).toHaveClass('w-1/2')
     })
 
     it('renders correct structure', () => {
       render(<ItemCardSkeleton titleWidth="w-1/3" />)
-      // Expect 4 skeletons: title, 2 small icons/text in one row, 2 small icons/text in another div (from visual inspection of code)
-      // Actually code has:
-      // 1. Title
-      // 2. Icon (mr-2 h-4 w-4)
-      // 3. Text (h-4 w-20)
-      // 4. Icon (mr-2 h-5 w-4)
-      // 5. Text (h-4 w-24)
       const skeletons = screen.getAllByTestId('skeleton')
       expect(skeletons).toHaveLength(5)
     })
@@ -49,10 +40,6 @@ describe('sharedSkeletons', () => {
           titleSkeletonWidth="w-32"
         />
       )
-      // Should have 3 ItemCardSkeletons
-      // Each ItemCardSkeleton has 5 skeletons.
-      // Plus the section header has 2 skeletons (icon + title)
-      // Total = 2 + 3 * 5 = 17 skeletons
       const skeletons = screen.getAllByTestId('skeleton')
       expect(skeletons).toHaveLength(17)
     })
@@ -121,11 +108,6 @@ describe('sharedSkeletons', () => {
         { keyPrefix: 's2', titleWidth: 'w-30', itemTitleWidth: 'w-half' },
       ]
       render(<TwoColumnSection sections={sections} />)
-      // Each section header has 2 skeletons
-      // Each section has 5 items (hardcoded in TwoColumnSection)
-      // Each item has 5 skeletons
-      // Total per section = 2 + 5 * 5 = 27
-      // Total for 2 sections = 54
       const skeletons = screen.getAllByTestId('skeleton')
       expect(skeletons).toHaveLength(54)
     })
@@ -142,14 +124,7 @@ describe('sharedSkeletons', () => {
     it('renders without rounded class when false', () => {
       render(<SectionHeader titleSkeletonWidth="w-20" rounded={false} />)
       const skeletons = screen.getAllByTestId('skeleton')
-      // The first skeleton has 'w-5' in base class, check it doesn't have 'rounded' explicitly added by the prop logic
-      // Actually code is: `h-5 w-5 ${rounded ? 'rounded' : ''}`.
-      // If rounded is false, it's empty string.
-      // But note that skeletons might have rounded-lg or similar from base styles if Skeleton component had them,
-      // but here we are mocking Skeleton.
-      // We check for exact class match or presence.
       expect(skeletons[0]).not.toHaveClass('rounded', { exact: false })
-      // Wait, 'rounded' might be a partial match if we aren't careful, but here expecting class list to NOT contain the specific class 'rounded'.
     })
 
     it('renders correct title width', () => {

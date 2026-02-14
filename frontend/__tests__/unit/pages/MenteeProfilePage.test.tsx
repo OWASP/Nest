@@ -467,7 +467,6 @@ describe('MenteeProfilePage', () => {
     mockUseQuery.mockReturnValue({ data: dataWithNullLabels, loading: false, error: undefined })
     render(<MenteeProfilePage />)
 
-    // Should render without crashing
     expect(screen.getAllByText('Issue with null labels').length).toBeGreaterThan(0)
   })
 
@@ -492,7 +491,6 @@ describe('MenteeProfilePage', () => {
     })
     render(<MenteeProfilePage />)
 
-    // Should render without crashing
     expect(screen.getAllByText('Issue with undefined labels').length).toBeGreaterThan(0)
   })
 
@@ -508,7 +506,6 @@ describe('MenteeProfilePage', () => {
     mockUseQuery.mockReturnValue({ data: dataWithNullDomains, loading: false, error: undefined })
     render(<MenteeProfilePage />)
 
-    // Should render skills section but not domains
     expect(screen.queryByRole('heading', { name: /Domains/i })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /Skills & Technologies/i })).toBeInTheDocument()
   })
@@ -525,7 +522,6 @@ describe('MenteeProfilePage', () => {
     mockUseQuery.mockReturnValue({ data: dataWithNullTags, loading: false, error: undefined })
     render(<MenteeProfilePage />)
 
-    // Should render domains section but not skills
     expect(screen.getByRole('heading', { name: /Domains/i })).toBeInTheDocument()
     expect(
       screen.queryByRole('heading', { name: /Skills & Technologies/i })
@@ -536,15 +532,12 @@ describe('MenteeProfilePage', () => {
     mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
     render(<MenteeProfilePage />)
 
-    // Initially should show all issues
     expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
 
-    // Trigger empty selection by clicking the hidden test button
     const emptyTrigger = screen.getByTestId('select-trigger-empty')
     fireEvent.click(emptyTrigger)
 
-    // Issues should still be visible (filter unchanged)
     expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
   })

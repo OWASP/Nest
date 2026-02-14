@@ -164,16 +164,13 @@ describe('Organization', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Null Avatar Org')).toBeInTheDocument()
-      // Verify the actual avatar image is NOT shown
       expect(screen.queryByAltText("Null Avatar Org's profile picture")).not.toBeInTheDocument()
     })
 
-    // Verify the fallback container IS shown (contains the FaUser icon)
     const cards = screen.getAllByRole('button')
     const nullAvatarCard = cards.find((card) => card.textContent?.includes('Null Avatar Org'))
     expect(nullAvatarCard).toBeInTheDocument()
 
-    // The fallback is a div with specific classes containing an SVG
     const fallbackContainer = nullAvatarCard?.querySelector('.bg-gray-200')
     expect(fallbackContainer).toBeInTheDocument()
   })

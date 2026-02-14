@@ -189,7 +189,6 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
-    // Should render without crashing even when region is null
   })
 
   test('handles missing suggestedLocation and region gracefully', async () => {
@@ -210,6 +209,5 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
-    // Should render without crashing even when both fields are undefined
   })
 })

@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 
-// Mock styles from imported component
 jest.mock('components/forms/shared/FormDateInput', () => {
   const originalModule = jest.requireActual('components/forms/shared/FormDateInput')
   return {
@@ -9,7 +8,6 @@ jest.mock('components/forms/shared/FormDateInput', () => {
   }
 })
 
-// Mock @heroui/react Input component
 jest.mock('@heroui/react', () => ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Input: jest.fn(

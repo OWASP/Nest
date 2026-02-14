@@ -338,14 +338,11 @@ describe('SingleModuleCard', () => {
       }
       render(<SingleModuleCard module={moduleWithoutNames} />)
 
-      // Alt text fallback
       const avatar = screen.getByTestId('contributor-avatar')
       expect(avatar).toHaveAttribute('alt', 'Mentors avatar')
 
-      // Title/text fallback to login
       expect(screen.getByText('Mentor1')).toBeInTheDocument() // upperFirst('mentor1')
       const links = screen.getAllByRole('link')
-      // Filter for the specific link to avoid ambiguity
       const link = links.find((l) => l.getAttribute('href')?.includes('/members/mentor1'))
       expect(link).toHaveAttribute('title', 'mentor1')
     })
@@ -362,7 +359,6 @@ describe('SingleModuleCard', () => {
         experienceLevel: '' as unknown as ExperienceLevelEnum,
       }
       render(<SingleModuleCard module={moduleWithEmptyDetails} />)
-      // Expect at least one 'Unknown' for the empty experience level
       expect(screen.getAllByText('Unknown').length).toBeGreaterThan(0)
     })
   })

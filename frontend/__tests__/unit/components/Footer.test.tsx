@@ -72,7 +72,6 @@ jest.mock('utils/constants', () => ({
   ],
 }))
 
-// Create a mutable mock for environment variables
 let mockEnv = {
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
@@ -284,7 +283,6 @@ describe('Footer', () => {
     })
 
     test('renders version as commit link in non-production environment', () => {
-      // Set non-production environment with commit hash
       mockEnv.ENVIRONMENT = 'staging'
       mockEnv.RELEASE_VERSION = '24.2.10-12c25c5'
 
@@ -297,7 +295,6 @@ describe('Footer', () => {
       expect(versionLink).toHaveAttribute('target', '_blank')
       expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
 
-      // Reset to defaults to avoid leaking state
       mockEnv.ENVIRONMENT = 'production'
       mockEnv.RELEASE_VERSION = '1.2.3'
     })

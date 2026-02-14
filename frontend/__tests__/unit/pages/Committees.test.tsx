@@ -160,6 +160,5 @@ describe('Committees Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
     })
-    // Should render without crashing even when summary is undefined
   })
 })

@@ -176,13 +176,10 @@ describe('ProjectHealthMetricsDetails', () => {
 
     render(<ProjectHealthMetricsDetails />)
 
-    // Verify that charts still render even with null createdAt
-    // The component uses empty string '' as fallback for null createdAt (lines 54-62 in implementation)
     await waitFor(() => {
       expect(screen.getByText('Stars')).toBeInTheDocument()
       expect(screen.getByText('Forks')).toBeInTheDocument()
       expect(screen.getByText('Issues')).toBeInTheDocument()
-      // Verify the ApexCharts component is rendered (charts use the labels with empty string fallback)
       const charts = screen.getAllByTestId('mock-apexcharts')
       expect(charts.length).toBeGreaterThan(0)
     })

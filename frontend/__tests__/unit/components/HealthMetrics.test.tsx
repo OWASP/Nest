@@ -153,10 +153,8 @@ describe('HealthMetrics', () => {
       // @ts-expect-error - testing specific edge case with mocked data
       render(<HealthMetrics data={nullData} />)
 
-      // Verify LineCharts have 0s for data
       const lineCharts = screen.getAllByTestId('LineChart')
 
-      // Issues Trend
       const issuesProps = JSON.parse(lineCharts[0].dataset.props || '{}')
       expect(issuesProps.series[0].data).toEqual([0]) // openIssuesCount
       expect(issuesProps.series[1].data).toEqual([0]) // unassignedIssuesCount
@@ -165,15 +163,15 @@ describe('HealthMetrics', () => {
 
       // Pull Requests Trend
       const prProps = JSON.parse(lineCharts[1].dataset.props || '{}')
-      expect(prProps.series[0].data).toEqual([0]) // openPullRequestsCount
+      expect(prProps.series[0].data).toEqual([0])
 
       // Stars Trend
       const starsProps = JSON.parse(lineCharts[2].dataset.props || '{}')
-      expect(starsProps.series[0].data).toEqual([0]) // starsCount
+      expect(starsProps.series[0].data).toEqual([0])
 
       // Forks Trend
       const forksProps = JSON.parse(lineCharts[3].dataset.props || '{}')
-      expect(forksProps.series[0].data).toEqual([0]) // forksCount
+      expect(forksProps.series[0].data).toEqual([0])
     })
   })
 })

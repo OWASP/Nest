@@ -199,11 +199,9 @@ describe('ProgramDetailsPage', () => {
         expect(screen.getByTestId('details-card')).toBeInTheDocument()
       })
 
-      // Directly call setStatus with an invalid status to trigger the error path
       expect(capturedSetStatus).not.toBeNull()
       capturedSetStatus!('INVALID_STATUS')
 
-      // Should show error toast and NOT call the mutation
       await waitFor(() => {
         expect(addToast).toHaveBeenCalledWith({
           color: 'danger',
@@ -291,7 +289,6 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByTestId('details-card')).toBeInTheDocument()
     })
 
-    // Call setStatus as non-admin with valid status
     if (capturedSetStatus) {
       capturedSetStatus(ProgramStatusEnum.Published)
     }
@@ -321,7 +318,6 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByTestId('details-card')).toBeInTheDocument()
     })
 
-    // Call setStatus as admin with valid status
     if (capturedSetStatus) {
       await capturedSetStatus(ProgramStatusEnum.Published)
     }
@@ -361,7 +357,6 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByTestId('details-card')).toBeInTheDocument()
     })
 
-    // Call setStatus as admin with valid status but mutation will fail
     if (capturedSetStatus) {
       await capturedSetStatus(ProgramStatusEnum.Published)
     }
@@ -398,15 +393,7 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByTestId('details-card')).toBeInTheDocument()
 
       const detailsContent = screen.getByTestId('details-content')
-      // Mentees Limit -> '0' (from `String(program?.menteesLimit ?? 0)`)
       expect(detailsContent).toHaveTextContent('Mentees Limit0')
-
-      // key -> ''
-      // name -> ''
-      // description -> ''
-      // status -> ''
-      // startedAt -> '' (formatDate('') -> may be empty string or Invalid Date depending on util, assuming handled gracefully or empty)
-      // endedAt -> ''
     })
   })
 })
