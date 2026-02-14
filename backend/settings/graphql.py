@@ -5,6 +5,7 @@ from django.conf import settings
 from strawberry.extensions import DisableIntrospection, QueryDepthLimiter
 from strawberry_django.optimizer import DjangoOptimizerExtension
 
+from apps.api.internal.extensions.cache import CacheExtension
 from apps.api.internal.mutations import ApiMutations
 from apps.api.internal.queries import ApiKeyQueries
 from apps.github.api.internal.queries import GithubQuery
@@ -44,6 +45,7 @@ class Query(
 
 
 extensions = [
+    CacheExtension(),
     QueryDepthLimiter(max_depth=5),
     DjangoOptimizerExtension(),
 ]
