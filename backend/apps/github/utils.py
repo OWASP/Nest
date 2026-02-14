@@ -108,7 +108,7 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
     http_prefix = "http://"  # NOSONAR
     https_prefix = "https://"
     if not parsed_url.scheme:
-        url = f"{https_prefix}{url}"
+        url = f"{https_prefix}{url.lstrip('/')}"
 
     normalized_url = (
         f"{https_prefix}{url[len(http_prefix) :]}" if url.startswith(http_prefix) else url
