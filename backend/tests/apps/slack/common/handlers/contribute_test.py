@@ -105,7 +105,7 @@ class TestContributeHandler:
         assert any(block.get("type") == "actions" for block in blocks)
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_contribute_data):
-        """Test that no pagination buttons are added when include_pagination is False."""
+        """Test that no pagination buttons are added when include_pagination is disabled."""
         setup_mocks["get_issues"].return_value = mock_contribute_data
         presentation = EntityPresentation(include_pagination=False)
 

@@ -174,7 +174,7 @@ class TestProjectHandler:
         assert all(elem.get("type") == "button" for elem in elements)
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_project_data):
-        """Test that no pagination buttons are added when include_pagination is False."""
+        """Test that no pagination buttons are added when include_pagination is disabled."""
         setup_mocks["get_projects"].return_value = mock_project_data
         presentation = EntityPresentation(include_pagination=False)
 

@@ -157,7 +157,7 @@ class TestCommitteeHandler:
         assert "Test Committee" in blocks[1]["text"]["text"]
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_committee_data):
-        """Test that no pagination buttons are added when include_pagination is False."""
+        """Test that no pagination buttons are added when include_pagination is disabled."""
         setup_mocks["get_committees"].return_value = mock_committee_data
         presentation = EntityPresentation(include_pagination=False)
 

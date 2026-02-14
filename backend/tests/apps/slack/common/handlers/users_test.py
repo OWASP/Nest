@@ -148,7 +148,7 @@ class TestGetUsersBlocks:
         assert "testuser" in user_block_text
 
     def test_get_blocks_with_include_feedback(self, mocker, mock_users_data):
-        """Test that feedback block is included when include_feedback is True."""
+        """Test that feedback block is included when include_feedback is enabled."""
         mocker.patch("apps.github.index.search.user.get_users", return_value=mock_users_data)
         presentation = EntityPresentation(include_feedback=True)
 

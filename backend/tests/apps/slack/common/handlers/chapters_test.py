@@ -106,7 +106,7 @@ class TestChapterHandler:
         assert action_blocks[0] in blocks
 
     def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_chapter_data):
-        """Test that no pagination buttons are added when include_pagination is False."""
+        """Test that no pagination buttons are added when include_pagination is disabled."""
         setup_mocks["get_chapters"].return_value = mock_chapter_data
         presentation = EntityPresentation(include_pagination=False)
 

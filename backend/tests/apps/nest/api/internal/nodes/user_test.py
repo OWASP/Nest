@@ -36,7 +36,7 @@ class TestGitHubAuthResult:
         assert not result
 
     def test_is_owasp_staff_with_github_user_true(self):
-        """Test is_owasp_staff returns True when github_user.is_owasp_staff is True."""
+        """Test is_owasp_staff for staff users."""
 
         class FakeNode:
             pass
@@ -54,7 +54,7 @@ class TestGitHubAuthResult:
         assert result
 
     def test_is_owasp_staff_with_github_user_false(self):
-        """Test is_owasp_staff returns False when github_user.is_owasp_staff is False."""
+        """Test is_owasp_staff for non staff users."""
 
         class FakeNode:
             pass
