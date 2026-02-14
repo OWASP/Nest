@@ -94,7 +94,7 @@ describe('useBreadcrumbs', () => {
   })
 
   describe('HIDDEN_SEGMENTS', () => {
-    test('does not show "community" in breadcrumbs when present in path', () => {
+    test('shows Community breadcrumb for /community/* paths despite community being a hidden segment', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/community/forum')
 
       const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
