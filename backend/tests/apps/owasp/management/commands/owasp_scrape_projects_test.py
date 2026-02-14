@@ -1,7 +1,9 @@
 import os
+from argparse import ArgumentParser
 from unittest import mock
 
 import pytest
+from github.GithubException import UnknownObjectException
 
 from apps.owasp.management.commands.owasp_scrape_projects import (
     Command,
@@ -14,6 +16,13 @@ class TestOwaspScrapeProjects:
     @pytest.fixture
     def command(self):
         return Command()
+
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args([])
+        assert args.offset == 0
 
     @pytest.fixture
     def mock_project(self):
@@ -118,3 +127,150 @@ class TestOwaspScrapeProjects:
             "https://github.com/org/repo1",
             "https://github.com/org/repo2",
         ]
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_page_tree_none(self, mock_github, mock_bulk_save, command, mock_project):
+        """Test handle when scraper page_tree is None - project gets deactivated."""
+        mock_scraper = mock.Mock(spec=OwaspScraper)
+        mock_scraper.page_tree = None
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        command.stdout = mock.MagicMock()
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_project.deactivate.assert_called_once()
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_no_leaders_emails(self, mock_github, mock_bulk_save, command, mock_project):
+        """Test handle when project has no leaders emails."""
+        mock_scraper = mock.Mock(spec=OwaspScraper)
+        mock_scraper.page_tree = True
+
+        mock_project.get_leaders_emails.return_value = {}
+        mock_project.get_audience.return_value = []
+        mock_project.get_urls.return_value = []
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        command.stdout = mock.MagicMock()
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_project.sync_leaders.assert_not_called()
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_github_user_unknown_object(self, mock_github, mock_bulk_save, command):
+        """Test handle when GITHUB_USER_RE matches and get_organization raises."""
+        mock_project = mock.Mock(spec=Project)
+        mock_project.owasp_url = "https://owasp.org/www-project-test"
+        mock_project.github_url = "https://github.com/owasp/test-project"
+        mock_project.get_related_url.side_effect = lambda url, **_: url
+        mock_project.get_audience.return_value = []
+        mock_project.get_urls.return_value = ["https://github.com/some-org"]
+        mock_project.get_leaders_emails.return_value = {}
+
+        mock_scraper = mock.Mock(spec=OwaspScraper)
+        mock_scraper.page_tree = True
+        mock_scraper.verify_url.return_value = "https://github.com/some-org"
+
+        mock_gh = mock.Mock()
+        mock_gh.get_organization.side_effect = UnknownObjectException(
+            status=404, data={"message": "Not Found"}
+        )
+        mock_github.return_value = mock_gh
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        command.stdout = mock.MagicMock()
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_gh.get_organization.assert_called_once_with("some-org")
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_skipped_related_url(self, mock_github, mock_bulk_save, command):
+        """Test handle when get_related_url returns None for verified URL."""
+        mock_project = mock.Mock(spec=Project)
+        mock_project.owasp_url = "https://owasp.org/www-project-test"
+        mock_project.github_url = "https://github.com/owasp/test-project"
+        mock_project.get_audience.return_value = []
+        mock_project.get_urls.return_value = ["https://example.com/repo"]
+        mock_project.get_leaders_emails.return_value = {}
+        mock_project.get_related_url.side_effect = [
+            "https://example.com/repo",
+            None,
+        ]
+
+        mock_scraper = mock.Mock(spec=OwaspScraper)
+        mock_scraper.page_tree = True
+        mock_scraper.verify_url.return_value = "https://example.com/repo"
+
+        mock_github.return_value = mock.Mock()
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        command.stdout = mock.MagicMock()
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        assert mock_project.related_urls == []
+        assert mock_project.invalid_urls == []
+        assert mock_project.get_related_url.call_count == 2
