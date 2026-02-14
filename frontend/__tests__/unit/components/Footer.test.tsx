@@ -46,6 +46,7 @@ jest.mock('utils/constants', () => ({
       links: [
         { text: 'About', href: '/about' },
         { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
+        { text: 'Empty Href Link', href: '' }, // Empty href to test fallback
       ],
     },
     {
@@ -71,9 +72,18 @@ jest.mock('utils/constants', () => ({
   ],
 }))
 
-jest.mock('utils/env.client', () => ({
+let mockEnv = {
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
+}
+
+jest.mock('utils/env.client', () => ({
+  get ENVIRONMENT() {
+    return mockEnv.ENVIRONMENT
+  },
+  get RELEASE_VERSION() {
+    return mockEnv.RELEASE_VERSION
+  },
 }))
 
 import { FaGithub, FaSlack } from 'react-icons/fa6'
@@ -93,6 +103,10 @@ describe('Footer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockEnv = {
+      ENVIRONMENT: 'production',
+      RELEASE_VERSION: '1.2.3',
+    }
   })
 
   afterEach(() => {
@@ -132,10 +146,12 @@ describe('Footer', () => {
           }
         }
       }
+
       for (const link of regularLinks) {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
-        expect(linkElement).toHaveAttribute('href', link.href)
+        const expectedHref = link.href || '/'
+        expect(linkElement).toHaveAttribute('href', expectedHref)
         expect(linkElement).toHaveAttribute('target', '_blank')
       }
 
@@ -266,63 +282,29 @@ describe('Footer', () => {
       expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
 
+    test('renders version as commit link in non-production environment', () => {
+      mockEnv.ENVIRONMENT = 'staging'
+      mockEnv.RELEASE_VERSION = '24.2.10-12c25c5'
+
+      renderFooter()
+
+      const versionText = screen.getByText('v24.2.10-12c25c5')
+      const versionLink = versionText.closest('a')
+      expect(versionLink).toBeInTheDocument()
+      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/12c25c5')
+      expect(versionLink).toHaveAttribute('target', '_blank')
+      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
+
+      mockEnv.ENVIRONMENT = 'production'
+      mockEnv.RELEASE_VERSION = '1.2.3'
+    })
+
     test('handles span elements correctly', () => {
       renderFooter()
 
       const spanText = screen.getByText('Plain Text')
       expect(spanText.tagName).toBe('SPAN')
       expect(spanText).toHaveClass('text-slate-600', 'dark:text-slate-400')
-    })
-  })
-
-  describe('Version Link Behavior', () => {
-    let originalEnvironment: string
-    let originalReleaseVersion: string
-    let envModule: typeof import('utils/env.client')
-
-    beforeEach(() => {
-      jest.clearAllMocks()
-      envModule = jest.requireMock<typeof import('utils/env.client')>('utils/env.client')
-      originalEnvironment = envModule.ENVIRONMENT
-      originalReleaseVersion = envModule.RELEASE_VERSION
-    })
-
-    afterEach(() => {
-      if (envModule) {
-        envModule.ENVIRONMENT = originalEnvironment
-        envModule.RELEASE_VERSION = originalReleaseVersion
-      }
-    })
-
-    test('renders version as commit link in staging environment', () => {
-      envModule.ENVIRONMENT = 'staging'
-      envModule.RELEASE_VERSION = '24.2.10-12c25c5'
-
-      const { container } = render(<Footer />)
-      const versionLink = container.querySelector('a[href*="commit"]')
-
-      expect(versionLink).toBeInTheDocument()
-      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/12c25c5')
-      expect(versionLink).toHaveAttribute('target', '_blank')
-      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
-      expect(versionLink).toHaveTextContent('v24.2.10-12c25c5')
-    })
-
-    test('renders version as release tag link in production environment', () => {
-      envModule.ENVIRONMENT = 'production'
-      envModule.RELEASE_VERSION = '1.2.3'
-
-      const { container } = render(<Footer />)
-      const versionLink = container.querySelector('a[href*="releases"]')
-
-      expect(versionLink).toBeInTheDocument()
-      expect(versionLink).toHaveAttribute(
-        'href',
-        'https://github.com/OWASP/Nest/releases/tag/1.2.3'
-      )
-      expect(versionLink).toHaveAttribute('target', '_blank')
-      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
-      expect(versionLink).toHaveTextContent('v1.2.3')
     })
   })
 
@@ -418,6 +400,13 @@ describe('Footer', () => {
 
       const aboutLink = screen.getByRole('link', { name: 'About' })
       expect(aboutLink).toHaveAttribute('href', '/about')
+    })
+
+    test('handles empty href with fallback to root path', () => {
+      renderFooter()
+
+      const emptyHrefLink = screen.getByRole('link', { name: 'Empty Href Link' })
+      expect(emptyHrefLink).toHaveAttribute('href', '/')
     })
 
     test('handles sections with span elements', () => {

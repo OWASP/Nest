@@ -229,4 +229,96 @@ describe('RepositoryDetailsPage', () => {
       ).toBeInTheDocument()
     })
   })
+
+  test('handles issue with null author gracefully', async () => {
+    const dataWithNullAuthor = {
+      ...mockRepositoryData,
+      repository: {
+        ...mockRepositoryData.repository,
+        issues: [
+          {
+            title: 'Issue without author',
+            createdAt: 1727390000,
+            url: 'https://github.com/test-org/test-repo/issues/1',
+            repositoryName: 'test-repo',
+            author: null,
+          },
+        ],
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullAuthor,
+      loading: false,
+      error: null,
+    })
+
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Issue without author')).toBeInTheDocument()
+    })
+  })
+
+  test('handles null recentIssues gracefully', async () => {
+    const dataWithNullIssues = {
+      ...mockRepositoryData,
+      repository: {
+        ...mockRepositoryData.repository,
+        issues: null,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullIssues,
+      loading: false,
+      error: null,
+    })
+
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Repo')).toBeInTheDocument()
+    })
+  })
+
+  test('handles null recentMilestones gracefully', async () => {
+    const dataWithNullMilestones = {
+      ...mockRepositoryData,
+      repository: {
+        ...mockRepositoryData.repository,
+        recentMilestones: null,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullMilestones,
+      loading: false,
+      error: null,
+    })
+
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Repo')).toBeInTheDocument()
+    })
+  })
+
+  test('handles null releases gracefully', async () => {
+    const dataWithNullReleases = {
+      ...mockRepositoryData,
+      repository: {
+        ...mockRepositoryData.repository,
+        releases: null,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullReleases,
+      loading: false,
+      error: null,
+    })
+
+    render(<RepositoryDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Repo')).toBeInTheDocument()
+    })
+  })
 })
