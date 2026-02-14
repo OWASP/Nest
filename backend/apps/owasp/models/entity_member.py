@@ -11,11 +11,15 @@ class EntityMember(models.Model):
     """EntityMember model."""
 
     class Role(models.TextChoices):
+        """Entity member role choices."""
+
         CANDIDATE = "candidate", "Candidate"
         LEADER = "leader", "Leader"
         MEMBER = "member", "Member"
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_entity_members"
         unique_together = (
             "entity_type",
