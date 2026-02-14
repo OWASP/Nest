@@ -27,7 +27,7 @@ export default function Footer() {
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold focus:ring-slate-400 focus:outline-hidden lg:cursor-default"
+                className="flex w-full items-center justify-between bg-transparent pl-0 text-left text-lg font-semibold rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
@@ -42,8 +42,10 @@ export default function Footer() {
               </Button>
               <div
                 id={`footer-section-${section.title}`}
-                className={`flex flex-col gap-2 overflow-hidden text-sm transition-all duration-300 ease-in-out lg:max-h-full ${
-                  openSection === section.title ? 'max-h-96' : 'max-h-0 lg:max-h-full'
+                className={`flex flex-col gap-2 text-sm transition-all duration-300 ease-in-out ${
+                  openSection === section.title
+                    ? 'max-h-96'
+                    : 'max-h-0 overflow-hidden lg:max-h-full lg:overflow-visible'
                 }`}
               >
                 {section.links.map((link) => (
@@ -52,7 +54,7 @@ export default function Footer() {
                       <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                     ) : (
                       <Link
-                        className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                        className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                         href={link.href || '/'}
                         rel="noopener noreferrer"
                         target="_blank"
@@ -78,7 +80,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`OWASP Nest ${social.label}`}
-                className="text-slate-600 transition-colors duration-200 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                className="rounded-full p-2 text-slate-600 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
               >
                 <SocialIcon className="h-4 w-4" />
               </Link>
