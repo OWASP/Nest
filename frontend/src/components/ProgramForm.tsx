@@ -155,13 +155,9 @@ const ProgramForm = ({
     setTouched(newTouched)
 
     // Check name uniqueness and capture result before validation
-    let uniquenessError: string | undefined
-    if (formData.name.trim()) {
-      uniquenessError = await checkNameUniquenessSync(formData.name)
-      setNameUniquenessError(uniquenessError)
-    } else {
-      setNameUniquenessError(undefined)
-    }
+    // Check name uniqueness and capture result before validation
+    const uniquenessError = await checkNameUniquenessSync(formData.name)
+    setNameUniquenessError(uniquenessError)
 
     // Validate all required fields, using the captured uniquenessError
     const nameError = validateNameWithUniqueness(formData.name, uniquenessError)
@@ -251,7 +247,7 @@ const ProgramForm = ({
             type="number"
             label="Mentees Limit"
             placeholder="Enter mentees limit (0 for unlimited)"
-            value={formData.menteesLimit.toString()}
+            value={formData.menteesLimit?.toString() ?? ''}
             onValueChange={(value) => handleInputChange('menteesLimit', Number(value) || 0)}
             error={errors.menteesLimit}
             touched={touched.menteesLimit}

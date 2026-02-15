@@ -610,6 +610,61 @@ describe('ModuleCard', () => {
       expect(image.getAttribute('alt')).toBe('mentor1')
       expect(image.getAttribute('title')).toBe('mentor1')
     })
+    it('handles module with undefined mentors and mentees gracefully', () => {
+      const moduleWithUndefined = createMockModule({
+        mentors: undefined,
+        mentees: undefined,
+      } as unknown as Partial<Module>)
+
+      const modules = [moduleWithUndefined, createMockModule({ key: 'mod2' })]
+
+      // Should not throw and should not find sections
+      expect(() => render(<ModuleCard modules={modules} />)).not.toThrow()
+      expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
+    })
+
+    it('handles invalid avatar URL with query params correctly (separator check)', () => {
+      const mentors = [createMockContributor('mentor1', 'invalid-url?foo=bar')]
+      const modules = [createMockModule({ mentors }), createMockModule({ key: 'mod2' })]
+
+      render(<ModuleCard modules={modules} />)
+
+      const images = screen.getAllByTestId('next-image')
+      // Should fall back to appending &s=60
+      expect(images[0].getAttribute('src')).toContain('&s=60')
+    })
+
+    it('uses mentee name for avatar alt and title', () => {
+      const mentees = [
+        createMockContributor('mentee1', 'https://example.com/avatar1.png', 'Jane Doe'),
+      ]
+      const modules = [createMockModule({ mentees }), createMockModule({ key: 'mod2' })]
+
+      render(<ModuleCard modules={modules} />)
+
+      const image = screen.getAllByTestId('next-image')[0]
+      expect(image.getAttribute('alt')).toBe('Jane Doe')
+      expect(image.getAttribute('title')).toBe('Jane Doe')
+    })
+
+    it('falls back to mentee login for avatar alt and title', () => {
+      const mentees = [
+        {
+          id: 'id-mentee1',
+          login: 'mentee1',
+          name: '',
+          avatarUrl: 'https://example.com/avatar1.png',
+        },
+      ]
+      const modules = [createMockModule({ mentees }), createMockModule({ key: 'mod2' })]
+
+      render(<ModuleCard modules={modules} />)
+
+      const image = screen.getAllByTestId('next-image')[0]
+      expect(image.getAttribute('alt')).toBe('mentee1')
+      expect(image.getAttribute('title')).toBe('mentee1')
+    })
   })
 
   describe('Path Handling', () => {

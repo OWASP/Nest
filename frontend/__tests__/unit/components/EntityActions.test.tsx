@@ -716,4 +716,28 @@ describe('EntityActions', () => {
 
     expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
   })
+  it('does nothing when an unhandled key is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'a' })
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+  })
+})
+
+describe('Toggle Behavior', () => {
+  it('closes the dropdown and resets focus when toggled off via click', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+
+    // Open
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+
+    // Close by clicking again
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+  })
 })

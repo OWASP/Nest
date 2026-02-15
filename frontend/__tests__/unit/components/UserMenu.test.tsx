@@ -306,6 +306,55 @@ describe('UserMenu Component', () => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
       })
     })
+
+    it('does not close dropdown when clicking inside the dropdown', async () => {
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      // Open dropdown
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'true')
+      })
+
+      // Get dropdown element - mocking getElementById since aria-controls logic relies on it
+      const dropdownId = avatarButton.getAttribute('aria-controls')
+      // Note: In JSDOM with React Testing Library, getElementById works if element is in document
+      // The dropdown is rendered conditionally, so it should be there now
+      const dropdown = document.getElementById(dropdownId!)
+      expect(dropdown).toBeInTheDocument()
+
+      // Click inside (e.g. on the dropdown div itself)
+      fireEvent.mouseDown(dropdown!)
+
+      // Should still be open
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'true')
+      })
+    })
+
+    it('handles mousedown events gracefully when safely syncing (ref is null)', () => {
+      mockUseSession.mockReturnValue({
+        session: null,
+        isSyncing: true, // This causes early return, so ref is not attached
+        status: 'loading',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      // Fire mousedown on document (should not crash)
+      fireEvent.mouseDown(document.body)
+
+      // No assertions needed other than it doesn't crash,
+      // but we can assert loading state to be sure we rendered correctly
+      expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
+    })
   })
 
   describe('State changes / internal logic', () => {
@@ -804,6 +853,41 @@ describe('UserMenu Component', () => {
 
       const mentorshipLink = screen.getByText('My Mentorship')
       fireEvent.click(mentorshipLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+
+    it('closes dropdown when Project Health Dashboard link is clicked', async () => {
+      const staffSession: ExtendedSession = {
+        user: {
+          name: 'Staff User',
+          email: 'staff@example.com',
+          image: 'https://example.com/avatar.jpg',
+          isLeader: false,
+          isOwaspStaff: true,
+        },
+        expires: '2024-12-31',
+      }
+
+      mockUseSession.mockReturnValue({
+        session: staffSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('Project Health Dashboard')).toBeInTheDocument()
+      })
+
+      const dashboardLink = screen.getByText('Project Health Dashboard')
+      fireEvent.click(dashboardLink)
 
       await waitFor(() => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'false')

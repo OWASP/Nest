@@ -355,4 +355,81 @@ describe('EditProgramPage', () => {
 
     jest.useRealTimers()
   })
+
+  test('handles program with null name field', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin1' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: null as unknown as string,
+          description: 'Test description',
+          menteesLimit: 10,
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+          tags: ['react'],
+          domains: ['web'],
+          admins: [{ login: 'admin1' }],
+          status: ProgramStatusEnum.Draft,
+        },
+      },
+    })
+
+    render(<EditProgramPage />)
+
+    await waitFor(async () => {
+      const nameInput = await screen.findByLabelText('Name')
+      expect(nameInput).toHaveValue('')
+    })
+  })
+
+  test('submits form with null status using default', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin1' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: 'Test',
+          description: 'Test description',
+          menteesLimit: 10,
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+          tags: ['react'],
+          domains: ['web'],
+          admins: [{ login: 'admin1' }],
+          status: null as unknown as ProgramStatusEnum,
+        },
+      },
+    })
+    mockUpdateProgram.mockResolvedValue({
+      data: { updateProgram: { key: 'program_1' } },
+    })
+
+    render(<EditProgramPage />)
+
+    await waitFor(async () => {
+      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+    })
+
+    const submitButton = screen.getByRole('button', { name: /save/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockUpdateProgram).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            input: expect.objectContaining({
+              status: ProgramStatusEnum.Draft,
+            }),
+          }),
+        })
+      )
+    })
+  })
 })

@@ -1,4 +1,5 @@
 import { render, screen, act } from '@testing-library/react'
+import React from 'react'
 import { TruncatedText } from 'components/TruncatedText'
 
 type ResizeObserverCallback = (entries: ResizeObserverEntry[], observer: ResizeObserver) => void
@@ -243,5 +244,26 @@ describe('TruncatedText Component', () => {
 
     // Verify disconnect was called on unmount
     expect(mockDisconnect).toHaveBeenCalledTimes(1)
+  })
+  test('does not observe when textRef.current is null', () => {
+    const originalUseRef = React.useRef
+    // Create a ref object that ignores writes to .current and always returns null
+    const nullRef = {}
+    Object.defineProperty(nullRef, 'current', {
+      get: () => null,
+      set: () => {}, // Ignore assignments from React
+      configurable: true,
+    })
+
+    // We need to type cast because TypeScript expects MutableRefObject
+    jest
+      .spyOn(React, 'useRef')
+      .mockReturnValue(nullRef as unknown as React.MutableRefObject<HTMLSpanElement | null>)
+
+    render(<TruncatedText text="Null ref test" />)
+
+    expect(mockObserve).not.toHaveBeenCalled()
+
+    jest.spyOn(React, 'useRef').mockImplementation(originalUseRef)
   })
 })

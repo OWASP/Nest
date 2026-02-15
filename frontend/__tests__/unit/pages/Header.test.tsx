@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
 import React from 'react'
@@ -109,9 +109,11 @@ jest.mock('utils/constants', () => {
         submenu: [
           { text: 'Web Development', href: '/services/web' },
           { text: 'Mobile Development', href: '/services/mobile' },
+          { text: 'SubNoHref' },
         ],
       },
       { text: 'Contact', href: '/contact' },
+      { text: 'NoHref' },
     ],
   }
 })
@@ -387,15 +389,44 @@ describe('Header Component', () => {
       expect(isMobileMenuOpen()).toBe(true)
 
       // Find and click the logo link in mobile menu
-      const logoLinks = screen.getAllByRole('link')
-      const mobileLogoLink = logoLinks.find(
-        (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
-      )
+      const mobileMenu = findMobileMenu() as HTMLElement
+      expect(mobileMenu).not.toBeNull()
+
+      const mobileLogoLink = within(mobileMenu)
+        .getAllByRole('link')
+        .find((link) => link.querySelector('img[alt="OWASP Logo"]'))
 
       // Assert that mobileLogoLink is not null before clicking
-      expect(mobileLogoLink).not.toBeNull()
+      expect(mobileLogoLink).toBeDefined()
       await act(async () => {
-        fireEvent.click(mobileLogoLink)
+        fireEvent.click(mobileLogoLink!)
+      })
+      expect(isMobileMenuClosed()).toBe(true)
+    })
+
+    it('closes mobile menu when desktop logo is clicked', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+
+      // Open menu first
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Find the desktop logo link
+      const navbar = document.getElementById('navbar-sticky')
+      expect(navbar).toBeInTheDocument()
+
+      const desktopLogoLink = within(navbar!)
+        .getAllByRole('link')
+        .find((link) => link.querySelector('img[alt="OWASP Logo"]'))
+
+      expect(desktopLogoLink).toBeDefined()
+      await act(async () => {
+        fireEvent.click(desktopLogoLink!)
       })
       expect(isMobileMenuClosed()).toBe(true)
     })

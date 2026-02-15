@@ -640,4 +640,43 @@ describe('NavDropdown Component', () => {
       removeEventListenerSpy.mockRestore()
     })
   })
+  describe('Coverage Improvements', () => {
+    it('does nothing when Escape is pressed on dropdown button while closed (line 50)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+      const button = screen.getByRole('button')
+      button.focus()
+
+      // It is initially closed. Pressing Escape should check (e.key === 'Escape' && isOpen) -> false
+      await user.keyboard('{Escape}')
+      expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+    })
+
+    it('does nothing when random key is pressed on dropdown button (line 50)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+      const button = screen.getByRole('button')
+      button.focus()
+
+      // Pressing random key should skip the if and else if blocks
+      await user.keyboard('a')
+      expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+    })
+
+    it('does nothing when random key is pressed on submenu item (line 84)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button) // Open it
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      // Pressing random key should skip the if and else if blocks
+      await user.keyboard('a')
+      // Should remain open
+      expect(screen.getByText('Getting Started')).toBeInTheDocument()
+    })
+  })
 })

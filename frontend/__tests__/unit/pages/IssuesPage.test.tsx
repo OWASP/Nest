@@ -338,4 +338,37 @@ describe('IssuesPage', () => {
     expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
     expect(screen.getAllByText('First Issue Title')[0]).toBeInTheDocument()
   })
+  it('extracts labels from issues and handles null labels when availableLabels is empty', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: {
+          ...mockModuleData.getModule,
+          availableLabels: [], // Force extraction from issues
+          issues: [
+            {
+              ...mockModuleData.getModule.issues[0],
+              id: '1',
+              labels: ['extracted-label'],
+            },
+            {
+              ...mockModuleData.getModule.issues[0],
+              id: '2',
+              labels: null, // Test null labels handling
+            },
+          ],
+        },
+      },
+    })
+
+    render(<IssuesPage />)
+
+    // Open the label filter dropdown
+    const selectTrigger = screen.getByRole('button', { name: /Label/i })
+    fireEvent.click(selectTrigger)
+
+    // Verify that the label from the issue is present in the listbox
+    const listbox = await screen.findByRole('listbox')
+    expect(within(listbox).getByText('extracted-label')).toBeInTheDocument()
+  })
 })

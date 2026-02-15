@@ -1193,5 +1193,67 @@ describe('ProgramForm Component', () => {
         expect(mockOnSubmit).toHaveBeenCalled()
       })
     })
+
+    test('handles string menteesLimit in validation', async () => {
+      // This covers the typeof value === 'string' branch in validateMenteesLimit
+      const stringLimitFormData = { ...filledFormData, menteesLimit: '10' as unknown as number }
+
+      render(
+        <ProgramForm
+          formData={stringLimitFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Test"
+        />
+      )
+
+      // Trigger submission to force validation call with the existing string value in formData
+      const buttons = screen.getAllByRole('button')
+      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
+      if (submitButton) {
+        await userEvent.click(submitButton)
+      }
+
+      // validation should pass with '10' converted to 10
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
+
+    test('handles undefined menteesLimit in submission', async () => {
+      const user = userEvent.setup()
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: { myPrograms: { programs: [] } },
+        }),
+      })
+
+      // This covers the else branch of: if (formData.menteesLimit !== undefined && ...)
+      const undefinedLimitFormData = {
+        ...filledFormData,
+        menteesLimit: undefined as unknown as number,
+      }
+
+      render(
+        <ProgramForm
+          formData={undefinedLimitFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Test"
+        />
+      )
+
+      const buttons = screen.getAllByRole('button')
+      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
+      if (submitButton) {
+        await user.click(submitButton)
+      }
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
   })
 })

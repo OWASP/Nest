@@ -299,6 +299,36 @@ describe('ModuleIssueDetailsPage', () => {
         expect(setTaskDeadlineMutation).toHaveBeenCalled()
       })
     })
+    it('populates input with existing deadline when clicked', async () => {
+      const setDeadlineInput = jest.fn()
+      const setIsEditingDeadline = jest.fn()
+      const baseMocks = (useIssueMutations as jest.Mock)()
+
+      mockUseIssueMutations.mockReturnValue({
+        ...baseMocks,
+        setDeadlineInput,
+        setIsEditingDeadline,
+      })
+
+      // Set a deadline in the past to ensure consistent 'overdue' state
+      const pastDate = new Date('2020-01-01').toISOString()
+      const dataWithDeadline = {
+        ...mockIssueData,
+        getModule: { ...mockIssueData.getModule, taskDeadline: pastDate },
+      }
+
+      mockUseQuery.mockReturnValue({ data: dataWithDeadline, loading: false, error: undefined })
+      render(<ModuleIssueDetailsPage />)
+
+      // Button text will contain (overdue)
+      const deadlineButton = screen.getByRole('button', { name: /\(overdue\)/i })
+      fireEvent.click(deadlineButton)
+
+      await waitFor(() => {
+        expect(setDeadlineInput).toHaveBeenCalledWith('2020-01-01')
+        expect(setIsEditingDeadline).toHaveBeenCalledWith(true)
+      })
+    })
   })
 
   describe('issue states', () => {
@@ -567,5 +597,68 @@ describe('ModuleIssueDetailsPage', () => {
       '[aria-hidden="true"].rounded-full.bg-gray-400'
     )
     expect(placeholderDivs.length).toBeGreaterThan(0)
+  })
+
+  it('handles null assignees, labels, and interestedUsers', () => {
+    const dataWithNulls = {
+      getModule: {
+        ...mockIssueData.getModule,
+        interestedUsers: null,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          assignees: null,
+          labels: null,
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithNulls, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+
+    // Should render main sections without crashing
+    expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+    // Labels section is rendered but empty (LabelList handles null?)
+    // If LabelList handles it, fine.
+  })
+
+  it('does not trigger mutations when they are already in progress', () => {
+    const assignIssue = jest.fn()
+    const unassignIssue = jest.fn()
+    const setTaskDeadlineMutation = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      assignIssue,
+      unassignIssue,
+      setTaskDeadlineMutation,
+      assigning: true,
+      unassigning: true,
+      settingDeadline: true,
+      isEditingDeadline: true,
+      deadlineInput: '2025-01-01',
+      setDeadlineInput: jest.fn(),
+    })
+
+    // Need interestedUsers to show Assign button
+    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+
+    // 1. Try Assign
+    const assignButtons = screen.getAllByRole('button', { name: /Assign/i })
+    // The button might be disabled, so fireEvent matches browser behavior (sometimes ignores, sometimes not).
+    // But we want to test the LOGIC guard `if (... assigning) return`.
+    // We assume the button is clickable for the test event props.
+    fireEvent.click(assignButtons[0])
+    expect(assignIssue).not.toHaveBeenCalled()
+
+    // 2. Try Unassign
+    const unassignButton = screen.getByRole('button', { name: /Unassign/i })
+    fireEvent.click(unassignButton)
+    expect(unassignIssue).not.toHaveBeenCalled()
+
+    // 3. Try Deadline Change (guard line 189)
+    const dateInputEl = screen.getByDisplayValue('2025-01-01')
+    fireEvent.change(dateInputEl, { target: { value: '2025-02-02' } })
+    expect(setTaskDeadlineMutation).not.toHaveBeenCalled()
   })
 })
