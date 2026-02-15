@@ -1,8 +1,15 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import ActionButton from 'components/ActionButton'
 
-describe('ActionButton Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ActionButton Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should not have any accessibility violations when no url is provided', async () => {
     const { container } = render(<ActionButton>Sample Text</ActionButton>)
 

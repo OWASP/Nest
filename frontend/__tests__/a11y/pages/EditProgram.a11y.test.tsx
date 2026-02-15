@@ -3,6 +3,7 @@ import mockProgramDetailsData from '@mockData/mockProgramData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useSession } from 'next-auth/react'
+import { useTheme } from 'next-themes'
 import EditProgramPage from 'app/my/mentorship/programs/[programKey]/edit/page'
 
 jest.mock('next/navigation', () => ({
@@ -20,7 +21,13 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
 }))
 
-describe('EditProgramPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('EditProgramPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should have no accessibility violations', async () => {
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
     ;(useQuery as unknown as jest.Mock).mockReturnValue({

@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockProjectsDashboardOverviewData } from '@mockData/mockProjectsDashboardOverviewData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import ProjectsDashboardPage from 'app/projects/dashboard/page'
 
 jest.mock('@apollo/client/react', () => ({
@@ -32,7 +33,13 @@ jest.mock('hooks/useDjangoSession', () => ({
   }),
 }))
 
-describe('ProjectHealthDashboardOverviewPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ProjectHealthDashboardOverviewPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProjectsDashboardOverviewData,

@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { ReactNode } from 'react'
 import { Issue } from 'types/issue'
 import ItemCardList from 'components/ItemCardList'
@@ -63,7 +64,13 @@ const defaultProps = {
   )),
 }
 
-describe('ItemCardList a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ItemCardList a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should not have any accessibility violations', async () => {
     const { baseElement } = render(
       <main>

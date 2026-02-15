@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { Release } from 'types/release'
 import RecentReleases from 'components/RecentReleases'
 
@@ -46,7 +47,13 @@ const mockReleases: Release[] = [
   },
 ]
 
-describe('RecentReleases a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('RecentReleases a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<RecentReleases data={mockReleases} />)
     const results = await axe(container)

@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { ReactNode } from 'react'
 import { Contributor } from 'types/contributor'
 import { getMemberUrl } from 'utils/urlFormatter'
@@ -52,7 +53,13 @@ const mockContributors: Contributor[] = [
   },
 ]
 
-describe('ContributorsList Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ContributorsList Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(
       <ContributorsList contributors={mockContributors} getUrl={getMemberUrl} />

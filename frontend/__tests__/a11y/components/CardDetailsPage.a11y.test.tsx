@@ -1,6 +1,7 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import React from 'react'
 import { FaCode, FaTags } from 'react-icons/fa6'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
@@ -142,7 +143,13 @@ const defaultProps: DetailsCardProps = {
   socialLinks: [],
 }
 
-describe('CardDetailsPage a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('CardDetailsPage a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should have no accessibility violations', async () => {
     const { container } = render(<DetailsCard {...defaultProps} />)
     const results = await axe(container)

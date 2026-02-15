@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import React from 'react'
 import MenteeProfilePage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/mentees/[menteeKey]/page'
 
@@ -170,7 +171,13 @@ const mockMenteeData = {
   ],
 }
 
-describe('MenteeProfilePage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('MenteeProfilePage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   afterAll(() => {
     jest.clearAllMocks()
   })

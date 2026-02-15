@@ -1,6 +1,7 @@
 import mockProjectData from '@mockData/mockProjectData'
 import { waitFor, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import ProjectsPage from 'app/projects/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -33,7 +34,13 @@ jest.mock('@/components/MarkdownWrapper', () => {
   )
 })
 
-describe('ProjectsPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ProjectsPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should have no accessibility violations', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockProjectData.projects,

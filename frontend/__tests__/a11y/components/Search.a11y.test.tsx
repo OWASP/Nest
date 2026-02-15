@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import SearchBar from 'components/Search'
 
 const mockOnSearch = jest.fn()
@@ -9,7 +10,13 @@ const defaultProps = {
   placeholder: 'Search projects...',
 }
 
-describe('SearchBar a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('SearchBar a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   describe('when not loaded', () => {
     it('should not have any accessibility violations', async () => {
       const { container } = render(<SearchBar {...defaultProps} />)

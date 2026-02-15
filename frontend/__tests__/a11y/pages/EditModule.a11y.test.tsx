@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockModuleData } from '@mockData/mockModuleData'
 import mockProgramDetailsData from '@mockData/mockProgramData'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import EditModulePage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/edit/page'
 
@@ -16,7 +17,13 @@ jest.mock('@apollo/client/react', () => ({
   useApolloClient: jest.fn(),
 }))
 
-describe('EditModulePage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('EditModulePage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {

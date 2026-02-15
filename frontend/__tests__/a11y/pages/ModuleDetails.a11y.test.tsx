@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockModuleData } from '@mockData/mockModuleData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import ModuleDetailsPage from 'app/mentorship/programs/[programKey]/modules/[moduleKey]/page'
 
 jest.mock('@apollo/client/react', () => ({
@@ -17,7 +18,13 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
 
-describe('ModuleDetails Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ModuleDetails Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   const mockUseQuery = useQuery as unknown as jest.Mock
 
   it('should have no accessibility violations', async () => {

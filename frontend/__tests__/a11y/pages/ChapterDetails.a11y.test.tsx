@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockChapterDetailsData } from '@mockData/mockChapterDetailsData'
 import { render, screen, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
 
 jest.mock('@apollo/client/react', () => ({
@@ -19,7 +20,13 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(() => mockRouter),
 }))
 
-describe('ChapterDetailsPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ChapterDetailsPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   const mockUseQuery = useQuery as unknown as jest.Mock
 
   it('should have no accessibility violations', async () => {

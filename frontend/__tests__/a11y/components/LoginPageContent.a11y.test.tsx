@@ -1,6 +1,7 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useSession } from 'next-auth/react'
+import { useTheme } from 'next-themes'
 import { userAuthStatus } from 'utils/constants'
 import LoginPageContent from 'components/LoginPageContent'
 
@@ -10,7 +11,13 @@ jest.mock('next-auth/react', () => ({
   signIn: jest.fn(),
 }))
 
-describe('LoginPage a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('LoginPage a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
 
   describe('when GitHub auth is enabled', () => {

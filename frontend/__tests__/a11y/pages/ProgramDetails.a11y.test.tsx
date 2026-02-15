@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import mockProgramDetailsData from '@mockData/mockProgramData'
 import { waitFor, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import ProgramDetailsPage from 'app/mentorship/programs/[programKey]/page'
 
@@ -15,7 +16,13 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }))
 
-describe('ProgramDetailsPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ProgramDetailsPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProgramDetailsData,

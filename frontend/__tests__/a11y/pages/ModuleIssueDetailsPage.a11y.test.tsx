@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { render } from '@testing-library/react'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import ModuleIssueDetailsPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/[issueId]/page'
 
 jest.mock('@apollo/client/react', () => ({
@@ -70,7 +71,13 @@ const mockIssueData = {
   },
 }
 
-describe('ModuleIssueDetailsPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ModuleIssueDetailsPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   const mockUseQuery = useQuery as unknown as jest.Mock
   beforeEach(() => {
     ;(useIssueMutations as jest.Mock).mockReturnValue({

@@ -1,5 +1,6 @@
 import { useApolloClient, useQuery } from '@apollo/client/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/create/page'
 
@@ -14,7 +15,13 @@ jest.mock('@apollo/client/react', () => ({
   useApolloClient: jest.fn(),
 }))
 
-describe('CreateModulePage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('CreateModulePage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   beforeEach(() => {
     ;(useApolloClient as jest.Mock).mockReturnValue({
       query: jest.fn().mockReturnValue({

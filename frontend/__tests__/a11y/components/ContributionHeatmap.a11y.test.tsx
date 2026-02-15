@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
-import { ReactNode } from 'react'
+import { useTheme } from 'next-themes'
+
 import ContributionHeatmap from 'components/ContributionHeatmap'
 
 jest.mock('react-apexcharts', () => {
@@ -51,11 +52,6 @@ jest.mock('react-apexcharts', () => {
   }
 })
 
-jest.mock('next-themes', () => ({
-  useTheme: () => ({ theme: 'light', setTheme: jest.fn() }),
-  ThemeProvider: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}))
-
 const mockData: Record<string, number> = {
   '2024-01-01': 5,
   '2024-01-02': 8,
@@ -71,7 +67,13 @@ const defaultProps = {
   endDate: '2024-01-31',
 }
 
-describe('ContributionHeatmap Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ContributionHeatmap Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<ContributionHeatmap {...defaultProps} />)
 

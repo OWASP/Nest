@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockAlgoliaData, mockGraphQLData } from '@mockData/mockHomeData'
 import { render, screen, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import Home from 'app/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
@@ -40,7 +41,13 @@ jest.mock('components/Modal', () => {
   return ModalMock
 })
 
-describe('HomePage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('HomePage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+  })
   afterAll(() => {
     jest.clearAllMocks()
   })
