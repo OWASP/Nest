@@ -3,6 +3,7 @@ export const mockProjectsDashboardOverviewData = {
     averageScore: 78.5,
     monthlyOverallScores: [70, 75, 80, 85, 90],
     monthlyOverallScoresMonths: [1, 2, 3, 4, 5],
+    monthlyOverallScoresYears: [2025, 2025, 2025, 2025, 2025],
     projectsCountHealthy: 542,
     projectsCountNeedAttention: 164,
     projectsCountUnhealthy: 252,
