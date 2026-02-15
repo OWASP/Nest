@@ -83,12 +83,11 @@ const ProjectDetailsPage = () => {
     },
     ...(project.entityChannels && project.entityChannels.length > 0
       ? [
-        {
-          label: 'Slack',
-          value: (
-            <div className="inline-flex flex-wrap gap-3">
-              {project.entityChannels.map(
-                (ch) => (
+          {
+            label: 'Slack',
+            value: (
+              <div className="inline-flex flex-wrap gap-3">
+                {project.entityChannels.map((ch) => (
                   <Link
                     key={ch.slackChannelId}
                     href={slackChannelUrl(ch.slackChannelId)}
@@ -98,12 +97,11 @@ const ProjectDetailsPage = () => {
                   >
                     #{ch.name}
                   </Link>
-                )
-              )}
-            </div>
-          ),
-        },
-      ]
+                ))}
+              </div>
+            ),
+          },
+        ]
       : []),
   ]
   const projectStats = [

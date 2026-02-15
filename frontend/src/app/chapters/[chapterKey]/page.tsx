@@ -72,25 +72,25 @@ export default function ChapterDetailsPage() {
     },
     ...(chapter.entityChannels && chapter.entityChannels.length > 0
       ? [
-        {
-          label: 'Slack',
-          value: (
-            <div className="inline-flex flex-wrap gap-3">
-              {chapter.entityChannels.map((chapter) => (
-                <Link
-                  key={chapter.slackChannelId}
-                  href={slackChannelUrl(chapter.slackChannelId)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:underline"
-                >
-                  {chapter.name}
-                </Link>
-              ))}
-            </div>
-          ),
-        },
-      ]
+          {
+            label: 'Slack',
+            value: (
+              <div className="inline-flex flex-wrap gap-3">
+                {chapter.entityChannels.map((chapter) => (
+                  <Link
+                    key={chapter.slackChannelId}
+                    href={slackChannelUrl(chapter.slackChannelId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:underline"
+                  >
+                    {chapter.name}
+                  </Link>
+                ))}
+              </div>
+            ),
+          },
+        ]
       : []),
   ]
 
