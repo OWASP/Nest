@@ -20,6 +20,8 @@ class ModuleAdmin(admin.ModelAdmin):
 
     autocomplete_fields = ("issues",)
 
+    inlines = (MentorModuleInline,)
+
     list_display = (
         "name",
         "program",
@@ -30,8 +32,6 @@ class ModuleAdmin(admin.ModelAdmin):
         "name",
         "project__name",
     )
-
-    inlines = (MentorModuleInline,)
 
 
 admin.site.register(Module, ModuleAdmin)

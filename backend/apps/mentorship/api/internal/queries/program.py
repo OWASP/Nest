@@ -85,7 +85,7 @@ class ProgramQuery:
             results.append(program)
 
         return PaginatedPrograms(
+            current_page=page,
             programs=results,
             total_pages=total_pages,
-            current_page=page,
         )

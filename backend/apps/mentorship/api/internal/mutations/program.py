@@ -44,6 +44,7 @@ def resolve_admins_from_logins(logins: list[str]) -> set:
             msg = f"GitHub user '{login}' not found."
             logger.warning(msg, exc_info=True)
             raise ValueError(msg) from e
+
     return admins
 
 
@@ -146,8 +147,7 @@ class ProgramMutation:
         program.save()
 
         if input_data.admin_logins is not None:
-            admins_to_set = resolve_admins_from_logins(input_data.admin_logins)
-            program.admins.set(admins_to_set)
+            program.admins.set(resolve_admins_from_logins(input_data.admin_logins))
 
         return program
 

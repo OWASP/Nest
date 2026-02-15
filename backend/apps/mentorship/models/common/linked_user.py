@@ -7,6 +7,8 @@ class LinkedUser(models.Model):
     """Linked user model connecting nest.User and github.User."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     # FKs.

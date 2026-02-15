@@ -11,9 +11,13 @@ class ProgramAdmin(TimestampedModel):
     """Program admin relationship with role."""
 
     class AdminRole(models.TextChoices):
+        """Admin role choices."""
+
         OWNER = "owner", "Owner"
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_program_admins"
         verbose_name_plural = "Program admins"
         unique_together = ("program", "admin")

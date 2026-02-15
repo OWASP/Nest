@@ -141,7 +141,8 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            raise PermissionDenied(msg="Only mentors of this module can assign issues.")
+            msg = "Only mentors of this module can assign issues."
+            raise PermissionDenied(msg)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -180,7 +181,8 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            raise PermissionDenied(msg="Only mentors of this module can unassign issues.")
+            msg = "Only mentors of this module can unassign issues."
+            raise PermissionDenied(msg)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -206,7 +208,10 @@ class ModuleMutation:
         issue_number: int,
         deadline_at: datetime,
     ) -> ModuleNode:
-        """Set a deadline for a task. The user must be a mentor of the module."""
+        """Set a deadline for a task.
+
+        The user must be a mentor of the module.
+        """
         user = info.context.request.user
 
         module = (
@@ -218,7 +223,8 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            raise PermissionDenied(msg="Only mentors of this module can set deadlines.")
+            msg = "Only mentors of this module can set deadlines."
+            raise PermissionDenied(msg)
 
         issue = (
             module.issues.select_related("repository")
@@ -265,7 +271,10 @@ class ModuleMutation:
         program_key: str,
         issue_number: int,
     ) -> ModuleNode:
-        """Clear the deadline for a task. The user must be a mentor of the module."""
+        """Clear the deadline for a task.
+
+        The user must be a mentor of the module.
+        """
         user = info.context.request.user
 
         module = (
@@ -277,7 +286,8 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            raise PermissionDenied(msg="Only mentors of this module can clear deadlines.")
+            msg = "Only mentors of this module can clear deadlines."
+            raise PermissionDenied(msg)
 
         issue = (
             module.issues.select_related("repository")
@@ -324,9 +334,8 @@ class ModuleMutation:
         is_admin = module.program.admins.filter(nest_user=user).exists()
         is_mentor = Mentor.objects.filter(nest_user=user, modules=module).exists()
         if not (is_admin or is_mentor):
-            raise PermissionDenied(
-                msg="Only admins of the program or mentors of this module can edit modules."
-            )
+            msg = "Only admins of the program or mentors of this module can edit modules."
+            raise PermissionDenied(msg)
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,

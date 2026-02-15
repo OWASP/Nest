@@ -1,7 +1,5 @@
 """Admin model for the Mentorship app."""
 
-from __future__ import annotations
-
 from apps.common.models import TimestampedModel
 from apps.mentorship.models.common import (
     ExperienceLevel,
@@ -14,6 +12,8 @@ class Admin(LinkedUser, ExperienceLevel, MatchingAttributes, TimestampedModel):
     """Admin model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_admins"
         verbose_name_plural = "Admins"
 
