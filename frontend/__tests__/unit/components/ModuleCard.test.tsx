@@ -618,7 +618,6 @@ describe('ModuleCard', () => {
 
       const modules = [moduleWithUndefined, createMockModule({ key: 'mod2' })]
 
-      // Should not throw and should not find sections
       expect(() => render(<ModuleCard modules={modules} />)).not.toThrow()
       expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
       expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
@@ -631,7 +630,6 @@ describe('ModuleCard', () => {
       render(<ModuleCard modules={modules} />)
 
       const images = screen.getAllByTestId('next-image')
-      // Should fall back to appending &s=60
       expect(images[0].getAttribute('src')).toContain('&s=60')
     })
 
@@ -691,7 +689,6 @@ describe('ModuleCard', () => {
       mockPathname.mockReturnValue(undefined)
       const modules = [createMockModule(), createMockModule({ key: 'mod2' })]
 
-      // Should not throw
       expect(() => render(<ModuleCard modules={modules} />)).not.toThrow()
     })
 

@@ -653,18 +653,10 @@ describe('Rendering', () => {
         await user.type(input, 'test')
         await waitFor(expectListItemsExist)
 
-        // Navigate to first item
         await user.keyboard('{ArrowDown}')
         const listItems = screen.getAllByRole('listitem')
         expect(listItems[0]).toHaveClass('bg-gray-100')
-
-        // Press ArrowUp
         await user.keyboard('{ArrowUp}')
-
-        // Should still be at first item (or index null if logic allows, but here check it doesn't crash or go weird)
-        // Actually MultiSearch logic: if index>0 OR subIndex>0 decrement.
-        // If index=0 and subIndex=0, nothing happens in the `if/else if`.
-        // So state remains { index: 0, subIndex: 0 }
         expect(listItems[0]).toHaveClass('bg-gray-100')
       })
     })
@@ -984,7 +976,6 @@ describe('Rendering', () => {
       await waitFor(() => {
         expect(mockFetchAlgoliaData).toHaveBeenCalled()
       })
-      // Should not crash and events should not be in suggestions (only algolia hits)
       expect(true).toBe(true)
     })
 
@@ -1001,7 +992,6 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'test')
 
-      // Need to rely on icon or something else since text might be empty/different
       await waitFor(() => {
         expect(screen.getByTestId('fa-folder-icon')).toBeInTheDocument()
       })

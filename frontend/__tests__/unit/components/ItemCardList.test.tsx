@@ -979,7 +979,6 @@ describe('ItemCardList Component', () => {
         author: mockUser,
         url: 'https://example.com/name',
         name: 'Item Name',
-        // No title
       } as unknown as Issue
 
       render(

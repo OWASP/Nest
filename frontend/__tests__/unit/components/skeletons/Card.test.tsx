@@ -32,7 +32,6 @@ describe('CardSkeleton', () => {
   it('renders with showIcons=false specifically', () => {
     render(<CardSkeleton showIcons={false} />)
     const skeletons = screen.getAllByTestId('skeleton')
-    // Filter for the icon class 'h-8 w-16' mentioned in component
     const iconSkeletons = skeletons.filter((s) => s.className?.includes('h-8 w-16'))
     expect(iconSkeletons.length).toBe(0)
   })

@@ -363,11 +363,9 @@ describe('IssuesPage', () => {
 
     render(<IssuesPage />)
 
-    // Open the label filter dropdown
     const selectTrigger = screen.getByRole('button', { name: /Label/i })
     fireEvent.click(selectTrigger)
 
-    // Verify that the label from the issue is present in the listbox
     const listbox = await screen.findByRole('listbox')
     expect(within(listbox).getByText('extracted-label')).toBeInTheDocument()
   })

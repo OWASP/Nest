@@ -1196,7 +1196,6 @@ describe('ProgramForm Component', () => {
 
     test('handles string menteesLimit in validation', async () => {
       const user = userEvent.setup()
-      // This covers the typeof value === 'string' branch in validateMenteesLimit
       const stringLimitFormData = { ...filledFormData, menteesLimit: '10' as unknown as number }
 
       render(
@@ -1209,14 +1208,12 @@ describe('ProgramForm Component', () => {
         />
       )
 
-      // Trigger submission to force validation call with the existing string value in formData
       const buttons = screen.getAllByRole('button')
       const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
       if (submitButton) {
         await user.click(submitButton)
       }
 
-      // validation should pass with '10' converted to 10
       await waitFor(() => {
         expect(mockOnSubmit).toHaveBeenCalled()
       })
@@ -1230,7 +1227,6 @@ describe('ProgramForm Component', () => {
         }),
       })
 
-      // This covers the else branch of: if (formData.menteesLimit !== undefined && ...)
       const undefinedLimitFormData = {
         ...filledFormData,
         menteesLimit: undefined as unknown as number,

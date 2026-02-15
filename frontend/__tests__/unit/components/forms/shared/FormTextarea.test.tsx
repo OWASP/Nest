@@ -14,11 +14,8 @@ describe('FormTextarea', () => {
     render(<FormTextarea {...defaultProps} />)
     const textarea = screen.getByRole('textbox')
     expect(textarea).toBeInTheDocument()
-    // Check default rows
     expect(textarea).toHaveAttribute('rows', '4')
-    // Check default required (should be false, so not required)
     expect(textarea).not.toBeRequired()
-    // Check label logic for not required (no asterisk)
     expect(screen.queryByText('*')).not.toBeInTheDocument()
   })
 
@@ -26,7 +23,6 @@ describe('FormTextarea', () => {
     render(<FormTextarea {...defaultProps} required={true} />)
     const textarea = screen.getByRole('textbox')
     expect(textarea).toBeRequired()
-    // Check label logic for required (asterisk present)
     expect(screen.getByText('*')).toBeInTheDocument()
   })
 

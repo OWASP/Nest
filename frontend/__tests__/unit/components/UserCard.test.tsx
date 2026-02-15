@@ -442,7 +442,6 @@ describe('UserCard', () => {
 
     it('handles undefined metrics props (all undefined)', () => {
       const props = { ...defaultProps }
-      // Explicitly override defaultProps (which are 0) with undefined
       Object.assign(props, {
         followersCount: undefined,
         repositoriesCount: undefined,

@@ -731,11 +731,9 @@ describe('EntityActions', () => {
       render(<EntityActions type="program" programKey="test-program" />)
       const button = screen.getByRole('button', { name: /Program actions menu/ })
 
-      // Open
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
-      // Close by clicking again
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'false')
     })

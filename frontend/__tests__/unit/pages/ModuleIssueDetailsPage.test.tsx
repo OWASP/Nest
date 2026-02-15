@@ -310,7 +310,6 @@ describe('ModuleIssueDetailsPage', () => {
         setIsEditingDeadline,
       })
 
-      // Set a deadline in the past to ensure consistent 'overdue' state
       const pastDate = new Date('2020-01-01').toISOString()
       const dataWithDeadline = {
         ...mockIssueData,
@@ -320,7 +319,6 @@ describe('ModuleIssueDetailsPage', () => {
       mockUseQuery.mockReturnValue({ data: dataWithDeadline, loading: false, error: undefined })
       render(<ModuleIssueDetailsPage />)
 
-      // Button text will contain (overdue)
       const deadlineButton = screen.getByRole('button', { name: /\(overdue\)/i })
       fireEvent.click(deadlineButton)
 
@@ -350,7 +348,6 @@ describe('ModuleIssueDetailsPage', () => {
       }
       mockUseQuery.mockReturnValue({ data: issueWithState, loading: false, error: undefined })
       render(<ModuleIssueDetailsPage />)
-      // The issue status is the first badge of its kind.
       expect(screen.getAllByText(expectedText)[0]).toBeInTheDocument()
     })
   })

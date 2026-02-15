@@ -647,7 +647,6 @@ describe('NavDropdown Component', () => {
       const button = screen.getByRole('button')
       button.focus()
 
-      // It is initially closed. Pressing Escape should check (e.key === 'Escape' && isOpen) -> false
       await user.keyboard('{Escape}')
       expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
     })
@@ -658,7 +657,6 @@ describe('NavDropdown Component', () => {
       const button = screen.getByRole('button')
       button.focus()
 
-      // Pressing random key should skip the if and else if blocks
       await user.keyboard('a')
       expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
     })

@@ -312,7 +312,6 @@ describe('MyMentorshipPage', () => {
     const searchInput = screen.getByTestId('search-input')
     fireEvent.change(searchInput, { target: { value: 'query' } })
 
-    // Wait for debounce and push
     await waitFor(
       () => {
         expect(mockPush).toHaveBeenCalledWith('?q=query', { scroll: false })

@@ -233,20 +233,15 @@ describe('TruncatedText Component', () => {
   })
 
   test('observer.observe is not called when textRef.current is initially null', () => {
-    // This is difficult to test directly since React always sets the ref on mount
-    // But we can verify the observer behavior with rapid mount/unmount
     jest.clearAllMocks()
 
     const { unmount } = render(<TruncatedText text="Quick mount" />)
     expect(mockObserve).toHaveBeenCalledTimes(1)
 
     unmount()
-
-    // Verify disconnect was called on unmount
     expect(mockDisconnect).toHaveBeenCalledTimes(1)
   })
   test('does not observe when textRef.current is null', () => {
-    // Create a ref object that ignores writes to .current and always returns null
     const nullRef = {}
     Object.defineProperty(nullRef, 'current', {
       get: () => null,
