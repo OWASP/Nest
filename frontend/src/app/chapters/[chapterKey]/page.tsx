@@ -76,15 +76,15 @@ export default function ChapterDetailsPage() {
             label: 'Slack',
             value: (
               <div className="inline-flex flex-wrap gap-3">
-                {chapter.entityChannels.map((chapter) => (
+                {chapter.entityChannels.map((ch) => (
                   <Link
-                    key={chapter.slackChannelId}
-                    href={slackChannelUrl(chapter.slackChannelId)}
+                    key={ch.slackChannelId}
+                    href={slackChannelUrl(ch.slackChannelId)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:underline"
                   >
-                    {chapter.name}
+                    {ch.name}
                   </Link>
                 ))}
               </div>
