@@ -47,13 +47,13 @@ const minimalData = [
   {
     id: 'mock-pull-request',
     author: mockUser,
-    createdAt: '2024-06-01T12:00:00Z',
+    createdAt: 1717243200,
     organizationName: 'test-org',
     repositoryName: 'test-repo',
     title: 'Test Pull Request',
     url: 'https://github.com/test-org/test-repo/pull/1',
     state: 'open',
-    mergedAt: '2024-06-02T12:00:00Z',
+    mergedAt: 1717329600,
   },
 ]
 

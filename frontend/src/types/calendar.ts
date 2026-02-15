@@ -4,8 +4,8 @@ export type CalendarEvent = {
   title: string
   description?: string
   location?: string
-  startDate: string | Date
-  endDate?: string | Date
+  startDate: number
+  endDate?: number
   url?: string
 }
 

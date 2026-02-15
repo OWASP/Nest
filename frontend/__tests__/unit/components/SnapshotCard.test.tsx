@@ -9,8 +9,8 @@ describe('SnapshotCard', () => {
     key: 'test-snapshot-1',
     title: 'Test Snapshot',
     button: { label: 'Open', onclick: mockOnClick },
-    startAt: '2025-01-01T00:00:00Z',
-    endAt: '2025-01-10T00:00:00Z',
+    startAt: 1735689600,
+    endAt: 1736467200,
   }
 
   beforeEach(() => {
@@ -50,11 +50,11 @@ describe('SnapshotCard', () => {
   })
 
   it('handles missing startAt or endAt (conditional rendering) - timezone safe', () => {
-    const { rerender } = render(<SnapshotCard {...defaultProps} startAt="" />)
+    const { rerender } = render(<SnapshotCard {...defaultProps} startAt={0} />)
     const onlyEnd = formatDate(defaultProps.endAt)
     expect(screen.getByText(new RegExp(onlyEnd))).toBeInTheDocument()
 
-    rerender(<SnapshotCard {...defaultProps} endAt="" />)
+    rerender(<SnapshotCard {...defaultProps} endAt={0} />)
     const onlyStart = formatDate(defaultProps.startAt)
     expect(screen.getByText(new RegExp(onlyStart))).toBeInTheDocument()
   })

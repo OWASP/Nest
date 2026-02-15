@@ -7,8 +7,8 @@ const mockEvent = {
   title: 'Test Event',
   description: 'Test description',
   location: 'Test Location',
-  startDate: '2025-12-01',
-  endDate: '2025-12-02',
+  startDate: 1764547200, // 2025-12-01
+  endDate: 1764633600, // 2025-12-02
 }
 
 describe('CalendarButton Accessibility', () => {
