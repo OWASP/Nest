@@ -88,9 +88,9 @@ class OwaspScraper:
 
     def get_urls(self, domain=None):
         """Return scraped URLs."""
-        if self.page_tree == None:
+        if self.page_tree is None:
             return set()
-        
+
         return set(
             self.page_tree.xpath(f"//div[@class='sidebar']//a[contains(@href, '{domain}')]/@href")
             if domain is not None

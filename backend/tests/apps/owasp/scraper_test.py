@@ -356,9 +356,8 @@ class TestOwaspScraper:
 
     def test_urls_with_none_page_tree(self, mock_session):
         """Test get_urls returns empty set when request fails (page_tree is None)."""
-
         mock_session.get.side_effect = requests.exceptions.RequestException
-        
+
         scraper = OwaspScraper("https://test.org")
 
         assert scraper.page_tree is None
