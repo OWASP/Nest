@@ -1,3 +1,4 @@
+from .admin import Admin
 from .issue_user_interest import IssueUserInterest
 from .mentee import Mentee
 from .mentee_module import MenteeModule
@@ -6,5 +7,6 @@ from .mentor import Mentor
 from .mentor_module import MentorModule
 from .module import Module
 from .program import Program
+from .program_admin import ProgramAdmin
 from .task import Task
 from .task_level import TaskLevel

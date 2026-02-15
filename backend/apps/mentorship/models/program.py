@@ -70,7 +70,9 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
 
     # M2Ms.
     admins = models.ManyToManyField(
-        "mentorship.Mentor",
+        "mentorship.Admin",
+        through="mentorship.ProgramAdmin",
+        related_name="admin_programs",
         verbose_name="Admins",
         blank=True,
     )

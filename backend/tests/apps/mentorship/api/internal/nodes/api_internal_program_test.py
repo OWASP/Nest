@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import get_type_hints
 from unittest.mock import MagicMock
 
 import pytest
@@ -85,13 +86,14 @@ def test_paginated_programs_fields():
 
 def test_create_program_input_fields():
     """Test that CreateProgramInput fields are correctly defined."""
-    assert CreateProgramInput.__annotations__["name"] is str
-    assert CreateProgramInput.__annotations__["description"] is str
-    assert CreateProgramInput.__annotations__["domains"] == list[str]
-    assert CreateProgramInput.__annotations__["ended_at"] is datetime
-    assert CreateProgramInput.__annotations__["mentees_limit"] is int
-    assert CreateProgramInput.__annotations__["started_at"] is datetime
-    assert CreateProgramInput.__annotations__["tags"] == list[str]
+    hints = get_type_hints(CreateProgramInput)
+    assert hints["name"] is str
+    assert hints["description"] is str
+    assert hints["domains"] == list[str]
+    assert hints["ended_at"] is datetime
+    assert hints["mentees_limit"] is int
+    assert hints["started_at"] is datetime
+    assert hints["tags"] == list[str]
 
     create_input = CreateProgramInput(
         name="New Program",
@@ -106,16 +108,17 @@ def test_create_program_input_fields():
 
 def test_update_program_input_fields():
     """Test that UpdateProgramInput fields are correctly defined."""
-    assert UpdateProgramInput.__annotations__["key"] is str
-    assert UpdateProgramInput.__annotations__["name"] is str
-    assert UpdateProgramInput.__annotations__["description"] is str
-    assert UpdateProgramInput.__annotations__["admin_logins"] == list[str] | None
-    assert UpdateProgramInput.__annotations__["domains"] == list[str] | None
-    assert UpdateProgramInput.__annotations__["ended_at"] is datetime
-    assert UpdateProgramInput.__annotations__["mentees_limit"] is int
-    assert UpdateProgramInput.__annotations__["started_at"] is datetime
-    assert UpdateProgramInput.__annotations__["status"] is ProgramStatusEnum
-    assert UpdateProgramInput.__annotations__["tags"] == list[str] | None
+    hints = get_type_hints(UpdateProgramInput)
+    assert hints["key"] is str
+    assert hints["name"] is str
+    assert hints["description"] is str
+    assert hints["admin_logins"] == list[str] | None
+    assert hints["domains"] == list[str] | None
+    assert hints["ended_at"] is datetime
+    assert hints["mentees_limit"] is int
+    assert hints["started_at"] is datetime
+    assert hints["status"] is ProgramStatusEnum
+    assert hints["tags"] == list[str] | None
 
     update_input = UpdateProgramInput(
         key="update-program-key",
@@ -133,6 +136,7 @@ def test_update_program_input_fields():
 
 def test_update_program_status_input_fields():
     """Test that UpdateProgramStatusInput fields are correctly defined."""
-    assert UpdateProgramStatusInput.__annotations__["key"] is str
-    assert UpdateProgramStatusInput.__annotations__["name"] is str
-    assert UpdateProgramStatusInput.__annotations__["status"] is ProgramStatusEnum
+    hints = get_type_hints(UpdateProgramStatusInput)
+    assert hints["key"] is str
+    assert hints["name"] is str
+    assert hints["status"] is ProgramStatusEnum

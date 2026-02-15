@@ -6,7 +6,7 @@ import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 
-from apps.mentorship.api.internal.mutations.module import resolve_mentors_from_logins
+from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.program import (
     CreateProgramInput,
@@ -14,10 +14,38 @@ from apps.mentorship.api.internal.nodes.program import (
     UpdateProgramInput,
     UpdateProgramStatusInput,
 )
-from apps.mentorship.models import Mentor, Program
+from apps.mentorship.models import Admin, Program
+from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
+from apps.nest.models import User
 
 logger = logging.getLogger(__name__)
+
+
+def resolve_admins_from_logins(logins: list[str]) -> set:
+    """Resolve a list of GitHub logins to a set of Admin objects."""
+    admins = set()
+    for login in logins:
+        try:
+            github_user = GithubUser.objects.get(login__iexact=login.lower())
+            admin, _ = Admin.objects.get_or_create(github_user=github_user)
+            if not admin.nest_user:
+                try:
+                    nest_user = User.objects.get(github_user=github_user)
+                    admin.nest_user = nest_user
+                    admin.save(update_fields=["nest_user"])
+                except User.DoesNotExist:
+                    logger.info(
+                        "No Nest user found for GitHub user '%s'; leaving admin.nest_user unset.",
+                        github_user.login,
+                    )
+            admins.add(admin)
+        except GithubUser.DoesNotExist as e:
+            msg = f"GitHub user '{login}' not found."
+            logger.warning(msg, exc_info=True)
+            raise ValueError(msg) from e
+
+    return admins
 
 
 @strawberry.type
@@ -29,12 +57,6 @@ class ProgramMutation:
     def create_program(self, info: strawberry.Info, input_data: CreateProgramInput) -> ProgramNode:
         """Create a new mentorship program."""
         user = info.context.request.user
-
-        mentor, created = Mentor.objects.get_or_create(
-            nest_user=user, defaults={"github_user": user.github_user}
-        )
-        if created:
-            logger.info("Created a new mentor profile for user '%s'.", user.username)
 
         if input_data.ended_at <= input_data.started_at:
             msg = "End date must be after start date."
@@ -57,7 +79,13 @@ class ProgramMutation:
             status=ProgramStatusEnum.DRAFT.value,
         )
 
-        program.admins.set([mentor])
+        admin, _ = Admin.objects.get_or_create(github_user=user.github_user)
+        if not admin.nest_user:
+            admin.nest_user = user
+            admin.save(update_fields=["nest_user"])
+        ProgramAdmin.objects.create(
+            program=program, admin=admin, role=ProgramAdmin.AdminRole.OWNER
+        )
 
         logger.info(
             "User '%s' successfully created program '%s' (ID: %s).",
@@ -81,18 +109,7 @@ class ProgramMutation:
             logger.warning(msg, exc_info=True)
             raise ObjectDoesNotExist(msg) from err
 
-        try:
-            admin = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            msg = "You must be a mentor to update a program."
-            logger.warning(
-                "User '%s' is not a mentor and cannot update programs.",
-                user.username,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from err
-
-        if not program.admins.filter(id=admin.id).exists():
+        if not program.admins.filter(nest_user=user).exists():
             msg = "You must be an admin of this program to update it."
             logger.warning(
                 "Permission denied for user '%s' to update program '%s'.",
@@ -130,8 +147,7 @@ class ProgramMutation:
         program.save()
 
         if input_data.admin_logins is not None:
-            admins_to_set = resolve_mentors_from_logins(input_data.admin_logins)
-            program.admins.set(admins_to_set)
+            program.admins.set(resolve_admins_from_logins(input_data.admin_logins))
 
         return program
 
@@ -149,13 +165,7 @@ class ProgramMutation:
             msg = f"Program with key '{input_data.key}' not found."
             raise ObjectDoesNotExist(msg) from e
 
-        try:
-            mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as e:
-            msg = "You must be a mentor to update a program."
-            raise PermissionDenied(msg) from e
-
-        if not program.admins.filter(id=mentor.id).exists():
+        if not program.admins.filter(nest_user=user).exists():
             raise PermissionDenied
 
         program.status = input_data.status.value

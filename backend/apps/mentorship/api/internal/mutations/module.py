@@ -82,15 +82,11 @@ class ModuleMutation:
         try:
             program = Program.objects.get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
-        except Mentor.DoesNotExist as e:
-            msg = "Only mentors can create modules."
-            raise PermissionDenied(msg) from e
 
-        if not program.admins.filter(id=creator_as_mentor.id).exists():
+        if not program.admins.filter(nest_user=user).exists():
             raise PermissionDenied
 
         started_at, ended_at = _validate_module_dates(
@@ -118,7 +114,6 @@ class ModuleMutation:
             program.save(update_fields=["experience_levels"])
 
         mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins or [])
-        mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
 
         return module
@@ -145,11 +140,9 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied(msg="Only mentors can assign issues.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            msg = "Only mentors of this module can assign issues."
+            raise PermissionDenied(msg)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -187,11 +180,9 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            msg = "Only mentors of this module can unassign issues."
+            raise PermissionDenied(msg)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -217,7 +208,10 @@ class ModuleMutation:
         issue_number: int,
         deadline_at: datetime,
     ) -> ModuleNode:
-        """Set a deadline for a task. User must be a mentor and an admin of the program."""
+        """Set a deadline for a task.
+
+        The user must be a mentor of the module.
+        """
         user = info.context.request.user
 
         module = (
@@ -228,11 +222,9 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied(msg="Only mentors can set deadlines.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            msg = "Only mentors of this module can set deadlines."
+            raise PermissionDenied(msg)
 
         issue = (
             module.issues.select_related("repository")
@@ -279,7 +271,10 @@ class ModuleMutation:
         program_key: str,
         issue_number: int,
     ) -> ModuleNode:
-        """Clear the deadline for a task. User must be a mentor and an admin of the program."""
+        """Clear the deadline for a task.
+
+        The user must be a mentor of the module.
+        """
         user = info.context.request.user
 
         module = (
@@ -290,11 +285,9 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied(msg="Only mentors can clear deadlines.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            msg = "Only mentors of this module can clear deadlines."
+            raise PermissionDenied(msg)
 
         issue = (
             module.issues.select_related("repository")
@@ -326,7 +319,7 @@ class ModuleMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
-        """Update an existing mentorship module. User must be an admin of the program."""
+        """Update an existing mentorship module."""
         user = info.context.request.user
 
         try:
@@ -338,19 +331,11 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
-        try:
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            msg = "Only mentors can edit modules."
-            logger.warning(
-                "User '%s' is not a mentor and cannot edit modules.",
-                user.username,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from err
-
-        if not module.program.admins.filter(id=creator_as_mentor.id).exists():
-            raise PermissionDenied
+        is_admin = module.program.admins.filter(nest_user=user).exists()
+        is_mentor = Mentor.objects.filter(nest_user=user, modules=module).exists()
+        if not (is_admin or is_mentor):
+            msg = "Only admins of the program or mentors of this module can edit modules."
+            raise PermissionDenied(msg)
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
