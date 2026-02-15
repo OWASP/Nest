@@ -7,9 +7,9 @@
 
 Nest is a full-stack web application built using:
 
-* **Backend**: Python, Django
-* **Frontend**: TypeScript, React, Tailwind CSS
-* **Search**: Algolia
+- **Backend**: Python, Django
+- **Frontend**: TypeScript, React, Tailwind CSS
+- **Search**: Algolia
 
 !!! info "Containerization"
     The project uses a **containerized approach** for both development and production environments. Docker is required to run Nest locally.
@@ -21,43 +21,45 @@ Before contributing, ensure you have the following installed:
 ### Required Tools
 
 1. **Docker**
-    * Required for running the Nest instance
-    * [Docker Documentation](https://docs.docker.com/)
+    - Required for running the Nest instance
+    - [Docker Documentation](https://docs.docker.com/)
 
 2. **pre-commit**
-    * Required to automate code checks and apply fixes
-    * Installation options:
-        * Virtual environment: `pip install pre-commit`
-        * OS package: `apt install pre-commit` / `brew install pre-commit`
-        * Other methods depending on your configuration
+    - Required to automate code checks and apply fixes
+    - Installation options:
+        - Virtual environment: `pip install pre-commit`
+        - OS package: `apt install pre-commit` / `brew install pre-commit`
+        - Other methods depending on your configuration
 
 ### Windows Users Requirements
 
 !!! warning "Windows Setup Requirements"
     **WSL (Windows Subsystem for Linux)** is required for Windows users to enable Linux compatibility.
 
-    1. The `make run` command requires WSL
-    2. You must use WSL terminal (not Windows PowerShell)
-    3. WSL integration must be enabled in Docker Desktop settings
+```plaintext
+1. The `make run` command requires WSL
+2. You must use WSL terminal (not Windows PowerShell)
+3. WSL integration must be enabled in Docker Desktop settings
 
-    === "WSL Installation"
-        Follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install)
+=== "WSL Installation"
+    Follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install)
 
-    === "Docker Desktop Setup"
-        1. Open Docker Desktop
-        2. Go to Settings → Resources → WSL Integration
-        3. Enable WSL integration
+=== "Docker Desktop Setup"
+    1. Open Docker Desktop
+    2. Go to Settings → Resources → WSL Integration
+    3. Enable WSL integration
 
-    !!! danger "PowerShell Not Supported"
-        Do not report issues if using PowerShell for running commands -- it's not the intended way to run Nest locally.
+!!! danger "PowerShell Not Supported"
+    Do not report issues if using PowerShell for running commands -- it's not the intended way to run Nest locally.
+```
 
 ## Getting Started
 
 ### Support the Project
 
-* [![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
+- [![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
 
-* [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
+- [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
 ### Initial Setup
 
@@ -218,9 +220,9 @@ To fetch GitHub OWASP data locally:
     ```
 
 3. **Configure Slack App**
-    * Use [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`).
-    * Replace slash commands endpoint with your ngrok domain
-    * Reinstall your Slack application after making the changes using `Settings -- Install App` section
+    - Use [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`).
+    - Replace slash commands endpoint with your ngrok domain
+    - Reinstall your Slack application after making the changes using `Settings -- Install App` section
 
 ## Development Guidelines
 
@@ -247,8 +249,8 @@ make test
 
 #### Test Coverage
 
-* Minimum test coverage requirement for the Backend: [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml)
-* Minimum test coverage requirement for the Frontend: [jest.config.ts](https://github.com/OWASP/Nest/blob/main/frontend/jest.config.ts)
+- Minimum test coverage requirement for the Backend: [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml)
+- Minimum test coverage requirement for the Frontend: [jest.config.ts](https://github.com/OWASP/Nest/blob/main/frontend/jest.config.ts)
 
 !!! danger "Important Notice"
     - Ensure your changes do not drop the overall test coverage percentage.
@@ -258,8 +260,8 @@ make test
 
 ### 1. Find an Issue
 
-* Browse [issues](https://github.com/owasp/nest/issues)
-* If you want to work on something specific, create a new issue or comment on an existing one to let others know
+- Browse [issues](https://github.com/owasp/nest/issues)
+- If you want to work on something specific, create a new issue or comment on an existing one to let others know
 
 ### 2. Branch Creation
 
@@ -270,23 +272,23 @@ git checkout -b feature/my-feature-name
 
 ### 3. Make Changes and Commit
 
-* Check that your commits include only related and intended changes. Do not include unrelated files.
-* Follow best practices for code style and testing.
+- Check that your commits include only related and intended changes. Do not include unrelated files.
+- Follow best practices for code style and testing.
 
 - **Add tests** for any new functionality or changes to ensure proper coverage.
-  * **Run the code quality checks**:
+  - **Run the code quality checks**:
 
       ```bash
       make check
       ```
 
-  * **Run tests to ensure everything works correctly**:
+  - **Run tests to ensure everything works correctly**:
 
       ```bash
       make test
       ```
 
-  * **Write meaningful commit messages**:
+  - **Write meaningful commit messages**:
 
       ```bash
       git commit -m "Add feature: short description"
@@ -302,13 +304,13 @@ git checkout -b feature/my-feature-name
 
 ### 5. Pull Request
 
-* Submit a **Pull Request** (PR) to the `main` branch
-* Your PR will trigger CI/CD pipelines that run automated checks and tests
+- Submit a **Pull Request** (PR) to the `main` branch
+- Your PR will trigger CI/CD pipelines that run automated checks and tests
 
 ### 6. Review Process
 
-* Address feedback from maintainers during code review.
-* Once approved, your PR will be merged into the main branch.
+- Address feedback from maintainers during code review.
+- Once approved, your PR will be merged into the main branch.
 
 ## Troubleshooting
 
@@ -320,9 +322,9 @@ This error is usually caused by incorrect encoding of `.env` files. To resolve t
 
 1. **Open the `.env` file in a text editor** (e.g., Visual Studio Code).
 2. **Check and change the encoding**:
-   * Click on the encoding information in the bottom-right corner of the VS Code window.
-   * Select **"Save with Encoding"**.
-   * Choose **"UTF-8"** from the list (ensure it's not "UTF-8 with BOM").
+   - Click on the encoding information in the bottom-right corner of the VS Code window.
+   - Select **"Save with Encoding"**.
+   - Choose **"UTF-8"** from the list (ensure it's not "UTF-8 with BOM").
 3. **Save the file** with the correct encoding.
 4. **Restart the application** using the command
    **`make run`**.

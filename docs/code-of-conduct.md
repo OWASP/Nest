@@ -10,8 +10,10 @@
     nationality, personal appearance, race, religion, or sexual identity
     and orientation.
 
-    We pledge to act and interact in ways that contribute to an open, welcoming,
-    diverse, inclusive, and healthy community.
+```plaintext
+We pledge to act and interact in ways that contribute to an open, welcoming,
+diverse, inclusive, and healthy community.
+```
 
 ## Community Standards
 
@@ -19,11 +21,11 @@
 
 We encourage behaviors that contribute to a positive environment:
 
--  Demonstrating empathy and kindness toward other people
--  Being respectful of differing opinions, viewpoints, and experiences
--  Giving and gracefully accepting constructive feedback
--  Accepting responsibility and apologizing for mistakes
--  Focusing on what is best for the overall community
+- Demonstrating empathy and kindness toward other people
+- Being respectful of differing opinions, viewpoints, and experiences
+- Giving and gracefully accepting constructive feedback
+- Accepting responsibility and apologizing for mistakes
+- Focusing on what is best for the overall community
 
 ### Unacceptable Behaviors
 
@@ -39,20 +41,25 @@ We encourage behaviors that contribute to a positive environment:
 ### Responsibilities
 
 !!! info "Leadership Role"
-    Community leaders are responsible for:
 
-    - Clarifying and enforcing standards of acceptable behavior
-    - Taking appropriate and fair corrective action
-    - Removing, editing, or rejecting contributions not aligned with this Code
-    - Communicating moderation decisions when appropriate
+Community leaders are responsible for:
+
+```plaintext
+- Clarifying and enforcing standards of acceptable behavior
+- Taking appropriate and fair corrective action
+- Removing, editing, or rejecting contributions not aligned with this Code
+- Communicating moderation decisions when appropriate
+```
 
 ### Reporting Process
 
 !!! tip "Reporting Violations"
-    Report instances of unacceptable behavior to the community leaders at:
-    [OWASP Nest Project Leaders](https://owasp.org/www-project-nest)
+Report instances of unacceptable behavior to the community leaders at:
+[OWASP Nest Project Leaders](https://owasp.org/www-project-nest)
 
-    All complaints will be reviewed and investigated promptly and fairly.
+```plaintext
+All complaints will be reviewed and investigated promptly and fairly.
+```
 
 ### Guidelines for Enforcement
 
@@ -81,8 +88,6 @@ Community leaders follow these impact guidelines when determining consequences:
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/version/2/0/code_of_conduct.html), version 2.0, available at [contributor-covenant.org](https://www.contributor-covenant.org/version/2/0/code_of_conduct.html).
-
-
 
 Community Impact Guidelines were inspired by [Mozilla's code of conduct enforcement ladder](https://github.com/mozilla/diversity).
 

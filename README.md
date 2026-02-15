@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD041 -->
 <div align="center">
 
 [![OWASP](https://img.shields.io/badge/Lab-blue?&label=owasp%20level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=OWASP%20Type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=OWASP%20Slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/archives/project-nest)
@@ -70,4 +71,4 @@ Over time, OWASP Nest has expanded to address broader OWASP community needs, suc
 
 - [BlueSky account](https://bsky.app/profile/nest.owasp.org)
 - [LinkedIn group](https://www.linkedin.com/groups/14656108/)
-- [Slack channel](https://owasp.slack.com/archives/project-nest) (join [here](https://owasp.org/slack/invite))
+- [Slack channel](https://owasp.slack.com/archives/project-nest) (join [here](https://owasp.org/slack/invite)) <!-- markdownlint-disable MD059 -->
