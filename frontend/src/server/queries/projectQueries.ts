@@ -92,6 +92,10 @@ export const GET_PROJECT_DATA = gql`
       type
       updatedAt
       url
+      entityChannels {
+        name
+        slackChannelId
+      }
       recentMilestones(limit: 5) {
         author {
           id
