@@ -606,14 +606,14 @@ tests = ["pytest (>=9)", "typing-extensions (>=4.15)"]
 
 [[package]]
 name = "platformdirs"
-version = "4.9.0"
+version = "4.9.1"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "platformdirs-4.9.0-py3-none-any.whl", hash = "sha256:b02ef5c8ddacd466a19decb2390e52f48ae49a5c41f55646cc45e85320d9aff7"},
-    {file = "platformdirs-4.9.0.tar.gz", hash = "sha256:d8c98e89c427a101947441c7e77b4cd1c8ea717de6f3885e2aa9c73fce276207"},
+    {file = "platformdirs-4.9.1-py3-none-any.whl", hash = "sha256:61d8b967d34791c162d30d60737369cbbd77debad5b981c4bfda1842e71e0d66"},
+    {file = "platformdirs-4.9.1.tar.gz", hash = "sha256:f310f16e89c4e29117805d8328f7c10876eeff36c94eac879532812110f7d39f"},
 ]
 
 [[package]]
