@@ -323,7 +323,7 @@ def test_module_node_task_assigned_at_none(mock_module_node):
 
 
 def test_module_node_issues_invalid_limit(mock_module_node):
-    """Test the issues resolver returns [] when limit is invalid"""
+    """Test the issues resolver returns [] when limit is invalid."""
     issues_list = mock_module_node.mock_issues(limit=0)
     assert issues_list == []
 
@@ -349,10 +349,9 @@ def test_module_node_issues_label_all(mock_module_node):
 
 def test_module_node_recent_pull_requests(mock_module_node):
     """Test the recent_pull_requests resolver."""
-    with patch(
-        "apps.mentorship.api.internal.nodes.module.PullRequest.objects"
-    ) as mock_pr_objects:
-        mock_pr_objects.filter.return_value.select_related.return_value.distinct.return_value.order_by.return_value.__getitem__.return_value = [
+    with patch("apps.mentorship.api.internal.nodes.module.PullRequest.objects") as mock_pr_objects:
+        pr_chain = mock_pr_objects.filter.return_value.select_related.return_value
+        pr_chain.distinct.return_value.order_by.return_value.__getitem__.return_value = [
             MagicMock(),
             MagicMock(),
         ]

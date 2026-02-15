@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
+from django.utils import timezone
 
 from apps.mentorship.api.internal.mutations.module import (
     ModuleMutation,
@@ -145,12 +146,11 @@ class TestValidateModuleDates:
     def test_naive_dates_made_aware(self):
         """Test that naive dates are made timezone-aware."""
         result = _validate_module_dates(
-            datetime(2025, 2, 1),
-            datetime(2025, 6, 30),
+            datetime(2025, 2, 1),  # noqa: DTZ001
+            datetime(2025, 6, 30),  # noqa: DTZ001
             datetime(2025, 1, 1, tzinfo=UTC),
             datetime(2025, 12, 31, tzinfo=UTC),
         )
-        from django.utils import timezone
 
         assert not timezone.is_naive(result[0])
         assert not timezone.is_naive(result[1])
@@ -389,9 +389,7 @@ class TestModuleMutationAssignIssue:
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_assign_issue_success(
-        self, mock_module, mock_mentor, mock_gh_user, mock_interest
-    ):
+    def test_assign_issue_success(self, mock_module, mock_mentor, mock_gh_user, mock_interest):
         """Test successful issue assignment."""
         user = MagicMock()
         info = self._make_info(user)
@@ -552,7 +550,7 @@ class TestModuleMutationUnassignIssue:
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_unassign_issue_success(self, mock_module, mock_mentor, mock_gh_user):
-        """Test successful issue unassignment."""
+        """Test successful issue un-assignment."""
         user = MagicMock()
         info = self._make_info(user)
 
@@ -685,7 +683,7 @@ class TestModuleMutationUnassignIssue:
         mock_mod.issues.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
-        with pytest.raises(ObjectDoesNotExist, match="Issue .* not found in this module"):
+        with pytest.raises(ObjectDoesNotExist, match=r"Issue .* not found in this module"):
             mutation.unassign_issue_from_user(
                 info,
                 module_key="mod-1",
@@ -707,9 +705,7 @@ class TestModuleMutationSetTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_task_deadline_success(
-        self, mock_tz, mock_module, mock_mentor, mock_task
-    ):
+    def test_set_task_deadline_success(self, mock_tz, mock_module, mock_mentor, mock_task):
         """Test successful deadline setting."""
         user = MagicMock()
         info = self._make_info(user)
@@ -728,7 +724,8 @@ class TestModuleMutationSetTaskDeadline:
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
         mock_issue.assignees.all.return_value = assignees_qs
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         deadline = datetime(2025, 12, 1, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
@@ -826,7 +823,8 @@ class TestModuleMutationSetTaskDeadline:
             mock_mod
         )
         mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = None
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
@@ -853,7 +851,8 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_issue = MagicMock()
         mock_issue.assignees.all.return_value.exists.return_value = False
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         mutation = ModuleMutation()
         with pytest.raises(ValidationError, match="Cannot set deadline: issue has no assignees"):
@@ -869,9 +868,7 @@ class TestModuleMutationSetTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.timezone")
-    def test_set_deadline_naive_deadline(
-        self, mock_tz, mock_module, mock_mentor, mock_task
-    ):
+    def test_set_deadline_naive_deadline(self, mock_tz, mock_module, mock_mentor, mock_task):
         """Test naive deadline is made aware."""
         user = MagicMock()
         info = self._make_info(user)
@@ -889,9 +886,10 @@ class TestModuleMutationSetTaskDeadline:
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
         mock_issue.assignees.all.return_value = assignees_qs
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
-        naive_deadline = datetime(2025, 12, 1)
+        naive_deadline = datetime(2025, 12, 1)  # noqa: DTZ001
         aware_deadline = datetime(2025, 12, 1, tzinfo=UTC)
 
         mock_tz.is_naive.return_value = True
@@ -930,7 +928,8 @@ class TestModuleMutationSetTaskDeadline:
 
         mock_issue = MagicMock()
         mock_issue.assignees.all.return_value.exists.return_value = True
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         past_deadline = datetime(2020, 1, 1, tzinfo=UTC)
         mock_tz.is_naive.return_value = False
@@ -976,7 +975,8 @@ class TestModuleMutationClearTaskDeadline:
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
         mock_issue.assignees.all.return_value = assignees_qs
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         task_obj = MagicMock()
         task_obj.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
@@ -1013,7 +1013,8 @@ class TestModuleMutationClearTaskDeadline:
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee1, assignee2]))
         mock_issue.assignees.all.return_value = assignees_qs
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         task1 = MagicMock()
         task1.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
@@ -1032,9 +1033,7 @@ class TestModuleMutationClearTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_no_tasks_with_deadline(
-        self, mock_module, mock_mentor, mock_task
-    ):
+    def test_clear_deadline_no_tasks_with_deadline(self, mock_module, mock_mentor, mock_task):
         """Test when no tasks have deadlines."""
         user = MagicMock()
         info = self._make_info(user)
@@ -1052,7 +1051,8 @@ class TestModuleMutationClearTaskDeadline:
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
         mock_issue.assignees.all.return_value = assignees_qs
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         task_obj = MagicMock()
         task_obj.deadline_at = None
@@ -1069,9 +1069,7 @@ class TestModuleMutationClearTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_task_not_found(
-        self, mock_module, mock_mentor, mock_task
-    ):
+    def test_clear_deadline_task_not_found(self, mock_module, mock_mentor, mock_task):
         """Test when task object is None (no task exists for assignee)."""
         user = MagicMock()
         info = self._make_info(user)
@@ -1089,7 +1087,8 @@ class TestModuleMutationClearTaskDeadline:
         assignees_qs.exists.return_value = True
         assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
         mock_issue.assignees.all.return_value = assignees_qs
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         mock_task.objects.filter.return_value.first.return_value = None
 
@@ -1111,9 +1110,7 @@ class TestModuleMutationClearTaskDeadline:
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
-            mutation.clear_task_deadline(
-                info, module_key="bad", program_key="bad", issue_number=1
-            )
+            mutation.clear_task_deadline(info, module_key="bad", program_key="bad", issue_number=1)
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
@@ -1164,7 +1161,8 @@ class TestModuleMutationClearTaskDeadline:
             mock_mod
         )
         mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = None
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Issue not found in this module"):
@@ -1187,12 +1185,11 @@ class TestModuleMutationClearTaskDeadline:
 
         mock_issue = MagicMock()
         mock_issue.assignees.all.return_value.exists.return_value = False
-        mock_mod.issues.select_related.return_value.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
 
         mutation = ModuleMutation()
-        with pytest.raises(
-            ValidationError, match="Cannot clear deadline: issue has no assignees"
-        ):
+        with pytest.raises(ValidationError, match="Cannot clear deadline: issue has no assignees"):
             mutation.clear_task_deadline(
                 info, module_key="mod-1", program_key="prog-1", issue_number=1
             )
@@ -1244,7 +1241,8 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_mod.program.experience_levels = ["intermediate"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.select_for_update.return_value.get.return_value = mock_mod
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
         mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
 
         mock_creator = MagicMock()
@@ -1268,7 +1266,8 @@ class TestModuleMutationUpdateModule:
         info = self._make_info(user)
         input_data = self._make_input_data()
         mock_module.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_module.objects.select_related.return_value.select_for_update.return_value.get.side_effect = mock_module.DoesNotExist
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.side_effect = mock_module.DoesNotExist
 
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist, match="Module not found"):
@@ -1283,7 +1282,8 @@ class TestModuleMutationUpdateModule:
         info = self._make_info(user)
         input_data = self._make_input_data()
         mock_mod = MagicMock()
-        mock_module.objects.select_related.return_value.select_for_update.return_value.get.return_value = mock_mod
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
         mock_mentor.DoesNotExist = type("DoesNotExist", (Exception,), {})
         mock_mentor.objects.get.side_effect = mock_mentor.DoesNotExist
 
@@ -1300,7 +1300,8 @@ class TestModuleMutationUpdateModule:
         input_data = self._make_input_data()
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = False
-        mock_module.objects.select_related.return_value.select_for_update.return_value.get.return_value = mock_mod
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
         mock_mentor.objects.get.return_value = MagicMock()
 
         mutation = ModuleMutation()
@@ -1325,14 +1326,15 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_mod.program.experience_levels = ["intermediate"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.select_for_update.return_value.get.return_value = mock_mod
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
         mock_mentor.objects.get.return_value = MagicMock()
         mock_validate.return_value = (input_data.started_at, input_data.ended_at)
         mock_project.DoesNotExist = type("DoesNotExist", (Exception,), {})
         mock_project.objects.get.side_effect = mock_project.DoesNotExist
 
         mutation = ModuleMutation()
-        with pytest.raises(ObjectDoesNotExist, match="Project with id .* not found"):
+        with pytest.raises(ObjectDoesNotExist, match=r"Project with id .* not found"):
             mutation.update_module(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Project")
@@ -1353,7 +1355,8 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_mod.program.experience_levels = ["intermediate", "advanced"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.select_for_update.return_value.get.return_value = mock_mod
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
         mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = True
 
         mock_mentor.objects.get.return_value = MagicMock()
@@ -1385,7 +1388,8 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.ended_at = datetime(2025, 12, 31, tzinfo=UTC)
         mock_mod.program.experience_levels = ["intermediate"]
         mock_mod.program.admins.filter.return_value.exists.return_value = True
-        mock_module.objects.select_related.return_value.select_for_update.return_value.get.return_value = mock_mod
+        mod_qs = mock_module.objects.select_related.return_value
+        mod_qs.select_for_update.return_value.get.return_value = mock_mod
         mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
 
         mock_mentor.objects.get.return_value = MagicMock()

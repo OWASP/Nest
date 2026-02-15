@@ -255,7 +255,7 @@ def test_get_last_assigned_date_naive_datetime(mock_tz, command):
     mock_issue_gh = MagicMock()
     mock_repo.get_issue.return_value = mock_issue_gh
 
-    naive_dt = datetime(2023, 5, 15, 10, 0, 0)
+    naive_dt = datetime(2023, 5, 15, 10, 0, 0)  # noqa: DTZ001
     aware_dt = datetime(2023, 5, 15, 10, 0, 0, tzinfo=dt.UTC)
     e1 = MagicMock(
         event="assigned",
@@ -294,9 +294,8 @@ def test_handle_full_flow(mock_issue, mock_module_cls, mock_get_gh, command):
     mock_module.project.repositories.all.return_value = [mock_repo_obj]
     mock_module.issues = MagicMock()
 
-    mock_module_cls.objects.prefetch_related.return_value.exclude.return_value.exclude.return_value.exclude.return_value = [
-        mock_module
-    ]
+    mod_chain = mock_module_cls.objects.prefetch_related.return_value
+    mod_chain.exclude.return_value.exclude.return_value.exclude.return_value = [mock_module]
 
     # No assigned issues
     mock_issue_filter = mock_issue.objects.filter.return_value.select_related.return_value
@@ -323,7 +322,8 @@ def test_handle_no_modules(mock_issue, mock_module_cls, mock_get_gh, command):
     rows = iter([])
     mock_issue.objects.filter.return_value.values_list.return_value.iterator.return_value = rows
 
-    mock_module_cls.objects.prefetch_related.return_value.exclude.return_value.exclude.return_value.exclude.return_value = []
+    mod_chain = mock_module_cls.objects.prefetch_related.return_value
+    mod_chain.exclude.return_value.exclude.return_value.exclude.return_value = []
 
     command.handle(verbosity=1)
 
@@ -555,7 +555,7 @@ def test_process_module_no_repo_full_name(mock_issue, mock_task, command):
     assignee = MagicMock()
     assignee.login = "user1"
     issue_repo = MagicMock()
-    issue_repo.__str__ = lambda self: "not-a-url"
+    issue_repo.__str__ = lambda _: "not-a-url"
     del issue_repo.path
     issue = MagicMock(id=1, number=1, state="open")
     issue.repository = issue_repo
@@ -691,9 +691,8 @@ def test_handle_module_with_zero_links(mock_issue, mock_module_cls, mock_get_gh,
     mock_module.project.repositories.all.return_value = [MagicMock(id=99, name="repo")]
     mock_module.issues = MagicMock()
 
-    mock_module_cls.objects.prefetch_related.return_value.exclude.return_value.exclude.return_value.exclude.return_value = [
-        mock_module
-    ]
+    mod_chain = mock_module_cls.objects.prefetch_related.return_value
+    mod_chain.exclude.return_value.exclude.return_value.exclude.return_value = [mock_module]
 
     with patch(
         "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"

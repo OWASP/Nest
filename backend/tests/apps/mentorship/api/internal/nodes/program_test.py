@@ -23,9 +23,7 @@ def test_program_recent_milestones():
     mock_program.modules = mock_modules_manager
     mock_modules_manager.values_list.return_value = [1, 2]
 
-    with patch(
-        "apps.mentorship.api.internal.nodes.program.Milestone"
-    ) as mock_milestone:
+    with patch("apps.mentorship.api.internal.nodes.program.Milestone") as mock_milestone:
         mock_chain = MagicMock()
         mock_milestone.open_milestones.filter.return_value = mock_chain
         mock_chain.select_related.return_value = mock_chain

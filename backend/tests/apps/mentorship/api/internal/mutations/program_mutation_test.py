@@ -129,9 +129,7 @@ class TestUpdateProgram:
     @patch("apps.mentorship.api.internal.mutations.program.resolve_mentors_from_logins")
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     @patch("apps.mentorship.api.internal.mutations.program.Mentor")
-    def test_update_program_success(
-        self, mock_mentor, mock_program, mock_resolve, mutation
-    ):
+    def test_update_program_success(self, mock_mentor, mock_program, mock_resolve, mutation):
         """Test successful program update."""
         user = MagicMock()
         info = _make_info(user)

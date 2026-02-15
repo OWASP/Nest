@@ -16,7 +16,7 @@ class TestProgram:
 
     @patch("apps.common.models.TimestampedModel.save")
     def test_save_sets_key_from_name(self, mock_super_save):
-        """Test save method sets key from slugified name."""
+        """Test save method sets key from slug name."""
         mock_program = MagicMock(spec=Program)
         mock_program.name = "My Test Program"
 

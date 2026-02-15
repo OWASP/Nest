@@ -115,13 +115,12 @@ def test_process_mentorship_modules_with_modules(mock_module, command):
 
 
 @patch("apps.mentorship.management.commands.mentorship_update_comments.get_github_client")
-def test_process_module_no_repos(mock_get_gh, command, mock_module):
+def test_process_module_no_repos(mock_get_gh, command, mock_module):  # noqa: ARG001
     """Test process_module when module has no repositories."""
-    mock_module.project.repositories.filter.return_value.values_list.return_value.distinct.return_value.exists.return_value = False
+    repo_chain = mock_module.project.repositories.filter.return_value
+    repo_chain.values_list.return_value.distinct.return_value.exists.return_value = False
     command.process_module(mock_module)
-    command.stdout.write.assert_any_call(
-        "Skipping. Module 'Test Module' has no repositories."
-    )
+    command.stdout.write.assert_any_call("Skipping. Module 'Test Module' has no repositories.")
 
 
 @patch("apps.mentorship.management.commands.mentorship_update_comments.get_github_client")

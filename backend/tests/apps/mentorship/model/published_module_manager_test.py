@@ -21,7 +21,5 @@ class TestPublishedModuleManager:
 
         result = manager.get_queryset()
 
-        mock_qs.filter.assert_called_once_with(
-            program__status=Program.ProgramStatus.PUBLISHED
-        )
+        mock_qs.filter.assert_called_once_with(program__status=Program.ProgramStatus.PUBLISHED)
         assert result == mock_qs

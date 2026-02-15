@@ -11,8 +11,8 @@ class TestMenteeModule:
     def test_str_returns_mentee_and_module(self):
         """Test __str__ returns formatted mentee."""
         mock = MagicMock(spec=MenteeModule)
-        mock.mentee = MagicMock(__str__=lambda self: "John Doe")
-        mock.module = MagicMock(__str__=lambda self: "Security Basics")
+        mock.mentee = MagicMock(__str__=lambda _: "John Doe")
+        mock.module = MagicMock(__str__=lambda _: "Security Basics")
 
         result = MenteeModule.__str__(mock)
 
