@@ -322,6 +322,51 @@ def test_module_node_task_assigned_at_none(mock_module_node):
         assert assigned_at is None
 
 
+def test_module_node_issues_invalid_limit(mock_module_node):
+    """Test the issues resolver returns [] when limit is invalid"""
+    issues_list = mock_module_node.mock_issues(limit=0)
+    assert issues_list == []
+
+
+def test_module_node_issues_no_label(mock_module_node):
+    """Test the issues resolver without label filter."""
+    mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
+    mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
+
+    issues_list = mock_module_node.mock_issues()
+    assert len(issues_list) == 1
+    mock_qs.filter.assert_not_called()
+
+
+def test_module_node_issues_label_all(mock_module_node):
+    """Test the issues resolver with label='all' does not filter."""
+    mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
+    mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
+
+    issues_list = mock_module_node.mock_issues(label="all")
+    assert len(issues_list) == 1
+
+
+def test_module_node_recent_pull_requests(mock_module_node):
+    """Test the recent_pull_requests resolver."""
+    with patch(
+        "apps.mentorship.api.internal.nodes.module.PullRequest.objects"
+    ) as mock_pr_objects:
+        mock_pr_objects.filter.return_value.select_related.return_value.distinct.return_value.order_by.return_value.__getitem__.return_value = [
+            MagicMock(),
+            MagicMock(),
+        ]
+        mock_module_node.issues.values_list.return_value = [1, 2]
+        result = _call_module_resolver(mock_module_node, "recent_pull_requests", limit=5)
+        assert len(result) == 2
+
+
+def test_module_node_recent_pull_requests_invalid_limit(mock_module_node):
+    """Test recent_pull_requests returns [] with invalid limit."""
+    result = _call_module_resolver(mock_module_node, "recent_pull_requests", limit=0)
+    assert result == []
+
+
 def test_create_update_input_defaults():
     create_input = CreateModuleInput(
         name="Test",

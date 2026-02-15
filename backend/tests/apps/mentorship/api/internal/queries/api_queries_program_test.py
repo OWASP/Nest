@@ -230,3 +230,33 @@ class TestMyPrograms:
         assert result.programs[0].id == 2
         assert result.total_pages == 3
         assert result.current_page == 2
+
+    @patch("apps.mentorship.api.internal.queries.program.Mentor.objects.select_related")
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_my_programs_invalid_limit_uses_default(
+        self,
+        mock_program_prefetch: MagicMock,
+        mock_mentor_select: MagicMock,
+        mock_info: MagicMock,
+        api_program_queries,
+    ) -> None:
+        """Test that invalid limit (0) falls back to PAGE_SIZE default."""
+        mock_mentor = MagicMock(spec=Mentor, id=1)
+        mock_mentor_select.return_value.get.return_value = mock_mentor
+
+        mock_program = MagicMock(spec=Program, nest_created_at="2023-01-01", id=1)
+        mock_program.admins.all.return_value = [mock_mentor]
+
+        mock_queryset = MagicMock()
+        mock_queryset.count.return_value = 1
+        mock_queryset.order_by.return_value.__getitem__.return_value = [mock_program]
+        mock_queryset.filter.return_value = mock_queryset
+
+        mock_program_prefetch.return_value.filter.return_value.distinct.return_value = (
+            mock_queryset
+        )
+
+        result = api_program_queries.my_programs(info=mock_info, limit=0)
+
+        assert isinstance(result, PaginatedPrograms)
+        assert result.total_pages == 1

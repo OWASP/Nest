@@ -119,3 +119,35 @@ def test_handle_no_updates_needed(mock_task_level, mock_issue, command):
 
     mock_issue.objects.bulk_update.assert_not_called()
     command.stdout.write.assert_any_call("All issue levels are already up-to-date.")
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
+@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
+def test_handle_module_not_in_map(mock_task_level, mock_issue, command):
+    """When an issue's module is not in the module_data_map, it should be skipped."""
+    mock_module_in_map = MagicMock()
+    mock_module_in_map.id = 1
+
+    mock_module_not_in_map = MagicMock()
+    mock_module_not_in_map.id = 999
+
+    mock_level = MagicMock(module_id=mock_module_in_map.id, name="Beginner", labels=["label-a"])
+    levels_qs = make_qs([mock_level], exist=True)
+    mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
+
+    label_a = MagicMock()
+    label_a.name = "Label-A"
+
+    issue_with_unknown_module = MagicMock()
+    issue_with_unknown_module.labels.all.return_value = [label_a]
+    issue_with_unknown_module.mentorship_modules.all.return_value = [mock_module_not_in_map]
+    issue_with_unknown_module.level = None
+
+    issues_qs = make_qs([issue_with_unknown_module], exist=True)
+    mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
+
+    command.handle()
+
+    # best_match_level is None and level is already None, so no update needed
+    mock_issue.objects.bulk_update.assert_not_called()
+    command.stdout.write.assert_any_call("All issue levels are already up-to-date.")

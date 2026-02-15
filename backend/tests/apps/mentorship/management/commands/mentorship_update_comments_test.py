@@ -46,6 +46,13 @@ def command():
     return cmd
 
 
+def test_handle_calls_process_mentorship_modules(command):
+    """Test that handle() calls process_mentorship_modules."""
+    with patch.object(command, "process_mentorship_modules") as mock_process:
+        command.handle()
+        mock_process.assert_called_once()
+
+
 @pytest.fixture
 def mock_module():
     m = MagicMock()
@@ -86,6 +93,34 @@ def test_process_mentorship_modules_no_modules_with_labels(mock_module, command)
     command.process_mentorship_modules()
     command.stdout.write.assert_called_with(
         "No published mentorship modules with labels found. Exiting."
+    )
+
+
+@patch("apps.mentorship.management.commands.mentorship_update_comments.Module")
+def test_process_mentorship_modules_with_modules(mock_module, command):
+    """Test process_mentorship_modules with modules that have labels."""
+    mock_module.published_modules.all.return_value.exists.return_value = True
+    mock_mod = MagicMock()
+    mock_mod.name = "Test Module"
+    mock_excluded_modules = mock_module.published_modules.all.return_value.exclude.return_value
+    mock_excluded_modules.select_related.return_value.exists.return_value = True
+    mock_excluded_modules.select_related.return_value.__iter__ = MagicMock(
+        return_value=iter([mock_mod])
+    )
+
+    with patch.object(command, "process_module") as mock_process:
+        command.process_mentorship_modules()
+        mock_process.assert_called_once_with(mock_mod)
+    command.stdout.write.assert_any_call("Processed successfully!")
+
+
+@patch("apps.mentorship.management.commands.mentorship_update_comments.get_github_client")
+def test_process_module_no_repos(mock_get_gh, command, mock_module):
+    """Test process_module when module has no repositories."""
+    mock_module.project.repositories.filter.return_value.values_list.return_value.distinct.return_value.exists.return_value = False
+    command.process_module(mock_module)
+    command.stdout.write.assert_any_call(
+        "Skipping. Module 'Test Module' has no repositories."
     )
 
 
@@ -308,3 +343,27 @@ def test_process_issue_interests_multiple_users(
     command.stdout.write.assert_any_call(
         command.style.WARNING("Unregistered 1 interest(s) for issue #123: user1")
     )
+
+
+@patch("apps.mentorship.management.commands.mentorship_update_comments.IssueUserInterest")
+def test_process_issue_interests_no_interest_not_existing(
+    mock_issue_user_interest, command, mock_issue, mock_module
+):
+    """Test loop continues when user is not interested and not in existing interests."""
+    user1 = make_user(1, "user1")
+    comment1 = make_comment(body="Just a regular comment", author=user1, created_at="2023-01-01")
+
+    comments_qs = make_qs([comment1], exist=True)
+    mock_issue.comments.select_related.return_value.filter.return_value.order_by.return_value = (
+        comments_qs
+    )
+    mock_issue_user_interest.objects.filter.return_value.values_list.return_value = []
+
+    mock_issue_user_interest.side_effect = lambda **kw: SimpleNamespace(
+        module=kw.get("module"), issue=kw.get("issue"), user=kw.get("user")
+    )
+    mock_issue_user_interest.objects.bulk_create = MagicMock()
+
+    command.process_issue_interests(mock_issue, mock_module)
+
+    mock_issue_user_interest.objects.bulk_create.assert_not_called()

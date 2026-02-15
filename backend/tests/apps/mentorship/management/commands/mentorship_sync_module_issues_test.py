@@ -246,3 +246,461 @@ def test_process_module_no_matches():
     mock_module.issues.set.assert_called_once_with(set())
     mock_task.objects.get_or_create.assert_not_called()
     assert num_linked == 0
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.timezone")
+def test_get_last_assigned_date_naive_datetime(mock_tz, command):
+    """Test _get_last_assigned_date makes naive datetime aware."""
+    mock_repo = MagicMock()
+    mock_issue_gh = MagicMock()
+    mock_repo.get_issue.return_value = mock_issue_gh
+
+    naive_dt = datetime(2023, 5, 15, 10, 0, 0)
+    aware_dt = datetime(2023, 5, 15, 10, 0, 0, tzinfo=dt.UTC)
+    e1 = MagicMock(
+        event="assigned",
+        assignee=MagicMock(login="target"),
+        created_at=naive_dt,
+    )
+    mock_issue_gh.get_events.return_value = [e1]
+
+    mock_tz.is_naive.return_value = True
+    mock_tz.make_aware.return_value = aware_dt
+
+    result = command._get_last_assigned_date(mock_repo, 1, "target")
+    assert result is not None
+    mock_tz.is_naive.assert_called_once_with(naive_dt)
+    mock_tz.make_aware.assert_called_once()
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.get_github_client")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Module")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_handle_full_flow(mock_issue, mock_module_cls, mock_get_gh, command):
+    """Test the handle method end-to-end."""
+    mock_get_gh.return_value = MagicMock()
+
+    rows = iter([(1, 10, "label-a")])
+    mock_issue.objects.filter.return_value.values_list.return_value.iterator.return_value = rows
+
+    mock_repo_obj = MagicMock()
+    mock_repo_obj.id = 10
+    mock_repo_obj.name = "test-repo"
+
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module 1"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo_obj]
+    mock_module.issues = MagicMock()
+
+    mock_module_cls.objects.prefetch_related.return_value.exclude.return_value.exclude.return_value.exclude.return_value = [
+        mock_module
+    ]
+
+    # No assigned issues
+    mock_issue_filter = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_filter.prefetch_related.return_value.distinct.return_value = iter([])
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        command.handle(verbosity=1)
+
+    command.stdout.write.assert_any_call("starting...")
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.get_github_client")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Module")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_handle_no_modules(mock_issue, mock_module_cls, mock_get_gh, command):
+    """Test handle when no modules need processing."""
+    mock_get_gh.return_value = MagicMock()
+
+    rows = iter([])
+    mock_issue.objects.filter.return_value.values_list.return_value.iterator.return_value = rows
+
+    mock_module_cls.objects.prefetch_related.return_value.exclude.return_value.exclude.return_value.exclude.return_value = []
+
+    command.handle(verbosity=1)
+
+    command.stdout.write.assert_any_call("starting...")
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_process_module_existing_task_with_updates(mock_issue, mock_task, command):
+    """Test _process_module with an existing task that needs module/status updates."""
+    mock_task.Status = Task.Status
+
+    mock_repo = MagicMock()
+    mock_repo.id = 10
+    mock_repo.name = "repo"
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo]
+
+    repo_label_map = {(10, "label-a"): {1}}
+
+    assignee = MagicMock()
+    assignee.login = "user1"
+    issue = MagicMock(id=1, number=1, state="open", repository=mock_repo)
+    issue.assignees.first.return_value = assignee
+
+    issues_qs = make_qs([issue], exist=True)
+    mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_chain.prefetch_related.return_value.distinct.return_value = issues_qs
+
+    existing_task = MagicMock(
+        module=MagicMock(),
+        status=Task.Status.TODO,
+        assigned_at=datetime(2023, 1, 1, tzinfo=dt.UTC),
+    )
+    mock_task.objects.get_or_create.return_value = (existing_task, False)
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        num_linked = command._process_module(
+            module=mock_module,
+            repo_label_to_issue_ids=repo_label_map,
+            gh_client=MagicMock(),
+            repo_cache={},
+            verbosity=1,
+        )
+
+    assert num_linked == 1
+    existing_task.save.assert_called_once()
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_process_module_repo_cache_miss_and_failure(mock_issue, mock_task, command):
+    """Test _process_module with repo cache miss and GithubException on fetch."""
+    mock_task.Status = Task.Status
+
+    mock_repo = MagicMock()
+    mock_repo.id = 10
+    mock_repo.name = "repo"
+    mock_repo.path = "owner/repo"
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo]
+
+    repo_label_map = {(10, "label-a"): {1}}
+
+    assignee = MagicMock()
+    assignee.login = "user1"
+    issue = MagicMock(id=1, number=1, state="open")
+    issue.repository = mock_repo
+    issue.assignees.first.return_value = assignee
+
+    issues_qs = make_qs([issue], exist=True)
+    mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_chain.prefetch_related.return_value.distinct.return_value = issues_qs
+
+    created_task = MagicMock(module=None, status=None, assigned_at=None)
+    mock_task.objects.get_or_create.return_value = (created_task, True)
+
+    mock_gh_client = MagicMock()
+    mock_gh_client.get_repo.side_effect = GithubException("fail")
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        num_linked = command._process_module(
+            module=mock_module,
+            repo_label_to_issue_ids=repo_label_map,
+            gh_client=mock_gh_client,
+            repo_cache={},
+            verbosity=1,
+        )
+
+    assert num_linked == 1
+    command.stderr.write.assert_called()
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_process_module_repo_cache_none(mock_issue, mock_task, command):
+    """Test _process_module when cached repo is None."""
+    mock_task.Status = Task.Status
+
+    mock_repo = MagicMock()
+    mock_repo.id = 10
+    mock_repo.name = "repo"
+    mock_repo.path = "owner/repo"
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo]
+
+    repo_label_map = {(10, "label-a"): {1}}
+
+    assignee = MagicMock()
+    assignee.login = "user1"
+    issue = MagicMock(id=1, number=1, state="open")
+    issue.repository = mock_repo
+    issue.assignees.first.return_value = assignee
+
+    issues_qs = make_qs([issue], exist=True)
+    mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_chain.prefetch_related.return_value.distinct.return_value = issues_qs
+
+    created_task = MagicMock(module=None, status=None, assigned_at=None)
+    mock_task.objects.get_or_create.return_value = (created_task, True)
+
+    repo_cache = {"owner/repo": None}
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        num_linked = command._process_module(
+            module=mock_module,
+            repo_label_to_issue_ids=repo_label_map,
+            gh_client=MagicMock(),
+            repo_cache=repo_cache,
+            verbosity=1,
+        )
+
+    assert num_linked == 1
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_process_module_assigned_date_none(mock_issue, mock_task, command):
+    """Test _process_module when _get_last_assigned_date returns None."""
+    mock_task.Status = Task.Status
+
+    mock_repo = MagicMock()
+    mock_repo.id = 10
+    mock_repo.name = "repo"
+    mock_repo.path = "owner/repo"
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo]
+
+    repo_label_map = {(10, "label-a"): {1}}
+
+    assignee = MagicMock()
+    assignee.login = "user1"
+    issue = MagicMock(id=1, number=1, state="open")
+    issue.repository = mock_repo
+    issue.assignees.first.return_value = assignee
+
+    issues_qs = make_qs([issue], exist=True)
+    mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_chain.prefetch_related.return_value.distinct.return_value = issues_qs
+
+    created_task = MagicMock(module=None, status=None, assigned_at=None)
+    mock_task.objects.get_or_create.return_value = (created_task, True)
+
+    with (
+        patch(
+            "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+        ) as mock_atomic,
+        patch.object(command, "_get_last_assigned_date", return_value=None),
+    ):
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        num_linked = command._process_module(
+            module=mock_module,
+            repo_label_to_issue_ids=repo_label_map,
+            gh_client=MagicMock(),
+            repo_cache={"owner/repo": MagicMock()},
+            verbosity=2,
+        )
+
+    assert num_linked == 1
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_process_module_no_repo_full_name(mock_issue, mock_task, command):
+    """Test _process_module when repo full name extraction returns None."""
+    mock_task.Status = Task.Status
+
+    mock_repo = MagicMock()
+    mock_repo.id = 10
+    mock_repo.name = "repo"
+    del mock_repo.path
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo]
+
+    repo_label_map = {(10, "label-a"): {1}}
+
+    assignee = MagicMock()
+    assignee.login = "user1"
+    issue_repo = MagicMock()
+    issue_repo.__str__ = lambda self: "not-a-url"
+    del issue_repo.path
+    issue = MagicMock(id=1, number=1, state="open")
+    issue.repository = issue_repo
+    issue.assignees.first.return_value = assignee
+
+    issues_qs = make_qs([issue], exist=True)
+    mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_chain.prefetch_related.return_value.distinct.return_value = issues_qs
+
+    created_task = MagicMock(module=None, status=None, assigned_at=None)
+    mock_task.objects.get_or_create.return_value = (created_task, True)
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        num_linked = command._process_module(
+            module=mock_module,
+            repo_label_to_issue_ids=repo_label_map,
+            gh_client=MagicMock(),
+            repo_cache={},
+            verbosity=1,
+        )
+
+    assert num_linked == 1
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_process_module_issue_no_repository(mock_issue, mock_task, command):
+    """Test _process_module when issue has no repository."""
+    mock_task.Status = Task.Status
+
+    mock_repo = MagicMock()
+    mock_repo.id = 10
+    mock_repo.name = "repo"
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo]
+
+    repo_label_map = {(10, "label-a"): {1}}
+
+    assignee = MagicMock()
+    assignee.login = "user1"
+    issue = MagicMock(id=1, number=1, state="open")
+    issue.repository = None
+    issue.assignees.first.return_value = assignee
+
+    issues_qs = make_qs([issue], exist=True)
+    mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_chain.prefetch_related.return_value.distinct.return_value = issues_qs
+
+    existing_task = MagicMock(module=mock_module, status=Task.Status.IN_PROGRESS, assigned_at=None)
+    mock_task.objects.get_or_create.return_value = (existing_task, False)
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        num_linked = command._process_module(
+            module=mock_module,
+            repo_label_to_issue_ids=repo_label_map,
+            gh_client=MagicMock(),
+            repo_cache={},
+            verbosity=1,
+        )
+
+    assert num_linked == 1
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Task")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_process_module_assignee_none_continues(mock_issue, mock_task, command):
+    """Test _process_module skips issues where assignees.first() returns None."""
+    mock_task.Status = Task.Status
+
+    mock_repo = MagicMock()
+    mock_repo.id = 10
+    mock_repo.name = "repo"
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Module"
+    mock_module.labels = ["label-a"]
+    mock_module.project.repositories.all.return_value = [mock_repo]
+
+    repo_label_map = {(10, "label-a"): {1}}
+
+    issue = MagicMock(id=1, number=1, state="open")
+    issue.assignees.first.return_value = None
+
+    issues_qs = make_qs([issue], exist=True)
+    mock_issue_chain = mock_issue.objects.filter.return_value.select_related.return_value
+    mock_issue_chain.prefetch_related.return_value.distinct.return_value = issues_qs
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        num_linked = command._process_module(
+            module=mock_module,
+            repo_label_to_issue_ids=repo_label_map,
+            gh_client=MagicMock(),
+            repo_cache={},
+            verbosity=1,
+        )
+
+    assert num_linked == 1
+    mock_task.objects.get_or_create.assert_not_called()
+
+
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.get_github_client")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Module")
+@patch("apps.mentorship.management.commands.mentorship_sync_module_issues.Issue")
+def test_handle_module_with_zero_links(mock_issue, mock_module_cls, mock_get_gh, command):
+    """Test handle when a module returns 0 links."""
+    mock_get_gh.return_value = MagicMock()
+
+    rows = iter([])
+    mock_issue.objects.filter.return_value.values_list.return_value.iterator.return_value = rows
+
+    mock_module = MagicMock()
+    mock_module.id = 1
+    mock_module.name = "Empty Module"
+    mock_module.labels = ["no-match"]
+    mock_module.project.repositories.all.return_value = [MagicMock(id=99, name="repo")]
+    mock_module.issues = MagicMock()
+
+    mock_module_cls.objects.prefetch_related.return_value.exclude.return_value.exclude.return_value.exclude.return_value = [
+        mock_module
+    ]
+
+    with patch(
+        "apps.mentorship.management.commands.mentorship_sync_module_issues.transaction.atomic"
+    ) as mock_atomic:
+        mock_atomic.return_value.__enter__.return_value = None
+        mock_atomic.return_value.__exit__.return_value = None
+
+        command.handle(verbosity=1)
+
+    command.stdout.write.assert_any_call("starting...")
