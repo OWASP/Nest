@@ -246,24 +246,23 @@ describe('TruncatedText Component', () => {
     expect(mockDisconnect).toHaveBeenCalledTimes(1)
   })
   test('does not observe when textRef.current is null', () => {
-    const originalUseRef = React.useRef
     // Create a ref object that ignores writes to .current and always returns null
     const nullRef = {}
     Object.defineProperty(nullRef, 'current', {
       get: () => null,
-      set: () => {}, // Ignore assignments from React
+      set: () => {},
       configurable: true,
     })
 
-    // We need to type cast because TypeScript expects MutableRefObject
-    jest
+    const useRefSpy = jest
       .spyOn(React, 'useRef')
       .mockReturnValue(nullRef as unknown as React.MutableRefObject<HTMLSpanElement | null>)
 
-    render(<TruncatedText text="Null ref test" />)
-
-    expect(mockObserve).not.toHaveBeenCalled()
-
-    jest.spyOn(React, 'useRef').mockImplementation(originalUseRef)
+    try {
+      render(<TruncatedText text="Null ref test" />)
+      expect(mockObserve).not.toHaveBeenCalled()
+    } finally {
+      useRefSpy.mockRestore()
+    }
   })
 })

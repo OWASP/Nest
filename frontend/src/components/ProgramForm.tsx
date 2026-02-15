@@ -155,9 +155,13 @@ const ProgramForm = ({
     setTouched(newTouched)
 
     // Check name uniqueness and capture result before validation
-    // Check name uniqueness and capture result before validation
-    const uniquenessError = await checkNameUniquenessSync(formData.name)
-    setNameUniquenessError(uniquenessError)
+    let uniquenessError: string | undefined
+    if (formData.name.trim()) {
+      uniquenessError = await checkNameUniquenessSync(formData.name)
+      setNameUniquenessError(uniquenessError)
+    } else {
+      setNameUniquenessError(undefined)
+    }
 
     // Validate all required fields, using the captured uniquenessError
     const nameError = validateNameWithUniqueness(formData.name, uniquenessError)

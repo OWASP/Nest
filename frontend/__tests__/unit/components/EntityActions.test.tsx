@@ -725,19 +725,19 @@ describe('EntityActions', () => {
     fireEvent.keyDown(menu, { key: 'a' })
     expect(button).toHaveAttribute('aria-expanded', 'true')
   })
-})
 
-describe('Toggle Behavior', () => {
-  it('closes the dropdown and resets focus when toggled off via click', () => {
-    render(<EntityActions type="program" programKey="test-program" />)
-    const button = screen.getByRole('button', { name: /Program actions menu/ })
+  describe('Toggle Behavior', () => {
+    it('closes the dropdown and resets focus when toggled off via click', () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
 
-    // Open
-    fireEvent.click(button)
-    expect(button).toHaveAttribute('aria-expanded', 'true')
+      // Open
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
 
-    // Close by clicking again
-    fireEvent.click(button)
-    expect(button).toHaveAttribute('aria-expanded', 'false')
+      // Close by clicking again
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
   })
 })

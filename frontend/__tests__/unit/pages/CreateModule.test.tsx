@@ -25,6 +25,8 @@ jest.mock('@apollo/client/react', () => ({
   useMutation: jest.fn(),
   useQuery: jest.fn(),
   useApolloClient: jest.fn(),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  CreateModuleDocument: 'CreateModuleDocument',
 }))
 
 describe('CreateModulePage', () => {

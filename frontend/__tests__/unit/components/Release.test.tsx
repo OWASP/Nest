@@ -371,11 +371,9 @@ describe('Release Component', () => {
     const releaseWithoutOrg = { ...mockReleases[0], organizationName: undefined }
     render(<Release release={releaseWithoutOrg} />)
 
-    // Should find the text
     const title = screen.getByText('v1.0 The First Release')
     expect(title).toBeInTheDocument()
 
-    // Should NOT be inside a link
     const link = title.closest('a')
     expect(link).toBeNull()
   })
@@ -384,31 +382,13 @@ describe('Release Component', () => {
     const releaseWithoutRepo = { ...mockReleases[0], repositoryName: undefined }
     render(<Release release={releaseWithoutRepo} />)
 
-    // Should find the text
     const title = screen.getByText('v1.0 The First Release')
     expect(title).toBeInTheDocument()
 
-    // Should NOT be inside a link
     const link = title.closest('a')
     expect(link).toBeNull()
   })
 
-  it('safely handles click on disabled button (defensive coding check)', () => {
-    const releaseWithoutOrg = { ...mockReleases[0], organizationName: '' }
-    render(<Release release={releaseWithoutOrg} />)
-
-    const repoButton = screen.getByRole('button')
-
-    // Manually ensure the handler is called even if disabled in DOM
-    // This is to verify the defensive checks inside handleClickRepository (lines 26-28)
-    // We can't easily force the click on disabled element through React's event system with fireEvent.click
-    // so we skip this if unachievable, OR we try to fire it specifically.
-    // However, if we can't trigger it, code is effectively dead.
-    // BUT checking for coverage, sometimes fireEvent.click DOES work on disabled elements in JSDOM?
-    // Let's try firing it again, explicitly.
-    fireEvent.click(repoButton)
-    expect(mockRouterPush).not.toHaveBeenCalled()
-  })
   it('renders tag name as plain text when release name AND organizationName are missing', () => {
     const releaseWithoutOrgAndName = {
       ...mockReleases[0],
@@ -432,8 +412,6 @@ describe('Release Component', () => {
 
     const repoButton = screen.getByRole('button')
 
-    // Attempt to fire keydown event on the disabled button
-    // This targets lines 26-28 inside handleClickRepository via handleKeyDown
     fireEvent.keyDown(repoButton, { key: 'Enter' })
 
     expect(mockRouterPush).not.toHaveBeenCalled()

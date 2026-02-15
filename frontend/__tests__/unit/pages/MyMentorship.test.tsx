@@ -379,42 +379,44 @@ describe('MyMentorshipPage', () => {
 
   it('updates debounced search query', async () => {
     jest.useFakeTimers()
-    ;(mockUseSession as jest.Mock).mockReturnValue({
-      data: {
-        user: {
-          name: 'User',
-          email: 'user@example.com',
-          login: 'user',
-          isLeader: true,
+    try {
+      ;(mockUseSession as jest.Mock).mockReturnValue({
+        data: {
+          user: {
+            name: 'User',
+            email: 'user@example.com',
+            login: 'user',
+            isLeader: true,
+          },
+          expires: '2099-01-01T00:00:00.000Z',
         },
-        expires: '2099-01-01T00:00:00.000Z',
-      },
-      status: 'authenticated',
-    })
-    mockUseQuery.mockReturnValue({
-      data: mockProgramData,
-      loading: false,
-      error: undefined,
-    })
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({
+        data: mockProgramData,
+        loading: false,
+        error: undefined,
+      })
 
-    render(<MyMentorshipPage />)
+      render(<MyMentorshipPage />)
 
-    const searchInput = screen.getByTestId('search-input')
-    fireEvent.change(searchInput, { target: { value: 'debounced' } })
+      const searchInput = screen.getByTestId('search-input')
+      fireEvent.change(searchInput, { target: { value: 'debounced' } })
 
-    React.act(() => {
-      jest.advanceTimersByTime(500)
-    })
+      React.act(() => {
+        jest.advanceTimersByTime(500)
+      })
 
-    await waitFor(() => {
-      expect(mockUseQuery).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          variables: expect.objectContaining({ search: 'debounced' }),
-        })
-      )
-    })
-
-    jest.useRealTimers()
+      await waitFor(() => {
+        expect(mockUseQuery).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            variables: expect.objectContaining({ search: 'debounced' }),
+          })
+        )
+      })
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })

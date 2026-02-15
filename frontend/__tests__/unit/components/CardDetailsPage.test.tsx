@@ -75,8 +75,10 @@ jest.mock('utils/dateFormatter', () => ({
 
 jest.mock('utils/urlFormatter', () => ({
   getMemberUrl: (login: string) => `/members/${login}`,
-  getMenteeUrl: (programKey: string, entityKey: string, login: string) =>
-    `/programs/${programKey}/mentees/${login}`,
+  getMenteeUrl: (programKey: string, entityKey: string, login: string) => {
+    const programPart = programKey ? `/programs/${programKey}` : ''
+    return `${programPart}/mentees/${login}`
+  },
 }))
 
 jest.mock('utils/urlIconMappings', () => ({
@@ -2392,8 +2394,8 @@ describe('CardDetailsPage', () => {
       const menteeLink = screen.getByText('Test Mentee')
       expect(menteeLink).toBeInTheDocument()
       // getMenteeUrl mock: `/programs/${programKey}/mentees/${login}`
-      // with empty string keys: /programs//mentees/test_mentee
-      expect(menteeLink).toHaveAttribute('href', '/programs//mentees/test_mentee')
+      // with empty string keys: /mentees/test_mentee
+      expect(menteeLink).toHaveAttribute('href', '/mentees/test_mentee')
     })
 
     it('handles null/undefined mentees array gracefully', () => {

@@ -614,10 +614,7 @@ describe('ModuleIssueDetailsPage', () => {
     mockUseQuery.mockReturnValue({ data: dataWithNulls, loading: false, error: undefined })
     render(<ModuleIssueDetailsPage />)
 
-    // Should render main sections without crashing
     expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
-    // Labels section is rendered but empty (LabelList handles null?)
-    // If LabelList handles it, fine.
   })
 
   it('does not trigger mutations when they are already in progress', () => {
@@ -639,24 +636,20 @@ describe('ModuleIssueDetailsPage', () => {
       setDeadlineInput: jest.fn(),
     })
 
-    // Need interestedUsers to show Assign button
     mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
     render(<ModuleIssueDetailsPage />)
 
-    // 1. Try Assign
-    const assignButtons = screen.getAllByRole('button', { name: /Assign/i })
-    // The button might be disabled, so fireEvent matches browser behavior (sometimes ignores, sometimes not).
-    // But we want to test the LOGIC guard `if (... assigning) return`.
-    // We assume the button is clickable for the test event props.
-    fireEvent.click(assignButtons[0])
+    const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
+    const userGrid = interestedUsersHeading.nextElementSibling
+    const assignButton = within(userGrid as HTMLElement).getByRole('button', { name: /Assign/i })
+
+    fireEvent.click(assignButton)
     expect(assignIssue).not.toHaveBeenCalled()
 
-    // 2. Try Unassign
     const unassignButton = screen.getByRole('button', { name: /Unassign/i })
     fireEvent.click(unassignButton)
     expect(unassignIssue).not.toHaveBeenCalled()
 
-    // 3. Try Deadline Change (guard line 189)
     const dateInputEl = screen.getByDisplayValue('2025-01-01')
     fireEvent.change(dateInputEl, { target: { value: '2025-02-02' } })
     expect(setTaskDeadlineMutation).not.toHaveBeenCalled()
