@@ -8,6 +8,8 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
+from apps.nest.models.user_badge import UserBadge
 
 MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
     "pull_requests",
@@ -61,12 +63,28 @@ class IssueNode(strawberry.relay.Node):
         """Return True if this issue has at least one merged pull request."""
         return bool(getattr(root, "merged_pull_requests", None))
 
-    @strawberry_django.field(prefetch_related=["participant_interests__user"])
-    def interested_users(self, root: Issue) -> list[UserNode]:
-        """Return all users who have expressed interest in this issue."""
-        return [
-            interest.user
-            for interest in root.participant_interests.select_related("user").order_by(
-                "user__login"
+    @strawberry_django.field(
+        prefetch_related=[
+            Prefetch(
+                "participant_interests",
+                queryset=IssueUserInterest.objects.select_related("user__owasp_profile")
+                .prefetch_related(
+                    Prefetch(
+                        "user__user_badges",
+                        queryset=UserBadge.objects.filter(is_active=True)
+                        .select_related("badge")
+                        .order_by(
+                            "badge__weight",
+                            "badge__name",
+                        ),
+                        to_attr="user_badges_list",
+                    )
+                )
+                .order_by("user__login"),
+                to_attr="interests_users",
             )
         ]
+    )
+    def interested_users(self, root: Issue) -> list[UserNode]:
+        """Return all users who have expressed interest in this issue."""
+        return [interest.user for interest in getattr(root, "interests_users", [])]
