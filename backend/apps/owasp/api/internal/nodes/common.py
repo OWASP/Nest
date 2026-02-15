@@ -2,10 +2,21 @@
 
 import strawberry
 import strawberry_django
+from django.contrib.contenttypes.prefetch import GenericPrefetch
+from django.db.models import Prefetch
 
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from apps.owasp.api.internal.nodes.entity_channel import EntityChannelNode
 from apps.owasp.api.internal.nodes.entity_member import EntityMemberNode
+from apps.owasp.models.entity_channel import EntityChannel
+from apps.slack.models.conversation import Conversation
+
+ENTITY_CHANNELS_PREFETCH = Prefetch(
+    "entity_channels",
+    queryset=EntityChannel.objects.filter(is_active=True).prefetch_related(
+        GenericPrefetch("channel", [Conversation.objects.all()]),
+    ),
+)
 
 
 @strawberry.type
@@ -17,10 +28,10 @@ class GenericEntityNode(strawberry.relay.Node):
         """Resolve entity leaders."""
         return root.entity_leaders
 
-    @strawberry_django.field(prefetch_related=["entity_channels"])
+    @strawberry_django.field(prefetch_related=[ENTITY_CHANNELS_PREFETCH])
     def entity_channels(self, root) -> list[EntityChannelNode]:
         """Resolve entity channels."""
-        return list(root.entity_channels.filter(is_active=True))
+        return list(root.entity_channels.all())
 
     @strawberry_django.field
     def leaders(self, root) -> list[str]:
