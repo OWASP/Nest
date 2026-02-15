@@ -1,5 +1,6 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
+import openai as openai_module
 import pytest
 
 from apps.common.open_ai import OpenAi
@@ -53,9 +54,12 @@ class TestOpenAi:
 
     @patch("apps.common.open_ai.logger")
     @patch("openai.OpenAI")
-    def test_complete_general_exception(self, mock_openai, mock_logger, openai_instance):
-        mock_openai.return_value.chat.completions.create.side_effect = Exception()
-
+    def test_complete_general_exception(self, mock_openai, mock_logger):
+        """Test that general exceptions are caught and logged."""
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.side_effect = Exception("API error")
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
         openai_instance.set_prompt("Test prompt").set_input("Test input")
         response = openai_instance.complete()
 
@@ -64,3 +68,39 @@ class TestOpenAi:
         mock_logger.exception.assert_called_once_with(
             "An error occurred during OpenAI API request."
         )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_complete_api_connection_error(self, mock_openai, mock_logger):
+        """Test that APIConnectionError is caught and logged."""
+        mock_client = MagicMock()
+        mock_request = MagicMock()
+        api_error = openai_module.APIConnectionError(request=mock_request)
+        mock_client.chat.completions.create.side_effect = api_error
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response is None
+
+        mock_logger.exception.assert_called_once_with(
+            "A connection error occurred during OpenAI API request."
+        )
+
+    @patch("openai.OpenAI")
+    def test_complete_success(self, mock_openai):
+        """Test successful completion returns the message content."""
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = "Generated response content"
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response == "Generated response content"
+        mock_client.chat.completions.create.assert_called_once()

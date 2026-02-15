@@ -21,5 +21,12 @@ class Local(Base):
     IS_LOCAL_ENVIRONMENT = True
     LOGGING = {}
     PUBLIC_IP_ADDRESS = values.Value()
+
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0
+    SECURE_PROXY_SSL_HEADER = None  # type: ignore[assignment]  # Django accepts None to disable.
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True

@@ -4,7 +4,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.management.commands.ai_update_chapter_context import Command
+from apps.owasp.models.chapter import Chapter
 
 
 @pytest.fixture
@@ -23,8 +25,6 @@ def mock_chapter():
 class TestAiCreateChapterContextCommand:
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
-        from apps.ai.common.base.context_command import BaseContextCommand
-
         assert isinstance(command, BaseContextCommand)
 
     def test_command_help_text(self, command):
@@ -33,8 +33,6 @@ class TestAiCreateChapterContextCommand:
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Chapter."""
-        from apps.owasp.models.chapter import Chapter
-
         assert command.model_class == Chapter
 
     def test_entity_name_property(self, command):
