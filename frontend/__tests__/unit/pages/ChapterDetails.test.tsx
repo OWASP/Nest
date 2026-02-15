@@ -132,6 +132,7 @@ describe('chapterDetailsPage Component', () => {
       const slackLink = screen.getByRole('link', { name: 'chapter-test' })
       expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C123ABC')
       expect(slackLink).toHaveAttribute('target', '_blank')
+      expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
   })
 
