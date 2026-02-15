@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
-import proxy from 'proxy'
+import proxy, { config } from 'proxy'
 
 // Mock the external dependencies
 jest.mock('next-auth/jwt', () => ({
@@ -18,6 +18,11 @@ jest.mock('next/server', () => ({
 }))
 
 describe('Authentication Proxy', () => {
+  it('should export valid config', () => {
+    expect(config).toBeDefined()
+    expect(config.matcher).toEqual(expect.arrayContaining(['/my/mentorship/:path*']))
+  })
+
   const mockRequest = (url = 'http://localhost/'): NextRequest =>
     ({
       url,

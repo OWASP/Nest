@@ -14,6 +14,18 @@ def command():
     return Command()
 
 
+def test_add_arguments(command):
+    """Test that the command's arguments are correctly added."""
+    parser = mock.Mock()
+    command.add_arguments(parser)
+    parser.add_argument.assert_called_once_with(
+        "--organization",
+        required=False,
+        type=str,
+        help="The organization name (e.g. juice-shop, DefectDojo)",
+    )
+
+
 @pytest.fixture
 def mock_logger():
     with mock.patch(
@@ -154,6 +166,7 @@ class TestGithubUpdateExternalRepositories:
         orgs, gh_orgs = setup_organizations(scenario.num_orgs, scenario.num_repos_per_org)
         self._setup_organizations_mock(orgs)
         self.mock_gh.get_organization.side_effect = gh_orgs
+        self.mock_sync_repository.return_value = (mock.Mock(), mock.Mock())
 
         with mock.patch("builtins.print"):
             self.command.handle(organization=None)
@@ -173,6 +186,7 @@ class TestGithubUpdateExternalRepositories:
 
         self._setup_organizations_mock([org])
         self.mock_gh.get_organization.return_value = gh_org
+        self.mock_sync_repository.return_value = (mock.Mock(), mock.Mock())
 
         with mock.patch("builtins.print"):
             self.command.handle(organization="test-org")
