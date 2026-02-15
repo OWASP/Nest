@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -33,7 +33,6 @@ export function useSearchPage<T>({
   defaultOrder = '',
   hitsPerPage,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
-  const router = useRouter()
   const searchParams = useSearchParams()
 
   const [items, setItems] = useState<T[]>([])
@@ -46,51 +45,17 @@ export function useSearchPage<T>({
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
-  // Sync state with URL changes
-  useEffect(() => {
-    if (searchParams) {
-      const searchQueryParam = searchParams.get('q') || ''
-      const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'desc'
-
-      const searchQueryChanged = searchQuery !== searchQueryParam
-      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
-
-      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
-      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
-        setCurrentPage(1)
-      }
-    }
-  }, [searchParams, order, searchQuery, sortBy, indexName])
-  // Sync URL with state changes
-  useEffect(() => {
-    const params = new URLSearchParams()
-    if (searchQuery) params.set('q', searchQuery)
-    if (currentPage > 1) params.set('page', currentPage.toString())
-
-    if (sortBy && sortBy !== 'default' && sortBy !== '') {
-      params.set('sortBy', sortBy)
-    }
-
-    if (sortBy !== 'default' && order && order !== '') {
-      params.set('order', order)
-    }
-
-    router.push(`?${params.toString()}`)
-  }, [searchQuery, order, currentPage, sortBy, router])
-  // Update URL when state changes
   useEffect(() => {
     setIsLoaded(false)
+
+    const controller = new AbortController()
 
     const fetchData = async () => {
       try {
         let computedIndexName = indexName
-
-        // Check if valid sort option is selected
         const hasValidSort = sortBy && sortBy !== 'default'
 
         if (hasValidSort) {
-          // if sorting is active then appends the sort field and order to the base index name.
           const orderSuffix = order && order !== '' ? `_${order}` : ''
           computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
         }
@@ -99,8 +64,12 @@ export function useSearchPage<T>({
           computedIndexName,
           searchQuery,
           currentPage,
-          hitsPerPage
+          hitsPerPage,
+          [],
+          controller.signal
         )
+
+        if (controller.signal.aborted) return
 
         if ('hits' in response) {
           setItems(response.hits)
@@ -109,12 +78,21 @@ export function useSearchPage<T>({
           handleAppError(response)
         }
       } catch (error) {
-        handleAppError(error)
+        if ((error as Error).name !== 'AbortError') {
+          handleAppError(error)
+        }
       }
-      setIsLoaded(true)
+
+      if (!controller.signal.aborted) {
+        setIsLoaded(true)
+      }
     }
 
     fetchData()
+
+    return () => {
+      controller.abort()
+    }
   }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
 
   const handleSearch = (query: string) => {
