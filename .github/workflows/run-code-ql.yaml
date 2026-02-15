@@ -4,11 +4,11 @@ on:
   merge_group:
   pull_request:
     branches:
-      - feature/*
+      - feature/**
       - main
   push:
     branches:
-      - feature/*
+      - feature/**
       - main
   workflow_dispatch:
 
