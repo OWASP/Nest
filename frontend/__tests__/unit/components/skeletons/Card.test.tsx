@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import CardSkeleton from 'components/skeletons/Card'
 
-// Mock @heroui/skeleton
 jest.mock('@heroui/skeleton', () => ({
   Skeleton: ({ className }: { className?: string }) => (
     <div data-testid="skeleton" className={className} />

@@ -673,9 +673,7 @@ describe('NavDropdown Component', () => {
       const submenuItem = screen.getByText('Getting Started')
       submenuItem.focus()
 
-      // Pressing random key should skip the if and else if blocks
       await user.keyboard('a')
-      // Should remain open
       expect(screen.getByText('Getting Started')).toBeInTheDocument()
     })
   })

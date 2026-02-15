@@ -281,25 +281,21 @@ describe('CreateModulePage', () => {
 
     render(<CreateModulePage />)
 
-    // Fill minimal valid data
     await user.type(screen.getByLabelText('Name'), 'Test Module')
     await user.type(screen.getByLabelText(/Description/i), 'Desc')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
 
-    // Project selection
     const projectInput = await waitFor(() =>
       screen.getByPlaceholderText('Start typing project name...')
     )
     await user.type(projectInput, 'Aw')
 
-    // Select option
     const projectOption = await waitFor(() => screen.getByText('Awesome Project'), {
       timeout: 2000,
     })
     await user.click(projectOption)
 
-    // Submit
     await user.click(screen.getByRole('button', { name: /Create Module/i }))
 
     await waitFor(() => {
@@ -339,13 +335,11 @@ describe('CreateModulePage', () => {
 
     render(<CreateModulePage />)
 
-    // Fill minimal valid data
     await user.type(screen.getByLabelText('Name'), 'Test Module 2')
     await user.type(screen.getByLabelText(/Description/i), 'Desc 2')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
 
-    // Project selection
     const projectInput = await waitFor(() =>
       screen.getByPlaceholderText('Start typing project name...')
     )
@@ -355,7 +349,6 @@ describe('CreateModulePage', () => {
     })
     await user.click(projectOption)
 
-    // Submit
     await user.click(screen.getByRole('button', { name: /Create Module/i }))
 
     await waitFor(() => {

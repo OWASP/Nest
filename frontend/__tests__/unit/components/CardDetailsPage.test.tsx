@@ -2370,7 +2370,7 @@ describe('CardDetailsPage', () => {
       expect(menteeLink).toHaveAttribute('href', '/programs/program-key-123/mentees/test_mentee')
     })
 
-    it('renders mentees with execution of fallback keys', () => {
+    it('renders mentee links with empty program key segment when programKey is undefined', () => {
       const mentees = [
         {
           id: 'mentee-1',
@@ -2391,8 +2391,6 @@ describe('CardDetailsPage', () => {
 
       const menteeLink = screen.getByText('Test Mentee')
       expect(menteeLink).toBeInTheDocument()
-      // getMenteeUrl mock: `/programs/${programKey}/mentees/${login}`
-      // with empty string keys: /mentees/test_mentee
       expect(menteeLink).toHaveAttribute('href', '/programs//mentees/test_mentee')
     })
 

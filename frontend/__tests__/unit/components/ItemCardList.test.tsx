@@ -953,24 +953,17 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      // It should render safely. We can check if truncated text is empty.
-      // Since no url, it renders non-link TruncatedText
       const truncatedText = screen.getByTestId('truncated-text')
       expect(truncatedText).toHaveTextContent('')
     })
 
     it('handles item with no URL, no title, no name for TruncatedText coverage', () => {
-      // Item with NO URL -> renders non-link version
-      // NO Title -> hits false branch
-      // NO Name -> hits false branch
-      // Author has NO login -> NO avatar link
       const noUrlNoInfoItem = {
         id: 'no-url-item',
         author: {
           ...mockUser,
           login: '',
         },
-        // url undefined
       } as unknown as Issue
 
       render(
@@ -982,10 +975,8 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      // Implicitly asserts checking line 146 checks
       const truncatedText = screen.getByTestId('truncated-text')
       expect(truncatedText).toHaveTextContent('')
-      // Ensure no link
       expect(screen.queryByTestId('link')).not.toBeInTheDocument()
     })
 
@@ -1011,7 +1002,6 @@ describe('ItemCardList Component', () => {
       const links = screen.getAllByTestId('link')
       const itemLink = links.find((l) => l.getAttribute('href') === 'https://example.com/name')
       expect(itemLink).toBeInTheDocument()
-      // Content should be name
       expect(itemLink).toHaveTextContent('Item Name')
     })
 
@@ -1020,7 +1010,6 @@ describe('ItemCardList Component', () => {
         id: 'url-only-item',
         author: mockUser,
         url: 'https://example.com/empty',
-        // No title, no name
       } as unknown as Issue
 
       render(

@@ -316,24 +316,18 @@ describe('UserMenu Component', () => {
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
 
-      // Open dropdown
       const avatarButton = screen.getByRole('button')
       fireEvent.click(avatarButton)
       await waitFor(() => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'true')
       })
 
-      // Get dropdown element - mocking getElementById since aria-controls logic relies on it
       const dropdownId = avatarButton.getAttribute('aria-controls')
-      // Note: In JSDOM with React Testing Library, getElementById works if element is in document
-      // The dropdown is rendered conditionally, so it should be there now
       const dropdown = document.getElementById(dropdownId!)
       expect(dropdown).toBeInTheDocument()
 
-      // Click inside (e.g. on the dropdown div itself)
       fireEvent.mouseDown(dropdown!)
 
-      // Should still be open
       await waitFor(() => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'true')
       })
@@ -342,17 +336,14 @@ describe('UserMenu Component', () => {
     it('handles mousedown events gracefully when safely syncing (ref is null)', () => {
       mockUseSession.mockReturnValue({
         session: null,
-        isSyncing: true, // This causes early return, so ref is not attached
+        isSyncing: true,
         status: 'loading',
       })
 
       render(<UserMenu isGitHubAuthEnabled={true} />)
 
-      // Fire mousedown on document (should not crash)
       fireEvent.mouseDown(document.body)
 
-      // No assertions needed other than it doesn't crash,
-      // but we can assert loading state to be sure we rendered correctly
       expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
     })
   })
