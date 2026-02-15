@@ -8,7 +8,6 @@ from functools import cached_property
 from urllib.parse import urlparse
 
 import yaml
-
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -21,8 +20,8 @@ from apps.github.constants import (
     GITHUB_USER_RE,
 )
 from apps.github.utils import get_repository_file_content
-from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.entity_channel import EntityChannel
+from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.enums.project import AudienceChoices
 
 logger = logging.getLogger(__name__)
