@@ -68,6 +68,6 @@ Over time, OWASP Nest has expanded to address broader OWASP community needs, suc
 
 ### Community and Social Media
 
-- [BlueSky account](https://bsky.app/profile/nest.owasp.org)
-- [LinkedIn group](https://www.linkedin.com/groups/14656108/)
-- [Slack channel](https://owasp.slack.com/archives/project-nest) (join [here](https://owasp.org/slack/invite)) <!-- markdownlint-disable MD059 -->
+- [BlueSky](https://bsky.app/profile/nest.owasp.org)
+- [LinkedIn](https://www.linkedin.com/groups/14656108/)
+- [OWASP Slack](https://owasp.slack.com/archives/project-nest) -- join [#project-nest](https://owasp.org/slack/invite)
