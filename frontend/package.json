@@ -35,7 +35,7 @@
     "@sentry/nextjs": "^10.38.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.23",
-    "apexcharts": "^5.4.0",
+    "apexcharts": "^5.3.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "core-js": "^3.48.0",
