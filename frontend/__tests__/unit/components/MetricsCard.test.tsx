@@ -62,6 +62,7 @@ describe('MetricsCard component', () => {
       [75, 'bg-green-500'],
       [60, 'bg-orange-500'],
       [50, 'bg-orange-500'],
+      [74, 'bg-orange-500'],
       [30, 'bg-red-500'],
     ]
 
