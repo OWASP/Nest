@@ -48,6 +48,19 @@ export const METADATA_CONFIG = {
     pageTitle: 'About',
     type: 'website',
   },
+  community: {
+    description:
+      'The OWASP Community Hub — discover chapters, projects, contributors, and the pulse of the global security community.',
+    keywords: [
+      'OWASP community',
+      'community hub',
+      'contributors',
+      'chapters',
+      'security community',
+    ],
+    pageTitle: 'Community',
+    type: 'website',
+  },
   organizations: {
     description: 'Explore OWASP organizations and their contributions to web security.',
     keywords: ['OWASP organizations', 'security organizations', 'web security'],
