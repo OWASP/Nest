@@ -4,6 +4,7 @@ from django.db import models
 from github.GithubException import UnknownObjectException
 
 
+# Generic user model
 class GenericUserModel(models.Model):
     """Generic user model."""
 

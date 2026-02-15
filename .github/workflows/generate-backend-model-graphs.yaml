@@ -10,7 +10,7 @@ on:
       - main
     paths:
       - backend/**/models.py
-      - backend/**/models/** 
+      - backend/**/models/**
   workflow_dispatch:
 
 jobs:
@@ -91,4 +91,4 @@ jobs:
         with:
           name: backend-model-graphs
           path: backend/model-graphs
-      
+
