@@ -2,7 +2,6 @@
 title: OWASP Nest
 ---
 
-<!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD025 -->
 # OWASP Nest
 
