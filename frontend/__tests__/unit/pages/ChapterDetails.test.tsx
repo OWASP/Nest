@@ -110,6 +110,31 @@ describe('chapterDetailsPage Component', () => {
     })
   })
 
+  test('renders Slack channel link with expected Slack URL', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        ...mockChapterDetailsData,
+        chapter: {
+          ...mockChapterDetailsData.chapter,
+          entityChannels: [
+            {
+              name: 'chapter-test',
+              slackChannelId: 'C123ABC',
+            },
+          ],
+        },
+      },
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      const slackLink = screen.getByRole('link', { name: 'chapter-test' })
+      expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C123ABC')
+      expect(slackLink).toHaveAttribute('target', '_blank')
+    })
+  })
+
   test('handles contributors with missing names gracefully', async () => {
     const chapterDataWithIncompleteContributors = {
       ...mockChapterDetailsData,
