@@ -74,9 +74,9 @@ class TestReleaseNode(GraphQLNodeBaseTest):
         mock_repository = Mock()
         mock_project = Mock()
         mock_project.name = "OWASP Test Project"
-        mock_repository.project = mock_project
-        mock_release.repository = mock_repository
+        mock_repository.project_set.all.return_value = [mock_project]
 
+        mock_release.repository = mock_repository
         field = self._get_field_by_name("project_name", ReleaseNode)
         result = field.base_resolver.wrapped_func(None, mock_release)
         assert result == " Test Project"  # OWASP prefix stripped
@@ -85,9 +85,8 @@ class TestReleaseNode(GraphQLNodeBaseTest):
         """Test project_name field when project doesn't exist."""
         mock_release = Mock()
         mock_repository = Mock()
-        mock_repository.project = None
+        mock_repository.project_set.all.return_value = []
         mock_release.repository = mock_repository
-
         field = self._get_field_by_name("project_name", ReleaseNode)
         result = field.base_resolver.wrapped_func(None, mock_release)
         assert result is None
