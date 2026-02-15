@@ -34,6 +34,7 @@ describe.each([
 ])('RecentReleases a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   it('should have no accessibility violations with releases', async () => {
     const { container } = render(

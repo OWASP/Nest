@@ -18,6 +18,7 @@ describe.each([
 ])('CalendarButton Accessibility ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   it('should not have any accessibility violations as an icon-only button', async () => {
     const { container } = render(<CalendarButton event={mockEvent} />)

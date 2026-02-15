@@ -36,6 +36,7 @@ describe.each([
 ])('RepositoryCard a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   it('should not have any accessibility violations', async () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))

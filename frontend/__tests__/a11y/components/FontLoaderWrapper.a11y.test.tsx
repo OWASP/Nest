@@ -11,6 +11,7 @@ describe.each([
 ])('FontLoaderWrapper a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
     Object.defineProperty(document, 'fonts', {
       value: { ready: Promise.resolve() },
       configurable: true,

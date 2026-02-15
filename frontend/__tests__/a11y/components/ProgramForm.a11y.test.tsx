@@ -25,7 +25,11 @@ describe.each([
 ])('ProgramForm a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    jest.spyOn(console, 'error').mockImplementation((...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('not wrapped in act')) return
+      throw new Error(`Console error: ${args.join(' ')}`)
+    })
   })
 
   afterEach(() => {

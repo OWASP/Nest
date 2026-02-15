@@ -24,7 +24,11 @@ describe.each([
 ])('Header a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    jest.spyOn(console, 'error').mockImplementation((...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('non-boolean attribute')) return
+      throw new Error(`Console error: ${args.join(' ')}`)
+    })
   })
 
   afterEach(() => {

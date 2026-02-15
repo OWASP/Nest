@@ -17,6 +17,7 @@ describe.each([
 ])('LoginPage a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
 

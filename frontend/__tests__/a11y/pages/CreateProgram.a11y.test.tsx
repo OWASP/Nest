@@ -26,6 +26,7 @@ describe.each([
 ])('CreateProgramPage Accessibility ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   ;(useApolloClient as jest.Mock).mockReturnValue({
     query: jest.fn().mockReturnValue({

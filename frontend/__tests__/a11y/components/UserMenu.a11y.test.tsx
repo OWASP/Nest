@@ -38,6 +38,7 @@ describe.each([
 ])('UserMenu Accessibility ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   const mockUseSession = useDjangoSession as jest.MockedFunction<typeof useDjangoSession>
   const mockUseLogout = useLogout as jest.MockedFunction<typeof useLogout>

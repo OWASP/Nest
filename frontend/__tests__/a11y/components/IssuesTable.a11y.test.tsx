@@ -11,9 +11,9 @@ const mockIssues: IssueRow[] = [
     title: 'Fix accessibility violations',
     state: 'open',
     labels: ['bug', 'a11y'],
-    avatarUrl: 'https://example.com/avatar.png',
-    login: 'testuser',
-    name: 'Test User',
+    assignees: [
+      { avatarUrl: 'https://example.com/avatar.png', login: 'testuser', name: 'Test User' },
+    ],
   },
   {
     objectID: '2',
@@ -22,9 +22,6 @@ const mockIssues: IssueRow[] = [
     state: 'closed',
     isMerged: true,
     labels: ['docs'],
-    avatarUrl: 'https://example.com/avatar2.png',
-    login: 'testuser2',
-    name: 'Test User 2',
     assignees: [
       { avatarUrl: 'https://example.com/avatar2.png', login: 'testuser2', name: 'Test User 2' },
     ],
@@ -37,6 +34,7 @@ describe.each([
 ])('IssuesTable a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   it('should have no accessibility violations with issues', async () => {
     const { container } = render(

@@ -24,6 +24,7 @@ describe.each([
 ])('ModuleDetails Accessibility ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   const mockUseQuery = useQuery as unknown as jest.Mock
 

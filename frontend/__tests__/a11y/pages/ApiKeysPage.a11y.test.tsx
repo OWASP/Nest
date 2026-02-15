@@ -22,6 +22,7 @@ describe.each([
 ])('ApiKeysPage Accessibility ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   const mockUseQuery = useQuery as unknown as jest.Mock
 
@@ -64,7 +65,11 @@ describe.each([
   })
 
   it('should have no violations when Revoke Confirmation is open', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {})
+    // Suppress jsdom TreeWalker limitation with @react-aria/focus FocusScope
+    jest.spyOn(console, 'error').mockImplementation((...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('TreeWalker')) return
+      throw new Error(`Console error: ${args.join(' ')}`)
+    })
     mockUseQuery.mockReturnValue({ data: mockApiKeys, loading: false })
 
     const { container } = render(<ApiKeysPage />)

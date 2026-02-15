@@ -64,6 +64,7 @@ describe.each([
 ])('RecentPullRequests a11y ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<RecentPullRequests data={minimalData} />)

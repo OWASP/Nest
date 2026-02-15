@@ -25,6 +25,7 @@ describe.each([
 ])('CommitteesPage Accessibility ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
     hits: mockCommitteeData.committees,

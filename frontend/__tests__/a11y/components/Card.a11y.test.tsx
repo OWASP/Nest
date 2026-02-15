@@ -47,6 +47,7 @@ describe.each([
 ])('Card Accessibility ($name theme)', ({ theme }) => {
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   })
   it('should not have any accessibility violations with minimal props', async () => {
     const { container } = render(<Card {...baseProps} />)
