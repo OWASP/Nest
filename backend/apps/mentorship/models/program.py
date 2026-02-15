@@ -19,10 +19,14 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
     """Program model representing an overarching mentorship initiative."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_programs"
         verbose_name_plural = "Programs"
 
     class ProgramStatus(models.TextChoices):
+        """Program lifecycle status choices."""
+
         DRAFT = "draft", "Draft"
         PUBLISHED = "published", "Published"
         COMPLETED = "completed", "Completed"

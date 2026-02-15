@@ -15,6 +15,8 @@ class Milestone(GenericIssueModel):
     closed_milestones = ClosedMilestoneManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_milestones"
         verbose_name_plural = "Milestones"
         ordering = ["-updated_at", "-state"]

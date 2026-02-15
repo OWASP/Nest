@@ -14,6 +14,8 @@ class Mentor(LinkedUser, ExperienceLevel, MatchingAttributes, TimestampedModel):
     """Mentor model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_mentors"
         verbose_name_plural = "Mentors"
 

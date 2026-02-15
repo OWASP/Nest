@@ -6,7 +6,6 @@ import datetime
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.db import models
 from django.utils import timezone
@@ -46,6 +45,8 @@ class Project(
     active_projects = ActiveProjectManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_projects"
         indexes = [
             models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),
@@ -123,9 +124,6 @@ class Project(
         null=True,
         help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
     )
-
-    # GKs.
-    members = GenericRelation("owasp.EntityMember")
 
     # FKs.
     owasp_repository = models.ForeignKey(

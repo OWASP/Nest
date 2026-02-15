@@ -14,6 +14,8 @@ from apps.common.index import (
     register,
 )
 
+TEST_IP_ADDRESS = "127.0.0.1"
+
 ENV = settings.ENVIRONMENT.lower()
 TOTAL_COUNT = 42
 
@@ -160,6 +162,21 @@ class TestIndexBase:
                     f"{ENV}_{index_name}", {"replicas": expected_replicas}
                 )
 
+    def test_configure_replicas_empty_indexable_replicas(self):
+        """Test configure_replicas when all replicas are non-indexable."""
+        replicas = {"replica1": ["asc"], "replica2": ["desc"]}
+        index_name = "index_name"
+        is_local = False
+
+        with (
+            patch("apps.common.index.settings.IS_LOCAL_ENVIRONMENT", is_local),
+            patch("apps.common.index.is_indexable") as mock_is_indexable,
+        ):
+            mock_is_indexable.side_effect = lambda name: name == index_name
+
+            IndexBase.configure_replicas(index_name, replicas)
+            self.mock_client.set_settings.assert_not_called()
+
     def test_parse_synonyms_file_empty(self):
         with patch("pathlib.Path.open", mock_open(read_data="\n  \n# comment\n")):
             result = IndexBase._parse_synonyms_file("test.txt")
@@ -205,3 +222,111 @@ class TestIndexBase:
 
         assert result1 == result2 == TOTAL_COUNT
         self.mock_client.search_single_index.assert_called_once()
+
+    def test_get_total_count_with_filters(self):
+        """Test get_total_count applies search filters."""
+        mock_response = MagicMock()
+        mock_response.nb_hits = 10
+        self.mock_client.search_single_index.return_value = mock_response
+
+        IndexBase.get_total_count.cache_clear()
+        result = IndexBase.get_total_count("filtered_index", search_filters="is_active:true")
+
+        assert result == 10
+        call_args = self.mock_client.search_single_index.call_args
+        assert call_args[1]["search_params"]["filters"] == "is_active:true"
+
+    def test_parse_synonyms_file_one_way_synonym(self):
+        """Test parsing one-way synonyms with colon separator."""
+        file_content = "input_term: synonym1, synonym2, synonym3"
+        with patch("pathlib.Path.open", mock_open(read_data=file_content)):
+            result = IndexBase._parse_synonyms_file("test.txt")
+
+        assert len(result) == 1
+        assert result[0]["type"] == "oneWaySynonym"
+        assert result[0]["input"] == "input_term"
+        assert result[0]["synonyms"] == ["synonym1", "synonym2", "synonym3"]
+
+    def test_parse_synonyms_file_two_way_synonym(self):
+        """Test parsing two-way synonyms without colon."""
+        file_content = "term1, term2, term3"
+        with patch("pathlib.Path.open", mock_open(read_data=file_content)):
+            result = IndexBase._parse_synonyms_file("test.txt")
+
+        assert len(result) == 1
+        assert result[0]["type"] == "synonym"
+        assert result[0]["synonyms"] == ["term1", "term2", "term3"]
+
+    def test_parse_synonyms_file_not_found(self):
+        """Test handling of file not found error."""
+        with patch("pathlib.Path.open", side_effect=FileNotFoundError):
+            result = IndexBase._parse_synonyms_file("/nonexistent/path.txt")
+
+        assert result is None
+        self.mock_logger.exception.assert_called_once()
+
+    def test_reindex_synonyms_success(self):
+        """Test successful re-indexing of synonyms."""
+        synonyms = [
+            {"objectID": "1", "type": "synonym", "synonyms": ["a", "b"]},
+            {"objectID": "2", "type": "synonym", "synonyms": ["c", "d"]},
+        ]
+        with patch.object(IndexBase, "_parse_synonyms_file", return_value=synonyms):
+            result = IndexBase.reindex_synonyms("owasp", "projects")
+
+        assert result == 2
+        self.mock_client.clear_synonyms.assert_called_once()
+        self.mock_client.save_synonyms.assert_called_once()
+
+    def test_reindex_synonyms_no_synonyms(self):
+        """Test reindex_synonyms returns None when no synonyms."""
+        with patch.object(IndexBase, "_parse_synonyms_file", return_value=None):
+            result = IndexBase.reindex_synonyms("test_app", "test_index")
+
+        assert result is None
+
+    def test_reindex_synonyms_algolia_exception(self):
+        """Test reindex_synonyms handles AlgoliaException."""
+        synonyms = [{"objectID": "1", "type": "synonym", "synonyms": ["a", "b"]}]
+        self.mock_client.save_synonyms.side_effect = AlgoliaException("API Error")
+
+        with patch.object(IndexBase, "_parse_synonyms_file", return_value=synonyms):
+            result = IndexBase.reindex_synonyms("owasp", "projects")
+
+        assert result is None
+        self.mock_logger.exception.assert_called()
+
+    def test_get_queryset_local_environment(self):
+        """Test get_queryset limits results in local environment."""
+        mock_index = MagicMock()
+        mock_queryset = MagicMock()
+        mock_index.get_entities.return_value = mock_queryset
+
+        self.mock_settings.IS_LOCAL_ENVIRONMENT = True
+
+        IndexBase.get_queryset(mock_index)
+
+        mock_queryset.__getitem__.assert_called()
+
+    def test_get_queryset_non_local_environment(self):
+        """Test get_queryset returns full queryset in non-local environment."""
+        mock_index = MagicMock()
+        mock_queryset = MagicMock()
+        mock_index.get_entities.return_value = mock_queryset
+
+        self.mock_settings.IS_LOCAL_ENVIRONMENT = False
+
+        result = IndexBase.get_queryset(mock_index)
+
+        assert result == mock_queryset
+
+    def test_get_client_with_ip_address(self):
+        """Test get_client sets X-Forwarded-For header with IP address."""
+        with patch("apps.common.index.SearchConfig") as mock_config:
+            mock_config_instance = MagicMock()
+            mock_config_instance.headers = {}
+            mock_config.return_value = mock_config_instance
+
+            IndexBase.get_client(ip_address=TEST_IP_ADDRESS)
+
+            assert mock_config_instance.headers["X-Forwarded-For"] == TEST_IP_ADDRESS
