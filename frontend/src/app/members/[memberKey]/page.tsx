@@ -9,11 +9,75 @@ import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
 import { Badge } from 'types/badge'
+import { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import Badges from 'components/Badges'
 import DetailsCard from 'components/CardDetailsPage'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
+
+type DateRange = { startDate: string; endDate: string }
+
+interface UserSummaryProps {
+  user: User | null
+  contributionData: Record<string, number>
+  dateRange: DateRange
+  hasContributionData: boolean
+  formattedBio: React.ReactNode
+}
+
+export const UserSummary: React.FC<UserSummaryProps> = ({
+  user,
+  contributionData,
+  dateRange,
+  hasContributionData,
+  formattedBio,
+}) => (
+  <div className="mt-4 flex flex-col items-center lg:flex-row">
+    <Image
+      width={200}
+      height={200}
+      className="mr-4 h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
+      src={user?.avatarUrl || '/placeholder.svg'}
+      alt={user?.name || user?.login || 'User Avatar'}
+    />
+    <div className="w-full overflow-x-auto text-center lg:text-left">
+      <div className="pl-0 lg:pl-4">
+        <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
+          <Link href={user?.url || '#'} className="text-xl font-bold text-blue-400 hover:underline">
+            @{user?.login}
+          </Link>
+          {user?.badges && user.badges.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {user.badges.slice().map((badge: Badge) => (
+                <React.Fragment key={badge.id}>
+                  <Badges
+                    name={badge.name}
+                    cssClass={badge.cssClass || 'medal'}
+                    showTooltip={true}
+                  />
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+        </div>
+        <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
+      </div>
+      {hasContributionData && dateRange.startDate && dateRange.endDate && (
+        <div className="w-full lg:block">
+          <div className="overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800">
+            <ContributionHeatmap
+              contributionData={contributionData}
+              startDate={dateRange.startDate}
+              endDate={dateRange.endDate}
+              variant="medium"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+)
 
 const UserDetailsPage: React.FC = () => {
   const { memberKey } = useParams<{ memberKey: string }>()
@@ -129,56 +193,6 @@ const UserDetailsPage: React.FC = () => {
     { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
   ]
 
-  const UserSummary = () => (
-    <div className="mt-4 flex flex-col items-center lg:flex-row">
-      <Image
-        width={200}
-        height={200}
-        className="mr-4 h-[200px] w-[200px] rounded-full border-2 border-white bg-white object-cover shadow-md dark:border-gray-800 dark:bg-gray-600/60"
-        src={user?.avatarUrl || '/placeholder.svg'}
-        alt={user?.name || user?.login || 'User Avatar'}
-      />
-      <div className="w-full overflow-x-auto text-center lg:text-left">
-        <div className="pl-0 lg:pl-4">
-          <div className="flex items-center justify-center gap-3 text-center text-sm text-gray-500 lg:justify-start lg:text-left dark:text-gray-400">
-            <Link
-              href={user?.url || '#'}
-              className="text-xl font-bold text-blue-400 hover:underline"
-            >
-              @{user?.login}
-            </Link>
-            {user?.badges && user.badges.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {user.badges.slice().map((badge: Badge) => (
-                  <React.Fragment key={badge.id}>
-                    <Badges
-                      name={badge.name}
-                      cssClass={badge.cssClass || 'medal'}
-                      showTooltip={true}
-                    />
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">{formattedBio}</p>
-        </div>
-        {hasContributionData && dateRange.startDate && dateRange.endDate && (
-          <div className="w-full lg:block">
-            <div className="overflow-x-auto rounded-lg bg-gray-100 dark:bg-gray-800">
-              <ContributionHeatmap
-                contributionData={contributionData}
-                startDate={dateRange.startDate}
-                endDate={dateRange.endDate}
-                variant="medium"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
   return (
     <DetailsCard
       details={userDetails}
@@ -191,7 +205,15 @@ const UserDetailsPage: React.FC = () => {
       stats={userStats}
       title={user?.name || user?.login}
       type="user"
-      userSummary={<UserSummary />}
+      userSummary={
+        <UserSummary
+          user={user}
+          contributionData={contributionData}
+          dateRange={dateRange}
+          hasContributionData={hasContributionData}
+          formattedBio={formattedBio}
+        />
+      }
     />
   )
 }
