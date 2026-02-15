@@ -56,7 +56,12 @@ export const GET_MODULE_BY_ID = gql`
 `
 
 export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
-  query GetProgramAdminsAndModules($programKey: String!, $moduleKey: String!) {
+  query GetProgramAdminsAndModules(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 4
+    $offset: Int = 0
+  ) {
     getProgram(programKey: $programKey) {
       id
       startedAt
@@ -93,7 +98,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         name
         avatarUrl
       }
-      recentPullRequests {
+      recentPullRequests(limit: $limit, offset: $offset) {
         id
         title
         url

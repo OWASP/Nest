@@ -1,7 +1,13 @@
 import { gql } from '@apollo/client'
 
 export const GET_MODULE_ISSUE_VIEW = gql`
-  query GetModuleIssueView($programKey: String!, $moduleKey: String!, $number: Int!) {
+  query GetModuleIssueView(
+    $programKey: String!
+    $moduleKey: String!
+    $number: Int!
+    $limit: Int = 4
+    $offset: Int = 0
+  ) {
     getModule(programKey: $programKey, moduleKey: $moduleKey) {
       id
       taskDeadline(issueNumber: $number)
@@ -23,7 +29,7 @@ export const GET_MODULE_ISSUE_VIEW = gql`
           avatarUrl
         }
         labels
-        pullRequests {
+        pullRequests(limit: $limit, offset: $offset) {
           id
           title
           url
