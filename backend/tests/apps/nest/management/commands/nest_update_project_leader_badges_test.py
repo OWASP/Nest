@@ -14,6 +14,7 @@ class TestProjectLeaderBadgeCommand(SimpleTestCase):
     def test_has_correct_metadata(self):
         assert Command.badge_name == "OWASP Project Leader"
         assert Command.badge_weight == 90
+        assert Command.badge_css_class == "star"
 
     @patch("apps.nest.management.commands.nest_update_project_leader_badges.User")
     @patch("apps.nest.management.commands.nest_update_project_leader_badges.EntityMember")
