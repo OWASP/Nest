@@ -879,7 +879,6 @@ describe('ItemCardList Component', () => {
 
       expect(screen.queryByTestId('avatar-image')).not.toBeInTheDocument()
 
-      // There are multiple links (title + avatar)
       const links = screen.getAllByTestId('link')
       const profileLink = links.find(
         (link) => link.getAttribute('href') === `/members/${mockIssue.author.login}`
@@ -909,7 +908,6 @@ describe('ItemCardList Component', () => {
       )
 
       expect(screen.getByTestId('avatar-image')).toBeInTheDocument()
-      // Should NOT have a link to members profile
       const links = screen.queryAllByTestId('link')
       const profileLink = links.find((link) => link.getAttribute('href')?.startsWith('/members/'))
       expect(profileLink).toBeUndefined()
@@ -935,13 +933,8 @@ describe('ItemCardList Component', () => {
     })
 
     it('handles item with no identifiers for key generation coverage', () => {
-      // Item with no objectID, no id
-      // This forces execution past line 98 in getItemKey
-      // And we strictly omit title, name, repositoryName, url to hit 'false' branches of 'in' checks
       const noIdItem = {
         author: mockUser,
-        // No id, no objectID
-        // No title, name, repositoryName, url
       } as unknown as Issue
 
       render(
@@ -998,7 +991,6 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      // Should be a link
       const links = screen.getAllByTestId('link')
       const itemLink = links.find((l) => l.getAttribute('href') === 'https://example.com/name')
       expect(itemLink).toBeInTheDocument()
@@ -1021,11 +1013,9 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      // Should be a link
       const links = screen.getAllByTestId('link')
       const itemLink = links.find((l) => l.getAttribute('href') === 'https://example.com/empty')
       expect(itemLink).toBeInTheDocument()
-      // Content should be empty
       expect(itemLink).toHaveTextContent('')
     })
   })
