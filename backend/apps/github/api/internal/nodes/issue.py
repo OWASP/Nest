@@ -7,6 +7,7 @@ from django.db.models import Prefetch
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
+from apps.github.models.label import Label
 from apps.github.models.pull_request import PullRequest
 
 MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
@@ -16,6 +17,12 @@ MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
         state="closed",
     ),
     to_attr="merged_pull_requests",
+)
+
+LABELS_PREFETCH = Prefetch(
+    "labels",
+    queryset=Label.objects.all(),
+    to_attr="label_names",
 )
 
 
@@ -51,10 +58,10 @@ class IssueNode(strawberry.relay.Node):
         """Resolve the repository name."""
         return root.repository.name if root.repository else None
 
-    @strawberry_django.field(prefetch_related=["labels"])
+    @strawberry_django.field(prefetch_related=[LABELS_PREFETCH])
     def labels(self, root: Issue) -> list[str]:
         """Resolve label names for the issue."""
-        return [label.name for label in root.labels.all()]
+        return [label.name for label in getattr(root, "label_names", [])]
 
     @strawberry_django.field(prefetch_related=[MERGED_PULL_REQUESTS_PREFETCH])
     def is_merged(self, root: Issue) -> bool:
