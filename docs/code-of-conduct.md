@@ -1,3 +1,5 @@
+<!-- Disabling MD046 to preserve MkDocs rendering -->
+<!-- markdownlint-disable MD046 -->
 # Code of Conduct
 
 ## Our Pledge
@@ -10,10 +12,8 @@
     nationality, personal appearance, race, religion, or sexual identity
     and orientation.
 
-```plaintext
-We pledge to act and interact in ways that contribute to an open, welcoming,
-diverse, inclusive, and healthy community.
-```
+    We pledge to act and interact in ways that contribute to an open, welcoming,
+    diverse, inclusive, and healthy community.
 
 ## Community Standards
 
@@ -42,24 +42,20 @@ We encourage behaviors that contribute to a positive environment:
 
 !!! info "Leadership Role"
 
-Community leaders are responsible for:
+    Community leaders are responsible for:
 
-```plaintext
-- Clarifying and enforcing standards of acceptable behavior
-- Taking appropriate and fair corrective action
-- Removing, editing, or rejecting contributions not aligned with this Code
-- Communicating moderation decisions when appropriate
-```
+    - Clarifying and enforcing standards of acceptable behavior
+    - Taking appropriate and fair corrective action
+    - Removing, editing, or rejecting contributions not aligned with this Code
+    - Communicating moderation decisions when appropriate
 
 ### Reporting Process
 
 !!! tip "Reporting Violations"
-Report instances of unacceptable behavior to the community leaders at:
-[OWASP Nest Project Leaders](https://owasp.org/www-project-nest)
+    Report instances of unacceptable behavior to the community leaders at:
+    [OWASP Nest Project Leaders](https://owasp.org/www-project-nest)
 
-```plaintext
-All complaints will be reviewed and investigated promptly and fairly.
-```
+    All complaints will be reviewed and investigated promptly and fairly.
 
 ### Guidelines for Enforcement
 
