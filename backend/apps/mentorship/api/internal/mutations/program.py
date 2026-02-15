@@ -35,7 +35,10 @@ def resolve_admins_from_logins(logins: list[str]) -> set:
                     admin.nest_user = nest_user
                     admin.save(update_fields=["nest_user"])
                 except User.DoesNotExist:
-                    pass
+                    logger.info(
+                        "No Nest user found for GitHub user '%s'; leaving admin.nest_user unset.",
+                        github_user.login,
+                    )
             admins.add(admin)
         except GithubUser.DoesNotExist as e:
             msg = f"GitHub user '{login}' not found."
