@@ -34,6 +34,7 @@ describe('useBreadcrumbs', () => {
 
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Members', path: '/members' },
       ])
     })
@@ -78,6 +79,7 @@ describe('useBreadcrumbs', () => {
       // Note: 'repositories' segment is hidden (in HIDDEN_SEGMENTS)
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Organizations', path: '/organizations' },
         { title: 'Test Organization', path: '/organizations/test-org' },
         { title: 'Test Repository', path: '/organizations/test-org/repositories/test-repo' },
@@ -92,15 +94,14 @@ describe('useBreadcrumbs', () => {
   })
 
   describe('HIDDEN_SEGMENTS', () => {
-    test('does not show "community" in breadcrumbs when present in path', () => {
+    test('shows Community breadcrumb for /community/* paths despite community being a hidden segment', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/community/forum')
 
       const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
 
-      const titles = result.current.map((item) => item.title)
-      expect(titles).not.toContain('Community')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Forum', path: '/community/forum' },
       ])
     })
@@ -109,11 +110,9 @@ describe('useBreadcrumbs', () => {
 
       const { result } = renderHook(() => useBreadcrumbs(), { wrapper })
 
-      const titles = result.current.map((item) => item.title)
-      expect(titles).not.toContain('Community')
-      expect(titles).not.toContain('Mentees')
       expect(result.current).toEqual([
         { title: 'Home', path: '/' },
+        { title: 'Community', path: '/community' },
         { title: 'Profile', path: '/community/mentees/profile' },
       ])
     })

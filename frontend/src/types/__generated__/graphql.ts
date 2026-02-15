@@ -710,6 +710,7 @@ export type Query = {
   recentChapters: Array<ChapterNode>;
   recentIssues: Array<IssueNode>;
   recentMilestones: Array<MilestoneNode>;
+  recentOrganizations: Array<OrganizationNode>;
   recentPosts: Array<PostNode>;
   recentProjects: Array<ProjectNode>;
   recentPullRequests: Array<PullRequestNode>;
@@ -855,6 +856,11 @@ export type QueryRecentMilestonesArgs = {
   login?: InputMaybe<Scalars['String']['input']>;
   organization?: InputMaybe<Scalars['String']['input']>;
   state?: InputMaybe<MilestoneStateEnum>;
+};
+
+
+export type QueryRecentOrganizationsArgs = {
+  limit?: Scalars['Int']['input'];
 };
 
 

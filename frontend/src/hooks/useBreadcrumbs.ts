@@ -5,14 +5,15 @@ import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 
 export type { BreadcrumbItem } from 'types/breadcrumb'
 
-const HIDDEN_SEGMENTS = new Set(['community', 'mentees', 'modules', 'programs', 'repositories'])
+const HIDDEN_SEGMENTS = new Set(['repositories', 'mentees', 'modules', 'programs', 'community'])
+const COMMUNITY_RELATED_PATHS = ['/chapters', '/members', '/organizations']
 
 function buildBreadcrumbItems(
   pathname: string | null,
   registeredItems: BreadcrumbItem[]
 ): BreadcrumbItem[] {
   const registeredMap = new Map<string, BreadcrumbItem>()
-  for (const item of registeredItems) {
+  for (const item of registeredItems || []) {
     registeredMap.set(item.path, item)
   }
 
@@ -23,14 +24,25 @@ function buildBreadcrumbItems(
   }
 
   const segments = pathname.split('/').filter(Boolean)
+
+  const shouldShowCommunity =
+    pathname === '/community' ||
+    pathname.startsWith('/community/') ||
+    COMMUNITY_RELATED_PATHS.some((path) => pathname.startsWith(path))
+
+  if (shouldShowCommunity) {
+    items.push({
+      title: 'Community',
+      path: '/community',
+    })
+  }
+
   let currentPath = ''
 
   for (const segment of segments) {
     currentPath = `${currentPath}/${segment}`
 
-    if (HIDDEN_SEGMENTS.has(segment)) {
-      continue
-    }
+    if (HIDDEN_SEGMENTS.has(segment)) continue
 
     const registeredItem = registeredMap.get(currentPath)
     if (registeredItem) {
