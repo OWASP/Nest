@@ -1,8 +1,10 @@
 'use client'
 import Link from 'next/link'
-import { FaArrowRight, FaSlack } from 'react-icons/fa'
-import { exploreCards, engagementWays, journeySteps } from 'utils/communityData'
+import { FaArrowRight, FaSlack, FaChevronRight } from 'react-icons/fa'
+import { exploreCards as NAV_SECTIONS, engagementWays, journeySteps } from 'utils/communityData'
 import SecondaryCard from 'components/SecondaryCard'
+import AnchorTitle from 'components/AnchorTitle'
+import { IconWrapper } from 'wrappers/IconWrapper'
 
 export default function CommunityPage() {
   return (
@@ -13,45 +15,51 @@ export default function CommunityPage() {
             OWASP Community
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-            Explore the vibrant OWASP community. Connect with chapters, members, and organizations
-            around the world. Discover opportunities to engage, learn, and contribute.
+            Explore the vibrant OWASP community. Connect with{' '}
+            <Link href="/chapters" className="text-blue-500 hover:underline">
+              Chapters
+            </Link>
+            ,{' '}
+            <Link href="/members" className="text-blue-500 hover:underline">
+              Members
+            </Link>
+            , and{' '}
+            <Link href="/organizations" className="text-blue-500 hover:underline">
+              Organizations
+            </Link>{' '}
+            around the world at your fingertips. Discover opportunities to engage, learn, and
+            contribute.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/chapters"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-600"
-            >
-              Explore Chapters
-              <FaArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/members"
-              className="inline-flex items-center gap-2 rounded-lg border-2 border-blue-500 px-6 py-3 font-semibold text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
-            >
-              Meet Members
-              <FaArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
         </div>
 
         {/* Explore Community Section */}
-        <SecondaryCard title="Explore Community">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {exploreCards.map((card) => (
+        <SecondaryCard
+          title={
+            <div className="flex items-center gap-2">
+              <AnchorTitle title="Explore Resources" />
+            </div>
+          }
+          className="overflow-hidden"
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {NAV_SECTIONS.map((section) => (
               <Link
-                key={card.title}
-                href={card.href}
-                className="group rounded-lg border-2 border-gray-200 bg-white p-6 transition-all hover:scale-105 hover:border-blue-400 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-500"
+                key={section.title}
+                href={section.href}
+                className="group flex items-start gap-4 rounded-lg bg-gray-200 p-5 transition-all duration-300 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-gray-600"
               >
-                <div
-                  className={`mb-4 inline-flex rounded-lg p-3 ${card.bgColor} transition-transform group-hover:scale-110`}
-                >
-                  <card.icon className={`h-6 w-6 ${card.color}`} />
+                <div className="flex-shrink-0 pt-1">
+                  <IconWrapper icon={section.icon} className={`h-6 w-6 ${section.color}`} />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  {card.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{card.description}</p>
+                <div className="min-w-0 flex-1">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    {section.title}
+                    <FaChevronRight className="h-3 w-3 transform transition-transform group-hover:translate-x-1" />
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    {section.description}
+                  </p>
+                </div>
               </Link>
             ))}
           </div>
@@ -138,31 +146,12 @@ export default function CommunityPage() {
           <p className="mb-8 text-lg text-gray-600 dark:text-gray-400">
             Join thousands of security professionals making a difference in the OWASP community.
             Whether you&apos;re just starting out or you&apos;re an experienced contributor,
-            there&apos;s a place for you here.
+            there&apos;s a place for you here. Start by{' '}
+            <Link href="/contribute" className="text-blue-500 hover:underline">
+              contributing to a project
+            </Link>
+            .
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/chapters"
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-600"
-            >
-              Find Your Chapter
-              <FaArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/members"
-              className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-6 py-3 font-bold text-white transition-colors hover:bg-green-600"
-            >
-              Connect with Members
-              <FaArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/contribute"
-              className="inline-flex items-center gap-2 rounded-lg border-2 border-blue-500 px-6 py-3 font-bold text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20"
-            >
-              Start Contributing
-              <FaArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
         </SecondaryCard>
       </div>
     </div>
