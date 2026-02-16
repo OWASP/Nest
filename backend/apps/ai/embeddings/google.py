@@ -9,18 +9,8 @@ genai_client_module = None
 use_deprecated_api = False
 
 try:
-    import warnings
-
     import google.generativeai as genai_deprecated
 
-    warnings.warn(
-        (
-            "google.generativeai is deprecated. "
-            "Please install google-genai package: pip install google-genai"
-        ),
-        DeprecationWarning,
-        stacklevel=2,
-    )
     # Check if it has the methods we need
     if hasattr(genai_deprecated, "configure") and hasattr(genai_deprecated, "embed_content"):
         genai = genai_deprecated
@@ -56,6 +46,19 @@ MODEL_DIMENSIONS: dict[str, int] = {
 DEFAULT_MODEL = "gemini-embedding-001"
 DEFAULT_DIMENSIONS = 768
 
+# Error message for unrecognized API structure
+_EMBEDDING_EXTRACTION_ERROR = (
+    "Could not extract embedding from new API response. Unexpected result structure."
+)
+
+
+def _raise_embedding_extraction_error() -> None:
+    """Raise ValueError for unrecognized API structure.
+
+    Helper function to satisfy TRY301 linting rule.
+    """
+    raise ValueError(_EMBEDDING_EXTRACTION_ERROR)
+
 
 class GoogleEmbedder(Embedder):
     """Google implementation of embedder using Google Generative AI SDK."""
@@ -76,6 +79,8 @@ class GoogleEmbedder(Embedder):
 
         """
         self.api_key = settings.GOOGLE_API_KEY
+        # Initialize base_url for REST API fallback (used in all code paths)
+        self.base_url = "https://generativelanguage.googleapis.com/v1beta"
 
         # Validate and set model
         if model not in MODEL_DIMENSIONS:
@@ -100,6 +105,17 @@ class GoogleEmbedder(Embedder):
         # Priority: deprecated API (google.generativeai) > new API (google.genai.Client) > REST
         if genai and use_deprecated_api:
             # Use deprecated google.generativeai API
+            # Warn only when actually using the deprecated API
+            import warnings
+
+            warnings.warn(
+                (
+                    "google.generativeai is deprecated. "
+                    "Please install google-genai package: pip install google-genai"
+                ),
+                DeprecationWarning,
+                stacklevel=2,
+            )
             try:
                 genai.configure(api_key=self.api_key)
                 self.use_deprecated_sdk = True
@@ -120,8 +136,7 @@ class GoogleEmbedder(Embedder):
                 self.use_new_sdk = False
                 self.client = None
         else:
-            # Fallback to REST API
-            self.base_url = "https://generativelanguage.googleapis.com/v1beta"
+            # Fallback to REST API (base_url already initialized above)
             self.use_deprecated_sdk = False
             self.use_new_sdk = False
             self.client = None
@@ -173,8 +188,12 @@ class GoogleEmbedder(Embedder):
                 if hasattr(result, "embedding") and hasattr(result.embedding, "values"):
                     return result.embedding.values
                 # Fallback: try to access as dict-like
-                return result.get("embedding", {}).get("values", [])
-            except (AttributeError, TypeError) as e:
+                embedding = result.get("embedding", {}).get("values", [])
+                if embedding:
+                    return embedding
+                # If we can't extract embedding, raise an error instead of returning empty
+                _raise_embedding_extraction_error()
+            except (AttributeError, TypeError, ValueError) as e:
                 # If new API structure is different, fall back to REST
                 import warnings
 
@@ -185,10 +204,14 @@ class GoogleEmbedder(Embedder):
                 )
 
         # Fallback to REST API
-        endpoint = f"{self.base_url}/models/{self.model}:embedContent?key={self.api_key}"
+        # Use header instead of query parameter to avoid API key in logs
+        endpoint = f"{self.base_url}/models/{self.model}:embedContent"
         response = requests.post(
             endpoint,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": self.api_key,
+            },
             json={
                 "content": {"parts": [{"text": text}]},
             },
@@ -242,20 +265,26 @@ class GoogleEmbedder(Embedder):
                         embedding = result.get("embedding", {}).get("values", [])
                         if embedding:
                             embedding_values = embedding
+                        else:
+                            # If extraction fails, raise error to trigger REST fallback
+                            _raise_embedding_extraction_error()
                 except (AttributeError, TypeError, ValueError):
                     # If SDK call fails, embedding_values remains None
+                    # This will trigger REST fallback below
                     pass
 
                 if embedding_values:
                     results.append(embedding_values)
                 else:
                     # Fall back to REST API for this item
-                    endpoint = (
-                        f"{self.base_url}/models/{self.model}:embedContent?key={self.api_key}"
-                    )
+                    # Use header instead of query parameter to avoid API key in logs
+                    endpoint = f"{self.base_url}/models/{self.model}:embedContent"
                     response = requests.post(
                         endpoint,
-                        headers={"Content-Type": "application/json"},
+                        headers={
+                            "Content-Type": "application/json",
+                            "x-goog-api-key": self.api_key,
+                        },
                         json={
                             "content": {"parts": [{"text": text}]},
                         },
@@ -267,12 +296,22 @@ class GoogleEmbedder(Embedder):
             return results
 
         # Fallback to REST API
-        endpoint = f"{self.base_url}/models/{self.model}:batchEmbedContents?key={self.api_key}"
+        # Use header instead of query parameter to avoid API key in logs
+        endpoint = f"{self.base_url}/models/{self.model}:batchEmbedContents"
         response = requests.post(
             endpoint,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": self.api_key,
+            },
             json={
-                "requests": [{"content": {"parts": [{"text": text}]}} for text in texts],
+                "requests": [
+                    {
+                        "model": self.model,
+                        "content": {"parts": [{"text": text}]},
+                    }
+                    for text in texts
+                ],
             },
             timeout=60,
         )
