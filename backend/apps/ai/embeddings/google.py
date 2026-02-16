@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import NoReturn
+
 # Try deprecated google.generativeai first (has configure/embed_content methods)
 # The new google.genai has a different API (Client-based) that we also support
 genai = None
@@ -58,6 +60,62 @@ def _raise_embedding_extraction_error() -> None:
     Helper function to satisfy TRY301 linting rule.
     """
     raise ValueError(_EMBEDDING_EXTRACTION_ERROR)
+
+
+def _raise_deprecated_api_error(result_type: type) -> NoReturn:
+    """Raise ValueError for unrecognized deprecated API response type.
+
+    Helper function to satisfy TRY003 and EM102 linting rules.
+    """
+    error_msg = (
+        f"Could not extract embedding from deprecated API response. "
+        f"Unexpected result type: {result_type}"
+    )
+    raise ValueError(error_msg)
+
+
+def _raise_deprecated_api_dict_error(result_keys: list) -> NoReturn:
+    """Raise ValueError for unrecognized deprecated API dict structure.
+
+    Helper function to satisfy TRY003 and EM102 linting rules.
+    """
+    error_msg = (
+        f"Could not extract embedding from deprecated API response. "
+        f"Unexpected dict structure: {result_keys}"
+    )
+    raise ValueError(error_msg)
+
+
+def _extract_embedding_from_result(result: object) -> list[float]:
+    """Extract embedding values from deprecated API result.
+
+    Handles both object and dict return types from google.generativeai.
+
+    Args:
+        result: The result from genai.embed_content() which may be an object or dict.
+
+    Returns:
+        List of floats representing the embedding vector.
+
+    Raises:
+        ValueError: If the result structure is unrecognized.
+
+    """
+    # Try object with embeddings attribute
+    if hasattr(result, "embeddings") and result.embeddings:
+        return result.embeddings[0].values
+    # Try object with embedding attribute
+    if hasattr(result, "embedding") and hasattr(result.embedding, "values"):
+        return result.embedding.values
+    # Try dict return type
+    if isinstance(result, dict):
+        if "embedding" in result:
+            return result["embedding"].get("values", [])
+        if result.get("embeddings"):
+            return result["embeddings"][0].get("values", [])
+        _raise_deprecated_api_dict_error(list(result.keys()))
+    # If we can't extract, raise error
+    _raise_deprecated_api_error(type(result))
 
 
 class GoogleEmbedder(Embedder):
@@ -167,9 +225,9 @@ class GoogleEmbedder(Embedder):
                 model=self.model,
                 content=text,
             )
-            # SDK returns an object with embeddings attribute
-            # For single embedding: result.embeddings[0].values
-            return result.embeddings[0].values
+            # SDK may return an object with embeddings attribute or a dict
+            # Handle both cases for compatibility
+            return _extract_embedding_from_result(result)
 
         if self.use_new_sdk and self.client:
             # Use new google.genai Client API
@@ -193,8 +251,10 @@ class GoogleEmbedder(Embedder):
                     return embedding
                 # If we can't extract embedding, raise an error instead of returning empty
                 _raise_embedding_extraction_error()
-            except (AttributeError, TypeError, ValueError) as e:
+            except (AttributeError, TypeError) as e:
                 # If new API structure is different, fall back to REST
+                # Note: ValueError from _raise_embedding_extraction_error() is not caught here
+                # so it will propagate and trigger REST fallback below
                 import warnings
 
                 warnings.warn(
@@ -202,6 +262,8 @@ class GoogleEmbedder(Embedder):
                     UserWarning,
                     stacklevel=2,
                 )
+            # ValueError from _raise_embedding_extraction_error() is not caught here
+            # so it will propagate and trigger REST fallback below
 
         # Fallback to REST API
         # Use header instead of query parameter to avoid API key in logs
@@ -240,8 +302,9 @@ class GoogleEmbedder(Embedder):
                     model=self.model,
                     content=text,
                 )
-                # SDK returns an object with embeddings attribute
-                results.append(result.embeddings[0].values)
+                # SDK may return an object with embeddings attribute or a dict
+                # Handle both cases for compatibility
+                results.append(_extract_embedding_from_result(result))
             return results
 
         if self.use_new_sdk and self.client:
@@ -268,10 +331,12 @@ class GoogleEmbedder(Embedder):
                         else:
                             # If extraction fails, raise error to trigger REST fallback
                             _raise_embedding_extraction_error()
-                except (AttributeError, TypeError, ValueError):
+                except (AttributeError, TypeError):
                     # If SDK call fails, embedding_values remains None
                     # This will trigger REST fallback below
                     pass
+                # ValueError from _raise_embedding_extraction_error() is not caught here
+                # so it will propagate and trigger REST fallback below
 
                 if embedding_values:
                     results.append(embedding_values)
@@ -307,7 +372,7 @@ class GoogleEmbedder(Embedder):
             json={
                 "requests": [
                     {
-                        "model": self.model,
+                        "model": f"models/{self.model}",
                         "content": {"parts": [{"text": text}]},
                     }
                     for text in texts
