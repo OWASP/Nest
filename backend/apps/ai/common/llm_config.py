@@ -21,7 +21,7 @@ def get_llm() -> LLM:
 
     if provider == "openai":
         return LLM(
-            model=settings.OPENAI_MODEL_NAME,
+            model=settings.OPEN_AI_MODEL_NAME,
             api_key=settings.OPEN_AI_SECRET_KEY,
             temperature=0.1,
         )
@@ -35,13 +35,13 @@ def get_llm() -> LLM:
 
     # Fallback to OpenAI if provider not recognized or not specified
     if provider and provider not in ("openai", "google"):
-        logger.warning(
+        logger.error(
             "Unrecognized LLM_PROVIDER '%s'. Falling back to OpenAI. "
             "Supported providers: 'openai', 'google'",
             provider,
         )
     return LLM(
-        model=settings.OPENAI_MODEL_NAME,
+        model=settings.OPEN_AI_MODEL_NAME,
         api_key=settings.OPEN_AI_SECRET_KEY,
         temperature=0.1,
     )
