@@ -2,9 +2,18 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
 import { FaCode, FaTags } from 'react-icons/fa6'
+import type { MenteeNode } from 'types/__generated__/graphql'
 import type { DetailsCardProps } from 'types/card'
 import type { PullRequest } from 'types/pullRequest'
 import CardDetailsPage, { type CardType } from 'components/CardDetailsPage'
+
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div data-testid="mock-tooltip" title={content}>
+      {children}
+    </div>
+  ),
+}))
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -406,11 +415,11 @@ jest.mock('components/ContributorsList', () => ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon,
     title = 'Contributors',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     getUrl,
     ...props
   }: {
-    contributors: unknown[]
+    contributors: (Partial<MenteeNode> & { tag?: string; login?: string; name?: string })[]
     icon?: unknown
     title?: string
     maxInitialDisplay: number
@@ -419,6 +428,11 @@ jest.mock('components/ContributorsList', () => ({
   }) => (
     <div data-testid="contributors-list" {...props}>
       {title} ({contributors.length} items, max display: {maxInitialDisplay})
+      {contributors.map((c) => (
+        <a key={c.tag || c.login || 'unknown'} href={getUrl && getUrl(c.login || 'unknown')}>
+          {c.name || c.login || 'Unknown'}
+        </a>
+      ))}
     </div>
   ),
 }))
@@ -2351,9 +2365,33 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...propsWithMentees} />)
 
-      const allContributorsLists = screen.getAllByTestId('contributors-list')
-      const menteesSection = allContributorsLists.find((el) => el.textContent?.includes('Mentees'))
-      expect(menteesSection).toHaveTextContent('Mentees (1 items, max display: 6)')
+      const menteeLink = screen.getByText('Test Mentee')
+      expect(menteeLink).toBeInTheDocument()
+      expect(menteeLink).toHaveAttribute('href', '/programs/program-key-123/mentees/test_mentee')
+    })
+
+    it('renders mentee links with empty program key segment when programKey is undefined', () => {
+      const mentees = [
+        {
+          id: 'mentee-1',
+          login: 'test_mentee',
+          name: 'Test Mentee',
+          avatarUrl: 'https://example.com/mentee.jpg',
+        },
+      ]
+
+      const propsWithMentees: DetailsCardProps = {
+        ...defaultProps,
+        mentees,
+        programKey: undefined,
+        entityKey: undefined,
+      }
+
+      render(<CardDetailsPage {...propsWithMentees} />)
+
+      const menteeLink = screen.getByText('Test Mentee')
+      expect(menteeLink).toBeInTheDocument()
+      expect(menteeLink).toHaveAttribute('href', '/programs//mentees/test_mentee')
     })
 
     it('handles null/undefined mentees array gracefully', () => {
