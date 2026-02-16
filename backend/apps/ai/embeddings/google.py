@@ -110,9 +110,17 @@ def _extract_embedding_from_result(result: object) -> list[float]:
     # Try dict return type
     if isinstance(result, dict):
         if "embedding" in result:
-            return result["embedding"].get("values", [])
+            embedding_data = result["embedding"]
+            # Handle both list and dict with "values" key
+            if isinstance(embedding_data, (list, tuple)):
+                return list(embedding_data)
+            return embedding_data.get("values", [])
         if result.get("embeddings"):
-            return result["embeddings"][0].get("values", [])
+            embeddings_data = result["embeddings"][0]
+            # Handle both list and dict with "values" key
+            if isinstance(embeddings_data, (list, tuple)):
+                return list(embeddings_data)
+            return embeddings_data.get("values", [])
         _raise_deprecated_api_dict_error(list(result.keys()))
     # If we can't extract, raise error
     _raise_deprecated_api_error(type(result))
@@ -247,10 +255,8 @@ class GoogleEmbedder(Embedder):
                     return embedding
                 # If we can't extract embedding, raise an error instead of returning empty
                 _raise_embedding_extraction_error()
-            except (AttributeError, TypeError) as e:
-                # If new API structure is different, fall back to REST
-                # Note: ValueError from _raise_embedding_extraction_error() is not caught here
-                # so it will propagate and trigger REST fallback below
+            except (AttributeError, TypeError, ValueError) as e:
+                # If new API structure is different or extraction fails, fall back to REST
                 import warnings
 
                 warnings.warn(
@@ -258,8 +264,6 @@ class GoogleEmbedder(Embedder):
                     UserWarning,
                     stacklevel=2,
                 )
-            # ValueError from _raise_embedding_extraction_error() is not caught here
-            # so it will propagate and trigger REST fallback below
 
         # Fallback to REST API
         # Use header instead of query parameter to avoid API key in logs
@@ -327,12 +331,10 @@ class GoogleEmbedder(Embedder):
                         else:
                             # If extraction fails, raise error to trigger REST fallback
                             _raise_embedding_extraction_error()
-                except (AttributeError, TypeError):
-                    # If SDK call fails, embedding_values remains None
+                except (AttributeError, TypeError, ValueError):
+                    # If SDK call fails or extraction fails, embedding_values remains None
                     # This will trigger REST fallback below
                     pass
-                # ValueError from _raise_embedding_extraction_error() is not caught here
-                # so it will propagate and trigger REST fallback below
 
                 if embedding_values:
                     results.append(embedding_values)
