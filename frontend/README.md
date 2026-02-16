@@ -4,15 +4,15 @@ The OWASP Nest frontend is a modern web application built with [Next.js](https:/
 
 ## Tech Stack
 
-| Component        | Technology                                                              |
-| ---------------- | ----------------------------------------------------------------------- |
-| **Framework**    | Next.js 16.x (React 19)                                                 |
-| **Language**     | TypeScript                                                              |
-| **Styling**      | TailwindCSS 4.x                                                         |
-| **UI Library**   | HeroUI                                                                  |
-| **Data Fetching**| Apollo Client (for GraphQL)                                             |
-| **Mapping**      | Leaflet / React Leaflet                                                 |
-| **Testing**      | Jest (unit/a11y), Playwright (e2e)                                      |
+| Component         | Technology                         |
+| ----------------- | ---------------------------------- |
+| **Framework**     | Next.js 16.x (React 19)            |
+| **Language**      | TypeScript                         |
+| **Styling**       | TailwindCSS 4.x                    |
+| **UI Library**    | HeroUI                             |
+| **Data Fetching** | Apollo Client (for GraphQL)        |
+| **Mapping**       | Leaflet / React Leaflet            |
+| **Testing**       | Jest (unit/a11y), Playwright (e2e) |
 
 ## Directory Structure
 

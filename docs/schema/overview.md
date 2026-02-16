@@ -11,11 +11,11 @@ The database is PostgreSQL, and the schema is managed through Django's ORM and m
 
 ### Key Commands
 
-| Task                   | Command              |
-| ---------------------- | -------------------- |
-| Create migrations      | `make migrations`    |
-| Apply migrations       | `make migrate`       |
-| Recreate schema        | `make recreate-schema` |
+| Task              | Command                |
+| ----------------- | -----------------------|
+| Create migrations | `make migrations`      |
+| Apply migrations  | `make migrate`         |
+| Recreate schema   | `make recreate-schema` |
 
 ---
 

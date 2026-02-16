@@ -4,15 +4,15 @@ The OWASP Nest backend is a Python-based API server built with the [Django](http
 
 ## Tech Stack
 
-| Component       | Technology                                                                 |
-| --------------- | -------------------------------------------------------------------------- |
-| **Framework**   | Django 6.x                                                                 |
-| **REST API**    | [Django Ninja](https://django-ninja.dev/)                                  |
-| **GraphQL API** | [Strawberry GraphQL](https://strawberry.rocks/)                            |
-| **Database**    | PostgreSQL                                                                 |
-| **Caching**     | Redis (via `django-redis`)                                                 |
-| **Task Queue**  | Django RQ                                                                  |
-| **Search**      | Algolia                                                                    |
+| Component       | Technology                                      |
+| --------------- | ------------------------------------------------|
+| **Framework**   | Django 6.x                                      |
+| **REST API**    | [Django Ninja](https://django-ninja.dev/)       |
+| **GraphQL API** | [Strawberry GraphQL](https://strawberry.rocks/) |
+| **Database**    | PostgreSQL                                      |
+| **Caching**     | Redis (via `django-redis`)                      |
+| **Task Queue**  | Django RQ                                       |
+| **Search**      | Algolia                                         |
 
 ## Directory Structure
 
