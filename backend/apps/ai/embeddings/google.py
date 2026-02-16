@@ -48,19 +48,6 @@ MODEL_DIMENSIONS: dict[str, int] = {
 DEFAULT_MODEL = "gemini-embedding-001"
 DEFAULT_DIMENSIONS = 768
 
-# Error message for unrecognized API structure
-_EMBEDDING_EXTRACTION_ERROR = (
-    "Could not extract embedding from new API response. Unexpected result structure."
-)
-
-
-def _raise_embedding_extraction_error() -> None:
-    """Raise ValueError for unrecognized API structure.
-
-    Helper function to satisfy TRY301 linting rule.
-    """
-    raise ValueError(_EMBEDDING_EXTRACTION_ERROR)
-
 
 def _raise_deprecated_api_error(result_type: type) -> NoReturn:
     """Raise ValueError for unrecognized deprecated API response type.
@@ -253,10 +240,9 @@ class GoogleEmbedder(Embedder):
                 embedding = result.get("embedding", {}).get("values", [])
                 if embedding:
                     return embedding
-                # If we can't extract embedding, raise an error instead of returning empty
-                _raise_embedding_extraction_error()
-            except (AttributeError, TypeError, ValueError) as e:
-                # If new API structure is different or extraction fails, fall back to REST
+                # If we can't extract embedding, fall through to REST API
+            except (AttributeError, TypeError) as e:
+                # If new API structure is different, fall back to REST
                 import warnings
 
                 warnings.warn(
@@ -328,11 +314,10 @@ class GoogleEmbedder(Embedder):
                         embedding = result.get("embedding", {}).get("values", [])
                         if embedding:
                             embedding_values = embedding
-                        else:
-                            # If extraction fails, raise error to trigger REST fallback
-                            _raise_embedding_extraction_error()
-                except (AttributeError, TypeError, ValueError):
-                    # If SDK call fails or extraction fails, embedding_values remains None
+                        # If extraction fails, embedding_values remains None
+                        # This will trigger REST fallback below
+                except (AttributeError, TypeError):
+                    # If SDK call fails, embedding_values remains None
                     # This will trigger REST fallback below
                     pass
 
