@@ -316,10 +316,17 @@ class GoogleEmbedder(Embedder):
                             embedding_values = embedding
                         # If extraction fails, embedding_values remains None
                         # This will trigger REST fallback below
-                except (AttributeError, TypeError):
-                    # If SDK call fails, embedding_values remains None
-                    # This will trigger REST fallback below
-                    pass
+                except (AttributeError, TypeError) as e:
+                    # If SDK call fails, warn and fall back to REST
+                    import warnings
+
+                    warnings.warn(
+                        f"New google.genai API structure unexpected: {e}. "
+                        f"Falling back to REST API.",
+                        UserWarning,
+                        stacklevel=2,
+                    )
+                    # embedding_values remains None, will trigger REST fallback below
 
                 if embedding_values:
                     results.append(embedding_values)
