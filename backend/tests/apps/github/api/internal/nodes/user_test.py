@@ -21,7 +21,6 @@ class TestUserNode(GraphQLNodeBaseTest):
         field_names = {field.name for field in UserNode.__strawberry_definition__.fields}
         expected_field_names = {
             "avatar_url",
-            "badge_count",
             "badges",
             "bio",
             "company",
@@ -94,15 +93,6 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("url", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == "https://github.com/testuser"
-
-    def test_badge_count_field(self):
-        """Test badge_count field resolution."""
-        mock_user = Mock()
-        mock_user.user_badges_list = [Mock(), Mock(), Mock()]
-
-        field = self._get_field_by_name("badge_count", UserNode)
-        result = field.base_resolver.wrapped_func(None, mock_user)
-        assert result == 3
 
     def test_badges_field_empty(self):
         """Test badges field resolution with no badges."""
