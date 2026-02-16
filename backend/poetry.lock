@@ -1127,14 +1127,14 @@ sftp = ["paramiko (>=1.15)"]
 
 [[package]]
 name = "elevenlabs"
-version = "2.35.0"
+version = "2.36.0"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["video"]
 files = [
-    {file = "elevenlabs-2.35.0-py3-none-any.whl", hash = "sha256:e27be0ccafccc46f619a6e29b04054a3e668ac32e68fe69616d7768e79c7f9e4"},
-    {file = "elevenlabs-2.35.0.tar.gz", hash = "sha256:7276ef1f928c51fa623c9de90ea0675fc69460046b52eab4ae510a437e18fea6"},
+    {file = "elevenlabs-2.36.0-py3-none-any.whl", hash = "sha256:d8c4954666818f52fa0ca5bd47ca60efeea1f217206774de71a439c60c85a231"},
+    {file = "elevenlabs-2.36.0.tar.gz", hash = "sha256:d35e75395caefe97d4e71bd1fd616ba3695a268dee787af064d410177d506106"},
 ]
 
 [package.dependencies]
@@ -3329,14 +3329,14 @@ typing-extensions = ">=4.14.1"
 
 [[package]]
 name = "pydantic-settings"
-version = "2.12.0"
+version = "2.13.0"
 description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pydantic_settings-2.12.0-py3-none-any.whl", hash = "sha256:fddb9fd99a5b18da837b29710391e945b1e30c135477f484084ee513adb93809"},
-    {file = "pydantic_settings-2.12.0.tar.gz", hash = "sha256:005538ef951e3c2a68e1c08b292b5f2e71490def8589d4221b95dab00dafcfd0"},
+    {file = "pydantic_settings-2.13.0-py3-none-any.whl", hash = "sha256:d67b576fff39cd086b595441bf9c75d4193ca9c0ed643b90360694d0f1240246"},
+    {file = "pydantic_settings-2.13.0.tar.gz", hash = "sha256:95d875514610e8595672800a5c40b073e99e4aae467fa7c8f9c263061ea2e1fe"},
 ]
 
 [package.dependencies]
@@ -3570,22 +3570,18 @@ testing = ["process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
 name = "pytest-django"
-version = "4.11.1"
+version = "4.12.0"
 description = "A Django plugin for pytest."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 groups = ["test"]
 files = [
-    {file = "pytest_django-4.11.1-py3-none-any.whl", hash = "sha256:1b63773f648aa3d8541000c26929c1ea63934be1cfa674c76436966d73fe6a10"},
-    {file = "pytest_django-4.11.1.tar.gz", hash = "sha256:a949141a1ee103cb0e7a20f1451d355f83f5e4a5d07bdd4dcfdd1fd0ff227991"},
+    {file = "pytest_django-4.12.0-py3-none-any.whl", hash = "sha256:3ff300c49f8350ba2953b90297d23bf5f589db69545f56f1ec5f8cff5da83e85"},
+    {file = "pytest_django-4.12.0.tar.gz", hash = "sha256:df94ec819a83c8979c8f6de13d9cdfbe76e8c21d39473cfe2b40c9fc9be3c758"},
 ]
 
 [package.dependencies]
 pytest = ">=7.0.0"
-
-[package.extras]
-docs = ["sphinx", "sphinx_rtd_theme"]
-testing = ["Django", "django-configurations (>=2.0)"]
 
 [[package]]
 name = "pytest-mock"
@@ -3849,14 +3845,14 @@ all = ["numpy"]
 
 [[package]]
 name = "redis"
-version = "7.1.1"
+version = "7.2.0"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "redis-7.1.1-py3-none-any.whl", hash = "sha256:f77817f16071c2950492c67d40b771fa493eb3fccc630a424a10976dbb794b7a"},
-    {file = "redis-7.1.1.tar.gz", hash = "sha256:a2814b2bda15b39dad11391cc48edac4697214a8a5a4bd10abe936ab4892eb43"},
+    {file = "redis-7.2.0-py3-none-any.whl", hash = "sha256:01f591f8598e483f1842d429e8ae3a820804566f1c73dca1b80e23af9fba0497"},
+    {file = "redis-7.2.0.tar.gz", hash = "sha256:4dd5bf4bd4ae80510267f14185a15cba2a38666b941aff68cccf0256b51c1f26"},
 ]
 
 [package.extras]
@@ -3864,6 +3860,8 @@ circuit-breaker = ["pybreaker (>=1.4.0)"]
 hiredis = ["hiredis (>=3.2.0)"]
 jwt = ["pyjwt (>=2.9.0)"]
 ocsp = ["cryptography (>=36.0.1)", "pyopenssl (>=20.0.1)", "requests (>=2.31.0)"]
+otel = ["opentelemetry-api (>=1.39.1)", "opentelemetry-exporter-otlp-proto-http (>=1.39.1)", "opentelemetry-sdk (>=1.39.1)"]
+xxhash = ["xxhash (>=3.6.0,<3.7.0)"]
 
 [[package]]
 name = "referencing"
@@ -4103,14 +4101,14 @@ crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "2.52.0"
+version = "2.53.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "sentry_sdk-2.52.0-py2.py3-none-any.whl", hash = "sha256:931c8f86169fc6f2752cb5c4e6480f0d516112e78750c312e081ababecbaf2ed"},
-    {file = "sentry_sdk-2.52.0.tar.gz", hash = "sha256:fa0bec872cfec0302970b2996825723d67390cdd5f0229fb9efed93bd5384899"},
+    {file = "sentry_sdk-2.53.0-py2.py3-none-any.whl", hash = "sha256:46e1ed8d84355ae54406c924f6b290c3d61f4048625989a723fd622aab838899"},
+    {file = "sentry_sdk-2.53.0.tar.gz", hash = "sha256:6520ef2c4acd823f28efc55e43eb6ce2e6d9f954a95a3aa96b6fd14871e92b77"},
 ]
 
 [package.dependencies]
@@ -4374,14 +4372,14 @@ sanic = ["sanic (>=20.12.2)"]
 
 [[package]]
 name = "strawberry-graphql-django"
-version = "0.75.0"
+version = "0.75.1"
 description = "Strawberry GraphQL Django extension"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "strawberry_graphql_django-0.75.0-py3-none-any.whl", hash = "sha256:d4c31a526c72332eafc1067a3e5dd6e2917cbea2a2e5faac589c86a5b6081297"},
-    {file = "strawberry_graphql_django-0.75.0.tar.gz", hash = "sha256:2a3720687811c723e030fe09726a2a81cfa3a7b3b6ff1a5af187368b44df7afd"},
+    {file = "strawberry_graphql_django-0.75.1-py3-none-any.whl", hash = "sha256:554f96206fbea67fd4cde0416ee9f1efa54b05347ef72bed60f0d449df65b60f"},
+    {file = "strawberry_graphql_django-0.75.1.tar.gz", hash = "sha256:5529b9de45dfd7008d7bc359998b83c4147d0daccdf24a2d7af554fc3b16b5a8"},
 ]
 
 [package.dependencies]

@@ -1193,5 +1193,64 @@ describe('ProgramForm Component', () => {
         expect(mockOnSubmit).toHaveBeenCalled()
       })
     })
+
+    test('handles string menteesLimit in validation', async () => {
+      const user = userEvent.setup()
+      const stringLimitFormData = { ...filledFormData, menteesLimit: '10' as unknown as number }
+
+      render(
+        <ProgramForm
+          formData={stringLimitFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Test"
+        />
+      )
+
+      const buttons = screen.getAllByRole('button')
+      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
+      if (submitButton) {
+        await user.click(submitButton)
+      }
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
+
+    test('handles undefined menteesLimit in submission', async () => {
+      const user = userEvent.setup()
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: { myPrograms: { programs: [] } },
+        }),
+      })
+
+      const undefinedLimitFormData = {
+        ...filledFormData,
+        menteesLimit: undefined as unknown as number,
+      }
+
+      render(
+        <ProgramForm
+          formData={undefinedLimitFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Test"
+        />
+      )
+
+      const buttons = screen.getAllByRole('button')
+      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
+      if (submitButton) {
+        await user.click(submitButton)
+      }
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
   })
 })

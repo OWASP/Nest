@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Program } from 'types/mentorship'
 import ProgramCard from 'components/ProgramCard'
@@ -19,7 +20,14 @@ const baseMockProgram: Program = {
   userRole: 'admin',
 }
 
-describe('ProgramCard Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ProgramCard Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { baseElement } = render(
       <main>

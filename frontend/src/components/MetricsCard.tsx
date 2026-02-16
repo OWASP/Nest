@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { FC } from 'react'
 import { HealthMetricsProps } from 'types/healthMetrics'
 const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
+  const score = metric.score ?? 0
   return (
     <Link
       href={`/projects/dashboard/metrics/${metric.projectKey}`}
@@ -24,13 +25,13 @@ const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
             className={clsx(
               'flex-shrink-0 rounded px-3 py-1.5 text-center text-white lg:px-4 lg:py-2 dark:text-gray-900',
               {
-                'bg-green-500': (metric.score ?? 0) >= 75,
-                'bg-orange-500': (metric.score ?? 0) >= 50 && (metric.score ?? 0) < 75,
-                'bg-red-500': (metric.score ?? 0) < 50,
+                'bg-green-500': score >= 75,
+                'bg-orange-500': score >= 50 && score < 75,
+                'bg-red-500': score < 50,
               }
             )}
           >
-            <p className="text-sm font-semibold lg:text-base">Score: {metric.score ?? 0}</p>
+            <p className="text-sm font-semibold lg:text-base">Score: {score}</p>
           </div>
         </div>
         <hr className="my-4 border-0 border-t border-gray-200 dark:border-gray-600" />
