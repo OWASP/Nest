@@ -78,6 +78,13 @@ describe('RepositoryCard', () => {
     expect(screen.queryByRole('button', { name: /Show/ })).not.toBeInTheDocument()
   })
 
+  it('returns null when repositories prop is missing', () => {
+    const { container } = render(
+      <RepositoryCard repositories={null as unknown as RepositoryCardProps[]} />
+    )
+    expect(container.querySelector('.grid')).toBeNull()
+  })
+
   it('shows first 4 repositories initially when there are more than 4', () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
 

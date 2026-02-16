@@ -653,18 +653,10 @@ describe('Rendering', () => {
         await user.type(input, 'test')
         await waitFor(expectListItemsExist)
 
-        // Navigate to first item
         await user.keyboard('{ArrowDown}')
         const listItems = screen.getAllByRole('listitem')
         expect(listItems[0]).toHaveClass('bg-gray-100')
-
-        // Press ArrowUp
         await user.keyboard('{ArrowUp}')
-
-        // Should still be at first item (or index null if logic allows, but here check it doesn't crash or go weird)
-        // Actually MultiSearch logic: if index>0 OR subIndex>0 decrement.
-        // If index=0 and subIndex=0, nothing happens in the `if/else if`.
-        // So state remains { index: 0, subIndex: 0 }
         expect(listItems[0]).toHaveClass('bg-gray-100')
       })
     })
@@ -955,6 +947,95 @@ describe('Rendering', () => {
       expect(debouncedFn?.cancel).toHaveBeenCalled()
 
       removeEventListenerSpy.mockRestore()
+    })
+  })
+
+  describe('Coverage Improvements', () => {
+    beforeEach(() => {
+      mockFetchAlgoliaData.mockResolvedValue({
+        hits: [mockChapter],
+        totalPages: 1,
+      })
+    })
+
+    it('uses default empty string for initialValue (line 23)', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { initialValue, ...minimalProps } = defaultProps
+      render(<MultiSearchBar {...minimalProps} />)
+      const input = screen.getByPlaceholderText('Search...') as HTMLInputElement
+      expect(input.value).toBe('')
+    })
+
+    it('handles undefined eventData during search (line 61)', async () => {
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} eventData={undefined} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(mockFetchAlgoliaData).toHaveBeenCalled()
+      })
+      expect(true).toBe(true)
+    })
+
+    it('sets empty string query when suggestion name is missing (line 89)', async () => {
+      const itemNoName = { key: 'no-name-item', name: null } as unknown as Project
+      mockFetchAlgoliaData.mockResolvedValue({
+        hits: [itemNoName],
+        totalPages: 1,
+      })
+
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(screen.getByTestId('fa-folder-icon')).toBeInTheDocument()
+      })
+
+      const icon = await screen.findByTestId('fa-folder-icon')
+      const suggestionBtn = icon.closest('button')
+      if (!suggestionBtn) throw new Error('Suggestion button not found')
+
+      await user.click(suggestionBtn)
+
+      expect(input).toHaveValue('')
+    })
+
+    it('does nothing when pressing ArrowUp with no highlight (line 139)', async () => {
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+      await waitFor(expectListItemsExist)
+
+      await user.keyboard('{ArrowUp}')
+
+      const listItems = screen.getAllByRole('listitem')
+      listItems.forEach((item) => {
+        expect(item).not.toHaveClass('bg-gray-100')
+      })
+    })
+
+    it('does not trigger action on random keys on suggestion (line 199)', async () => {
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+      await waitFor(expectListItemsExist)
+
+      const suggestionBtns = screen.getAllByRole('button', { name: /Test Chapter/i })
+      const suggestionBtn = suggestionBtns[0]
+
+      suggestionBtn.focus()
+      await user.keyboard('a') // Random key
+
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 })

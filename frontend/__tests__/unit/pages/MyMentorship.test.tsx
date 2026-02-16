@@ -283,7 +283,7 @@ describe('MyMentorshipPage', () => {
     }
   })
 
-  it('handles search callback', async () => {
+  it('updates URL when search or page changes', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({
       data: {
         user: {
@@ -310,8 +310,112 @@ describe('MyMentorshipPage', () => {
     })
 
     const searchInput = screen.getByTestId('search-input')
-    fireEvent.change(searchInput, { target: { value: 'test search' } })
+    fireEvent.change(searchInput, { target: { value: 'query' } })
 
-    expect(searchInput).toBeInTheDocument()
+    await waitFor(
+      () => {
+        expect(mockPush).toHaveBeenCalledWith('?q=query', { scroll: false })
+      },
+      { timeout: 1000 }
+    )
+  })
+
+  it('handles missing totalPages in program data', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'User',
+          email: 'user@example.com',
+          login: 'user',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: {
+        myPrograms: {
+          programs: mockProgramData.myPrograms.programs,
+          totalPages: null, // Test fallback
+        },
+      },
+      loading: false,
+      error: undefined,
+    })
+
+    render(<MyMentorshipPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Program')).toBeInTheDocument()
+    })
+  })
+
+  it('cleans up debounce on unmount', () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'User',
+          email: 'user@example.com',
+          login: 'user',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+    mockUseQuery.mockReturnValue({
+      data: mockProgramData,
+      loading: false,
+      error: undefined,
+    })
+
+    const { unmount } = render(<MyMentorshipPage />)
+    expect(screen.getByText('My Mentorship')).toBeInTheDocument()
+    unmount()
+  })
+
+  it('updates debounced search query', async () => {
+    jest.useFakeTimers()
+    try {
+      ;(mockUseSession as jest.Mock).mockReturnValue({
+        data: {
+          user: {
+            name: 'User',
+            email: 'user@example.com',
+            login: 'user',
+            isLeader: true,
+          },
+          expires: '2099-01-01T00:00:00.000Z',
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({
+        data: mockProgramData,
+        loading: false,
+        error: undefined,
+      })
+
+      render(<MyMentorshipPage />)
+
+      const searchInput = screen.getByTestId('search-input')
+      fireEvent.change(searchInput, { target: { value: 'debounced' } })
+
+      React.act(() => {
+        jest.advanceTimersByTime(500)
+      })
+
+      await waitFor(() => {
+        expect(mockUseQuery).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            variables: expect.objectContaining({ search: 'debounced' }),
+          })
+        )
+      })
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })

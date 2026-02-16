@@ -28,6 +28,12 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
+jest.mock('components/forms/shared/formValidationUtils', () => ({
+  ...jest.requireActual('components/forms/shared/formValidationUtils'),
+  validateStartDate: jest.fn(),
+  validateEndDate: jest.fn(),
+}))
+
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
@@ -336,7 +342,6 @@ describe('EditModulePage', () => {
       },
     })
     ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
-
     render(<EditModulePage />)
 
     await act(async () => {
@@ -344,5 +349,72 @@ describe('EditModulePage', () => {
     })
 
     expect(await screen.findByDisplayValue('Test Module')).toBeInTheDocument()
+  })
+  it('submits form with null dates using mocked validation', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: null,
+          endedAt: null,
+        },
+        getModule: {
+          name: null,
+          description: 'Desc',
+          experienceLevel: ExperienceLevelEnum.Beginner,
+          startedAt: null,
+          endedAt: null,
+          domains: [],
+          tags: [],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockResolvedValue({ data: { updateModule: { key: 'mod-key' } } }),
+      { loading: false },
+    ])
+
+    render(<EditModulePage />)
+
+    // Wait for form to load with fallback empty name
+    expect(await screen.findByLabelText('Name')).toHaveValue('')
+
+    await act(async () => {
+      // Fill required fields that aren't dates
+      fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Valid Name' } })
+
+      // Project is already "valid" from mock data (projectId: '123')
+      // Dates are null/empty, but we mocked validators to return undefined (valid).
+
+      // Advance timers
+      jest.runAllTimers()
+
+      // Submit the form
+      fireEvent.click(screen.getByRole('button', { name: /Save/i }))
+    })
+
+    await waitFor(() => {
+      expect(mockUpdateModule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            input: expect.objectContaining({
+              name: 'Valid Name',
+              projectId: '123',
+              startedAt: '',
+              endedAt: '',
+            }),
+          }),
+        })
+      )
+    })
   })
 })
