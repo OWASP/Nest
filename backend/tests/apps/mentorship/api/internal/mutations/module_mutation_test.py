@@ -454,7 +454,7 @@ class TestModuleMutationAssignIssue:
         mock_mentor.objects.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
-        with pytest.raises((PermissionDenied, TypeError)):
+        with pytest.raises(PermissionDenied, match="Only mentors can assign issues"):
             mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
@@ -779,7 +779,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_mentor.objects.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
-        with pytest.raises((PermissionDenied, TypeError)):
+        with pytest.raises(PermissionDenied, match="Only mentors can set deadlines"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
@@ -1125,7 +1125,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_mentor.objects.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
-        with pytest.raises((PermissionDenied, TypeError)):
+        with pytest.raises(PermissionDenied, match="Only mentors can clear deadlines"):
             mutation.clear_task_deadline(
                 info, module_key="mod-1", program_key="prog-1", issue_number=1
             )

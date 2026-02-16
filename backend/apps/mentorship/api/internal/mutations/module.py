@@ -23,6 +23,9 @@ from apps.owasp.models import Project
 ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
+NOT_MENTOR_ASSIGN_MSG = "Only mentors can assign issues."
+NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors can clear deadlines."
+NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors can set deadlines."
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +150,7 @@ class ModuleMutation:
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
-            raise PermissionDenied(msg="Only mentors can assign issues.")
+            raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
         if not module.program.admins.filter(id=mentor.id).exists():
             raise PermissionDenied
 
@@ -230,7 +233,7 @@ class ModuleMutation:
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
-            raise PermissionDenied(msg="Only mentors can set deadlines.")
+            raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
         if not module.program.admins.filter(id=mentor.id).exists():
             raise PermissionDenied
 
@@ -292,7 +295,7 @@ class ModuleMutation:
 
         mentor = Mentor.objects.filter(nest_user=user).first()
         if mentor is None:
-            raise PermissionDenied(msg="Only mentors can clear deadlines.")
+            raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
         if not module.program.admins.filter(id=mentor.id).exists():
             raise PermissionDenied
 

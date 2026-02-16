@@ -248,7 +248,7 @@ class TestMyPrograms:
         mock_program.admins.all.return_value = [mock_mentor]
 
         mock_queryset = MagicMock()
-        mock_queryset.count.return_value = 1
+        mock_queryset.count.return_value = 26
         mock_queryset.order_by.return_value.__getitem__.return_value = [mock_program]
         mock_queryset.filter.return_value = mock_queryset
 
@@ -259,4 +259,4 @@ class TestMyPrograms:
         result = api_program_queries.my_programs(info=mock_info, limit=0)
 
         assert isinstance(result, PaginatedPrograms)
-        assert result.total_pages == 1
+        assert result.total_pages == 2

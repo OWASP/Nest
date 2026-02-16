@@ -22,5 +22,5 @@ class TestProgram:
 
         Program.save(mock_program)
 
-        assert mock_program.key is not None
+        assert mock_program.key == "my-test-program"
         mock_super_save.assert_called_once()

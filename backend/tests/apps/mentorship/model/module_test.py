@@ -163,7 +163,7 @@ class TestModulePureMocks:
 
         Module.save(mock_module)
 
-        assert mock_module.key is not None
+        assert mock_module.key == "my-test-module"
         mock_super_save.assert_called_once()
 
     @patch("apps.common.models.TimestampedModel.save")
@@ -181,5 +181,5 @@ class TestModulePureMocks:
 
         Module.save(mock_module)
 
-        assert mock_module.key is not None
+        assert mock_module.key == "orphan-module"
         mock_super_save.assert_called_once()
