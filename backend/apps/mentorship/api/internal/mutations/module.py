@@ -339,8 +339,10 @@ class ModuleMutation:
         user = info.context.request.user
 
         try:
-            module = Module.objects.select_related("program").get(
-                key=input_data.key, program__key=input_data.program_key
+            module = (
+                Module.objects.select_related("program")
+                .select_for_update()
+                .get(key=input_data.key, program__key=input_data.program_key)
             )
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e

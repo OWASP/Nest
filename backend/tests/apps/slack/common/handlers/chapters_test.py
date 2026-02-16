@@ -93,3 +93,63 @@ class TestChapterHandler:
         blocks = get_blocks(presentation=presentation)
 
         assert "Extended search over 42 OWASP chapters" in blocks[-1]["text"]["text"]
+
+    def test_get_blocks_with_pagination_on_page_2(self, setup_mocks, mock_chapter_data):
+        """Test that pagination buttons are added on page 2."""
+        setup_mocks["get_chapters"].return_value = mock_chapter_data
+        presentation = EntityPresentation(include_pagination=True)
+
+        blocks = get_blocks(page=2, presentation=presentation)
+
+        action_blocks = [block for block in blocks if block.get("type") == "actions"]
+        assert len(action_blocks) > 0
+        assert action_blocks[0] in blocks
+
+    def test_get_blocks_without_pagination_buttons(self, setup_mocks, mock_chapter_data):
+        """Test that no pagination buttons are added when include_pagination is disabled."""
+        setup_mocks["get_chapters"].return_value = mock_chapter_data
+        presentation = EntityPresentation(include_pagination=False)
+
+        blocks = get_blocks(page=1, presentation=presentation)
+
+        assert not any(block.get("type") == "actions" for block in blocks)
+
+    def test_get_blocks_with_empty_leaders(self, setup_mocks):
+        """Test chapters with empty or None leaders."""
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "Chapter No Leaders",
+                    "idx_country": "Test",
+                    "idx_suggested_location": "Location",
+                    "idx_leaders": [],
+                    "idx_summary": "Summary",
+                    "idx_url": "https://example.com",
+                }
+            ],
+            "nbPages": 1,
+        }
+        setup_mocks["get_chapters"].return_value = mock_data
+        presentation = EntityPresentation(include_metadata=True)
+
+        blocks = get_blocks(presentation=presentation)
+
+        assert "Leaders:" not in blocks[1]["text"]["text"]
+
+    def test_get_blocks_no_search_query(self, setup_mocks, mock_chapter_data):
+        """Test get_blocks without search query."""
+        setup_mocks["get_chapters"].return_value = mock_chapter_data
+
+        blocks = get_blocks(search_query="")
+
+        assert "OWASP chapters:" in blocks[0]["text"]["text"]
+        assert "Test Chapter" in blocks[1]["text"]["text"]
+
+    def test_get_blocks_no_results_no_search_query(self, setup_mocks, mock_empty_chapter_data):
+        """Test get_blocks with no results and no search query."""
+        setup_mocks["get_chapters"].return_value = mock_empty_chapter_data
+
+        blocks = get_blocks(search_query="")
+
+        assert len(blocks) == 1
+        assert "No chapters found" in blocks[0]["text"]["text"]

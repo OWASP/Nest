@@ -136,8 +136,43 @@ def test_format_links_for_slack(input_text, expected_output):
             "Click me",
         ),
         (
-            [{"type": "header", "text": {"type": "plain_text", "text": "Header text"}}],
+            [
+                {
+                    "type": "actions",
+                    "elements": [
+                        {"type": "button", "text": {"text": "Button 1", "type": "plain_text"}},
+                        {"type": "button", "text": {"text": "Button 2", "type": "plain_text"}},
+                        {"type": "overflow", "options": []},
+                    ],
+                }
+            ],
+            "Button 1\nButton 2",
+        ),
+        (
+            [
+                {
+                    "type": "header",
+                    "text": {"type": "plain_text", "text": "Header text"},
+                }
+            ],
             "Header text",
+        ),
+        (
+            [
+                {
+                    "type": "header",
+                    "text": {"type": "mrkdwn", "text": "Markdown header"},
+                }
+            ],
+            "",
+        ),
+        (
+            [
+                {
+                    "type": "header",
+                }
+            ],
+            "",
         ),
         (
             [
@@ -235,6 +270,31 @@ def test_get_news_data(monkeypatch):
     result2 = get_news_data()
     assert mock_get.call_count == length
     assert result == result2
+
+
+def test_get_news_data_with_missing_anchor(monkeypatch):
+    """Test getting news data when h2 tags don't have anchors."""
+    mock_html = """
+    <html>
+        <body>
+            <h2>Title without anchor</h2>
+            <p class="author">Author 1</p>
+            <h2><a href="/news2">Title with anchor</a></h2>
+            <p class="author">Author 2</p>
+        </body>
+    </html>
+    """
+    mock_response = Mock()
+    mock_response.content = mock_html.encode()
+    mock_get = Mock(return_value=mock_response)
+
+    monkeypatch.setattr("requests.get", mock_get)
+    get_news_data.cache_clear()
+
+    result = get_news_data()
+
+    assert len(result) == 1
+    assert result[0]["title"] == "Title with anchor"
 
 
 def test_get_staff_data(monkeypatch):

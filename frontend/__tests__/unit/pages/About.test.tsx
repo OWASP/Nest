@@ -704,4 +704,106 @@ describe('About Component', () => {
       expect(screen.getByText('Completed')).toBeInTheDocument()
     })
   })
+
+  test('handles leaders with missing login', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          data: {
+            project: mockAboutData.project,
+            topContributors: mockAboutData.topContributors,
+            leader1: {
+              ...mockAboutData.users['arkid15r'],
+              login: '', // Missing login
+              name: 'No Login Leader',
+            },
+            leader2: null,
+            leader3: null,
+          },
+          loading: false,
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+
+    await act(async () => {
+      render(<About />)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('No Login Leader')).toBeInTheDocument()
+    })
+  })
+
+  test('renders milestones with missing url and title', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            project: {
+              ...mockAboutData.project,
+              recentMilestones: [
+                {
+                  ...mockAboutData.project.recentMilestones[0],
+                  url: null,
+                  title: '',
+                  body: 'Body only',
+                },
+              ],
+            },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: null,
+            leader3: null,
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+
+    await act(async () => {
+      render(<About />)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Body only')).toBeInTheDocument()
+    })
+  })
+
+  test('renders project stats with zero values', async () => {
+    ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
+      if (query === GetAboutPageDataDocument) {
+        return {
+          loading: false,
+          data: {
+            project: {
+              ...mockAboutData.project,
+              forksCount: 0,
+              starsCount: 0,
+              contributorsCount: 0,
+              issuesCount: 0,
+            },
+            topContributors: mockAboutData.topContributors,
+            leader1: mockAboutData.users['arkid15r'],
+            leader2: null,
+            leader3: null,
+          },
+          error: null,
+        }
+      }
+      return { loading: true }
+    })
+
+    await act(async () => {
+      render(<About />)
+    })
+
+    await waitFor(() => {
+      const zeroStats = screen.getAllByText('0+')
+      expect(zeroStats.length).toBeGreaterThan(0)
+    })
+  })
 })

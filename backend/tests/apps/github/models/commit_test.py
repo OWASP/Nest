@@ -51,23 +51,23 @@ class TestCommitModel:
 
         assert field.remote_field.on_delete.__name__ == "CASCADE"
         assert field.remote_field.related_name == "commits"
-        assert field.null is False
+        assert not field.null
 
     def test_author_field(self):
         field = Commit._meta.get_field("author")
 
         assert field.remote_field.on_delete.__name__ == "SET_NULL"
         assert field.remote_field.related_name == "authored_commits"
-        assert field.null is True
-        assert field.blank is True
+        assert field.null
+        assert field.blank
 
     def test_committer_field(self):
         field = Commit._meta.get_field("committer")
 
         assert field.remote_field.on_delete.__name__ == "SET_NULL"
         assert field.remote_field.related_name == "committed_commits"
-        assert field.null is True
-        assert field.blank is True
+        assert field.null
+        assert field.blank
 
     def test_sha_field(self):
         field = Commit._meta.get_field("sha")

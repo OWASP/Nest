@@ -7,6 +7,8 @@ class ExperienceLevel(models.Model):
     """Matching attributes model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     class ExperienceLevelChoices(models.TextChoices):
