@@ -50,9 +50,5 @@ export default async function ChapterDetailsLayout({
     return children
   }
 
-  return (
-    <PageLayout title={data.chapter.name}>
-      {children}
-    </PageLayout>
-  )
+  return <PageLayout title={data.chapter.name}>{children}</PageLayout>
 }

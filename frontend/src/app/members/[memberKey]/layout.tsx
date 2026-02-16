@@ -56,9 +56,7 @@ export default async function UserDetailsLayout({
   }
 
   return (
-    <PageLayout
-      title={data?.user?.name || data?.user?.login || ''}
-    >
+    <PageLayout title={data?.user?.name || data?.user?.login || ''}>
       <StructuredDataScript data={generateProfilePageStructuredData(data.user)} />
       {children}
     </PageLayout>

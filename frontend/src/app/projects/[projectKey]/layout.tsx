@@ -52,9 +52,5 @@ export default async function ProjectDetailsLayout({
     return children
   }
 
-  return (
-    <PageLayout title={data.project.name}>
-      {children}
-    </PageLayout>
-  )
+  return <PageLayout title={data.project.name}>{children}</PageLayout>
 }

@@ -50,9 +50,5 @@ export default async function CommitteeDetailsLayout({
     return children
   }
 
-  return (
-    <PageLayout title={data.committee.name}>
-      {children}
-    </PageLayout>
-  )
+  return <PageLayout title={data.committee.name}>{children}</PageLayout>
 }
