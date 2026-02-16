@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.github.api.internal.nodes.user import USER_BADGES_PREFETCH
 from apps.github.api.internal.queries.user import UserQuery
 from apps.github.models.user import User
 
@@ -24,7 +25,7 @@ class TestUserQuery:
 
             assert result == mock_user
             mock_filter.assert_called_once_with(has_public_member_page=True, login="test-user")
-            mock_queryset.prefetch_related.assert_called_once()
+            mock_queryset.prefetch_related.assert_called_once_with(USER_BADGES_PREFETCH)
             mock_queryset.prefetch_related.return_value.first.assert_called_once()
 
     def test_resolve_user_not_found_when_has_public_member_page_false(self):
