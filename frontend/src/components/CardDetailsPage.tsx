@@ -16,6 +16,8 @@ import {
   FaCircleExclamation,
   FaSignsPost,
   FaCodeBranch,
+  FaChevronDown,
+  FaChevronUp,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
@@ -98,6 +100,9 @@ const DetailsCard = ({
   isActive = true,
   isArchived = false,
   languages,
+  onLoadMorePullRequests,
+  onResetPullRequests,
+  isFetchingMore,
   programKey,
   projectName,
   pullRequests,
@@ -136,6 +141,8 @@ const DetailsCard = ({
     (contributionData && Object.keys(contributionData).length > 0)
 
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
+
+  const prDisplayLimit = onLoadMorePullRequests || onResetPullRequests || showAllPRs ? undefined : 4
 
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
@@ -386,13 +393,42 @@ const DetailsCard = ({
             )}
           </div>
         )}
+
         {type === 'module' && pullRequests && pullRequests.length > 0 && (
           <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
             <div className="grid grid-cols-1 gap-3">
-              {pullRequests.slice(0, showAllPRs ? undefined : 4).map((pr) => (
+              {pullRequests.slice(0, prDisplayLimit).map((pr) => (
                 <MentorshipPullRequest key={pr.id} pr={pr} />
               ))}
-              {pullRequests.length > 4 && (
+
+              {(onLoadMorePullRequests || onResetPullRequests) && (
+                <div className="mt-4 flex justify-start gap-4">
+                  {onLoadMorePullRequests && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={onLoadMorePullRequests}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
+                      <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+
+                  {onResetPullRequests && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={onResetPullRequests}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!onLoadMorePullRequests && !onResetPullRequests && pullRequests.length > 4 && (
                 <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
               )}
             </div>

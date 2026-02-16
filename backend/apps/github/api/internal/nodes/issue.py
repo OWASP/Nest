@@ -4,6 +4,7 @@ import strawberry
 import strawberry_django
 from django.db.models import Prefetch
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
@@ -18,6 +19,8 @@ MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
     ),
     to_attr="merged_pull_requests",
 )
+
+MAX_LIMIT = 1000
 
 
 @strawberry_django.type(
@@ -36,7 +39,17 @@ class IssueNode(strawberry.relay.Node):
 
     assignees: list[UserNode] = strawberry_django.field()
     author: UserNode | None = strawberry_django.field()
-    pull_requests: list[PullRequestNode] = strawberry_django.field()
+
+    @strawberry_django.field(prefetch_related=["pull_requests"])
+    def pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
+        """Return pull requests linked to this issue."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        offset = max(0, offset)
+        return list(
+            self.pull_requests.all().order_by("-created_at")[offset : offset + normalized_limit]
+        )
 
     @strawberry_django.field(select_related=["repository__organization", "repository"])
     def organization_name(self, root: Issue) -> str | None:
