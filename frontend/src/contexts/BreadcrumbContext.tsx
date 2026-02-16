@@ -36,7 +36,7 @@ export function registerBreadcrumbClassName(className: string): () => void {
 }
 
 function getCurrentBreadcrumbClassName(): string {
-  return classNameStack.length > 0 ? classNameStack[classNameStack.length - 1] : ''
+  return classNameStack.at(-1) ?? ''
 }
 
 export function useBreadcrumbClassName(): string {
