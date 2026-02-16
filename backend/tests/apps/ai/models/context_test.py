@@ -32,8 +32,8 @@ class TestContextModel:
 
     def test_content_type_field_properties(self):
         field = Context._meta.get_field("entity_type")
-        assert field.null is False
-        assert field.blank is False
+        assert not field.null
+        assert not field.blank
         assert hasattr(field, "remote_field")
         assert field.remote_field.on_delete.__name__ == "CASCADE"
 
@@ -44,7 +44,7 @@ class TestContextModel:
     def test_source_field_properties(self):
         field = Context._meta.get_field("source")
         assert field.max_length == 100
-        assert field.blank is True
+        assert field.blank
         assert field.default == ""
 
     @patch("apps.ai.models.context.Context.save")
