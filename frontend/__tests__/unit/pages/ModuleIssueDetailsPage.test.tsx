@@ -299,6 +299,34 @@ describe('ModuleIssueDetailsPage', () => {
         expect(setTaskDeadlineMutation).toHaveBeenCalled()
       })
     })
+    it('populates input with existing deadline when clicked', async () => {
+      const setDeadlineInput = jest.fn()
+      const setIsEditingDeadline = jest.fn()
+      const baseMocks = (useIssueMutations as jest.Mock)()
+
+      mockUseIssueMutations.mockReturnValue({
+        ...baseMocks,
+        setDeadlineInput,
+        setIsEditingDeadline,
+      })
+
+      const pastDate = new Date('2020-01-01').toISOString()
+      const dataWithDeadline = {
+        ...mockIssueData,
+        getModule: { ...mockIssueData.getModule, taskDeadline: pastDate },
+      }
+
+      mockUseQuery.mockReturnValue({ data: dataWithDeadline, loading: false, error: undefined })
+      render(<ModuleIssueDetailsPage />)
+
+      const deadlineButton = screen.getByRole('button', { name: /\(overdue\)/i })
+      fireEvent.click(deadlineButton)
+
+      await waitFor(() => {
+        expect(setDeadlineInput).toHaveBeenCalledWith('2020-01-01')
+        expect(setIsEditingDeadline).toHaveBeenCalledWith(true)
+      })
+    })
   })
 
   describe('issue states', () => {
@@ -320,7 +348,6 @@ describe('ModuleIssueDetailsPage', () => {
       }
       mockUseQuery.mockReturnValue({ data: issueWithState, loading: false, error: undefined })
       render(<ModuleIssueDetailsPage />)
-      // The issue status is the first badge of its kind.
       expect(screen.getAllByText(expectedText)[0]).toBeInTheDocument()
     })
   })
@@ -567,5 +594,61 @@ describe('ModuleIssueDetailsPage', () => {
       '[aria-hidden="true"].rounded-full.bg-gray-400'
     )
     expect(placeholderDivs.length).toBeGreaterThan(0)
+  })
+
+  it('handles null assignees, labels, and interestedUsers', () => {
+    const dataWithNulls = {
+      getModule: {
+        ...mockIssueData.getModule,
+        interestedUsers: null,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          assignees: null,
+          labels: null,
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithNulls, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+
+    expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+  })
+
+  it('does not trigger mutations when they are already in progress', () => {
+    const assignIssue = jest.fn()
+    const unassignIssue = jest.fn()
+    const setTaskDeadlineMutation = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      assignIssue,
+      unassignIssue,
+      setTaskDeadlineMutation,
+      assigning: true,
+      unassigning: true,
+      settingDeadline: true,
+      isEditingDeadline: true,
+      deadlineInput: '2025-01-01',
+      setDeadlineInput: jest.fn(),
+    })
+
+    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+
+    const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
+    const userGrid = interestedUsersHeading.nextElementSibling
+    const assignButton = within(userGrid as HTMLElement).getByRole('button', { name: /Assign/i })
+
+    fireEvent.click(assignButton)
+    expect(assignIssue).not.toHaveBeenCalled()
+
+    const unassignButton = screen.getByRole('button', { name: /Unassign/i })
+    fireEvent.click(unassignButton)
+    expect(unassignIssue).not.toHaveBeenCalled()
+
+    const dateInputEl = screen.getByDisplayValue('2025-01-01')
+    fireEvent.change(dateInputEl, { target: { value: '2025-02-02' } })
+    expect(setTaskDeadlineMutation).not.toHaveBeenCalled()
   })
 })
