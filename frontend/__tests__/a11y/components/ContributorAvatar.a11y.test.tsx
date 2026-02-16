@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { ReactNode } from 'react'
 import { Contributor } from 'types/contributor'
 import ContributorAvatar from 'components/ContributorAvatar'
@@ -43,7 +44,14 @@ const mockGitHubContributor: Contributor = {
   projectKey: 'test-key',
 }
 
-describe('ContributorAvatar a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ContributorAvatar a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(
       <ContributorAvatar contributor={mockGitHubContributor} uniqueKey="test-key" />
