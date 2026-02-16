@@ -9,8 +9,22 @@ repos:
           - --strict
         exclude: (.github|pnpm-lock.yaml)
 
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v26.1.1
+    hooks:
+      - id: ansible-lint
+        additional_dependencies:
+          - ansible-core
+        args:
+          - -c
+          - .github/ansible/.ansible-lint.yaml
+          - .github/ansible
+        files: ^\.github/ansible/.*\.ya?ml$
+        language_version: python3
+        pass_filenames: true
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.0
+    rev: v0.15.1
     hooks:
       - id: ruff-check
         args:
@@ -25,6 +39,14 @@ repos:
         entry: djlint --reformat
         types:
           - html
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.47.0
+    hooks:
+      - id: markdownlint
+        args:
+          - --fix
+        files: \.md$
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
@@ -84,6 +106,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.12.1
+    rev: v2.16.0
     hooks:
       - id: pyproject-fmt

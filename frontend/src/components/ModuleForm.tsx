@@ -372,7 +372,7 @@ export const ProjectSelector = ({
           variables: { query: trimmedQuery },
         })
 
-        const projects = data.searchProjects || []
+        const projects = data?.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
       } catch (err) {
@@ -398,16 +398,9 @@ export const ProjectSelector = ({
     }
   }, [inputValue, fetchSuggestions])
 
-  const handleSelectionChange = (keys: React.Key | Set<React.Key> | 'all') => {
-    let keySet: Set<React.Key>
-    if (keys instanceof Set) {
-      keySet = keys
-    } else if (keys === 'all') {
-      keySet = new Set()
-    } else {
-      keySet = new Set([keys])
-    }
-    const selectedKey = Array.from(keySet as Set<string>)[0]
+  const handleSelectionChange = (keys: React.Key | null) => {
+    if (keys === null) return
+    const selectedKey = keys as string
     if (selectedKey) {
       const selectedProject = items.find((item) => item.id === selectedKey)
       if (selectedProject) {

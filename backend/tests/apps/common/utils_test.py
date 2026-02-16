@@ -9,12 +9,14 @@ from apps.common.utils import (
     convert_to_camel_case,
     convert_to_snake_case,
     get_absolute_url,
+    get_nest_user_agent,
     get_user_ip_address,
     join_values,
     natural_date,
     natural_number,
     normalize_limit,
     round_down,
+    slugify,
     validate_url,
 )
 
@@ -171,32 +173,71 @@ class TestUtils:
     @pytest.mark.parametrize(
         ("url", "expected"),
         [
+            # Valid URLs.
             ("https://example.com", True),
             ("http://example.com", True),
             ("https://example.com/path", True),
             ("https://example.com/path?query=1", True),
             ("https://example.com/path#fragment", True),
             ("https://subdomain.example.com", True),
+            ("https://sub-domain.example.com", True),
+            ("https://example-domain.com", True),
             ("https://example.com:8080", True),
             ("https://example.com:8080/path", True),
+            ("https://example", True),
+            ("https://example.", True),
+            ("https://example.com.", True),
+            ("https://192.168.1.1", True),
+            ("https://[::1]", True),
+            ("https://[2001:db8::1]", True),
+            ("https://example.com:1", True),
+            ("https://example.com:80", True),
+            ("https://example.com:443", True),
+            ("https://example.com:65535", True),
+            ("https://example123.com", True),
+            ("https://123example.com", True),
+            # Invalid URLs - empty or None.
             ("", False),
             (None, False),
             ("not-a-url", False),
+            # Invalid URLs - wrong scheme.
             ("ftp://example.com", False),
+            ("javascript:alert(1)", False),
+            ("data:text/html,<script>alert(1)</script>", False),
+            ("file:///etc/passwd", False),
+            # Invalid URLs - missing netloc.
             ("https://", False),
             ("http://", False),
-            ("https://example", True),  # Valid single label domain
-            ("https://example.", True),  # Valid with trailing dot
-            ("https://example.com.", True),  # Valid with trailing dot
-            ("https://192.168.1.1", True),  # Valid IP address
-            ("https://[::1]", True),  # Valid IPv6 address
-            ("https://example.com:99999", True),  # Valid port (urlparse accepts it)
+            ("http://.", False),
+            ("http://-", False),
+            ("https://...", False),
+            ("http://---", False),
+            ("http:// ", False),
+            ("https://. ", False),
+            ("http://.example.com", False),
+            ("https://-example.com", False),
+            ("https://example.com-", False),
+            # Invalid URLs - invalid port.
+            ("https://example.com:0", False),
+            ("https://example.com:65536", False),
+            ("https://example.com:99999", False),
+            ("https://example.com:100000", False),
+            # Invalid URLs - has control characters.
+            ("http://example.com\x00", False),
+            ("http://exam\x00ple.com", False),
+            ("http://example.com\x01", False),
+            ("http://example.com\n", False),
+            ("http://example.com\r", False),
+            ("http://example.com\t", False),
+            # Invalid URLs - too long.
+            ("https://" + "a" * 2050 + ".com", False),
+            ("https://example.com/" + "x" * 2050, False),
         ],
     )
     def test_validate_url(self, url, expected):
         """Test the validate_url function."""
         result = validate_url(url)
-        assert result == expected
+        assert result == expected, f"validate_url({url!r}) returned {result}, expected {expected}"
 
     @pytest.mark.parametrize(
         ("limit", "max_limit", "expected"),
@@ -239,3 +280,14 @@ class TestUtils:
         assert normalize_limit(1500) == 1000
         assert normalize_limit(-1) is None
         assert normalize_limit(0) is None
+
+    def test_slugify_multiple_hyphens(self):
+        """Test slugify removes multiple consecutive hyphens."""
+        assert slugify("test---multiple--hyphens") == "test-multiple-hyphens"
+        assert slugify("test-single-hyphens") == "test-single-hyphens"
+
+    @patch("apps.common.utils.settings")
+    def test_get_nest_user_agent(self, mock_settings):
+        """Test get_nest_user_agent replaces spaces with dashes and lowercases."""
+        mock_settings.APP_NAME = "Test App Name"
+        assert get_nest_user_agent() == "test-app-name"
