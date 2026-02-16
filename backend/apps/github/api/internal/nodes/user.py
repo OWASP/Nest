@@ -1,9 +1,22 @@
 """GitHub user GraphQL node."""
 
 import strawberry_django
+from django.db.models.query import Prefetch
 
 from apps.github.models.user import User
 from apps.nest.api.internal.nodes.badge import BadgeNode
+from apps.nest.models.user_badge import UserBadge
+
+USER_BADGES_PREFETCH = Prefetch(
+    "user_badges",
+    queryset=UserBadge.objects.filter(is_active=True)
+    .select_related("badge")
+    .order_by(
+        "badge__weight",
+        "badge__name",
+    ),
+    to_attr="user_badges_list",
+)
 
 
 @strawberry_django.type(
@@ -28,25 +41,10 @@ from apps.nest.api.internal.nodes.badge import BadgeNode
 class UserNode:
     """GitHub user node."""
 
-    @strawberry_django.field(prefetch_related=["user_badges"])
-    def badge_count(self, root: User) -> int:
-        """Resolve badge count."""
-        return root.user_badges.filter(is_active=True).count()
-
-    @strawberry_django.field(prefetch_related=["user_badges__badge"])
+    @strawberry_django.field(prefetch_related=[USER_BADGES_PREFETCH])
     def badges(self, root: User) -> list[BadgeNode]:
         """Return user badges."""
-        user_badges = (
-            root.user_badges.filter(
-                is_active=True,
-            )
-            .select_related("badge")
-            .order_by(
-                "badge__weight",
-                "badge__name",
-            )
-        )
-        return [user_badge.badge for user_badge in user_badges]
+        return [user_badge.badge for user_badge in getattr(root, "user_badges_list", [])]
 
     @strawberry_django.field
     def created_at(self, root: User) -> float:

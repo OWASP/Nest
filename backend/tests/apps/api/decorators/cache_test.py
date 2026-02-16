@@ -101,8 +101,54 @@ class TestCacheResponse:
         view_func = MagicMock(return_value=HttpResponse(status=status_code))
         decorated_view = cache_response(ttl=60)(view_func)
 
-        decorated_view(mock_request)
+        response = decorated_view(mock_request)
 
+        assert response.status_code == status_code
         mock_cache.get.assert_called_once()
         mock_cache.set.assert_not_called()
         view_func.assert_called_once_with(mock_request)
+
+    @patch("apps.api.decorators.cache.cache")
+    def test_head_request_caches_response(self, mock_cache, mock_request):
+        """Test that a HEAD request caches the response."""
+        mock_request.method = "HEAD"
+        mock_cache.get.return_value = None
+        view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
+        decorated_view = cache_response(ttl=60)(view_func)
+
+        assert decorated_view(mock_request).status_code == HTTPStatus.OK
+        mock_cache.get.assert_called_once()
+        mock_cache.set.assert_called_once()
+
+    @patch("apps.api.decorators.cache.settings")
+    @patch("apps.api.decorators.cache.cache")
+    def test_cache_response_with_default_ttl_and_prefix(
+        self, mock_cache, mock_settings, mock_request
+    ):
+        """Test cache_response uses default TTL and prefix from settings."""
+        mock_settings.API_CACHE_TIME_SECONDS = 300
+        mock_settings.API_CACHE_PREFIX = "test_prefix"
+        mock_cache.get.return_value = None
+        view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
+
+        decorated_view = cache_response()(view_func)
+
+        response = decorated_view(mock_request)
+        assert response.status_code == HTTPStatus.OK
+        mock_cache.get.assert_called_once()
+        cache_key = mock_cache.get.call_args[0][0]
+        assert cache_key.startswith("test_prefix:")
+        mock_cache.set.assert_called_once_with(cache_key, response, timeout=300)
+
+    @patch("apps.api.decorators.cache.cache")
+    def test_cache_response_with_custom_prefix(self, mock_cache, mock_request):
+        """Test cache_response with custom prefix."""
+        mock_cache.get.return_value = None
+        view_func = MagicMock(return_value=HttpResponse(status=HTTPStatus.OK))
+        decorated_view = cache_response(ttl=60, prefix="custom_prefix")(view_func)
+
+        assert decorated_view(mock_request).status_code == HTTPStatus.OK
+
+        cache_key_call = mock_cache.get.call_args[0][0]
+        assert cache_key_call.startswith("custom_prefix:")
+        mock_cache.set.assert_called_once()
