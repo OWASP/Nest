@@ -41,7 +41,7 @@ USER_BADGES_PREFETCH = Prefetch(
 class UserNode:
     """GitHub user node."""
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=[USER_BADGES_PREFETCH])
     def badges(self, root: User) -> list[BadgeNode]:
         """Return user badges."""
         return [user_badge.badge for user_badge in getattr(root, "user_badges_list", [])]
