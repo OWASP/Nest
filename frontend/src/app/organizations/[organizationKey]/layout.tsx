@@ -121,7 +121,11 @@ export default async function OrganizationDetailsLayout({
   const orgName = data?.organization?.name || data?.organization?.login || organizationKey
 
   return (
-    <PageLayout title={orgName} path={`/organizations/${organizationKey}`}>
+    <PageLayout
+      title={orgName}
+      path={`/organizations/${organizationKey}`}
+      breadcrumbClassName="bg-white dark:bg-[#212529]"
+    >
       {jsonLdString && (
         <Script
           id="organization-structured-data"

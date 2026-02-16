@@ -1,6 +1,7 @@
 'use client'
 
 import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
+import { useBreadcrumbClassName } from 'contexts/BreadcrumbContext'
 import { useBreadcrumbs } from 'hooks/useBreadcrumbs'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -8,14 +9,14 @@ import { FaChevronRight } from 'react-icons/fa6'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function BreadCrumbsWrapper() {
-  
   const pathname = usePathname()
   const items = useBreadcrumbs()
+  const breadcrumbClassName = useBreadcrumbClassName()
 
   if (pathname === '/' || items.length <= 1) return null
 
   return (
-    <div className="mt-16 w-full pt-4">
+    <div className={`mt-16 w-full pt-4 ${breadcrumbClassName}`}>
       <div className="w-full px-8 sm:px-8 md:px-8 lg:px-8">
         <Breadcrumbs
           aria-label="breadcrumb"
