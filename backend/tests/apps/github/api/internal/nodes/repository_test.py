@@ -6,7 +6,7 @@ from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
 from apps.github.api.internal.nodes.organization import OrganizationNode
 from apps.github.api.internal.nodes.release import ReleaseNode
-from apps.github.api.internal.nodes.repository import RepositoryNode
+from apps.github.api.internal.nodes.repository import RECENT_ISSUES_LIMIT, RepositoryNode
 from apps.github.api.internal.nodes.repository_contributor import RepositoryContributorNode
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -91,8 +91,8 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         assert field is not None
         assert field.type is str
 
-    def test_issues_method(self):
-        """Test issues method resolution."""
+    def test_issues_method_with_recent_issues_attribute(self):
+        """Test issues method when recent_issues attribute is available."""
         mock_repository = Mock()
         mock_issues = []
         mock_repository.recent_issues = mock_issues
@@ -100,6 +100,26 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("issues", RepositoryNode)
         result = field.base_resolver.wrapped_func(None, mock_repository)
         assert result == mock_issues
+
+    def test_issues_method_without_recent_issues_attribute(self):
+        """Test issues method when recent_issues doesn't exist."""
+        mock_repository = Mock(spec=["issues"])
+        mock_issues = Mock()
+        mock_ordered_queryset = Mock()
+        mock_ordered_queryset.__getitem__ = Mock(return_value=[])
+
+        mock_issues.order_by.return_value = mock_ordered_queryset
+        mock_repository.issues = mock_issues
+
+        field = self._get_field_by_name("issues", RepositoryNode)
+        resolver = field.base_resolver.wrapped_func
+        resolver(None, mock_repository)
+
+        mock_issues.order_by.assert_called_with("-created_at")
+
+        mock_ordered_queryset.__getitem__.assert_called_with(
+            slice(None, RECENT_ISSUES_LIMIT, None)
+        )
 
     def test_recent_milestones_with_invalid_limit(self):
         """Test recent_milestones returns empty list for invalid limit."""
