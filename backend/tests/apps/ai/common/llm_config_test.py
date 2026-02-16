@@ -3,15 +3,16 @@
 import os
 from unittest.mock import Mock, patch
 
-import pytest
-
 from apps.ai.common.llm_config import get_llm
 
 
 class TestLLMConfig:
     """Test cases for LLM configuration."""
 
-    @patch.dict(os.environ, {"LLM_PROVIDER": "openai", "DJANGO_OPEN_AI_SECRET_KEY": "test-key"})
+    @patch.dict(
+        os.environ,
+        {"DJANGO_LLM_PROVIDER": "openai", "DJANGO_OPEN_AI_SECRET_KEY": "test-key"},
+    )
     @patch("apps.ai.common.llm_config.LLM")
     def test_get_llm_openai_default(self, mock_llm):
         """Test getting OpenAI LLM with default model."""
@@ -21,7 +22,7 @@ class TestLLMConfig:
         result = get_llm()
 
         mock_llm.assert_called_once_with(
-            model="gpt-4.1-mini",
+            model="gpt-4o-mini",
             api_key="test-key",
             temperature=0.1,
         )
@@ -30,9 +31,9 @@ class TestLLMConfig:
     @patch.dict(
         os.environ,
         {
-            "LLM_PROVIDER": "openai",
+            "DJANGO_LLM_PROVIDER": "openai",
             "DJANGO_OPEN_AI_SECRET_KEY": "test-key",
-            "OPENAI_MODEL_NAME": "gpt-4",
+            "DJANGO_OPENAI_MODEL_NAME": "gpt-4",
         },
     )
     @patch("apps.ai.common.llm_config.LLM")
@@ -53,21 +54,25 @@ class TestLLMConfig:
     @patch.dict(
         os.environ,
         {
-            "LLM_PROVIDER": "anthropic",
-            "ANTHROPIC_API_KEY": "test-anthropic-key",
+            "DJANGO_LLM_PROVIDER": "unsupported",
+            "DJANGO_OPEN_AI_SECRET_KEY": "test-key",
         },
     )
+    @patch("apps.ai.common.llm_config.logger")
     @patch("apps.ai.common.llm_config.LLM")
-    def test_get_llm_anthropic_default(self, mock_llm):
-        """Test getting Anthropic LLM with default model."""
+    def test_get_llm_unsupported_provider(self, mock_llm, mock_logger):
+        """Test getting LLM with unsupported provider logs warning and falls back to OpenAI."""
         mock_llm_instance = Mock()
         mock_llm.return_value = mock_llm_instance
 
         result = get_llm()
 
+        # Should log warning about unrecognized provider
+        mock_logger.warning.assert_called_once()
+        # Should fallback to OpenAI
         mock_llm.assert_called_once_with(
-            model="claude-3-5-sonnet-20241022",
-            api_key="test-anthropic-key",
+            model="gpt-4o-mini",
+            api_key="test-key",
             temperature=0.1,
         )
         assert result == mock_llm_instance
@@ -75,28 +80,47 @@ class TestLLMConfig:
     @patch.dict(
         os.environ,
         {
-            "LLM_PROVIDER": "anthropic",
-            "ANTHROPIC_API_KEY": "test-anthropic-key",
-            "ANTHROPIC_MODEL_NAME": "claude-3-opus",
+            "DJANGO_LLM_PROVIDER": "google",
+            "DJANGO_GOOGLE_API_KEY": "test-google-key",
+            "DJANGO_GOOGLE_MODEL_NAME": "gemini-2.0-flash",
         },
     )
     @patch("apps.ai.common.llm_config.LLM")
-    def test_get_llm_anthropic_custom_model(self, mock_llm):
-        """Test getting Anthropic LLM with custom model."""
+    def test_get_llm_google(self, mock_llm):
+        """Test getting Google LLM with default model."""
         mock_llm_instance = Mock()
         mock_llm.return_value = mock_llm_instance
 
         result = get_llm()
 
         mock_llm.assert_called_once_with(
-            model="claude-3-opus",
-            api_key="test-anthropic-key",
+            model="gemini-2.0-flash",
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            api_key="test-google-key",
             temperature=0.1,
         )
         assert result == mock_llm_instance
 
-    @patch.dict(os.environ, {"LLM_PROVIDER": "unsupported"})
-    def test_get_llm_unsupported_provider(self):
-        """Test getting LLM with unsupported provider raises error."""
-        with pytest.raises(ValueError, match="Unsupported LLM provider: unsupported"):
-            get_llm()
+    @patch.dict(
+        os.environ,
+        {
+            "DJANGO_LLM_PROVIDER": "google",
+            "DJANGO_GOOGLE_API_KEY": "test-google-key",
+            "DJANGO_GOOGLE_MODEL_NAME": "gemini-pro",
+        },
+    )
+    @patch("apps.ai.common.llm_config.LLM")
+    def test_get_llm_google_custom_model(self, mock_llm):
+        """Test getting Google LLM with custom model."""
+        mock_llm_instance = Mock()
+        mock_llm.return_value = mock_llm_instance
+
+        result = get_llm()
+
+        mock_llm.assert_called_once_with(
+            model="gemini-pro",
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            api_key="test-google-key",
+            temperature=0.1,
+        )
+        assert result == mock_llm_instance

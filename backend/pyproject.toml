@@ -14,7 +14,7 @@ packages = [ { include = "apps" } ]
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
-crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
+crewai = { version = "^1.7.2", python = ">=3.10,<3.14", extras = [ "google-genai" ] }
 django = "^6.0"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
