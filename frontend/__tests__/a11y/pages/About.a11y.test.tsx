@@ -7,7 +7,6 @@ import {
   GetProjectMetadataDocument,
   GetTopContributorsDocument,
 } from 'types/__generated__/projectQueries.generated'
-import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -44,12 +43,6 @@ jest.mock('components/MarkdownWrapper', () => ({
   __esModule: true,
   default: ({ content }) => <div data-testid="markdown-content">{content}</div>,
 }))
-
-const mockUserData = (username: string) => ({
-  data: { user: mockAboutData.users[username] },
-  loading: false,
-  error: null,
-})
 
 const mockProjectData = {
   data: { project: mockAboutData.project },
@@ -145,8 +138,6 @@ describe('About Page Accessibility', () => {
         if (key === 'nest') {
           return mockTopContributorsData
         }
-      } else if (query === GetLeaderDataDocument) {
-        return mockUserData(key)
       }
 
       return { loading: true }

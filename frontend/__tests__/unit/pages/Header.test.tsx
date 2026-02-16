@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
 import React from 'react'
@@ -109,9 +109,11 @@ jest.mock('utils/constants', () => {
         submenu: [
           { text: 'Web Development', href: '/services/web' },
           { text: 'Mobile Development', href: '/services/mobile' },
+          { text: 'SubNoHref' },
         ],
       },
       { text: 'Contact', href: '/contact' },
+      { text: 'NoHref' },
     ],
   }
 })
@@ -387,15 +389,42 @@ describe('Header Component', () => {
       expect(isMobileMenuOpen()).toBe(true)
 
       // Find and click the logo link in mobile menu
-      const logoLinks = screen.getAllByRole('link')
-      const mobileLogoLink = logoLinks.find(
-        (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
-      )
+      const mobileMenu = findMobileMenu() as HTMLElement
+      expect(mobileMenu).not.toBeNull()
+
+      const mobileLogoLink = within(mobileMenu)
+        .getAllByRole('link')
+        .find((link) => link.querySelector('img[alt="OWASP Logo"]'))
 
       // Assert that mobileLogoLink is not null before clicking
-      expect(mobileLogoLink).not.toBeNull()
+      expect(mobileLogoLink).toBeDefined()
       await act(async () => {
-        fireEvent.click(mobileLogoLink)
+        fireEvent.click(mobileLogoLink!)
+      })
+      expect(isMobileMenuClosed()).toBe(true)
+    })
+
+    it('closes mobile menu when desktop logo is clicked', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      const navbar = document.getElementById('navbar-sticky')
+      expect(navbar).toBeInTheDocument()
+
+      const desktopLogoLink = within(navbar!)
+        .getAllByRole('link')
+        .find((link) => link.querySelector('img[alt="OWASP Logo"]'))
+
+      expect(desktopLogoLink).toBeDefined()
+      await act(async () => {
+        fireEvent.click(desktopLogoLink!)
       })
       expect(isMobileMenuClosed()).toBe(true)
     })
@@ -415,7 +444,7 @@ describe('Header Component', () => {
       const allAboutLinks = screen.getAllByText('About')
       const allContactLinks = screen.getAllByText('Contact')
 
-      expect(allHomeLinks.length).toBeGreaterThan(1) // Desktop + Mobile
+      expect(allHomeLinks.length).toBeGreaterThan(1)
       expect(allAboutLinks.length).toBeGreaterThan(1)
       expect(allContactLinks.length).toBeGreaterThan(1)
     })
@@ -424,7 +453,6 @@ describe('Header Component', () => {
       const navButtons = screen.getAllByTestId('nav-button')
       expect(navButtons.length).toBeGreaterThanOrEqual(2)
 
-      // Check for the specific button texts from the actual component
       const starButton = navButtons.find((btn) => btn.textContent?.includes('Star'))
       const sponsorButton = navButtons.find((btn) => btn.textContent?.includes('Sponsor'))
 
@@ -480,40 +508,33 @@ describe('Header Component', () => {
       expect(window.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     })
 
-    // Simplified resize test - just check that the functionality works
     it('handles window resize events', async () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      // Open mobile menu first
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
       })
 
-      // Simulate resize event
       await act(async () => {
         globalThis.dispatchEvent(new Event('resize'))
       })
 
-      // Test passes if no errors are thrown
       expect(true).toBe(true)
     })
 
     it('handles outside click correctly', async () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      // Open mobile menu
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
       })
 
-      // Click outside
       await act(async () => {
         document.body.click()
       })
 
-      // Verify the event listener is set up
       expect(window.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     })
   })
@@ -543,7 +564,6 @@ describe('Header Component', () => {
       mockUsePathname.mockReturnValue('/')
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      // Find the Home links that should be active
       const homeLinks = screen.getAllByRole('link', { name: 'Home' })
       const activeHomeLinks = homeLinks.filter(
         (link) => link.getAttribute('aria-current') === 'page'
