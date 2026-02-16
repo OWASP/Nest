@@ -188,6 +188,28 @@ class TestEntityChannelInline:
             assert "queryset" in call_kwargs
             assert "initial" in call_kwargs
 
+    def test_formfield_for_dbfield_other_field(self, mocker):
+        """Test that other fields use default parent behavior."""
+        inline = EntityChannelInline(Project, mocker.Mock())
+        mock_db_field = mocker.Mock()
+        mock_db_field.name = "other_field"
+        mock_request = mocker.Mock()
+
+        with patch.object(
+            EntityChannelInline.__bases__[0], "formfield_for_dbfield"
+        ) as mock_parent:
+            mock_result = mocker.Mock()
+            mock_parent.return_value = mock_result
+
+            result = inline.formfield_for_dbfield(mock_db_field, mock_request)
+
+            assert result == mock_result
+            mock_parent.assert_called_once()
+            call_kwargs = mock_parent.call_args[1]
+            assert "widget" not in call_kwargs
+            assert "queryset" not in call_kwargs
+            assert "initial" not in call_kwargs
+
 
 class TestStandardOwaspAdminMixin:
     """Tests for StandardOwaspAdminMixin."""

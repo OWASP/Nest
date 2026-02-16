@@ -46,6 +46,25 @@ class TestGenericEntityNode:
 
         assert math.isclose(result, 1234567890.0)
 
+    def test_top_contributors_resolver(self):
+        """Test top_contributors returns list of RepositoryContributorNodes."""
+        mock_entity = Mock()
+        mock_entity.idx_top_contributors = [
+            {
+                "avatar_url": "https://example.com/avatar.png",
+                "contributions_count": 10,
+                "id": "1",
+                "login": "user1",
+                "name": "User One",
+            }
+        ]
+
+        result = GenericEntityNode.top_contributors(None, mock_entity)
+
+        assert len(result) == 1
+        assert result[0].login == "user1"
+        assert result[0].contributions_count == 10
+
     def test_url_resolver(self):
         """Test url returns indexed URL."""
         mock_entity = Mock()

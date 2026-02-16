@@ -74,6 +74,21 @@ class TestEventModel:
         result = Event.parse_dates(dates, start_date)
         assert result == expected_result
 
+    def test_parse_dates_iso_format_invalid(self):
+        """Test parse_dates with invalid ISO-like single date returns None."""
+        result = Event.parse_dates("0000-00-00", date(2025, 5, 26))
+        assert result is None
+
+    def test_parse_dates_year_crossover(self):
+        """Test parse_dates with year crossover when end month is before start month."""
+        result = Event.parse_dates("December 25 - January 5", date(2025, 12, 25))
+        assert result == date(2026, 1, 5)
+
+    def test_parse_dates_no_year_crossover(self):
+        """Test parse_dates without year crossover when end is after start."""
+        result = Event.parse_dates("May 1 - May 5", date(2025, 5, 1))
+        assert result == date(2025, 5, 5)
+
     def test_update_data_existing_event(self):
         """Test update_data when the event already exists."""
         category = "Global"
@@ -260,6 +275,46 @@ class TestEventGeoMethods:
 
             assert math.isclose(event.latitude, 40.7128)
             assert math.isclose(event.longitude, -74.0060)
+
+    def test_generate_geo_location_both_return_none(self):
+        """Test generate_geo_location does not set lat/long when both lookups fail."""
+        event = Event(
+            key="test-event",
+            name="Test Event",
+            start_date=date(2025, 1, 1),
+            suggested_location="Unknown Place",
+            latitude=None,
+            longitude=None,
+        )
+
+        with patch("apps.owasp.models.event.get_location_coordinates") as mock_get_coords:
+            mock_get_coords.return_value = None
+
+            event.generate_geo_location()
+
+            assert event.latitude is None
+            assert event.longitude is None
+
+    def test_generate_geo_location_suggested_is_none_string(self):
+        """Test generate_geo_location skips suggested_location when it equals 'None'."""
+        event = Event(
+            key="test-event",
+            name="Test Event",
+            start_date=date(2025, 1, 1),
+            suggested_location="None",
+        )
+        mock_location = Mock()
+        mock_location.latitude = 51.5074
+        mock_location.longitude = -0.1278
+
+        with patch("apps.owasp.models.event.get_location_coordinates") as mock_get_coords:
+            mock_get_coords.return_value = mock_location
+
+            event.generate_geo_location()
+
+            # Should skip "None" and use context instead
+            assert math.isclose(event.latitude, 51.5074)
+            assert math.isclose(event.longitude, -0.1278)
 
     def test_generate_suggested_location(self):
         """Test generate_suggested_location uses OpenAI."""

@@ -202,7 +202,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("is_owasp_board_member", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
 
-        assert result is True
+        assert result
 
     def test_is_owasp_board_member_without_profile(self):
         """Test is_owasp_board_member returns False when no profile."""
@@ -211,7 +211,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("is_owasp_board_member", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
 
-        assert result is False
+        assert not result
 
     def test_is_former_owasp_staff_true(self):
         """Test is_former_owasp_staff returns True when flag is set."""
@@ -224,7 +224,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("is_former_owasp_staff", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
 
-        assert result is True
+        assert result
 
     def test_is_former_owasp_staff_without_profile(self):
         """Test is_former_owasp_staff returns False when no profile."""
@@ -233,7 +233,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("is_former_owasp_staff", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
 
-        assert result is False
+        assert not result
 
     def test_is_gsoc_mentor_true(self):
         """Test is_gsoc_mentor returns True when flag is set."""
@@ -246,7 +246,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("is_gsoc_mentor", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
 
-        assert result is True
+        assert result
 
     def test_is_gsoc_mentor_without_profile(self):
         """Test is_gsoc_mentor returns False when no profile."""
@@ -255,7 +255,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("is_gsoc_mentor", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
 
-        assert result is False
+        assert not result
 
     def test_linkedin_page_id_with_profile_and_value(self):
         """Test linkedin_page_id returns ID when profile exists with value."""

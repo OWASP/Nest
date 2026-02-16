@@ -9,6 +9,8 @@ report: all
 
 scan:
   show-suppressed: true
+  skip-dirs:
+    - .cache
   skip-files:
 
 severity:

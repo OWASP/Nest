@@ -11,7 +11,7 @@ from apps.api.internal.mutations.api_key import (
     CreateApiKeyResult,
     RevokeApiKeyResult,
 )
-from apps.api.models.api_key import MAX_ACTIVE_KEYS, ApiKey
+from apps.api.models.api_key import MAX_ACTIVE_KEYS, MAX_WORD_LENGTH, ApiKey
 
 
 def mock_info() -> MagicMock:
@@ -140,3 +140,87 @@ class TestApiKeyMutations:
         assert not result.ok
         assert result.code == "NOT_FOUND"
         assert result.message == "API key not found."
+
+    def test_create_api_key_empty_name(self, api_key_mutations):
+        """Test creating an API key with empty name."""
+        info = mock_info()
+        name = ""
+        expires_at = timezone.now() + timedelta(days=30)
+
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
+
+        assert isinstance(result, CreateApiKeyResult)
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_NAME",
+            "message": "Name is required",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for key, value in expected.items():
+            assert getattr(result, key) == value
+
+    def test_create_api_key_whitespace_only_name(self, api_key_mutations):
+        """Test creating an API key with whitespace-only name."""
+        info = mock_info()
+        name = "   "
+        expires_at = timezone.now() + timedelta(days=30)
+
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
+
+        assert isinstance(result, CreateApiKeyResult)
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_NAME",
+            "message": "Name is required",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for field, value in expected.items():
+            assert getattr(result, field) == value
+
+    def test_create_api_key_name_too_long(self, api_key_mutations):
+        """Test creating an API key with name exceeding maximum length."""
+        info = mock_info()
+        name = "a" * (MAX_WORD_LENGTH + 1)
+        expires_at = timezone.now() + timedelta(days=30)
+
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
+
+        assert isinstance(result, CreateApiKeyResult)
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_NAME",
+            "message": "Name too long",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for field, value in expected.items():
+            assert getattr(result, field) == value
+
+    def test_create_api_key_expires_in_past(self, api_key_mutations):
+        """Test creating an API key with expiry date in the past."""
+        info = mock_info()
+        name = "Valid Name"
+        expires_at = timezone.now() - timedelta(days=1)
+
+        result = api_key_mutations.create_api_key(info, name=name, expires_at=expires_at)
+
+        assert isinstance(result, CreateApiKeyResult)
+
+        expected = {
+            "ok": False,
+            "code": "INVALID_DATE",
+            "message": "Expiry date must be in future",
+            "api_key": None,
+            "raw_key": None,
+        }
+
+        for field, value in expected.items():
+            assert getattr(result, field) == value
