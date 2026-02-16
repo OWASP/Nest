@@ -353,3 +353,13 @@ class TestOwaspScraper:
         audience = scraper.get_audience()
 
         assert audience == ["builder"]
+
+    def test_urls_with_none_page_tree(self, mock_session):
+        """Test get_urls returns empty set when request fails (page_tree is None)."""
+        mock_session.get.side_effect = requests.exceptions.RequestException
+
+        scraper = OwaspScraper("https://test.org")
+
+        assert scraper.page_tree is None
+        assert scraper.get_urls() == set()
+        mock_session.get.assert_called_once()
