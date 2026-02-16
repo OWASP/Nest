@@ -113,13 +113,13 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
 
         field = self._get_field_by_name("issues", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
-        resolver(None, mock_repository)
+        result = resolver(None, mock_repository)
 
         mock_issues.order_by.assert_called_with("-created_at")
-
         mock_ordered_queryset.__getitem__.assert_called_with(
             slice(None, RECENT_ISSUES_LIMIT, None)
         )
+        assert result == []
 
     def test_recent_milestones_with_invalid_limit(self):
         """Test recent_milestones returns empty list for invalid limit."""
