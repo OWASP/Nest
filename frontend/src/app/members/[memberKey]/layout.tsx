@@ -58,7 +58,6 @@ export default async function UserDetailsLayout({
   return (
     <PageLayout
       title={data?.user?.name || data?.user?.login || ''}
-      breadcrumbClassName="bg-white dark:bg-[#212529]"
     >
       <StructuredDataScript data={generateProfilePageStructuredData(data.user)} />
       {children}

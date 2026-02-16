@@ -59,7 +59,6 @@ export default async function RepositoryDetailsLayout({
     <PageLayout
       title={repoName}
       path={`/organizations/${organizationKey}/repositories/${repositoryKey}`}
-      breadcrumbClassName="bg-white dark:bg-[#212529]"
     >
       {children}
     </PageLayout>

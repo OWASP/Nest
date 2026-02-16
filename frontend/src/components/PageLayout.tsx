@@ -11,10 +11,12 @@ type PageLayoutProps = Readonly<{
   children: ReactNode
 }>
 
+const defaultBreadcrumbClassName = 'bg-white dark:bg-[#212529]'
+
 export default function PageLayout({
   title,
   path,
-  breadcrumbClassName,
+  breadcrumbClassName = defaultBreadcrumbClassName,
   children,
 }: PageLayoutProps) {
   const pathname = usePathname()
@@ -24,11 +26,7 @@ export default function PageLayout({
     <BreadcrumbProvider item={{ title, path: breadcrumbPath }}>{children}</BreadcrumbProvider>
   )
 
-  if (breadcrumbClassName) {
-    return (
-      <BreadcrumbStyleProvider className={breadcrumbClassName}>{content}</BreadcrumbStyleProvider>
-    )
-  }
-
-  return content
+  return (
+    <BreadcrumbStyleProvider className={breadcrumbClassName}>{content}</BreadcrumbStyleProvider>
+  )
 }

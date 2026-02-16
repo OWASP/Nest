@@ -51,7 +51,7 @@ export default async function ChapterDetailsLayout({
   }
 
   return (
-    <PageLayout title={data.chapter.name} breadcrumbClassName="bg-white dark:bg-[#212529]">
+    <PageLayout title={data.chapter.name}>
       {children}
     </PageLayout>
   )

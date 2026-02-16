@@ -124,7 +124,6 @@ export default async function OrganizationDetailsLayout({
     <PageLayout
       title={orgName}
       path={`/organizations/${organizationKey}`}
-      breadcrumbClassName="bg-white dark:bg-[#212529]"
     >
       {jsonLdString && (
         <Script

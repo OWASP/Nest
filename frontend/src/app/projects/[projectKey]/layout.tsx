@@ -53,7 +53,7 @@ export default async function ProjectDetailsLayout({
   }
 
   return (
-    <PageLayout title={data.project.name} breadcrumbClassName="bg-white dark:bg-[#212529]">
+    <PageLayout title={data.project.name}>
       {children}
     </PageLayout>
   )

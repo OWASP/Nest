@@ -51,7 +51,7 @@ export default async function CommitteeDetailsLayout({
   }
 
   return (
-    <PageLayout title={data.committee.name} breadcrumbClassName="bg-white dark:bg-[#212529]">
+    <PageLayout title={data.committee.name}>
       {children}
     </PageLayout>
   )
