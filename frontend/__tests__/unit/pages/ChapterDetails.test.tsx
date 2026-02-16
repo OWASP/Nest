@@ -111,21 +111,6 @@ describe('chapterDetailsPage Component', () => {
   })
 
   test('renders Slack channel link with expected Slack URL', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: {
-        ...mockChapterDetailsData,
-        chapter: {
-          ...mockChapterDetailsData.chapter,
-          entityChannels: [
-            {
-              name: 'chapter-test',
-              slackChannelId: 'C123ABC',
-            },
-          ],
-        },
-      },
-      error: null,
-    })
     render(<ChapterDetailsPage />)
 
     await waitFor(() => {
