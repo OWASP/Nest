@@ -231,16 +231,12 @@ class GoogleEmbedder(Embedder):
 
         if self.use_new_sdk and self.client:
             # Use new google.genai Client API
-            # The new API uses client.models.embed_content() or similar
-            # Note: Exact API may vary, this is a placeholder implementation
             try:
-                # Try the new API pattern (may need adjustment based on actual API)
                 result = self.client.models.embed_content(
                     model=self.model,
-                    content=text,
+                    contents=text,
                 )
                 # Extract embedding values from result
-                # The exact structure depends on the new API - may need adjustment
                 if hasattr(result, "embeddings") and result.embeddings:
                     return result.embeddings[0].values
                 if hasattr(result, "embedding") and hasattr(result.embedding, "values"):
@@ -316,7 +312,7 @@ class GoogleEmbedder(Embedder):
                 try:
                     result = self.client.models.embed_content(
                         model=self.model,
-                        content=text,
+                        contents=text,
                     )
                     # Extract embedding values from result
                     if hasattr(result, "embeddings") and result.embeddings:
