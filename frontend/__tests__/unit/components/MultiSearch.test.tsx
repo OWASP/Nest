@@ -10,8 +10,6 @@ import { Project } from 'types/project'
 import { User } from 'types/user'
 import MultiSearchBar from 'components/MultiSearch'
 
-
-
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
@@ -78,8 +76,6 @@ const mockChapter: Chapter = {
   name: 'Test Chapter',
 } as Chapter
 
-
-
 const mockUser: User = {
   key: 'test-user',
   name: 'Test User',
@@ -123,8 +119,6 @@ afterEach(() => {
   jest.clearAllMocks()
 })
 
-
-
 describe('Rendering', () => {
   it('renders successfully with minimal required props', () => {
     render(<MultiSearchBar {...defaultProps} />)
@@ -132,8 +126,6 @@ describe('Rendering', () => {
     expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument()
     expect(screen.getByTestId('fa-search-icon')).toBeInTheDocument()
   })
-
-
 
   it('renders with initial value', () => {
     render(<MultiSearchBar {...defaultProps} initialValue={'initial search'} />)
@@ -257,7 +249,6 @@ describe('Rendering', () => {
         expect(sendGAEvent).not.toHaveBeenCalled()
       })
     })
-
   })
 
   describe('Suggestions Display', () => {
@@ -291,8 +282,8 @@ describe('Rendering', () => {
       await user.type(input, 'test')
 
       await waitFor(() => {
-        expect(screen.getAllByTestId('fa-location-dot-icon')).toHaveLength(1) 
-        expect(screen.getAllByTestId('fa-user-icon')).toHaveLength(1) 
+        expect(screen.getAllByTestId('fa-location-dot-icon')).toHaveLength(1)
+        expect(screen.getAllByTestId('fa-user-icon')).toHaveLength(1)
       })
     })
 
@@ -410,12 +401,10 @@ describe('Rendering', () => {
       const input = screen.getByPlaceholderText('Search...')
       await user.type(input, 'nonexistent')
 
-      
       await waitFor(() => {
         expect(mockFetchAlgoliaData).toHaveBeenCalled()
       })
 
-      
       expect(screen.queryByText('Test Chapter')).not.toBeInTheDocument()
     })
 
@@ -467,7 +456,7 @@ describe('Rendering', () => {
       await user.type(input, '   ')
 
       await waitFor(() => {
-        expect(mockFetchAlgoliaData).not.toHaveBeenCalled() 
+        expect(mockFetchAlgoliaData).not.toHaveBeenCalled()
       })
 
       expect(sendGAEvent).not.toHaveBeenCalled()
