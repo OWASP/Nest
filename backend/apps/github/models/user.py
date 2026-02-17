@@ -33,6 +33,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     active_users = ActiveUserManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_users"
         indexes = [
             models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
@@ -110,7 +112,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             QuerySet: Entities where this user is an active, reviewed leader.
 
         """
-        from apps.owasp.models.entity_member import EntityMember
+        from apps.owasp.models.entity_member import EntityMember  # noqa: PLC0415
 
         leader_memberships = EntityMember.objects.filter(
             member=self,
@@ -132,7 +134,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             QuerySet[Chapter]: Chapters where this user is an active, reviewed leader.
 
         """
-        from apps.owasp.models.chapter import Chapter
+        from apps.owasp.models.chapter import Chapter  # noqa: PLC0415
 
         return self._get_led_entities(Chapter)
 
@@ -144,7 +146,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             QuerySet[Project]: Projects where this user is an active, reviewed leader.
 
         """
-        from apps.owasp.models.project import Project
+        from apps.owasp.models.project import Project  # noqa: PLC0415
 
         return self._get_led_entities(Project)
 

@@ -8,7 +8,6 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import transaction
 from django.utils import timezone
 
-from apps.api.internal.extensions.cache import invalidate_module_cache, invalidate_program_cache
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
     CreateModuleInput,
@@ -24,6 +23,10 @@ from apps.owasp.models import Project
 ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
+NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
+NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines."
+NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
+NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
 
 logger = logging.getLogger(__name__)
 
@@ -83,15 +86,11 @@ class ModuleMutation:
         try:
             program = Program.objects.get(key=input_data.program_key)
             project = Project.objects.get(id=input_data.project_id)
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
-        except Mentor.DoesNotExist as e:
-            msg = "Only mentors can create modules."
-            raise PermissionDenied(msg) from e
 
-        if not program.admins.filter(id=creator_as_mentor.id).exists():
+        if not program.admins.filter(nest_user=user).exists():
             raise PermissionDenied
 
         started_at, ended_at = _validate_module_dates(
@@ -119,10 +118,7 @@ class ModuleMutation:
             program.save(update_fields=["experience_levels"])
 
         mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins or [])
-        mentors_to_set.add(creator_as_mentor)
         module.mentors.set(list(mentors_to_set))
-
-        transaction.on_commit(lambda: invalidate_program_cache(program.key))
 
         return module
 
@@ -148,11 +144,8 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied(msg="Only mentors can assign issues.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -190,11 +183,8 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            raise PermissionDenied(NOT_MENTOR_UNASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -220,7 +210,10 @@ class ModuleMutation:
         issue_number: int,
         deadline_at: datetime,
     ) -> ModuleNode:
-        """Set a deadline for a task. User must be a mentor and an admin of the program."""
+        """Set a deadline for a task.
+
+        The user must be a mentor of the module.
+        """
         user = info.context.request.user
 
         module = (
@@ -231,11 +224,8 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied(msg="Only mentors can set deadlines.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")
@@ -282,7 +272,10 @@ class ModuleMutation:
         program_key: str,
         issue_number: int,
     ) -> ModuleNode:
-        """Clear the deadline for a task. User must be a mentor and an admin of the program."""
+        """Clear the deadline for a task.
+
+        The user must be a mentor of the module.
+        """
         user = info.context.request.user
 
         module = (
@@ -293,11 +286,8 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        mentor = Mentor.objects.filter(nest_user=user).first()
-        if mentor is None:
-            raise PermissionDenied(msg="Only mentors can clear deadlines.")
-        if not module.program.admins.filter(id=mentor.id).exists():
-            raise PermissionDenied
+        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+            raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")
@@ -329,30 +319,23 @@ class ModuleMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
-        """Update an existing mentorship module. User must be an admin of the program."""
+        """Update an existing mentorship module."""
         user = info.context.request.user
 
         try:
-            module = Module.objects.select_related("program").get(
-                key=input_data.key, program__key=input_data.program_key
+            module = (
+                Module.objects.select_related("program")
+                .select_for_update()
+                .get(key=input_data.key, program__key=input_data.program_key)
             )
-            old_module_key = module.key
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
-        try:
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
-        except Mentor.DoesNotExist as err:
-            msg = "Only mentors can edit modules."
-            logger.warning(
-                "User '%s' is not a mentor and cannot edit modules.",
-                user.username,
-                exc_info=True,
-            )
-            raise PermissionDenied(msg) from err
-
-        if not module.program.admins.filter(id=creator_as_mentor.id).exists():
-            raise PermissionDenied
+        is_admin = module.program.admins.filter(nest_user=user).exists()
+        is_mentor = Mentor.objects.filter(nest_user=user, modules=module).exists()
+        if not (is_admin or is_mentor):
+            msg = "Only admins of the program or mentors of this module can edit modules."
+            raise PermissionDenied(msg)
 
         started_at, ended_at = _validate_module_dates(
             input_data.started_at,
@@ -406,14 +389,5 @@ class ModuleMutation:
             module.program.experience_levels.remove(old_experience_level)
 
         module.program.save(update_fields=["experience_levels"])
-
-        program_key = module.program.key
-
-        def _invalidate():
-            invalidate_module_cache(old_module_key, program_key)
-            if module.key != old_module_key:
-                invalidate_module_cache(module.key, program_key)
-
-        transaction.on_commit(_invalidate)
 
         return module

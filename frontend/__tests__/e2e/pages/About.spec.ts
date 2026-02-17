@@ -8,18 +8,27 @@ test.describe('About Page', () => {
       const request = route.request()
       const postData = request.postDataJSON()
 
-      if (postData.query?.includes('user')) {
-        const username = postData.variables.key
-        const userData = mockAboutData.users[username]
-        await route.fulfill({ status: 200, json: { data: { user: userData } } })
-      } else if (postData.query?.includes('topContributors')) {
-        await route.fulfill({
+      if (postData.operationName === 'GetAboutPageData') {
+        const leaders = ['arkid15r', 'kasya', 'mamicidal']
+        const leaderData = leaders.reduce(
+          (acc, leader, index) => ({
+            ...acc,
+            [`leader${index + 1}`]: mockAboutData.users[leader],
+          }),
+          {}
+        )
+        return route.fulfill({
           status: 200,
-          json: { data: { topContributors: mockAboutData.topContributors } },
+          json: {
+            data: {
+              project: mockAboutData.project,
+              topContributors: mockAboutData.topContributors,
+              ...leaderData,
+            },
+          },
         })
-      } else {
-        await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
       }
+      return route.continue()
     })
 
     await page.context().addCookies([

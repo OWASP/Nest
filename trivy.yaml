@@ -1,9 +1,16 @@
+exit-code: 1
+
 filesystem:
   skip-files:
 
-ignorefile: trivyignore.yaml
+ignorefile: /trivyignore.yaml
+
+report: all
 
 scan:
+  show-suppressed: true
+  skip-dirs:
+    - .cache
   skip-files:
 
 severity:
@@ -15,7 +22,3 @@ timeout: 10m
 
 vulnerability:
   ignore-unfixed: true
-  security-checks:
-    - config
-    - secret
-    - vuln

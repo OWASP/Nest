@@ -28,6 +28,7 @@ class Base(Configuration):
 
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
 
+    CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_NAME = "nest.session-id"
     SESSION_COOKIE_SAMESITE = "Lax"
@@ -133,8 +134,6 @@ class Base(Configuration):
     API_PAGE_SIZE = 100
     API_CACHE_PREFIX = "api-response"
     API_CACHE_TIME_SECONDS = 86400  # 24 hours.
-    GRAPHQL_RESOLVER_CACHE_PREFIX = "graphql-resolver"
-    GRAPHQL_RESOLVER_CACHE_TIME_SECONDS = 86400  # 24 hours.
     NINJA_PAGINATION_CLASS = "apps.api.rest.v0.pagination.CustomPagination"
     NINJA_PAGINATION_PER_PAGE = API_PAGE_SIZE
 
@@ -231,3 +230,10 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = False

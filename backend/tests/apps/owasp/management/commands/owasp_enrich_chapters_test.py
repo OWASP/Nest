@@ -47,17 +47,18 @@ class TestOwaspEnrichChapters:
         mock_chapter.generate_suggested_location.side_effect = lambda: setattr(
             mock_chapter, "suggested_location", "Suggested location"
         )
-        mock_chapter.generate_geo_location.side_effect = lambda: setattr(
-            mock_chapter, "latitude", latitude
-        ) or setattr(mock_chapter, "longitude", longitude)
+        mock_chapter.generate_geo_location.side_effect = lambda: (
+            setattr(mock_chapter, "latitude", latitude)
+            or setattr(mock_chapter, "longitude", longitude)
+        )
 
         mock_chapters_list = [mock_chapter] * chapters
 
         mock_active_chapters = mock.MagicMock()
         mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
         mock_active_chapters.count.return_value = len(mock_chapters_list)
-        mock_active_chapters.__getitem__.side_effect = (
-            lambda idx: mock_chapters_list[idx.start : idx.stop]
+        mock_active_chapters.__getitem__.side_effect = lambda idx: (
+            mock_chapters_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_chapters_list[idx]
         )
@@ -68,19 +69,19 @@ class TestOwaspEnrichChapters:
             mock.patch.object(
                 Prompt, "get_owasp_chapter_summary", mock_prompt.get_owasp_chapter_summary
             ),
-            mock.patch("builtins.print") as mock_print,
             mock.patch("time.sleep", return_value=None),
         ):
+            command.stdout = mock.MagicMock()
             command.handle(offset=offset)
 
         mock_active_chapters.count.assert_called_once()
 
         assert mock_bulk_save.called
 
-        assert mock_print.call_count == len(mock_chapters_list) - offset
+        assert command.stdout.write.call_count == len(mock_chapters_list) - offset
 
-        for call in mock_print.call_args_list:
-            args, _ = call
+        for call in command.stdout.write.call_args_list:
+            args = call[0]
             assert "https://owasp.org/www-chapter-test" in args[0]
 
         for chapter in mock_chapters_list:

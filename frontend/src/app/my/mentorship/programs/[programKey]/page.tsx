@@ -1,6 +1,7 @@
 'use client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -46,14 +47,25 @@ const ProgramDetailsPage = () => {
     return true
   }, [isAdmin, program])
 
-  const updateStatus = async (newStatus: ProgramStatusEnum) => {
+  const updateStatus = async (newStatus: string) => {
+    if (!Object.values(ProgramStatusEnum).includes(newStatus as ProgramStatusEnum)) {
+      addToast({
+        color: 'danger',
+        description: 'The provided status is not valid.',
+        timeout: 3000,
+        title: 'Invalid Status',
+        variant: 'solid',
+      })
+      return
+    }
+
     if (!program || !isAdmin) {
       addToast({
-        title: 'Permission Denied',
-        description: 'Only admins can update the program status.',
-        variant: 'solid',
         color: 'danger',
+        description: 'Only admins can update the program status.',
         timeout: 3000,
+        title: 'Permission Denied',
+        variant: 'solid',
       })
       return
     }
@@ -64,7 +76,7 @@ const ProgramDetailsPage = () => {
           inputData: {
             key: program.key,
             name: program.name,
-            status: newStatus,
+            status: newStatus as ProgramStatusEnum,
           },
         },
       })
@@ -94,32 +106,34 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: titleCaseWord(program.status) },
-    { label: 'Start Date', value: formatDate(program.startedAt) },
-    { label: 'End Date', value: formatDate(program.endedAt) },
-    { label: 'Mentees Limit', value: String(program.menteesLimit) },
+    { label: 'Status', value: titleCaseWord(program?.status ?? '') },
+    { label: 'Start Date', value: formatDate(program?.startedAt ?? '') },
+    { label: 'End Date', value: formatDate(program?.endedAt ?? '') },
+    { label: 'Mentees Limit', value: String(program?.menteesLimit ?? 0) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
+      value: program?.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
     },
   ]
 
   return (
-    <DetailsCard
-      accessLevel="admin"
-      admins={program.admins}
-      canUpdateStatus={canUpdateStatus}
-      details={programDetails}
-      domains={program.domains}
-      modules={modules}
-      programKey={program.key}
-      setStatus={updateStatus}
-      status={program.status}
-      summary={program.description}
-      tags={program.tags}
-      title={program.name}
-      type="program"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        accessLevel="admin"
+        admins={program?.admins ?? undefined}
+        canUpdateStatus={canUpdateStatus}
+        details={programDetails}
+        domains={program?.domains ?? undefined}
+        modules={modules}
+        programKey={program?.key ?? ''}
+        setStatus={updateStatus}
+        status={program?.status ?? ''}
+        summary={program?.description ?? ''}
+        tags={program?.tags ?? undefined}
+        title={program?.name ?? ''}
+        type="program"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

@@ -324,6 +324,62 @@ describe('SearchBar Component', () => {
       expect(input).toHaveValue('')
       expect(input).toHaveFocus()
     })
+    it('does not send GTM event for whitespace-only input', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: '   ' } })
+
+      jest.advanceTimersByTime(750)
+
+      expect(mockOnSearch).toHaveBeenCalledWith('   ')
+      expect(sendGTMEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Keyboard event handling on clear button', () => {
+    it('clears search when Enter key is pressed on clear button', async () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: 'test query' } })
+      expect(input).toHaveValue('test query')
+
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      fireEvent.keyDown(clearButton, { key: 'Enter' })
+
+      expect(input).toHaveValue('')
+      expect(mockOnSearch).toHaveBeenCalledWith('')
+      expect(input).toHaveFocus()
+    })
+
+    it('clears search when Space key is pressed on clear button', async () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: 'test query' } })
+      expect(input).toHaveValue('test query')
+
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      fireEvent.keyDown(clearButton, { key: ' ' })
+
+      expect(input).toHaveValue('')
+      expect(mockOnSearch).toHaveBeenCalledWith('')
+      expect(input).toHaveFocus()
+    })
+
+    it('does not clear search when other keys are pressed on clear button', async () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: 'test query' } })
+      expect(input).toHaveValue('test query')
+
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      fireEvent.keyDown(clearButton, { key: 'Tab' })
+
+      expect(input).toHaveValue('test query')
+    })
   })
 
   describe('Accessibility roles and labels', () => {

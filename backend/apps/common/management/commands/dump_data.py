@@ -3,7 +3,7 @@
 import contextlib
 import os
 from pathlib import Path
-from subprocess import CalledProcessError, run
+from subprocess import PIPE, CalledProcessError, Popen, run
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -15,6 +15,9 @@ DB_PORT = str(DEFAULT_DATABASE.get("PORT", "5432"))
 DB_USER = DEFAULT_DATABASE.get("USER", "")
 DB_PASSWORD = DEFAULT_DATABASE.get("PASSWORD", "")
 DB_NAME = DEFAULT_DATABASE.get("NAME", "")
+
+PG_DUMP = "/usr/bin/pg_dump"
+PSQL = "/usr/bin/psql"
 
 
 class Command(BaseCommand):
@@ -54,21 +57,57 @@ class Command(BaseCommand):
         try:
             self._execute_sql(
                 "postgres",
-                [
-                    sql.SQL("CREATE DATABASE {temp_db} TEMPLATE {DB_NAME};").format(
-                        temp_db=sql.Identifier(temp_db), DB_NAME=sql.Identifier(DB_NAME)
-                    )
-                ],
+                [sql.SQL("CREATE DATABASE {temp_db}").format(temp_db=sql.Identifier(temp_db))],
             )
 
             self.stdout.write(self.style.SUCCESS(f"Created temporary DB: {temp_db}"))
 
+            # Getting data.
+            dump_process = Popen(  # noqa: S603
+                [
+                    PG_DUMP,
+                    "-h",
+                    DB_HOST,
+                    "-p",
+                    DB_PORT,
+                    "-U",
+                    DB_USER,
+                    "-d",
+                    DB_NAME,
+                ],
+                stdout=PIPE,
+                env=env,
+            )
+            psql_process = Popen(  # noqa: S603
+                [
+                    PSQL,
+                    "-h",
+                    DB_HOST,
+                    "-p",
+                    DB_PORT,
+                    "-U",
+                    DB_USER,
+                    "-d",
+                    temp_db,
+                ],
+                env=env,
+                stdin=dump_process.stdout,
+            )
+
+            dump_process.stdout.close()
+            psql_process.communicate()
+            dump_process.wait()
+            if dump_process.returncode or psql_process.returncode:
+                message = f"Failed to sync data from {DB_NAME} to {temp_db}"
+                raise CommandError(message)
+
+            self.stdout.write(self.style.SUCCESS(f"Synced data from {DB_NAME} to {temp_db}"))
             table_list = self._execute_sql(temp_db, [self._table_list_query()])
             self._execute_sql(temp_db, self._remove_emails([row[0] for row in table_list]))
             self.stdout.write(self.style.SUCCESS("Removed emails from temporary DB"))
 
             dump_cmd = [
-                "pg_dump",
+                PG_DUMP,
                 "-h",
                 DB_HOST,
                 "-p",
@@ -86,7 +125,7 @@ class Command(BaseCommand):
             dump_cmd += [f"--table={table}" for table in tables]
             dump_cmd += ["-f", str(output_path)]
 
-            run(dump_cmd, check=True, env=env)
+            run(dump_cmd, check=True, env=env)  # noqa: S603
             self.stdout.write(self.style.SUCCESS(f"Created dump: {output_path}"))
         except CalledProcessError as e:
             message = f"Command failed: {e.cmd}"

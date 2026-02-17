@@ -30,6 +30,8 @@ class RepositoryBasedEntityModel(models.Model):
     """Repository based entity model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     name = models.CharField(verbose_name="Name", max_length=100)
@@ -95,7 +97,7 @@ class RepositoryBasedEntityModel(models.Model):
         EntityMember,
         content_type_field="entity_type",
         object_id_field="entity_id",
-        related_query_name="entity",
+        related_query_name="entity_member",
     )
 
     @cached_property
