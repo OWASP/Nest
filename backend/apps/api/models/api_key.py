@@ -5,6 +5,7 @@ import secrets
 import uuid
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.utils import timezone
 
@@ -57,7 +58,9 @@ class ApiKey(models.Model):
     @transaction.atomic
     def create(cls, user, name, expires_at):
         """Create a new API key instance."""
-        if user.active_api_keys.select_for_update().count() >= MAX_ACTIVE_KEYS:
+        locked_user = get_user_model().objects.select_for_update().get(pk=user.pk)
+
+        if locked_user.active_api_keys.count() >= MAX_ACTIVE_KEYS:
             return None
 
         raw_key = cls.generate_raw_key()
