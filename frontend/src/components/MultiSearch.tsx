@@ -161,7 +161,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     <div className="w-full max-w-md p-4" ref={searchBarRef}>
       <div className="relative">
         <FaSearch
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
           aria-hidden="true"
         />
 
@@ -172,14 +172,14 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           onChange={handleSearchChange}
           placeholder={placeholder}
           aria-label={placeholder || 'Search'}
-          className="h-12 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-10 text-lg"
+          className="h-12 w-full rounded-lg border border-gray-300 bg-white pr-10 pl-10 text-lg"
         />
 
         {searchQuery && (
           <button
             type="button"
             onClick={handleClearSearch}
-            className="absolute right-2 top-1/2 -translate-y-1/2"
+            className="absolute top-1/2 right-2 -translate-y-1/2"
             aria-label="Clear search"
           >
             <FaTimes aria-hidden="true" />
