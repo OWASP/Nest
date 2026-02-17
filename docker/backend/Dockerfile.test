@@ -41,6 +41,8 @@ COPY tests/apps tests/apps
 
 FROM python:3.13.11-alpine3.23
 
+RUN apk add --no-cache graphviz
+
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \
     mkdir -p /home/owasp && \
