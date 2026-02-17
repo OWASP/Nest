@@ -6,8 +6,8 @@ import debounce from 'lodash/debounce'
 import type React from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
-import { GetModulesByProgramDocument } from 'types/__generated__/moduleQueries.generated'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
+import type { FieldErrors } from 'utils/helpers/handleGraphQLError'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
@@ -44,8 +44,7 @@ interface ModuleFormProps {
   submitText?: string
   minDate?: string
   maxDate?: string
-  programKey: string
-  currentModuleKey?: string
+  mutationErrors?: FieldErrors
 }
 
 const EXPERIENCE_LEVELS = [
@@ -65,12 +64,9 @@ const ModuleForm = ({
   submitText = 'Save',
   minDate,
   maxDate,
-  programKey,
-  currentModuleKey,
+  mutationErrors,
 }: ModuleFormProps) => {
-  const client = useApolloClient()
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [nameUniquenessError, setNameUniquenessError] = useState<string | undefined>(undefined)
 
   const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -92,16 +88,9 @@ const ModuleForm = ({
     }
   }
 
-  const validateNameWithUniqueness = (
-    value: string,
-    uniquenessError?: string | undefined
-  ): string | undefined => {
-    return validateName(value, uniquenessError)
-  }
-
   const validateNameLocal = (value: string): string | undefined => {
-    if (nameUniquenessError) {
-      return nameUniquenessError
+    if (mutationErrors?.name) {
+      return mutationErrors.name
     }
     return validateName(value)
   }
@@ -121,38 +110,6 @@ const ModuleForm = ({
     return validateRequired(value, 'Experience level')
   }
 
-  const checkNameUniqueness = useCallback(
-    async (name: string): Promise<string | undefined> => {
-      if (!name.trim()) {
-        return undefined
-      }
-
-      try {
-        const { data } = await client.query({
-          query: GetModulesByProgramDocument,
-          variables: { programKey },
-          fetchPolicy: 'network-only',
-        })
-
-        const modules = data?.getProgramModules || []
-        const duplicateModule = modules.find(
-          (module: { name: string; key: string }) =>
-            module.name.toLowerCase() === name.trim().toLowerCase() &&
-            (!isEdit || module.key !== currentModuleKey)
-        )
-
-        if (duplicateModule) {
-          return 'This module name already exists in this program'
-        }
-        return undefined
-      } catch {
-        // Silently fail uniqueness check - backend will catch it
-        return undefined
-      }
-    },
-    [client, programKey, isEdit, currentModuleKey]
-  )
-
   const errors = useFormValidation(
     [
       ...getCommonValidationRules(formData, touched, validateNameLocal, validateEndDateLocal),
@@ -167,10 +124,10 @@ const ModuleForm = ({
         validator: () => validateExperienceLevel(formData.experienceLevel),
       },
     ],
-    [formData, touched, nameUniquenessError]
+    [formData, touched, mutationErrors]
   )
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const allFields = [
@@ -187,18 +144,7 @@ const ModuleForm = ({
     })
     setTouched(newTouched)
 
-    let uniquenessError: string | undefined
-    if (formData.name.trim()) {
-      uniquenessError = await checkNameUniqueness(formData.name)
-      setNameUniquenessError(uniquenessError)
-      if (uniquenessError) {
-        setTouched((prev) => ({ ...prev, name: true }))
-      }
-    } else {
-      setNameUniquenessError(undefined)
-    }
-
-    const nameError = validateNameWithUniqueness(formData.name, uniquenessError)
+    const nameError = validateName(formData.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDateLocal(formData.endedAt)
@@ -239,11 +185,8 @@ const ModuleForm = ({
                   onValueChange={(value) => {
                     handleInputChange('name', value)
                     setTouched((prev) => ({ ...prev, name: true }))
-                    if (nameUniquenessError) {
-                      setNameUniquenessError(undefined)
-                    }
                   }}
-                  error={errors.name || nameUniquenessError}
+                  error={errors.name || mutationErrors?.name}
                   touched={touched.name}
                   required
                   className="w-full min-w-0 lg:col-span-2"

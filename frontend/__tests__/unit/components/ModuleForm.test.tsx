@@ -478,7 +478,7 @@ describe('ModuleForm', () => {
         experienceLevel: 'BEGINNER',
       }
 
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
+      renderModuleForm({ formData: validFormData })
 
       const form = document.querySelector('form')
       await act(async () => {
@@ -528,7 +528,7 @@ describe('ModuleForm', () => {
     })
   })
 
-  describe('Duplicate Name Validation (checkNameUniqueness)', () => {
+  describe('Mutation Error Display (mutationErrors prop)', () => {
     const validFormData = {
       ...defaultFormData,
       name: 'Test Module',
@@ -540,287 +540,62 @@ describe('ModuleForm', () => {
       experienceLevel: 'BEGINNER',
     }
 
-    beforeEach(() => {
-      // Default: no modules in program (no duplicates)
-      mockQuery.mockResolvedValue({
-        data: { getProgramModules: [] },
-      })
-    })
-
-    it('calls checkNameUniqueness when form is submitted with valid data', async () => {
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      expect(form).toBeInTheDocument()
-
-      await act(async () => {
-        fireEvent.submit(form!)
-        // Wait for async checkNameUniqueness to complete
-        await new Promise((resolve) => setTimeout(resolve, 0))
-      })
-
-      // Should query for existing modules
-      await waitFor(() => {
-        expect(mockQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            variables: { programKey: 'test-program' },
-          })
-        )
-      })
-    })
-
-    it('shows error message when duplicate name exists (create mode)', async () => {
-      // Mock existing module with same name
-      mockQuery.mockResolvedValue({
-        data: {
-          getProgramModules: [{ name: 'Test Module', key: 'test-module' }],
-        },
-      })
-
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
-
-      await waitFor(() => {
-        expect(screen.getByTestId('module-name-error')).toHaveTextContent(
-          'This module name already exists in this program'
-        )
-      })
-    })
-
-    it('prevents form submission when duplicate name exists', async () => {
-      // Mock existing module with same name
-      mockQuery.mockResolvedValue({
-        data: {
-          getProgramModules: [{ name: 'Test Module', key: 'test-module' }],
-        },
-      })
-
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
-
-      await waitFor(() => {
-        expect(screen.getByTestId('module-name-error')).toBeInTheDocument()
-      })
-
-      // onSubmit should NOT be called because validation failed
-      expect(mockOnSubmit).not.toHaveBeenCalled()
-    })
-
-    it('allows submission when no duplicate exists', async () => {
-      // Mock no existing modules
-      mockQuery.mockResolvedValue({
-        data: { getProgramModules: [] },
-      })
-
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
-
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalled()
-      })
-    })
-
-    it('is case-insensitive when checking for duplicates', async () => {
-      // Mock existing module with different casing
-      mockQuery.mockResolvedValue({
-        data: {
-          getProgramModules: [{ name: 'test module', key: 'test-module' }],
-        },
-      })
-
-      const formDataWithUpperCase = {
-        ...validFormData,
-        name: 'TEST MODULE',
-      }
-
-      renderModuleForm({ formData: formDataWithUpperCase, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
-
-      await waitFor(() => {
-        expect(screen.getByTestId('module-name-error')).toHaveTextContent(
-          'This module name already exists in this program'
-        )
-      })
-    })
-
-    it('excludes current module when checking duplicates in edit mode', async () => {
-      // Mock existing module with same key (current module being edited)
-      mockQuery.mockResolvedValue({
-        data: {
-          getProgramModules: [{ name: 'Test Module', key: 'current-module-key' }],
-        },
-      })
-
+    it('displays mutation error for name field when mutationErrors.name is set', () => {
       renderModuleForm({
         formData: validFormData,
-        programKey: 'test-program',
-        isEdit: true,
-        currentModuleKey: 'current-module-key',
+        mutationErrors: { name: 'A module with a similar name already exists in this program.' },
       })
 
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
+      expect(screen.getByTestId('module-name-error')).toHaveTextContent(
+        'A module with a similar name already exists in this program.'
+      )
+    })
+
+    it('does not display mutation error when mutationErrors is empty', () => {
+      renderModuleForm({
+        formData: validFormData,
+        mutationErrors: {},
       })
 
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalled()
-      })
-
-      // Should not show error for the current module
       expect(screen.queryByTestId('module-name-error')).not.toBeInTheDocument()
     })
 
-    it('shows error for duplicate name of different module in edit mode', async () => {
-      // Mock existing module with different key (another module)
-      mockQuery.mockResolvedValue({
-        data: {
-          getProgramModules: [{ name: 'Test Module', key: 'different-module-key' }],
-        },
-      })
-
+    it('prevents form submission when mutationErrors.name is set', () => {
       renderModuleForm({
         formData: validFormData,
-        programKey: 'test-program',
-        isEdit: true,
-        currentModuleKey: 'current-module-key',
+        mutationErrors: { name: 'A module with a similar name already exists in this program.' },
       })
 
       const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
+      fireEvent.submit(form!)
 
-      await waitFor(() => {
-        expect(screen.getByTestId('module-name-error')).toHaveTextContent(
-          'This module name already exists in this program'
-        )
-      })
+      expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
-    it('handles API errors gracefully and allows form submission', async () => {
-      // Mock API error
-      mockQuery.mockRejectedValue(new Error('Network error'))
-
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
+    it('allows submission when mutationErrors has no name error', async () => {
+      renderModuleForm({
+        formData: validFormData,
+        mutationErrors: {},
       })
 
-      // Should still allow submission (backend will catch duplicate)
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
       await waitFor(() => {
         expect(mockOnSubmit).toHaveBeenCalled()
       })
     })
 
-    it('trims whitespace when checking for duplicates', async () => {
-      // Mock existing module
-      mockQuery.mockResolvedValue({
-        data: {
-          getProgramModules: [{ name: 'Test Module', key: 'test-module' }],
-        },
+    it('allows submission when mutationErrors is undefined', async () => {
+      renderModuleForm({
+        formData: validFormData,
       })
-
-      const formDataWithWhitespace = {
-        ...validFormData,
-        name: '  Test Module  ',
-      }
-
-      renderModuleForm({ formData: formDataWithWhitespace, programKey: 'test-program' })
 
       const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
+      fireEvent.submit(form!)
 
       await waitFor(() => {
-        expect(screen.getByTestId('module-name-error')).toHaveTextContent(
-          'This module name already exists in this program'
-        )
-      })
-    })
-
-    it('does not check uniqueness for empty name', async () => {
-      const formDataEmptyName = {
-        ...validFormData,
-        name: '',
-      }
-
-      renderModuleForm({ formData: formDataEmptyName, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
-
-      // Should not call the uniqueness check API
-      await waitFor(() => {
-        expect(mockQuery).not.toHaveBeenCalledWith(
-          expect.objectContaining({
-            variables: { programKey: 'test-program' },
-          })
-        )
-      })
-    })
-
-    it('sets name field as touched when duplicate is found', async () => {
-      mockQuery.mockResolvedValue({
-        data: {
-          getProgramModules: [{ name: 'Test Module', key: 'test-module' }],
-        },
-      })
-
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
-
-      await waitFor(() => {
-        const nameError = screen.getByTestId('module-name-error')
-        expect(nameError).toBeInTheDocument()
-        // Error should be visible (touched state is true)
-        expect(nameError).toHaveTextContent('This module name already exists in this program')
-      })
-    })
-
-    it('uses network-only fetch policy to get latest data', async () => {
-      mockQuery.mockResolvedValue({
-        data: { getProgramModules: [] },
-      })
-
-      renderModuleForm({ formData: validFormData, programKey: 'test-program' })
-
-      const form = document.querySelector('form')
-      await act(async () => {
-        fireEvent.submit(form!)
-      })
-
-      await waitFor(() => {
-        expect(mockQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            fetchPolicy: 'network-only',
-          })
-        )
+        expect(mockOnSubmit).toHaveBeenCalled()
       })
     })
   })

@@ -110,7 +110,7 @@ const ProgramForm = ({
     [formData, touched, nameUniquenessError]
   )
 
-  const checkNameUniqueness = useCallback(
+  const checkNameUniquenessSync = useCallback(
     async (name: string): Promise<string | undefined> => {
       if (!name.trim()) {
         return undefined
@@ -157,7 +157,7 @@ const ProgramForm = ({
     // Check name uniqueness and capture result before validation
     let uniquenessError: string | undefined
     if (formData.name.trim()) {
-      uniquenessError = await checkNameUniqueness(formData.name)
+      uniquenessError = await checkNameUniquenessSync(formData.name)
       setNameUniquenessError(uniquenessError)
     } else {
       setNameUniquenessError(undefined)

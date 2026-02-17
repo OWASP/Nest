@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, Validat
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
@@ -114,8 +115,11 @@ class ModuleMutation:
         except IntegrityError as e:
             error_message = str(e)
             if "unique_module_key_in_program" in error_message:
-                msg = "This module name already exists in this program"
-                raise ValidationError(message=msg) from e
+                msg = "A module with a similar name already exists in this program."
+                raise GraphQLError(
+                    msg,
+                    extensions={"code": "VALIDATION_ERROR", "field": "name"},
+                ) from e
             raise
 
         if module.experience_level not in program.experience_levels:
@@ -386,8 +390,11 @@ class ModuleMutation:
         except IntegrityError as e:
             error_message = str(e)
             if "unique_module_key_in_program" in error_message:
-                msg = "This module name already exists in this program"
-                raise ValidationError(message=msg) from e
+                msg = "A module with a similar name already exists in this program."
+                raise GraphQLError(
+                    msg,
+                    extensions={"code": "VALIDATION_ERROR", "field": "name"},
+                ) from e
             raise
 
         if module.experience_level not in module.program.experience_levels:
