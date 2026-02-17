@@ -113,7 +113,8 @@ class TestApiKeyModel:
             __enter__=MagicMock(return_value=None),
             __exit__=MagicMock(return_value=False),
         )
-        mock_user.active_api_keys.select_for_update.return_value.count.return_value = 0
+        type(mock_user).objects = MagicMock()
+        mock_user.active_api_keys.count.return_value = 0
         mock_instance = MagicMock(spec=ApiKey)
         mock_create.return_value = mock_instance
         expires_at = timezone.now() + timedelta(days=30)
@@ -130,7 +131,8 @@ class TestApiKeyModel:
 
     def test_create_max_keys_exceeded(self, mock_user):
         """Test API key creation fails when max active keys exceeded."""
-        mock_user.active_api_keys.select_for_update.return_value.count.return_value = 100
+        type(mock_user).objects = MagicMock()
+        mock_user.active_api_keys.count.return_value = 100
         expires_at = timezone.now() + timedelta(days=30)
 
         result = ApiKey.create.__wrapped__(ApiKey, mock_user, "Test Key", expires_at)

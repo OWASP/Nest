@@ -57,7 +57,9 @@ class ApiKey(models.Model):
     @transaction.atomic
     def create(cls, user, name, expires_at):
         """Create a new API key instance."""
-        if user.active_api_keys.select_for_update().count() >= MAX_ACTIVE_KEYS:
+        type(user).objects.select_for_update().get(pk=user.pk)
+
+        if user.active_api_keys.count() >= MAX_ACTIVE_KEYS:
             return None
 
         raw_key = cls.generate_raw_key()
