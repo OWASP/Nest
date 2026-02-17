@@ -9,11 +9,11 @@ from apps.github.constants import (
 )
 
 
-class SnapshotUserManager(models.Manager):
-    """Users for snapshot processing."""
+class ActiveUserManager(models.Manager):
+    """Active users."""
 
     def get_queryset(self):
-        """Get queryset of users excluding bots and system accounts.
+        """Get queryset of active users.
 
         Filters out bot users and system accounts to ensure valid user data
         for snapshot processing.

@@ -70,7 +70,7 @@ class Command(BaseCommand):
                 created_at__gte=snapshot.start_at,
                 created_at__lte=snapshot.end_at,
             )
-            new_issues = Issue.snapshot_issues.filter(
+            new_issues = Issue.active_issues.filter(
                 created_at__gte=snapshot.start_at,
                 created_at__lte=snapshot.end_at,
             )
@@ -82,7 +82,7 @@ class Command(BaseCommand):
                 created_at__gte=snapshot.start_at,
                 created_at__lte=snapshot.end_at,
             )
-            new_users = User.snapshot_users.filter(
+            new_users = User.active_users.filter(
                 created_at__gte=snapshot.start_at,
                 created_at__lte=snapshot.end_at,
             )

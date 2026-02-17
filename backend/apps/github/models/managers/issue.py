@@ -48,8 +48,8 @@ class OpenIssueManager(models.Manager):
         return self.get_queryset().filter(summary="")
 
 
-class SnapshotIssueManager(models.Manager):
-    """Issues for snapshot processing."""
+class ActiveIssueManager(models.Manager):
+    """Active issues."""
 
     def get_queryset(self):
         """Get queryset of issues with non-empty repositories.
