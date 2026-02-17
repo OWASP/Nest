@@ -230,6 +230,7 @@ generate-backend-model-graphs:
 	@mkdir -p backend/model-graphs
 
 	@docker run --rm \
+	    --user $(id -u):$(id -g) \
 	    -v $(CURDIR)/backend/model-graphs:/home/owasp/model-graphs \
 	    -e DJANGO_SETTINGS_MODULE=settings.graphs \
 	    -e DJANGO_CONFIGURATION=Graphs \
