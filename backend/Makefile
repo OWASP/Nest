@@ -227,11 +227,12 @@ generate-backend-model-graphs:
 		-f docker/backend/Dockerfile.test backend \
 		-t nest-graphs-backend
 	@docker run --rm \
-		-e DJANGO_SETTINGS_MODULE=settings.graphs \
-		-e DJANGO_CONFIGURATION=Graphs \
-		--env-file backend/.env.example \
-		nest-graphs-backend \
-		python manage.py generate_model_graphs
+	    -v $(CURDIR)/backend:/home/owasp \
+	    -e DJANGO_SETTINGS_MODULE=settings.graphs \
+	    -e DJANGO_CONFIGURATION=Graphs \
+	    --env-file backend/.env.example \
+	    nest-graphs-backend \
+	    python manage.py generate_model_graphs
 
 test-fuzz:
 	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true
