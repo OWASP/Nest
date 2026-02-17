@@ -1,8 +1,15 @@
+"""Django settings configuration for generating backend model graphs."""
+
 from .local import Local
 
 
 class Graphs(Local):
-    INSTALLED_APPS = list(Local.INSTALLED_APPS)
+    """Settings configuration used for model graph generation."""
 
-    if "django_extensions" not in INSTALLED_APPS:
-        INSTALLED_APPS.append("django_extensions")
+    @classmethod
+    def setup(cls):
+        """Extend INSTALLED_APPS to include django_extensions."""
+        super().setup()
+
+        if "django_extensions" not in cls.INSTALLED_APPS:
+            cls.INSTALLED_APPS = (*cls.INSTALLED_APPS, "django_extensions")
