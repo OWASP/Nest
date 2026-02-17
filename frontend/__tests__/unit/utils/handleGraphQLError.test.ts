@@ -121,14 +121,14 @@ describe('extractFieldErrors', () => {
       expect(result.unmappedErrors).toEqual(['Network error'])
     })
 
-    it('handles Error with empty message', () => {
-      const error = new Error('')
+    it('puts generic Error message into unmappedErrors', () => {
+      const error = new Error('Something went wrong')
 
       const result = extractFieldErrors(error)
 
       expect(result.hasFieldErrors).toBe(false)
       expect(result.fieldErrors).toEqual({})
-      expect(result.unmappedErrors).toEqual([])
+      expect(result.unmappedErrors).toEqual(['Something went wrong'])
     })
   })
 

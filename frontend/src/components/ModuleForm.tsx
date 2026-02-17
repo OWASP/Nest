@@ -144,7 +144,7 @@ const ModuleForm = ({
     })
     setTouched(newTouched)
 
-    const nameError = validateNameLocal(formData.name)
+    const nameError = validateName(formData.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDateLocal(formData.endedAt)

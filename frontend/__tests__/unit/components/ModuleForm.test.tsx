@@ -583,7 +583,7 @@ describe('ModuleForm', () => {
       expect(screen.queryByTestId('module-name-error')).not.toBeInTheDocument()
     })
 
-    it('prevents form submission when mutationErrors.name is set', () => {
+    it('allows resubmission even when mutationErrors.name is set', async () => {
       const { rerender } = render(
         <ModuleForm
           formData={validFormData}
@@ -614,9 +614,12 @@ describe('ModuleForm', () => {
         />
       )
 
-      // Second submit should be prevented by mutation error
+      // Second submit should still call onSubmit so parent can clear errors and retry
       fireEvent.submit(form!)
-      expect(mockOnSubmit).not.toHaveBeenCalled()
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      })
     })
 
     it('allows submission when mutationErrors has no name error', async () => {
