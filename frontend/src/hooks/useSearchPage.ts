@@ -51,18 +51,17 @@ export function useSearchPage<T>({
       const current = new URLSearchParams(Array.from(searchParams.entries()))
 
       Object.entries(params).forEach(([key, value]) => {
-        const isEmpty =
-          value === undefined ||
-          value === '' ||
-          value === null ||
-          value === 1 ||
-          value === '1'
-
-        if (isEmpty) {
+        if (value === undefined || value === null || value === '') {
           current.delete(key)
-        } else {
-          current.set(key, String(value))
+          return
         }
+
+        if (key === 'page' && (value === 1 || value === '1')) {
+          current.delete(key)
+          return
+        }
+
+        current.set(key, String(value))
       })
 
       const search = current.toString()
@@ -72,7 +71,6 @@ export function useSearchPage<T>({
     },
     [router, pathname, searchParams]
   )
-
 
   useEffect(() => {
     setIsLoaded(false)
