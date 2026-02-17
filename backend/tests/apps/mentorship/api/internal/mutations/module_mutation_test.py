@@ -249,26 +249,6 @@ class TestModuleMutationCreateModule:
     @patch("apps.mentorship.api.internal.mutations.module.Project")
     @patch("apps.mentorship.api.internal.mutations.module.Program")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    def test_create_module_not_mentor(self, mock_mentor, mock_program, mock_project):
-        """Test PermissionDenied when user is not a mentor."""
-        user = MagicMock()
-        info = self._make_info(user)
-        input_data = self._make_input_data()
-
-        mock_program.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_project.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_program.objects.get.return_value = MagicMock()
-        mock_project.objects.get.return_value = MagicMock()
-        mock_mentor.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_mentor.objects.get.side_effect = mock_mentor.DoesNotExist
-
-        mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied, match="Only mentors can create modules"):
-            mutation.create_module(info, input_data)
-
-    @patch("apps.mentorship.api.internal.mutations.module.Project")
-    @patch("apps.mentorship.api.internal.mutations.module.Program")
-    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     def test_create_module_not_admin(self, mock_mentor, mock_program, mock_project):
         """Test PermissionDenied when mentor is not program admin."""
         user = MagicMock()
@@ -400,8 +380,7 @@ class TestModuleMutationAssignIssue:
             mock_mod
         )
 
-        mock_mentor_obj = MagicMock()
-        mock_mentor.objects.filter.return_value.first.return_value = mock_mentor_obj
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_gh = MagicMock()
         mock_gh_user.objects.filter.return_value.first.return_value = mock_gh
@@ -451,33 +430,10 @@ class TestModuleMutationAssignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = None
+        mock_mentor.objects.filter.return_value.exists.return_value = False
 
         mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied, match="Only mentors can assign issues"):
-            mutation.assign_issue_to_user(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                user_login="testuser",
-            )
-
-    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_assign_issue_not_admin(self, mock_module, mock_mentor):
-        """Test PermissionDenied when mentor is not admin."""
-        user = MagicMock()
-        info = self._make_info(user)
-        mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = False
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
-        )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
-
-        mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied):
+        with pytest.raises(PermissionDenied, match="Only mentors of this module can assign"):
             mutation.assign_issue_to_user(
                 info,
                 module_key="mod-1",
@@ -498,7 +454,7 @@ class TestModuleMutationAssignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh.objects.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
@@ -523,7 +479,7 @@ class TestModuleMutationAssignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh.objects.filter.return_value.first.return_value = MagicMock()
         mock_mod.issues.filter.return_value.first.return_value = None
 
@@ -559,7 +515,7 @@ class TestModuleMutationUnassignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh = MagicMock()
         mock_gh_user.objects.filter.return_value.first.return_value = mock_gh
         mock_issue = MagicMock()
@@ -606,30 +562,7 @@ class TestModuleMutationUnassignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = None
-
-        mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied):
-            mutation.unassign_issue_from_user(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                user_login="testuser",
-            )
-
-    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_unassign_not_admin(self, mock_module, mock_mentor):
-        """Test PermissionDenied when mentor is not admin."""
-        user = MagicMock()
-        info = self._make_info(user)
-        mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = False
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
-        )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = False
 
         mutation = ModuleMutation()
         with pytest.raises(PermissionDenied):
@@ -653,7 +586,7 @@ class TestModuleMutationUnassignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh.objects.filter.return_value.first.return_value = None
 
         mutation = ModuleMutation()
@@ -678,7 +611,7 @@ class TestModuleMutationUnassignIssue:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
         mock_gh.objects.filter.return_value.first.return_value = MagicMock()
         mock_mod.issues.filter.return_value.first.return_value = None
 
@@ -716,7 +649,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
@@ -776,33 +709,10 @@ class TestModuleMutationSetTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = None
+        mock_mentor.objects.filter.return_value.exists.return_value = False
 
         mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied, match="Only mentors can set deadlines"):
-            mutation.set_task_deadline(
-                info,
-                module_key="mod-1",
-                program_key="prog-1",
-                issue_number=1,
-                deadline_at=datetime(2025, 12, 1, tzinfo=UTC),
-            )
-
-    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_set_deadline_not_admin(self, mock_module, mock_mentor):
-        """Test PermissionDenied when mentor is not admin."""
-        user = MagicMock()
-        info = self._make_info(user)
-        mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = False
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
-        )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
-
-        mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied):
+        with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
@@ -822,7 +732,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
 
@@ -847,7 +757,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         mock_issue.assignees.all.return_value.exists.return_value = False
@@ -878,7 +788,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
@@ -924,7 +834,7 @@ class TestModuleMutationSetTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         mock_issue.assignees.all.return_value.exists.return_value = True
@@ -967,7 +877,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
@@ -1004,7 +914,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee1 = MagicMock()
@@ -1043,7 +953,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
@@ -1079,7 +989,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         assignee = MagicMock()
@@ -1122,29 +1032,10 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = None
+        mock_mentor.objects.filter.return_value.exists.return_value = False
 
         mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied, match="Only mentors can clear deadlines"):
-            mutation.clear_task_deadline(
-                info, module_key="mod-1", program_key="prog-1", issue_number=1
-            )
-
-    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_not_admin(self, mock_module, mock_mentor):
-        """Test PermissionDenied when mentor is not admin."""
-        user = MagicMock()
-        info = self._make_info(user)
-        mock_mod = MagicMock()
-        mock_mod.program.admins.filter.return_value.exists.return_value = False
-        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
-            mock_mod
-        )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
-
-        mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied):
+        with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
             mutation.clear_task_deadline(
                 info, module_key="mod-1", program_key="prog-1", issue_number=1
             )
@@ -1160,7 +1051,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
         issue_qs = mock_mod.issues.select_related.return_value
         issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = None
 
@@ -1181,7 +1072,7 @@ class TestModuleMutationClearTaskDeadline:
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
-        mock_mentor.objects.filter.return_value.first.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = True
 
         mock_issue = MagicMock()
         mock_issue.assignees.all.return_value.exists.return_value = False
@@ -1275,37 +1166,23 @@ class TestModuleMutationUpdateModule:
 
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    def test_update_module_not_mentor(self, mock_mentor, mock_module):
-        """Test PermissionDenied when user is not a mentor."""
+    def test_update_module_not_admin_nor_mentor(self, mock_mentor, mock_module):
+        """Test PermissionDenied when user is neither admin nor mentor."""
         user = MagicMock()
         user.username = "testuser"
-        info = self._make_info(user)
-        input_data = self._make_input_data()
-        mock_mod = MagicMock()
-        mod_qs = mock_module.objects.select_related.return_value
-        mod_qs.select_for_update.return_value.get.return_value = mock_mod
-        mock_mentor.DoesNotExist = type("DoesNotExist", (Exception,), {})
-        mock_mentor.objects.get.side_effect = mock_mentor.DoesNotExist
-
-        mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied, match="Only mentors can edit modules"):
-            mutation.update_module(info, input_data)
-
-    @patch("apps.mentorship.api.internal.mutations.module.Module")
-    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
-    def test_update_module_not_admin(self, mock_mentor, mock_module):
-        """Test PermissionDenied when mentor is not admin."""
-        user = MagicMock()
         info = self._make_info(user)
         input_data = self._make_input_data()
         mock_mod = MagicMock()
         mock_mod.program.admins.filter.return_value.exists.return_value = False
         mod_qs = mock_module.objects.select_related.return_value
         mod_qs.select_for_update.return_value.get.return_value = mock_mod
-        mock_mentor.objects.get.return_value = MagicMock()
+        mock_mentor.objects.filter.return_value.exists.return_value = False
 
         mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied):
+        with pytest.raises(
+            PermissionDenied,
+            match="Only admins of the program or mentors of this module can edit",
+        ):
             mutation.update_module(info, input_data)
 
     @patch("apps.mentorship.api.internal.mutations.module.Project")

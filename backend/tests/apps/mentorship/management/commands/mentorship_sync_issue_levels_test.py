@@ -5,6 +5,15 @@ import pytest
 from apps.mentorship.management.commands.mentorship_sync_issue_levels import Command
 
 
+def make_qs(iterable, exist):
+    """Return a queryset-like MagicMock that is iterable."""
+    qs = MagicMock(name="QuerySet")
+    qs.exists.return_value = exist
+    qs.__iter__.return_value = iter(iterable)
+    qs.all.return_value = list(iterable)
+    return qs
+
+
 @pytest.fixture
 def command():
     cmd = Command()
@@ -15,139 +24,132 @@ def command():
     return cmd
 
 
-def make_qs(iterable, exist):
-    """Return a queryset-like MagicMock that is iterable."""
-    qs = MagicMock(name="QuerySet")
-    qs.exists.return_value = exist
-    qs.__iter__.return_value = iter(iterable)
-    qs.all.return_value = list(iterable)
-    return qs
+class TestSyncIssueLevelsCommand:
+    @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
+    def test_handle_no_task_levels(self, mock_task_level, command):
+        """When no TaskLevel objects exist, command should exit early with a warning."""
+        empty_qs = make_qs([], exist=False)
+        mock_task_level.objects.select_related.return_value.order_by.return_value = empty_qs
 
+        command.handle()
+        command.stdout.write.assert_called_with(
+            "No TaskLevel objects found in the database. Exiting."
+        )
 
-@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
-def test_handle_no_task_levels(mock_task_level, command):
-    """When no TaskLevel objects exist, command should exit early with a warning."""
-    empty_qs = make_qs([], exist=False)
-    mock_task_level.objects.select_related.return_value.order_by.return_value = empty_qs
+    @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
+    @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
+    def test_handle_updates_issues(self, mock_task_level, mock_issue, command):
+        """When matches exist, issues should be updated and bulk_update called."""
+        mock_module = MagicMock()
+        mock_module.id = 1
+        mock_module.name = "Test Module"
 
-    command.handle()
-    command.stdout.write.assert_called_with("No TaskLevel objects found in the database. Exiting.")
+        mock_level_1 = MagicMock(module_id=mock_module.id, name="Beginner", labels=["label-a"])
+        mock_level_2 = MagicMock(module_id=mock_module.id, name="Intermediate", labels=["label-b"])
 
+        levels_qs = make_qs([mock_level_1, mock_level_2], exist=True)
+        mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
 
-@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
-@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
-def test_handle_updates_issues(mock_task_level, mock_issue, command):
-    """When matches exist, issues should be updated and bulk_update called."""
-    mock_module = MagicMock()
-    mock_module.id = 1
-    mock_module.name = "Test Module"
+        label_a = MagicMock()
+        label_a.name = "Label-A"
+        label_b = MagicMock()
+        label_b.name = "Label-B"
+        label_nomatch = MagicMock()
+        label_nomatch.name = "No-Match"
 
-    mock_level_1 = MagicMock(module_id=mock_module.id, name="Beginner", labels=["label-a"])
-    mock_level_2 = MagicMock(module_id=mock_module.id, name="Intermediate", labels=["label-b"])
+        issue_with_label_a = MagicMock()
+        issue_with_label_a.labels.all.return_value = [label_a]
+        issue_with_label_a.mentorship_modules.all.return_value = [mock_module]
+        issue_with_label_a.level = None
 
-    levels_qs = make_qs([mock_level_1, mock_level_2], exist=True)
-    mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
+        issue_with_label_b = MagicMock()
+        issue_with_label_b.labels.all.return_value = [label_b]
+        issue_with_label_b.mentorship_modules.all.return_value = [mock_module]
+        issue_with_label_b.level = mock_level_1
 
-    label_a = MagicMock()
-    label_a.name = "Label-A"
-    label_b = MagicMock()
-    label_b.name = "Label-B"
-    label_nomatch = MagicMock()
-    label_nomatch.name = "No-Match"
+        issue_no_match = MagicMock()
+        issue_no_match.labels.all.return_value = [label_nomatch]
+        issue_no_match.mentorship_modules.all.return_value = [mock_module]
+        issue_no_match.level = mock_level_1
 
-    issue_with_label_a = MagicMock()
-    issue_with_label_a.labels.all.return_value = [label_a]
-    issue_with_label_a.mentorship_modules.all.return_value = [mock_module]
-    issue_with_label_a.level = None
+        issue_already_up_to_date = MagicMock()
+        issue_already_up_to_date.labels.all.return_value = [label_a]
+        issue_already_up_to_date.mentorship_modules.all.return_value = [mock_module]
+        issue_already_up_to_date.level = mock_level_1
 
-    issue_with_label_b = MagicMock()
-    issue_with_label_b.labels.all.return_value = [label_b]
-    issue_with_label_b.mentorship_modules.all.return_value = [mock_module]
-    issue_with_label_b.level = mock_level_1
+        issues_qs = make_qs(
+            [issue_with_label_a, issue_with_label_b, issue_no_match, issue_already_up_to_date],
+            exist=True,
+        )
+        mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
 
-    issue_no_match = MagicMock()
-    issue_no_match.labels.all.return_value = [label_nomatch]
-    issue_no_match.mentorship_modules.all.return_value = [mock_module]
-    issue_no_match.level = mock_level_1
+        command.handle()
 
-    issue_already_up_to_date = MagicMock()
-    issue_already_up_to_date.labels.all.return_value = [label_a]
-    issue_already_up_to_date.mentorship_modules.all.return_value = [mock_module]
-    issue_already_up_to_date.level = mock_level_1
+        assert issue_with_label_a.level == mock_level_1
+        assert issue_with_label_b.level == mock_level_2
+        assert issue_no_match.level is None
+        assert issue_already_up_to_date.level == mock_level_1
 
-    issues_qs = make_qs(
-        [issue_with_label_a, issue_with_label_b, issue_no_match, issue_already_up_to_date],
-        exist=True,
-    )
-    mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
+        expected_updated = [issue_with_label_a, issue_with_label_b, issue_no_match]
+        mock_issue.objects.bulk_update.assert_called_once_with(expected_updated, ["level"])
+        command.stdout.write.assert_any_call("Successfully updated the level for 3 issues.")
 
-    command.handle()
+    @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
+    @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
+    def test_handle_no_updates_needed(self, mock_task_level, mock_issue, command):
+        """When all issues already have the correct level, bulk_update is not called."""
+        mock_module = MagicMock()
+        mock_module.id = 1
 
-    assert issue_with_label_a.level == mock_level_1
-    assert issue_with_label_b.level == mock_level_2
-    assert issue_no_match.level is None
-    assert issue_already_up_to_date.level == mock_level_1
+        mock_level_1 = MagicMock(module_id=mock_module.id, name="Beginner", labels=["label-a"])
+        levels_qs = make_qs([mock_level_1], exist=True)
+        mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
 
-    expected_updated = [issue_with_label_a, issue_with_label_b, issue_no_match]
-    mock_issue.objects.bulk_update.assert_called_once_with(expected_updated, ["level"])
-    command.stdout.write.assert_any_call("Successfully updated the level for 3 issues.")
+        label_a = MagicMock()
+        label_a.name = "Label-A"
 
+        issue_already_up_to_date = MagicMock()
+        issue_already_up_to_date.labels.all.return_value = [label_a]
+        issue_already_up_to_date.mentorship_modules.all.return_value = [mock_module]
+        issue_already_up_to_date.level = mock_level_1
 
-@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
-@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
-def test_handle_no_updates_needed(mock_task_level, mock_issue, command):
-    """When all issues already have the correct level, bulk_update is not called."""
-    mock_module = MagicMock()
-    mock_module.id = 1
+        issues_qs = make_qs([issue_already_up_to_date], exist=True)
+        mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
 
-    mock_level_1 = MagicMock(module_id=mock_module.id, name="Beginner", labels=["label-a"])
-    levels_qs = make_qs([mock_level_1], exist=True)
-    mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
+        command.handle()
 
-    label_a = MagicMock()
-    label_a.name = "Label-A"
+        mock_issue.objects.bulk_update.assert_not_called()
+        command.stdout.write.assert_any_call("All issue levels are already up-to-date.")
 
-    issue_already_up_to_date = MagicMock()
-    issue_already_up_to_date.labels.all.return_value = [label_a]
-    issue_already_up_to_date.mentorship_modules.all.return_value = [mock_module]
-    issue_already_up_to_date.level = mock_level_1
+    @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
+    @patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
+    def test_handle_module_not_in_map(self, mock_task_level, mock_issue, command):
+        """When an issue's module is not in the module_data_map, it should be skipped."""
+        mock_module_in_map = MagicMock()
+        mock_module_in_map.id = 1
 
-    issues_qs = make_qs([issue_already_up_to_date], exist=True)
-    mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
+        mock_module_not_in_map = MagicMock()
+        mock_module_not_in_map.id = 999
 
-    command.handle()
+        mock_level = MagicMock(
+            module_id=mock_module_in_map.id, name="Beginner", labels=["label-a"]
+        )
+        levels_qs = make_qs([mock_level], exist=True)
+        mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
 
-    mock_issue.objects.bulk_update.assert_not_called()
-    command.stdout.write.assert_any_call("All issue levels are already up-to-date.")
+        label_a = MagicMock()
+        label_a.name = "Label-A"
 
+        issue_with_unknown_module = MagicMock()
+        issue_with_unknown_module.labels.all.return_value = [label_a]
+        issue_with_unknown_module.mentorship_modules.all.return_value = [mock_module_not_in_map]
+        issue_with_unknown_module.level = None
 
-@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.Issue")
-@patch("apps.mentorship.management.commands.mentorship_sync_issue_levels.TaskLevel")
-def test_handle_module_not_in_map(mock_task_level, mock_issue, command):
-    """When an issue's module is not in the module_data_map, it should be skipped."""
-    mock_module_in_map = MagicMock()
-    mock_module_in_map.id = 1
+        issues_qs = make_qs([issue_with_unknown_module], exist=True)
+        mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
 
-    mock_module_not_in_map = MagicMock()
-    mock_module_not_in_map.id = 999
+        command.handle()
 
-    mock_level = MagicMock(module_id=mock_module_in_map.id, name="Beginner", labels=["label-a"])
-    levels_qs = make_qs([mock_level], exist=True)
-    mock_task_level.objects.select_related.return_value.order_by.return_value = levels_qs
-
-    label_a = MagicMock()
-    label_a.name = "Label-A"
-
-    issue_with_unknown_module = MagicMock()
-    issue_with_unknown_module.labels.all.return_value = [label_a]
-    issue_with_unknown_module.mentorship_modules.all.return_value = [mock_module_not_in_map]
-    issue_with_unknown_module.level = None
-
-    issues_qs = make_qs([issue_with_unknown_module], exist=True)
-    mock_issue.objects.prefetch_related.return_value.select_related.return_value = issues_qs
-
-    command.handle()
-
-    # best_match_level is None and level is already None, so no update needed
-    mock_issue.objects.bulk_update.assert_not_called()
-    command.stdout.write.assert_any_call("All issue levels are already up-to-date.")
+        # best_match_level is None and level is already None, so no update needed
+        mock_issue.objects.bulk_update.assert_not_called()
+        command.stdout.write.assert_any_call("All issue levels are already up-to-date.")
