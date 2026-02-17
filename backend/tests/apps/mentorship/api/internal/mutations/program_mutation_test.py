@@ -69,12 +69,12 @@ class TestResolveAdminsFromLogins:
         mock_nest_user = MagicMock()
         mock_user.objects.get.return_value = mock_nest_user
 
-        result = resolve_admins_from_logins(["NewAdmin"])
+        result = resolve_admins_from_logins(["New_Admin"])
 
         assert mock_admin_obj in result
         assert mock_admin_obj.nest_user == mock_nest_user
         mock_admin_obj.save.assert_called_once_with(update_fields=["nest_user"])
-        mock_gh.objects.get.assert_called_once_with(login__iexact="newadmin")
+        mock_gh.objects.get.assert_called_once_with(login__iexact="new_admin")
 
     @patch("apps.mentorship.api.internal.mutations.program.User")
     @patch("apps.mentorship.api.internal.mutations.program.Admin")

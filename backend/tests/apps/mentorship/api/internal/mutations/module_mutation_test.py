@@ -54,8 +54,8 @@ class TestResolveMentorsFromLogins:
         mock_github_user.DoesNotExist = Exception
         mock_github_user.objects.get.side_effect = mock_github_user.DoesNotExist
 
-        with pytest.raises(ValueError, match="GitHub user 'baduser' not found"):
-            resolve_mentors_from_logins(["baduser"])
+        with pytest.raises(ValueError, match="GitHub user 'bad_user' not found"):
+            resolve_mentors_from_logins(["bad_user"])
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.GithubUser")
