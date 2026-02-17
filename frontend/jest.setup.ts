@@ -113,12 +113,13 @@ beforeAll(() => {
     })
   }
 
-  globalThis.ResizeObserver = class {
-    disconnect() {} // NOSONAR: empty mock implementation for test environment.
-    observe() {} // NOSONAR: empty mock implementation for test environment.
-    unobserve() {} // NOSONAR: empty mock implementation for test environment.
-  }
+ globalThis.ResizeObserver = class {
+  disconnect = jest.fn();
+  observe = jest.fn();
+  unobserve = jest.fn();
+}
 })
+
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
