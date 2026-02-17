@@ -540,11 +540,34 @@ describe('ModuleForm', () => {
       experienceLevel: 'BEGINNER',
     }
 
-    it('displays mutation error for name field when mutationErrors.name is set', () => {
-      renderModuleForm({
-        formData: validFormData,
-        mutationErrors: { name: 'A module with a similar name already exists in this program.' },
-      })
+    it('displays mutation error for name field after submission', () => {
+      const { rerender } = render(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+        />
+      )
+
+      // Submit first to mark fields as touched
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      // Rerender with mutation errors (simulates page catching backend error)
+      rerender(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+          mutationErrors={{
+            name: 'A module with a similar name already exists in this program.',
+          }}
+        />
+      )
 
       expect(screen.getByTestId('module-name-error')).toHaveTextContent(
         'A module with a similar name already exists in this program.'
@@ -561,14 +584,38 @@ describe('ModuleForm', () => {
     })
 
     it('prevents form submission when mutationErrors.name is set', () => {
-      renderModuleForm({
-        formData: validFormData,
-        mutationErrors: { name: 'A module with a similar name already exists in this program.' },
-      })
+      const { rerender } = render(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+        />
+      )
 
+      // First submit to mark fields as touched
       const form = document.querySelector('form')
       fireEvent.submit(form!)
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      mockOnSubmit.mockClear()
 
+      // Rerender with mutation errors
+      rerender(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+          mutationErrors={{
+            name: 'A module with a similar name already exists in this program.',
+          }}
+        />
+      )
+
+      // Second submit should be prevented by mutation error
+      fireEvent.submit(form!)
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
