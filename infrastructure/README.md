@@ -10,7 +10,7 @@ Ensure you have the following setup/installed:
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - An AWS account with credentials configured locally:
-Note: Refer to the respective README.md files for more information.
+Note: Refer to the respective `README.md` files and [Required Policies](#required-policies) for more information.
 - Read `INFO.md` for information related to policies.
 
 ## Setting up the infrastructure
@@ -392,3 +392,60 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
+
+## Required Policies
+
+- The Minimum policies required to use the terraform remote backend:
+(Replace ${} variables appropriately)
+
+```json
+  {
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+            "Sid": "S3StateManagement",
+			"Effect": "Allow",
+			"Action": [
+				"s3:GetObject",
+				"s3:PutObject",
+				"s3:ListBucket"
+			],
+			"Resource": [
+				"arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}",
+				"arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}/*"
+			]
+		},
+		{
+            "Sid": "DynamoDBStateManagement",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:DeleteItem"
+            ],
+            "Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/${TERRAFORM_DYNAMODB_TABLE_NAME}"
+        },
+        {
+            "Sid": "KMSStateManagement",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": "${AWS_BACKEND_KMS_KEY_ARN}"
+        }
+    ]
+}
+```
+
+`staging/` also requires the following policy assume it's role:
+```json
+{
+    "Sid": "STSManagement",
+        "Effect": "Allow",
+        "Action": [
+            "sts:AssumeRole",
+            "sts:TagSession"
+        ],
+        "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-staging-terraform"
+}
+```
