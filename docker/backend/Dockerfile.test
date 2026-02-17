@@ -53,8 +53,9 @@ ENV FORCE_COLOR=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /home/owasp
-USER owasp
 
 COPY --from=builder /home/owasp /home/owasp
 RUN chown -R owasp:owasp /home/owasp
 RUN chmod -R go-w /home/owasp
+
+USER owasp
