@@ -41,8 +41,6 @@ COPY tests/apps tests/apps
 
 FROM python:3.13.11-alpine3.23
 
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
-
 RUN apk add --no-cache graphviz
 
 RUN addgroup -S owasp && \
@@ -57,4 +55,4 @@ ENV FORCE_COLOR=1 \
 WORKDIR /home/owasp
 USER owasp
 
-COPY --from=builder --chmod=555 --chown=root:root /home/owasp /home/owasp
+COPY --from=builder --chown=owasp:owasp /home/owasp /home/owasp
