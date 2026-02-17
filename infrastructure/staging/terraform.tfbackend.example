@@ -1,3 +1,4 @@
 bucket         = "${STATE_BUCKET_NAME}"
-dynamodb_table = "nest-terraform-state-lock"
+dynamodb_table = "nest-terraform-state-lock-staging"
+profile        = "nest-staging"
 region         = "us-east-2"

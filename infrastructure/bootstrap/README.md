@@ -41,14 +41,17 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
 				"iam:DeletePolicy",
 				"iam:DeletePolicyVersion",
 				"iam:DeleteRole",
+				"iam:DeleteRolePolicy",
 				"iam:DetachRolePolicy",
 				"iam:GetPolicy",
 				"iam:GetPolicyVersion",
 				"iam:GetRole",
+				"iam:GetRolePolicy",
 				"iam:ListAttachedRolePolicies",
 				"iam:ListInstanceProfilesForRole",
 				"iam:ListPolicyVersions",
 				"iam:ListRolePolicies",
+				"iam:PutRolePolicy",
 				"iam:TagPolicy",
 				"iam:TagRole",
 				"iam:UntagPolicy",
@@ -56,8 +59,8 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
 				"iam:UpdateRole"
 			],
 			"Resource": [
-				"arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-*-terraform",
-				"arn:aws:iam::${AWS_ACCOUNT_ID}:policy/nest-*-terraform"
+				"arn:aws:iam::652192963764:role/nest-*-terraform",
+				"arn:aws:iam::652192963764:policy/nest-*-terraform"
 			]
 		},
 		{

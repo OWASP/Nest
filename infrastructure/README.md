@@ -9,7 +9,12 @@ Ensure you have the following setup/installed:
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-- An AWS account with credentials configured locally.
+- An AWS account with credential profiles configured locally:
+    - [nest-backend]
+    - [nest-bootstrap]
+    - [nest-staging] - this user must assume the role created by `nest-bootstrap`
+Note: Refer to the respective README.md files for more information.
+- Read `INFO.md` for information related to policies.
 
 ## Setting up the infrastructure
 

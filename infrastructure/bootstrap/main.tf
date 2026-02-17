@@ -25,16 +25,19 @@ data "aws_iam_policy_document" "terraform" {
 
   statement {
     actions = [
-      "s3:GetObject",
-      "s3:ListBucket",
-      "s3:PutObject",
+      "acm:AddTagsToCertificate",
+      "acm:DeleteCertificate",
+      "acm:DescribeCertificate",
+      "acm:ListCertificates",
+      "acm:ListTagsForCertificate",
+      "acm:RemoveTagsFromCertificate",
+      "acm:RequestCertificate",
+      "acm:ResendValidationEmail",
+      "acm:UpdateCertificateOptions",
     ]
-    effect = "Allow"
-    resources = [
-      "arn:aws:s3:::${var.project_name}-*",
-      "arn:aws:s3:::${var.project_name}-*/*",
-    ]
-    sid = "S3StateAccess"
+    effect    = "Allow"
+    resources = ["arn:aws:acm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:certificate/*"]
+    sid       = "ACMManagement"
   }
 
   statement {
@@ -50,17 +53,457 @@ data "aws_iam_policy_document" "terraform" {
     ]
     sid = "DynamoDBStateLocking"
   }
-}
 
-resource "aws_iam_policy" "terraform" {
-  for_each = local.environments
+  statement {
+    sid    = "EC2Management"
+    effect = "Allow"
+    actions = [
+      "ec2:AllocateAddress",
+      "ec2:AssociateRouteTable",
+      "ec2:AttachInternetGateway",
+      "ec2:AuthorizeSecurityGroupEgress",
+      "ec2:AuthorizeSecurityGroupIngress",
+      "ec2:CreateFlowLogs",
+      "ec2:CreateInternetGateway",
+      "ec2:CreateNatGateway",
+      "ec2:CreateNetworkAcl",
+      "ec2:CreateNetworkAclEntry",
+      "ec2:CreateRoute",
+      "ec2:CreateRouteTable",
+      "ec2:CreateSecurityGroup",
+      "ec2:CreateSubnet",
+      "ec2:CreateTags",
+      "ec2:CreateVpc",
+      "ec2:CreateVpcEndpoint",
+      "ec2:DeleteFlowLogs",
+      "ec2:DeleteInternetGateway",
+      "ec2:DeleteNatGateway",
+      "ec2:DeleteNetworkAcl",
+      "ec2:DeleteNetworkAclEntry",
+      "ec2:DeleteRoute",
+      "ec2:DeleteRouteTable",
+      "ec2:DeleteSecurityGroup",
+      "ec2:DeleteSubnet",
+      "ec2:DeleteTags",
+      "ec2:DeleteVpc",
+      "ec2:DeleteVpcEndpoint",
+      "ec2:Describe*",
+      "ec2:DetachInternetGateway",
+      "ec2:DisassociateRouteTable",
+      "ec2:ModifySubnetAttribute",
+      "ec2:ModifyVpcAttribute",
+      "ec2:ModifyVpcEndpoint",
+      "ec2:ReleaseAddress",
+      "ec2:ReplaceNetworkAclAssociation",
+      "ec2:ReplaceNetworkAclEntry",
+      "ec2:ReplaceRoute",
+      "ec2:ReplaceRouteTableAssociation",
+      "ec2:RevokeSecurityGroupEgress",
+      "ec2:RevokeSecurityGroupIngress",
+    ]
+    resources = ["*"]
+  }
 
-  name   = "${var.project_name}-${each.key}-terraform"
-  policy = data.aws_iam_policy_document.terraform[each.key].json
-  tags = merge(local.common_tags, {
-    Environment = each.key
-    Name        = "${var.project_name}-${each.key}-terraform"
-  })
+  statement {
+    actions = [
+      "ecr:CreateRepository",
+      "ecr:DeleteLifecyclePolicy",
+      "ecr:DeleteRepository",
+      "ecr:DescribeRepositories",
+      "ecr:GetLifecyclePolicy",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListTagsForResource",
+      "ecr:PutImageScanningConfiguration",
+      "ecr:PutLifecyclePolicy",
+      "ecr:SetRepositoryPolicy",
+      "ecr:TagResource",
+      "ecr:UntagResource",
+    ]
+    effect = "Allow"
+    resources = [
+      "arn:aws:ecr:*:${data.aws_caller_identity.current.account_id}:repository/${var.project_name}-${each.key}-*",
+    ]
+    sid = "ECRManagement"
+  }
+
+  statement {
+    sid    = "AppAutoscalingManagement"
+    effect = "Allow"
+    actions = [
+      "application-autoscaling:DeleteScalingPolicy",
+      "application-autoscaling:DeregisterScalableTarget",
+      "application-autoscaling:DescribeScalableTargets",
+      "application-autoscaling:DescribeScalingPolicies",
+      "application-autoscaling:ListTagsForResource",
+      "application-autoscaling:PutScalingPolicy",
+      "application-autoscaling:RegisterScalableTarget",
+      "application-autoscaling:TagResource",
+      "application-autoscaling:UntagResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "CloudWatchEventsManagement"
+    effect = "Allow"
+    actions = [
+      "events:DeleteRule",
+      "events:DescribeRule",
+      "events:ListTargetsByRule",
+      "events:PutRule",
+      "events:PutTargets",
+      "events:RemoveTargets",
+      "events:TagResource",
+      "events:UntagResource",
+    ]
+    resources = ["arn:aws:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-${each.key}-*"]
+  }
+
+  statement {
+    sid    = "DatabaseManagement"
+    effect = "Allow"
+    actions = [
+      "elasticache:AddTagsToResource",
+      "elasticache:CreateCacheSubnetGroup",
+      "elasticache:CreateReplicationGroup",
+      "elasticache:DeleteCacheSubnetGroup",
+      "elasticache:DeleteReplicationGroup",
+      "elasticache:DescribeCacheClusters",
+      "elasticache:DescribeCacheSubnetGroups",
+      "elasticache:DescribeReplicationGroups",
+      "elasticache:ListTagsForResource",
+      "elasticache:ModifyCacheSubnetGroup",
+      "elasticache:ModifyReplicationGroup",
+      "elasticache:RemoveTagsFromResource",
+      "rds:AddTagsToResource",
+      "rds:CreateDBInstance",
+      "rds:CreateDBSubnetGroup",
+      "rds:DeleteDBInstance",
+      "rds:DeleteDBSubnetGroup",
+      "rds:DescribeDBInstances",
+      "rds:DescribeDBSubnetGroups",
+      "rds:ListTagsForResource",
+      "rds:ModifyDBInstance",
+      "rds:ModifyDBSubnetGroup",
+      "rds:RemoveTagsFromResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "EC2ResourceSpecific"
+    effect = "Allow"
+    actions = [
+      "ec2:AttachInternetGateway",
+      "ec2:AuthorizeSecurityGroupEgress",
+      "ec2:AuthorizeSecurityGroupIngress",
+      "ec2:CreateFlowLogs",
+      "ec2:CreateNetworkAcl",
+      "ec2:CreateNetworkAclEntry",
+      "ec2:CreateTags",
+      "ec2:DeleteFlowLogs",
+      "ec2:DeleteNetworkAcl",
+      "ec2:DeleteNetworkAclEntry",
+      "ec2:DeleteSecurityGroup",
+      "ec2:DeleteTags",
+      "ec2:DeleteVpc",
+      "ec2:DescribeFlowLogs",
+      "ec2:DescribeNetworkAcls",
+      "ec2:DetachInternetGateway",
+      "ec2:ReplaceNetworkAclAssociation",
+      "ec2:ReplaceNetworkAclEntry",
+      "ec2:RevokeSecurityGroupEgress",
+      "ec2:RevokeSecurityGroupIngress",
+    ]
+    resources = ["arn:aws:ec2:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
+  }
+
+  statement {
+    sid    = "IAMPassRole"
+    effect = "Allow"
+    actions = [
+      "iam:PassRole",
+    ]
+    resources = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${each.key}-*"]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values = [
+        "ecs-tasks.amazonaws.com",
+        "lambda.amazonaws.com",
+        "rds.amazonaws.com",
+      ]
+    }
+  }
+
+  statement {
+    sid    = "LambdaManagement"
+    effect = "Allow"
+    actions = [
+      "lambda:AddPermission",
+      "lambda:CreateAlias",
+      "lambda:DeleteAlias",
+      "lambda:GetAlias",
+      "lambda:GetFunction",
+      "lambda:GetPolicy",
+      "lambda:ListTags",
+      "lambda:ListVersionsByFunction",
+      "lambda:RemovePermission",
+      "lambda:TagResource",
+      "lambda:UntagResource",
+      "lambda:UpdateAlias",
+    ]
+    resources = ["arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${each.key}-*"]
+  }
+
+  statement {
+    sid    = "SecretsManagerManagement"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:CreateSecret",
+      "secretsmanager:DeleteSecret",
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:GetResourcePolicy",
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:PutSecretValue",
+      "secretsmanager:RestoreSecret",
+      "secretsmanager:RotateSecret",
+      "secretsmanager:TagResource",
+      "secretsmanager:UntagResource",
+      "secretsmanager:UpdateSecret",
+    ]
+    resources = ["arn:aws:secretsmanager:${var.aws_region}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}-${each.key}-*"]
+  }
+
+  statement {
+    sid    = "ECSClusterManagement"
+    effect = "Allow"
+    actions = [
+      "ecs:CreateCluster",
+      "ecs:DeleteCluster",
+      "ecs:DescribeClusters",
+      "ecs:ListTagsForResource",
+      "ecs:PutClusterCapacityProviders",
+      "ecs:TagResource",
+      "ecs:UntagResource",
+      "ecs:UpdateCluster",
+    ]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster/${var.project_name}-${each.key}-*"]
+  }
+
+  statement {
+    sid    = "ECSGlobal"
+    effect = "Allow"
+    actions = [
+      "ecs:DeregisterTaskDefinition",
+      "ecs:DescribeTaskDefinition",
+      "ecs:ListClusters",
+      "ecs:ListTaskDefinitions",
+      "ecs:RegisterTaskDefinition",
+      "ecs:TagResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ELBManagement"
+    effect = "Allow"
+    actions = [
+      "elasticloadbalancing:AddTags",
+      "elasticloadbalancing:CreateListener",
+      "elasticloadbalancing:CreateLoadBalancer",
+      "elasticloadbalancing:CreateTargetGroup",
+      "elasticloadbalancing:DeleteListener",
+      "elasticloadbalancing:DeleteLoadBalancer",
+      "elasticloadbalancing:DeleteTargetGroup",
+      "elasticloadbalancing:Describe*",
+      "elasticloadbalancing:ModifyListener",
+      "elasticloadbalancing:ModifyLoadBalancerAttributes",
+      "elasticloadbalancing:ModifyTargetGroup",
+      "elasticloadbalancing:ModifyTargetGroupAttributes",
+      "elasticloadbalancing:RemoveTags",
+      "elasticloadbalancing:SetSecurityGroups",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ECSServiceManagement"
+    effect = "Allow"
+    actions = [
+      "ecs:CreateService",
+      "ecs:DeleteService",
+      "ecs:UpdateService",
+      "ecs:DescribeServices"
+    ]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:service/${var.project_name}-${each.key}-*/*"]
+  }
+
+  statement {
+    sid    = "ECSTaskDefinition"
+    effect = "Allow"
+    actions = [
+      "ecs:DescribeTaskDefinition",
+      "ecs:TagResource",
+    ]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${each.key}-*:*"]
+  }
+
+  statement {
+    sid = "EventBridgeManagement"
+    actions = [
+      "events:DeleteRule",
+      "events:DescribeRule",
+      "events:ListTagsForResource",
+      "events:ListTargetsByRule",
+      "events:PutRule",
+      "events:PutTargets",
+      "events:RemoveTargets",
+      "events:TagResource",
+      "events:UntagResource",
+    ]
+    effect = "Allow"
+    resources = [
+      "arn:aws:events:*:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-${each.key}-*",
+    ]
+  }
+
+  statement {
+    sid = "IAMManagement"
+    actions = [
+      "iam:AttachRolePolicy",
+      "iam:CreatePolicy",
+      "iam:CreatePolicyVersion",
+      "iam:CreateRole",
+      "iam:DeletePolicy",
+      "iam:DeletePolicyVersion",
+      "iam:DeleteRole",
+      "iam:DetachRolePolicy",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:GetRole",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListInstanceProfilesForRole",
+      "iam:ListPolicyVersions",
+      "iam:ListRolePolicies",
+      "iam:PassRole",
+      "iam:TagPolicy",
+      "iam:TagRole",
+      "iam:UntagPolicy",
+      "iam:UntagRole",
+      "iam:UpdateRole",
+      "iam:UpdateAssumeRolePolicy",
+    ]
+    effect = "Allow"
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project_name}-${each.key}-*",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${each.key}-*",
+    ]
+  }
+
+  statement {
+    sid = "KMSCreateAll"
+    actions = [
+      "kms:CreateAlias",
+      "kms:CreateKey",
+      "kms:Decrypt",
+      "kms:DeleteAlias",
+      "kms:DescribeKey",
+      "kms:DisableKeyRotation",
+      "kms:EnableKeyRotation",
+      "kms:GenerateDataKey",
+      "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus",
+      "kms:ListAliases",
+      "kms:ListResourceTags",
+      "kms:PutKeyPolicy",
+      "kms:ScheduleKeyDeletion",
+      "kms:TagResource",
+      "kms:UntagResource",
+      "kms:UpdateAlias",
+      "kms:UpdateKeyDescription",
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:DeleteLogGroup",
+      "logs:DescribeLogGroups",
+      "logs:ListTagsForResource",
+      "logs:ListTagsLogGroup",
+      "logs:PutRetentionPolicy",
+      "logs:TagLogGroup",
+      "logs:TagResource",
+      "logs:UntagLogGroup",
+      "logs:UntagResource",
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+    sid       = "CloudWatchLogsManagement"
+  }
+
+  statement {
+    sid = "S3Management"
+    actions = [
+      "s3:CreateBucket",
+      "s3:DeleteBucket",
+      "s3:GetAccelerateConfiguration",
+      "s3:GetBucketAcl",
+      "s3:GetBucketCors",
+      "s3:GetBucketLogging",
+      "s3:GetBucketObjectLockConfiguration",
+      "s3:GetBucketOwnershipControls",
+      "s3:GetBucketPolicy",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:GetBucketReplication",
+      "s3:GetBucketRequestPayment",
+      "s3:GetBucketTagging",
+      "s3:GetBucketVersioning",
+      "s3:GetBucketWebsite",
+      "s3:GetEncryptionConfiguration",
+      "s3:GetLifecycleConfiguration",
+      "s3:GetObject",
+      "s3:GetReplicationConfiguration",
+      "s3:ListBucket",
+      "s3:PutBucketLogging",
+      "s3:PutBucketObjectLockConfiguration",
+      "s3:PutBucketOwnershipControls",
+      "s3:PutBucketPolicy",
+      "s3:PutBucketPublicAccessBlock",
+      "s3:PutBucketTagging",
+      "s3:PutBucketVersioning",
+      "s3:PutEncryptionConfiguration",
+      "s3:PutLifecycleConfiguration",
+      "s3:PutObject",
+      "s3:PutBucketAcl"
+    ]
+    effect = "Allow"
+    resources = [
+      "arn:aws:s3:::${var.project_name}-*",
+      "arn:aws:s3:::${var.project_name}-*/*",
+    ]
+  }
+
+  statement {
+    sid = "SSMManagement"
+    actions = [
+      "ssm:AddTagsToResource",
+      "ssm:DeleteParameter",
+      "ssm:DescribeParameters",
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:ListTagsForResource",
+      "ssm:PutParameter",
+      "ssm:RemoveTagsFromResource",
+    ]
+    effect = "Allow"
+    resources = [
+      "arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:*",
+    ]
+  }
 }
 
 resource "aws_iam_role" "terraform" {
@@ -91,9 +534,10 @@ resource "aws_iam_role" "terraform" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "terraform" {
+resource "aws_iam_role_policy" "terraform" {
   for_each = local.environments
 
-  policy_arn = aws_iam_policy.terraform[each.key].arn
-  role       = aws_iam_role.terraform[each.key].name
+  name   = "${var.project_name}-${each.key}-terraform-inline"
+  role   = aws_iam_role.terraform[each.key].id
+  policy = data.aws_iam_policy_document.terraform[each.key].json
 }
