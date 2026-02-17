@@ -1,6 +1,6 @@
 ## Inline Permissions
 Use the following inline permissions for the `nest-backend` IAM User
-*Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY} with approriate values.
+*Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY_ARN} with appropriate values.
 
 ```json
 {
@@ -82,7 +82,7 @@ Use the following inline permissions for the `nest-backend` IAM User
 				"kms:UpdateAlias",
 				"kms:UpdateKeyDescription"
 			],
-			"Resource": "${AWS_BACKEND_KMS_KEY}"
+			"Resource": "${AWS_BACKEND_KMS_KEY_ARN}"
 		}
 	]
 }

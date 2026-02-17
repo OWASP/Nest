@@ -169,6 +169,7 @@ pyyaml
 quasis
 rediss
 relativedelta
+replicationgroup
 repositorycontributor
 requirepass
 rqworker
@@ -184,6 +185,7 @@ skillstruck
 slackbot
 slideshare
 speakerdeck
+subgrp
 superfences
 tfbackend
 tgz

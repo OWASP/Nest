@@ -89,7 +89,7 @@ resource "aws_dynamodb_table" "state_lock" {
     type = "S"
   }
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
   }
   point_in_time_recovery {
     enabled = true
@@ -107,7 +107,7 @@ resource "aws_s3_bucket" "logs" { # NOSONAR
   })
 
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
   }
 }
 
@@ -170,7 +170,7 @@ resource "aws_s3_bucket" "state" { # NOSONAR
   })
 
   lifecycle {
-    prevent_destroy = false
+    prevent_destroy = true
   }
 }
 
