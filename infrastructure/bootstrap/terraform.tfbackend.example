@@ -1,0 +1,4 @@
+bucket         = "${STATE_BUCKET_NAME}"
+dynamodb_table = "nest-terraform-state-lock-bootstrap"
+profile        = "nest-bootstrap"
+region         = "us-east-2"
