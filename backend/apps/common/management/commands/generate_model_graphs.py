@@ -78,7 +78,7 @@ class Command(BaseCommand):
         if failures:
             self.stdout.write(
                 self.style.WARNING(
-                    "Model graph generation completed with failures: " + ", ".join(failures)
+                    f"Model graph generation completed with failures: {', '.join(failures)}"
                 )
             )
         else:
