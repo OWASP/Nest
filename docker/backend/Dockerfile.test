@@ -41,6 +41,8 @@ COPY tests/apps tests/apps
 
 FROM python:3.13.11-alpine3.23
 
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+
 RUN apk add --no-cache graphviz
 
 RUN addgroup -S owasp && \
