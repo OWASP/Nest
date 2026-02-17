@@ -1,9 +1,8 @@
-'use client'
-
-import { useSearchParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+
 interface UseSearchPageOptions {
   indexName: string
   pageTitle: string
@@ -28,12 +27,14 @@ interface UseSearchPageReturn<T> {
 
 export function useSearchPage<T>({
   indexName,
-  pageTitle,
+  pageTitle: _pageTitle,
   defaultSortBy = '',
   defaultOrder = '',
   hitsPerPage,
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
   const [items, setItems] = useState<T[]>([])
   const [currentPage, setCurrentPage] = useState<number>(
@@ -44,6 +45,27 @@ export function useSearchPage<T>({
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+
+  const updateUrl = useCallback(
+    (params: Record<string, string | number | undefined>) => {
+      const current = new URLSearchParams(Array.from(searchParams.entries()))
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === undefined || value === '' || value === 1 || value === '1') {
+          if (key === 'page') current.delete(key)
+          if (key === 'q' && value === '') current.delete(key)
+        } else {
+          current.set(key, String(value))
+        }
+      })
+
+      const search = current.toString()
+      const query = search ? `?${search}` : ''
+
+      router.push(`${pathname}${query}`)
+    },
+    [router, pathname, searchParams]
+  )
 
   useEffect(() => {
     setIsLoaded(false)
@@ -93,23 +115,30 @@ export function useSearchPage<T>({
     return () => {
       controller.abort()
     }
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
+    setCurrentPage(1)
+    updateUrl({ q: query, page: 1 })
   }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'auto' })
+    updateUrl({ page })
   }
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort)
+    setCurrentPage(1)
+    updateUrl({ sortBy: sort, page: 1 })
   }
 
-  const handleOrderChange = (order: string) => {
-    setOrder(order)
+  const handleOrderChange = (newOrder: string) => {
+    setOrder(newOrder)
+    setCurrentPage(1)
+    updateUrl({ order: newOrder, page: 1 })
   }
 
   return {
