@@ -1,10 +1,10 @@
 'use client'
 import Link from 'next/link'
 import { FaArrowRight, FaSlack, FaChevronRight } from 'react-icons/fa'
-import { exploreCards as NAV_SECTIONS, engagementWays, journeySteps } from 'utils/communityData'
-import SecondaryCard from 'components/SecondaryCard'
-import AnchorTitle from 'components/AnchorTitle'
 import { IconWrapper } from 'wrappers/IconWrapper'
+import { exploreCards as NAV_SECTIONS, engagementWays, journeySteps } from 'utils/communityData'
+import AnchorTitle from 'components/AnchorTitle'
+import SecondaryCard from 'components/SecondaryCard'
 
 export default function CommunityPage() {
   return (
