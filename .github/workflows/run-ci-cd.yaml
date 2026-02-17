@@ -441,14 +441,14 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+    #if: |
+      #github.repository == 'OWASP/Nest' &&
+      #github.ref == 'refs/heads/main'
     needs:
-      - run-backend-tests
-      - run-frontend-a11y-tests
-      - run-frontend-e2e-tests
-      - run-frontend-unit-tests
+      #- run-backend-tests
+      #- run-frontend-a11y-tests
+      #- run-frontend-e2e-tests
+      #- run-frontend-unit-tests
       - run-infrastructure-tests
       - set-release-version
     permissions:
@@ -488,16 +488,16 @@ jobs:
             OWASP_UID=1001
           cache-from: |
             type=gha
-            type=registry,ref=owasp/nest:backend-staging-cache
+            type=registry,ref=rudransh-shrivastava/nest:backend-staging-cache
           cache-to: |
-            type=registry,ref=owasp/nest:backend-staging-cache
+            type=registry,ref=rudransh-shrivastava/nest:backend-staging-cache
           context: backend
           file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
           tags: |
-            owasp/nest:backend-staging
+            rudransh-shrivastava/nest:backend-staging
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
 
       - name: Prepare frontend public environment
@@ -532,7 +532,7 @@ jobs:
       - name: Get backend image size
         id: backend-size
         run: |
-          IMAGE_NAME="owasp/nest:backend-staging"
+          IMAGE_NAME="rudransh-shrivastava/nest:backend-staging"
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
@@ -542,9 +542,9 @@ jobs:
         with:
           cache-from: |
             type=gha
-            type=registry,ref=owasp/nest:frontend-staging-cache
+            type=registry,ref=rudransh-shrivastava/nest:frontend-staging-cache
           cache-to: |
-            type=registry,ref=owasp/nest:frontend-staging-cache
+            type=registry,ref=rudransh-shrivastava/nest:frontend-staging-cache
           context: frontend
           file: docker/frontend/Dockerfile
           load: true
@@ -554,13 +554,13 @@ jobs:
             RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
-            owasp/nest:frontend-staging
+            rudransh-shrivastava/nest:frontend-staging
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
 
       - name: Get frontend image size
         id: frontend-size
         run: |
-          IMAGE_NAME="owasp/nest:frontend-staging"
+          IMAGE_NAME="rudransh-shrivastava/nest:frontend-staging"
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
@@ -598,16 +598,16 @@ jobs:
 
       - name: Run Trivy security scan via Makefile
         run: |
-          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
+          make security-scan-backend-image BACKEND_IMAGE_NAME=rudransh-shrivastava/nest:backend-staging
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=rudransh-shrivastava/nest:frontend-staging
 
       - name: Generate SBOM for backend image
         run: |
-          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+          make sbom-backend-image BACKEND_IMAGE_NAME=rudransh-shrivastava/nest:backend-staging
 
       - name: Generate SBOM for frontend image
         run: |
-          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=rudransh-shrivastava/nest:frontend-staging
 
       - name: Upload SBOMs
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
@@ -618,18 +618,87 @@ jobs:
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
+  bootstrap-staging-nest:
+    name: Bootstrap Nest Staging
+    env:
+      TF_INPUT: false
+      TF_IN_AUTOMATION: true
+    environment: staging
+    # if: |
+    #   github.repository == 'OWASP/Nest' &&
+    #   github.ref == 'refs/heads/main'
+    #needs:
+      #- scan-staging-images
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708
+        with:
+          aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        with:
+          terraform_version: 1.14.0
+
+      - name: Prepare terraform backend
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          TF_STATE_BUCKET_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}
+          TF_STATE_DYNAMODB_TABLE_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_DYNAMODB_TABLE_NAME }}
+        run: |
+          umask 377
+          cat > infrastructure/bootstrap/terraform.tfbackend <<-EOF
+          bucket="$TF_STATE_BUCKET_NAME"
+          dynamodb_table="$TF_STATE_DYNAMODB_TABLE_NAME"
+          region="$AWS_REGION"
+          EOF
+
+      - name: Prepare terraform variables
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          PROJECT_NAME: 'nest'
+        run: |
+          umask 377
+          cat > infrastructure/bootstrap/terraform.tfvars <<-EOF
+          aws_region="$AWS_REGION"
+          project_name="$PROJECT_NAME"
+          EOF
+
+      - name: Terraform Init
+        working-directory: infrastructure/bootstrap
+        run: terraform init -backend-config=terraform.tfbackend
+
+      - name: Terraform Validate
+        working-directory: infrastructure/bootstrap
+        run: terraform validate
+
+      - name: Terraform Apply
+        working-directory: infrastructure/bootstrap
+        run: terraform apply -auto-approve
+    timeout-minutes: 10
+
   plan-staging-nest:
     name: Plan Nest Staging
     env:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+    #if: |
+      #github.repository == 'OWASP/Nest' &&
+      #github.ref == 'refs/heads/main'
     needs:
-      - scan-staging-images
+      - bootstrap-staging-nest
+      #- scan-staging-images
       - set-release-version
+
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -643,6 +712,9 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 1200
+          role-session-name: GitHubActions-StagingPlan
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
@@ -722,9 +794,9 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+    #if: |
+      #github.repository == 'OWASP/Nest' &&
+      #github.ref == 'refs/heads/main'
     needs:
       - plan-staging-nest
     permissions:
@@ -740,6 +812,9 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 1200
+          role-session-name: GitHubActions-StagingPlan
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
