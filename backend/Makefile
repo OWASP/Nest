@@ -226,11 +226,11 @@ generate-backend-model-graphs:
 		--cache-from nest-graphs-backend \
 		-f docker/backend/Dockerfile.test backend \
 		-t nest-graphs-backend
-	@docker run \
+	@docker run --rm \
 		-e DJANGO_SETTINGS_MODULE=settings.graphs \
-		-e DJANGO_CONFIGURATION=Graphs
+		-e DJANGO_CONFIGURATION=Graphs \
 		--env-file backend/.env.example \
-		--rm nest-graphs-backend \
+		nest-graphs-backend \
 		python manage.py generate_model_graphs
 
 test-fuzz:
