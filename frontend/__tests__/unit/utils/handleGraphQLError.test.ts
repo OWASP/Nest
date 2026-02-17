@@ -6,7 +6,7 @@ describe('extractFieldErrors', () => {
       const error = {
         graphQLErrors: [
           {
-            message: 'A module with a similar name already exists in this program.',
+            message: 'This module name already exists in this program.',
             extensions: { code: 'VALIDATION_ERROR', field: 'name' },
           },
         ],
@@ -16,7 +16,7 @@ describe('extractFieldErrors', () => {
 
       expect(result.hasFieldErrors).toBe(true)
       expect(result.fieldErrors).toEqual({
-        name: 'A module with a similar name already exists in this program.',
+        name: 'This module name already exists in this program.',
       })
       expect(result.unmappedErrors).toEqual([])
     })

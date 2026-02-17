@@ -564,13 +564,13 @@ describe('ModuleForm', () => {
           loading={false}
           title="Create Module"
           mutationErrors={{
-            name: 'A module with a similar name already exists in this program.',
+            name: 'This module name already exists in this program.',
           }}
         />
       )
 
       expect(screen.getByTestId('module-name-error')).toHaveTextContent(
-        'A module with a similar name already exists in this program.'
+        'This module name already exists in this program.'
       )
     })
 
@@ -609,7 +609,7 @@ describe('ModuleForm', () => {
           loading={false}
           title="Create Module"
           mutationErrors={{
-            name: 'A module with a similar name already exists in this program.',
+            name: 'This module name already exists in this program.',
           }}
         />
       )

@@ -115,7 +115,7 @@ class ModuleMutation:
         except IntegrityError as e:
             error_message = str(e)
             if "unique_module_key_in_program" in error_message:
-                msg = "A module with a similar name already exists in this program."
+                msg = "This module name already exists in this program."
                 raise GraphQLError(
                     msg,
                     extensions={"code": "VALIDATION_ERROR", "field": "name"},
@@ -390,7 +390,7 @@ class ModuleMutation:
         except IntegrityError as e:
             error_message = str(e)
             if "unique_module_key_in_program" in error_message:
-                msg = "A module with a similar name already exists in this program."
+                msg = "This module name already exists in this program."
                 raise GraphQLError(
                     msg,
                     extensions={"code": "VALIDATION_ERROR", "field": "name"},
