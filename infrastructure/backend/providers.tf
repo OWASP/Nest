@@ -1,3 +1,4 @@
 provider "aws" {
-  region = var.aws_region
+  profile = "nest-backend"
+  region  = var.aws_region
 }
