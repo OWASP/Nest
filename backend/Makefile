@@ -226,7 +226,11 @@ generate-backend-model-graphs:
 		--cache-from nest-graphs-backend \
 		-f docker/backend/Dockerfile.test backend \
 		-t nest-graphs-backend
+
+	@mkdir -p backend/model-graphs
+
 	@docker run --rm \
+	    -v $(CURDIR)/backend/model-graphs:/home/owasp/model-graphs \
 	    -e DJANGO_SETTINGS_MODULE=settings.graphs \
 	    -e DJANGO_CONFIGURATION=Graphs \
 	    --env-file backend/.env.example \
