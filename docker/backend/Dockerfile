@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.11-alpine3.23 AS builder
+FROM python:3.13.12-alpine3.23 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -42,7 +42,7 @@ COPY templates templates
 COPY static static
 COPY apps apps
 
-FROM python:3.13.11-alpine3.23
+FROM python:3.13.12-alpine3.23
 
 ARG OWASP_GID
 ARG OWASP_UID
