@@ -18,6 +18,14 @@ export type Scalars = {
   UUID: { input: any; output: any; }
 };
 
+export type AdminNode = {
+  __typename?: 'AdminNode';
+  avatarUrl: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  login: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type ApiKeyNode = Node & {
   __typename?: 'ApiKeyNode';
   createdAt: Scalars['DateTime']['output'];
@@ -527,7 +535,7 @@ export type PostNode = Node & {
 
 export type ProgramNode = {
   __typename?: 'ProgramNode';
-  admins?: Maybe<Array<MentorNode>>;
+  admins?: Maybe<Array<AdminNode>>;
   description: Scalars['String']['output'];
   domains?: Maybe<Array<Scalars['String']['output']>>;
   endedAt: Scalars['DateTime']['output'];
