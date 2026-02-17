@@ -1,6 +1,6 @@
 ## Inline Permissions
 Use the following inline permissions for the `nest-bootstrap` IAM User
-*Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY} with approriate values.
+*Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY} with appropriate values.
 
 ```json
 {
@@ -56,6 +56,7 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
 				"iam:TagRole",
 				"iam:UntagPolicy",
 				"iam:UntagRole",
+				"iam:UpdateAssumeRolePolicy",
 				"iam:UpdateRole"
 			],
 			"Resource": [

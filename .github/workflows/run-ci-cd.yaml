@@ -441,14 +441,14 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: staging
-    #if: |
-      #github.repository == 'OWASP/Nest' &&
-      #github.ref == 'refs/heads/main'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
-      #- run-backend-tests
-      #- run-frontend-a11y-tests
-      #- run-frontend-e2e-tests
-      #- run-frontend-unit-tests
+      - run-backend-tests
+      - run-frontend-a11y-tests
+      - run-frontend-e2e-tests
+      - run-frontend-unit-tests
       - run-infrastructure-tests
       - set-release-version
     permissions:
@@ -476,6 +476,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 1200
+          role-external-id: nest-staging-terraform
+          role-session-name: GitHubActions-BuildStagingImages
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
@@ -488,16 +492,16 @@ jobs:
             OWASP_UID=1001
           cache-from: |
             type=gha
-            type=registry,ref=rudransh-shrivastava/nest:backend-staging-cache
+            type=registry,ref=owasp/nest:backend-staging-cache
           cache-to: |
-            type=registry,ref=rudransh-shrivastava/nest:backend-staging-cache
+            type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
           file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
           tags: |
-            rudransh-shrivastava/nest:backend-staging
+            owasp/nest:backend-staging
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
 
       - name: Prepare frontend public environment
@@ -532,7 +536,7 @@ jobs:
       - name: Get backend image size
         id: backend-size
         run: |
-          IMAGE_NAME="rudransh-shrivastava/nest:backend-staging"
+          IMAGE_NAME="owasp/nest:backend-staging"
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
@@ -542,9 +546,9 @@ jobs:
         with:
           cache-from: |
             type=gha
-            type=registry,ref=rudransh-shrivastava/nest:frontend-staging-cache
+            type=registry,ref=owasp/nest:frontend-staging-cache
           cache-to: |
-            type=registry,ref=rudransh-shrivastava/nest:frontend-staging-cache
+            type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
           file: docker/frontend/Dockerfile
           load: true
@@ -554,13 +558,13 @@ jobs:
             RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
-            rudransh-shrivastava/nest:frontend-staging
+            owasp/nest:frontend-staging
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
 
       - name: Get frontend image size
         id: frontend-size
         run: |
-          IMAGE_NAME="rudransh-shrivastava/nest:frontend-staging"
+          IMAGE_NAME="owasp/nest:frontend-staging"
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
@@ -598,16 +602,16 @@ jobs:
 
       - name: Run Trivy security scan via Makefile
         run: |
-          make security-scan-backend-image BACKEND_IMAGE_NAME=rudransh-shrivastava/nest:backend-staging
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME=rudransh-shrivastava/nest:frontend-staging
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
       - name: Generate SBOM for backend image
         run: |
-          make sbom-backend-image BACKEND_IMAGE_NAME=rudransh-shrivastava/nest:backend-staging
+          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
 
       - name: Generate SBOM for frontend image
         run: |
-          make sbom-frontend-image FRONTEND_IMAGE_NAME=rudransh-shrivastava/nest:frontend-staging
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
       - name: Upload SBOMs
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
@@ -624,11 +628,11 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    # if: |
-    #   github.repository == 'OWASP/Nest' &&
-    #   github.ref == 'refs/heads/main'
-    #needs:
-      #- scan-staging-images
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
+    needs:
+      - scan-staging-images
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -691,14 +695,13 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    #if: |
-      #github.repository == 'OWASP/Nest' &&
-      #github.ref == 'refs/heads/main'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
       - bootstrap-staging-nest
-      #- scan-staging-images
+      - scan-staging-images
       - set-release-version
-
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -713,6 +716,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 1200
+          role-external-id: nest-staging-terraform
           role-session-name: GitHubActions-StagingPlan
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
@@ -794,9 +798,9 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    #if: |
-      #github.repository == 'OWASP/Nest' &&
-      #github.ref == 'refs/heads/main'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
     needs:
       - plan-staging-nest
     permissions:
@@ -813,7 +817,8 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 1200
-          role-session-name: GitHubActions-StagingPlan
+          role-external-id: nest-staging-terraform
+          role-session-name: GitHubActions-StagingDeploy
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Install Terraform
@@ -875,7 +880,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: poetry sync --no-root --without dev --without test --without video
+        run: poetry sync --no-root --without test --without video
 
       - name: Prepare Zappa settings
         env:

@@ -9,10 +9,7 @@ Ensure you have the following setup/installed:
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-- An AWS account with credential profiles configured locally:
-    - [nest-backend]
-    - [nest-bootstrap]
-    - [nest-staging] - this user must assume the role created by `nest-bootstrap`
+- An AWS account with credentials configured locally:
 Note: Refer to the respective README.md files for more information.
 - Read `INFO.md` for information related to policies.
 
@@ -49,7 +46,60 @@ Follow these steps to set up the infrastructure:
   > [!NOTE]
   > It is recommended to not destroy the backend resources unless absolutely necessary.
 
-2. **Setup Main Infrastructure (staging)**:
+2. **Bootstrap IAM Role**:
+
+  - Navigate to the bootstrap directory:
+
+    ```bash
+    cd infrastructure/bootstrap/
+    ```
+
+  - Create a local terraform variables file:
+
+    ```bash
+    touch terraform.tfvars
+    ```
+
+  - Copy the contents from the example file:
+
+    ```bash
+    cat terraform.tfvars.example > terraform.tfvars
+    ```
+
+  - Create a local backend configuration file:
+
+    ```bash
+    touch terraform.tfbackend
+    ```
+
+  - Copy the contents from the example file:
+
+    ```bash
+    cat terraform.tfbackend.example > terraform.tfbackend
+    ```
+
+  > [!NOTE]
+  > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (bootstrap) created in the previous step.
+
+  > [!NOTE]
+  > Update defaults (e.g. `region`) as needed.
+
+  > [!NOTE]
+  > Optionally change the region: set `aws_region` in a `.tfvars` file.
+
+  - Initialize Terraform if needed:
+
+    ```bash
+    terraform init -backend-config=terraform.tfbackend
+    ```
+
+  - Apply the changes to create the backend resources:
+
+    ```bash
+    terraform apply
+    ```
+
+3. **Setup Main Infrastructure (staging)**:
 
   - Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
 
@@ -99,7 +149,7 @@ Follow these steps to set up the infrastructure:
     terraform apply
     ```
 
-3. **Populate Secrets**
+4. **Populate Secrets**
 
   - Visit the AWS Console > Systems Manager > Parameter Store.
   - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
@@ -304,8 +354,8 @@ Migrate and load data into the new database.
 
     ```bash
     aws ecs update-service \
-        --cluster owasp-nest-staging-frontend-cluster \
-        --service owasp-nest-staging-frontend-service \
+        --cluster nest-staging-frontend-cluster \
+        --service nest-staging-frontend-service \
         --force-new-deployment \
         --region us-east-2
     ```
