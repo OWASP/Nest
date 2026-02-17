@@ -11,7 +11,7 @@ import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
 import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
-import type { MultiSearchBarProps, Suggestion } from 'types/search'
+import type { Suggestion } from 'types/search'
 import type { User } from 'types/user'
 
 import { SEARCH_DEBOUNCE_DELAY_MS } from 'utils/constants'
@@ -25,8 +25,14 @@ type HitMeta = {
   name?: string
 }
 
+type MultiSearchBarProps = {
+  placeholder?: string
+  indexes: string[]
+  initialValue?: string
+}
+
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
-  placeholder,
+  placeholder = 'Search...',
   indexes,
   initialValue = '',
 }) => {
@@ -43,6 +49,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
   const pageCount = 1
   const suggestionCount = 3
+
 
   const triggerSearch = useMemo(() => {
     return debounce(async (query: string) => {
@@ -63,29 +70,35 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       const controller = new AbortController()
       activeRequest.current = controller
 
-      const results: Suggestion[] = await Promise.all(
-        indexes.map(async (index) => {
-          const data = await fetchAlgoliaData<SearchHit>(
-            index,
-            query,
-            pageCount,
-            suggestionCount,
-            [],
-            controller.signal
-          )
+      try {
+        const results: Suggestion[] = await Promise.all(
+          indexes.map(async (index: string) => {
+            const data = await fetchAlgoliaData<SearchHit>(
+              index,
+              query,
+              pageCount,
+              suggestionCount,
+              [],
+              controller.signal
+            )
 
-          return {
-            indexName: index,
-            hits: data.hits as Suggestion['hits'],
-            totalPages: data.totalPages ?? 0,
-          }
-        })
-      )
+            return {
+              indexName: index,
+              hits: data.hits as Suggestion['hits'],
+              totalPages: data.totalPages ?? 0,
+            }
+          })
+        )
 
-      if (controller.signal.aborted) return
+        if (controller.signal.aborted) return
 
-      setSuggestions(results.filter((r) => r.hits.length > 0))
-      setShowSuggestions(true)
+        setSuggestions(results.filter((r) => r.hits.length > 0))
+        setShowSuggestions(true)
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error(err)
+        }
+      }
     }, SEARCH_DEBOUNCE_DELAY_MS)
   }, [indexes])
 
@@ -115,11 +128,15 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
       switch (indexName) {
         case 'chapters':
-          router.push(`/chapters/${suggestion.key}`)
+          if ('key' in suggestion && suggestion.key) {
+            router.push(`/chapters/${suggestion.key}`)
+          }
           break
 
         case 'events':
-          window.open((suggestion as Event).url, '_blank')
+          if ('url' in suggestion && suggestion.url) {
+            window.open(suggestion.url, '_blank')
+          }
           break
 
         case 'organizations':
@@ -129,11 +146,15 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           break
 
         case 'projects':
-          router.push(`/projects/${suggestion.key}`)
+          if ('key' in suggestion && suggestion.key) {
+            router.push(`/projects/${suggestion.key}`)
+          }
           break
 
         case 'users':
-          router.push(`/members/${suggestion.key}`)
+          if ('key' in suggestion && suggestion.key) {
+            router.push(`/members/${suggestion.key}`)
+          }
           break
       }
     },
@@ -160,7 +181,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   return (
     <div className="w-full max-w-md p-4" ref={searchBarRef}>
       <div className="relative">
-        <FaSearch className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <FaSearch
+          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+          aria-hidden="true"
+        />
 
         <input
           ref={inputRef}
@@ -168,21 +192,23 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder={placeholder}
-          className="h-12 w-full rounded-lg border border-gray-300 bg-white pr-10 pl-10 text-lg"
+          aria-label={placeholder}
+          className="h-12 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-10 text-lg"
         />
 
         {searchQuery && (
           <button
             type="button"
             onClick={handleClearSearch}
-            className="absolute top-1/2 right-2 -translate-y-1/2"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
+            aria-label="Clear search"
           >
-            <FaTimes />
+            <FaTimes aria-hidden="true" />
           </button>
         )}
 
         {showSuggestions && (
-          <div className="absolute top-14 left-0 z-50 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
+          <div className="absolute left-0 top-14 z-50 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
             {suggestions.map((group) => (
               <div key={group.indexName}>
                 {group.hits.map((hit) => {
