@@ -712,7 +712,7 @@ describe('ProgramForm Component', () => {
       )
 
       const adminInput = screen.getByPlaceholderText('johndoe, jane-doe')
-      await user.type(adminInput, 'newadmin')
+      await user.type(adminInput, 'new_admin')
 
       expect(mockSetFormData).toHaveBeenCalled()
     })
