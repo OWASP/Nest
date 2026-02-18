@@ -1,4 +1,5 @@
 {% extends "admin/base.html" %}
+{% load static %}
 {% block title %}
     OWASP Nest
 {% endblock title %}
@@ -7,3 +8,7 @@
         <a href="{% url 'admin:index' %}">OWASP Nest</a>
     </h1>
 {% endblock branding %}
+{% block dark-mode-vars %}
+  <link rel="stylesheet" href="{% static "admin/css/dark_mode.css" %}">
+  <script src="{% static "js/admin_theme_toggle.js" %}"></script>
+{% endblock dark-mode-vars %}
