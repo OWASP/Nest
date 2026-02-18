@@ -1,4 +1,4 @@
-import { formatDate, formatDateRange } from 'utils/dateFormatter'
+import { formatDate, formatDateRange, formatDateForInput } from 'utils/dateFormatter'
 
 describe('formatDate function', () => {
   beforeEach(() => {
@@ -83,5 +83,24 @@ describe('formatDateRange function', () => {
   test('handles mixed input types correctly', () => {
     // Sep 1, 2021 as Unix timestamp and ISO string
     expect(formatDateRange(1630454400, '2021-09-04')).toBe('Sep 1 — 4, 2021')
+  })
+})
+
+describe('formatDateForInput function', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('formats ISO date string correctly', () => {
+    expect(formatDateForInput('2023-09-01')).toBe('2023-09-01')
+  })
+
+  test('formats Unix timestamp correctly', () => {
+    expect(formatDateForInput(1630454400)).toBe('2021-09-01')
+  })
+
+  test('throws TypeError for invalid date', () => {
+    expect(() => formatDateForInput('invalid-date')).toThrow(TypeError)
+    expect(() => formatDateForInput('invalid-date')).toThrow('Invalid date')
   })
 })
