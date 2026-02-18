@@ -24,12 +24,37 @@ data "aws_iam_policy_document" "part_one" {
   for_each = local.environments
 
   statement {
+    sid    = "GlobalDescribe"
+    effect = "Allow"
+    actions = [
+      "acm:DescribeCertificate",
+      "application-autoscaling:DescribeScalableTargets",
+      "application-autoscaling:DescribeScalingPolicies",
+      "ec2:Describe*",
+      "ec2:DescribeFlowLogs",
+      "ec2:DescribeNetworkAcls",
+      "ecr:DescribeRepositories",
+      "ecs:DescribeTaskDefinition",
+      "elasticache:DescribeCacheClusters",
+      "elasticache:DescribeCacheSubnetGroups",
+      "elasticache:DescribeReplicationGroups",
+      "elasticloadbalancing:Describe*",
+      "kms:DescribeKey",
+      "logs:DescribeLogGroups",
+      "rds:DescribeDBInstances",
+      "rds:DescribeDBSubnetGroups",
+      "secretsmanager:DescribeSecret",
+      "ssm:DescribeParameters",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
     sid    = "ACMManagement"
     effect = "Allow"
     actions = [
       "acm:AddTagsToCertificate",
       "acm:DeleteCertificate",
-      "acm:DescribeCertificate",
       "acm:ListCertificates",
       "acm:ListTagsForCertificate",
       "acm:RemoveTagsFromCertificate",
@@ -46,8 +71,6 @@ data "aws_iam_policy_document" "part_one" {
     actions = [
       "application-autoscaling:DeleteScalingPolicy",
       "application-autoscaling:DeregisterScalableTarget",
-      "application-autoscaling:DescribeScalableTargets",
-      "application-autoscaling:DescribeScalingPolicies",
       "application-autoscaling:ListTagsForResource",
       "application-autoscaling:PutScalingPolicy",
       "application-autoscaling:RegisterScalableTarget",
@@ -72,7 +95,6 @@ data "aws_iam_policy_document" "part_one" {
     actions = [
       "logs:CreateLogGroup",
       "logs:DeleteLogGroup",
-      "logs:DescribeLogGroups",
       "logs:ListTagsForResource",
       "logs:ListTagsLogGroup",
       "logs:PutRetentionPolicy",
@@ -93,9 +115,6 @@ data "aws_iam_policy_document" "part_one" {
       "elasticache:CreateReplicationGroup",
       "elasticache:DeleteCacheSubnetGroup",
       "elasticache:DeleteReplicationGroup",
-      "elasticache:DescribeCacheClusters",
-      "elasticache:DescribeCacheSubnetGroups",
-      "elasticache:DescribeReplicationGroups",
       "elasticache:ListTagsForResource",
       "elasticache:ModifyCacheSubnetGroup",
       "elasticache:ModifyReplicationGroup",
@@ -105,8 +124,6 @@ data "aws_iam_policy_document" "part_one" {
       "rds:CreateDBSubnetGroup",
       "rds:DeleteDBInstance",
       "rds:DeleteDBSubnetGroup",
-      "rds:DescribeDBInstances",
-      "rds:DescribeDBSubnetGroups",
       "rds:ListTagsForResource",
       "rds:ModifyDBInstance",
       "rds:ModifyDBSubnetGroup",
@@ -169,7 +186,6 @@ data "aws_iam_policy_document" "part_one" {
       "ec2:DeleteTags",
       "ec2:DeleteVpc",
       "ec2:DeleteVpcEndpoints",
-      "ec2:Describe*",
       "ec2:DetachInternetGateway",
       "ec2:DisassociateAddress",
       "ec2:DisassociateRouteTable",
@@ -188,23 +204,12 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "EC2ResourceSpecific"
-    effect = "Allow"
-    actions = [
-      "ec2:DescribeFlowLogs",
-      "ec2:DescribeNetworkAcls",
-    ]
-    resources = ["arn:aws:ec2:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
-  }
-
-  statement {
     sid    = "ECRAuth"
     effect = "Allow"
     actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:BatchGetImage",
       "ecr:CompleteLayerUpload",
-      "ecr:DescribeRepositories",
       "ecr:GetAuthorizationToken",
       "ecr:GetDownloadUrlForLayer",
       "ecr:GetRepositoryPolicy",
@@ -223,7 +228,6 @@ data "aws_iam_policy_document" "part_one" {
       "ecr:CreateRepository",
       "ecr:DeleteLifecyclePolicy",
       "ecr:DeleteRepository",
-      "ecr:DescribeRepositories",
       "ecr:GetLifecyclePolicy",
       "ecr:GetRepositoryPolicy",
       "ecr:ListTagsForResource",
@@ -259,7 +263,6 @@ data "aws_iam_policy_document" "part_one" {
     effect = "Allow"
     actions = [
       "ecs:DeregisterTaskDefinition",
-      "ecs:DescribeTaskDefinition",
       "ecs:ListClusters",
       "ecs:ListTaskDefinitions",
       "ecs:RegisterTaskDefinition",
@@ -323,7 +326,6 @@ data "aws_iam_policy_document" "part_two" {
       "elasticloadbalancing:DeleteListener",
       "elasticloadbalancing:DeleteLoadBalancer",
       "elasticloadbalancing:DeleteTargetGroup",
-      "elasticloadbalancing:Describe*",
       "elasticloadbalancing:ModifyListener",
       "elasticloadbalancing:ModifyLoadBalancerAttributes",
       "elasticloadbalancing:ModifyTargetGroup",
@@ -425,7 +427,6 @@ data "aws_iam_policy_document" "part_two" {
     effect = "Allow"
     actions = [
       "kms:Decrypt",
-      "kms:DescribeKey",
       "kms:GenerateDataKey",
       "kms:PutKeyPolicy",
       "kms:ScheduleKeyDeletion",
@@ -555,7 +556,6 @@ data "aws_iam_policy_document" "part_two" {
     actions = [
       "secretsmanager:CreateSecret",
       "secretsmanager:DeleteSecret",
-      "secretsmanager:DescribeSecret",
       "secretsmanager:GetResourcePolicy",
       "secretsmanager:GetSecretValue",
       "secretsmanager:PutSecretValue",
@@ -574,7 +574,6 @@ data "aws_iam_policy_document" "part_two" {
     actions = [
       "ssm:AddTagsToResource",
       "ssm:DeleteParameter",
-      "ssm:DescribeParameters",
       "ssm:GetParameter",
       "ssm:GetParameters",
       "ssm:ListTagsForResource",

@@ -15,7 +15,7 @@ Use the following inline permissions for the `nest-staging` IAM User
             ],
             "Resource": [
                 "arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}",
-            "arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}/*"
+                "arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}/*"
             ]
         },
         {
