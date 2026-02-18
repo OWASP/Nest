@@ -127,6 +127,14 @@ class TestOwaspMatchChannels:
         assert len(matches) == 1
         assert matches[0][0].name == "project-test"
 
+    def test_find_fuzzy_matches_below_threshold(self):
+        """Test that conversations with score below threshold are not matched."""
+        cmd = Command()
+        mock_conv = type("Conversation", (), {"name": "completely-different-channel"})()
+
+        matches = cmd.find_fuzzy_matches("OWASP Juice Shop", [mock_conv], threshold=95)
+        assert len(matches) == 0
+
     def test_handle_skips_entity_without_name(self, mocker):
         """Test that entities with empty name are skipped."""
         mock_committee = mocker.Mock(spec=Committee, id=1)

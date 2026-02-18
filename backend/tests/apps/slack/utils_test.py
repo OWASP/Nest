@@ -196,6 +196,10 @@ def test_format_links_for_slack(input_text, expected_output):
             ],
             "Field 1\nField 2",
         ),
+        (
+            [{"type": "unknown_block_type", "data": "something"}],
+            "",
+        ),
     ],
 )
 def test_blocks_to_text(input_blocks, expected_output):

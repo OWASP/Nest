@@ -238,11 +238,7 @@ class RepositoryBasedEntityModel(models.Model):
             )
 
             for match in matches:
-                if match[0] and match[1]:  # Name with email
-                    leaders[match[0].strip()] = match[1].strip()
-                elif match[2]:  # Name without email
-                    leaders[match[2].strip()] = None
-
+                leaders[match[0].strip()] = match[1].strip()
         return leaders
 
     def get_metadata(self):

@@ -276,8 +276,13 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
                 ["https://example.com", "https://test.org"],
             ),
             (
-                """* [Broken](https://)
+                """* [Broken](https://.-invalid)
 * [Valid](https://example.com)""",
+                None,
+                ["https://example.com"],
+            ),
+            (
+                """Visit https://example.com and also see https://.-invalid""",
                 None,
                 ["https://example.com"],
             ),
