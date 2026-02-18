@@ -113,13 +113,12 @@ beforeAll(() => {
     })
   }
 
- globalThis.ResizeObserver = class {
-  disconnect = jest.fn();
-  observe = jest.fn();
-  unobserve = jest.fn();
-}
+  globalThis.ResizeObserver = class {
+    disconnect = jest.fn()
+    observe = jest.fn()
+    unobserve = jest.fn()
+  }
 })
-
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
