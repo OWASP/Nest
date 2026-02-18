@@ -10,7 +10,7 @@ Ensure you have the following setup/installed:
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - An AWS account.
-Note: Refer to the respective `README.md` files and [Required Policies](#required-policies) for more information.
+Note: Refer to the respective `README.md` files for more information.
 
 ## Setting up the infrastructure
 
@@ -388,4 +388,3 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
-}
