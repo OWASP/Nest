@@ -6,6 +6,7 @@ variable "aws_region" {
 
 variable "aws_role_external_id" {
   description = "The external ID for role assumption."
+  sensitive   = true
   type        = string
 }
 

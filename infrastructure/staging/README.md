@@ -27,7 +27,7 @@ Use the following inline permissions for the `nest-staging` IAM User
 				"dynamodb:PutItem",
 				"dynamodb:DeleteItem"
 			],
-			"Resource": "arn:aws:dynamodb:ap-south-1:${AWS_ACCOUNT_ID}:table/nest-staging-terraform-state-lock"
+			"Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/nest-staging-terraform-state-lock"
 		},
         {
             "Sid": "KMSStateManagement",
