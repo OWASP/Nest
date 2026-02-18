@@ -1,4 +1,4 @@
-"""Common app utils."""
+"""Utility helper functions used across the common app."""
 
 from __future__ import annotations
 
@@ -19,14 +19,13 @@ if TYPE_CHECKING:
 
 
 def convert_to_camel_case(text: str) -> str:
-    """Convert a string to camelCase.
+    """Convert a snake_case string into camelCase format.
 
     Args:
         text (str): The input string.
 
     Returns:
         str: The converted string in camelCase.
-
     """
     parts = text.split("_")
     offset = 1 if text.startswith("_") else 0
@@ -39,27 +38,25 @@ def convert_to_camel_case(text: str) -> str:
 
 
 def convert_to_snake_case(text: str) -> str:
-    """Convert a string to snake_case.
+    """Convert a camelCase or PascalCase string into snake_case format.
 
     Args:
         text (str): The input string.
 
     Returns:
         str: The converted string in snake_case.
-
     """
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
 def clean_url(url: str | None) -> str | None:
-    """Clean a URL by removing whitespace and trailing punctuation.
+    """Clean a URL string by trimming whitespace and trailing punctuation.
 
     Args:
         url (str, optional): Raw URL string.
 
     Returns:
         str | None: Cleaned URL string or None if empty.
-
     """
     if not url:
         return None
@@ -68,37 +65,34 @@ def clean_url(url: str | None) -> str | None:
 
 
 def get_absolute_url(path: str) -> str:
-    """Return the absolute URL for a given path.
+    """Build an absolute URL using the site's base URL and a given path.
 
     Args:
         path (str): The relative path.
 
     Returns:
-        str: The absolute URL.
-
+        str: The complete absolute URL.
     """
     return f"{settings.SITE_URL}/{path.lstrip('/')}"
 
 
 def get_nest_user_agent() -> str:
-    """Return the user agent string for the Nest application.
+    """Generate the user agent string for the Nest application.
 
     Returns:
-        str: The user agent string.
-
+        str: The formatted user agent string.
     """
     return settings.APP_NAME.replace(" ", "-").lower()
 
 
 def get_user_ip_address(request: HttpRequest) -> str:
-    """Retrieve the user's IP address from the request.
+    """Get the client's IP address from the HTTP request.
 
     Args:
         request (HttpRequest): The HTTP request object.
 
     Returns:
-        str: The user's IP address.
-
+        str: The client's IP address.
     """
     if settings.IS_LOCAL_ENVIRONMENT or settings.IS_E2E_ENVIRONMENT:
         return settings.PUBLIC_IP_ADDRESS
@@ -108,14 +102,13 @@ def get_user_ip_address(request: HttpRequest) -> str:
 
 
 def is_valid_json(content: str) -> bool:
-    """Check if content is JSON format.
+    """Check whether the given string contains valid JSON data.
 
     Args:
-        content: The content to check
+        content: The content to check.
 
     Returns:
-        bool: True if content is valid JSON, False otherwise
-
+        bool: True if content is valid JSON, otherwise False.
     """
     try:
         json.loads(content)
@@ -125,28 +118,26 @@ def is_valid_json(content: str) -> bool:
 
 
 def join_values(fields: list, delimiter: str = " ") -> str:
-    """Join non-empty field values using a specified delimiter.
+    """Join non-empty values from a list using a chosen delimiter.
 
     Args:
         fields (list): A list of field values.
         delimiter (str, optional): The delimiter to use.
 
     Returns:
-        str: The joined string.
-
+        str: A single joined string.
     """
     return delimiter.join(field for field in fields if field)
 
 
 def natural_date(value: int | str | datetime) -> str:
-    """Convert a date or timestamp into a human-readable format.
+    """Convert a date, timestamp, or datetime into a human-readable relative time.
 
     Args:
         value (int or str or datetime): The date or timestamp to convert.
 
     Returns:
-        str: The humanized date string.
-
+        str: The human-friendly date string.
     """
     if isinstance(value, str):
         dt = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=UTC)
@@ -159,72 +150,67 @@ def natural_date(value: int | str | datetime) -> str:
 
 
 def natural_number(value: int, unit: str | None = None) -> str:
-    """Convert a number into a human-readable format.
+    """Convert a number into a shorter, human-readable format.
 
     Args:
         value (int): The number to convert.
         unit (str, optional): The unit to append.
 
     Returns:
-        str: The humanized number string.
-
+        str: The formatted number string.
     """
     number = intword(value)
     return f"{number} {unit}{pluralize(value)}" if unit else number
 
 
 def round_down(value: int, base: int) -> int:
-    """Round down the stats to the nearest base.
+    """Round a number down to the nearest multiple of the given base.
 
     Args:
         value (int): The value to round down.
-        base (int): The base to round down to.
+        base (int): The base multiple.
 
     Returns:
         int: The rounded down value.
-
     """
     return value - (value % base)
 
 
 def slugify(text: str) -> str:
-    """Generate a slug from the given text.
+    """Convert text into a URL-friendly slug.
 
     Args:
         text (str): The text to slugify.
 
     Returns:
-        str: The slugify text.
-
+        str: The generated slug string.
     """
     return re.sub(r"-{2,}", "-", django_slugify(text))
 
 
 def truncate(text: str, limit: int, truncate: str = "...") -> str:
-    """Truncate text to a specified character limit.
+    """Shorten text to a specified character limit.
 
     Args:
         text (str): The text to truncate.
         limit (int): The character limit.
-        truncate (str, optional): The truncation suffix.
+        truncate (str, optional): The suffix added after truncation.
 
     Returns:
-        str: The truncated text.
-
+        str: The shortened text.
     """
     return Truncator(text).chars(limit, truncate=truncate)
 
 
 def normalize_limit(limit: int, max_limit: int = 1000) -> int | None:
-    """Normalize and validate a limit parameter.
+    """Validate and normalize a limit value within allowed bounds.
 
     Args:
         limit (int): The requested limit.
         max_limit (int): The maximum allowed limit. Defaults to 1000.
 
     Returns:
-        int | None: The normalized limit capped at max_limit, or None if invalid.
-
+        int | None: The adjusted limit, or None if invalid.
     """
     try:
         limit = int(limit)
@@ -238,21 +224,39 @@ def normalize_limit(limit: int, max_limit: int = 1000) -> int | None:
 
 
 def validate_url(url: str | None) -> bool:
-    """Validate that a URL has proper scheme and netloc.
+    """Check whether a URL is valid and properly structured.
 
     Args:
         url (str, optional): URL string to validate.
 
     Returns:
-        bool: True if URL is valid, False otherwise.
-
+        bool: True if the URL is valid, otherwise False.
     """
-    if not url:
+    max_url_length = 2048
+    if (
+        not url
+        or len(url) > max_url_length
+        # ASCII control characters.
+        or re.search(r"[\x00-\x1f\x7f]", url)
+    ):
         return False
 
     try:
         parsed = urlparse(url)
+
+        min_port = 1
+        max_port = 65535
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.netloc
+            or not re.search(r"[a-zA-Z0-9]", parsed.netloc)
+            or not (hostname := parsed.hostname)
+            or hostname.startswith((".", "-"))
+            or hostname.endswith("-")
+            or (parsed.port is not None and not (min_port <= parsed.port <= max_port))
+        ):
+            return False
     except ValueError:
         return False
 
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    return True
