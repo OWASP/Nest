@@ -15,6 +15,7 @@ describe('formatDate function', () => {
   })
 
   test('throws error for invalid date', () => {
+    expect(() => formatDate('invalid-date')).toThrow(TypeError)
     expect(() => formatDate('invalid-date')).toThrow('Invalid date')
   })
 
@@ -58,10 +59,12 @@ describe('formatDateRange function', () => {
   })
 
   test('throws error when start date is invalid', () => {
+    expect(() => formatDateRange('invalid-date', '2023-09-04')).toThrow(TypeError)
     expect(() => formatDateRange('invalid-date', '2023-09-04')).toThrow('Invalid date')
   })
 
   test('throws error when end date is invalid', () => {
+    expect(() => formatDateRange('2023-09-01', 'invalid-date')).toThrow(TypeError)
     expect(() => formatDateRange('2023-09-01', 'invalid-date')).toThrow('Invalid date')
   })
 
