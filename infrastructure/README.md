@@ -80,19 +80,13 @@ Follow these steps to set up the infrastructure:
   > [!NOTE]
   > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (bootstrap) created in the previous step.
 
-  > [!NOTE]
-  > Update defaults (e.g. `region`) as needed.
-
-  > [!NOTE]
-  > Optionally change the region: set `aws_region` in a `.tfvars` file.
-
   - Initialize Terraform if needed:
 
     ```bash
     terraform init -backend-config=terraform.tfbackend
     ```
 
-  - Apply the changes to create the backend resources:
+  - Apply the changes to create the bootstrap resources:
 
     ```bash
     terraform apply
@@ -394,33 +388,32 @@ Migrate and load data into the new database.
 
 ## Required Policies
 
-- All users (`nest-staging`, `nest-bootstrap`, etc) require these minumum policies to use the terraform remote backend:
+- All users (`nest-staging`, `nest-bootstrap`, etc.) require these minimum policies to use the terraform remote backend:
 Note: Replace ${...} variables appropriately.
 
 ```json
-  {
-	"Version": "2012-10-17",
-	"Statement": [
-		{
+{
+    "Version": "2012-10-17",
+        "Statement": [ {
             "Sid": "S3StateManagement",
-			"Effect": "Allow",
-			"Action": [
-				"s3:GetObject",
-				"s3:PutObject",
-				"s3:ListBucket"
-			],
-			"Resource": [
-				"arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}",
-				"arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}/*"
-			]
-		},
-		{
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+            "s3:PutObject",
+            "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}",
+            "arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}/*"
+            ]
+        },
+        {
             "Sid": "DynamoDBStateManagement",
             "Effect": "Allow",
             "Action": [
                 "dynamodb:GetItem",
-                "dynamodb:PutItem",
-                "dynamodb:DeleteItem"
+            "dynamodb:PutItem",
+            "dynamodb:DeleteItem"
             ],
             "Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/${TERRAFORM_DYNAMODB_TABLE_NAME}"
         },
@@ -439,17 +432,17 @@ Note: Replace ${...} variables appropriately.
 Additionally, the `nest-staging` IAM User requires the following policy to assume it's own role:
 ```json
 {
-  {
-	"Version": "2012-10-17",
-	"Statement": [
-    "Sid": "STSManagement",
-        "Effect": "Allow",
-        "Action": [
-            "sts:AssumeRole",
-            "sts:TagSession"
-        ],
-        "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-staging-terraform"
+    "Version": "2012-10-17",
+        "Statement": [
+        {
+            "Sid": "S3StateManagement",
+            "Effect": "Allow",
+            "Action": [
+                "sts:AssumeRole",
+                "sts:TagSession"
+            ],
+            "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-staging-terraform"
+        }
     ]
-  }
 }
 ```

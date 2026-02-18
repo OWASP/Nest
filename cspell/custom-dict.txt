@@ -184,6 +184,7 @@ skillstruck
 slackbot
 slideshare
 speakerdeck
+subgrp
 superfences
 tfbackend
 tgz
