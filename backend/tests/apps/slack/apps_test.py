@@ -88,6 +88,7 @@ class TestSlackAppHandlers:
         """Test log_events catches exceptions from Event.create."""
         handlers, _, orig = self._reload_with_mock_app()
         try:
+            assert "use" in handlers
             log_events = handlers["use"]
 
             mock_client = MagicMock()

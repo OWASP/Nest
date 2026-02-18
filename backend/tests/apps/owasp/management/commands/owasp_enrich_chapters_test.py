@@ -32,6 +32,18 @@ class TestOwaspEnrichChapters:
         chapter.longitude = None
         return chapter
 
+    @staticmethod
+    def _make_active_chapters_qs(chapters_list):
+        """Create a mock active chapters queryset from a list of chapter mocks."""
+        mock_active_chapters = mock.MagicMock()
+        mock_active_chapters.__iter__.return_value = iter(chapters_list)
+        mock_active_chapters.count.return_value = len(chapters_list)
+        mock_active_chapters.__getitem__.side_effect = lambda idx: (
+            chapters_list[idx.start : idx.stop] if isinstance(idx, slice) else chapters_list[idx]
+        )
+        mock_active_chapters.without_geo_data.order_by.return_value = mock_active_chapters
+        return mock_active_chapters
+
     @pytest.mark.parametrize(
         ("offset", "chapters", "latitude", "longitude"),
         [
@@ -61,16 +73,7 @@ class TestOwaspEnrichChapters:
         )
 
         mock_chapters_list = [mock_chapter] * chapters
-
-        mock_active_chapters = mock.MagicMock()
-        mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
-        mock_active_chapters.count.return_value = len(mock_chapters_list)
-        mock_active_chapters.__getitem__.side_effect = lambda idx: (
-            mock_chapters_list[idx.start : idx.stop]
-            if isinstance(idx, slice)
-            else mock_chapters_list[idx]
-        )
-        mock_active_chapters.without_geo_data.order_by.return_value = mock_active_chapters
+        mock_active_chapters = self._make_active_chapters_qs(mock_chapters_list)
 
         with (
             mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
@@ -114,16 +117,7 @@ class TestOwaspEnrichChapters:
         mock_chapter.generate_geo_location.side_effect = Exception("Geo API error")
 
         mock_chapters_list = [mock_chapter]
-
-        mock_active_chapters = mock.MagicMock()
-        mock_active_chapters.__iter__.return_value = iter(mock_chapters_list)
-        mock_active_chapters.count.return_value = 1
-        mock_active_chapters.__getitem__.side_effect = lambda idx: (
-            mock_chapters_list[idx.start : idx.stop]
-            if isinstance(idx, slice)
-            else mock_chapters_list[idx]
-        )
-        mock_active_chapters.without_geo_data.order_by.return_value = mock_active_chapters
+        mock_active_chapters = self._make_active_chapters_qs(mock_chapters_list)
 
         with (
             mock.patch.object(Chapter, "active_chapters", mock_active_chapters),
