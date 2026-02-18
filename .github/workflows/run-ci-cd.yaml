@@ -476,7 +476,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-BuildStagingImages
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
@@ -686,9 +686,21 @@ jobs:
         working-directory: infrastructure/bootstrap
         run: terraform validate
 
+      - name: Terraform Plan
+        working-directory: infrastructure/bootstrap
+        run: terraform plan -out=tfplan
+
+      - name: Show plan in summary
+        working-directory: infrastructure/bootstrap
+        run: |
+          echo "## Bootstrap Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
       - name: Terraform Apply
         working-directory: infrastructure/bootstrap
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve tfplan
     timeout-minutes: 10
 
   plan-staging-nest:
@@ -717,7 +729,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-StagingPlan
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
@@ -818,7 +830,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 1200
+          role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-StagingDeploy
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform

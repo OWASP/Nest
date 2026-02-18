@@ -209,7 +209,6 @@ data "aws_iam_policy_document" "part_one" {
       "ecr:GetDownloadUrlForLayer",
       "ecr:GetLifecyclePolicy",
       "ecr:GetRepositoryPolicy",
-      "ecr:GetRepositoryPolicy",
       "ecr:InitiateLayerUpload",
       "ecr:ListImages",
       "ecr:ListTagsForResource",
