@@ -36,7 +36,7 @@ class TestOwaspEnrichChapters:
     def _make_active_chapters_qs(chapters_list):
         """Create a mock active chapters queryset from a list of chapter mocks."""
         mock_active_chapters = mock.MagicMock()
-        mock_active_chapters.__iter__.return_value = iter(chapters_list)
+        mock_active_chapters.__iter__.side_effect = lambda: iter(chapters_list)
         mock_active_chapters.count.return_value = len(chapters_list)
         mock_active_chapters.__getitem__.side_effect = lambda idx: (
             chapters_list[idx.start : idx.stop] if isinstance(idx, slice) else chapters_list[idx]
