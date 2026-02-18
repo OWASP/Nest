@@ -161,6 +161,9 @@ class TestGithubUpdateOwaspOrganization:
                 elif repository_name.startswith("www-committee-"):
                     assert mock_committee_update.call_count == expected_calls["committee"]
             else:
+                assert mock_project_update.call_count == expected_calls["project"]
+                assert mock_chapter_update.call_count == expected_calls["chapter"]
+                assert mock_committee_update.call_count == expected_calls["committee"]
                 assert command.stdout.write.call_count > 0
 
             mock_project_bulk_save.assert_called_once()

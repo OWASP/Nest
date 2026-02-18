@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
 
 from apps.slack.commands.users import Users
 from apps.slack.common.presentation import EntityPresentation
@@ -33,6 +32,7 @@ class TestUsersHandler:
         mock_get_blocks,
         mock_client,
         mock_command,
+        settings,
         commands_enabled,
         search_query,
         expected_calls,
@@ -73,7 +73,7 @@ class TestUsersHandler:
             assert mock_client.chat_postMessage.call_args[1]["channel"] == "C123456"
 
     @patch("apps.slack.commands.users.get_blocks")
-    def test_users_handler_with_blocks(self, mock_get_blocks, mock_client, mock_command):
+    def test_users_handler_with_blocks(self, mock_get_blocks, mock_client, mock_command, settings):
         settings.SLACK_COMMANDS_ENABLED = True
         mock_get_blocks.return_value = [
             {"type": "section", "text": {"type": "mrkdwn", "text": "User: Test"}},

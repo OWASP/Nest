@@ -39,14 +39,14 @@ class TestApplyStructuredSearch:
         args, _ = qs.filter.call_args
         assert "stars_count__gte" in str(args[0])
 
-    def test_invalid_syntax_returns_original_queryset(self):
+    def test_invalid_syntax_skips_condition_and_applies_empty_filter(self):
         qs = make_queryset()
-        apply_structured_search(qs, "stars:!!!", FIELD_SCHEMA)
+        result = apply_structured_search(qs, "stars:!!!", FIELD_SCHEMA)
 
         qs.filter.assert_called_once()
         args, _ = qs.filter.call_args
-
         assert "stars_count" not in str(args[0])
+        assert result == qs.filter.return_value
 
     def test_unknown_field_is_ignored(self):
         qs = make_queryset()

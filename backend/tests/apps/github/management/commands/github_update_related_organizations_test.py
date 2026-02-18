@@ -77,13 +77,6 @@ class TestGithubUpdateRelatedOrganizations:
         ) as mock_logger:
             yield mock_logger
 
-    @pytest.fixture
-    def mock_get_github_client(self):
-        with mock.patch(
-            "apps.github.management.commands.github_update_related_organizations.get_github_client"
-        ) as mock_get_client:
-            yield mock_get_client
-
     def test_add_arguments(self, command):
         """Test that the command's arguments are correctly added."""
         parser = mock.Mock()
