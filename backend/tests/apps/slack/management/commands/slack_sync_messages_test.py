@@ -767,6 +767,7 @@ class TestSyncUserMessagesMissingBranches:
         mock_qs.__iter__.return_value = [mock_ws_instance]
         mock_workspace.objects.all.return_value = mock_qs
 
+        mock_conversation_cls = mocker.patch(f"{self.target_module}.Conversation")
         mock_webclient = mocker.patch(f"{self.target_module}.WebClient")
         mock_client = MagicMock()
         mock_webclient.return_value = mock_client
@@ -787,6 +788,8 @@ class TestSyncUserMessagesMissingBranches:
         command.stdout = MagicMock()
 
         command._sync_user_messages("U123", "2024-01-01", "2024-01-02", 0.1, 3)
+
+        mock_conversation_cls.objects.get_or_create.assert_not_called()
 
     def test_sync_message_create_returns_none(self, mocker):
         """Test when _create_message returns None."""

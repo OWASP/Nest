@@ -238,7 +238,8 @@ class RepositoryBasedEntityModel(models.Model):
             )
 
             for match in matches:
-                leaders[match[0].strip()] = match[1].strip()
+                name, value = match[0].strip(), match[1].strip()
+                leaders[name] = value if "@" in value else None
         return leaders
 
     def get_metadata(self):

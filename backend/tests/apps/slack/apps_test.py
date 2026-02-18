@@ -4,7 +4,6 @@ import importlib
 import logging
 from unittest.mock import MagicMock, patch
 
-import pytest
 from django.test import override_settings
 
 
@@ -28,10 +27,10 @@ class TestSlackAppHandlers:
         mock_app.error = capture_error
         mock_app.use = capture_use
         with (
-            override_settings(SLACK_BOT_TOKEN="xoxb-test", SLACK_SIGNING_SECRET="test-secret"),
+            override_settings(SLACK_BOT_TOKEN="xoxb-test", SLACK_SIGNING_SECRET="test-secret"),  # noqa: S106
             patch("slack_bolt.App", return_value=mock_app),
         ):
-            import apps.slack.apps as module
+            import apps.slack.apps as module  # noqa: PLC0415
 
             importlib.reload(module)
 
@@ -40,7 +39,7 @@ class TestSlackAppHandlers:
     @staticmethod
     def _restore_module():
         """Restore apps.slack.apps to its original state."""
-        import apps.slack.apps as module
+        import apps.slack.apps as module  # noqa: PLC0415
 
         importlib.reload(module)
 
@@ -57,15 +56,13 @@ class TestSlackAppHandlers:
             with patch.object(module, "logger") as mock_logger:
                 error_handler(test_error, test_body)
 
-            mock_logger.exception.assert_called_once_with(
-                test_error, extra={"body": test_body}
-            )
+            mock_logger.exception.assert_called_once_with(test_error, extra={"body": test_body})
         finally:
             self._restore_module()
 
     def test_log_events_creates_event_and_calls_next(self):
         """Test log_events creates Event and calls next()."""
-        handlers, module = self._reload_with_mock_app()
+        handlers, _ = self._reload_with_mock_app()
         try:
             assert "use" in handlers
             log_events = handlers["use"]
@@ -86,7 +83,7 @@ class TestSlackAppHandlers:
 
     def test_log_events_handles_exception(self):
         """Test log_events catches exceptions from Event.create."""
-        handlers, module = self._reload_with_mock_app()
+        handlers, _ = self._reload_with_mock_app()
         try:
             log_events = handlers["use"]
 
@@ -96,9 +93,7 @@ class TestSlackAppHandlers:
             mock_payload = {"type": "event_callback"}
             mock_next = MagicMock()
 
-            with patch(
-                "apps.slack.models.event.Event.create", side_effect=Exception("DB error")
-            ):
+            with patch("apps.slack.models.event.Event.create", side_effect=Exception("DB error")):
                 log_events(mock_client, mock_context, mock_logger, mock_payload, mock_next)
 
             mock_logger.exception.assert_called_once_with("Could not log Slack event")

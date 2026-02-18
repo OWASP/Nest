@@ -6,7 +6,7 @@ from apps.owasp.index.registry.chapter import ChapterIndex
 class TestChapterIndex:
     def test_get_entities(self):
         """Test get_entities returns active chapters with select_related."""
-        with patch.object(ChapterIndex, "__init__", lambda self: None):
+        with patch.object(ChapterIndex, "__init__", lambda _: None):
             index = ChapterIndex()
 
         with patch("apps.owasp.index.registry.chapter.Chapter") as mock_chapter:
