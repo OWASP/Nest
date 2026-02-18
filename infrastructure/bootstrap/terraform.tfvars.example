@@ -1,2 +1,3 @@
 aws_region   = "us-east-2"
+aws_role_external_id = ${AWS_ROLE_EXTERNAL_ID}
 project_name = "nest"

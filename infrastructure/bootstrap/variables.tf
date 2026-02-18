@@ -4,6 +4,11 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
+variable "aws_role_external_id" {
+  description = "The external ID for role assumption."
+  type        = string
+}
+
 variable "environments" {
   description = "The environments to create Terraform roles for."
   type        = list(string)

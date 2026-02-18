@@ -477,7 +477,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 1200
-          role-external-id: nest-staging-terraform
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-BuildStagingImages
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
@@ -669,11 +669,13 @@ jobs:
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           PROJECT_NAME: 'nest'
+          AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
         run: |
           umask 377
           cat > infrastructure/bootstrap/terraform.tfvars <<-EOF
           aws_region="$AWS_REGION"
           project_name="$PROJECT_NAME"
+          aws_role_external_id="$AWS_ROLE_EXTERNAL_ID"
           EOF
 
       - name: Terraform Init
@@ -716,7 +718,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 1200
-          role-external-id: nest-staging-terraform
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-StagingPlan
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
@@ -817,7 +819,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 1200
-          role-external-id: nest-staging-terraform
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-StagingDeploy
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 

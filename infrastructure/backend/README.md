@@ -61,19 +61,27 @@ Use the following inline permissions for the `nest-backend` IAM User
 			"Resource": "arn:aws:dynamodb:*:${AWS_ACCOUNT_ID}:table/nest-terraform-state-lock-*"
 		},
 		{
+			"Sid": "KMSCRUDManagement",
+			"Effect": "Allow",
+			"Action": [
+				"kms:CreateKey",
+				"kms:ListAliases",
+				"kms:ListKeys"
+			],
+			"Resource": "*"
+		},
+		{
 			"Sid": "KMSManagement",
 			"Effect": "Allow",
 			"Action": [
 				"kms:CreateAlias",
 				"kms:CreateGrant",
-				"kms:CreateKey",
 				"kms:DeleteAlias",
 				"kms:DescribeKey",
 				"kms:DisableKeyRotation",
 				"kms:EnableKeyRotation",
 				"kms:GetKeyPolicy",
 				"kms:GetKeyRotationStatus",
-				"kms:ListAliases",
 				"kms:ListResourceTags",
 				"kms:PutKeyPolicy",
 				"kms:ScheduleKeyDeletion",

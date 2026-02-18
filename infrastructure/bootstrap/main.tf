@@ -39,6 +39,7 @@ data "aws_iam_policy_document" "part_one" {
       "elasticache:DescribeCacheSubnetGroups",
       "elasticache:DescribeReplicationGroups",
       "elasticloadbalancing:Describe*",
+      "events:ListRuleNamesByTarget",
       "kms:DescribeKey",
       "lambda:ListFunctions",
       "lambda:ListVersionsByFunction",
@@ -83,15 +84,6 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "CloudWatchEventsManagement"
-    effect = "Allow"
-    actions = [
-      "events:ListRuleNamesByTarget",
-    ]
-    resources = ["*"]
-  }
-
-  statement {
     sid    = "CloudWatchLogsManagement"
     effect = "Allow"
     actions = [
@@ -109,7 +101,21 @@ data "aws_iam_policy_document" "part_one" {
   }
 
   statement {
-    sid    = "DatabaseAndCacheManagement"
+    sid    = "DynamoDBStateLocking"
+    effect = "Allow"
+    actions = [
+      "dynamodb:DeleteItem",
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+    ]
+    resources = [
+      "arn:aws:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/${var.project_name}-terraform-state-lock-${each.key}",
+    ]
+  }
+
+  statement {
+    sid    = "ElastiCacheManagement"
     effect = "Allow"
     actions = [
       "elasticache:AddTagsToResource",
@@ -121,37 +127,12 @@ data "aws_iam_policy_document" "part_one" {
       "elasticache:ModifyCacheSubnetGroup",
       "elasticache:ModifyReplicationGroup",
       "elasticache:RemoveTagsFromResource",
-      "rds:AddTagsToResource",
-      "rds:CreateDBInstance",
-      "rds:CreateDBSubnetGroup",
-      "rds:DeleteDBInstance",
-      "rds:DeleteDBSubnetGroup",
-      "rds:ListTagsForResource",
-      "rds:ModifyDBInstance",
-      "rds:ModifyDBSubnetGroup",
-      "rds:RemoveTagsFromResource",
     ]
     resources = [
       "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster:${var.project_name}-${each.key}-*",
       "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parametergroup:*",
       "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:replicationgroup:${var.project_name}-${each.key}-*",
       "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subnetgroup:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*"
-    ]
-  }
-
-  statement {
-    sid    = "DynamoDBStateLocking"
-    effect = "Allow"
-    actions = [
-      "dynamodb:DeleteItem",
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:PutItem",
-    ]
-    resources = [
-      "arn:aws:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/${var.project_name}-terraform-state-lock-${each.key}",
     ]
   }
 
@@ -210,16 +191,7 @@ data "aws_iam_policy_document" "part_one" {
     sid    = "ECRAuth"
     effect = "Allow"
     actions = [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:BatchGetImage",
-      "ecr:CompleteLayerUpload",
       "ecr:GetAuthorizationToken",
-      "ecr:GetDownloadUrlForLayer",
-      "ecr:GetRepositoryPolicy",
-      "ecr:InitiateLayerUpload",
-      "ecr:ListImages",
-      "ecr:PutImage",
-      "ecr:UploadLayerPart",
     ]
     resources = ["*"]
   }
@@ -228,17 +200,26 @@ data "aws_iam_policy_document" "part_one" {
     sid    = "ECRManagement"
     effect = "Allow"
     actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:CompleteLayerUpload",
       "ecr:CreateRepository",
       "ecr:DeleteLifecyclePolicy",
       "ecr:DeleteRepository",
+      "ecr:GetDownloadUrlForLayer",
       "ecr:GetLifecyclePolicy",
       "ecr:GetRepositoryPolicy",
+      "ecr:GetRepositoryPolicy",
+      "ecr:InitiateLayerUpload",
+      "ecr:ListImages",
       "ecr:ListTagsForResource",
+      "ecr:PutImage",
       "ecr:PutImageScanningConfiguration",
       "ecr:PutLifecyclePolicy",
       "ecr:SetRepositoryPolicy",
       "ecr:TagResource",
       "ecr:UntagResource",
+      "ecr:UploadLayerPart",
     ]
     resources = [
       "arn:aws:ecr:*:${data.aws_caller_identity.current.account_id}:repository/${var.project_name}-${each.key}-*",
@@ -291,10 +272,6 @@ data "aws_iam_policy_document" "part_one" {
       "arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task/${var.project_name}-*/*"
     ]
   }
-}
-
-data "aws_iam_policy_document" "part_two" {
-  for_each = local.environments
 
   statement {
     sid    = "ECSServiceManagement"
@@ -317,6 +294,10 @@ data "aws_iam_policy_document" "part_two" {
     ]
     resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-${each.key}-*:*"]
   }
+}
+
+data "aws_iam_policy_document" "part_two" {
+  for_each = local.environments
 
   statement {
     sid    = "ELBManagement"
@@ -511,6 +492,26 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
+    sid    = "RDSManagement"
+    effect = "Allow"
+    actions = [
+      "rds:AddTagsToResource",
+      "rds:CreateDBInstance",
+      "rds:CreateDBSubnetGroup",
+      "rds:DeleteDBInstance",
+      "rds:DeleteDBSubnetGroup",
+      "rds:ListTagsForResource",
+      "rds:ModifyDBInstance",
+      "rds:ModifyDBSubnetGroup",
+      "rds:RemoveTagsFromResource",
+    ]
+    resources = [
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*"
+    ]
+  }
+
+  statement {
     sid    = "S3Management"
     effect = "Allow"
     actions = [
@@ -602,6 +603,11 @@ resource "aws_iam_role" "terraform" {
     Statement = [
       {
         Action = ["sts:AssumeRole", "sts:TagSession"]
+        Condition = {
+          StringEquals = {
+            "sts:ExternalId" = var.aws_role_external_id
+          }
+        }
         Effect = "Allow"
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.project_name}-${each.key}"
