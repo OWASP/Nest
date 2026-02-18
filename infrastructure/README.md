@@ -11,7 +11,6 @@ Ensure you have the following setup/installed:
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - An AWS account with credentials configured locally:
 Note: Refer to the respective `README.md` files and [Required Policies](#required-policies) for more information.
-- Read `INFO.md` for information related to policies.
 
 ## Setting up the infrastructure
 
@@ -395,8 +394,8 @@ Migrate and load data into the new database.
 
 ## Required Policies
 
-- The Minimum policies required to use the terraform remote backend:
-(Replace ${} variables appropriately)
+- All users (`nest-staging`, `nest-bootstrap`, etc) require these minumum policies to use the terraform remote backend:
+Note: Replace ${...} variables appropriately.
 
 ```json
   {
@@ -437,9 +436,12 @@ Migrate and load data into the new database.
 }
 ```
 
-`staging/` also requires the following policy assume it's role:
+Additionally, the `nest-staging` IAM User requires the following policy to assume it's own role:
 ```json
 {
+  {
+	"Version": "2012-10-17",
+	"Statement": [
     "Sid": "STSManagement",
         "Effect": "Allow",
         "Action": [
@@ -447,5 +449,7 @@ Migrate and load data into the new database.
             "sts:TagSession"
         ],
         "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-staging-terraform"
+    ]
+  }
 }
 ```

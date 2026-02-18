@@ -1,3 +1,11 @@
+## Users
+The `bootstrap` allows specific IAM Users to perform actions.
+These users are listed in the `var.environments` variable.
+Ensure your IAM Users follow the naming convention:
+- nest-${var.environment}
+
+Example: `nest-staging`, `nest-bootstrap`, `nest-backend`.
+
 ## Inline Permissions
 Use the following inline permissions for the `nest-bootstrap` IAM User
 *Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY_ARN} with appropriate values.

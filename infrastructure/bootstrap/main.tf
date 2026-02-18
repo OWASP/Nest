@@ -61,15 +61,7 @@ data "aws_iam_policy_document" "part_one" {
     sid    = "CloudWatchEventsManagement"
     effect = "Allow"
     actions = [
-      "events:DeleteRule",
-      "events:DescribeRule",
       "events:ListRuleNamesByTarget",
-      "events:ListTargetsByRule",
-      "events:PutRule",
-      "events:PutTargets",
-      "events:RemoveTargets",
-      "events:TagResource",
-      "events:UntagResource",
     ]
     resources = ["*"]
   }
@@ -89,11 +81,11 @@ data "aws_iam_policy_document" "part_one" {
       "logs:UntagLogGroup",
       "logs:UntagResource",
     ]
-    resources = ["*"]
+    resources = ["arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
   }
 
   statement {
-    sid    = "DatabaseManagement"
+    sid    = "DatabaseAndCacheManagement"
     effect = "Allow"
     actions = [
       "elasticache:AddTagsToResource",
@@ -120,7 +112,11 @@ data "aws_iam_policy_document" "part_one" {
       "rds:ModifyDBSubnetGroup",
       "rds:RemoveTagsFromResource",
     ]
-    resources = ["*"]
+    resources = [
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*",
+      "arn:aws:elasticache:${var.aws_region}:${data.aws_caller_identity.current.account_id}:cluster:${var.project_name}-${each.key}-*"
+    ]
   }
 
   statement {
@@ -163,14 +159,17 @@ data "aws_iam_policy_document" "part_one" {
       "ec2:DeleteNatGateway",
       "ec2:DeleteNetworkAcl",
       "ec2:DeleteNetworkAclEntry",
+      "ec2:DeleteNetworkInterface",
       "ec2:DeleteRoute",
       "ec2:DeleteRouteTable",
       "ec2:DeleteSecurityGroup",
       "ec2:DeleteSubnet",
       "ec2:DeleteTags",
       "ec2:DeleteVpc",
+      "ec2:DeleteVpcEndpoints",
       "ec2:Describe*",
       "ec2:DetachInternetGateway",
+      "ec2:DisassociateAddress",
       "ec2:DisassociateRouteTable",
       "ec2:ModifySubnetAttribute",
       "ec2:ModifyVpcAttribute",
@@ -371,7 +370,6 @@ data "aws_iam_policy_document" "part_two" {
       "iam:ListInstanceProfilesForRole",
       "iam:ListPolicyVersions",
       "iam:ListRolePolicies",
-      "iam:PassRole",
       "iam:PutRolePolicy",
       "iam:TagPolicy",
       "iam:TagRole",
@@ -413,26 +411,52 @@ data "aws_iam_policy_document" "part_two" {
     sid    = "KMSManagement"
     effect = "Allow"
     actions = [
-      "kms:CreateAlias",
       "kms:CreateKey",
-      "kms:Decrypt",
-      "kms:DeleteAlias",
-      "kms:DescribeKey",
-      "kms:DisableKeyRotation",
-      "kms:EnableKeyRotation",
-      "kms:GenerateDataKey",
-      "kms:GetKeyPolicy",
-      "kms:GetKeyRotationStatus",
       "kms:ListAliases",
-      "kms:ListResourceTags",
+      "kms:ListResourceTags"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "KMSKeyUsageAndPolicy"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey",
+      "kms:GenerateDataKey",
       "kms:PutKeyPolicy",
       "kms:ScheduleKeyDeletion",
       "kms:TagResource",
-      "kms:UntagResource",
-      "kms:UpdateAlias",
       "kms:UpdateKeyDescription",
+      "kms:EnableKeyRotation",
+      "kms:DisableKeyRotation",
+      "kms:GetKeyPolicy",
+      "kms:GetKeyRotationStatus"
     ]
     resources = ["*"]
+
+    condition {
+      test     = "ForAnyValue:StringEquals"
+      variable = "kms:ResourceAliases"
+      values = [
+        "alias/${var.project_name}-backend",
+        "alias/${var.project_name}-${each.key}"
+      ]
+    }
+  }
+
+  statement {
+    sid    = "KMSAliasManagement"
+    effect = "Allow"
+    actions = [
+      "kms:CreateAlias",
+      "kms:DeleteAlias",
+      "kms:UpdateAlias"
+    ]
+    resources = [
+      "arn:aws:kms:${var.aws_region}:${data.aws_caller_identity.current.account_id}:alias/${var.project_name}-*"
+    ]
   }
 
   statement {
@@ -485,6 +509,7 @@ data "aws_iam_policy_document" "part_two" {
     actions = [
       "s3:CreateBucket",
       "s3:DeleteBucket",
+      "s3:DeleteBucketPolicy",
       "s3:DeleteObject",
       "s3:GetAccelerateConfiguration",
       "s3:GetBucketAcl",
@@ -503,6 +528,7 @@ data "aws_iam_policy_document" "part_two" {
       "s3:GetObject",
       "s3:GetReplicationConfiguration",
       "s3:ListBucket",
+      "s3:ListBucketVersions",
       "s3:PutBucketAcl",
       "s3:PutBucketLogging",
       "s3:PutBucketObjectLockConfiguration",
@@ -553,9 +579,7 @@ data "aws_iam_policy_document" "part_two" {
       "ssm:PutParameter",
       "ssm:RemoveTagsFromResource",
     ]
-    resources = [
-      "arn:aws:ssm:*:${data.aws_caller_identity.current.account_id}:*",
-    ]
+    resources = ["arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${each.key}/*"]
   }
 }
 
