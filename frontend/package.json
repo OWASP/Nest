@@ -121,7 +121,7 @@
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@10.24.0",
+  "packageManager": "pnpm@10.30.0",
   "pnpm": {
     "overrides": {
       "glob": "^11.1.0",

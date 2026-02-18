@@ -22,8 +22,7 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
 WORKDIR /app
 
 RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g npm@latest --cache ${NPM_CACHE} && \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+    npm install --ignore-scripts -g pnpm@10.30.0 --cache ${NPM_CACHE}
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
