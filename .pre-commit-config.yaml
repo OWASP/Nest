@@ -106,6 +106,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.16.0
+    rev: v2.16.1
     hooks:
       - id: pyproject-fmt
