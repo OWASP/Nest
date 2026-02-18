@@ -1,6 +1,7 @@
 ## Inline Permissions
 Use the following inline permissions for the `nest-backend` IAM User
 *Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY_ARN} with appropriate values.
+*Note*: use "*" instead of `AWS_BACKEND_KMS_KEY_ARN` on first `terraform apply`.
 
 ```json
 {
@@ -12,6 +13,7 @@ Use the following inline permissions for the `nest-backend` IAM User
 			"Action": [
 				"s3:CreateBucket",
 				"s3:DeleteBucket",
+				"s3:DeleteBucketPolicy",
 				"s3:GetAccelerateConfiguration",
 				"s3:GetBucketAcl",
 				"s3:GetBucketCors",
@@ -39,8 +41,8 @@ Use the following inline permissions for the `nest-backend` IAM User
 				"s3:PutObject"
 			],
 			"Resource": [
-				"arn:aws:s3:::nest-terraform-state-*",
-				"arn:aws:s3:::nest-terraform-state-*/*"
+				"arn:aws:s3:::nest-*-terraform-state*",
+				"arn:aws:s3:::nest-*-terraform-state*/*"
 			]
 		},
 		{
@@ -58,7 +60,7 @@ Use the following inline permissions for the `nest-backend` IAM User
 				"dynamodb:UpdateContinuousBackups",
 				"dynamodb:UpdateTable"
 			],
-			"Resource": "arn:aws:dynamodb:*:${AWS_ACCOUNT_ID}:table/nest-terraform-state-lock-*"
+			"Resource": "arn:aws:dynamodb:*:${AWS_ACCOUNT_ID}:table/nest-*-terraform-state-lock"
 		},
 		{
 			"Sid": "KMSCreateManagement",

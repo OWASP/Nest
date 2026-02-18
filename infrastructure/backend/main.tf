@@ -34,10 +34,12 @@ resource "random_id" "suffix" {
 }
 
 data "aws_iam_policy_document" "logs" {
+  for_each = local.state_environments
+
   statement {
     actions   = ["s3:PutObject"]
     effect    = "Allow"
-    resources = ["${aws_s3_bucket.logs.arn}/*"]
+    resources = ["${aws_s3_bucket.logs[each.key].arn}/*"]
     sid       = "s3-log-delivery"
 
     principals {
@@ -78,10 +80,10 @@ resource "aws_dynamodb_table" "state_lock" {
 
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
-  name         = "${var.project_name}-terraform-state-lock-${each.key}"
+  name         = "${var.project_name}-${each.key}-terraform-state-lock"
   tags = merge(local.common_tags, {
     Environment = each.key
-    Name        = "${var.project_name}-terraform-state-lock-${each.key}"
+    Name        = "${var.project_name}-${each.key}-terraform-state-lock"
   })
 
   attribute {
@@ -101,9 +103,12 @@ resource "aws_dynamodb_table" "state_lock" {
 }
 
 resource "aws_s3_bucket" "logs" { # NOSONAR
-  bucket = "${var.project_name}-terraform-state-logs-${random_id.suffix.hex}"
+  for_each = local.state_environments
+
+  bucket = "${var.project_name}-${each.key}-terraform-state-logs-${random_id.suffix.hex}"
   tags = merge(local.common_tags, {
-    Name = "${var.project_name}-terraform-state-logs"
+    Environment = each.key
+    Name        = "${var.project_name}-${each.key}-terraform-state-logs"
   })
 
   lifecycle {
@@ -112,7 +117,9 @@ resource "aws_s3_bucket" "logs" { # NOSONAR
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "logs" {
-  bucket = aws_s3_bucket.logs.id
+  for_each = local.state_environments
+
+  bucket = aws_s3_bucket.logs[each.key].id
 
   rule {
     id     = "expire-logs"
@@ -131,21 +138,27 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
 }
 
 resource "aws_s3_bucket_policy" "logs" {
-  bucket = aws_s3_bucket.logs.id
-  policy = data.aws_iam_policy_document.logs.json
+  for_each = local.state_environments
+
+  bucket = aws_s3_bucket.logs[each.key].id
+  policy = data.aws_iam_policy_document.logs[each.key].json
 }
 
 resource "aws_s3_bucket_public_access_block" "logs" {
+  for_each = local.state_environments
+
   block_public_acls       = true
   block_public_policy     = true
-  bucket                  = aws_s3_bucket.logs.id
+  bucket                  = aws_s3_bucket.logs[each.key].id
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
 #trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
-  bucket = aws_s3_bucket.logs.id
+  for_each = local.state_environments
+
+  bucket = aws_s3_bucket.logs[each.key].id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -155,7 +168,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
 }
 
 resource "aws_s3_bucket_versioning" "logs" {
-  bucket = aws_s3_bucket.logs.id
+  for_each = local.state_environments
+
+  bucket = aws_s3_bucket.logs[each.key].id
 
   versioning_configuration {
     status = "Enabled"
@@ -165,11 +180,11 @@ resource "aws_s3_bucket_versioning" "logs" {
 resource "aws_s3_bucket" "state" { # NOSONAR
   for_each = local.state_environments
 
-  bucket              = "${var.project_name}-terraform-state-${each.key}-${random_id.suffix.hex}"
+  bucket              = "${var.project_name}-${each.key}-terraform-state-${random_id.suffix.hex}"
   object_lock_enabled = true
   tags = merge(local.common_tags, {
     Environment = each.key
-    Name        = "${var.project_name}-terraform-state-${each.key}"
+    Name        = "${var.project_name}-${each.key}-terraform-state"
   })
 
   lifecycle {
@@ -199,8 +214,8 @@ resource "aws_s3_bucket_logging" "state" {
   for_each = local.state_environments
 
   bucket        = aws_s3_bucket.state[each.key].id
-  target_bucket = aws_s3_bucket.logs.id
-  target_prefix = "s3/${each.key}/"
+  target_bucket = aws_s3_bucket.logs[each.key].id
+  target_prefix = "s3/"
 }
 
 resource "aws_s3_bucket_object_lock_configuration" "state" {

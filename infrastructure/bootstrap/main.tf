@@ -110,7 +110,7 @@ data "aws_iam_policy_document" "part_one" {
       "dynamodb:PutItem",
     ]
     resources = [
-      "arn:aws:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/${var.project_name}-terraform-state-lock-${each.key}",
+      "arn:aws:dynamodb:*:${data.aws_caller_identity.current.account_id}:table/${var.project_name}-${each.key}-terraform-state-lock",
     ]
   }
 
@@ -549,8 +549,8 @@ data "aws_iam_policy_document" "part_two" {
       "s3:PutObject",
     ]
     resources = [
-      "arn:aws:s3:::${var.project_name}-*",
-      "arn:aws:s3:::${var.project_name}-*/*",
+      "arn:aws:s3:::${var.project_name}-${each.key}-*",
+      "arn:aws:s3:::${var.project_name}-${each.key}*/*",
     ]
   }
 

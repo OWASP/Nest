@@ -23,8 +23,8 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
 				"s3:PutObject"
 			],
 			"Resource": [
-				"arn:aws:s3:::nest-terraform-state-bootstrap-*",
-				"arn:aws:s3:::nest-terraform-state-bootstrap-*/*"
+				"arn:aws:s3:::nest-bootstrap-terraform-state-*",
+				"arn:aws:s3:::nest-bootstrap-terraform-state-*/*"
 			]
 		},
 		{
@@ -36,7 +36,7 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
 				"dynamodb:GetItem",
 				"dynamodb:PutItem"
 			],
-			"Resource": "arn:aws:dynamodb:*:${AWS_ACCOUNT_ID}:table/nest-terraform-state-lock-bootstrap"
+			"Resource": "arn:aws:dynamodb:*:${AWS_ACCOUNT_ID}:table/nest-bootstrap-terraform-state-lock"
 		},
 		{
 			"Sid": "IAMManagement",
