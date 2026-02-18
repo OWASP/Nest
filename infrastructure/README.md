@@ -9,7 +9,7 @@ Ensure you have the following setup/installed:
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-- An AWS account with credentials configured locally:
+- An AWS account.
 Note: Refer to the respective `README.md` files and [Required Policies](#required-policies) for more information.
 
 ## Setting up the infrastructure
@@ -17,6 +17,7 @@ Note: Refer to the respective `README.md` files and [Required Policies](#require
 Follow these steps to set up the infrastructure:
 
 1. **Setup Backend (one-time setup)**:
+  - Prerequisite: Create a `nest-backend` IAM user with the policies defined in `infrastructure/backend/README.md`.
 
   - Navigate to the backend directory:
 
@@ -46,6 +47,7 @@ Follow these steps to set up the infrastructure:
   > It is recommended to not destroy the backend resources unless absolutely necessary.
 
 2. **Bootstrap IAM Role**:
+  - Prerequisite: Create a `nest-bootstrap` IAM user with the policies defined in `infrastructure/bootstrap/README.md`.
 
   - Navigate to the bootstrap directory:
 
@@ -93,6 +95,7 @@ Follow these steps to set up the infrastructure:
     ```
 
 3. **Setup Main Infrastructure (staging)**:
+  - Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`
 
   - Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
 
@@ -385,64 +388,4 @@ Migrate and load data into the new database.
   ```bash
   zappa update staging
   ```
-
-## Required Policies
-
-- All users (`nest-staging`, `nest-bootstrap`, etc.) require these minimum policies to use the terraform remote backend:
-Note: Replace ${...} variables appropriately.
-
-```json
-{
-    "Version": "2012-10-17",
-        "Statement": [ {
-            "Sid": "S3StateManagement",
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-            "s3:PutObject",
-            "s3:ListBucket"
-            ],
-            "Resource": [
-                "arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}",
-            "arn:aws:s3:::${TERRAFORM_STATE_BUCKET_NAME}/*"
-            ]
-        },
-        {
-            "Sid": "DynamoDBStateManagement",
-            "Effect": "Allow",
-            "Action": [
-                "dynamodb:GetItem",
-            "dynamodb:PutItem",
-            "dynamodb:DeleteItem"
-            ],
-            "Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/${TERRAFORM_DYNAMODB_TABLE_NAME}"
-        },
-        {
-            "Sid": "KMSStateManagement",
-            "Effect": "Allow",
-            "Action": [
-                "kms:Decrypt"
-            ],
-            "Resource": "${AWS_BACKEND_KMS_KEY_ARN}"
-        }
-    ]
 }
-```
-
-Additionally, the `nest-staging` IAM User requires the following policy to assume it's own role:
-```json
-{
-    "Version": "2012-10-17",
-        "Statement": [
-        {
-            "Sid": "S3StateManagement",
-            "Effect": "Allow",
-            "Action": [
-                "sts:AssumeRole",
-                "sts:TagSession"
-            ],
-            "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-staging-terraform"
-        }
-    ]
-}
-```

@@ -1,10 +1,10 @@
 ## Users
-The `bootstrap` allows specific IAM Users to perform actions.
+`bootstrap` creates a role for each environment that IAM users can assume.
 These users are listed in the `var.environments` variable.
 Ensure your IAM Users follow the naming convention:
 - nest-${var.environment}
 
-Example: `nest-staging`, `nest-bootstrap`, `nest-backend`.
+Example: `nest-staging`, `nest-bootstrap`, etc.
 
 ## Inline Permissions
 Use the following inline permissions for the `nest-bootstrap` IAM User

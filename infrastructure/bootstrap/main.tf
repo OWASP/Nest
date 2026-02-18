@@ -483,7 +483,7 @@ data "aws_iam_policy_document" "part_two" {
       "lambda:GetAlias",
       "lambda:GetFunction",
       "lambda:GetFunctionConfiguration",
-      "lambda:GetFunctionUrlConfigs",
+      "lambda:GetFunctionUrlConfig",
       "lambda:GetPolicy",
       "lambda:InvokeFunction",
       "lambda:ListFunctionUrlConfigs",

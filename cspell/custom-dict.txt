@@ -169,6 +169,7 @@ pyyaml
 quasis
 rediss
 relativedelta
+replicationgroup
 repositorycontributor
 requirepass
 rqworker
