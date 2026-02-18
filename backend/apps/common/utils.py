@@ -105,7 +105,7 @@ def is_valid_json(content: str) -> bool:
     """Check whether the given string contains valid JSON data.
 
     Args:
-        content: The content to check.
+        content (str): The content string to validate.
 
     Returns:
         bool: True if content is valid JSON, otherwise False.
@@ -122,7 +122,7 @@ def join_values(fields: list, delimiter: str = " ") -> str:
 
     Args:
         fields (list): A list of field values.
-        delimiter (str, optional): The delimiter to use.
+        delimiter (str, optional): The delimiter to use. Defaults to " ".
 
     Returns:
         str: A single joined string.
@@ -134,7 +134,7 @@ def natural_date(value: int | str | datetime) -> str:
     """Convert a date, timestamp, or datetime into a human-readable relative time.
 
     Args:
-        value (int or str or datetime): The date or timestamp to convert.
+        value (int | str | datetime): The date or timestamp to convert.
 
     Returns:
         str: The human-friendly date string.
@@ -194,7 +194,7 @@ def truncate(text: str, limit: int, truncate: str = "...") -> str:
     Args:
         text (str): The text to truncate.
         limit (int): The character limit.
-        truncate (str, optional): The suffix added after truncation.
+        truncate (str, optional): The suffix added after truncation. Defaults to "...".
 
     Returns:
         str: The shortened text.
@@ -236,7 +236,6 @@ def validate_url(url: str | None) -> bool:
     if (
         not url
         or len(url) > max_url_length
-        # ASCII control characters.
         or re.search(r"[\x00-\x1f\x7f]", url)
     ):
         return False
