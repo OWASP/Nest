@@ -25,8 +25,8 @@ When reporting a vulnerability, please include:
 
 ## Response Timeline
 
-- Initial acknowledgment: **up to 7 days**
-- Investigation and validation: **up to 14 days** depending on the issue severity
-- Fix and coordinated disclosure thereafter
+- Initial acknowledgment: within **10 days**
+- Investigation and validation: within **30 days** depending on the issue severity
+- Fix and coordinated disclosure: **within 90 days** after investigation and validation
 
 Thank you for helping keep OWASP Nest and the community secure.
