@@ -38,10 +38,10 @@ backend/fuzzing_results/
 !*.tfvars.example
 **/.terraform/
 backend-sbom-local.cdx.json
-backend/*nest-backend-dev*.tar.gz
-backend/*nest-backend-dev*.zip
-backend/*nest-backend-staging*.tar.gz
-backend/*nest-backend-staging*.zip
+backend/*nest-dev*.tar.gz
+backend/*nest-dev*.zip
+backend/*nest-staging*.tar.gz
+backend/*nest-staging*.zip
 backend/data/backup*
 backend/generated_videos/
 backend/staticfiles

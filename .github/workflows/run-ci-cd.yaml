@@ -476,6 +476,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: GitHubActions-BuildStagingImages
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
@@ -618,6 +623,87 @@ jobs:
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
+  bootstrap-staging-nest:
+    name: Bootstrap Nest Staging
+    env:
+      TF_INPUT: false
+      TF_IN_AUTOMATION: true
+    environment: staging
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.ref == 'refs/heads/main'
+    needs:
+      - scan-staging-images
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708
+        with:
+          aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
+        with:
+          terraform_version: 1.14.0
+
+      - name: Prepare terraform backend
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          TF_STATE_BUCKET_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}
+          TF_STATE_DYNAMODB_TABLE_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_DYNAMODB_TABLE_NAME }}
+        run: |
+          umask 377
+          cat > infrastructure/bootstrap/terraform.tfbackend <<-EOF
+          bucket="$TF_STATE_BUCKET_NAME"
+          dynamodb_table="$TF_STATE_DYNAMODB_TABLE_NAME"
+          region="$AWS_REGION"
+          EOF
+
+      - name: Prepare terraform variables
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          PROJECT_NAME: 'nest'
+          AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+        run: |
+          umask 377
+          cat > infrastructure/bootstrap/terraform.tfvars <<-EOF
+          aws_region="$AWS_REGION"
+          project_name="$PROJECT_NAME"
+          aws_role_external_id="$AWS_ROLE_EXTERNAL_ID"
+          EOF
+
+      - name: Terraform Init
+        working-directory: infrastructure/bootstrap
+        run: terraform init -backend-config=terraform.tfbackend
+
+      - name: Terraform Validate
+        working-directory: infrastructure/bootstrap
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: infrastructure/bootstrap
+        run: terraform plan -out=tfplan
+
+      - name: Show plan in summary
+        working-directory: infrastructure/bootstrap
+        run: |
+          echo "## Bootstrap Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Terraform Apply
+        working-directory: infrastructure/bootstrap
+        run: terraform apply -auto-approve tfplan
+    timeout-minutes: 10
+
   plan-staging-nest:
     name: Plan Nest Staging
     env:
@@ -628,6 +714,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       github.ref == 'refs/heads/main'
     needs:
+      - bootstrap-staging-nest
       - scan-staging-images
       - set-release-version
     permissions:
@@ -643,6 +730,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: GitHubActions-StagingPlan
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
@@ -671,7 +763,7 @@ jobs:
           ECS_USE_FARGATE_SPOT: true
           ENVIRONMENT: 'staging'
           FRONTEND_USE_FARGATE_SPOT: true
-          LAMBDA_FUNCTION_NAME: ${{ secrets.ZAPPA_LAMBDA_FUNCTION_NAME }}
+          LAMBDA_FUNCTION_NAME: 'nest-staging'
           PROJECT_NAME: 'nest'
         run: |
           umask 377
@@ -740,6 +832,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-region: ${{ vars.AWS_REGION }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: GitHubActions-StagingDeploy
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
@@ -800,7 +897,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: poetry sync --no-root --without dev --without test --without video
+        run: poetry sync --no-root --without test --without video
 
       - name: Prepare Zappa settings
         env:
