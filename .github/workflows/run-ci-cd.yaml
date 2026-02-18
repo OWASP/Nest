@@ -479,6 +479,7 @@ jobs:
           role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-BuildStagingImages
+          role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
@@ -732,6 +733,7 @@ jobs:
           role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-StagingPlan
+          role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Install Terraform
@@ -839,6 +841,7 @@ jobs:
           role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
           role-session-name: GitHubActions-StagingDeploy
+          role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Install Terraform

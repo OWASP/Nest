@@ -601,7 +601,7 @@ resource "aws_iam_role" "terraform" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = ["sts:AssumeRole", "sts:TagSession"]
+        Action = ["sts:AssumeRole"]
         Condition = {
           StringEquals = {
             "sts:ExternalId" = var.aws_role_external_id
