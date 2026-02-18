@@ -1,19 +1,23 @@
 import { ApolloClient, InMemoryCache, HttpLink, NormalizedCacheObject } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
+import { mergeApolloHeadersWithCsrf } from 'server/apolloCookieHeader'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 
 async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
-    let csrfToken = null
-    const cookieValue = await getCsrfTokenOnServer()
-    csrfToken = cookieValue
-    return {
-      headers: {
+    const csrfToken = await getCsrfTokenOnServer()
+    const requestCookieHeader = await getRequestCookieHeaderOnServer()
+    const mergedHeaders = mergeApolloHeadersWithCsrf(
+      {
         ...headers,
-        'X-CSRFToken': csrfToken ?? '',
-        Cookie: csrfToken ? `csrftoken=${csrfToken}` : '',
+        Cookie: requestCookieHeader,
       },
+      csrfToken
+    )
+
+    return {
+      headers: mergedHeaders,
     }
   })
   const httpLink = new HttpLink({
@@ -43,4 +47,13 @@ export const getCsrfTokenOnServer = async () => {
   const csrfCookie = cookieStore.get('csrftoken')
 
   return csrfCookie ? csrfCookie.value : await fetchCsrfTokenServer()
+}
+
+export const getRequestCookieHeaderOnServer = async () => {
+  const cookieStore = await cookies()
+
+  return cookieStore
+    .getAll()
+    .map(({ name, value }) => `${name}=${value}`)
+    .join('; ')
 }
