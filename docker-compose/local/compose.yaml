@@ -29,7 +29,7 @@ services:
       DJANGO_SLACK_BOT_TOKEN: None
       DJANGO_SLACK_SIGNING_SECRET: None
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/status/"]
+      test: [CMD, curl, -f, http://localhost:8000/status/]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -48,7 +48,10 @@ services:
       sh -c '
         exec python manage.py runserver 0.0.0.0:8001
       '
-    image: nest-local-backend
+    image: nest-local-nestbot
+    build:
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile.nestbot.local
     depends_on:
       backend:
         condition: service_healthy
@@ -68,7 +71,7 @@ services:
       DJANGO_REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-cache-password}
       # Slack tokens inherited from .env file (not overridden here)
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/status/"]
+      test: [CMD, curl, -f, http://localhost:8001/status/]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -79,7 +82,7 @@ services:
       - 8001:8001
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - nestbot-venv:/home/owasp/.venv
 
   cache:
     command: >
@@ -163,9 +166,9 @@ services:
       sh -c '
         python manage.py rqworker ai --with-scheduler
       '
-    image: nest-local-backend
+    image: nest-local-nestbot
     depends_on:
-      backend:
+      nestbot:
         condition: service_healthy
       cache:
         condition: service_healthy
@@ -185,7 +188,7 @@ services:
       - nest-network
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - nestbot-venv:/home/owasp/.venv
 
 networks:
   nest-network:
@@ -197,3 +200,4 @@ volumes:
   docs-venv:
   frontend-next:
   frontend-node-modules:
+  nestbot-venv:

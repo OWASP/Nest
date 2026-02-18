@@ -31,7 +31,7 @@ WORKDIR /home/owasp
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     --mount=type=cache,target=${PIP_CACHE_DIR} \
-    poetry install --no-root --without dev --without test --without video --without nestbot
+    poetry install --no-root --without dev --without test --without video
 
 # Runtime stage using python:slim
 FROM python:3.13-slim
@@ -56,7 +56,7 @@ RUN apt-get update && \
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
-EXPOSE 8000
+EXPOSE 8001
 
 USER owasp
 WORKDIR /home/owasp
