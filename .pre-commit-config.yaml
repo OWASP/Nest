@@ -1,4 +1,9 @@
 repos:
+  - repo: https://github.com/mrtazz/checkmake
+    rev: v0.3.2
+    hooks:
+      - id: checkmake
+
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.38.0
     hooks:
@@ -47,6 +52,7 @@ repos:
         args:
           - --fix
         files: \.md$
+        language_version: system
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
