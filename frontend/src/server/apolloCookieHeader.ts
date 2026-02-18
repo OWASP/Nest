@@ -17,7 +17,7 @@ const getCookieName = (cookie: string) => {
 export const mergeCookieHeader = (existingCookieHeader: string, csrfToken: string | null) => {
   const existingCookies = splitCookieHeader(existingCookieHeader)
 
-  if (!csrfToken) {
+  if (csrfToken === null) {
     return existingCookies.join('; ')
   }
 

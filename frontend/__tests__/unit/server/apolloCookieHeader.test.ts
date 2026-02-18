@@ -68,4 +68,16 @@ describe('apolloCookieHeader', () => {
     expect(headers.cookie).toBe('sessionid=session123; csrftoken=csrf789')
     expect(headers['X-CSRFToken']).toBe('csrf789')
   })
+
+  test('treats empty-string csrf token as explicit cookie value', () => {
+    const headers = mergeApolloHeadersWithCsrf(
+      {
+        cookie: 'sessionid=session123; csrftoken=old',
+      },
+      ''
+    )
+
+    expect(headers.cookie).toBe('sessionid=session123; csrftoken=')
+    expect(headers['X-CSRFToken']).toBe('')
+  })
 })
