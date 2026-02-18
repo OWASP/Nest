@@ -25,7 +25,7 @@
     ],
     "manage_roles": true,
     "memory_size": 3008,
-    "project_name": "nest-backend",
+    "project_name": "nest",
     "regex_excludes": [
       "/boto3/",
       "/boto3-",
