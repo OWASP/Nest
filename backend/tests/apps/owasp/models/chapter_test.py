@@ -94,6 +94,18 @@ class TestChapterModel:
         mock_open_ai.set_prompt.assert_called_once_with("Tell me the location")
         mock_open_ai.complete.assert_called_once()
 
+    def test_generate_suggested_location_no_prompt(self):
+        """Test generate_suggested_location returns early when no prompt is available."""
+        mock_open_ai = MagicMock()
+        chapter = Chapter(is_active=True, suggested_location="")
+        chapter.get_geo_string = MagicMock(return_value="Test Geo")
+
+        with patch.object(Prompt, "get_owasp_chapter_suggested_location", return_value=None):
+            chapter.generate_suggested_location(open_ai=mock_open_ai)
+
+        mock_open_ai.set_input.assert_not_called()
+        assert chapter.suggested_location == ""
+
     @pytest.mark.parametrize(
         ("name", "key", "expected_str"),
         [
@@ -105,6 +117,28 @@ class TestChapterModel:
     def test_str_representation(self, name, key, expected_str):
         chapter = Chapter(name=name, key=key)
         assert str(chapter) == expected_str
+
+    @pytest.mark.parametrize(
+        ("key", "expected_nest_key"),
+        [
+            ("www-chapter-test", "test"),
+            ("www-chapter-new-york", "new-york"),
+            ("www-chapter-", ""),
+        ],
+    )
+    def test_nest_key_property(self, key, expected_nest_key):
+        """Test nest_key property strips www-chapter- prefix."""
+        chapter = Chapter(key=key)
+        assert chapter.nest_key == expected_nest_key
+
+    def test_nest_url_property(self):
+        """Test nest_url property returns correct URL."""
+        chapter = Chapter(key="www-chapter-new-york")
+        with patch("apps.owasp.models.chapter.get_absolute_url") as mock_get_url:
+            mock_get_url.return_value = "https://nest.owasp.org/chapters/new-york"
+            url = chapter.nest_url
+            mock_get_url.assert_called_once_with("chapters/new-york")
+            assert url == "https://nest.owasp.org/chapters/new-york"
 
     @pytest.mark.parametrize(
         ("value"),
@@ -200,3 +234,74 @@ class TestChapterModel:
         assert chapter.created_at == owasp_repository.created_at
         assert chapter.name == owasp_repository.title
         assert chapter.updated_at == owasp_repository.updated_at
+
+    def test_update_data_new_chapter(self):
+        """Test update_data creates a new chapter when one doesn't exist."""
+        mock_gh_repository = Mock()
+        mock_gh_repository.name = "www-chapter-test"
+
+        mock_repository = Mock()
+
+        with (
+            patch.object(Chapter, "objects") as mock_objects,
+            patch.object(Chapter, "from_github") as mock_from_github,
+            patch.object(Chapter, "save") as mock_save,
+        ):
+            mock_objects.get.side_effect = Chapter.DoesNotExist()
+
+            result = Chapter.update_data(mock_gh_repository, mock_repository, save=True)
+
+            assert result.key == "www-chapter-test"
+            mock_from_github.assert_called_once_with(mock_repository)
+            mock_save.assert_called_once()
+
+    def test_update_data_existing_chapter(self):
+        """Test update_data updates an existing chapter."""
+        mock_gh_repository = Mock()
+        mock_gh_repository.name = "www-chapter-test"
+
+        mock_repository = Mock()
+        mock_existing_chapter = Mock(spec=Chapter)
+
+        with (
+            patch.object(Chapter, "objects") as mock_objects,
+            patch.object(Chapter, "from_github") as _mock_from_github,
+        ):
+            mock_objects.get.return_value = mock_existing_chapter
+
+            result = Chapter.update_data(mock_gh_repository, mock_repository, save=True)
+
+            assert result == mock_existing_chapter
+            mock_existing_chapter.from_github.assert_called_once_with(mock_repository)
+            mock_existing_chapter.save.assert_called_once()
+
+    def test_update_data_no_save(self):
+        """Test update_data with save=False doesn't save."""
+        mock_gh_repository = Mock()
+        mock_gh_repository.name = "www-chapter-new"
+
+        mock_repository = Mock()
+
+        with (
+            patch.object(Chapter, "objects") as mock_objects,
+            patch.object(Chapter, "from_github") as mock_from_github,
+            patch.object(Chapter, "save") as mock_save,
+        ):
+            mock_objects.get.side_effect = Chapter.DoesNotExist()
+
+            result = Chapter.update_data(mock_gh_repository, mock_repository, save=False)
+
+            assert result.key == "www-chapter-new"
+            mock_from_github.assert_called_once_with(mock_repository)
+            mock_save.assert_not_called()
+
+    @patch("apps.owasp.models.chapter.Chapter.generate_suggested_location")
+    def test_save_does_not_call_geo_location_on_zero_coords(self, mock_suggested):
+        """Verify 0.0 coordinates are treated as valid data."""
+        chapter = Chapter(latitude=0.0, longitude=0.0, name="Test chapter")
+        with (
+            patch.object(chapter, "generate_geo_location") as mock_geo,
+            patch.object(Chapter, "save_base"),
+        ):
+            chapter.save()
+        mock_geo.assert_not_called()

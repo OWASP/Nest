@@ -27,7 +27,12 @@ export default function ScrollToTop() {
     }
 
     window.addEventListener('scroll', throttledScroll)
-    return () => window.removeEventListener('scroll', throttledScroll)
+    return () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout)
+      }
+      window.removeEventListener('scroll', throttledScroll)
+    }
   }, [handleScroll])
 
   return (

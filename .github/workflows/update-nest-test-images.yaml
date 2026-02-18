@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Update backend test image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -46,7 +46,7 @@ jobs:
           tags: owasp/nest:test-backend-latest
 
       - name: Update frontend unit test image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -61,7 +61,7 @@ jobs:
           tags: owasp/nest:test-frontend-unit-latest
 
       - name: Update frontend end-to-end test image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -76,7 +76,7 @@ jobs:
           tags: owasp/nest:test-frontend-e2e-latest
 
       - name: Build and push fuzz-test-backend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: type=registry,ref=owasp/nest:test-fuzz-backend-cache
           cache-to: |

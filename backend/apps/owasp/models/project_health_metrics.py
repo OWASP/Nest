@@ -19,6 +19,8 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
     """Project health metrics model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_project_health_metrics"
         verbose_name_plural = "Project Health Metrics"
 

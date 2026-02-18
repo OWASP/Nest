@@ -147,4 +147,25 @@ describe('UsersPage Component', () => {
       expect(screen.getByText('@fallback_login')).toBeInTheDocument()
     })
   })
+
+  test('handles missing company field', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [
+        {
+          key: 'user_4',
+          login: 'user_no_company',
+          name: 'User Without Company',
+          avatarUrl: 'https://example.com/avatar.jpg',
+          company: null,
+        },
+      ],
+      totalPages: 1,
+    })
+
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('User Without Company')).toBeInTheDocument()
+    })
+  })
 })

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.generated'
+import type { Chapter } from 'types/chapter'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -56,8 +57,8 @@ export default function ChapterDetailsPage() {
 
   const details = [
     { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
-    { label: 'Location', value: chapter.suggestedLocation },
-    { label: 'Region', value: chapter.region },
+    { label: 'Location', value: chapter.suggestedLocation ?? '' },
+    { label: 'Region', value: chapter.region ?? '' },
     {
       label: 'URL',
       value: (
@@ -83,7 +84,7 @@ export default function ChapterDetailsPage() {
       endDate={endDate}
       entityKey={chapter.key}
       entityLeaders={chapter.entityLeaders}
-      geolocationData={[chapter]}
+      geolocationData={[chapter as unknown as Chapter]}
       isActive={chapter.isActive}
       socialLinks={chapter.relatedUrls}
       startDate={startDate}

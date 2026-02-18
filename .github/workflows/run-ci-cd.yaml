@@ -108,7 +108,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Build cspell image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: type=gha,scope=cspell
           cache-to: type=gha,scope=cspell,mode=max
@@ -137,25 +137,15 @@ jobs:
       - name: Run Semgrep security scan
         run: make security-scan-code-semgrep
 
-      - name: Upload Semgrep report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          name: semgrep-results-run-${{ github.run_number }}
-          path: semgrep-security-report.txt
-          retention-days: 14
-
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
-        with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
       - name: Run Trivy security scan
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          scan-type: fs
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+        run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
     timeout-minutes: 5
 
   run-backend-tests:
@@ -174,7 +164,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Build backend test image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -224,7 +214,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Build frontend unit-testing image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -332,7 +322,7 @@ jobs:
           pg_restore -h localhost -U nest_user_e2e -d nest_db_e2e < backend/data/nest.dump
 
       - name: Build frontend end-to-end testing image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -363,7 +353,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
       - name: Build frontend a11y-testing image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -450,7 +440,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           build-args: |
             OWASP_GID=1001
@@ -505,7 +495,7 @@ jobs:
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
 
       - name: Build frontend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -544,35 +534,43 @@ jobs:
     name: Scan Staging Images
     needs:
       - build-staging-images
+      - set-release-version
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Scan backend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:backend-staging
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Run Trivy security scan via Makefile
+        run: |
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
-      - name: Scan frontend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+      - name: Generate SBOM for backend image
+        run: |
+          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+
+      - name: Generate SBOM for frontend image
+        run: |
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
+
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          exit-code: 1
-          image-ref: owasp/nest:frontend-staging
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+          name: staging-sbom-${{ env.RELEASE_VERSION }}
+          path: |
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
   deploy-staging-nest:
@@ -689,9 +687,13 @@ jobs:
           NEXTAUTH_URL=$NEXTAUTH_URL
           EOF
 
-      - name: Run Nest deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run Nest deploy
         run: ansible-playbook -i inventory.yaml staging/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-staging-nest-proxy:
@@ -725,9 +727,13 @@ jobs:
           $PROXY_SSH_PRIVATE_KEY
           EOF
 
-      - name: Run proxy deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml staging/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-staging-lighthouse-ci:
@@ -824,7 +830,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           build-args: |
             OWASP_GID=1002
@@ -877,7 +883,7 @@ jobs:
           EOF
 
       - name: Build frontend image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha
@@ -914,35 +920,43 @@ jobs:
     name: Scan Production Images
     needs:
       - build-production-images
+      - set-release-version
+    env:
+      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     permissions:
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514
+      - name: Cache Trivy DB
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
-          cache: true
+          path: .trivy-cache
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          restore-keys: trivy-${{ runner.os }}-
 
-      - name: Scan backend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:backend-production
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Run Trivy security scan via Makefile
+        run: |
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
 
-      - name: Scan frontend image
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          exit-code: 1
-          image-ref: owasp/nest:frontend-production
-          scan-type: image
-          skip-setup-trivy: true
-          trivy-config: trivy.yaml
+      - name: Generate SBOM for backend image
+        run: |
+          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-production
+
+      - name: Generate SBOM for frontend image
+        run: |
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-production
+
+      - name: Upload SBOMs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            backend-sbom-${{ env.RELEASE_VERSION }}.cdx.json \
+            frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
   deploy-production-nest:
@@ -1070,9 +1084,13 @@ jobs:
           "$NEST_GITHUB_APP_PRIVATE_KEY"
           EOF
 
-      - name: Run Nest deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run Nest deploy
         run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   deploy-production-nest-proxy:
@@ -1106,9 +1124,13 @@ jobs:
           $PROXY_SSH_PRIVATE_KEY
           EOF
 
-      - name: Run proxy deploy
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
         working-directory: .github/ansible
+
+      - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
+        working-directory: .github/ansible
     timeout-minutes: 5
 
   run-production-zap-baseline-scan:
