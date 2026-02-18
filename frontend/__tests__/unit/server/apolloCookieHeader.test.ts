@@ -23,10 +23,10 @@ describe('apolloCookieHeader', () => {
   test('replaces existing csrftoken cookie without creating duplicates', () => {
     const mergedCookie = mergeCookieHeader(
       'sessionid=session123; csrftoken=old1; auth_token=auth456; csrftoken=old2',
-      'newcsrf'
+      'csrf-new'
     )
 
-    expect(mergedCookie).toBe('sessionid=session123; auth_token=auth456; csrftoken=newcsrf')
+    expect(mergedCookie).toBe('sessionid=session123; auth_token=auth456; csrftoken=csrf-new')
     expect((mergedCookie.match(/csrftoken=/g) ?? []).length).toBe(1)
   })
 
@@ -36,10 +36,10 @@ describe('apolloCookieHeader', () => {
         Cookie: 'sessionid=session123',
         cookie: 'auth_token=auth456; csrftoken=old',
       },
-      'newcsrf'
+      'csrf-new'
     )
 
-    expect(headers.Cookie).toBe('sessionid=session123; auth_token=auth456; csrftoken=newcsrf')
+    expect(headers.Cookie).toBe('sessionid=session123; auth_token=auth456; csrftoken=csrf-new')
     expect(headers).not.toHaveProperty('cookie')
   })
 
