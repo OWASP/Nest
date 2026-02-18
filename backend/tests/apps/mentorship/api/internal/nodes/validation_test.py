@@ -8,7 +8,12 @@ import strawberry
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum, ProgramStatusEnum
 from apps.mentorship.api.internal.nodes.module import CreateModuleInput, UpdateModuleInput
 from apps.mentorship.api.internal.nodes.program import CreateProgramInput, UpdateProgramInput
-from apps.mentorship.api.internal.utils import validate_tags
+from apps.mentorship.api.internal.utils import validate_domains, validate_tags
+
+
+def test_validate_tags_empty():
+    """Test empty tags returns empty list."""
+    assert validate_tags([]) == []
 
 
 def test_validate_tags_valid():
@@ -39,18 +44,19 @@ def test_validate_tags_invalid_format():
         validate_tags(tags)
 
 
+def test_validate_domains_empty():
+    """Test empty domains returns empty list."""
+    assert validate_domains([]) == []
+
+
 def test_validate_domains_valid():
     """Test valid domains."""
-    from apps.mentorship.api.internal.utils import validate_domains
-
     domains = ["App Sec", "Web Security", "AI"]
     assert validate_domains(domains) == domains
 
 
 def test_validate_domains_duplicates():
     """Test duplicate domains raise error."""
-    from apps.mentorship.api.internal.utils import validate_domains
-
     domains = ["AppSec", "AppSec"]
     with pytest.raises(ValueError, match="Domains must be unique"):
         validate_domains(domains)
@@ -58,8 +64,6 @@ def test_validate_domains_duplicates():
 
 def test_validate_domains_invalid_format():
     """Test invalid domain format raises error."""
-    from apps.mentorship.api.internal.utils import validate_domains
-
     domains = ["App@Sec"]
     with pytest.raises(ValueError, match="alphanumeric characters or spaces"):
         validate_domains(domains)
