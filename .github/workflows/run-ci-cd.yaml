@@ -450,7 +450,7 @@ jobs:
       #- run-frontend-e2e-tests
       #- run-frontend-unit-tests
       #- run-infrastructure-tests
-      #- set-release-version
+      - set-release-version
     permissions:
       contents: read
     runs-on: ubuntu-latest
