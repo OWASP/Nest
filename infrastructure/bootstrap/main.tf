@@ -311,6 +311,7 @@ data "aws_iam_policy_document" "part_two" {
       "elasticloadbalancing:DeleteLoadBalancer",
       "elasticloadbalancing:DeleteRule",
       "elasticloadbalancing:DeleteTargetGroup",
+      "elasticloadbalancing:DeregisterTargets",
       "elasticloadbalancing:ModifyListener",
       "elasticloadbalancing:ModifyLoadBalancerAttributes",
       "elasticloadbalancing:ModifyRule",
