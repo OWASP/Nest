@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     chown -R node:node /home/owasp
 
 RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+    npm install --ignore-scripts -g pnpm@10.30.0 --cache ${NPM_CACHE}
 
 WORKDIR /home/owasp
 
@@ -48,7 +48,7 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     chown -R node:node /home/owasp
 
 RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+    npm install --ignore-scripts -g pnpm@10.30.0 --cache ${NPM_CACHE}
 
 COPY --from=builder --chmod=755 --chown=root:root /home/owasp/node_modules /home/owasp/node_modules
 
