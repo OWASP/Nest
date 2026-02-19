@@ -22,8 +22,7 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
 WORKDIR /app
 
 RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g npm@latest --cache ${NPM_CACHE} && \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+    npm install --ignore-scripts -g pnpm@10.30.0 --cache ${NPM_CACHE}
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
@@ -53,17 +52,17 @@ ENV NODE_ENV=production
 
 WORKDIR /tmp
 
-# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.7 in runner stage
+# Fix CVE-2026-23745, CVE-2026-26960: Update npm's bundled tar to 7.5.8 in runner stage
 # Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
-RUN npm pack tar@7.5.7 && \
-    tar -xzf tar-7.5.7.tgz && \
+RUN npm pack tar@7.5.8 && \
+    tar -xzf tar-7.5.8.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.7.tgz && \
-    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json" && \
+    rm -rf package tar-7.5.8.tgz && \
+    grep -q 'version.*7.5.8' "${TAR_DIR}/package.json" && \
     npm pack @isaacs/brace-expansion@5.0.1 && \
     tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
     BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \

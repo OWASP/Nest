@@ -9,7 +9,7 @@ ENV NPM_CONFIG_RETRY=5 \
     PATH="$PNPM_HOME:$PATH"
 
 RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+    npm install --ignore-scripts -g pnpm@10.30.0 --cache ${NPM_CACHE}
 
 COPY package.json pnpm-lock.yaml ./
 
