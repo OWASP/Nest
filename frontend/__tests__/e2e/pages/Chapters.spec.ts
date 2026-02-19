@@ -13,15 +13,7 @@ test.describe('Chapters Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/chapters')
+    await page.goto('/chapters', { timeout: 25000 })
   })
 
   test('renders chapter data correctly', async ({ page }) => {
@@ -29,6 +21,24 @@ test.describe('Chapters Page', () => {
     await expect(page.getByText('This is a summary of Chapter')).toBeVisible()
     await expect(page.getByRole('link', { name: "Isanori Sakanashi's avatar" })).toBeVisible()
     await expect(page.getByRole('button', { name: 'View Details' })).toBeVisible()
+  })
+
+  test('handles page change correctly', async ({ page }) => {
+    const nextPageButton = page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
+    await nextPageButton.click()
+    await expect(page).toHaveURL(/page=2/)
+  })
+
+  test('breadcrumb renders correct segments on /chapters', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Chapters'])
+  })
+
+  test('opens window on View Details button click', async ({ page }) => {
+    const contributeButton = page.getByRole('button', { name: 'View Details' })
+    await contributeButton.waitFor({ state: 'visible' })
+    await contributeButton.click()
+    await expect(page).toHaveURL('chapters/chapter_1')
   })
 
   test('displays "No chapters found" when there are no chapters', async ({ page }) => {
@@ -40,23 +50,5 @@ test.describe('Chapters Page', () => {
     })
     await page.goto('/chapters')
     await expect(page.getByText('No chapters found')).toBeVisible()
-  })
-
-  test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
-    await nextPageButton.waitFor({ state: 'visible' }) // Ensure button is visible
-    await nextPageButton.click()
-    await expect(page).toHaveURL(/page=2/)
-  })
-
-  test('opens window on View Details button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'View Details' })
-    await contributeButton.waitFor({ state: 'visible' })
-    await contributeButton.click()
-    await expect(page).toHaveURL('chapters/chapter_1')
-  })
-
-  test('breadcrumb renders correct segments on /chapters', async ({ page }) => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Chapters'])
   })
 })

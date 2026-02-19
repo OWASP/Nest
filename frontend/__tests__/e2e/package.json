@@ -1,0 +1,23 @@
+{
+  "name": "e2e",
+  "private": true,
+  "scripts": {
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui-host=0.0.0.0 --ui-port=3800"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.58.1",
+    "millify": "^6.1.0",
+    "dayjs": "^1.11.19"
+  },
+  "engines": {
+    "node": "^24.0.0"
+  },
+  "packageManager": "pnpm@10.24.0",
+  "pnpm": {
+    "overrides": {
+      "glob": "^11.1.0",
+      "test-exclude": "^7.0.1"
+    }
+  }
+}

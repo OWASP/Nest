@@ -13,15 +13,7 @@ test.describe('Organization Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/organizations')
+    await page.goto('/organizations', { timeout: 25000 })
   })
 
   test('renders organization data correctly', async ({ page }) => {
@@ -32,11 +24,6 @@ test.describe('Organization Page', () => {
     await expect(viewDetailsButtons).toHaveCount(2)
   })
 
-  test('navigation to organization details works', async ({ page }) => {
-    await page.getByRole('button', { name: 'View Profile' }).first().click()
-    expect(await page.url()).toContain('organizations')
-  })
-
   test('displays followers and repositories counts correctly', async ({ page }) => {
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('1.5k')).toBeVisible()
@@ -44,5 +31,10 @@ test.describe('Organization Page', () => {
 
   test('breadcrumb renders correct segments on /organizations', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Organizations'])
+  })
+
+  test('navigation to organization details works', async ({ page }) => {
+    await page.getByRole('button', { name: 'View Profile' }).first().click()
+    await expect(page).toHaveURL(/\/organizations\/[^/]+/)
   })
 })

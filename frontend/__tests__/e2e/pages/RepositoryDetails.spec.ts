@@ -1,101 +1,83 @@
-import { mockRepositoryData } from '@mockData/mockRepositoryData'
 import { test, expect } from '@playwright/test'
 
 test.describe('Repository Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: { data: mockRepositoryData },
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('organizations/OWASP/repositories/test-repository')
+    await page.goto('/organizations/OWASP/repositories/Nest', { timeout: 25000 })
   })
 
   test('should have a heading and summary', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Test Repo' })).toBeVisible()
-    await expect(page.getByText('A sample test repository')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Nest', exact: true })).toBeVisible()
+    await expect(page.getByText(/Your gateway to OWASP/i)).toBeVisible()
   })
 
   test('should have repository details block', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Repository Details' })).toBeVisible()
-    await expect(page.getByText('Last Updated: Jan 1, 2024')).toBeVisible()
+
     await expect(page.getByText('License: MIT')).toBeVisible()
-    await expect(page.getByText('Size: 1200 KB')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'https://github.com/test-repo' })).toBeVisible()
+
+    // Check that there is a link to the GitHub repo
+    await expect(page.getByRole('link', { name: 'https://github.com/OWASP/Nest' })).toBeVisible()
+
+    // Verify "Last Updated" text is present (date will vary)
+    await expect(page.getByText(/Last Updated:/i)).toBeVisible()
   })
 
-  test('should have statics block', async ({ page }) => {
-    await expect(page.getByText('50K Stars')).toBeVisible()
-    await expect(page.getByText('3K Forks')).toBeVisible()
-    await expect(page.getByText('5 Contributors')).toBeVisible()
-    await expect(page.getByText('2 Issues')).toBeVisible()
-    await expect(page.getByText('10 Commits')).toBeVisible()
+  test('should have statistics block', async ({ page }) => {
+    const stats = ['Stars', 'Forks', 'Contributors', 'Issues', 'Commits']
+    for (const stat of stats) {
+      // Look for the stat label and ensure a number is nearby
+      const text = String.raw`\d.*${stat}`
+      await expect(
+        page
+          .locator('div')
+          .filter({ hasText: new RegExp(text) })
+          .first()
+      ).toBeVisible()
+    }
   })
 
   test('should have topics', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Topics' })).toBeVisible()
-    await expect(page.getByText('JavaScript', { exact: true })).toBeVisible()
-    await expect(page.getByText('TypeScript', { exact: true })).toBeVisible()
+    const topics = ['python', 'nextjs', 'typescript']
+    for (const topic of topics) {
+      await expect(page.getByText(topic).first()).toBeVisible()
+    }
   })
 
   test('should have languages', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Languages' })).toBeVisible()
-    await expect(page.getByText('web', { exact: true })).toBeVisible()
-    await expect(page.getByText('security', { exact: true })).toBeVisible()
+    await expect(page.getByText('TypeScript', { exact: true }).first()).toBeVisible()
+    await expect(page.getByText('Python', { exact: true }).first()).toBeVisible()
   })
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    await expect(
-      page.getByRole('img', { name: "Contributor 1's avatar", exact: true })
-    ).toBeVisible()
-    await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
-    await expect(
-      page.getByRole('img', { name: "Contributor 2's avatar", exact: true })
-    ).toBeVisible()
-    await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
+    // Check for presence of contributor avatars/names
+    const contributor = page.locator('img[alt*="avatar"]').first()
+    await expect(contributor).toBeVisible()
   })
 
   test('toggle top contributors', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Show more' })).toBeVisible()
-    await page.getByRole('button', { name: 'Show more' }).click()
-    await expect(page.getByRole('button', { name: 'Show less' })).toBeVisible()
-    await page.getByRole('button', { name: 'Show less' }).click()
-    await expect(page.getByRole('button', { name: 'Show more' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
+    await page.getByRole('button', { name: 'Show more' }).last().click()
+    await expect(page.getByRole('button', { name: 'Show less' }).last()).toBeVisible()
+    await page.getByRole('button', { name: 'Show less' }).last().click()
+    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
   })
 
-  test('should have recent issues', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Issues' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Bug fix required' })).toBeVisible()
-    await expect(page.getByText('Jan 2, 2024')).toBeVisible()
-    await expect(page.getByText('test-repo-2')).toBeVisible()
-  })
-
-  test('should have recent releases', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Releases' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'v1.0.0' })).toBeVisible()
-    await expect(page.getByText('Jan 1, 2024', { exact: true })).toBeVisible()
-  })
-
-  test('should have recent milestones', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Milestones' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'v2.0.0 Release' })).toBeVisible()
-    await expect(page.getByText('Mar 1, 2025')).toBeVisible()
-    await expect(page.getByText('Repo One')).toBeVisible()
-  })
-
-  test('should display recent pull requests section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Recent Pull Requests' })).toBeVisible()
-    await expect(page.getByText('Test Pull Request 1')).toBeVisible()
-    await expect(page.getByText('Test Pull Request 2')).toBeVisible()
+  test('should have recent activity sections', async ({ page }) => {
+    // Grouping activity checks as they are dynamic lists (using data-anchor-title attribute for AnchorTitle components)
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Issues' })
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Releases' })
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Pull Requests' })
+    ).toBeVisible()
+    await expect(
+      page.locator('[data-anchor-title="true"]', { hasText: 'Recent Milestones' })
+    ).toBeVisible()
   })
 })
