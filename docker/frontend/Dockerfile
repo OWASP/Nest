@@ -40,8 +40,10 @@ ENV FORCE_STANDALONE=$FORCE_STANDALONE
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=secret,id=RELEASE_VERSION \
     --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-    export NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
-    export RELEASE_VERSION=$(cat /run/secrets/RELEASE_VERSION) && \
+    NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" && \
+    export NEXT_SENTRY_AUTH_TOKEN && \
+    RELEASE_VERSION="$(cat /run/secrets/RELEASE_VERSION)" && \
+    export RELEASE_VERSION && \
     pnpm run build
 
 # Production image, copy all the files and run next.
