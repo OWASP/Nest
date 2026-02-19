@@ -14,7 +14,6 @@ packages = [ { include = "apps" } ]
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
-crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
 django = "^6.0"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
@@ -27,9 +26,6 @@ geopy = "^2.4.1"
 gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 jinja2 = "^3.1.6"
-langchain = "^0.3.26"
-langchain-community = "^0.3.26"
-langgraph = "^1.0.1"
 lxml = "^6.0.0"
 markdown = "^3.7"
 openai = "~=1.83.0"
@@ -71,6 +67,12 @@ ffmpeg-python = "^0.2.0"
 pillow = "^12.1.0"
 pypdfium2 = "^5.2.0"
 weasyprint = "^67.0"
+
+[tool.poetry.group.nestbot.dependencies]
+crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
+langchain = "^0.3.26"
+langchain-community = "^0.3.26"
+langgraph = "^1.0.1"
 
 [tool.ruff]
 target-version = "py313"
