@@ -44,11 +44,6 @@ jobs:
           cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
-      - name: Set up Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491
-        with:
-          go-version: 'stable'
-
       - name: Set up pre-commit cache
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
         with:
