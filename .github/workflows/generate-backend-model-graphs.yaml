@@ -1,0 +1,34 @@
+name: Generate Backend Model Graphs
+
+on:
+  pull_request:
+    paths:
+      - backend/**/models.py
+      - backend/**/models/**
+  push:
+    branches:
+      - main
+    paths:
+      - backend/**/models.py
+      - backend/**/models/**
+  workflow_dispatch:
+
+jobs:
+  generate-backend-model-graphs:
+    name: Generate Backend Model Graphs
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Generate backend model graphs
+        run: make generate-backend-model-graphs
+
+      - name: Upload model graphs as artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: backend-model-graphs
+          path: backend/model-graphs

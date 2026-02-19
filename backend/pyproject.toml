@@ -58,6 +58,9 @@ group.video.dependencies.ffmpeg-python = "^0.2.0"
 group.video.dependencies.pillow = "^12.1.0"
 group.video.dependencies.pypdfium2 = "^5.4.0"
 group.video.dependencies.weasyprint = "^68.0"
+group.graphs.dependencies.django-extensions = "*"
+group.graphs.dependencies.pydotplus = "*"
+group.graphs.dependencies.pydot = "*"
 
 [tool.ruff]
 target-version = "py313"
