@@ -23,6 +23,8 @@ class Committee(
     active_committees = ActiveCommitteeManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_committees"
         verbose_name_plural = "Committees"
 

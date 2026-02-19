@@ -114,9 +114,9 @@ beforeAll(() => {
   }
 
   globalThis.ResizeObserver = class {
-    disconnect() {} // NOSONAR: empty mock implementation for test environment.
-    observe() {} // NOSONAR: empty mock implementation for test environment.
-    unobserve() {} // NOSONAR: empty mock implementation for test environment.
+    disconnect = jest.fn()
+    observe = jest.fn()
+    unobserve = jest.fn()
   }
 })
 
@@ -151,6 +151,12 @@ beforeEach(() => {
   globalThis.removeAnimationFrameCallbacks = jest.fn()
   globalThis.runAnimationFrameCallbacks = jest.fn()
 })
+
+jest.mock('next-themes', () => ({
+  useTheme: jest.fn(() => ({ theme: 'light', setTheme: jest.fn() })),
+  ThemeProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement('div', null, children),
+}))
 
 jest.mock('ics', () => {
   return {

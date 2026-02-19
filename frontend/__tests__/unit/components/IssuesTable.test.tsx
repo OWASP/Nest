@@ -4,9 +4,11 @@ import React from 'react'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
 import { LabelList } from 'components/LabelList'
 
+const mockPush = jest.fn()
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockPush,
   }),
 }))
 
@@ -178,8 +180,9 @@ describe('<IssuesTable />', () => {
 
     it('renders Merged status badge when isMerged is true', () => {
       render(<IssuesTable issues={[mockIssues[2]]} />)
-      const mergedBadges = screen.getAllByText('Merged')
-      expect(mergedBadges.length).toBeGreaterThan(0)
+      // Merged issues display with "Closed" text (purple badge)
+      const closedBadges = screen.getAllByText('Closed')
+      expect(closedBadges.length).toBeGreaterThan(0)
     })
 
     it('defaults to Closed status for unknown states', () => {
@@ -366,6 +369,26 @@ describe('<IssuesTable />', () => {
       const user4Texts = screen.getAllByText('user4')
       expect(user4Texts.length).toBeGreaterThan(0)
     })
+
+    it('uses name when login is not available', () => {
+      const issueWithoutLogin: IssueRow = {
+        objectID: '8-no-login',
+        number: 133,
+        title: 'Issue Without Login',
+        state: 'open',
+        labels: [],
+        assignees: [
+          {
+            avatarUrl: 'https://example.com/avatar5.jpg',
+            login: '',
+            name: 'User Five',
+          },
+        ],
+      }
+      render(<IssuesTable issues={[issueWithoutLogin]} />)
+      const user5Texts = screen.getAllByText('User Five')
+      expect(user5Texts.length).toBeGreaterThan(0)
+    })
   })
 
   describe('Click Handlers', () => {
@@ -376,6 +399,24 @@ describe('<IssuesTable />', () => {
       expect(issueButtons.length).toBeGreaterThan(0)
       fireEvent.click(issueButtons[0])
       expect(onIssueClick).toHaveBeenCalledWith(123)
+    })
+
+    it('navigates to issue URL when onIssueClick is not provided', () => {
+      const issueUrl = (num: number) => `/issues/${num}`
+      render(<IssuesTable {...defaultProps} onIssueClick={undefined} issueUrl={issueUrl} />)
+      const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
+      expect(issueButtons.length).toBeGreaterThan(0)
+      fireEvent.click(issueButtons[0])
+      expect(mockPush).toHaveBeenCalledWith('/issues/123')
+    })
+
+    it('does nothing when onIssueClick and issueUrl are not provided', () => {
+      mockPush.mockClear()
+      render(<IssuesTable {...defaultProps} onIssueClick={undefined} issueUrl={undefined} />)
+      const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
+      expect(issueButtons.length).toBeGreaterThan(0)
+      fireEvent.click(issueButtons[0])
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 

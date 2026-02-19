@@ -14,6 +14,8 @@ import type { Project } from 'types/project'
 import type { MultiSearchBarProps, Suggestion } from 'types/search'
 import type { User } from 'types/user'
 
+type SearchHit = Chapter | Event | Organization | Project | User
+
 const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   isLoaded,
   placeholder,
@@ -83,8 +85,8 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [debouncedSearch])
 
   const handleSuggestionClick = useCallback(
-    (suggestion: Chapter | Project | User | Event | Organization, indexName: string) => {
-      setSearchQuery(suggestion.name ?? '')
+    (suggestion: SearchHit, indexName: string) => {
+      setSearchQuery(suggestion.name || '')
       setShowSuggestions(false)
 
       switch (indexName) {
@@ -193,11 +195,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     }
   }
 
-  const handleSuggestionKeyDown = (
-    e: React.KeyboardEvent,
-    hit: Chapter | Project | User | Event | Organization,
-    indexName: string
-  ) => {
+  const handleSuggestionKeyDown = (e: React.KeyboardEvent, hit: SearchHit, indexName: string) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       e.stopPropagation()
@@ -264,7 +262,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                 <ul>
                   {suggestion.hits.map((hit, subIndex) => (
                     <li
-                      key={`multi-search-${suggestion.indexName}-${hit.key || hit.login || hit.url}`}
+                      key={`multi-search-${suggestion.indexName}-${(hit as unknown as Record<string, string | undefined>).key || (hit as unknown as Record<string, string | undefined>).login || (hit as unknown as Record<string, string | undefined>).url}`}
                       className={`flex items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${
                         highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
                           ? 'bg-gray-100 dark:bg-gray-700'
@@ -278,7 +276,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                         className="flex w-full cursor-pointer items-center overflow-hidden border-none bg-transparent p-0 text-left focus:rounded focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                       >
                         {getIconForIndex(suggestion.indexName)}
-                        <span className="block max-w-full truncate">{hit.name || hit.login}</span>
+                        <span className="block max-w-full truncate">
+                          {(hit as unknown as Record<string, string | undefined>).name ||
+                            (hit as unknown as Record<string, string | undefined>).login}
+                        </span>
                       </button>
                     </li>
                   ))}

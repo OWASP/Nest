@@ -1,5 +1,7 @@
 """Test cases for owasp_aggregate_entity_contributions management command."""
 
+import io
+from argparse import ArgumentParser
 from datetime import UTC, datetime, timedelta
 from unittest import mock
 
@@ -54,6 +56,28 @@ class TestOwaspAggregateContributions:
     @pytest.fixture
     def command(self):
         return Command()
+
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args(["--entity-type", "chapter"])
+        assert args.entity_type == "chapter"
+        assert args.days == 365
+        assert args.key is None
+        assert args.offset == 0
+
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
+    def test_handle_empty_entities(self, mock_chapter_model, command):
+        """Test handle with empty entities list."""
+        mock_chapter_model.objects.filter.return_value = MockQuerySet([])
+        mock_chapter_model.bulk_save = mock.Mock()
+        mock_chapter_model._meta = mock.Mock()
+        mock_chapter_model._meta.verbose_name_plural = "chapters"
+
+        command.handle(entity_type="chapter", days=365, offset=0)
+
+        mock_chapter_model.bulk_save.assert_not_called()
 
     @pytest.fixture
     def mock_chapter(self):
@@ -248,7 +272,7 @@ class TestOwaspAggregateContributions:
             command.handle(entity_type="chapter", days=365, offset=0)
 
         assert mock_chapter.contribution_data == {"2024-11-16": 5}
-        assert mock_chapter_model.bulk_save.called
+        mock_chapter_model.bulk_save.assert_called()
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
@@ -285,7 +309,7 @@ class TestOwaspAggregateContributions:
         assert mock_project.contribution_data == {"2024-11-16": 10}
         assert mock_project.contribution_stats is not None
         assert "commits" in mock_project.contribution_stats
-        assert mock_project_model.bulk_save.called
+        mock_project_model.bulk_save.assert_called()
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
@@ -325,8 +349,8 @@ class TestOwaspAggregateContributions:
             command.handle(entity_type="chapter", days=365, offset=0)
             command.handle(entity_type="project", days=365, offset=0)
 
-        assert mock_chapter_model.bulk_save.called
-        assert mock_project_model.bulk_save.called
+        mock_chapter_model.bulk_save.assert_called()
+        mock_project_model.bulk_save.assert_called()
 
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Chapter")
     @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
@@ -435,10 +459,101 @@ class TestOwaspAggregateContributions:
             command.handle(entity_type="chapter", days=90, offset=0)
 
         # Verify aggregate was called with correct start_date.
-        assert mock_aggregate.called
+        mock_aggregate.assert_called()
         call_args = mock_aggregate.call_args[0]
         start_date = call_args[1]
         expected_start = datetime.now(tz=UTC) - timedelta(days=90)
 
         # Allow 1 second tolerance for test execution time.
         assert abs((expected_start - start_date).total_seconds()) < 1
+
+    def test_calculate_contribution_stats_no_repositories(self, command, mock_chapter):
+        """Test calculate_contribution_stats when entity has no repositories."""
+        mock_chapter.owasp_repository = None
+        start_date = datetime.now(tz=UTC) - timedelta(days=365)
+
+        result = command.calculate_contribution_stats(mock_chapter, start_date)
+        assert result == {
+            "commits": 0,
+            "issues": 0,
+            "pull_requests": 0,
+            "releases": 0,
+            "total": 0,
+        }
+
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
+    def test_handle_project_with_key_filter(
+        self,
+        mock_release,
+        mock_pr,
+        mock_issue,
+        mock_commit,
+        mock_project_model,
+        command,
+        mock_project,
+    ):
+        """Test projects with key filter."""
+        mock_project_model.objects.filter.return_value = MockQuerySet([mock_project])
+        mock_project_model.bulk_save = mock.Mock()
+
+        mock_commit.objects.filter.return_value.count.return_value = 0
+        mock_issue.objects.filter.return_value.count.return_value = 0
+        mock_pr.objects.filter.return_value.count.return_value = 0
+        mock_release.objects.filter.return_value.count.return_value = 0
+
+        with mock.patch.object(
+            command,
+            "aggregate_contributions",
+            return_value={},
+        ):
+            command.handle(entity_type="project", key="www-project-test", days=365, offset=0)
+
+        mock_project_model.objects.filter.assert_called()
+        mock_project_model.bulk_save.assert_called()
+
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Project")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Commit")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Issue")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.PullRequest")
+    @mock.patch("apps.owasp.management.commands.owasp_aggregate_entity_contributions.Release")
+    def test_handle_project_with_offset(
+        self,
+        mock_release,
+        mock_pr,
+        mock_issue,
+        mock_commit,
+        mock_project_model,
+        command,
+        mock_project,
+    ):
+        """Test projects with offset."""
+        projects = [mock_project, mock_project, mock_project]
+        mock_project_model.objects.filter.return_value = MockQuerySet(projects)
+        mock_project_model.bulk_save = mock.Mock()
+
+        mock_commit.objects.filter.return_value.count.return_value = 0
+        mock_issue.objects.filter.return_value.count.return_value = 0
+        mock_pr.objects.filter.return_value.count.return_value = 0
+        mock_release.objects.filter.return_value.count.return_value = 0
+
+        with mock.patch.object(
+            command,
+            "aggregate_contributions",
+            return_value={},
+        ) as mock_aggregate:
+            command.handle(entity_type="project", offset=2, days=365)
+        assert mock_aggregate.call_count == 1
+        mock_project_model.bulk_save.assert_called_once()
+
+    def test_handle_invalid_entity_type(self, command):
+        """Test handle with invalid entity_type."""
+        command.stdout = io.StringIO()
+        command.style = mock.Mock()
+        command.style.SUCCESS = lambda msg: msg
+        command.handle(entity_type="invalid", days=365, offset=0)
+        output = command.stdout.getvalue()
+        assert "Done!" in output

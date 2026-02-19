@@ -6,7 +6,7 @@ import strawberry
 from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
-from apps.github.api.internal.nodes.issue import IssueNode
+from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH, IssueNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models import Label
@@ -115,7 +115,9 @@ class ModuleNode:
             return []
 
         queryset = self.issues.select_related("repository", "author").prefetch_related(
-            "assignees", "labels"
+            "assignees",
+            "labels",
+            MERGED_PULL_REQUESTS_PREFETCH,
         )
 
         if label and label != "all":
@@ -151,7 +153,11 @@ class ModuleNode:
 
         return (
             self.issues.select_related("repository", "author")
-            .prefetch_related("assignees", "labels")
+            .prefetch_related(
+                "assignees",
+                "labels",
+                MERGED_PULL_REQUESTS_PREFETCH,
+            )
             .filter(number=number)
             .first()
         )

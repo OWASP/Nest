@@ -2,6 +2,7 @@
 
 import { useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -155,11 +156,11 @@ const IssuesPage = () => {
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 
   return (
-    <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold">{moduleData.name} Issues</h1>
-          <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-3xl font-bold">{moduleData.name} Issues</h1>
             <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
               <Select
                 labelPlacement="outside-left"
@@ -220,8 +221,6 @@ const IssuesPage = () => {
                 ))}
               </Select>
             </div>
-          </div>
-        </div>
 
         <IssuesTable
           issues={moduleIssues}
@@ -239,7 +238,7 @@ const IssuesPage = () => {
           isLoaded={!loading}
         />
       </div>
-    </div>
+    </BreadcrumbStyleProvider>
   )
 }
 
