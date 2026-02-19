@@ -3,8 +3,14 @@ repos:
     rev: v1.4.5
     hooks:
       - id: mbake-format
+        args:
+          - --config
+          - .bake.toml
       - id: mbake-validate
-        exclude: ^backend/apps/|^backend/Makefile
+        args:
+          - --config
+          - .bake.toml
+        exclude: ^backend/
 
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.38.0
@@ -94,7 +100,7 @@ repos:
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
-        exclude: frontend/src/types/__generated__|Makefile
+        exclude: frontend/src/types/__generated__
         exclude_types:
           - svg
       - id: file-contents-sorter

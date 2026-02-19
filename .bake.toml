@@ -1,0 +1,25 @@
+# mbake configuration file
+
+debug = false
+gnu_error_format = true
+verbose = false
+wrap_error_messages = false
+
+[formatter]
+align_across_comments = false
+align_variable_assignments = false
+auto_insert_phony_declarations = false
+ensure_final_newline = true
+fix_missing_recipe_tabs = true
+group_phony_declarations = false
+indent_nested_conditionals = false
+max_consecutive_empty_lines = 2
+max_line_length = 120
+normalize_empty_lines = true
+normalize_line_continuations = true
+phony_at_top = false
+remove_trailing_whitespace = true
+space_after_colon = true
+space_around_assignment = true
+space_before_colon = false
+tab_width = 2
