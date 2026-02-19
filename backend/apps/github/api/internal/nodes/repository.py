@@ -77,7 +77,7 @@ class RepositoryNode(strawberry.relay.Node):
         return root.recent_milestones.order_by("-created_at")[:normalized_limit]
 
     @strawberry_django.field(prefetch_related=["releases"])
-    def releases(self, root: Repository) -> list[ReleaseNode]:
+    def recent_releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
         # TODO(arkid15r): rename this to recent_releases.
         return root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
