@@ -127,7 +127,6 @@ mamicidal
 markdownit
 markercluster
 mastg
-maxbodylength
 mcr
 mdfile
 mentee
@@ -135,7 +134,6 @@ menteemodule_set
 mentees
 mern
 millify
-minphony
 misconfig
 mkv
 mpim
@@ -155,7 +153,6 @@ pdfium
 pentest
 pentesting
 pgvector
-phonydeclared
 pil
 pnpmrc
 psycopg
