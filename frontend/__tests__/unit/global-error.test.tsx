@@ -247,4 +247,14 @@ describe('SentryErrorFallback component', () => {
     expect(screen.getByText('Custom Not Found')).toBeInTheDocument()
     expect(screen.getByText('Custom message')).toBeInTheDocument()
   })
+
+  test('wraps non-Error value in Error before capturing', () => {
+    const nonError = 'string error'
+    render(<SentryErrorFallback error={nonError} />)
+
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+    const captured = (Sentry.captureException as jest.Mock).mock.calls[0][0]
+    expect(captured).toBeInstanceOf(Error)
+    expect(captured.message).toBe('string error')
+  })
 })
