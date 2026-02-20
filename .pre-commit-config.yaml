@@ -1,8 +1,12 @@
 repos:
   - repo: https://github.com/AleksaC/hadolint-py
-    rev: v2.12.0.2
+    rev: v2.14.0
     hooks:
       - id: hadolint
+        args:
+          - --verbose
+          - --format=tty
+          - --failure-threshold=error # fail only on errors, not warnings
 
   - repo: https://github.com/EbodShojaei/bake
     rev: v1.4.5
@@ -65,6 +69,7 @@ repos:
         args:
           - --fix
         files: \.md$
+        language: system
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
