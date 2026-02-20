@@ -69,7 +69,6 @@ repos:
         args:
           - --fix
         files: \.md$
-        language: system
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
