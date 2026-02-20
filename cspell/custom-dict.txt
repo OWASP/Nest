@@ -69,6 +69,8 @@ embedder
 env
 facebookexternalhit
 gamesec
+genai
+generativeai
 geocoders
 geoloc
 geopy
