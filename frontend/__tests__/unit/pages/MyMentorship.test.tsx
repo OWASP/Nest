@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
-import { useRouter as useRouterMock } from 'next/navigation'
+import { useRouter as useRouterMock, useSearchParams } from 'next/navigation'
 import { useSession as mockUseSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
@@ -52,7 +52,7 @@ jest.mock('next/navigation', () => {
   return {
     ...actual,
     useRouter: jest.fn(),
-    useSearchParams: () => new URLSearchParams(''),
+    useSearchParams: jest.fn(),
   }
 })
 
@@ -74,6 +74,7 @@ const mockAddToast = addToast as jest.Mock
 beforeEach(() => {
   jest.clearAllMocks()
   ;(useRouterMock as jest.Mock).mockReturnValue({ push: mockPush })
+  ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams(''))
 })
 
 const mockProgramData = {
@@ -415,6 +416,49 @@ describe('MyMentorshipPage', () => {
         )
       })
     } finally {
+      jest.useRealTimers()
+    }
+  })
+
+  it('does not update URL if search params are unchanged', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'User',
+          email: 'user@example.com',
+          login: 'user',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+    })
+
+    mockUseQuery.mockReturnValue({
+      data: mockProgramData,
+      loading: false,
+      error: undefined,
+    })
+    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('q=existing'))
+    window.history.replaceState(null, '', '?q=existing')
+
+    try {
+      render(<MyMentorshipPage />)
+
+      const searchInput = screen.getByTestId('search-input')
+      fireEvent.change(searchInput, { target: { value: 'existing' } })
+      jest.useFakeTimers()
+      fireEvent.change(searchInput, { target: { value: 'existing' } })
+
+      React.act(() => {
+        jest.advanceTimersByTime(500)
+      })
+
+      await waitFor(() => {
+        expect(mockPush).not.toHaveBeenCalled()
+      })
+    } finally {
+      window.history.replaceState(null, '', '/')
       jest.useRealTimers()
     }
   })

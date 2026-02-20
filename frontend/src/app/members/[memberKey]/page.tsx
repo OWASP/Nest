@@ -117,7 +117,7 @@ const UserDetailsPage: React.FC = () => {
     }
     return {
       startDate: dates[0],
-      endDate: dates.at(-1) ?? '',
+      endDate: dates.at(-1),
     }
   }, [contributionData])
 

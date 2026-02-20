@@ -1279,6 +1279,13 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Languages: JavaScript')
       expect(screen.queryByText('Topics:')).not.toBeInTheDocument()
     })
+
+    it('handles conditional rendering when languages empty but topics present', () => {
+      render(<CardDetailsPage {...defaultProps} languages={[]} topics={['web']} />)
+
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Topics: web')
+      expect(screen.queryByText('Languages:')).not.toBeInTheDocument()
+    })
   })
 
   describe('Accessibility and Semantic HTML', () => {
@@ -1605,6 +1612,25 @@ describe('CardDetailsPage', () => {
       ).not.toThrow()
 
       expect(screen.getByText('Statistics')).toBeInTheDocument()
+    })
+
+    it('handles undefined topics/languages in grid layout', () => {
+      render(<CardDetailsPage {...defaultProps} languages={['JavaScript']} topics={undefined} />)
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Languages: JavaScript')
+      cleanup()
+      render(<CardDetailsPage {...defaultProps} languages={undefined} topics={['web']} />)
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Topics: web')
+    })
+
+    it('renders Leaders with Unknown when value is null', () => {
+      const propsWithNullLeader: DetailsCardProps = {
+        ...defaultProps,
+        type: 'chapter',
+        details: [{ label: 'Leaders', value: null }],
+      }
+      render(<CardDetailsPage {...propsWithNullLeader} />)
+      expect(screen.getByText('Leaders:')).toBeInTheDocument()
+      expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles mixed valid and invalid data in arrays', () => {
@@ -2077,6 +2103,39 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...programProps} />)
 
       expect(screen.getByText('Milestone No Author')).toBeInTheDocument()
+    })
+
+    it('renders milestone author tooltip using login when name is missing', () => {
+      const milestonesWithAuthorNoName = [
+        {
+          author: {
+            login: 'author-login-only',
+            name: null,
+            avatarUrl: 'https://example.com/author-avatar.jpg',
+          },
+          body: 'Milestone with author no name',
+          closedIssuesCount: 3,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 1,
+          repositoryName: 'test-repo',
+          organizationName: 'test-org',
+          state: 'open',
+          title: 'Milestone Author No Name',
+          url: 'https://github.com/test/project/milestone/1',
+        },
+      ]
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: milestonesWithAuthorNoName,
+        showAvatar: true,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+      expect(screen.getByTestId('mock-tooltip')).toHaveAttribute('title', 'author-login-only')
+      expect(screen.getByAltText("author-login-only's avatar")).toBeInTheDocument()
     })
 
     it('renders milestone title without link when URL is missing', () => {

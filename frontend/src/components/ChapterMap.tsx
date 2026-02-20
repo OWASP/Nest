@@ -26,10 +26,9 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
       map.doubleClickZoom.enable()
       map.keyboard.enable()
 
-      if (!zoomControlRef.current) {
-        zoomControlRef.current = L.control.zoom({ position: 'topleft' })
-        zoomControlRef.current.addTo(map)
-      }
+      zoomControlRef.current?.remove()
+      zoomControlRef.current = L.control.zoom({ position: 'topleft' })
+      zoomControlRef.current.addTo(map)
     } else {
       map.scrollWheelZoom.disable()
       map.dragging.disable()

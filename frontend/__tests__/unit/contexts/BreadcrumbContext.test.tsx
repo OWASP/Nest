@@ -1,4 +1,8 @@
-import { registerBreadcrumb, getBreadcrumbItems } from 'contexts/BreadcrumbContext'
+import {
+  registerBreadcrumb,
+  getBreadcrumbItems,
+  registerBreadcrumbClassName,
+} from 'contexts/BreadcrumbContext'
 
 describe('BreadcrumbContext', () => {
   let cleanupFns: (() => void)[] = []
@@ -45,5 +49,17 @@ describe('BreadcrumbContext', () => {
     const items = getBreadcrumbItems()
     expect(items[0].path).toBe('/short')
     expect(items[1].path).toBe('/very/long/path')
+  })
+
+  it('registers class name', () => {
+    const unregister = registerBreadcrumbClassName('test')
+    expect(unregister).toBeDefined()
+    unregister()
+  })
+
+  it('handles unregistering already removed class name', () => {
+    const unregister = registerBreadcrumbClassName('double-remove')
+    unregister()
+    expect(() => unregister()).not.toThrow()
   })
 })

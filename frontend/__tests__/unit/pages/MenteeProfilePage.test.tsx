@@ -541,4 +541,40 @@ describe('MenteeProfilePage', () => {
     expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
   })
+
+  it('uses fallback for invalid status filter', () => {
+    const originalUseState = React.useState
+    jest.spyOn(React, 'useState').mockImplementation((initialValue) => {
+      if (initialValue === 'all') {
+        return ['invalid_filter', jest.fn()]
+      }
+      return originalUseState(initialValue)
+    })
+
+    mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+
+    jest.restoreAllMocks()
+  })
+
+  it('handles undefined domains and tags', () => {
+    const dataWithUndefined = {
+      ...mockMenteeData,
+      getMenteeDetails: {
+        ...mockMenteeData.getMenteeDetails,
+        domains: undefined,
+        tags: undefined,
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: dataWithUndefined, loading: false, error: undefined })
+    render(<MenteeProfilePage />)
+
+    expect(screen.queryByRole('heading', { name: /Domains/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /Skills & Technologies/i })
+    ).not.toBeInTheDocument()
+  })
 })
