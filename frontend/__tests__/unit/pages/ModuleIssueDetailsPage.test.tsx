@@ -651,4 +651,55 @@ describe('ModuleIssueDetailsPage', () => {
     fireEvent.change(dateInputEl, { target: { value: '2025-02-02' } })
     expect(setTaskDeadlineMutation).not.toHaveBeenCalled()
   })
+
+  it('does not trigger mutations when issueId is missing', () => {
+    mockUseParams.mockReturnValue({
+      programKey: 'prog1',
+      moduleKey: 'mod1',
+      issueId: '',
+    })
+    const assignIssue = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      assignIssue,
+      assigning: false,
+    })
+
+    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+
+    const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
+    const userGrid = interestedUsersHeading.nextElementSibling
+    const assignButton = within(userGrid as HTMLElement).getByRole('button', { name: /Assign/i })
+    fireEvent.click(assignButton)
+    expect(assignIssue).not.toHaveBeenCalled()
+  })
+
+  it('does not open date picker when canEditDeadline is false', () => {
+    const setIsEditingDeadline = jest.fn()
+    const baseMocks = (useIssueMutations as jest.Mock)()
+    mockUseIssueMutations.mockReturnValue({
+      ...baseMocks,
+      setIsEditingDeadline,
+    })
+
+    const noAssigneesData = {
+      ...mockIssueData,
+      getModule: {
+        ...mockIssueData.getModule,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          assignees: [],
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: noAssigneesData, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+
+    const deadlineButton = screen.getByRole('button', { name: /No deadline set/i })
+    fireEvent.click(deadlineButton)
+    expect(setIsEditingDeadline).not.toHaveBeenCalled()
+  })
 })

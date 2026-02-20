@@ -79,7 +79,7 @@ jest.mock('@heroui/react', () => ({
       <button
         type="button"
         data-testid="autocomplete-clear"
-        onClick={() => onSelectionChange?.(new Set())}
+        onClick={() => onSelectionChange?.(null)}
       >
         Clear Selection
       </button>
@@ -396,6 +396,51 @@ describe('ModuleForm', () => {
       }
       expect(mockSetFormData).toHaveBeenCalled()
     })
+
+    it('updates project field when ProjectSelector changes', async () => {
+      renderModuleForm()
+      const input = screen.getByTestId('autocomplete-input')
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'Test' } })
+        jest.advanceTimersByTime(350)
+      })
+      await waitFor(() => expect(mockQuery).toHaveBeenCalled())
+      const selectButton = screen.getByTestId('autocomplete-select-single')
+      await act(async () => {
+        fireEvent.click(selectButton)
+      })
+      expect(mockSetFormData).toHaveBeenCalled()
+      const setterFn = mockSetFormData.mock.calls[mockSetFormData.mock.calls.length - 1][0]
+      const result = setterFn(defaultFormData)
+      expect(result).toEqual(
+        expect.objectContaining({
+          projectId: 'project-1',
+          projectName: 'Test Project',
+        })
+      )
+    })
+
+    it('updates project field when ProjectSelector is cleared', async () => {
+      const initialFormData = {
+        ...defaultFormData,
+        projectId: 'proj-1',
+        projectName: 'Existing Project',
+      }
+      renderModuleForm({ formData: initialFormData })
+      const clearButton = screen.getByTestId('autocomplete-clear')
+      await act(async () => {
+        fireEvent.click(clearButton)
+      })
+      expect(mockSetFormData).toHaveBeenCalled()
+      const setterFn = mockSetFormData.mock.calls[mockSetFormData.mock.calls.length - 1][0]
+      const result = setterFn(initialFormData)
+      expect(result).toEqual(
+        expect.objectContaining({
+          projectId: '',
+          projectName: '',
+        })
+      )
+    })
   })
 
   describe('Experience Level Select - handleSelectChange (lines 74-84)', () => {
@@ -690,7 +735,7 @@ describe('ProjectSelector', () => {
       expect(mockOnProjectChange).toHaveBeenCalledWith('project-1', 'Test Project 1')
     })
 
-    it('clears selection when empty set is passed (lines 419-420)', async () => {
+    it('clears selection when clear button is clicked (lines 411-413)', async () => {
       renderProjectSelector({ value: 'project-1', defaultName: 'Existing Project' })
       const clearButton = screen.getByTestId('autocomplete-clear')
 
@@ -698,9 +743,8 @@ describe('ProjectSelector', () => {
         fireEvent.click(clearButton)
       })
 
-      // The component's handleSelectionChange doesn't handle empty Set directly
-      // This test verifies the current behavior where it's not called
-      expect(mockOnProjectChange).not.toHaveBeenCalled()
+      // Now expected to call onProjectChange with null
+      expect(mockOnProjectChange).toHaveBeenCalledWith(null, '')
     })
   })
 
@@ -777,6 +821,24 @@ describe('ProjectSelector', () => {
       })
 
       consoleErrorSpy.mockRestore()
+    })
+
+    it('handles missing searchProjects in response', async () => {
+      mockQuery.mockResolvedValue({ data: {} })
+
+      renderProjectSelector()
+      const input = screen.getByTestId('autocomplete-input')
+
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'Test' } })
+        jest.advanceTimersByTime(350)
+      })
+
+      await waitFor(() => {
+        expect(mockQuery).toHaveBeenCalled()
+      })
+      const items = screen.queryAllByTestId('autocomplete-item')
+      expect(items).toHaveLength(0)
     })
   })
 

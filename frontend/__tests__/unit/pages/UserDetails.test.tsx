@@ -1104,5 +1104,95 @@ describe('UserDetailsPage', () => {
         expect(screen.getByText('No Repositories')).toBeInTheDocument()
       })
     })
+    test('renders joined date as "Not available" when createdAt is missing', async () => {
+      const userWithoutCreatedAt = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          createdAt: null,
+        },
+      }
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: userWithoutCreatedAt,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Joined:')).toBeInTheDocument()
+        expect(screen.getByText('Not available')).toBeInTheDocument()
+      })
+    })
+
+    test('validates defensive check for endDate', async () => {
+      const singleDateContribution = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          contributionData: { '2023-01-01': 5 },
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: singleDateContribution,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('contribution-heatmap')).toBeInTheDocument()
+      })
+    })
+
+    test('uses user login as fallback for avatar alt text and title when name is missing', async () => {
+      const userWithoutName = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          name: null,
+          login: 'fallback-login',
+        },
+      }
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: userWithoutName,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const avatar = screen.getByAltText('fallback-login')
+        expect(avatar).toBeInTheDocument()
+        expect(screen.getByText('fallback-login')).toBeInTheDocument()
+      })
+    })
+
+    test('uses "User Avatar" fallback when both name and login are missing', async () => {
+      const userWithoutNameAndLogin = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          name: null,
+          login: null,
+        },
+      }
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: userWithoutNameAndLogin,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const avatar = screen.getByAltText('User Avatar')
+        expect(avatar).toBeInTheDocument()
+      })
+    })
   })
 })

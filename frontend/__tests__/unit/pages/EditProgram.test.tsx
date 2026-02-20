@@ -432,4 +432,61 @@ describe('EditProgramPage', () => {
       )
     })
   })
+
+  test('handles null admins when access is initially allowed', async () => {
+    const validData = {
+      getProgram: {
+        name: 'Test',
+        description: 'Test description',
+        menteesLimit: 10,
+        startedAt: '2025-01-01',
+        endedAt: '2025-12-31',
+        tags: ['react'],
+        domains: ['web'],
+        admins: [{ login: 'admin1' }],
+        status: ProgramStatusEnum.Draft,
+      },
+    }
+
+    const nullAdminsData = {
+      getProgram: {
+        ...validData.getProgram,
+        admins: null,
+      },
+    }
+
+    const mockQueryFn = jest
+      .fn()
+      .mockReturnValueOnce({
+        loading: false,
+        data: validData,
+      })
+      .mockReturnValueOnce({
+        loading: false,
+        data: validData,
+      })
+      .mockReturnValueOnce({
+        loading: false,
+        data: validData,
+      })
+      .mockReturnValue({
+        loading: false,
+        data: nullAdminsData,
+      })
+
+    jest.clearAllMocks()
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin1' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as jest.Mock).mockImplementation(mockQueryFn)
+    const { rerender } = render(<EditProgramPage />)
+    await waitFor(async () => {
+      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+    })
+    rerender(<EditProgramPage />)
+    await waitFor(async () => {
+      expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+    })
+  })
 })
