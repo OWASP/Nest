@@ -27,7 +27,7 @@ export default function Footer() {
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
+                className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
@@ -54,7 +54,7 @@ export default function Footer() {
                       <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                     ) : (
                       <Link
-                        className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                        className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:text-slate-400 dark:hover:text-slate-100"
                         href={link.href || '/'}
                         rel="noopener noreferrer"
                         target="_blank"
@@ -80,7 +80,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`OWASP Nest ${social.label}`}
-                className="rounded-full p-2 text-slate-600 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                className="rounded-full p-2 text-slate-600 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:text-slate-400 dark:hover:text-slate-100"
               >
                 <SocialIcon className="h-4 w-4" />
               </Link>
@@ -96,7 +96,7 @@ export default function Footer() {
             {RELEASE_VERSION && (
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 <Link
-                  className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                  className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:text-slate-400 dark:hover:text-slate-100"
                   href={
                     ENVIRONMENT === 'production'
                       ? `https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`
