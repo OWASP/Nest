@@ -445,6 +445,7 @@ jest.mock('components/EntityActions', () => ({
     moduleKey,
     status: _status,
     setStatus: _setStatus,
+    isAdmin,
     ...props
   }: {
     type: string
@@ -452,9 +453,10 @@ jest.mock('components/EntityActions', () => ({
     moduleKey?: string
     status?: string
     setStatus?: (status: string) => void
+    isAdmin?: boolean
     [key: string]: unknown
   }) => (
-    <div data-testid="entity-actions" {...props}>
+    <div data-testid="entity-actions" {...props} data-isadmin={isAdmin}>
       EntityActions: type={type}, programKey={programKey}, moduleKey={moduleKey}
     </div>
   ),

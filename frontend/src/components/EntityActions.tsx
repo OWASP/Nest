@@ -230,11 +230,10 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   }
 
   return (
-    //--------------------need to verify locally--------------
     <>
       <div className="relative" ref={dropdownRef}>
         <button
-          data-testid={`${type}-actions-button`}
+          ref={triggerButtonRef}
           type="button"
           onClick={handleToggle}
           className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -247,20 +246,27 @@ const EntityActions: React.FC<EntityActionsProps> = ({
         {dropdownOpen && (
           <div
             className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+            onKeyDown={handleKeyDown}
             role="menu"
+            tabIndex={0}
           >
-            {options.map((option) => {
+            {options.map((option, index) => {
               const handleMenuItemClick = (e: React.MouseEvent) => {
                 e.preventDefault()
                 e.stopPropagation()
                 handleAction(option.key)
+                setFocusIndex(-1)
               }
 
               return (
                 <button
                   key={option.key}
+                  ref={(el) => {
+                    menuItemsRef.current[index] = el
+                  }}
                   type="button"
                   role="menuitem"
+                  tabIndex={focusIndex === index ? 0 : -1}
                   onClick={handleMenuItemClick}
                   className={`block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 ${
                     option.className || ''
@@ -296,46 +302,6 @@ const EntityActions: React.FC<EntityActionsProps> = ({
                 isLoading={isDeleting}
                 disabled={isDeleting}
                 className="text-white"
-<!--       main strat herer           -->
-    <div className="relative" ref={dropdownRef}>
-      <button
-        ref={triggerButtonRef}
-        type="button"
-        onClick={handleToggle}
-        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
-        aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
-        aria-expanded={dropdownOpen}
-        aria-haspopup="true"
-      >
-        <FaEllipsisV className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200" />
-      </button>
-      {dropdownOpen && (
-        <div
-          className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
-          onKeyDown={handleKeyDown}
-          role="menu"
-          tabIndex={0}
-        >
-          {options.map((option, index) => {
-            const handleMenuItemClick = (e: React.MouseEvent) => {
-              e.preventDefault()
-              e.stopPropagation()
-              handleAction(option.key)
-              setFocusIndex(-1)
-            }
-
-            return (
-              <button
-                key={option.key}
-                ref={(el) => {
-                  menuItemsRef.current[index] = el
-                }}
-                type="button"
-                role="menuitem"
-                tabIndex={focusIndex === index ? 0 : -1}
-                onClick={handleMenuItemClick}
-                className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-<!--          end herer        -->
               >
                 Delete
               </Button>

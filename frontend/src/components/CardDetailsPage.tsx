@@ -154,6 +154,7 @@ const DetailsCard = ({
               )}
               {type === 'module' &&
                 (() => {
+                  if (!programKey || !entityKey) return null
                   const currentUserLogin = session?.user?.login
                   const isAdmin =
                     accessLevel === 'admin' &&
@@ -164,7 +165,7 @@ const DetailsCard = ({
                       type="module"
                       programKey={programKey}
                       moduleKey={entityKey}
-                      isAdmin={isAdmin}
+                      isAdmin={isAdmin ? true : undefined}
                     />
                   ) : null
                 })()}

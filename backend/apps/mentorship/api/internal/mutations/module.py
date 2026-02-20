@@ -1,6 +1,5 @@
 """GraphQL mutations for mentorship modules in the mentorship app."""
 
-import contextlib
 import logging
 from datetime import datetime
 
@@ -48,6 +47,20 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     return mentors
 
 
+def _is_mentor_of_module(user, module) -> bool:
+    """Check if the given user is a mentor for the module.
+
+    Runs a fallback check against github_user if the mentor hasn't linked
+    their nest_user profile yet.
+    """
+    if Mentor.objects.filter(nest_user=user, modules=module).exists():
+        return True
+    return (
+        hasattr(user, "github_user")
+        and Mentor.objects.filter(github_user=user.github_user, modules=module).exists()
+    )
+
+
 def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
     """Validate and normalize module start/end dates against program constraints."""
     if started_at is None or ended_at is None:
@@ -90,21 +103,6 @@ class ModuleMutation:
         except (Program.DoesNotExist, Project.DoesNotExist) as e:
             msg = f"{e.__class__.__name__} matching query does not exist."
             raise ObjectDoesNotExist(msg) from e
-
-        creator_as_mentor = None
-        with contextlib.suppress(Mentor.DoesNotExist):
-            creator_as_mentor = Mentor.objects.get(nest_user=user)
-
-        if creator_as_mentor is None and hasattr(user, "github_user"):
-            with contextlib.suppress(Mentor.DoesNotExist):
-                creator_as_mentor = Mentor.objects.get(github_user=user.github_user)
-
-        if creator_as_mentor is None:
-            msg = "Only mentors can create modules."
-            raise PermissionDenied(msg)
-
-        if not program.admins.filter(id=creator_as_mentor.id).exists():
-            raise PermissionDenied("Only program admins can create modules.")
 
         if not program.admins.filter(nest_user=user).exists():
             raise PermissionDenied
@@ -160,7 +158,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -199,7 +197,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_UNASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -240,7 +238,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
@@ -302,7 +300,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
 
         issue = (
@@ -341,8 +339,7 @@ class ModuleMutation:
         - An admin of the program, or
         - A mentor explicitly assigned to this module
 
-        Admins can edit any field and manage mentor assignments.
-        Module mentors can edit module details but cannot modify mentor assignments.
+        Admins and module mentors can edit any field and manage mentor assignments.
         """
         user = info.context.request.user
 
@@ -356,7 +353,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
         is_admin = module.program.admins.filter(nest_user=user).exists()
-        is_mentor = Mentor.objects.filter(nest_user=user, modules=module).exists()
+        is_mentor = _is_mentor_of_module(user, module)
         if not (is_admin or is_mentor):
             msg = "Only admins of the program or mentors of this module can edit modules."
             raise PermissionDenied(msg)
@@ -392,28 +389,8 @@ class ModuleMutation:
             raise ObjectDoesNotExist(msg) from err
 
         if input_data.mentor_logins is not None:
-            if not is_program_admin:
-                current_logins = {
-                    login.lower()
-                    for login in module.mentors.values_list("github_user__login", flat=True)
-                }
-                requested_logins = {login.lower() for login in input_data.mentor_logins}
-
-                if requested_logins != current_logins:
-                    msg = "Only program admins can modify mentor assignments."
-                    logger.warning(
-                        "Unauthorized mentor assignment attempt: Non-admin mentor '%s' "
-                        "tried to modify mentors for module '%s'.",
-                        user.username,
-                        module.name,
-                    )
-                    raise PermissionDenied(msg)
-                # Mentor list unchanged; skip the update
-                input_data.mentor_logins = None
-
-            if input_data.mentor_logins is not None:
-                mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
-                module.mentors.set(mentors_to_set)
+            mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
+            module.mentors.set(mentors_to_set)
 
         module.save()
 
@@ -433,21 +410,6 @@ class ModuleMutation:
             module.program.experience_levels.remove(old_experience_level)
 
         module.program.save(update_fields=["experience_levels"])
-
-        logger.info(
-            "User '%s' successfully updated module '%s' in program '%s'.",
-            user.username,
-            module.name,
-            module.program.key,
-        )
-        program_key = module.program.key
-
-        def _invalidate():
-            invalidate_module_cache(old_module_key, program_key)
-            if module.key != old_module_key:
-                invalidate_module_cache(module.key, program_key)
-
-        transaction.on_commit(_invalidate)
 
         return module
 
@@ -469,30 +431,13 @@ class ModuleMutation:
         except Module.DoesNotExist as e:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
-        admin_as_mentor = None
-        with contextlib.suppress(Mentor.DoesNotExist):
-            admin_as_mentor = Mentor.objects.get(nest_user=user)
-
-        if admin_as_mentor is None and hasattr(user, "github_user"):
-            with contextlib.suppress(Mentor.DoesNotExist):
-                admin_as_mentor = Mentor.objects.get(github_user=user.github_user)
-
-        if admin_as_mentor is None:
-            msg = "Only mentors can delete modules."
-            logger.warning(
-                "User '%s' is not a mentor and cannot delete modules.",
-                user.username,
-            )
-            raise PermissionDenied(msg)
-
-        if not module.program.admins.filter(id=admin_as_mentor.id).exists():
+        if not module.program.admins.filter(nest_user=user).exists():
             msg = "Only program admins can delete modules."
             raise PermissionDenied(msg)
 
         program = module.program
         module_name = module.name
 
-        # Clean up experience levels if this module is the only one using it
         experience_level_to_remove = module.experience_level
         if (
             experience_level_to_remove in program.experience_levels
@@ -505,20 +450,6 @@ class ModuleMutation:
             program.experience_levels.remove(experience_level_to_remove)
             program.save(update_fields=["experience_levels"])
 
-        # Delete the module
         module.delete()
-
-        def _invalidate():
-            invalidate_module_cache(module_key, program_key)
-            invalidate_program_cache(program_key)
-
-        transaction.on_commit(_invalidate)
-
-        logger.info(
-            "User '%s' deleted module '%s' from program '%s'.",
-            user.username,
-            module_name,
-            program_key,
-        )
 
         return f"Module '{module_name}' has been deleted successfully."

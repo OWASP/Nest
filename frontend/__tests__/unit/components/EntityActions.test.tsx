@@ -1,3 +1,5 @@
+import { useMutation } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
@@ -9,12 +11,21 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
 
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(),
+}))
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
+
 describe('EntityActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn()])
   })
 
   describe('Program Actions - Create Module', () => {
@@ -750,6 +761,273 @@ describe('EntityActions', () => {
 
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
+  describe('Module Actions - Delete Module', () => {
+    let mockDeleteMutation: jest.Mock
+
+    beforeEach(() => {
+      mockDeleteMutation = jest.fn()
+      ;(useMutation as unknown as jest.Mock).mockReturnValue([mockDeleteMutation])
+    })
+
+    it('opens delete modal when Delete is clicked', () => {
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
+      fireEvent.click(button)
+
+      const deleteButton = screen.getByText('Delete')
+      fireEvent.click(deleteButton)
+
+      expect(screen.getByText('Delete Module')).toBeInTheDocument()
+      expect(screen.getByText(/Are you sure you want to delete this module/)).toBeInTheDocument()
+    })
+
+    it('closes delete modal when Cancel is clicked', async () => {
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      expect(screen.getByText('Delete Module')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Cancel/i }))
+
+      await waitFor(() => {
+        expect(screen.queryByText('Delete Module')).not.toBeInTheDocument()
+      })
+    })
+
+    it('closes delete modal when Modal close button is clicked (onClose)', async () => {
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      expect(screen.getByText('Delete Module')).toBeInTheDocument()
+
+      const closeButton = screen.getByRole('button', { name: /Close/i })
+      fireEvent.click(closeButton)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Delete Module')).not.toBeInTheDocument()
+      })
+    })
+
+    it('does not do anything if moduleKey is missing on submit', async () => {
+      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      const confirmButton = screen.getByRole('button', { name: 'Delete' })
+      fireEvent.click(confirmButton)
+
+      expect(mockDeleteMutation).not.toHaveBeenCalled()
+    })
+
+    it('handles successful module deletion', async () => {
+      mockDeleteMutation.mockResolvedValueOnce({ data: { deleteModule: true } })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      const confirmButton = screen.getByRole('button', { name: 'Delete' })
+      fireEvent.click(confirmButton)
+
+      await waitFor(() => {
+        expect(mockDeleteMutation).toHaveBeenCalledWith({
+          variables: { programKey: 'test-program', moduleKey: 'test-module' },
+          update: expect.any(Function),
+        })
+      })
+
+      // We should check that addToast was called with success
+      expect(addToast).toHaveBeenCalledWith({
+        title: 'Success',
+        description: 'Module has been deleted successfully.',
+        color: 'success',
+      })
+
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+    })
+
+    it('calls update cache function when delete is successful', async () => {
+      // Create a mock cache object with readQuery and writeQuery
+      const mockCache = {
+        readQuery: jest.fn().mockReturnValue({
+          getProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
+        }),
+        writeQuery: jest.fn(),
+      }
+
+      mockDeleteMutation.mockImplementationOnce(({ update }) => {
+        // execute update cache function directly to test its internals
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (update) update(mockCache as any)
+        return Promise.resolve({ data: { deleteModule: true } })
+      })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(mockCache.readQuery).toHaveBeenCalled()
+        expect(mockCache.writeQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: {
+              getProgramModules: [{ key: 'other-module' }],
+            },
+          })
+        )
+      })
+    })
+
+    it('handles mutation structural failure', async () => {
+      mockDeleteMutation.mockResolvedValueOnce({ data: { deleteModule: false } })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Failed to delete module. Please try again.',
+          })
+        )
+      })
+    })
+
+    it('handles Permission Denied error from server', async () => {
+      mockDeleteMutation.mockRejectedValueOnce(
+        new Error('Permission denied: You do not have permission')
+      )
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description:
+              'You do not have permission to delete this module. Only program admins can delete modules.',
+          })
+        )
+      })
+    })
+
+    it('handles Unauthorized error from server', async () => {
+      mockDeleteMutation.mockRejectedValueOnce(new Error('Unauthorized request'))
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Unauthorized: You must be a program admin to delete modules.',
+          })
+        )
+      })
+    })
+
+    it('handles a generic network error from server', async () => {
+      mockDeleteMutation.mockRejectedValueOnce(new Error('Network disconnected'))
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Failed to delete module. Please try again.',
+          })
+        )
+      })
     })
   })
 })
