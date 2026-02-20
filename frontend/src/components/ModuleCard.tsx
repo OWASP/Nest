@@ -22,7 +22,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type React from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   FaChevronDown,
   FaChevronUp,
@@ -51,19 +51,17 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
   const [isSaving, setIsSaving] = useState(false)
   const isAdmin = accessLevel === 'admin'
 
-  const moduleKeysSignature = useMemo(
-    () =>
-      [...modules]
-        .map((m) => m.key || m.id)
-        .sort()
-        .join(','),
-    [modules]
-  )
-
   useEffect(() => {
-    setOrderedModules(modules)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleKeysSignature])
+    setOrderedModules((prev) => {
+      const moduleMap = new Map(modules.map((m) => [m.key || m.id, m]))
+      const updated = prev
+        .map((m) => moduleMap.get(m.key || m.id))
+        .filter((m): m is Module => m !== undefined)
+      const existingIds = new Set(prev.map((m) => m.key || m.id))
+      const added = modules.filter((m) => !existingIds.has(m.key || m.id))
+      return [...updated, ...added]
+    })
+  }, [modules])
 
   const [reorderModules] = useMutation(REORDER_MODULES)
 
@@ -82,6 +80,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
       if (!over || active.id === over.id) return
       if (isSaving) return
 
+      const previousOrder = [...orderedModules]
       const oldIndex = orderedModules.findIndex((m) => (m.key || m.id) === active.id)
       const newIndex = orderedModules.findIndex((m) => (m.key || m.id) === over.id)
       if (oldIndex === -1 || newIndex === -1) return
@@ -107,7 +106,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
               title: 'Reorder Failed',
               variant: 'solid',
             })
-            setOrderedModules(orderedModules)
+            setOrderedModules(previousOrder)
           })
           .finally(() => setIsSaving(false))
       }
