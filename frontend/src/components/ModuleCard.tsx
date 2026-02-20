@@ -1,10 +1,37 @@
+import { useMutation } from '@apollo/client/react'
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import type { DragEndEvent } from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { addToast } from '@heroui/toast'
 import { capitalize } from 'lodash'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type React from 'react'
-import { useState } from 'react'
-import { FaChevronDown, FaChevronUp, FaTurnUp, FaCalendar, FaHourglassHalf } from 'react-icons/fa6'
+import { useCallback, useState } from 'react'
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaGripVertical,
+  FaTurnUp,
+  FaCalendar,
+  FaHourglassHalf,
+} from 'react-icons/fa6'
+import { REORDER_MODULES } from 'server/mutations/moduleMutations'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -15,16 +42,66 @@ interface ModuleCardProps {
   modules: Module[]
   accessLevel?: string
   admins?: { login: string }[]
+  programKey?: string
 }
 
-const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
+const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProps) => {
   const [showAllModule, setShowAllModule] = useState(false)
+  const [orderedModules, setOrderedModules] = useState(modules)
+  const isAdmin = accessLevel === 'admin'
+
+  const [reorderModules] = useMutation(REORDER_MODULES)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+
+      setOrderedModules((prev) => {
+        const oldIndex = prev.findIndex((m) => m.key === active.id)
+        const newIndex = prev.findIndex((m) => m.key === over.id)
+        const newOrder = arrayMove(prev, oldIndex, newIndex)
+
+        if (programKey) {
+          reorderModules({
+            variables: {
+              input: {
+                programKey,
+                moduleKeys: newOrder.map((m) => m.key),
+              },
+            },
+          }).catch(() => {
+            addToast({
+              color: 'danger',
+              description: 'Failed to save module order.',
+              timeout: 3000,
+              title: 'Reorder Failed',
+              variant: 'solid',
+            })
+            setOrderedModules(prev)
+          })
+        }
+
+        return newOrder
+      })
+    },
+    [programKey, reorderModules]
+  )
 
   if (modules.length === 1) {
     return <SingleModuleCard module={modules[0]} accessLevel={accessLevel} admins={admins} />
   }
 
-  const displayedModule = showAllModule ? modules : modules.slice(0, 4)
+  const displayedModules = showAllModule ? orderedModules : orderedModules.slice(0, 4)
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -33,14 +110,33 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
     }
   }
 
+  const moduleGrid = (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+      {displayedModules.map((module) => {
+        return isAdmin ? (
+          <SortableModuleItem key={module.key || module.id} module={module} />
+        ) : (
+          <ModuleItem key={module.key || module.id} module={module} />
+        )
+      })}
+    </div>
+  )
+
   return (
     <div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
-        {displayedModule.map((module) => {
-          return <ModuleItem key={module.key || module.id} module={module} />
-        })}
-      </div>
-      {modules.length > 4 && (
+      {isAdmin ? (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext
+            items={displayedModules.map((m) => m.key)}
+            strategy={rectSortingStrategy}
+          >
+            {moduleGrid}
+          </SortableContext>
+        </DndContext>
+      ) : (
+        moduleGrid
+      )}
+      {orderedModules.length > 4 && (
         <div className="mt-6 flex items-center justify-center text-center">
           <button
             type="button"
@@ -64,7 +160,31 @@ const ModuleCard = ({ modules, accessLevel, admins }: ModuleCardProps) => {
   )
 }
 
-const ModuleItem = ({ module }: { module: Module }) => {
+const SortableModuleItem = ({ module }: { module: Module }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: module.key,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ModuleItem module={module} dragHandleProps={{ ...attributes, ...listeners }} />
+    </div>
+  )
+}
+
+const ModuleItem = ({
+  module,
+  dragHandleProps,
+}: {
+  module: Module
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>
+}) => {
   const pathname = usePathname()
 
   const mentors = module.mentors || []
@@ -96,12 +216,23 @@ const ModuleItem = ({ module }: { module: Module }) => {
 
   return (
     <div className="flex h-auto min-h-[12rem] w-full flex-col gap-3 rounded-lg border-1 border-gray-200 p-4 text-gray-600 shadow-xs ease-in-out hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-      <Link
-        href={`${pathname}/modules/${module.key}`}
-        className="text-start font-semibold text-gray-600 hover:underline dark:text-gray-300"
-      >
-        <TruncatedText text={module?.name} />
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          href={`${pathname}/modules/${module.key}`}
+          className="text-start font-semibold text-gray-600 hover:underline dark:text-gray-300"
+        >
+          <TruncatedText text={module?.name} />
+        </Link>
+        {dragHandleProps && (
+          <div
+            {...dragHandleProps}
+            className="cursor-grab touch-none text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            aria-label="Drag to reorder"
+          >
+            <FaGripVertical className="h-4 w-4" />
+          </div>
+        )}
+      </div>
       <TextInfoItem icon={FaTurnUp} label="Level" value={capitalize(module.experienceLevel)} />
       <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
       <TextInfoItem

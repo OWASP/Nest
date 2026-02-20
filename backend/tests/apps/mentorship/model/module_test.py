@@ -183,3 +183,9 @@ class TestModulePureMocks:
 
         assert mock_module.key == "orphan-module"
         mock_super_save.assert_called_once()
+
+    def test_order_field_default(self):
+        """Test that order field defaults to 0."""
+        mock_module = MagicMock(spec=Module)
+        mock_module.order = Module._meta.get_field("order").default
+        assert mock_module.order == 0
