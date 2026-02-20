@@ -32,7 +32,7 @@ resource "aws_iam_policy" "fixtures_read_only" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = ["s3:GetObject"]
+      Action   = ["s3:GetObject", "s3:HeadObject"]
       Resource = ["arn:aws:s3:::${var.fixtures_bucket_name}-${random_id.suffix.hex}/*"]
     }]
   })
