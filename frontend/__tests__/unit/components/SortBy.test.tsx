@@ -81,6 +81,17 @@ describe('<SortBy />', () => {
     expect(defaultProps.onOrderChange).toHaveBeenCalledWith('desc')
   })
 
+  it('toggles order from desc to asc when the button is clicked', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedOrder="desc" />)
+    })
+    await act(async () => {
+      const buttons = screen.getAllByRole('button')
+      fireEvent.click(buttons[1])
+    })
+    expect(defaultProps.onOrderChange).toHaveBeenCalledWith('asc')
+  })
+
   it('uses proper accessibility attributes', async () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)

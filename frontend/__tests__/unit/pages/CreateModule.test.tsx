@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useApolloClient } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter, useParams } from 'next/navigation'
@@ -252,6 +253,111 @@ describe('CreateModulePage', () => {
     await waitFor(() => {
       const moduleForm = screen.getByText('Create New Module')
       expect(moduleForm).toBeInTheDocument()
+    })
+  })
+  it('handles form submission error gracefully', async () => {
+    const user = userEvent.setup({ delay: null })
+
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: '2025-01-15T00:00:00Z',
+          endedAt: '2025-12-31T00:00:00Z',
+        },
+      },
+      loading: false,
+    })
+
+    const mockCreateModuleError = jest.fn().mockRejectedValue(new Error('Network error'))
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockCreateModuleError,
+      { loading: false },
+    ])
+
+    render(<CreateModulePage />)
+
+    await user.type(screen.getByLabelText('Name'), 'Test Module')
+    await user.type(screen.getByLabelText(/Description/i), 'Desc')
+    await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
+    await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
+
+    const projectInput = await waitFor(() =>
+      screen.getByPlaceholderText('Start typing project name...')
+    )
+    await user.type(projectInput, 'Aw')
+
+    const projectOption = await waitFor(() => screen.getByText('Awesome Project'), {
+      timeout: 2000,
+    })
+    await user.click(projectOption)
+
+    await user.click(screen.getByRole('button', { name: /Create Module/i }))
+
+    await waitFor(() => {
+      expect(mockCreateModuleError).toHaveBeenCalled()
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Creation Failed',
+          description: 'Network error',
+          color: 'danger',
+        })
+      )
+    })
+  })
+  it('handles non-Error submission failure', async () => {
+    const user = userEvent.setup({ delay: null })
+
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: '2025-01-15T00:00:00Z',
+          endedAt: '2025-12-31T00:00:00Z',
+        },
+      },
+      loading: false,
+    })
+
+    const mockCreateModuleError = jest.fn().mockRejectedValue('String error')
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockCreateModuleError,
+      { loading: false },
+    ])
+
+    render(<CreateModulePage />)
+
+    await user.type(screen.getByLabelText('Name'), 'Test Module 2')
+    await user.type(screen.getByLabelText(/Description/i), 'Desc 2')
+    await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
+    await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
+
+    const projectInput = await waitFor(() =>
+      screen.getByPlaceholderText('Start typing project name...')
+    )
+    await user.type(projectInput, 'Aw')
+    const projectOption = await waitFor(() => screen.getByText('Awesome Project'), {
+      timeout: 2000,
+    })
+    await user.click(projectOption)
+
+    await user.click(screen.getByRole('button', { name: /Create Module/i }))
+
+    await waitFor(() => {
+      expect(mockCreateModuleError).toHaveBeenCalled()
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: 'Something went wrong while creating the module.',
+        })
+      )
     })
   })
 })

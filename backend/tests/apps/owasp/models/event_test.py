@@ -89,6 +89,11 @@ class TestEventModel:
         result = Event.parse_dates("May 1 - May 5", date(2025, 5, 1))
         assert result == date(2025, 5, 5)
 
+    def test_parse_dates_day_with_year_suffix_no_comma(self):
+        """Test parse_dates where end_str has day match, >2 chars, and no comma."""
+        result = Event.parse_dates("26-30th", date(2025, 5, 26))
+        assert result == date(2025, 5, 30)
+
     def test_update_data_existing_event(self):
         """Test update_data when the event already exists."""
         category = "Global"
@@ -230,6 +235,26 @@ class TestEventUpdateData:
             result = Event.update_data(category, data)
 
             assert result is None
+
+    def test_update_data_without_save(self):
+        """Test update_data with save=False skips event.save()."""
+        category = "Global"
+        data = {"name": "No Save Event", "start-date": date(2025, 5, 26)}
+
+        with (
+            patch("apps.owasp.models.event.slugify") as mock_slugify,
+            patch("apps.owasp.models.event.Event.objects.get") as mock_get,
+            patch.object(Event, "from_dict") as mock_from_dict,
+            patch.object(Event, "save") as mock_save,
+        ):
+            mock_slugify.return_value = "no-save-event"
+            mock_get.side_effect = Event.DoesNotExist
+
+            result = Event.update_data(category, data, save=False)
+
+            assert result is not None
+            mock_from_dict.assert_called_once()
+            mock_save.assert_not_called()
 
 
 class TestEventGeoMethods:

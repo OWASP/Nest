@@ -7,3 +7,6 @@ misconfigurations:
 vulnerabilities:
   # TODO(arkid15r): Remove when v5.9.3 is no longer current.
   - id: CVE-2025-64756  # glob: Command Injection Vulnerability via Malicious Filenames.
+  # minimatch ReDoS: Dev-only (eslint-plugin-import, graphql-codegen). Can't upgrade to 10.x;
+  # eslint-plugin-import expects CommonJS default export, which minimatch v10 no longer provides.
+  - id: CVE-2026-26996  # minimatch: ReDoS via repeated wildcards with non-matching literal.
