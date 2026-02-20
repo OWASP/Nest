@@ -1,7 +1,7 @@
-import { AppError } from 'app/global-error'
-import { CSRF_URL } from 'utils/env.client'
-
 export const fetchCsrfToken = async (): Promise<string> => {
+  if (typeof window !== 'undefined') {
+    throw new AppError(500, 'fetchCsrfToken must only be called on the server')
+  }
   try {
     if (!CSRF_URL) {
       throw new AppError(500, 'CSRF_URL is not configured')
@@ -33,4 +33,5 @@ export const fetchCsrfToken = async (): Promise<string> => {
       'Unexpected error while fetching CSRF token'
     throw new AppError(500, message)
   }
+// End of file
 }

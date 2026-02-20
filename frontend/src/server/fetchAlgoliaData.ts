@@ -1,7 +1,7 @@
-import { AppError } from 'app/global-error'
+import { AppError } from 'utils/appError'
 import type { AlgoliaResponse } from 'types/algolia'
 import { IDX_URL } from 'utils/env.client'
-import { getCsrfToken } from 'utils/utility'
+import { fetchCsrfToken } from 'server/fetchCsrfToken'
 
 export const fetchAlgoliaData = async <T>(
   indexName: string,
@@ -19,11 +19,15 @@ export const fetchAlgoliaData = async <T>(
       throw new Error('IDX_URL is not defined')
     }
 
+    const csrfToken = await fetchCsrfToken();
+    // Debug log CSRF token
+    // eslint-disable-next-line no-console
+    console.log('fetchAlgoliaData: CSRF token:', csrfToken);
     const response = await fetch(IDX_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': (await getCsrfToken()) || '',
+        'X-CSRFToken': csrfToken,
       },
       credentials: 'include',
       body: JSON.stringify({
@@ -33,10 +37,12 @@ export const fetchAlgoliaData = async <T>(
         page: currentPage,
         query,
       }),
-    })
-
+    });
+    // Debug log IDX_URL response status
+    // eslint-disable-next-line no-console
+    console.log('fetchAlgoliaData: IDX_URL response status:', response.status);
     if (!response.ok) {
-      throw new AppError(response.status, 'Search service error')
+      throw new AppError(response.status, 'Search service error');
     }
 
     const results = await response.json()

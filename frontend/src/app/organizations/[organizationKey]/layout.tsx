@@ -2,7 +2,7 @@ import DOMPurify from 'isomorphic-dompurify'
 import { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
-import { apolloClient } from 'server/apolloClient'
+import { apolloClient } from '../../../lib/apolloClient'
 import {
   GetOrganizationDataDocument,
   GetOrganizationMetadataDocument,

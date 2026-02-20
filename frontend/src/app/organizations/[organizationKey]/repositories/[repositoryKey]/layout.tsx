@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
-import { apolloClient } from 'server/apolloClient'
+import { apolloClient } from '../../../../../lib/apolloClient'
 import { GetRepositoryMetadataDocument } from 'types/__generated__/repositoryQueries.generated'
 import { formatBreadcrumbTitle } from 'utils/breadcrumb'
 import { generateSeoMetadata } from 'utils/metaconfig'

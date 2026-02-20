@@ -1,6 +1,6 @@
 import NextAuth, { type AuthOptions } from 'next-auth'
 import GitHubProvider from 'next-auth/providers/github'
-import { apolloClient } from 'server/apolloClient'
+import { apolloClient } from '../../../../lib/apolloClient'
 import {
   IsMentorDocument,
   IsProjectLeaderDocument,
@@ -11,6 +11,9 @@ import { IS_GITHUB_AUTH_ENABLED, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from '
 async function checkIfProjectLeader(login: string): Promise<boolean> {
   try {
     const client = await apolloClient
+    if (!client) {
+      throw new Error('Apollo Client is not initialized')
+    }
     const { data } = await client.query({
       query: IsProjectLeaderDocument,
       variables: { login },
@@ -28,6 +31,9 @@ async function checkIfProjectLeader(login: string): Promise<boolean> {
 async function checkIfMentor(login: string): Promise<boolean> {
   try {
     const client = await apolloClient
+    if (!client) {
+      throw new Error('Apollo Client is not initialized')
+    }
     const { data } = await client.query({
       query: IsMentorDocument,
       variables: { login },

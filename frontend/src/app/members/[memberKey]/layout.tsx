@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import React from 'react'
-import { apolloClient } from 'server/apolloClient'
+import { apolloClient } from '../../../lib/apolloClient'
 import {
   GetUserDataDocument,
   GetUserMetadataDocument,

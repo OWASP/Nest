@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import React, { cache } from 'react'
-import { apolloClient } from 'server/apolloClient'
+import { apolloClient } from '../../../lib/apolloClient'
 import { GetChapterMetadataDocument } from 'types/__generated__/chapterQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
 import PageLayout from 'components/PageLayout'

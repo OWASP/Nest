@@ -5,7 +5,7 @@ import { useDjangoSession } from 'hooks/useDjangoSession'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import React, { Suspense } from 'react'
-import apolloClient from 'utils/helpers/apolloClient'
+import apolloClient from '../lib/apolloClient'
 
 // <AppInitializer> is a component that initializes the Django session.
 // It ensures the session is synced with Django when the app starts.

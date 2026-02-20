@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { FaGlobe } from 'react-icons/fa6'
 import { twMerge } from 'tailwind-merge'
-import { fetchCsrfToken } from 'server/fetchCsrfToken'
+// Removed fetchCsrfToken import; server-only usage enforced
 
 import type { Chapter } from 'types/chapter'
 import type { Committee } from 'types/committee'
@@ -49,7 +49,7 @@ export type IndexedObject = {
   [key: string]: unknown
 }
 
-export const getCsrfToken = async (): Promise<string> => {
+export const getCsrfToken = (): string => {
   const csrfToken = document.cookie
     ? document.cookie
         .split(';')
@@ -62,5 +62,6 @@ export const getCsrfToken = async (): Promise<string> => {
     return csrfToken
   }
 
-  return await fetchCsrfToken()
+  // Server-only fetchCsrfToken logic must be handled outside this utility
+  return ''
 }
