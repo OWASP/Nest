@@ -11,6 +11,7 @@ CCSP
 CISSP
 Cañón
 DRF
+ELB
 ELEVENLABS
 Emay
 FOSS
@@ -41,6 +42,7 @@ Nominatim
 Oleksiuk
 PGPASSWORD
 PLR
+PYTHONPATH
 PYTHONUNBUFFERED
 RUF
 SEO
@@ -87,10 +89,12 @@ cyclonedx
 defectdojo
 demojize
 dismissable
+dkr
 dockerhub
 dsn
 elevenlabs
 env
+envsubst
 euo
 facebookexternalhit
 gamesec
@@ -102,10 +106,12 @@ graphiql
 graphqler
 gunicorn
 hackathon
+hcl
 heroui
 hsl
 ics
 igoat
+igw
 inlinehilite
 isanori
 janedoe
@@ -162,7 +168,9 @@ pymdownx
 pypoetry
 pyyaml
 quasis
+rediss
 relativedelta
+replicationgroup
 repositorycontributor
 requirepass
 rqworker
@@ -178,9 +186,12 @@ skillstruck
 slackbot
 slideshare
 speakerdeck
+subgrp
 superfences
+tfbackend
 tgz
 tiktok
+trailofbits
 trgm
 trivyignores
 tsc
