@@ -35,7 +35,7 @@ class GoogleEmbedder(Embedder):
         result = self.client.models.embed_content(
             model=self.model,
             contents=text,
-            output_dimensionality=1536,
+            config={"output_dimensionality": 1536},
         )
         return result.embeddings[0].values
 
@@ -54,7 +54,7 @@ class GoogleEmbedder(Embedder):
             result = self.client.models.embed_content(
                 model=self.model,
                 contents=text,
-                output_dimensionality=1536,
+                config={"output_dimensionality": 1536},
             )
             results.append(result.embeddings[0].values)
         return results
