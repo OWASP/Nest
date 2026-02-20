@@ -37,6 +37,9 @@ class GoogleEmbedder(Embedder):
             contents=text,
             config={"output_dimensionality": 1536},
         )
+        if not result.embeddings:
+            msg = f"Google embedding API returned no embeddings for model {self.model!r}"
+            raise ValueError(msg)
         return result.embeddings[0].values
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
@@ -56,6 +59,9 @@ class GoogleEmbedder(Embedder):
                 contents=text,
                 config={"output_dimensionality": 1536},
             )
+            if not result.embeddings:
+                msg = f"Google embedding API returned no embeddings for model {self.model!r}"
+                raise ValueError(msg)
             results.append(result.embeddings[0].values)
         return results
 
