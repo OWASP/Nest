@@ -6,12 +6,12 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { notFound, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaCode, FaExclamationCircle } from 'react-icons/fa'
 import { FaLinkedin, FaCodeBranch, FaCodeMerge } from 'react-icons/fa6'
 
-import { handleAppError, ErrorDisplay } from 'app/global-error'
+import { handleAppError } from 'app/global-error'
 import {
   GetBoardCandidatesDocument,
   GetMemberSnapshotDocument,
@@ -672,13 +672,7 @@ const BoardCandidatesPage = () => {
   }
 
   if (!graphQLData?.boardOfDirectors) {
-    return (
-      <ErrorDisplay
-        statusCode={404}
-        title="Board not found"
-        message={`Sorry, the board information for ${year} doesn't exist`}
-      />
-    )
+    notFound()
   }
 
   return (
