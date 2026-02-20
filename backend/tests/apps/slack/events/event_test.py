@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from slack_sdk.errors import SlackApiError
 
-from apps.slack.blocks import DIVIDER
+from apps.slack.blocks import DIVIDER, SECTION_BREAK
 from apps.slack.events.event import EventBase
 
 
@@ -257,3 +257,13 @@ class TestEventBase:
 
         assert len(result) > 0
         assert result[0]["type"] == "section"
+
+    def test_render_blocks_skips_empty_sections(self, event_instance):
+        """Tests that render_blocks skips empty sections from consecutive SECTION_BREAKs."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = f"Text before{SECTION_BREAK}{SECTION_BREAK}Text after"
+
+        result = event_instance.render_blocks(template=mock_template, context={})
+
+        assert len(result) == 2
+        assert all(block["type"] == "section" for block in result)

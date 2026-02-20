@@ -155,7 +155,7 @@ recreate-schema:
 	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
-	  	$(MAKE) exec-db-command-it 2>/dev/null
+		$(MAKE) exec-db-command-it 2>/dev/null
 	@$(MAKE) migrate
 
 restore-backup:
@@ -188,11 +188,11 @@ security-scan-backend-image:
 		--rm \
 		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
 		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-	    -v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
-	    -v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
-	    $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-	    image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
 
 SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
 

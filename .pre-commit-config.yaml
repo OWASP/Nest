@@ -1,4 +1,17 @@
 repos:
+  - repo: https://github.com/EbodShojaei/bake
+    rev: v1.4.5
+    hooks:
+      - id: mbake-format
+        args:
+          - --config
+          - .bake.toml
+      - id: mbake-validate
+        args:
+          - --config
+          - .bake.toml
+        exclude: ^backend/
+
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.38.0
     hooks:
@@ -34,7 +47,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.0
+    rev: v0.15.1
     hooks:
       - id: ruff-check
         args:
@@ -49,6 +62,14 @@ repos:
         entry: djlint --reformat
         types:
           - html
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.47.0
+    hooks:
+      - id: markdownlint
+        args:
+          - --fix
+        files: \.md$
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
     rev: 0.2.3
@@ -108,6 +129,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.15.3
+    rev: v2.16.1
     hooks:
       - id: pyproject-fmt

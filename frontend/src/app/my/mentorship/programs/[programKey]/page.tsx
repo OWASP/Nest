@@ -1,6 +1,7 @@
 'use client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -116,21 +117,23 @@ const ProgramDetailsPage = () => {
   ]
 
   return (
-    <DetailsCard
-      accessLevel="admin"
-      admins={program?.admins ?? undefined}
-      canUpdateStatus={canUpdateStatus}
-      details={programDetails}
-      domains={program?.domains ?? undefined}
-      modules={modules}
-      programKey={program?.key ?? ''}
-      setStatus={updateStatus}
-      status={program?.status ?? ''}
-      summary={program?.description ?? ''}
-      tags={program?.tags ?? undefined}
-      title={program?.name ?? ''}
-      type="program"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        accessLevel="admin"
+        admins={program?.admins ?? undefined}
+        canUpdateStatus={canUpdateStatus}
+        details={programDetails}
+        domains={program?.domains ?? undefined}
+        modules={modules}
+        programKey={program?.key ?? ''}
+        setStatus={updateStatus}
+        status={program?.status ?? ''}
+        summary={program?.description ?? ''}
+        tags={program?.tags ?? undefined}
+        title={program?.name ?? ''}
+        type="program"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

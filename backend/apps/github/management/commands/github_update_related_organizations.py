@@ -28,7 +28,7 @@ class Command(BaseCommand):
             "--organization",
             required=False,
             type=str,
-            help="The organization name (e.g. juice-shop, DefectDojo')",
+            help="The organization name (e.g. juice-shop, DefectDojo)",
         )
 
     def handle(self, *_args, **options) -> None:

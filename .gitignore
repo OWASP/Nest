@@ -4,12 +4,12 @@ __pycache__
 .cache
 .coverage
 .cursor/rules/snyk_rules.mdc
-backend/fuzzing_results/
 .DS_Store
 .env*
 !.env.example
 !.env.e2e.example
 !.env.fuzz.example
+.github/ansible/.ansible/.lock
 .github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/
@@ -43,6 +43,7 @@ backend/*nest-dev*.zip
 backend/*nest-staging*.tar.gz
 backend/*nest-staging*.zip
 backend/data/backup*
+backend/fuzzing_results/
 backend/generated_videos/
 backend/staticfiles
 backend/zappa_settings.json
