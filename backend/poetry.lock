@@ -171,14 +171,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.36.0"
+version = "4.37.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.36.0-py3-none-any.whl", hash = "sha256:2a76bbda08916d8c1dc99982896c0bec4af9048ae63b7a7951ad5299c532ec9b"},
-    {file = "algoliasearch-4.36.0.tar.gz", hash = "sha256:f73cc88ad4c59ab9640f8b2fba26a77453a65681091cd8e8e5415fa29a684e8a"},
+    {file = "algoliasearch-4.37.0-py3-none-any.whl", hash = "sha256:1fcf1e757bc81a62197a3309ec70a62801d0c524dd3a9300a2014c8a6216f1e1"},
+    {file = "algoliasearch-4.37.0.tar.gz", hash = "sha256:9ddae64b96262fdcc62403b65f11d776b80baecd4b4a337fc57bd34d1ec5e962"},
 ]
 
 [package.dependencies]
@@ -306,18 +306,18 @@ wrapt = "*"
 
 [[package]]
 name = "boto3"
-version = "1.42.47"
+version = "1.42.52"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.47-py3-none-any.whl", hash = "sha256:ed881ed246027028af566acbb80f008aa619be4d3fdbcc4ad3c75dbe8c34bfaf"},
-    {file = "boto3-1.42.47.tar.gz", hash = "sha256:74812a2e29de7c2bd19e446d765cb887394f20f1517388484b51891a410f33b2"},
+    {file = "boto3-1.42.52-py3-none-any.whl", hash = "sha256:7b3e0c4bfd8815a3df64fbe98fc9f87dfb12bd7a783cf63dfc2f166c66798c9d"},
+    {file = "boto3-1.42.52.tar.gz", hash = "sha256:ff4a4afb832f63a1358e11fe6eb321da0f4767979c6721dd32fb02e6eabcebf5"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.47,<1.43.0"
+botocore = ">=1.42.52,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -326,14 +326,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.47"
+version = "1.42.52"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.47-py3-none-any.whl", hash = "sha256:c60f5feaf189423e17755aca3f1d672b7466620dd2032440b32aaac64ae8cac8"},
-    {file = "botocore-1.42.47.tar.gz", hash = "sha256:c26e190c1b4d863ba7b44dc68cc574d8eb862ddae5f0fe3472801daee12a0378"},
+    {file = "botocore-1.42.52-py3-none-any.whl", hash = "sha256:c3a0b7138a4c5a534da0eb2444c19763b4d03ba2190c0602c49315e54efd7252"},
+    {file = "botocore-1.42.52.tar.gz", hash = "sha256:3bdef10aee4cee13ff019b6a1423a2ce3ca17352328d9918157a1829e5cc9be1"},
 ]
 
 [package.dependencies]
@@ -342,7 +342,7 @@ python-dateutil = ">=2.1,<3.0.0"
 urllib3 = {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""}
 
 [package.extras]
-crt = ["awscrt (==0.29.2)"]
+crt = ["awscrt (==0.31.2)"]
 
 [[package]]
 name = "brotli"
@@ -981,14 +981,14 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "cssselect2"
-version = "0.8.0"
+version = "0.9.0"
 description = "CSS selectors for Python ElementTree"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["video"]
 files = [
-    {file = "cssselect2-0.8.0-py3-none-any.whl", hash = "sha256:46fc70ebc41ced7a32cd42d58b1884d72ade23d21e5a4eaaf022401c13f0e76e"},
-    {file = "cssselect2-0.8.0.tar.gz", hash = "sha256:7674ffb954a3b46162392aee2a3a0aedb2e14ecf99fcc28644900f4e6e3e9d3a"},
+    {file = "cssselect2-0.9.0-py3-none-any.whl", hash = "sha256:6a99e5f91f9a016a304dd929b0966ca464bcfda15177b6fb4a118fc0fb5d9563"},
+    {file = "cssselect2-0.9.0.tar.gz", hash = "sha256:759aa22c216326356f65e62e791d66160a0f9c91d1424e8d8adc5e74dddfc6fb"},
 ]
 
 [package.dependencies]
@@ -1187,14 +1187,14 @@ files = [
 
 [[package]]
 name = "elevenlabs"
-version = "2.35.0"
+version = "2.36.1"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["video"]
 files = [
-    {file = "elevenlabs-2.35.0-py3-none-any.whl", hash = "sha256:e27be0ccafccc46f619a6e29b04054a3e668ac32e68fe69616d7768e79c7f9e4"},
-    {file = "elevenlabs-2.35.0.tar.gz", hash = "sha256:7276ef1f928c51fa623c9de90ea0675fc69460046b52eab4ae510a437e18fea6"},
+    {file = "elevenlabs-2.36.1-py3-none-any.whl", hash = "sha256:c60c03b463565704038364703b0d54746fd0b67dea0341c2d53da445c32c75cc"},
+    {file = "elevenlabs-2.36.1.tar.gz", hash = "sha256:9b278f861679824ee03ee06da049d6fd9ca3886950e77d8d49dab2530ed837d3"},
 ]
 
 [package.dependencies]
@@ -1604,14 +1604,14 @@ test = ["objgraph", "psutil", "setuptools"]
 
 [[package]]
 name = "gunicorn"
-version = "25.0.3"
+version = "25.1.0"
 description = "WSGI HTTP Server for UNIX"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "gunicorn-25.0.3-py3-none-any.whl", hash = "sha256:aca364c096c81ca11acd4cede0aaeea91ba76ca74e2c0d7f879154db9d890f35"},
-    {file = "gunicorn-25.0.3.tar.gz", hash = "sha256:b53a7fff1a07b825b962af320554de44ae77a26abfa373711ff3f83d57d3506d"},
+    {file = "gunicorn-25.1.0-py3-none-any.whl", hash = "sha256:d0b1236ccf27f72cfe14bce7caadf467186f19e865094ca84221424e839b8b8b"},
+    {file = "gunicorn-25.1.0.tar.gz", hash = "sha256:1426611d959fa77e7de89f8c0f32eed6aa03ee735f98c01efba3e281b1c47616"},
 ]
 
 [package.dependencies]
@@ -2129,14 +2129,14 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.7.1"
+version = "0.7.4"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.7.1-py3-none-any.whl", hash = "sha256:92cfa54253d35417184c297ad25bfd921d95f15d60a1ca75f14d4e7acd152a29"},
-    {file = "langsmith-0.7.1.tar.gz", hash = "sha256:e3fec2f97f7c5192f192f4873d6a076b8c6469768022323dded07087d8cb70a4"},
+    {file = "langsmith-0.7.4-py3-none-any.whl", hash = "sha256:1d0590dccc7d8b0b2b39a700a1fb8b775858bf07d3b8b5f3a01b6da22bc12726"},
+    {file = "langsmith-0.7.4.tar.gz", hash = "sha256:7a1fe2604424ba1c19d4a39e16a340610bf8f0c94f9eb2f3a292235bb2ee86b0"},
 ]
 
 [package.dependencies]
@@ -2152,6 +2152,7 @@ zstandard = ">=0.23.0"
 
 [package.extras]
 claude-agent-sdk = ["claude-agent-sdk (>=0.1.0) ; python_version >= \"3.10\""]
+google-adk = ["google-adk (>=1.0.0)", "wrapt (>=1.16.0)"]
 langsmith-pyo3 = ["langsmith-pyo3 (>=0.1.0rc2)"]
 openai-agents = ["openai-agents (>=0.0.3)"]
 otel = ["opentelemetry-api (>=1.30.0)", "opentelemetry-exporter-otlp-proto-http (>=1.30.0)", "opentelemetry-sdk (>=1.30.0)"]
@@ -2701,14 +2702,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "2.20.0"
+version = "2.21.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "openai-2.20.0-py3-none-any.whl", hash = "sha256:38d989c4b1075cd1f76abc68364059d822327cf1a932531d429795f4fc18be99"},
-    {file = "openai-2.20.0.tar.gz", hash = "sha256:2654a689208cd0bf1098bb9462e8d722af5cbe961e6bba54e6f19fb843d88db1"},
+    {file = "openai-2.21.0-py3-none-any.whl", hash = "sha256:0bc1c775e5b1536c294eded39ee08f8407656537ccc71b1004104fe1602e267c"},
+    {file = "openai-2.21.0.tar.gz", hash = "sha256:81b48ce4b8bbb2cc3af02047ceb19561f7b1dc0d4e52d1de7f02abfd15aa59b7"},
 ]
 
 [package.dependencies]
@@ -3442,14 +3443,14 @@ typing-extensions = ">=4.14.1"
 
 [[package]]
 name = "pydantic-settings"
-version = "2.12.0"
+version = "2.13.1"
 description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pydantic_settings-2.12.0-py3-none-any.whl", hash = "sha256:fddb9fd99a5b18da837b29710391e945b1e30c135477f484084ee513adb93809"},
-    {file = "pydantic_settings-2.12.0.tar.gz", hash = "sha256:005538ef951e3c2a68e1c08b292b5f2e71490def8589d4221b95dab00dafcfd0"},
+    {file = "pydantic_settings-2.13.1-py3-none-any.whl", hash = "sha256:d56fd801823dbeae7f0975e1f8c8e25c258eb75d278ea7abb5d9cebb01b56237"},
+    {file = "pydantic_settings-2.13.1.tar.gz", hash = "sha256:b4c11847b15237fb0171e1462bf540e294affb9b86db4d9aa5c01730bdbe4025"},
 ]
 
 [package.dependencies]
@@ -3594,34 +3595,34 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pypdfium2"
-version = "5.4.0"
+version = "5.5.0"
 description = "Python bindings to PDFium"
 optional = false
 python-versions = ">=3.6"
 groups = ["video"]
 files = [
-    {file = "pypdfium2-5.4.0-py3-none-android_23_arm64_v8a.whl", hash = "sha256:8bc51a12a8c8eabbdbd7499d3e5ec47bcf56ba18e07b52bdd07d321cc1252c90"},
-    {file = "pypdfium2-5.4.0-py3-none-android_23_armeabi_v7a.whl", hash = "sha256:a414ef5b685824cc6c7acbe19b7dbc735de2023cf473321a8ebfe8d7f5d8a41f"},
-    {file = "pypdfium2-5.4.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0e83657db8da5971434ff5683bf3faa007ee1f3a56b61f245b8aa5b60442c23a"},
-    {file = "pypdfium2-5.4.0-py3-none-macosx_11_0_x86_64.whl", hash = "sha256:e42b1d14db642e96bb3a57167f620b4247e9c843d22b9fb569b16a7c35a18f47"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0698c9a002f839127e74ec0185147e08b64e47a1e6caeaee95df434c05b26e8c"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:22e9d4c73fc48b18b022977ea6fe78df43adf95440e1135020ed35fea9595017"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:4f0619f8a8ae3eb71b2cdc1fbd2a8f5d43f0fc6bee66d1b3aac2c9c23e44a3bf"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:50124415d815c41de8ce7e21cee5450f74f6f1240a140573bb71ccac804d5e5f"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ce482d76e5447e745d761307401eaa366616ca44032b86cf7fbe6be918ade64e"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_27_s390x.manylinux_2_28_s390x.whl", hash = "sha256:16b9c6b07f3dbe7eda209bf7aaf131ca9614e1dae527e9764180dd58bcbaf411"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_38_riscv64.manylinux_2_39_riscv64.whl", hash = "sha256:3b08d48b7cca3b51aefaad7855bc0e9e251432a6eef1356d532ff438be84855e"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:0a1526e2a2bde7f2f13bec0f471d9fd475f7bbac2c0c860d48c35af8394d5931"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:40cea0bceb1e60a71b3855e2b04d175d2199b7da06212bb80f0c78067d065810"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_i686.whl", hash = "sha256:7a116f8fbeae7aa3a18ff2d1fa331ac647831cc16b589d4fbbbb66d64ecc8793"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_ppc64le.whl", hash = "sha256:55c7fc894718db5fa2981d46dee45fe3a4fcd60d26f5095ad8f7779600fa8b6f"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_riscv64.whl", hash = "sha256:dfc1c0c7e6e7ba258ebb338aaf664eb933bff1854cda76e4ee530886ea39b31a"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_s390x.whl", hash = "sha256:4c0a48ede7180f804c029c509c2b6ea0c66813a3fde9eb9afc390183f947164d"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:dea22d15c44a275702fd95ad664ba6eaa3c493d53d58b4d69272a04bdfb0df70"},
-    {file = "pypdfium2-5.4.0-py3-none-win32.whl", hash = "sha256:35c643827ed0f4dae9cedf3caf836f94cba5b31bd2c115b80a7c85f004636de9"},
-    {file = "pypdfium2-5.4.0-py3-none-win_amd64.whl", hash = "sha256:f9d9ce3c6901294d6984004d4a797dea110f8248b1bde33a823d25b45d3c2685"},
-    {file = "pypdfium2-5.4.0-py3-none-win_arm64.whl", hash = "sha256:2b78ea216fb92e7709b61c46241ebf2cc0c60cf18ad2fb4633af665d7b4e21e6"},
-    {file = "pypdfium2-5.4.0.tar.gz", hash = "sha256:7219e55048fb3999fc8adcaea467088507207df4676ff9e521a3ae15a67d99c4"},
+    {file = "pypdfium2-5.5.0-py3-none-android_23_arm64_v8a.whl", hash = "sha256:414f0b4aef7413e04df7355043fb752f2efb6f9777e04fd880d302612dacf89f"},
+    {file = "pypdfium2-5.5.0-py3-none-android_23_armeabi_v7a.whl", hash = "sha256:126ff8b131d12f16ce96b3e85b7f413e5073212be06b571f157fe11ad221c274"},
+    {file = "pypdfium2-5.5.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0770bd3f0be5c68443fc4017e43b1b1fe8f36877481cab70fd29b68b2c362e1b"},
+    {file = "pypdfium2-5.5.0-py3-none-macosx_11_0_x86_64.whl", hash = "sha256:5ab41a3b9953d9be44be35c36a2340f1d67c602db98a0d6f70006610871ae43a"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2492a22c3126a004cee2fa208ea4aa03ede2c7e205d05814934ab18f83d073e9"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:83ff93e08b1fadb00040564e2eccc99147fc1a632ba5daff745126b373d78446"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b7e85de3332bedf8e5f157c248063b4eaf968660e1e490353b6e581d9f96a4c6"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:e258365f34b6e334bb415e44dd9b1ee78a6e525bf854a1e74af67af7ede7555b"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bec21d833404ca771f02fa5cefb0b73e2148f05cbdb3b5b9989bdd51d9b5cbac"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_27_s390x.manylinux_2_28_s390x.whl", hash = "sha256:1dd6ccbe1b5e2e778e8b021e47f9485b4fd42eaa6c9bdda2631641724e1fcc04"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_38_riscv64.manylinux_2_39_riscv64.whl", hash = "sha256:da3eada345570cec5e34872d1472d4ac542f0e650ccdb6c2eac08ae1a5f07c82"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:a087fb4088c7433fd3d78833dbe42cfb66df3d5ac98e3edf66110520fb33c0f0"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:e6418cdc500ef85a90319f9bc7f1c54fc133460379f509429403225d8a4c157f"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_i686.whl", hash = "sha256:8f7b66eedfac26eb2df4b00936e081b0a1c76fb8ee1c12639d85c2e73b0769ef"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_ppc64le.whl", hash = "sha256:faea3246591ce2ea6218cd06679071275e3c65f11c3f5c9091eb7fb07610af6a"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_riscv64.whl", hash = "sha256:aba26d404b51a9de3d3e80c867a95c71abf1c79552001ae22707451e59186b3d"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_s390x.whl", hash = "sha256:e0fa8f81679e6e71f26806f4db853571ee6435dc3bde7a46acdd182ef886a5b9"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:ee22df3376d350eeb64d2002a1071e3a02c0d874c557a3cd8229a8fc572cdaac"},
+    {file = "pypdfium2-5.5.0-py3-none-win32.whl", hash = "sha256:ec62a00223d1222d2f35c0866dd79cdc24da070738544cdf51b17d332d4a7389"},
+    {file = "pypdfium2-5.5.0-py3-none-win_amd64.whl", hash = "sha256:15c32fbeebb5198afa785dd03e98906ebb4eded9ef8862e10f833c37b4a18786"},
+    {file = "pypdfium2-5.5.0-py3-none-win_arm64.whl", hash = "sha256:f618af0884c16c768539c44933a255039131dbbf39d68eded020da4f14958d73"},
+    {file = "pypdfium2-5.5.0.tar.gz", hash = "sha256:3283c61f54c3c546d140da201ef48a51c18b0ad54293091a010029ac13ece23a"},
 ]
 
 [[package]]
@@ -3684,22 +3685,18 @@ testing = ["process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
 name = "pytest-django"
-version = "4.11.1"
+version = "4.12.0"
 description = "A Django plugin for pytest."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 groups = ["test"]
 files = [
-    {file = "pytest_django-4.11.1-py3-none-any.whl", hash = "sha256:1b63773f648aa3d8541000c26929c1ea63934be1cfa674c76436966d73fe6a10"},
-    {file = "pytest_django-4.11.1.tar.gz", hash = "sha256:a949141a1ee103cb0e7a20f1451d355f83f5e4a5d07bdd4dcfdd1fd0ff227991"},
+    {file = "pytest_django-4.12.0-py3-none-any.whl", hash = "sha256:3ff300c49f8350ba2953b90297d23bf5f589db69545f56f1ec5f8cff5da83e85"},
+    {file = "pytest_django-4.12.0.tar.gz", hash = "sha256:df94ec819a83c8979c8f6de13d9cdfbe76e8c21d39473cfe2b40c9fc9be3c758"},
 ]
 
 [package.dependencies]
 pytest = ">=7.0.0"
-
-[package.extras]
-docs = ["sphinx", "sphinx_rtd_theme"]
-testing = ["Django", "django-configurations (>=2.0)"]
 
 [[package]]
 name = "pytest-mock"
@@ -3981,14 +3978,14 @@ all = ["numpy"]
 
 [[package]]
 name = "redis"
-version = "7.1.1"
+version = "7.2.0"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "redis-7.1.1-py3-none-any.whl", hash = "sha256:f77817f16071c2950492c67d40b771fa493eb3fccc630a424a10976dbb794b7a"},
-    {file = "redis-7.1.1.tar.gz", hash = "sha256:a2814b2bda15b39dad11391cc48edac4697214a8a5a4bd10abe936ab4892eb43"},
+    {file = "redis-7.2.0-py3-none-any.whl", hash = "sha256:01f591f8598e483f1842d429e8ae3a820804566f1c73dca1b80e23af9fba0497"},
+    {file = "redis-7.2.0.tar.gz", hash = "sha256:4dd5bf4bd4ae80510267f14185a15cba2a38666b941aff68cccf0256b51c1f26"},
 ]
 
 [package.extras]
@@ -3996,6 +3993,8 @@ circuit-breaker = ["pybreaker (>=1.4.0)"]
 hiredis = ["hiredis (>=3.2.0)"]
 jwt = ["pyjwt (>=2.9.0)"]
 ocsp = ["cryptography (>=36.0.1)", "pyopenssl (>=20.0.1)", "requests (>=2.31.0)"]
+otel = ["opentelemetry-api (>=1.39.1)", "opentelemetry-exporter-otlp-proto-http (>=1.39.1)", "opentelemetry-sdk (>=1.39.1)"]
+xxhash = ["xxhash (>=3.6.0,<3.7.0)"]
 
 [[package]]
 name = "referencing"
@@ -4235,14 +4234,14 @@ crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "2.52.0"
+version = "2.53.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "sentry_sdk-2.52.0-py2.py3-none-any.whl", hash = "sha256:931c8f86169fc6f2752cb5c4e6480f0d516112e78750c312e081ababecbaf2ed"},
-    {file = "sentry_sdk-2.52.0.tar.gz", hash = "sha256:fa0bec872cfec0302970b2996825723d67390cdd5f0229fb9efed93bd5384899"},
+    {file = "sentry_sdk-2.53.0-py2.py3-none-any.whl", hash = "sha256:46e1ed8d84355ae54406c924f6b290c3d61f4048625989a723fd622aab838899"},
+    {file = "sentry_sdk-2.53.0.tar.gz", hash = "sha256:6520ef2c4acd823f28efc55e43eb6ce2e6d9f954a95a3aa96b6fd14871e92b77"},
 ]
 
 [package.dependencies]
@@ -4347,14 +4346,14 @@ slack_sdk = ">=3.38.0,<4"
 
 [[package]]
 name = "slack-sdk"
-version = "3.40.0"
+version = "3.40.1"
 description = "The Slack API Platform SDK for Python"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "slack_sdk-3.40.0-py2.py3-none-any.whl", hash = "sha256:f2bada5ed3adb10a01e154e90db01d6d8938d0461b5790c12bcb807b2d28bbe2"},
-    {file = "slack_sdk-3.40.0.tar.gz", hash = "sha256:87b9a79d1d6e19a2b1877727a0ec6f016d82d30a6a410389fba87c221c99f10e"},
+    {file = "slack_sdk-3.40.1-py2.py3-none-any.whl", hash = "sha256:cd8902252979aa248092b0d77f3a9ea3cc605bc5d53663ad728e892e26e14a65"},
+    {file = "slack_sdk-3.40.1.tar.gz", hash = "sha256:a215333bc251bc90abf5f5110899497bf61a3b5184b6d9ee35d73ebf09ec3fd0"},
 ]
 
 [package.extras]
@@ -4527,14 +4526,14 @@ sanic = ["sanic (>=20.12.2)"]
 
 [[package]]
 name = "strawberry-graphql-django"
-version = "0.75.0"
+version = "0.75.2"
 description = "Strawberry GraphQL Django extension"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "strawberry_graphql_django-0.75.0-py3-none-any.whl", hash = "sha256:d4c31a526c72332eafc1067a3e5dd6e2917cbea2a2e5faac589c86a5b6081297"},
-    {file = "strawberry_graphql_django-0.75.0.tar.gz", hash = "sha256:2a3720687811c723e030fe09726a2a81cfa3a7b3b6ff1a5af187368b44df7afd"},
+    {file = "strawberry_graphql_django-0.75.2-py3-none-any.whl", hash = "sha256:9b7c898409bb17799f9830e39e2f6028dba847b3b1b5bc98ab894523557965bb"},
+    {file = "strawberry_graphql_django-0.75.2.tar.gz", hash = "sha256:17668295065348330b1dc3630482eac2cb4b953750aab1fe53234c0322888912"},
 ]
 
 [package.dependencies]
@@ -5360,24 +5359,24 @@ wheel = "*"
 
 [[package]]
 name = "zopfli"
-version = "0.4.0"
+version = "0.4.1"
 description = "Zopfli module for python"
 optional = false
 python-versions = ">=3.10"
 groups = ["video"]
 files = [
-    {file = "zopfli-0.4.0-cp310-abi3-macosx_10_9_universal2.whl", hash = "sha256:d1b98ad47c434ef213444a03ef2f826eeec100144d64f6a57504b9893d3931ce"},
-    {file = "zopfli-0.4.0-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:18b5f1570f64d4988482e4466f10ef5f2a30f687c19ad62a64560f2152dc89eb"},
-    {file = "zopfli-0.4.0-cp310-abi3-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b72a010d205d00b2855acc2302772067362f9ab5a012e3550662aec60d28e6b3"},
-    {file = "zopfli-0.4.0-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:c3ba02a9a6ca90481d2b2f68bab038b310d63a1e3b5ae305e95a6599787ed941"},
-    {file = "zopfli-0.4.0-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:7d66337be6d5613dec55213e9ac28f378c41e2cc04fbad4a10748e4df774ca85"},
-    {file = "zopfli-0.4.0-cp310-abi3-win32.whl", hash = "sha256:03181d48e719fcb6cf8340189c61e8f9883d8bbbdf76bf5212a74457f7d083c1"},
-    {file = "zopfli-0.4.0-cp310-abi3-win_amd64.whl", hash = "sha256:f94e4dd7d76b4fe9f5d9229372be20d7f786164eea5152d1af1c34298c3d5975"},
-    {file = "zopfli-0.4.0-pp311-pypy311_pp73-macosx_10_15_x86_64.whl", hash = "sha256:b8bdb41fbfdc4738b7bdc09ed7c1e951579fae192391a5e694d59bb186cdbec7"},
-    {file = "zopfli-0.4.0-pp311-pypy311_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:9097e8e1dfdb7f5aea5464e469946857e80502b6d29ba1b232450916bd4a74d1"},
-    {file = "zopfli-0.4.0-pp311-pypy311_pp73-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:f67d04280065e24cb9a4174cb6b3d1f763687f8cb2963aa135ad8f57c6995f5a"},
-    {file = "zopfli-0.4.0-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:25e4863b8dc30e5d5309f87c106b0b7d3da4ed0e340b8a52b36d4471e797589f"},
-    {file = "zopfli-0.4.0.tar.gz", hash = "sha256:a8ee992b2549e090cd3f0178bf606dd41a29e0613a04cdf5054224662c72dce6"},
+    {file = "zopfli-0.4.1-cp310-abi3-macosx_10_9_universal2.whl", hash = "sha256:4238d4d746d1095e29c9125490985e0c12ffd3654f54a24af551e2391e936d54"},
+    {file = "zopfli-0.4.1-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:fdfb7ce9f5de37a5b2f75dd2642fd7717956ef2a72e0387302a36d382440db07"},
+    {file = "zopfli-0.4.1-cp310-abi3-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:d7bcee1b189d64ec33d1e05cfa1b6a1268c29329c382f6ca1bd6245b04925c57"},
+    {file = "zopfli-0.4.1-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:27823dc1161a4031d1c25925fd45d9868ec0cbc7692341830a7dcfa25063662c"},
+    {file = "zopfli-0.4.1-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:5a4c22b6161f47f5bd34637dbaee6735abd287cd64e0d1ce28ef1871bf625f4b"},
+    {file = "zopfli-0.4.1-cp310-abi3-win32.whl", hash = "sha256:a899eca405662a23ae75054affa3517a060362eae1185d3d791c86a50153c4dd"},
+    {file = "zopfli-0.4.1-cp310-abi3-win_amd64.whl", hash = "sha256:84a31ba9edc921b1d3a4449929394a993888f32d70de3a3617800c428a947b9b"},
+    {file = "zopfli-0.4.1-pp311-pypy311_pp73-macosx_10_15_x86_64.whl", hash = "sha256:02086247dd12fda929f9bfe8b3962b6bcdbfc8c82e99255aebcf367867cf0760"},
+    {file = "zopfli-0.4.1-pp311-pypy311_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:a93c2ecafff372de6c0aa2212eff18a75f6c71a100372fee7b4b129cc0b6f9a7"},
+    {file = "zopfli-0.4.1-pp311-pypy311_pp73-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:cb136a74d14a4ecfae29cb0fdecece58a6c115abc9a74c12bc6ac62e80f229d7"},
+    {file = "zopfli-0.4.1-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:2f992ac7d83cbddd889e1813ace576cbc91a05d5d7a0a21b366e2e5f492e7707"},
+    {file = "zopfli-0.4.1.tar.gz", hash = "sha256:07a5cdc5d1aaa6c288c5d9f5a5383042ba743641abf8e2fd898dcad622d8a38e"},
 ]
 
 [package.extras]

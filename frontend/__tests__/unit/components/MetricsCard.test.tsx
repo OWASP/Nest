@@ -62,6 +62,7 @@ describe('MetricsCard component', () => {
       [75, 'bg-green-500'],
       [60, 'bg-orange-500'],
       [50, 'bg-orange-500'],
+      [74, 'bg-orange-500'],
       [30, 'bg-red-500'],
     ]
 
@@ -98,5 +99,19 @@ describe('MetricsCard component', () => {
     expect(screen.getAllByText('Jan 1, 2024')[0]).toBeInTheDocument()
     expect(screen.getByText(/Score:/).textContent).toContain('55')
     expect(screen.getByRole('link')).toHaveAttribute('href', '/projects/dashboard/metrics/another')
+  })
+
+  it('handles undefined optional props using defaults', () => {
+    const metric = makeMetric({
+      score: undefined,
+      createdAt: undefined,
+    })
+    render(<MetricsCard metric={metric} />)
+
+    const scoreText = screen.getByText(/Score: 0/)
+    expect(scoreText).toBeInTheDocument()
+    expect(scoreText.closest('div')).toHaveClass('bg-red-500')
+
+    expect(screen.getByText('N/A')).toBeInTheDocument()
   })
 })

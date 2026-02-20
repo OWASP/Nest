@@ -10,6 +10,7 @@ from apps.owasp.admin.entity_channel import (
     mark_as_reviewed,
 )
 from apps.owasp.models import EntityChannel
+from apps.slack.models import Conversation
 
 
 class TestMarkAsReviewedAction:
@@ -61,8 +62,8 @@ class TestEntityChannelAdmin:
     def test_channel_search_display_conversation_not_found(self, admin_instance, mocker):
         """Test channel_search_display when conversation doesn't exist."""
         mock_conversation = mocker.patch(f"{self.target_module}.Conversation")
-        mock_conversation.DoesNotExist = Exception
-        mock_conversation.objects.get.side_effect = mock_conversation.DoesNotExist
+        mock_conversation.DoesNotExist = Conversation.DoesNotExist
+        mock_conversation.objects.get.side_effect = Conversation.DoesNotExist
 
         mock_channel_type = MagicMock()
         mock_channel_type.model = "conversation"
@@ -81,6 +82,19 @@ class TestEntityChannelAdmin:
         obj = MagicMock()
         obj.channel_id = None
         obj.channel_type = None
+
+        result = admin_instance.channel_search_display(obj)
+
+        assert result == "-"
+
+    def test_channel_search_display_non_conversation_model(self, admin_instance):
+        """Test channel_search_display for non-conversation model."""
+        mock_channel_type = MagicMock()
+        mock_channel_type.model = "other_model"
+
+        obj = MagicMock()
+        obj.channel_id = 123
+        obj.channel_type = mock_channel_type
 
         result = admin_instance.channel_search_display(obj)
 

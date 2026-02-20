@@ -59,7 +59,9 @@ class Command(BaseCommand):
                         project.invalid_urls.add(repository_url)
                         project.related_urls.remove(repository_url)
                         project.save(update_fields=("invalid_urls", "related_urls"))
-                        continue
+                    else:
+                        logger.exception("Unexpected error fetching repository %s", repository_url)
+                    continue
 
                 try:
                     organization, repository = sync_repository(gh_repository)

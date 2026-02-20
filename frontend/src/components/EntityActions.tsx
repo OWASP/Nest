@@ -98,8 +98,6 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   }, [focusIndex])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!dropdownOpen) return
-
     const optionsCount = options.length
 
     switch (e.key) {
@@ -120,9 +118,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
       case 'Enter':
       case ' ':
         e.preventDefault()
-        if (focusIndex >= 0) {
-          menuItemsRef.current[focusIndex]?.click()
-        }
+        menuItemsRef.current[focusIndex]?.click()
         break
       default:
         break
@@ -159,7 +155,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
           className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
           onKeyDown={handleKeyDown}
           role="menu"
-          tabIndex={dropdownOpen ? 0 : -1}
+          tabIndex={0}
         >
           {options.map((option, index) => {
             const handleMenuItemClick = (e: React.MouseEvent) => {
