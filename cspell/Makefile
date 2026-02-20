@@ -1,3 +1,5 @@
+.PHONY: check-spelling cspell-install cspell-check cspell-run update-cspell-dependencies
+
 check-spelling: cspell-check
 
 cspell-install:
@@ -11,15 +13,16 @@ cspell-check: cspell-install cspell-run
 
 cspell-run:
 	@docker run \
-		--mount type=bind,src="$(PWD)",dst=/nest \
+		--mount type=bind,src="$(CURDIR)",dst=/nest \
 		--rm \
 		cspell -c cspell/cspell.json "$(CMD)"
 
 update-cspell-dependencies: cspell-install
 	@-docker run \
-		-it \
-		--mount type=bind,src="$(PWD)",dst=/nest \
 		--entrypoint=/bin/sh \
-		--workdir=/nest/cspell \
+		--interactive \
+		--mount type=bind,src="$(CURDIR)",dst=/nest \
 		--rm \
+		--tty \
+		--workdir=/nest/cspell \
 		cspell -c "pnpm install && pnpm upgrade && rm -rf ./node_modules"

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.geocoding import get_location_coordinates
@@ -29,6 +28,8 @@ class Chapter(
     active_chapters = ActiveChapterManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_chapters"
         indexes = [
             models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
@@ -75,9 +76,6 @@ class Chapter(
         blank=True,
         help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
     )
-
-    # GRs.
-    members = GenericRelation("owasp.EntityMember")
 
     def __str__(self) -> str:
         """Chapter human readable representation."""
@@ -189,7 +187,7 @@ class Chapter(
         if not self.suggested_location:
             self.generate_suggested_location()
 
-        if not self.latitude or not self.longitude:
+        if self.latitude is None or self.longitude is None:
             self.generate_geo_location()
 
         super().save(*args, **kwargs)

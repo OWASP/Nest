@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.utils import normalize_limit
 from apps.owasp.api.internal.nodes.board_of_directors import BoardOfDirectorsNode
 from apps.owasp.models.board_of_directors import BoardOfDirectors
 
@@ -40,8 +41,7 @@ class BoardOfDirectorsQuery:
             List of BoardOfDirectorsNode objects.
 
         """
-        return (
-            BoardOfDirectors.objects.order_by("-year")[:limit]
-            if (limit := min(limit, MAX_LIMIT)) > 0
-            else []
-        )
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return BoardOfDirectors.objects.order_by("-year")[:normalized_limit]

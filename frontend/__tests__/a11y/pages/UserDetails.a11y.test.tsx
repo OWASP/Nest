@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockUserDetailsData } from '@mockData/mockUserDetails'
 import { waitFor, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import UserDetailsPage from 'app/members/[memberKey]/page'
 
@@ -44,7 +45,23 @@ jest.mock('utils/helpers/githubHeatmap', () => ({
   drawContributions: jest.fn(() => {}),
 }))
 
-describe('UserDetailsPage Accessibility', () => {
+jest.mock('components/ContributionHeatmap', () => {
+  const MockContributionHeatmap = () => <div data-testid="contribution-heatmap">Heatmap</div>
+  MockContributionHeatmap.displayName = 'MockContributionHeatmap'
+  return {
+    __esModule: true,
+    default: MockContributionHeatmap,
+  }
+})
+
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('UserDetailsPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,

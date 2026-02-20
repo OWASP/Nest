@@ -5,8 +5,9 @@ import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
-import { ExperienceLevelEnum, UpdateModuleInput } from 'types/__generated__/graphql'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
@@ -83,17 +84,17 @@ const EditModulePage = () => {
     if (accessStatus === 'allowed' && data?.getModule) {
       const m = data.getModule
       setFormData({
-        name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
-        startedAt: formatDateForInput(m.startedAt),
-        endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
-        projectName: m.projectName,
-        tags: (m.tags || []).join(', '),
+        endedAt: formatDateForInput(m.endedAt),
+        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
         labels: (m.labels || []).join(', '),
-        projectId: m.projectId || '',
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
+        name: m.name || '',
+        projectId: m.projectId || '',
+        projectName: m.projectName || '',
+        startedAt: formatDateForInput(m.startedAt),
+        tags: (m.tags || []).join(', '),
       })
     }
   }, [accessStatus, data])
@@ -111,7 +112,7 @@ const EditModulePage = () => {
       const input: UpdateModuleInput = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || null,
+        endedAt: formData.endedAt || '',
         experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
         labels: parseCommaSeparated(formData.labels),
@@ -119,7 +120,7 @@ const EditModulePage = () => {
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        startedAt: formData.startedAt || null,
+        startedAt: formData.startedAt || '',
         tags: parseCommaSeparated(formData.tags),
       }
 
@@ -180,7 +181,7 @@ const EditModulePage = () => {
     <ModuleForm
       title="Edit Module"
       formData={formData}
-      setFormData={setFormData}
+      setFormData={setFormData as React.Dispatch<React.SetStateAction<ModuleFormData>>}
       onSubmit={handleSubmit}
       loading={mutationLoading}
       submitText="Save"

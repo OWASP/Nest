@@ -27,7 +27,7 @@ interface EntityActionsProps {
   programKey: string
   moduleKey?: string
   status?: string
-  setStatus?: (newStatus: string) => void
+  setStatus?: (newStatus: ProgramStatusEnum) => void | Promise<void>
   isAdmin?: boolean
 }
 
@@ -43,7 +43,10 @@ const EntityActions: React.FC<EntityActionsProps> = ({
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [focusIndex, setFocusIndex] = useState(-1)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const triggerButtonRef = useRef<HTMLButtonElement>(null)
+  const menuItemsRef = useRef<(HTMLButtonElement | null)[]>([])
 
   const [deleteModule] = useMutation<DeleteModuleResponse>(DELETE_MODULE_MUTATION)
 
@@ -170,6 +173,7 @@ const EntityActions: React.FC<EntityActionsProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false)
+        setFocusIndex(-1)
       }
     }
 
@@ -179,13 +183,54 @@ const EntityActions: React.FC<EntityActionsProps> = ({
     }
   }, [])
 
+  useEffect(() => {
+    if (focusIndex >= 0 && menuItemsRef.current[focusIndex]) {
+      menuItemsRef.current[focusIndex]?.focus()
+    }
+  }, [focusIndex])
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const optionsCount = options.length
+
+    switch (e.key) {
+      case 'Escape':
+        e.preventDefault()
+        setDropdownOpen(false)
+        setFocusIndex(-1)
+        triggerButtonRef.current?.focus()
+        break
+      case 'ArrowDown':
+        e.preventDefault()
+        setFocusIndex((prev) => (prev < optionsCount - 1 ? prev + 1 : 0))
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setFocusIndex((prev) => (prev > 0 ? prev - 1 : optionsCount - 1))
+        break
+      case 'Enter':
+      case ' ':
+        e.preventDefault()
+        menuItemsRef.current[focusIndex]?.click()
+        break
+      default:
+        break
+    }
+  }
+
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setDropdownOpen((prev) => !prev)
+    const newState = !dropdownOpen
+    setDropdownOpen(newState)
+    if (newState) {
+      setFocusIndex(0)
+    } else {
+      setFocusIndex(-1)
+    }
   }
 
   return (
+    //--------------------need to verify locally--------------
     <>
       <div className="relative" ref={dropdownRef}>
         <button
@@ -251,6 +296,46 @@ const EntityActions: React.FC<EntityActionsProps> = ({
                 isLoading={isDeleting}
                 disabled={isDeleting}
                 className="text-white"
+<!--       main strat herer           -->
+    <div className="relative" ref={dropdownRef}>
+      <button
+        ref={triggerButtonRef}
+        type="button"
+        onClick={handleToggle}
+        className="cursor-pointer rounded px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-700"
+        aria-label={`${type === 'program' ? 'Program' : 'Module'} actions menu`}
+        aria-expanded={dropdownOpen}
+        aria-haspopup="true"
+      >
+        <FaEllipsisV className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-200" />
+      </button>
+      {dropdownOpen && (
+        <div
+          className="absolute right-0 z-20 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+          onKeyDown={handleKeyDown}
+          role="menu"
+          tabIndex={0}
+        >
+          {options.map((option, index) => {
+            const handleMenuItemClick = (e: React.MouseEvent) => {
+              e.preventDefault()
+              e.stopPropagation()
+              handleAction(option.key)
+              setFocusIndex(-1)
+            }
+
+            return (
+              <button
+                key={option.key}
+                ref={(el) => {
+                  menuItemsRef.current[index] = el
+                }}
+                type="button"
+                role="menuitem"
+                tabIndex={focusIndex === index ? 0 : -1}
+                onClick={handleMenuItemClick}
+                className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+<!--          end herer        -->
               >
                 Delete
               </Button>

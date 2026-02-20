@@ -1,16 +1,24 @@
 """GraphQL node for Program model."""
 
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import datetime  # noqa: TC003
+from typing import TYPE_CHECKING, Annotated
 
 import strawberry
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode  # noqa: TC001
 from apps.github.models.milestone import Milestone
 from apps.mentorship.api.internal.nodes.enum import (
-    ExperienceLevelEnum,
-    ProgramStatusEnum,
+    ExperienceLevelEnum,  # noqa: TC001
+    ProgramStatusEnum,  # noqa: TC001
 )
-from apps.mentorship.api.internal.nodes.mentor import MentorNode
+
+# TC001/TC003: These imports must stay at runtime. Strawberry GraphQL introspects
+# type annotations when building the schema; moving them under TYPE_CHECKING would
+# cause UnresolvedFieldTypeError at startup.
+if TYPE_CHECKING:
+    from apps.mentorship.api.internal.nodes.admin import AdminNode
 
 
 @strawberry.type
@@ -31,12 +39,17 @@ class ProgramNode:
     tags: list[str] | None = None
 
     @strawberry.field
-    def admins(self) -> list[MentorNode] | None:
+    def admins(
+        self,
+    ) -> (
+        list[Annotated[AdminNode, strawberry.lazy("apps.mentorship.api.internal.nodes.admin")]]
+        | None
+    ):
         """Get the list of program administrators."""
-        return self.admins.all()
+        return self.admins.order_by("github_user__login")
 
     @strawberry.field
-    def recent_milestones(self) -> list["MilestoneNode"]:
+    def recent_milestones(self) -> list[MilestoneNode]:
         """Get the list of recent milestones for the program."""
         project_ids = self.modules.values_list("project_id", flat=True)
 

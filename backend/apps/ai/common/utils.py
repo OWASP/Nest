@@ -40,8 +40,6 @@ def create_chunks_and_embeddings(
         ValueError: If context is None or invalid
 
     """
-    from apps.ai.models.chunk import Chunk
-
     try:
         last_request_time = datetime.now(UTC) - timedelta(
             seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS
@@ -94,8 +92,6 @@ def regenerate_chunks_for_context(context: Context):
       context (Context): The specific context instance to be updated.
 
     """
-    from apps.ai.models.chunk import Chunk
-
     context.chunks.all().delete()
     new_chunk_texts = Chunk.split_text(context.content)
 

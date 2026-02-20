@@ -1,47 +1,52 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directory: /docker/backend
+    directory: docker/backend
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker/cspell
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker-compose
-    directory: /docker-compose/local
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker-compose
-    directory: /docker-compose/production
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker-compose
-    directory: /docker-compose/proxy
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker-compose
-    directory: /docker-compose/staging
+    directory: docker/cspell
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker/docs
+    directory: docker/docs
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker/frontend
+    directory: docker/frontend
     schedule:
       interval: daily
 
   - package-ecosystem: docker
-    directory: /docker/semgrep
+    directory: docker/semgrep
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: docker/trivy
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: docker-compose/local
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: docker-compose/production
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: docker-compose/proxy
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker-compose
+    directory: docker-compose/staging
     schedule:
       interval: daily
 
@@ -52,19 +57,19 @@ updates:
     target-branch: main
 
   - package-ecosystem: npm
-    directory: /frontend
+    directory: frontend
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: pip
-    directory: /backend
+    directory: backend
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: pip
-    directory: /docs
+    directory: docs
     schedule:
       interval: daily
     target-branch: main

@@ -22,7 +22,7 @@ class IssueBase(Schema):
     """Base schema for Issue (used in list endpoints)."""
 
     created_at: datetime
-    state: GenericIssueModel.State
+    state: GenericIssueModel.IssueState
     title: str
     updated_at: datetime
     url: str
@@ -57,7 +57,7 @@ class IssueFilter(FilterSchema):
         description="Repository that issues belong to",
         example="Nest",
     )
-    state: GenericIssueModel.State | None = Field(
+    state: GenericIssueModel.IssueState | None = Field(
         None,
         description="Issue state",
     )
@@ -90,7 +90,12 @@ def list_issues(
     if filters.state:
         issues = issues.filter(state=filters.state)
 
-    return issues.order_by(ordering or "-created_at", "-updated_at")
+    primary_order = ordering or "-created_at"
+    order_fields = [primary_order]
+    if primary_order not in {"updated_at", "-updated_at"}:
+        order_fields.append("-updated_at")
+
+    return issues.order_by(*order_fields)
 
 
 @router.get(
