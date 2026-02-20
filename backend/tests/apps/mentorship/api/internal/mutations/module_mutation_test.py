@@ -1361,3 +1361,39 @@ class TestModuleMutationReorderModules:
         mutation = ModuleMutation()
         with pytest.raises(ObjectDoesNotExist):
             mutation.reorder_modules(info, input_data)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_duplicate_keys(self, mock_program):
+        """Test ValidationError when duplicate module keys are provided."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(module_keys=["key-a", "key-a", "key-c"])
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = True
+
+        mutation = ModuleMutation()
+        with pytest.raises(ValidationError, match=r"Duplicate module keys are not allowed."):
+            mutation.reorder_modules(info, input_data)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_mismatched_keys(self, mock_program, mock_module):
+        """Test ValidationError when provided keys do not match the program's modules."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(module_keys=["key-a", "key-b"])
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = True
+
+        mod_a = MagicMock(key="key-a")
+        mock_module.objects.filter.return_value.select_for_update.return_value = [mod_a]
+
+        mutation = ModuleMutation()
+        with pytest.raises(
+            ValidationError, match=r"Provided module keys do not match the program's modules."
+        ):
+            mutation.reorder_modules(info, input_data)

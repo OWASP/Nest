@@ -472,11 +472,19 @@ class ModuleMutation:
         if not program.admins.filter(nest_user=user).exists():
             raise PermissionDenied
 
+        if len(set(input_data.module_keys)) != len(input_data.module_keys):
+            msg = "Duplicate module keys are not allowed."
+            raise ValidationError(msg)
+
         modules = list(
             Module.objects.filter(
                 program=program, key__in=input_data.module_keys
             ).select_for_update()
         )
+
+        if len(modules) != len(input_data.module_keys):
+            msg = "Provided module keys do not match the program's modules."
+            raise ValidationError(msg)
 
         key_to_order = {key: idx for idx, key in enumerate(input_data.module_keys)}
 

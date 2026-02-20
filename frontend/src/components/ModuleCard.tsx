@@ -22,7 +22,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type React from 'react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   FaChevronDown,
   FaChevronUp,
@@ -48,7 +48,12 @@ interface ModuleCardProps {
 const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProps) => {
   const [showAllModule, setShowAllModule] = useState(false)
   const [orderedModules, setOrderedModules] = useState(modules)
+  const [isSaving, setIsSaving] = useState(false)
   const isAdmin = accessLevel === 'admin'
+
+  useEffect(() => {
+    setOrderedModules(modules)
+  }, [modules])
 
   const [reorderModules] = useMutation(REORDER_MODULES)
 
@@ -65,6 +70,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
     (event: DragEndEvent) => {
       const { active, over } = event
       if (!over || active.id === over.id) return
+      if (isSaving) return
 
       setOrderedModules((prev) => {
         const oldIndex = prev.findIndex((m) => m.key === active.id)
@@ -72,6 +78,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
         const newOrder = arrayMove(prev, oldIndex, newIndex)
 
         if (programKey) {
+          setIsSaving(true)
           reorderModules({
             variables: {
               input: {
@@ -79,22 +86,24 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
                 moduleKeys: newOrder.map((m) => m.key),
               },
             },
-          }).catch(() => {
-            addToast({
-              color: 'danger',
-              description: 'Failed to save module order.',
-              timeout: 3000,
-              title: 'Reorder Failed',
-              variant: 'solid',
-            })
-            setOrderedModules(prev)
           })
+            .catch(() => {
+              addToast({
+                color: 'danger',
+                description: 'Failed to save module order.',
+                timeout: 3000,
+                title: 'Reorder Failed',
+                variant: 'solid',
+              })
+              setOrderedModules(prev)
+            })
+            .finally(() => setIsSaving(false))
         }
 
         return newOrder
       })
     },
-    [programKey, reorderModules]
+    [programKey, reorderModules, isSaving]
   )
 
   if (modules.length === 1) {
@@ -127,7 +136,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
       {isAdmin ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext
-            items={displayedModules.map((m) => m.key)}
+            items={displayedModules.map((m) => m.key || m.id)}
             strategy={rectSortingStrategy}
           >
             {moduleGrid}
@@ -162,7 +171,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
 
 const SortableModuleItem = ({ module }: { module: Module }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: module.key,
+    id: module.key || module.id,
   })
 
   const style = {
