@@ -2,7 +2,7 @@ export const mockHomeData = {
   data: {
     recentProjects: [
       {
-        createdAt: '2025-03-05T13:49:06+00:00',
+        createdAt: 1741182546,
         key: 'project_1',
         leaders: ['Leader 1', 'Leader 2'],
         name: 'Project 1',
@@ -11,7 +11,7 @@ export const mockHomeData = {
         type: 'documentation',
       },
       {
-        createdAt: '2025-03-05T13:45:28+00:00',
+        createdAt: 1741182328,
         key: 'eks-goat',
         leaders: ['Leader 3', 'Leader 4'],
         name: 'OWASP EKS Goat',
@@ -20,7 +20,7 @@ export const mockHomeData = {
         type: 'code',
       },
       {
-        createdAt: '2025-03-03T16:23:05+00:00',
+        createdAt: 1741019585,
         key: 'dojo-shield',
         leaders: ['Leader 5', 'Leader 6'],
         name: 'OWASP Dojo Shield',
@@ -33,42 +33,42 @@ export const mockHomeData = {
       {
         authorName: 'Author 1',
         authorImageUrl: 'https://owasp.org/assets/images/people/shruti_kulkarni.jpeg',
-        publishedAt: '2025-03-06T07:00:00+00:00',
+        publishedAt: 1741244400,
         title: 'Post 1',
         url: 'https://owasp.org/blog/2025/03/06/owasp-education-and-training-committee-update.html',
       },
       {
         authorName: 'Author 2',
         authorImageUrl: 'https://owasp.org/assets/images/people/leader_springett.png',
-        publishedAt: '2025-02-24T07:00:00+00:00',
+        publishedAt: 1740380400,
         title: 'Post 2',
         url: 'https://owasp.org/blog/2025/02/24/advisory-on-implementation-of-software-bill-of-materials-for-vulnerability-management.html',
       },
       {
         authorName: 'Author 3',
         authorImageUrl: 'https://owasp.org/assets/images/people/leader_bjoern.jpg',
-        publishedAt: '2025-01-29T07:00:00+00:00',
+        publishedAt: 1738130400,
         title: 'Author 3',
         url: 'https://owasp.org/blog/2025/01/29/juice-shop-leadership.html',
       },
     ],
     recentChapters: [
       {
-        createdAt: '2025-03-18T01:03:09+00:00',
+        createdAt: 1742259789,
         key: 'chapter_1',
         leaders: ['Leader 1', 'Leader 3'],
         name: 'Chapter 1',
         suggestedLocation: 'Pune, Maharashtra, India',
       },
       {
-        createdAt: '2025-03-13T00:01:01+00:00',
+        createdAt: 1741827661,
         key: 'chapter_2',
         leaders: ['Leader 1', 'Leader 2'],
         name: 'Chapter 2',
         suggestedLocation: 'Location 2',
       },
       {
-        createdAt: '2025-02-25T02:04:57+00:00',
+        createdAt: 1740449097,
         key: 'chapter_3',
         leaders: ['Leader 1', 'Leader 2'],
         name: 'Chapter 3',
@@ -94,7 +94,7 @@ export const mockHomeData = {
     ],
     recentIssues: [
       {
-        createdAt: '2025-03-20T14:03:10+00:00',
+        createdAt: 1742479390,
         title: 'Issue 1',
         repositoryName: 'Dependency-Track',
         url: 'https://github.com/DependencyTrack/hyades/issues/1724',
@@ -105,7 +105,7 @@ export const mockHomeData = {
         },
       },
       {
-        createdAt: '2025-03-20T10:30:33+00:00',
+        createdAt: 1742466633,
         title: 'Issue 2',
         repositoryName: 'BLT',
         url: 'https://github.com/OWASP-BLT/BLT/issues/4013',
@@ -116,7 +116,7 @@ export const mockHomeData = {
         },
       },
       {
-        createdAt: '2025-03-20T09:36:39+00:00',
+        createdAt: 1742463399,
         title: 'Troubleshooting the OWASP Dependency-Check Scanner',
         repositoryName: 'devguard',
         url: 'https://github.com/l3montree-dev/devguard/issues/336',
@@ -135,7 +135,7 @@ export const mockHomeData = {
           name: '',
         },
         name: 'Release 1',
-        publishedAt: '2025-03-19T13:51:35+00:00',
+        publishedAt: 1742392295,
         repositoryName: 'repo-1',
         tagName: 'v2.1.0',
         url: 'https://github.com/CycloneDX/cyclonedx-node-npm/releases/tag/v2.1.0',
@@ -147,7 +147,7 @@ export const mockHomeData = {
           name: 'Arkadii Yakovets',
         },
         name: 'Release 2',
-        publishedAt: '2025-03-20T01:41:36+00:00',
+        publishedAt: 1742434896,
         repositoryName: 'Nest',
         tagName: '0.1.25',
         url: 'https://github.com/OWASP/Nest/releases/tag/0.1.25',
@@ -159,7 +159,7 @@ export const mockHomeData = {
           name: 'author 3',
         },
         name: 'v4.14.0',
-        publishedAt: '2025-03-18T12:24:40+00:00',
+        publishedAt: 1742300680,
         repositoryName: 'secureCodeBox',
         tagName: 'v4.14.0',
         url: 'https://github.com/secureCodeBox/secureCodeBox/releases/tag/v4.14.0',
@@ -177,7 +177,7 @@ export const mockHomeData = {
         closedIssuesCount: 15,
         repositoryName: 'Home Repo One',
         organizationName: 'OWASP',
-        createdAt: '2025-03-01T10:00:00Z',
+        createdAt: 1740823200,
         url: 'https://github.com/OWASP/repo-one/milestone/1',
       },
     ],
@@ -214,10 +214,10 @@ export const mockHomeData = {
     upcomingEvents: [
       {
         category: 'APPSEC_DAYS',
-        endDate: '2025-04-06',
+        endDate: 1743897600,
         key: 'event_1',
         name: 'Event 1',
-        startDate: '2025-04-05',
+        startDate: 1743811200,
         summary:
           'The OWASP Boston Application Security Conference 2025 will take place on April 5, 2025. This event is organized by the Boston chapter of OWASP and features presenters and workshops. The focus will be on the latest trends in application security. It is an opportunity for attendees to learn and engage with experts in the field.',
         suggestedLocation: 'Boston, USA',
@@ -225,10 +225,10 @@ export const mockHomeData = {
       },
       {
         category: 'PARTNER',
-        endDate: '2025-05-23',
+        endDate: 1747958400,
         key: 'event_2',
         name: 'Event 2',
-        startDate: '2025-05-19',
+        startDate: 1747612800,
         summary:
           'The github 2025 event will take place in Oslo from May 19 to May 23, 2025. Attendees can find discounted tickets by using the provided link. This event will focus on various topics related to technology and development. It promises to be an informative experience for those interested in these fields.',
         suggestedLocation: 'Oslo, Norway',
@@ -236,10 +236,10 @@ export const mockHomeData = {
       },
       {
         category: 'GLOBAL',
-        endDate: '2025-05-30',
+        endDate: 1748563200,
         key: 'event_3',
         name: 'Event 3',
-        startDate: '2025-05-26',
+        startDate: 1748217600,
         summary:
           'The OWASP Global AppSec EU 2025 event will take place from May 26 to May 30, 2025. The location for this event has not been specified in the information provided. This event focuses on application security and brings together professionals from around the world. Participants will have the opportunity to learn and share knowledge about improving security in software development.',
         suggestedLocation: 'Barcelona, Spain',

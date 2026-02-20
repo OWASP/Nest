@@ -1,7 +1,7 @@
 export const mockGraphQLData = {
   recentProjects: [
     {
-      createdAt: '2024-12-06T20:46:54+00:00',
+      createdAt: 1734158694,
       key: 'gamesec-framework',
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP GameSec Framework',
@@ -9,7 +9,7 @@ export const mockGraphQLData = {
       url: '/projects/gamesec-framework',
     },
     {
-      createdAt: '2024-12-06T20:46:54+00:00',
+      createdAt: 1734158694,
       key: 'owasp-project-2',
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 2',
@@ -17,7 +17,7 @@ export const mockGraphQLData = {
       url: '/projects/owasp-project-2',
     },
     {
-      createdAt: '2024-12-06T20:46:54+00:00',
+      createdAt: 1734158694,
       key: 'owasp-project-3',
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 3',
@@ -25,7 +25,7 @@ export const mockGraphQLData = {
       url: '/projects/owasp-project-3',
     },
     {
-      createdAt: '2024-12-06T20:46:54+00:00',
+      createdAt: 1734158694,
       key: 'owasp-project-4',
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 4',
@@ -33,7 +33,7 @@ export const mockGraphQLData = {
       url: '/projects/owasp-project-4',
     },
     {
-      createdAt: '2024-12-06T20:46:54+00:00',
+      createdAt: 1734158694,
       key: 'owasp-project-5',
       leaders: ['Project Leader1', 'Project Leader2'],
       name: 'OWASP project 5',
@@ -45,7 +45,7 @@ export const mockGraphQLData = {
     {
       authorName: 'Author 1',
       authorImageUrl: 'https://owasp.org/assets/images/people/author1.png',
-      publishedAt: '2024-12-14T06:44:54+00:00',
+      publishedAt: 1734158694,
       title: 'Post 1',
       url: 'https://owasp.org/blog/post-1.html',
     },
@@ -58,7 +58,7 @@ export const mockGraphQLData = {
   ],
   recentChapters: [
     {
-      createdAt: '2024-12-14T06:44:54+00:00',
+      createdAt: 1734158694,
       key: 'sivagangai',
       leaders: ['Chapter Leader1', 'Chapter Leader2'],
       name: 'OWASP Sivagangai',
@@ -75,7 +75,7 @@ export const mockGraphQLData = {
   ],
   recentIssues: [
     {
-      createdAt: '2024-12-14T06:44:54+00:00',
+      createdAt: 1734158694,
       number: 177,
       title: 'Documentation : Project Setup Documentation Update',
       author: {
@@ -94,7 +94,7 @@ export const mockGraphQLData = {
       },
       isPreRelease: false,
       name: 'v0.9.2',
-      publishedAt: '2024-12-13T14:43:46+00:00',
+      publishedAt: 1734098626,
       tagName: 'v0.9.2',
       url: 'https://github.com/owasp/owasp-nest/releases/tag/v0.9.2',
     },
@@ -111,7 +111,7 @@ export const mockGraphQLData = {
       closedIssuesCount: 15,
       repositoryName: 'Home Repo One',
       organizationName: 'OWASP',
-      createdAt: '2025-03-01T10:00:00Z',
+      createdAt: 1740823200,
       url: 'https://github.com/OWASP/repo-one/milestone/1',
     },
   ],
@@ -125,9 +125,9 @@ export const mockGraphQLData = {
   upcomingEvents: [
     {
       category: 'Category 1',
-      endDate: '2025-02-28',
+      endDate: 1740769800,
       name: 'Event 1',
-      startDate: '2025-02-27',
+      startDate: 1740640200,
       summary: 'Event Summary',
       suggestedLocation: 'Location 1',
       url: 'https://nest.owasp.org/events/event-1',
@@ -135,7 +135,7 @@ export const mockGraphQLData = {
   ],
   recentPullRequests: [
     {
-      createdAt: '2025-03-25T10:00:00Z',
+      createdAt: 1742896800,
       title: 'Fix authentication bug',
       author: {
         name: 'John Doe',
@@ -145,7 +145,7 @@ export const mockGraphQLData = {
       url: 'https://github.com/example/repo/pull/1',
     },
     {
-      createdAt: '2025-03-24T15:30:00Z',
+      createdAt: 1742830200,
       title: 'Add new feature',
       author: {
         login: 'jane-smith',

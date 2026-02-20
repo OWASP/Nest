@@ -53,7 +53,7 @@ export const mockUserDetailsData = {
       closedIssuesCount: 15,
       repositoryName: 'Project Repo 1',
       organizationName: 'OWASP',
-      createdAt: '2025-03-01T10:00:00Z',
+      createdAt: 1740823200, // 2025-03-01T10:00:00Z
       url: 'https://github.com/OWASP/repo-one/milestone/1',
     },
   ],

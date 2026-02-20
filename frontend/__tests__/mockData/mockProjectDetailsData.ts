@@ -34,6 +34,8 @@ export const mockProjectDetailsData = {
     leaders: ['alice', 'bob'],
     level: 'Lab',
     name: 'Test Project',
+    createdAt: 1738768830, // Feb 5, 2025
+    updatedAt: 1738931696, // Feb 7, 2025
     recentIssues: [
       {
         author: {
@@ -42,7 +44,7 @@ export const mockProjectDetailsData = {
           name: 'Dave Debugger',
           url: 'https://github.com/arkid15r',
         },
-        createdAt: '2025-02-05T15:20:30Z',
+        createdAt: 1738768830,
         repositoryName: 'test-repo',
         title: 'Fix authentication bug',
       },
@@ -56,7 +58,7 @@ export const mockProjectDetailsData = {
         },
         isPreRelease: false,
         name: 'v1.2.0',
-        publishedAt: '2025-01-20T10:00:00Z',
+        publishedAt: 1737367200,
         tagName: 'v1.2.0',
       },
     ],
@@ -93,7 +95,6 @@ export const mockProjectDetailsData = {
     summary: 'An example project showcasing GraphQL and Django integration.',
     topics: ['graphql', 'django', 'backend'],
     type: 'Tool',
-    updatedAt: '2025-02-07T12:34:56Z',
     url: 'https://github.com/example-project',
     recentMilestones: [
       {
@@ -107,7 +108,7 @@ export const mockProjectDetailsData = {
         closedIssuesCount: 15,
         repositoryName: 'Project Repo 1',
         organizationName: 'OWASP',
-        createdAt: '2025-03-01T10:00:00Z',
+        createdAt: 1740823200,
         url: 'https://github.com/OWASP/repo-one/milestone/1',
       },
     ],
