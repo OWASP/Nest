@@ -22,7 +22,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   FaChevronDown,
   FaChevronUp,
@@ -51,9 +51,19 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
   const [isSaving, setIsSaving] = useState(false)
   const isAdmin = accessLevel === 'admin'
 
+  const moduleKeysSignature = useMemo(
+    () =>
+      [...modules]
+        .map((m) => m.key || m.id)
+        .sort()
+        .join(','),
+    [modules]
+  )
+
   useEffect(() => {
     setOrderedModules(modules)
-  }, [modules])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleKeysSignature])
 
   const [reorderModules] = useMutation(REORDER_MODULES)
 
@@ -72,38 +82,37 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
       if (!over || active.id === over.id) return
       if (isSaving) return
 
-      setOrderedModules((prev) => {
-        const oldIndex = prev.findIndex((m) => m.key === active.id)
-        const newIndex = prev.findIndex((m) => m.key === over.id)
-        const newOrder = arrayMove(prev, oldIndex, newIndex)
+      const oldIndex = orderedModules.findIndex((m) => (m.key || m.id) === active.id)
+      const newIndex = orderedModules.findIndex((m) => (m.key || m.id) === over.id)
+      if (oldIndex === -1 || newIndex === -1) return
 
-        if (programKey) {
-          setIsSaving(true)
-          reorderModules({
-            variables: {
-              input: {
-                programKey,
-                moduleKeys: newOrder.map((m) => m.key),
-              },
+      const newOrder = arrayMove(orderedModules, oldIndex, newIndex)
+      setOrderedModules(newOrder)
+
+      if (programKey) {
+        setIsSaving(true)
+        reorderModules({
+          variables: {
+            input: {
+              programKey,
+              moduleKeys: newOrder.map((m) => m.key),
             },
-          })
-            .catch(() => {
-              addToast({
-                color: 'danger',
-                description: 'Failed to save module order.',
-                timeout: 3000,
-                title: 'Reorder Failed',
-                variant: 'solid',
-              })
-              setOrderedModules(prev)
+          },
+        })
+          .catch(() => {
+            addToast({
+              color: 'danger',
+              description: 'Failed to save module order.',
+              timeout: 3000,
+              title: 'Reorder Failed',
+              variant: 'solid',
             })
-            .finally(() => setIsSaving(false))
-        }
-
-        return newOrder
-      })
+            setOrderedModules(orderedModules)
+          })
+          .finally(() => setIsSaving(false))
+      }
     },
-    [programKey, reorderModules, isSaving]
+    [programKey, reorderModules, isSaving, orderedModules]
   )
 
   if (modules.length === 1) {
