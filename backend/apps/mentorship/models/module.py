@@ -24,6 +24,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         """Model options."""
 
         db_table = "mentorship_modules"
+        ordering = ["order", "started_at"]
         verbose_name_plural = "Modules"
         constraints = [
             models.UniqueConstraint(
@@ -46,6 +47,11 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         verbose_name="Name",
         blank=True,
         default="",
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Order",
+        help_text="Display order of the module within its program.",
     )
 
     # FKs.

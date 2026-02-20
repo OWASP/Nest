@@ -86,6 +86,7 @@ export const GET_PROGRAM_AND_MODULES = gql`
       name
       description
       experienceLevel
+      order
       startedAt
       endedAt
       domains

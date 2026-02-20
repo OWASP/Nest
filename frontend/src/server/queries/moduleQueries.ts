@@ -8,6 +8,7 @@ export const GET_MODULES_BY_PROGRAM = gql`
       name
       description
       experienceLevel
+      order
       startedAt
       endedAt
       projectId
