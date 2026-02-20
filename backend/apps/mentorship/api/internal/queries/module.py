@@ -21,7 +21,7 @@ class ModuleQuery:
             Module.objects.filter(program__key=program_key)
             .select_related("program", "project")
             .prefetch_related("mentors__github_user")
-            .order_by("started_at")
+            .order_by("order", "started_at")
         )
 
     @strawberry.field
@@ -31,7 +31,7 @@ class ModuleQuery:
             Module.objects.filter(project__key=project_key)
             .select_related("program", "project")
             .prefetch_related("mentors__github_user")
-            .order_by("started_at")
+            .order_by("order", "started_at")
         )
 
     @strawberry.field

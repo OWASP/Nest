@@ -1278,3 +1278,86 @@ class TestModuleMutationUpdateModule:
 
         assert "advanced" in mock_mod.program.experience_levels
         mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
+
+
+class TestModuleMutationReorderModules:
+    """Tests for ModuleMutation.reorder_modules."""
+
+    def _make_info(self, user):
+        info = MagicMock()
+        info.context.request.user = user
+        return info
+
+    def _make_input_data(self, **overrides):
+        defaults = {
+            "program_key": "test-program",
+            "module_keys": ["mod-b", "mod-a", "mod-c"],
+        }
+        defaults.update(overrides)
+        return MagicMock(**defaults)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_success(self, mock_program, mock_module):
+        """Test successful module reordering by admin."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data()
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = True
+
+        mod_a = MagicMock()
+        mod_a.key = "mod-a"
+        mod_b = MagicMock()
+        mod_b.key = "mod-b"
+        mod_c = MagicMock()
+        mod_c.key = "mod-c"
+
+        mock_module.objects.filter.return_value.select_for_update.return_value = [
+            mod_a,
+            mod_b,
+            mod_c,
+        ]
+
+        mock_result_qs = MagicMock()
+        mock_qs = mock_module.objects.filter.return_value.select_related.return_value
+        mock_qs.prefetch_related.return_value.order_by.return_value = mock_result_qs
+
+        mutation = ModuleMutation()
+        mutation.reorder_modules(info, input_data)
+
+        assert mod_b.order == 0
+        assert mod_a.order == 1
+        assert mod_c.order == 2
+        mock_module.objects.bulk_update.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_not_admin(self, mock_program):
+        """Test PermissionDenied when user is not a program admin."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data()
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = False
+
+        mutation = ModuleMutation()
+        with pytest.raises(PermissionDenied):
+            mutation.reorder_modules(info, input_data)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_program_not_found(self, mock_program):
+        """Test ObjectDoesNotExist when program not found."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data()
+
+        mock_program.DoesNotExist = ObjectDoesNotExist
+        mock_program.objects.get.side_effect = ObjectDoesNotExist("not found")
+
+        mutation = ModuleMutation()
+        with pytest.raises(ObjectDoesNotExist):
+            mutation.reorder_modules(info, input_data)
