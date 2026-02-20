@@ -276,7 +276,7 @@ const CandidateCard = ({ candidate, year }: CandidateCardProps) => {
   return (
     <Button
       onPress={handleCardClick}
-      className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
+      className="group flex h-full w-full flex-col items-start justify-start rounded-lg bg-white p-6 text-left shadow-lg transition-transform duration-300 hover:scale-102 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
     >
       <div className="flex w-full items-start gap-4">
         {candidate.member?.avatarUrl && (
