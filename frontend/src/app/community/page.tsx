@@ -1,4 +1,5 @@
 'use client'
+
 import Link from 'next/link'
 import { FaArrowRight, FaSlack, FaChevronRight } from 'react-icons/fa'
 import { IconWrapper } from 'wrappers/IconWrapper'
