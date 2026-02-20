@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 from django.conf import settings
 from google import genai
 
@@ -22,6 +24,24 @@ class GoogleEmbedder(Embedder):
         self.model = model
         self._dimensions = 1536
 
+    def _normalize_embedding(self, embedding: list[float]) -> list[float]:
+        """Normalize embedding vector to unit length (L2 norm).
+
+        Only 3072-dimension embeddings from gemini-embedding-001 are pre-normalized.
+        For 1536 dimensions, we must normalize manually for accurate cosine similarity.
+
+        Args:
+            embedding: The embedding vector to normalize.
+
+        Returns:
+            Normalized embedding vector with unit length.
+
+        """
+        norm = math.sqrt(sum(x * x for x in embedding))
+        if norm == 0:
+            return embedding
+        return [x / norm for x in embedding]
+
     def embed_query(self, text: str) -> list[float]:
         """Generate embedding for a query string.
 
@@ -40,7 +60,8 @@ class GoogleEmbedder(Embedder):
         if not result.embeddings:
             msg = f"Google embedding API returned no embeddings for model {self.model!r}"
             raise ValueError(msg)
-        return result.embeddings[0].values
+        embedding = result.embeddings[0].values
+        return self._normalize_embedding(embedding)
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for multiple documents.
@@ -62,7 +83,8 @@ class GoogleEmbedder(Embedder):
             if not result.embeddings:
                 msg = f"Google embedding API returned no embeddings for model {self.model!r}"
                 raise ValueError(msg)
-            results.append(result.embeddings[0].values)
+            embedding = result.embeddings[0].values
+            results.append(self._normalize_embedding(embedding))
         return results
 
     def get_dimensions(self) -> int:
