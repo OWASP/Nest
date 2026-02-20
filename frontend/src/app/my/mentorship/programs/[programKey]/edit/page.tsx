@@ -83,7 +83,8 @@ const EditProgramPage = () => {
         variant: 'solid',
         timeout: 4000,
       })
-      setTimeout(() => router.replace('/my/mentorship/programs'), 1500)
+      const timeoutId = setTimeout(() => router.replace('/my/mentorship/programs'), 1500)
+      return () => clearTimeout(timeoutId)
     }
   }, [sessionStatus, session, data, queryLoading, router])
   useEffect(() => {

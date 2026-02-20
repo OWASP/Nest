@@ -88,7 +88,8 @@ const CreateModulePage = () => {
         variant: 'solid',
         timeout: 4000,
       })
-      setTimeout(() => router.replace('/my/mentorship'), 1500)
+      const timeoutId = setTimeout(() => router.replace('/my/mentorship'), 1500)
+      return () => clearTimeout(timeoutId)
     }
   }, [sessionStatus, sessionData, queryLoading, programData, programKey, queryError, router])
 
