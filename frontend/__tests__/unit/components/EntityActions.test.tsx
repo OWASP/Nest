@@ -866,20 +866,16 @@ describe('EntityActions', () => {
           variables: { programKey: 'test-program', moduleKey: 'test-module' },
           update: expect.any(Function),
         })
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Success',
+          description: 'Module has been deleted successfully.',
+          color: 'success',
+        })
+        expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
       })
-
-      // We should check that addToast was called with success
-      expect(addToast).toHaveBeenCalledWith({
-        title: 'Success',
-        description: 'Module has been deleted successfully.',
-        color: 'success',
-      })
-
-      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
     })
 
     it('calls update cache function when delete is successful', async () => {
-      // Create a mock cache object with readQuery and writeQuery
       const mockCache = {
         readQuery: jest.fn().mockReturnValue({
           getProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
@@ -888,7 +884,6 @@ describe('EntityActions', () => {
       }
 
       mockDeleteMutation.mockImplementationOnce(({ update }) => {
-        // execute update cache function directly to test its internals
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (update) update(mockCache as any)
         return Promise.resolve({ data: { deleteModule: true } })
