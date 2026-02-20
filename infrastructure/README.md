@@ -17,9 +17,10 @@ Note: Refer to the respective `README.md` files for more information.
 Follow these steps to set up the infrastructure:
 
 1. **Setup Backend (one-time setup)**:
-  - Prerequisite: Create a `nest-backend` IAM user with the policies defined in `infrastructure/backend/README.md`.
 
-  - Navigate to the backend directory:
+- Prerequisite: Create a `nest-backend` IAM user with the policies defined in `infrastructure/backend/README.md`.
+
+- Navigate to the backend directory:
 
     ```bash
     cd infrastructure/backend/
@@ -28,13 +29,13 @@ Follow these steps to set up the infrastructure:
   > [!NOTE]
   > Optionally change the region: set `aws_region` in a `.tfvars` file.
 
-  - Initialize Terraform if needed:
+- Initialize Terraform if needed:
 
     ```bash
     terraform init
     ```
 
-  - Apply the changes to create the backend resources:
+- Apply the changes to create the backend resources:
 
     ```bash
     terraform apply
@@ -42,38 +43,37 @@ Follow these steps to set up the infrastructure:
 
   > [!NOTE]
   > Copy the state bucket name from the output.
-
-  > [!NOTE]
   > It is recommended to not destroy the backend resources unless absolutely necessary.
 
-2. **Bootstrap IAM Role**:
-  - Prerequisite: Create a `nest-bootstrap` IAM user with the policies defined in `infrastructure/bootstrap/README.md`.
+1. **Bootstrap IAM Role**:
 
-  - Navigate to the bootstrap directory:
+- Prerequisite: Create a `nest-bootstrap` IAM user with the policies defined in `infrastructure/bootstrap/README.md`.
+
+- Navigate to the bootstrap directory:
 
     ```bash
     cd infrastructure/bootstrap/
     ```
 
-  - Create a local terraform variables file:
+- Create a local terraform variables file:
 
     ```bash
     touch terraform.tfvars
     ```
 
-  - Copy the contents from the example file:
+- Copy the contents from the example file:
 
     ```bash
     cat terraform.tfvars.example > terraform.tfvars
     ```
 
-  - Create a local backend configuration file:
+- Create a local backend configuration file:
 
     ```bash
     touch terraform.tfbackend
     ```
 
-  - Copy the contents from the example file:
+- Copy the contents from the example file:
 
     ```bash
     cat terraform.tfbackend.example > terraform.tfbackend
@@ -82,46 +82,47 @@ Follow these steps to set up the infrastructure:
   > [!NOTE]
   > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (bootstrap) created in the previous step.
 
-  - Initialize Terraform if needed:
+- Initialize Terraform if needed:
 
     ```bash
     terraform init -backend-config=terraform.tfbackend
     ```
 
-  - Apply the changes to create the bootstrap resources:
+- Apply the changes to create the bootstrap resources:
 
     ```bash
     terraform apply
     ```
 
-3. **Setup Main Infrastructure (staging)**:
-  - Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`
+1. **Setup Main Infrastructure (staging)**:
 
-  - Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
+- Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`
+
+- Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
 
     ```bash
     cd ../staging/
     ```
 
-  - Create a local variables file:
+- Create a local variables file:
 
     ```bash
     touch terraform.tfvars
     ```
 
-  - Copy the contents from the example file:
+- Copy the contents from the example file:
 
     ```bash
     cat terraform.tfvars.example > terraform.tfvars
     ```
 
-  - Create a local backend configuration file:
+- Create a local backend configuration file:
 
     ```bash
     touch terraform.tfbackend
     ```
 
-  - Copy the contents from the example file:
+- Copy the contents from the example file:
 
     ```bash
     cat terraform.tfbackend.example > terraform.tfbackend
@@ -129,26 +130,24 @@ Follow these steps to set up the infrastructure:
 
   > [!NOTE]
   > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket created in the previous step.
-
-  > [!NOTE]
   > Update defaults (e.g. `region`) as needed.
 
-  - Initialize Terraform with the backend configuration:
+- Initialize Terraform with the backend configuration:
 
     ```bash
     terraform init -backend-config=terraform.tfbackend
     ```
 
-  - Apply the changes to create the main infrastructure using the command:
+- Apply the changes to create the main infrastructure using the command:
 
     ```bash
     terraform apply
     ```
 
-4. **Populate Secrets**
+1. **Populate Secrets**
 
-  - Visit the AWS Console > Systems Manager > Parameter Store.
-  - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
+- Visit the AWS Console > Systems Manager > Parameter Store.
+- Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
 
 ## Setting up Zappa
 
@@ -156,41 +155,41 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 
 1. **Change Directory**:
 
-  - Change the directory to `backend/` using the following command:
+- Change the directory to `backend/` using the following command:
 
     ```bash
     cd ../../backend/
     ```
 
-2. **Setup Dependencies**:
+1. **Setup Dependencies**:
 
-  - This step may differ for different operating systems.
-  - The goal is to install dependencies listed in `pyproject.toml`.
-  - Steps for Linux:
+- This step may differ for different operating systems.
+- The goal is to install dependencies listed in `pyproject.toml`.
+- Steps for Linux:
 
     ```bash
     poetry sync --without test --without video && eval $(poetry env activate)
     ```
 
-3. **Create Zappa Settings File**:
+1. **Create Zappa Settings File**:
 
-  - Create a local Zappa settings file in the `backend` directory:
+- Create a local Zappa settings file in the `backend` directory:
 
     ```bash
     touch zappa_settings.json
     ```
 
-  - Copy the contents from the template file into your new local environment file:
+- Copy the contents from the template file into your new local environment file:
 
     ```bash
     cat zappa_settings.template.json > zappa_settings.json
     ```
 
-4. **Populate Settings File**:
+1. **Populate Settings File**:
 
-  - Replace all `${...}` variables in `zappa_settings.json` with appropriate output variables.
+- Replace all `${...}` variables in `zappa_settings.json` with appropriate output variables.
 
-5. **Deploy**:
+1. **Deploy**:
 
   > [!NOTE]
   > Make sure to populate all `DJANGO_*` secrets that are set as `to-be-set-in-aws-console` in the Parameter Store. The deployment might fail with no logs if secrets such as `DJANGO_SLACK_BOT_TOKEN` are invalid.
@@ -202,15 +201,16 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
   > [!NOTE]
   > If the deployment is successful but returns a `5xx` error, resolve the issues and use `zappa undeploy staging` & `zappa deploy staging`. The command `zappa update staging` may not work.
 
-6. **Configure ALB Routing**:
-  - Run `zappa status staging` to get Zappa details.
-  - Update `terraform.tfvars` with the Lambda details:
+1. **Configure ALB Routing**:
+
+- Run `zappa status staging` to get Zappa details.
+- Update `terraform.tfvars` with the Lambda details:
 
     ```hcl
     lambda_function_name = "nest-staging"
     ```
 
-  - Apply the changes to create ALB routing:
+- Apply the changes to create ALB routing:
 
     ```bash
     cd ../infrastructure/staging/
@@ -218,15 +218,15 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
     ```
 
 ## Populate ECR Repositories
+
 ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
 
 1. **Login to ECR**:
 
-  - Login to the Elastic Container Registry using the following command:
+- Login to the Elastic Container Registry using the following command:
 
     > [!NOTE]
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
-
     > [!WARNING]
     > Configure a credential helper instead of using following command to login.
 
@@ -234,15 +234,15 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.us-east-2.amazonaws.com
     ```
 
-2. **Upload backend image to ECR**:
+1. **Upload backend image to ECR**:
 
-  - Build the backend image using the following command:
+- Build the backend image using the following command:
 
     ```bash
     docker build -t owasp-nest-staging-backend:latest -f docker/backend/Dockerfile backend/
     ```
 
-  - Tag the image:
+- Tag the image:
 
     > [!NOTE]
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
@@ -251,7 +251,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     docker tag owasp-nest-staging-backend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
     ```
 
-  - Push the image:
+- Push the image:
 
     > [!NOTE]
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
@@ -260,9 +260,9 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
     ```
 
-3. **Upload frontend image to ECR**:
+1. **Upload frontend image to ECR**:
 
-  - Build the frontend image using the following command:
+- Build the frontend image using the following command:
 
     > [!NOTE]
     > Make sure to update the frontend `.env` file with correct `NEXT_PUBLIC_*` variables.
@@ -272,7 +272,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     docker build -t owasp-nest-staging-frontend:latest -f docker/frontend/Dockerfile frontend/
     ```
 
-  - Tag the image:
+- Tag the image:
 
     > [!NOTE]
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
@@ -281,7 +281,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     docker tag owasp-nest-staging-frontend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-frontend:latest
     ```
 
-  - Push the image:
+- Push the image:
 
     > [!NOTE]
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
@@ -291,59 +291,60 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     ```
 
 ## Setup Database
+
 Migrate and load data into the new database.
 
 1. **Upload Fixture to S3**:
 
-  - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
+- Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
 
     ```bash
     aws s3 cp data/nest.json.gz s3://owasp-nest-fixtures-<id>/
     ```
 
-2. **Run ECS Tasks**:
+1. **Run ECS Tasks**:
 
-  - Head over to Elastic Container Service in the AWS Console.
-  - Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
-  - Select the task definition revision.
-  - Click Deploy > Run Task.
-  - Use the following configuration:
-    - Environment: Cluster: owasp-nest-staging-tasks-cluster
-    - Networking:
-      - VPC: owasp-nest-staging-vpc
-      - Subnets: subnets will be auto-selected due to VPC selection.
-      - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
-  - Click "Create"
-  - The task is now running... Click on the task ID to view Logs, Status, etc.
-  - Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
+- Head over to Elastic Container Service in the AWS Console.
+- Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
+- Select the task definition revision.
+- Click Deploy > Run Task.
+- Use the following configuration:
+  - Environment: Cluster: owasp-nest-staging-tasks-cluster
+  - Networking:
+    - VPC: owasp-nest-staging-vpc
+    - Subnets: subnets will be auto-selected due to VPC selection.
+    - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
+- Click "Create"
+- The task is now running... Click on the task ID to view Logs, Status, etc.
+- Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
 
 ## Configure Domain and Frontend
 
 1. **Validate ACM Certificate**:
 
-  - Get the DNS validation records:
+- Get the DNS validation records:
 
     ```bash
     terraform output acm_certificate_domain_validation_options
     ```
 
-  - Add the CNAME records to your DNS provider.
+- Add the CNAME records to your DNS provider.
 
-  - Wait some time and run `terraform apply` to check if the certificate status has changed to `ISSUED`:
+- Wait some time and run `terraform apply` to check if the certificate status has changed to `ISSUED`:
 
     ```bash
     terraform apply
     ```
 
-  - Add a CNAME record and point the domain to the frontend ALB.
+- Add a CNAME record and point the domain to the frontend ALB.
 
-2. **Configure Frontend Parameters**:
+1. **Configure Frontend Parameters**:
 
-  - Update the frontend server (`NEXT_SERVER_*`) parameters using the Lambda URL from Terraform outputs.
+- Update the frontend server (`NEXT_SERVER_*`) parameters using the Lambda URL from Terraform outputs.
 
-3. **Restart Frontend ECS Tasks**:
+1. **Restart Frontend ECS Tasks**:
 
-  - Force a new deployment to pick up the updated configuration:
+- Force a new deployment to pick up the updated configuration:
 
     > [!NOTE]
     > Replace `us-east-2` with configured region.

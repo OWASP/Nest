@@ -1,4 +1,5 @@
 ## Inline Permissions
+
 Use the following inline permissions for the `nest-staging` IAM User
 *Note*: replace ${...} with appropriate values.
 
@@ -6,29 +7,29 @@ Use the following inline permissions for the `nest-staging` IAM User
 {
     "Version": "2012-10-17",
         "Statement": [
-		{
-			"Sid": "S3StateManagement",
-			"Effect": "Allow",
-			"Action": [
-				"s3:GetObject",
-				"s3:PutObject",
-				"s3:ListBucket"
-			],
-			"Resource": [
-				"arn:aws:s3:::nest-staging-terraform-state-*",
-				"arn:aws:s3:::nest-staging-terraform-state-*/*"
-			]
-		},
-		{
-			"Sid": "DynamoDBStateManagement",
-			"Effect": "Allow",
-			"Action": [
-				"dynamodb:GetItem",
-				"dynamodb:PutItem",
-				"dynamodb:DeleteItem"
-			],
-			"Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/nest-staging-terraform-state-lock"
-		},
+  {
+   "Sid": "S3StateManagement",
+   "Effect": "Allow",
+   "Action": [
+    "s3:GetObject",
+    "s3:PutObject",
+    "s3:ListBucket"
+   ],
+   "Resource": [
+    "arn:aws:s3:::nest-staging-terraform-state-*",
+    "arn:aws:s3:::nest-staging-terraform-state-*/*"
+   ]
+  },
+  {
+   "Sid": "DynamoDBStateManagement",
+   "Effect": "Allow",
+   "Action": [
+    "dynamodb:GetItem",
+    "dynamodb:PutItem",
+    "dynamodb:DeleteItem"
+   ],
+   "Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/nest-staging-terraform-state-lock"
+  },
         {
             "Sid": "KMSStateManagement",
             "Effect": "Allow",
