@@ -395,10 +395,10 @@ The Project Health Dashboard is visible only to users marked as staff.
    - [http://localhost:8000/a](http://localhost:8000/a)
    - Log in using your superuser credentials.
 
-2. **Navigate to Github Users** and open your user record.
+2. **Navigate to GitHub Users** and open your user record.
 
-3. **In the Permissions section, enable**:
-   - Staff status (`is_owasp_staff`)
+3. **In the Permissions section, enable the custom `is_owasp_staff` field**:
+   - Locate the `is_owasp_staff` checkbox and tick it.
    - Save the changes.
 
 4. **Clear authentication cookies**:
