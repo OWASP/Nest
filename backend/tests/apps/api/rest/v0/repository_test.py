@@ -57,6 +57,8 @@ class TestListRepository:
         """Test list repositories without organization filter."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.q = ""
+        mock_filters.filter_q = ""
         mock_filters.organization_id = None
 
         mock_queryset = MagicMock()
@@ -73,6 +75,8 @@ class TestListRepository:
         """Test list repositories with organization filter."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.q = ""
+        mock_filters.filter_q = ""
         mock_filters.organization_id = "OWASP"
 
         mock_queryset = MagicMock()

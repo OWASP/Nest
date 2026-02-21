@@ -59,6 +59,8 @@ class TestListMembers:
         """Test listing members without ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.q = ""
+        mock_filters.filter_q = ""
         mock_ordered_queryset = MagicMock()
         mock_filtered_queryset = MagicMock()
         mock_user_model.objects.order_by.return_value = mock_ordered_queryset
@@ -66,15 +68,17 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=None)
 
-        mock_user_model.objects.order_by.assert_called_with("-created_at")
-        mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
-        assert result == mock_filtered_queryset
+        mock_filtered_queryset.order_by.assert_called_with("-created_at")
+        mock_filters.filter.assert_called_once_with(mock_user_model.objects.all.return_value)
+        assert result == mock_filtered_queryset.order_by.return_value
 
     @patch("apps.api.rest.v0.member.UserModel")
     def test_list_members_with_ordering(self, mock_user_model):
         """Test listing members with custom ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.q = ""
+        mock_filters.filter_q = ""
         mock_ordered_queryset = MagicMock()
         mock_filtered_queryset = MagicMock()
         mock_user_model.objects.order_by.return_value = mock_ordered_queryset
@@ -82,9 +86,9 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering="updated_at")
 
-        mock_user_model.objects.order_by.assert_called_with("updated_at")
-        mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
-        assert result == mock_filtered_queryset
+        mock_filtered_queryset.order_by.assert_called_with("updated_at")
+        mock_filters.filter.assert_called_once_with(mock_user_model.objects.all.return_value)
+        assert result == mock_filtered_queryset.order_by.return_value
 
 
 class TestGetMember:
