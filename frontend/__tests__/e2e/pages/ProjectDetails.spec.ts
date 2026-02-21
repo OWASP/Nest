@@ -37,6 +37,13 @@ test.describe('Project Details Page', () => {
     await expect(page.getByText('URL: https://github.com/')).toBeVisible()
   })
 
+  test('should have Slack channel link', async ({ page }) => {
+    const slackLink = page.getByRole('link', { name: '#project-security' })
+    await expect(slackLink).toBeVisible()
+    await expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C456DEF')
+    await expect(slackLink).toHaveAttribute('target', '_blank')
+  })
+
   test('should have project statics block', async ({ page }) => {
     await expect(page.getByText('2.2K Stars')).toBeVisible()
     await expect(page.getByText('10 Forks')).toBeVisible()
