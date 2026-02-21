@@ -12,7 +12,9 @@ from github.GithubException import UnknownObjectException
 if TYPE_CHECKING:
     from github import Github
 
+from apps.github.constants import GITHUB_COMMITS_BULK_SAVE_CHUNK_SIZE
 from apps.github.models.comment import Comment
+from apps.github.models.commit import Commit
 from apps.github.models.issue import Issue
 from apps.github.models.label import Label
 from apps.github.models.milestone import Milestone
@@ -69,6 +71,34 @@ def sync_repository(
     )
 
     if not repository.is_archived:
+        year_ago = timezone.now() - td(days=365)
+
+        # GitHub repository commits.
+        since = (
+            latest_commit.created_at if (latest_commit := repository.latest_commit) else year_ago
+        )
+
+        commits_to_save = []
+        for gh_commit in gh_repository.get_commits(since=since):
+            author = User.update_data(gh_commit.author) if gh_commit.author else None
+            committer = User.update_data(gh_commit.committer) if gh_commit.committer else None
+
+            commit = Commit.update_data(
+                gh_commit,
+                repository=repository,
+                author=author,
+                committer=committer,
+                save=False,
+            )
+            commits_to_save.append(commit)
+
+            if len(commits_to_save) >= GITHUB_COMMITS_BULK_SAVE_CHUNK_SIZE:
+                Commit.bulk_save(commits_to_save)
+                commits_to_save = []
+
+        if commits_to_save:
+            Commit.bulk_save(commits_to_save)
+
         # GitHub repository milestones.
         kwargs = {
             "direction": "desc",
@@ -79,7 +109,7 @@ def sync_repository(
         until = (
             latest_updated_milestone.updated_at
             if (latest_updated_milestone := repository.latest_updated_milestone)
-            else timezone.now() - td(days=30)
+            else timezone.now() - td(days=365)
         )
 
         for gh_milestone in gh_repository.get_milestones(**kwargs):
@@ -102,7 +132,6 @@ def sync_repository(
 
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
-        month_ago = timezone.now() - td(days=30)
 
         if repository.track_issues and project_track_issues:
             kwargs = {
@@ -113,7 +142,7 @@ def sync_repository(
             until = (
                 latest_updated_issue.updated_at
                 if (latest_updated_issue := repository.latest_updated_issue)
-                else month_ago
+                else year_ago
             )
             for gh_issue in gh_repository.get_issues(**kwargs):
                 if gh_issue.pull_request:  # Skip pull requests.
@@ -164,7 +193,7 @@ def sync_repository(
         until = (
             latest_updated_pull_request.updated_at
             if (latest_updated_pull_request := repository.latest_updated_pull_request)
-            else month_ago
+            else year_ago
         )
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
             if gh_pull_request.updated_at < until:
