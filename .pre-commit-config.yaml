@@ -28,7 +28,7 @@ repos:
           - --format
           - parsable
           - --strict
-        exclude: (.github|pnpm-lock.yaml)
+        exclude: pnpm-lock.yaml
 
   - repo: https://github.com/ansible/ansible-lint
     rev: v26.1.1
@@ -78,7 +78,7 @@ repos:
           - --mapping=2
           - --offset=2
           - --sequence=4
-        exclude: (.github|pnpm-lock.yaml)
+        exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.1
