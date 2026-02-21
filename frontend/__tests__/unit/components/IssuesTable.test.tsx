@@ -2,10 +2,13 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
+import { LabelList } from 'components/LabelList'
+
+const mockPush = jest.fn()
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockPush,
   }),
 }))
 
@@ -45,6 +48,36 @@ jest.mock('@heroui/tooltip', () => ({
       </div>
     )
   },
+}))
+
+interface MockLabelListProps {
+  entityKey: string
+  labels: string[]
+  maxVisible?: number
+  className?: string
+}
+
+const MockLabelList = (props: MockLabelListProps) => {
+  const { entityKey, labels, maxVisible = 5, className } = props
+  if (!labels || labels.length === 0) return null
+  const visibleLabels = labels.slice(0, maxVisible)
+  const remainingCount = labels.length - maxVisible
+  return (
+    <div data-testid="label-list" className={className}>
+      {visibleLabels.map((label) => (
+        <span key={`${entityKey}-${label}`} data-testid="label">
+          {label}
+        </span>
+      ))}
+      {remainingCount > 0 && <span data-testid="label-more">+{remainingCount} more</span>}
+    </div>
+  )
+}
+
+jest.mock('components/LabelList', () => ({
+  // Must match the module export name for the mock to be used by IssuesTable
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- component export name
+  LabelList: jest.fn((props: MockLabelListProps) => <MockLabelList {...props} />),
 }))
 
 const mockIssues: IssueRow[] = [
@@ -102,6 +135,10 @@ describe('<IssuesTable />', () => {
     issues: mockIssues,
   }
 
+  beforeEach(() => {
+    jest.mocked(LabelList).mockClear()
+  })
+
   describe('Rendering', () => {
     it('renders table view', () => {
       render(<IssuesTable {...defaultProps} />)
@@ -143,8 +180,9 @@ describe('<IssuesTable />', () => {
 
     it('renders Merged status badge when isMerged is true', () => {
       render(<IssuesTable issues={[mockIssues[2]]} />)
-      const mergedBadges = screen.getAllByText('Merged')
-      expect(mergedBadges.length).toBeGreaterThan(0)
+      // Merged issues display with "Closed" text (purple badge)
+      const closedBadges = screen.getAllByText('Closed')
+      expect(closedBadges.length).toBeGreaterThan(0)
     })
 
     it('defaults to Closed status for unknown states', () => {
@@ -200,6 +238,83 @@ describe('<IssuesTable />', () => {
       render(<IssuesTable issues={[manyLabelsIssue]} maxVisibleLabels={3} />)
       expect(screen.getByText('+2 more')).toBeInTheDocument()
     })
+
+    it('uses LabelList with entityKey derived from issue objectID', () => {
+      render(<IssuesTable issues={[mockIssues[0]]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-1',
+          labels: ['bug', 'enhancement'],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('passes maxVisibleLabels to LabelList as maxVisible', () => {
+      render(<IssuesTable issues={[mockIssues[0]]} maxVisibleLabels={3} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-1',
+          labels: ['bug', 'enhancement'],
+          maxVisible: 3,
+        }),
+        undefined
+      )
+    })
+
+    it('passes empty array to LabelList when issue has no labels', () => {
+      render(<IssuesTable issues={[mockIssues[2]]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-3',
+          labels: [],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('passes empty array to LabelList when issue.labels is undefined', () => {
+      const issueWithUndefinedLabels = {
+        ...mockIssues[0],
+        objectID: 'undefined-labels',
+        labels: undefined,
+      } as IssueRow
+      render(<IssuesTable issues={[issueWithUndefinedLabels]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-undefined-labels',
+          labels: [],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('calls LabelList once per issue row with correct labels', () => {
+      render(<IssuesTable issues={mockIssues} />)
+      expect(LabelList).toHaveBeenCalledTimes(3)
+      expect(LabelList).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ entityKey: 'issue-1', labels: ['bug', 'enhancement'] }),
+        undefined
+      )
+      expect(LabelList).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ entityKey: 'issue-2', labels: ['documentation'] }),
+        undefined
+      )
+      expect(LabelList).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ entityKey: 'issue-3', labels: [] }),
+        undefined
+      )
+    })
   })
 
   describe('Assignee Column', () => {
@@ -215,9 +330,10 @@ describe('<IssuesTable />', () => {
 
     it('renders assignee avatar and name', () => {
       render(<IssuesTable issues={[mockIssues[0]]} />)
-      const assigneeImages = screen.getAllByAltText('user1')
+      const userContainer = screen.getByText('user1').closest('div')
+      const avatar = within(userContainer).getByRole('presentation', { hidden: true })
       const user1Texts = screen.getAllByText('user1')
-      expect(assigneeImages.length).toBeGreaterThan(0)
+      expect(avatar).toBeInTheDocument()
       expect(user1Texts.length).toBeGreaterThan(0)
     })
 
@@ -253,6 +369,26 @@ describe('<IssuesTable />', () => {
       const user4Texts = screen.getAllByText('user4')
       expect(user4Texts.length).toBeGreaterThan(0)
     })
+
+    it('uses name when login is not available', () => {
+      const issueWithoutLogin: IssueRow = {
+        objectID: '8-no-login',
+        number: 133,
+        title: 'Issue Without Login',
+        state: 'open',
+        labels: [],
+        assignees: [
+          {
+            avatarUrl: 'https://example.com/avatar5.jpg',
+            login: '',
+            name: 'User Five',
+          },
+        ],
+      }
+      render(<IssuesTable issues={[issueWithoutLogin]} />)
+      const user5Texts = screen.getAllByText('User Five')
+      expect(user5Texts.length).toBeGreaterThan(0)
+    })
   })
 
   describe('Click Handlers', () => {
@@ -263,6 +399,24 @@ describe('<IssuesTable />', () => {
       expect(issueButtons.length).toBeGreaterThan(0)
       fireEvent.click(issueButtons[0])
       expect(onIssueClick).toHaveBeenCalledWith(123)
+    })
+
+    it('navigates to issue URL when onIssueClick is not provided', () => {
+      const issueUrl = (num: number) => `/issues/${num}`
+      render(<IssuesTable {...defaultProps} onIssueClick={undefined} issueUrl={issueUrl} />)
+      const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
+      expect(issueButtons.length).toBeGreaterThan(0)
+      fireEvent.click(issueButtons[0])
+      expect(mockPush).toHaveBeenCalledWith('/issues/123')
+    })
+
+    it('does nothing when onIssueClick and issueUrl are not provided', () => {
+      mockPush.mockClear()
+      render(<IssuesTable {...defaultProps} onIssueClick={undefined} issueUrl={undefined} />)
+      const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
+      expect(issueButtons.length).toBeGreaterThan(0)
+      fireEvent.click(issueButtons[0])
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 

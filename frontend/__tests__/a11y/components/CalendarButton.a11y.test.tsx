@@ -1,9 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { FaCalendarAlt } from 'react-icons/fa'
 import CalendarButton from 'components/CalendarButton'
-
-expect.extend(toHaveNoViolations)
 
 const mockEvent = {
   title: 'Test Event',
@@ -13,7 +12,14 @@ const mockEvent = {
   endDate: '2025-12-02',
 }
 
-describe('CalendarButton Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('CalendarButton Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations as an icon-only button', async () => {
     const { container } = render(<CalendarButton event={mockEvent} />)
 

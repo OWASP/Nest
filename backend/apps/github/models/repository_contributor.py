@@ -21,6 +21,8 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     objects = RepositoryContributorManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_repository_contributors"
         indexes = [
             models.Index(
@@ -179,21 +181,26 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
 
         # Aggregate total contributions for users.
         top_contributors = (
-            queryset.values(
-                "user__avatar_url",
-                "user__login",
-                "user__name",
+            (
+                queryset.values(
+                    "user__avatar_url",
+                    "user__login",
+                    "user__name",
+                )
+                .annotate(
+                    total_contributions=Sum("contributions_count"),
+                )
+                .order_by("-total_contributions")[:limit]
             )
-            .annotate(
-                total_contributions=Sum("contributions_count"),
-            )
-            .order_by("-total_contributions")[:limit]
+            if limit > 0
+            else []
         )
 
         return [
             {
                 "avatar_url": tc["user__avatar_url"],
                 "contributions_count": tc["total_contributions"],
+                "id": tc["user__login"],
                 "login": tc["user__login"],
                 "name": tc["user__name"],
             }

@@ -1,18 +1,23 @@
 'use client'
 
 import { capitalize } from 'lodash'
+import upperFirst from 'lodash/upperFirst'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import React from 'react'
+import React, { useState } from 'react'
+import { FaFolderOpen } from 'react-icons/fa'
 import { HiUserGroup } from 'react-icons/hi'
 import { ExtendedSession } from 'types/auth'
+import type { Contributor } from 'types/contributor'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
+import { getMemberUrl } from 'utils/urlFormatter'
 import EntityActions from 'components/EntityActions'
 import Markdown from 'components/MarkdownWrapper'
 import { getSimpleDuration } from 'components/ModuleCard'
-import TopContributorsList from 'components/TopContributorsList'
+import ShowMoreButton from 'components/ShowMoreButton'
 
 interface SingleModuleCardProps {
   module: Module
@@ -25,6 +30,8 @@ interface SingleModuleCardProps {
 const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel, admins }) => {
   const { data } = useSession()
   const pathname = usePathname()
+  const [showAllMentors, setShowAllMentors] = useState(false)
+  const [showAllMentees, setShowAllMentees] = useState(false)
 
   const isAdmin =
     accessLevel === 'admin' &&
@@ -40,25 +47,76 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
     { label: 'Duration', value: getSimpleDuration(module.startedAt, module.endedAt) },
   ]
 
+  const maxInitialDisplay = 6
+  const displayMentors = showAllMentors
+    ? module.mentors
+    : module.mentors?.slice(0, maxInitialDisplay)
+  const displayMentees = showAllMentees
+    ? module.mentees
+    : module.mentees?.slice(0, maxInitialDisplay)
+
+  const isPrivateView = pathname?.startsWith('/my/mentorship')
+
+  const renderContributors = (
+    contributors: Contributor[] | undefined,
+    displayContributors: Contributor[] | undefined,
+    label: string,
+    showAll: boolean,
+    toggleShowAll: () => void,
+    isMentee = false
+  ) => {
+    if (!contributors || contributors.length === 0) return null
+
+    return (
+      <div className="pt-4">
+        <h3 className="mb-4 flex items-center gap-2 text-xl font-semibold">
+          <HiUserGroup className="h-5 w-5" />
+          {label}
+        </h3>
+        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+          {displayContributors?.map((contributor) => (
+            <div
+              key={contributor.login}
+              className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+            >
+              <div className="flex w-full items-center gap-2">
+                <Image
+                  alt={contributor?.name ? `${contributor.name}'s avatar` : `${label} avatar`}
+                  className="rounded-full"
+                  height={24}
+                  src={`${contributor?.avatarUrl}&s=60`}
+                  title={contributor?.name || contributor?.login}
+                  width={24}
+                />
+                <Link
+                  className="cursor-pointer overflow-hidden font-semibold text-ellipsis whitespace-nowrap text-blue-400 hover:underline"
+                  href={
+                    isMentee && isPrivateView
+                      ? `/my/mentorship/programs/${programKey}/modules/${module.key}/mentees/${contributor.login}`
+                      : getMemberUrl(contributor?.login)
+                  }
+                  title={contributor?.name || contributor?.login}
+                >
+                  {upperFirst(contributor.name) || upperFirst(contributor.login)}
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+        {contributors.length > maxInitialDisplay && <ShowMoreButton onToggle={toggleShowAll} />}
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 p-5 shadow-md dark:border-gray-700">
+    <div className="flex flex-col gap-4 rounded-lg bg-gray-100 p-6 dark:bg-gray-800">
       <div className="flex items-center justify-between">
         <div className="flex cursor-pointer items-center gap-2">
-          <HiUserGroup className="text-gray-500 dark:text-gray-300" />
-          <Link
-            href={`${pathname}/modules/${module.key}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1"
-          >
-            <h1
-              className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
-              style={{
-                transition: 'color 0.3s ease',
-              }}
-            >
+          <FaFolderOpen className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+          <Link href={`${pathname}/modules/${module.key}`} className="flex-1">
+            <h2 className="max-w-full text-2xl font-semibold break-words text-blue-400 transition-colors duration-300 hover:text-blue-600 sm:break-normal">
               {module.name}
-            </h1>
+            </h2>
           </Link>
         </div>
 
@@ -80,13 +138,18 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
       </div>
 
       {/* Mentors */}
-      {module.mentors?.length > 0 && (
-        <TopContributorsList
-          icon={HiUserGroup}
-          contributors={module.mentors}
-          maxInitialDisplay={6}
-          label="Mentors"
-        />
+      {renderContributors(module.mentors, displayMentors, 'Mentors', showAllMentors, () =>
+        setShowAllMentors(!showAllMentors)
+      )}
+
+      {/* Mentees */}
+      {renderContributors(
+        module.mentees,
+        displayMentees,
+        'Mentees',
+        showAllMentees,
+        () => setShowAllMentees(!showAllMentees),
+        true
       )}
     </div>
   )

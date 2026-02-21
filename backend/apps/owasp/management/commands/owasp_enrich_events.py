@@ -29,9 +29,10 @@ class Command(BaseCommand):
         all_events = []
         offset = options["offset"]
 
+        total_count = events.count()
         for idx, event in enumerate(events[offset:]):
-            prefix = f"{idx + offset + 1} of {events.count()}"
-            print(f"{prefix:<10} {event.url}")
+            prefix = f"{idx + offset + 1} of {total_count}"
+            self.stdout.write(f"{prefix:<10} {event.url}\n")
             # Summary.
             if not event.summary and (prompt := Prompt.get_owasp_event_summary()):
                 event.generate_summary(prompt)

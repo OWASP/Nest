@@ -40,7 +40,7 @@ const ProjectHealthMetricsDetails: FC = () => {
       handleAppError(graphqlError)
     }
     if (data?.project?.healthMetricsLatest) {
-      setMetricsLatest(data.project.healthMetricsLatest)
+      setMetricsLatest(data.project.healthMetricsLatest as unknown as HealthMetricsProps)
     }
     if (data?.project?.healthMetricsList) {
       setMetricsList(data.project.healthMetricsList)
@@ -53,25 +53,27 @@ const ProjectHealthMetricsDetails: FC = () => {
 
   const labels =
     metricsList?.map((m) =>
-      new Date(m.createdAt).toLocaleString('default', {
-        month: 'short',
-        day: 'numeric',
-      })
+      m.createdAt
+        ? new Date(m.createdAt).toLocaleString('default', {
+            month: 'short',
+            day: 'numeric',
+          })
+        : ''
     ) || []
   return (
     <div className="flex flex-col gap-4">
       {metricsList && metricsLatest ? (
         <>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex justify-start">
-              <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
+              <h1 className="text-lg font-bold sm:text-2xl">{metricsLatest.projectName}</h1>
               <MetricsPDFButton
                 path={`${projectKey}/pdf`}
                 fileName={`${projectKey}-health-metrics`}
               />
             </div>
             <div className="flex items-center gap-2">
-              <MetricsScoreCircle score={metricsLatest.score} clickable={false} />
+              <MetricsScoreCircle score={metricsLatest.score ?? 0} clickable={false} />
               <GeneralCompliantComponent
                 title={
                   metricsLatest.isFundingRequirementsCompliant
@@ -79,7 +81,7 @@ const ProjectHealthMetricsDetails: FC = () => {
                     : 'Funding Requirements Not Compliant'
                 }
                 icon={FaDollarSign}
-                compliant={metricsLatest.isFundingRequirementsCompliant}
+                compliant={metricsLatest.isFundingRequirementsCompliant ?? false}
               />
               <GeneralCompliantComponent
                 title={
@@ -88,7 +90,7 @@ const ProjectHealthMetricsDetails: FC = () => {
                     : 'Leader Requirements Not Compliant'
                 }
                 icon={FaHandshake}
-                compliant={metricsLatest.isLeaderRequirementsCompliant}
+                compliant={metricsLatest.isLeaderRequirementsCompliant ?? false}
               />
             </div>
           </div>
@@ -99,7 +101,7 @@ const ProjectHealthMetricsDetails: FC = () => {
               series={[
                 {
                   name: 'Stars',
-                  data: metricsList.map((m) => m.starsCount),
+                  data: metricsList.map((m) => m.starsCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -111,7 +113,7 @@ const ProjectHealthMetricsDetails: FC = () => {
               series={[
                 {
                   name: 'Forks',
-                  data: metricsList.map((m) => m.forksCount),
+                  data: metricsList.map((m) => m.forksCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -125,19 +127,19 @@ const ProjectHealthMetricsDetails: FC = () => {
               series={[
                 {
                   name: 'Open Issues',
-                  data: metricsList.map((m) => m.openIssuesCount),
+                  data: metricsList.map((m) => m.openIssuesCount ?? 0),
                 },
                 {
                   name: 'Unassigned Issues',
-                  data: metricsList.map((m) => m.unassignedIssuesCount),
+                  data: metricsList.map((m) => m.unassignedIssuesCount ?? 0),
                 },
                 {
                   name: 'Unanswered Issues',
-                  data: metricsList.map((m) => m.unansweredIssuesCount),
+                  data: metricsList.map((m) => m.unansweredIssuesCount ?? 0),
                 },
                 {
                   name: 'Total Issues',
-                  data: metricsList.map((m) => m.totalIssuesCount),
+                  data: metricsList.map((m) => m.totalIssuesCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -149,7 +151,7 @@ const ProjectHealthMetricsDetails: FC = () => {
               series={[
                 {
                   name: 'Open Pull Requests',
-                  data: metricsList.map((m) => m.openPullRequestsCount),
+                  data: metricsList.map((m) => m.openPullRequestsCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -163,11 +165,11 @@ const ProjectHealthMetricsDetails: FC = () => {
               series={[
                 {
                   name: 'Recent Releases',
-                  data: metricsList.map((m) => m.recentReleasesCount),
+                  data: metricsList.map((m) => m.recentReleasesCount ?? 0),
                 },
                 {
                   name: 'Total Releases',
-                  data: metricsList.map((m) => m.totalReleasesCount),
+                  data: metricsList.map((m) => m.totalReleasesCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -179,7 +181,7 @@ const ProjectHealthMetricsDetails: FC = () => {
               series={[
                 {
                   name: 'Contributors',
-                  data: metricsList.map((m) => m.contributorsCount),
+                  data: metricsList.map((m) => m.contributorsCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -197,18 +199,18 @@ const ProjectHealthMetricsDetails: FC = () => {
               'Days Since OWASP Page Last Update',
             ]}
             days={[
-              metricsLatest.ageDays,
-              metricsLatest.lastCommitDays,
-              metricsLatest.lastReleaseDays,
-              metricsLatest.lastPullRequestDays,
-              metricsLatest.owaspPageLastUpdateDays,
+              metricsLatest.ageDays ?? 0,
+              metricsLatest.lastCommitDays ?? 0,
+              metricsLatest.lastReleaseDays ?? 0,
+              metricsLatest.lastPullRequestDays ?? 0,
+              metricsLatest.owaspPageLastUpdateDays ?? 0,
             ]}
             requirements={[
-              metricsLatest.ageDaysRequirement,
-              metricsLatest.lastCommitDaysRequirement,
-              metricsLatest.lastReleaseDaysRequirement,
-              metricsLatest.lastPullRequestDaysRequirement,
-              metricsLatest.owaspPageLastUpdateDaysRequirement,
+              metricsLatest.ageDaysRequirement ?? 0,
+              metricsLatest.lastCommitDaysRequirement ?? 0,
+              metricsLatest.lastReleaseDaysRequirement ?? 0,
+              metricsLatest.lastPullRequestDaysRequirement ?? 0,
+              metricsLatest.owaspPageLastUpdateDaysRequirement ?? 0,
             ]}
             reverseColors={[true, false, false, false, false]}
           />

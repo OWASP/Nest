@@ -10,7 +10,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import type { Chapter } from 'types/chapter'
 import type { UserLocation } from 'utils/geolocationUtils'
-import 'leaflet.markercluster'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
@@ -22,12 +21,22 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
     if (!map) return
     if (isMapActive) {
       map.scrollWheelZoom.enable()
+      map.dragging.enable()
+      map.touchZoom.enable()
+      map.doubleClickZoom.enable()
+      map.keyboard.enable()
+
       if (!zoomControlRef.current) {
         zoomControlRef.current = L.control.zoom({ position: 'topleft' })
         zoomControlRef.current.addTo(map)
       }
     } else {
       map.scrollWheelZoom.disable()
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.keyboard.disable()
+
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
         zoomControlRef.current = null
@@ -39,6 +48,10 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
     return () => {
       if (!map) return
       map.scrollWheelZoom.disable()
+      map.dragging.disable()
+      map.touchZoom.disable()
+      map.doubleClickZoom.disable()
+      map.keyboard.disable()
       if (zoomControlRef.current) {
         zoomControlRef.current.remove()
         zoomControlRef.current = null
@@ -61,6 +74,14 @@ const MapViewUpdater = ({
 
   useEffect(() => {
     if (!map) return
+    const container = map.getContainer()
+    const width = container.clientWidth
+    const height = container.clientHeight
+    const aspectRatio = height > 0 ? width / height : 1
+
+    const dynamicMinZoom = aspectRatio > 2 ? 1 : 2
+    map.setMinZoom(dynamicMinZoom)
+
     if (userLocation && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters)
@@ -76,28 +97,30 @@ const MapViewUpdater = ({
       ]
       const localBounds = L.latLngBounds(locationsForBounds)
       const maxZoom = 12
-      map.fitBounds(localBounds, { maxZoom: maxZoom })
+      const padding = 50
+      map.fitBounds(localBounds, { maxZoom: maxZoom, padding: [padding, padding] })
     } else if (showLocal && validGeoLocData.length > 0) {
       const maxNearestChapters = 5
       const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(
         localChapters.map((chapter) => [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+          (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+          (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
         ])
       )
       const maxZoom = 7
+      const padding = 50
       const nearestChapter = validGeoLocData[0]
       map.setView(
         [
-          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
+          (nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat) as number,
+          (nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng) as number,
         ],
         maxZoom
       )
-      map.fitBounds(localBounds, { maxZoom: maxZoom })
+      map.fitBounds(localBounds, { maxZoom: maxZoom, padding: [padding, padding] })
     } else {
-      map.setView([20, 0], 2)
+      map.setView([20, 0], Math.max(dynamicMinZoom, 2))
     }
   }, [userLocation, showLocal, validGeoLocData, map])
 
@@ -167,11 +190,14 @@ const ChapterMap = ({
         scrollWheelZoom={isMapActive}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
+        minZoom={1}
+        maxZoom={18}
+        worldCopyJump={true}
         maxBounds={[
-          [-90, -180],
-          [90, 180],
+          [-85, -180],
+          [85, 180],
         ]}
-        maxBoundsViscosity={1}
+        maxBoundsViscosity={0.5}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -193,8 +219,8 @@ const ChapterMap = ({
                 <Marker
                   key={chapter.key}
                   position={[
-                    chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-                    chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+                    (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+                    (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
                   ]}
                   icon={chapterIcon}
                 >
@@ -224,26 +250,26 @@ const ChapterMap = ({
         )}
       </MapContainer>
       {!isMapActive && (
-        <button
-          type="button"
-          tabIndex={0}
-          className="pointer-events-none absolute inset-0 z-[500] flex cursor-pointer items-center justify-center rounded-[inherit] bg-black/10"
-          onClick={() => {
-            setIsMapActive(true)
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
+        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-black/10">
+          <button
+            type="button"
+            tabIndex={0}
+            className="pointer-events-auto flex cursor-pointer items-center justify-center rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white"
+            onClick={() => {
               setIsMapActive(true)
-            }
-          }}
-          aria-label="Unlock map"
-        >
-          <p className="pointer-events-auto flex items-center gap-2 rounded-md bg-white/90 px-5 py-3 text-sm font-medium text-gray-700 shadow-lg transition-colors hover:bg-gray-200 hover:text-gray-900 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 dark:hover:text-white">
-            <FaUnlock aria-hidden="true" />
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setIsMapActive(true)
+              }
+            }}
+            aria-label="Unlock map"
+          >
+            <FaUnlock aria-hidden="true" className="mr-2" />
             Unlock map
-          </p>
-        </button>
+          </button>
+        </div>
       )}
       {isMapActive && (
         <div className="absolute top-20 left-3 z-[999] w-fit">

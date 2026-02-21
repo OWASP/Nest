@@ -19,13 +19,16 @@ class Base(Configuration):
     DEBUG = False
     GITHUB_APP_ID = None
     GITHUB_APP_INSTALLATION_ID = None
+    IS_E2E_ENVIRONMENT = False
     IS_LOCAL_ENVIRONMENT = False
+    IS_FUZZ_ENVIRONMENT = False
     IS_PRODUCTION_ENVIRONMENT = False
     IS_STAGING_ENVIRONMENT = False
     IS_TEST_ENVIRONMENT = False
 
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
 
+    CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_NAME = "nest.session-id"
     SESSION_COOKIE_SAMESITE = "Lax"
@@ -97,6 +100,7 @@ class Base(Configuration):
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
+        "apps.common.middlewares.block_null_characters.BlockNullCharactersMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
     ]
@@ -136,17 +140,19 @@ class Base(Configuration):
     API_PAGE_SIZE = 100
     API_CACHE_PREFIX = "api-response"
     API_CACHE_TIME_SECONDS = 86400  # 24 hours.
-    GRAPHQL_RESOLVER_CACHE_PREFIX = "graphql-resolver"
-    GRAPHQL_RESOLVER_CACHE_TIME_SECONDS = 86400  # 24 hours.
     NINJA_PAGINATION_CLASS = "apps.api.rest.v0.pagination.CustomPagination"
     NINJA_PAGINATION_PER_PAGE = API_PAGE_SIZE
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
+    REDIS_AUTH_ENABLED = values.BooleanValue(environ_name="REDIS_AUTH_ENABLED", default=True)
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379",
+            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379"
+            # GH actions does not support authenticated redis connections.
+            if REDIS_AUTH_ENABLED
+            else f"redis://{REDIS_HOST}:6379",
             "OPTIONS": {
                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
             },
@@ -230,3 +236,10 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = False

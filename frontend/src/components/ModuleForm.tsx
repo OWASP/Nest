@@ -41,6 +41,8 @@ interface ModuleFormProps {
   isEdit?: boolean
   title: string
   submitText?: string
+  minDate?: string
+  maxDate?: string
 }
 
 const EXPERIENCE_LEVELS = [
@@ -58,6 +60,8 @@ const ModuleForm = ({
   title,
   isEdit,
   submitText = 'Save',
+  minDate,
+  maxDate,
 }: ModuleFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
@@ -213,6 +217,8 @@ const ModuleForm = ({
                   error={errors.startedAt}
                   touched={touched.startedAt}
                   required
+                  min={minDate}
+                  max={maxDate}
                 />
                 <FormDateInput
                   id="module-end-date"
@@ -225,7 +231,8 @@ const ModuleForm = ({
                   error={errors.endedAt}
                   touched={touched.endedAt}
                   required
-                  min={formData.startedAt || undefined}
+                  min={formData.startedAt || minDate || undefined}
+                  max={maxDate}
                 />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <Select
@@ -365,7 +372,7 @@ export const ProjectSelector = ({
           variables: { query: trimmedQuery },
         })
 
-        const projects = data.searchProjects || []
+        const projects = data?.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
       } catch (err) {
@@ -391,16 +398,9 @@ export const ProjectSelector = ({
     }
   }, [inputValue, fetchSuggestions])
 
-  const handleSelectionChange = (keys: React.Key | Set<React.Key> | 'all') => {
-    let keySet: Set<React.Key>
-    if (keys instanceof Set) {
-      keySet = keys
-    } else if (keys === 'all') {
-      keySet = new Set()
-    } else {
-      keySet = new Set([keys])
-    }
-    const selectedKey = Array.from(keySet as Set<string>)[0]
+  const handleSelectionChange = (keys: React.Key | null) => {
+    if (keys === null) return
+    const selectedKey = keys as string
     if (selectedKey) {
       const selectedProject = items.find((item) => item.id === selectedKey)
       if (selectedProject) {
@@ -453,6 +453,9 @@ export const ProjectSelector = ({
             helperWrapper: 'min-w-0 max-w-full w-full',
             errorMessage: 'break-words whitespace-normal max-w-full w-full',
           },
+        }}
+        clearButtonProps={{
+          'aria-label': 'clear selected project',
         }}
       >
         {items.map((project) => (

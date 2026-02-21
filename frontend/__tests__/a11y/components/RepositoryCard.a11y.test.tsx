@@ -1,10 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { Organization } from 'types/organization'
 import { RepositoryCardProps } from 'types/project'
 import RepositoryCard from 'components/RepositoryCard'
-
-expect.extend(toHaveNoViolations)
 
 const createMockRepository = (index: number): RepositoryCardProps => ({
   contributorsCount: 10 + index,
@@ -31,7 +30,14 @@ const createMockRepository = (index: number): RepositoryCardProps => ({
   url: `https://github.com/org-${index}/repo-${index}`,
 })
 
-describe('RepositoryCard a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('RepositoryCard a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
     const { container } = render(<RepositoryCard repositories={repositories} />)

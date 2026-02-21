@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from unittest import mock
 
 import pytest
@@ -5,10 +6,24 @@ import pytest
 from apps.owasp.management.commands.owasp_aggregate_projects import Command, Project
 
 
+class MockQuerySet(list):
+    """Helper class to simulate a QuerySet with exists() method."""
+
+    def exists(self):
+        return bool(self)
+
+
 class TestOwaspAggregateProjects:
     @pytest.fixture
     def command(self):
         return Command()
+
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args([])
+        assert args.offset == 0
 
     @pytest.fixture
     def mock_project(self):
@@ -56,32 +71,109 @@ class TestOwaspAggregateProjects:
         mock_repository.topics = ["security", "owasp"]
 
         mock_project.repositories.all.return_value = [mock_repository]
-
-        class QS(list):
-            def exists(self):
-                return bool(self)
-
-        mock_project.repositories.filter.return_value = QS([mock_repository])
+        mock_project.repositories.filter.return_value = MockQuerySet([mock_repository])
         mock_projects_list = [mock_project] * projects
         mock_active_projects = mock.MagicMock()
         mock_active_projects.__iter__.return_value = iter(mock_projects_list)
         mock_active_projects.count.return_value = len(mock_projects_list)
-        mock_active_projects.__getitem__.side_effect = (
-            lambda idx: mock_projects_list[idx.start : idx.stop]
+        mock_active_projects.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
             if isinstance(idx, slice)
             else mock_projects_list[idx]
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
-        with (
-            mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print") as mock_print,
-        ):
+        with mock.patch.object(Project, "active_projects", mock_active_projects):
+            command.stdout = mock.MagicMock()
             command.handle(offset=offset)
 
-        assert mock_bulk_save.called
-        assert mock_print.call_count == projects - offset
+        mock_bulk_save.assert_called()
+        assert command.stdout.write.call_count == projects - offset
 
-        for call in mock_print.call_args_list:
-            args, _ = call
+        for call in command.stdout.write.call_args_list:
+            args = call[0]
             assert "https://owasp.org/www-project-test" in args[0]
+
+    @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    def test_handle_deactivates_archived_project(self, mock_bulk_save, command, mock_project):
+        """Test that project with archived repository is deactivated."""
+        mock_project.owasp_repository.is_archived = True
+
+        mock_organization = mock.Mock()
+        mock_repository = mock.Mock()
+        mock_repository.organization = mock_organization
+        mock_repository.owner = mock.Mock()
+        mock_repository.is_archived = False
+        mock_repository.pushed_at = "2024-12-28T00:00:00Z"
+        mock_repository.latest_release = None
+        mock_repository.commits_count = 10
+        mock_repository.contributors_count = 5
+        mock_repository.forks_count = 2
+        mock_repository.open_issues_count = 4
+        mock_repository.releases.count.return_value = 0
+        mock_repository.stars_count = 50
+        mock_repository.subscribers_count = 3
+        mock_repository.watchers_count = 7
+        mock_repository.top_languages = []
+        mock_repository.license = None
+        mock_repository.topics = None
+
+        mock_project.repositories.all.return_value = [mock_repository]
+        mock_project.repositories.filter.return_value = MockQuerySet([mock_repository])
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
+            if isinstance(idx, slice)
+            else mock_projects_list[idx]
+        )
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        with mock.patch.object(Project, "active_projects", mock_active_projects):
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+
+        assert not mock_project.is_active
+        mock_bulk_save.assert_called()
+
+    @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    def test_handle_no_release_or_license(self, mock_bulk_save, command, mock_project):
+        """Test handle when repository has no latest_release or license."""
+        mock_repository = mock.Mock()
+        mock_repository.organization = None
+        mock_repository.owner = mock.Mock()
+        mock_repository.is_archived = False
+        mock_repository.pushed_at = "2024-12-28T00:00:00Z"
+        mock_repository.latest_release = None
+        mock_repository.commits_count = 10
+        mock_repository.contributors_count = 5
+        mock_repository.forks_count = 2
+        mock_repository.open_issues_count = 4
+        mock_repository.releases.count.return_value = 0
+        mock_repository.stars_count = 50
+        mock_repository.subscribers_count = 3
+        mock_repository.watchers_count = 7
+        mock_repository.top_languages = []
+        mock_repository.license = None
+        mock_repository.topics = None
+        mock_project.repositories.all.return_value = [mock_repository]
+        mock_project.repositories.filter.return_value = MockQuerySet([mock_repository])
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
+            if isinstance(idx, slice)
+            else mock_projects_list[idx]
+        )
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        with mock.patch.object(Project, "active_projects", mock_active_projects):
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+        mock_bulk_save.assert_called()

@@ -7,6 +7,8 @@ include backend/apps/slack/Makefile
 
 SHELL := /bin/bash
 
+.PHONY: sbom-backend-image
+
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
 		--no-cache \
@@ -41,8 +43,35 @@ exec-backend-command:
 exec-backend-command-it:
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
 
+exec-backend-command-e2e:
+	@docker exec -i e2e-nest-backend $(CMD)
+
+exec-backend-command-e2e-it:
+	@docker exec -it e2e-nest-backend $(CMD)
+
+exec-backend-command-fuzz:
+	@docker exec -i fuzz-nest-backend $(CMD)
+
+exec-backend-command-fuzz-it:
+	@docker exec -it fuzz-nest-backend $(CMD)
+
+exec-db-command:
+	@docker exec -i nest-db $(CMD)
+
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
+
+exec-db-command-e2e:
+	@docker exec -i e2e-nest-db $(CMD)
+
+exec-db-command-e2e-it:
+	@docker exec -it e2e-nest-db $(CMD)
+
+exec-db-command-fuzz:
+	@docker exec -i fuzz-nest-db $(CMD)
+
+exec-db-command-fuzz-it:
+	@docker exec -it fuzz-nest-db $(CMD)
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -55,18 +84,7 @@ django-shell:
 
 dump-data:
 	@echo "Dumping Nest data"
-	@CMD="python manage.py dumpdata \
-		github \
-		owasp \
-		slack.Conversation \
-		slack.Member \
-		slack.Message \
-		slack.Workspace \
-		--indent=4 \
-		--natural-foreign \
-		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
-	@CMD="sed -E -i 's/(\"[^\"]*email\"): *\"([^\"]|\\\")*\"/\1: \"\"/g' data/nest.json" $(MAKE) exec-backend-command
-	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
+	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
 enrich-data: \
 	github-enrich-issues \
@@ -86,7 +104,19 @@ index-data:
 
 load-data:
 	@echo "Loading Nest data"
-	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
+	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
+
+load-data-e2e:
+	@echo "Loading Nest e2e data"
+	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) exec-db-command-e2e
+
+load-data-fuzz:
+	@echo "Loading Nest fuzz data"
+	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+
+load-data-staging:
+	@echo "Loading Nest staging data"
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
@@ -97,32 +127,78 @@ migrate:
 migrations:
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
+migrations-empty:
+	@CMD="python manage.py makemigrations --empty $(APP_NAME)" $(MAKE) exec-backend-command
+
 purge-data:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
+
+purge-data-e2e:
+	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-e2e
+
+purge-data-fuzz:
+	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-fuzz
 
 recreate-schema:
 	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
-	  	$(MAKE) exec-db-command-it 2>/dev/null
+		$(MAKE) exec-db-command-it 2>/dev/null
 	@$(MAKE) migrate
 
 restore-backup:
 	@echo "Restoring Nest backup"
 	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
 
+run-backend-e2e:
+	@DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
+
+run-backend-fuzz:
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
+
 save-backup:
 	@echo "Saving Nest backup"
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
 
-scan-backend-image: build-backend-local-image
-	@trivy image \
-		--config trivy.yaml \
-		--docker-host $$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2>/dev/null) \
-		--exit-code 1 \
-		--severity CRITICAL,HIGH \
-		nest-backend-local
+# vars (defaults for local dev)
+BACKEND_IMAGE_NAME ?= nest-backend-local
+IMAGE_SCANNERS ?= misconfig,secret,vuln
+
+security-scan-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
+	@echo "Scanning image: $(BACKEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
+		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
+
+SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
+
+sbom-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
+	@echo "Generating SBOM for image: $(BACKEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		-v $(CURDIR):/work \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--format cyclonedx \
+		--output /work/backend-sbom-$(SBOM_VERSION).cdx.json \
+		$(BACKEND_IMAGE_NAME)
 
 shell-backend:
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
@@ -145,6 +221,18 @@ test-backend:
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
 
+test-fuzz:
+	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true
+	@docker volume rm -f nest-fuzz_fuzz-db-data >/dev/null 2>&1 || true
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
+	@echo "Running REST API fuzz tests..."
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db backend rest
+	@echo "Running GraphQL fuzz tests..."
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
+
 update-backend-dependencies:
 	@cd backend && poetry update
 
@@ -157,7 +245,8 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
-	owasp-aggregate-contributions \
+	owasp-aggregate-entity-contributions \
+	owasp-aggregate-member-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \

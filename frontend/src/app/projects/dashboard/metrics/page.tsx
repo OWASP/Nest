@@ -1,13 +1,12 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { FC, useState, useEffect } from 'react'
-import type { IconType } from 'react-icons'
-import { FaFilter, FaSort, FaSortUp, FaSortDown } from 'react-icons/fa6'
-import { IconWrapper } from 'wrappers/IconWrapper'
+import { FC, useState, useEffect, Key } from 'react'
+import { FaFilter, FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
-import { Ordering } from 'types/__generated__/graphql'
+import { Ordering, ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 import { HealthMetricsProps } from 'types/healthMetrics'
@@ -18,30 +17,42 @@ import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
 
 const PAGINATION_LIMIT = 10
 
-const FIELD_MAPPING = {
-  contributors: 'contributorsCount',
-  createdAt: 'createdAt',
-  forks: 'forksCount',
-  score: 'score',
-  stars: 'starsCount',
+const ORDERING_MAP = {
+  scoreDesc: { field: 'score', direction: Ordering.Desc },
+  scoreAsc: { field: 'score', direction: Ordering.Asc },
+  starsDesc: { field: 'starsCount', direction: Ordering.Desc },
+  starsAsc: { field: 'starsCount', direction: Ordering.Asc },
+  forksDesc: { field: 'forksCount', direction: Ordering.Desc },
+  forksAsc: { field: 'forksCount', direction: Ordering.Asc },
+  contributorsDesc: { field: 'contributorsCount', direction: Ordering.Desc },
+  contributorsAsc: { field: 'contributorsCount', direction: Ordering.Asc },
+  createdAtDesc: { field: 'createdAt', direction: Ordering.Desc },
+  createdAtAsc: { field: 'createdAt', direction: Ordering.Asc },
 } as const
 
-type OrderKey = keyof typeof FIELD_MAPPING
+type OrderingKey = keyof typeof ORDERING_MAP
+
+const SORT_FIELDS = [
+  { label: 'Score (High → Low)', key: 'scoreDesc' },
+  { label: 'Score (Low → High)', key: 'scoreAsc' },
+  { label: 'Stars (High → Low)', key: 'starsDesc' },
+  { label: 'Stars (Low → High)', key: 'starsAsc' },
+  { label: 'Forks (High → Low)', key: 'forksDesc' },
+  { label: 'Forks (Low → High)', key: 'forksAsc' },
+  { label: 'Contributors (High → Low)', key: 'contributorsDesc' },
+  { label: 'Contributors (Low → High)', key: 'contributorsAsc' },
+  { label: 'Last checked (Newest)', key: 'createdAtDesc' },
+  { label: 'Last checked (Oldest)', key: 'createdAtAsc' },
+] as const
 
 const parseOrderParam = (orderParam: string | null) => {
-  if (!orderParam) {
-    return { field: 'score', direction: Ordering.Desc, urlKey: '-score' }
+  if (!orderParam || !Object.hasOwn(ORDERING_MAP, orderParam)) {
+    return { field: 'score', direction: Ordering.Desc, urlKey: 'scoreDesc' }
   }
 
-  const isDescending = orderParam.startsWith('-')
-  const fieldKey = isDescending ? orderParam.slice(1) : orderParam
-  const isValidKey = fieldKey in FIELD_MAPPING
-  const normalizedKey = isValidKey ? fieldKey : 'score'
-  const graphqlField = FIELD_MAPPING[normalizedKey as OrderKey]
-  const direction = isDescending ? Ordering.Desc : Ordering.Asc
-  const normalizedUrlKey = direction === Ordering.Desc ? `-${normalizedKey}` : normalizedKey
+  const { field, direction } = ORDERING_MAP[orderParam as OrderingKey]
 
-  return { field: graphqlField, direction, urlKey: normalizedUrlKey }
+  return { field, direction, urlKey: orderParam }
 }
 
 const buildGraphQLOrdering = (field: string, direction: Ordering) => {
@@ -57,71 +68,6 @@ const buildOrderingWithTieBreaker = (primaryOrdering: Record<string, Ordering>) 
     project_Name: Ordering.Asc,
   },
 ]
-const SortableColumnHeader: FC<{
-  label: string
-  fieldKey: OrderKey
-  currentOrderKey: string
-  onSort: (orderKey: string | null) => void
-  align?: 'left' | 'center' | 'right'
-}> = ({ label, fieldKey, currentOrderKey, onSort, align = 'left' }) => {
-  const isActiveSortDesc = currentOrderKey === `-${fieldKey}`
-  const isActiveSortAsc = currentOrderKey === fieldKey
-  const isActive = isActiveSortDesc || isActiveSortAsc
-
-  const handleClick = () => {
-    if (!isActive) {
-      onSort(`-${fieldKey}`)
-    } else if (isActiveSortDesc) {
-      onSort(fieldKey)
-    } else {
-      onSort(null)
-    }
-  }
-
-  const justifyMap = {
-    left: 'justify-start',
-    center: 'justify-center',
-    right: 'justify-end',
-  }
-
-  const alignmentClass = justifyMap[align] || justifyMap.left
-
-  const textAlignMap = {
-    left: 'text-left',
-    center: 'text-center',
-    right: 'text-right',
-  }
-
-  const textAlignClass = textAlignMap[align] || textAlignMap.left
-
-  let iconType: IconType
-  if (isActiveSortDesc) {
-    iconType = FaSortDown
-  } else if (isActiveSortAsc) {
-    iconType = FaSortUp
-  } else {
-    iconType = FaSort
-  }
-
-  return (
-    <div className={`flex items-center gap-1 ${alignmentClass}`}>
-      <button
-        type="button"
-        onClick={handleClick}
-        className={`flex items-center gap-1 font-semibold transition-colors hover:text-blue-600 ${textAlignClass}`}
-        title={`Sort by ${label}`}
-        aria-label={`Sort by ${label}`}
-        aria-pressed={isActive}
-      >
-        <span className="truncate">{label}</span>
-        <IconWrapper
-          icon={iconType}
-          className={`h-3 w-3 ${isActive ? 'text-blue-600' : 'text-gray-400'}`}
-        />
-      </button>
-    </div>
-  )
-}
 
 const MetricsPage: FC = () => {
   const searchParams = useSearchParams()
@@ -146,16 +92,16 @@ const MetricsPage: FC = () => {
   }
   const levelFiltersMapping = {
     incubator: {
-      level: 'incubator',
+      level: ProjectLevel.Incubator,
     },
     lab: {
-      level: 'lab',
+      level: ProjectLevel.Lab,
     },
     production: {
-      level: 'production',
+      level: ProjectLevel.Production,
     },
     flagship: {
-      level: 'flagship',
+      level: ProjectLevel.Flagship,
     },
   }
 
@@ -169,14 +115,14 @@ const MetricsPage: FC = () => {
   const currentFilterKeys = []
   if (healthFilter) {
     currentFilters = {
-      ...healthFiltersMapping[healthFilter],
+      ...healthFiltersMapping[healthFilter as keyof typeof healthFiltersMapping],
     }
     currentFilterKeys.push(healthFilter)
   }
   if (levelFilter) {
     currentFilters = {
       ...currentFilters,
-      ...levelFiltersMapping[levelFilter],
+      ...levelFiltersMapping[levelFilter as keyof typeof levelFiltersMapping],
     }
     currentFilterKeys.push(levelFilter)
   }
@@ -211,7 +157,7 @@ const MetricsPage: FC = () => {
 
   useEffect(() => {
     if (data) {
-      setMetrics(data.projectHealthMetrics)
+      setMetrics(data.projectHealthMetrics as unknown as HealthMetricsProps[])
       setMetricsLength(data.projectHealthMetricsDistinctLength)
     }
     if (graphQLRequestError) {
@@ -267,9 +213,39 @@ const MetricsPage: FC = () => {
 
   return (
     <>
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Project Health Metrics</h1>
-        <div className="flex flex-row items-center gap-2">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="mb-2 text-2xl font-bold">Project Health Metrics</h1>
+        <div className="flex flex-row items-center gap-2 self-end">
+          <div>
+            <ProjectsDashboardDropDown
+              buttonDisplayName="Sort By"
+              icon={urlKey?.endsWith('Desc') ? FaArrowDownWideShort : FaArrowUpWideShort}
+              sections={[
+                {
+                  title: 'Sort by',
+                  items: SORT_FIELDS.map((field) => ({
+                    label: field.label,
+                    key: field.key,
+                  })),
+                },
+                {
+                  title: 'Reset',
+                  items: [{ label: 'Reset Sorting', key: 'reset-sort' }],
+                },
+              ]}
+              selectionMode="single"
+              selectedKeys={[urlKey]}
+              selectedLabels={[SORT_FIELDS.find((f) => f.key === urlKey)!.label]}
+              onAction={(key: Key) => {
+                if (key === 'reset-sort') {
+                  handleSort(null)
+                  return
+                }
+
+                handleSort(key as string)
+              }}
+            />
+          </div>
           <ProjectsDashboardDropDown
             buttonDisplayName="Filter By"
             icon={FaFilter}
@@ -277,17 +253,23 @@ const MetricsPage: FC = () => {
             selectionMode="multiple"
             selectedKeys={activeFilters}
             selectedLabels={getKeysLabels(filteringSections, activeFilters)}
-            onAction={(key: string) => {
+            onAction={(key: Key) => {
               // Because how apollo caches pagination, we need to reset the pagination.
               setPagination({ offset: 0, limit: PAGINATION_LIMIT })
               let newFilters = { ...currentFilters }
               const newParams = new URLSearchParams(searchParams.toString())
-              if (key in healthFiltersMapping) {
-                newParams.set('health', key)
-                newFilters = { ...newFilters, ...healthFiltersMapping[key] }
-              } else if (key in levelFiltersMapping) {
-                newParams.set('level', key)
-                newFilters = { ...newFilters, ...levelFiltersMapping[key] }
+              if ((key as string) in healthFiltersMapping) {
+                newParams.set('health', key as string)
+                newFilters = {
+                  ...newFilters,
+                  ...healthFiltersMapping[key as string as keyof typeof healthFiltersMapping],
+                }
+              } else if ((key as string) in levelFiltersMapping) {
+                newParams.set('level', key as string)
+                newFilters = {
+                  ...newFilters,
+                  ...levelFiltersMapping[key as string as keyof typeof levelFiltersMapping],
+                }
               } else {
                 newParams.delete('health')
                 newParams.delete('level')
@@ -306,44 +288,6 @@ const MetricsPage: FC = () => {
             }}
           />
         </div>
-      </div>
-      <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] gap-2 border-b border-gray-200 p-4 dark:border-gray-700">
-        <div className="truncate font-semibold">Project Name</div>
-        <SortableColumnHeader
-          label="Stars"
-          fieldKey="stars"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Forks"
-          fieldKey="forks"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Contributors"
-          fieldKey="contributors"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Health Checked At"
-          fieldKey="createdAt"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
-        <SortableColumnHeader
-          label="Score"
-          fieldKey="score"
-          currentOrderKey={urlKey}
-          onSort={handleSort}
-          align="center"
-        />
       </div>
       {loading ? (
         <LoadingSpinner />

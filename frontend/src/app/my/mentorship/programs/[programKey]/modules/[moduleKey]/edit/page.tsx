@@ -7,8 +7,10 @@ import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -75,17 +77,17 @@ const EditModulePage = () => {
     if (accessStatus === 'allowed' && data?.getModule) {
       const m = data.getModule
       setFormData({
-        name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
-        startedAt: formatDateForInput(m.startedAt),
-        endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
-        projectName: m.projectName,
-        tags: (m.tags || []).join(', '),
+        endedAt: formatDateForInput(m.endedAt),
+        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
         labels: (m.labels || []).join(', '),
-        projectId: m.projectId || '',
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
+        name: m.name || '',
+        projectId: m.projectId || '',
+        projectName: m.projectName || '',
+        startedAt: formatDateForInput(m.startedAt),
+        tags: (m.tags || []).join(', '),
       })
     }
   }, [accessStatus, data])
@@ -95,10 +97,10 @@ const EditModulePage = () => {
     if (!formData) return
 
     try {
-      const input = {
+      const input: UpdateModuleInput = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || null,
+        endedAt: formData.endedAt || '',
         experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
         labels: parseCommaSeparated(formData.labels),
@@ -107,11 +109,15 @@ const EditModulePage = () => {
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        startedAt: formData.startedAt || null,
+        startedAt: formData.startedAt || '',
         tags: parseCommaSeparated(formData.tags),
       }
 
-      const result = await updateModule({ variables: { input } })
+      const result = await updateModule({
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        variables: { input },
+      })
       const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 
       addToast({
@@ -145,11 +151,15 @@ const EditModulePage = () => {
     <ModuleForm
       title="Edit Module"
       formData={formData}
-      setFormData={setFormData}
+      setFormData={setFormData as React.Dispatch<React.SetStateAction<ModuleFormData>>}
       onSubmit={handleSubmit}
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      minDate={
+        data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
+      }
+      maxDate={data?.getProgram?.endedAt ? formatDateForInput(data.getProgram.endedAt) : undefined}
     />
   )
 }

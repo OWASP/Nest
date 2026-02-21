@@ -4,8 +4,7 @@ import { mockUserDetailsData } from '@mockData/mockUserDetails'
 import { screen, waitFor } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
-import UserDetailsPage from 'app/members/[memberKey]/page'
-import { drawContributions, fetchHeatmapData } from 'utils/helpers/githubHeatmap'
+import UserDetailsPage, { UserSummary } from 'app/members/[memberKey]/page'
 
 // Mock Apollo Client
 jest.mock('@apollo/client/react', () => ({
@@ -53,15 +52,116 @@ jest.mock('next/navigation', () => ({
   useParams: () => ({ memberKey: 'test-user' }),
 }))
 
-// Mock GitHub heatmap utilities
-jest.mock('utils/helpers/githubHeatmap', () => ({
-  fetchHeatmapData: jest.fn(),
-  drawContributions: jest.fn(() => {}),
-}))
+jest.mock('components/ContributionHeatmap', () => {
+  const MockContributionHeatmap = () => <div data-testid="contribution-heatmap">Heatmap</div>
+  MockContributionHeatmap.displayName = 'MockContributionHeatmap'
+  return {
+    __esModule: true,
+    default: MockContributionHeatmap,
+  }
+})
 
 jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
+
+describe('UserSummary', () => {
+  test('renders user avatar, login link, and formatted bio', () => {
+    const user = {
+      login: 'johndoe',
+      name: 'John Doe',
+      avatarUrl: 'https://example.com/avatar.png',
+      url: 'https://github.com/johndoe',
+    }
+    render(
+      <UserSummary
+        user={user}
+        contributionData={{}}
+        dateRange={{ startDate: '', endDate: '' }}
+        hasContributionData={false}
+        formattedBio={<span>Bio text</span>}
+      />
+    )
+    expect(screen.getByRole('img', { name: 'John Doe' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '@johndoe' })).toHaveAttribute(
+      'href',
+      'https://github.com/johndoe'
+    )
+    expect(screen.getByText('Bio text')).toBeInTheDocument()
+  })
+
+  test('renders contribution heatmap when hasContributionData is true', () => {
+    const user = {
+      login: 'jane',
+      name: 'Jane',
+      avatarUrl: '/avatar.png',
+      url: 'https://github.com/jane',
+    }
+    render(
+      <UserSummary
+        user={user}
+        contributionData={{ '2025-01-01': 1 }}
+        dateRange={{ startDate: '2025-01-01', endDate: '2025-01-01' }}
+        hasContributionData={true}
+        formattedBio={null}
+      />
+    )
+    expect(screen.getByTestId('contribution-heatmap')).toBeInTheDocument()
+  })
+
+  test('uses login as avatar alt when user has no name', () => {
+    const user = {
+      login: 'nologin',
+      name: undefined,
+      avatarUrl: '/avatar.png',
+      url: 'https://github.com/nologin',
+    }
+    render(
+      <UserSummary
+        user={user}
+        contributionData={{}}
+        dateRange={{ startDate: '', endDate: '' }}
+        hasContributionData={false}
+        formattedBio={null}
+      />
+    )
+    expect(screen.getByRole('img', { name: 'nologin' })).toBeInTheDocument()
+  })
+
+  test('uses placeholder avatar and fallback alt when user is null', () => {
+    render(
+      <UserSummary
+        user={null}
+        contributionData={{}}
+        dateRange={{ startDate: '', endDate: '' }}
+        hasContributionData={false}
+        formattedBio={null}
+      />
+    )
+    const img = screen.getByRole('img', { name: 'User Avatar' })
+    expect(img).toHaveAttribute('src', expect.stringContaining('placeholder.svg'))
+  })
+
+  test('renders badges when user has badges', () => {
+    const user = {
+      login: 'badged',
+      name: 'Badged User',
+      avatarUrl: '/a.png',
+      url: 'https://github.com/badged',
+      badges: [{ id: 'b1', name: 'Star', cssClass: 'fa-star', description: 'Star', weight: 1 }],
+    }
+    render(
+      <UserSummary
+        user={user}
+        contributionData={{}}
+        dateRange={{ startDate: '', endDate: '' }}
+        hasContributionData={false}
+        formattedBio={null}
+      />
+    )
+    expect(screen.getByTestId('badge-star')).toBeInTheDocument()
+  })
+})
 
 describe('UserDetailsPage', () => {
   beforeEach(() => {
@@ -70,10 +170,6 @@ describe('UserDetailsPage', () => {
       loading: false,
       error: null,
     })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      contributions: { years: [{ year: '2023' }] },
-    })
-    ;(drawContributions as jest.Mock).mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -271,35 +367,35 @@ describe('UserDetailsPage', () => {
       error: null,
       loading: false,
     })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue({
-      years: [{ year: '2023' }], // Provide years data to satisfy condition in component
-    })
 
     render(<UserDetailsPage />)
 
-    // Wait for useEffect to process the fetchHeatmapData result
     await waitFor(() => {
-      const heatmapContainer = screen
-        .getByAltText('Heatmap Background')
-        .closest(String.raw`div.hidden.lg\:block`)
-      expect(heatmapContainer).toBeInTheDocument()
-      expect(heatmapContainer).toHaveClass('hidden')
-      expect(heatmapContainer).toHaveClass('lg:block')
+      const heatmap = screen.getByTestId('contribution-heatmap')
+      expect(heatmap).toBeInTheDocument()
     })
   })
 
   test('handles contribution heatmap loading error correctly', async () => {
+    const dataWithoutContributions = {
+      ...mockUserDetailsData,
+      user: {
+        ...mockUserDetailsData.user,
+        contributionData: null,
+      },
+    }
+
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockUserDetailsData,
+      data: dataWithoutContributions,
       error: null,
+      loading: false,
     })
-    ;(fetchHeatmapData as jest.Mock).mockResolvedValue(null)
 
     render(<UserDetailsPage />)
 
     await waitFor(() => {
-      const heatmapTitle = screen.queryByText('Contribution Heatmap')
-      expect(heatmapTitle).not.toBeInTheDocument()
+      const heatmap = screen.queryByTestId('contribution-heatmap')
+      expect(heatmap).not.toBeInTheDocument()
     })
   })
 
@@ -307,6 +403,7 @@ describe('UserDetailsPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockUserDetailsData,
       error: null,
+      loading: false,
     })
 
     render(<UserDetailsPage />)
@@ -802,6 +899,209 @@ describe('UserDetailsPage', () => {
           'badge-top-contributor', // weight 3
         ]
         expectBadgesInCorrectOrder(expectedOrder)
+      })
+    })
+  })
+
+  describe('Contribution Heatmap', () => {
+    test('does not render heatmap when user has empty contribution data', async () => {
+      const dataWithEmptyContributions = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          contributionData: {},
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithEmptyContributions,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('contribution-heatmap')).not.toBeInTheDocument()
+      })
+    })
+
+    test('does not render heatmap when user has null contribution data', async () => {
+      const dataWithoutContributions = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          contributionData: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithoutContributions,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('contribution-heatmap')).not.toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('User Not Found Edge Cases', () => {
+    test('renders 404 when graphQLData exists but user is null', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: {
+          user: null,
+          recentIssues: [],
+          topContributedRepositories: [],
+          recentMilestones: [],
+          recentPullRequests: [],
+          recentReleases: [],
+        },
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('User not found')).toBeInTheDocument()
+        expect(
+          screen.getByText("Sorry, the user you're looking for doesn't exist")
+        ).toBeInTheDocument()
+      })
+    })
+
+    test('renders 404 when graphQLData is undefined', async () => {
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: undefined,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('User not found')).toBeInTheDocument()
+      })
+    })
+  })
+
+  describe('User Fallback Values', () => {
+    test('renders with login as title when name is null', async () => {
+      const dataWithNullName = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          name: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullName,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        // The page title should use login when name is null
+        const loginLink = screen.getByRole('link', { name: '@testuser' })
+        expect(loginLink).toBeInTheDocument()
+      })
+    })
+
+    test('renders placeholder avatar when avatarUrl is null', async () => {
+      const dataWithNullAvatar = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          avatarUrl: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullAvatar,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const avatar = screen.getByRole('img')
+        expect(avatar).toHaveAttribute('src', expect.stringContaining('placeholder.svg'))
+      })
+    })
+
+    test('renders with login as alt text when name is null', async () => {
+      const dataWithNullName = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          name: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullName,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const avatar = screen.getByAltText('testuser')
+        expect(avatar).toBeInTheDocument()
+      })
+    })
+
+    test('renders with hash link when url is null', async () => {
+      const dataWithNullUrl = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          url: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullUrl,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        const loginLink = screen.getByRole('link', { name: '@testuser' })
+        expect(loginLink).toHaveAttribute('href', '#')
+      })
+    })
+
+    test('renders with publicRepositoriesCount as null using fallback', async () => {
+      const dataWithNullRepoCount = {
+        ...mockUserDetailsData,
+        user: {
+          ...mockUserDetailsData.user,
+          publicRepositoriesCount: null,
+        },
+      }
+
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
+        data: dataWithNullRepoCount,
+        loading: false,
+        error: null,
+      })
+
+      render(<UserDetailsPage />)
+
+      await waitFor(() => {
+        expect(screen.getByText('No Repositories')).toBeInTheDocument()
       })
     })
   })

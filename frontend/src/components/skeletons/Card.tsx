@@ -16,8 +16,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
   const NUM_CONTRIBUTORS = 8
 
   return (
-    <div
-      role="status"
+    <output
       aria-live="polite"
       aria-busy="true"
       aria-label="Loading"
@@ -37,9 +36,8 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
 
           {showIcons && (
             <div className="flex min-w-[30%] grow flex-row items-center justify-start gap-2 overflow-auto">
-              {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
               {Array.from({ length: numIcons }).map((_, i) => (
-                <Skeleton key={i} className="h-8 w-16" />
+                <Skeleton key={`header-icon-${i}`} className="h-8 w-16" /> // NOSONAR - Safe to use index as key for static skeleton items with fixed length
               ))}
               <Skeleton />
             </div>
@@ -63,9 +61,11 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
             <div className="flex flex-col justify-start gap-2">
               {showContributors && (
                 <div className="mt-3 flex w-full flex-wrap items-center gap-2">
-                  {/* # NOSONAR As safe to use index as key - static skeleton items with fixed length */}
                   {Array.from({ length: NUM_CONTRIBUTORS }).map((_, i) => (
-                    <Skeleton key={i} className="border-background h-8 w-8 rounded-full border-2" />
+                    <Skeleton
+                      key={`contributor-${i}`} // NOSONAR - Safe to use index as key for static skeleton items with fixed length
+                      className="border-background h-8 w-8 rounded-full border-2"
+                    />
                   ))}
                 </div>
               )}
@@ -87,7 +87,7 @@ const CardSkeleton: React.FC<CardSkeletonProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </output>
   )
 }
 

@@ -484,4 +484,258 @@ describe('EntityActions', () => {
       expect(mockParentClick).not.toHaveBeenCalled()
     })
   })
+
+  describe('handles keyboard navigation', () => {
+    it('closes menu when escape key is pressed', async () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
+
+      const menu = screen.getByRole('menu')
+      fireEvent.keyDown(menu, { key: 'Escape' })
+
+      await waitFor(() => {
+        expect(button).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+
+    it('returns focus to trigger button when escape is pressed', async () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
+      fireEvent.click(button)
+
+      const menu = screen.getByRole('menu')
+      fireEvent.keyDown(menu, { key: 'Escape' })
+
+      await waitFor(() => {
+        expect(button).toHaveFocus()
+      })
+    })
+  })
+
+  it('focuses first menu item when menu opens', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const editButton = screen.getByText('Edit')
+    expect(editButton).toHaveFocus()
+  })
+
+  it('navigates down through menu items with ArrowDown', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const editButton = screen.getByText('Edit')
+    const addModuleButton = screen.getByText('Add Module')
+
+    expect(editButton).toHaveFocus()
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    await waitFor(() => {
+      expect(addModuleButton).toHaveFocus()
+    })
+  })
+
+  it('navigates up through menu items with ArrowUp', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const editButton = screen.getByText('Edit')
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+    fireEvent.keyDown(menu, { key: 'ArrowUp' })
+
+    await waitFor(() => {
+      expect(editButton).toHaveFocus()
+    })
+  })
+
+  it('wraps around to last item when ArrowUp is pressed on first item', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    const menuItems = screen.getAllByRole('menuitem')
+
+    fireEvent.keyDown(menu, { key: 'ArrowUp' })
+
+    await waitFor(() => {
+      expect(menuItems[menuItems.length - 1]).toHaveFocus()
+    })
+  })
+
+  it('wraps around to first item when ArrowDown is pressed on last item', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    const menuItems = screen.getAllByRole('menuitem')
+
+    for (let i = 0; i < menuItems.length - 1; i++) {
+      fireEvent.keyDown(menu, { key: 'ArrowDown' })
+    }
+
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    await waitFor(() => {
+      expect(menuItems[0]).toHaveFocus()
+    })
+  })
+
+  it('activates menu item when Enter is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
+  })
+
+  it('activates menu item when Space is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: ' ' })
+
+    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
+  })
+
+  it('closes menu after activating item with Enter', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
+  it('closes menu after activating item with Space', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: ' ' })
+
+    await waitFor(() => {
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
+  it('navigates to specific action with keyboard', async () => {
+    const mockSetStatus = jest.fn()
+    render(
+      <EntityActions
+        type="program"
+        programKey="test-program"
+        status={ProgramStatusEnum.Draft}
+        setStatus={mockSetStatus}
+      />
+    )
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    expect(mockSetStatus).toHaveBeenCalledWith(ProgramStatusEnum.Published)
+  })
+
+  it('sets appropriate tabIndex for focused and non-focused items', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menuItems = screen.getAllByRole('menuitem')
+
+    expect(menuItems[0]).toHaveAttribute('tabIndex', '0')
+
+    expect(menuItems[1]).toHaveAttribute('tabIndex', '-1')
+  })
+
+  it('updates tabIndex as focus changes with arrow keys', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menuItems = screen.getAllByRole('menuitem')
+    const menu = screen.getByRole('menu')
+
+    expect(menuItems[0]).toHaveAttribute('tabIndex', '0')
+
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    await waitFor(() => {
+      expect(menuItems[0]).toHaveAttribute('tabIndex', '-1')
+      expect(menuItems[1]).toHaveAttribute('tabIndex', '0')
+    })
+  })
+
+  it('does not process keyboard events when menu is closed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+
+    expect(() => {
+      fireEvent.keyDown(button, { key: 'ArrowDown' })
+    }).not.toThrow()
+  })
+
+  it('navigates to edit page when enter key is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    const editButton = screen.getByText('Edit')
+
+    expect(editButton).toHaveFocus()
+
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
+  })
+  it('does nothing when an unhandled key is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'a' })
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  describe('Toggle Behavior', () => {
+    it('closes the dropdown and resets focus when toggled off via click', () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
+
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
+
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
 })

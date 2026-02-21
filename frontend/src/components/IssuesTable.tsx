@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 
+import { LabelList } from 'components/LabelList'
+
 export type IssueRow = {
   objectID: string
   number: number
@@ -49,7 +51,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
   const getStatusBadge = (state: string, isMerged?: boolean) => {
     const statusMap: Record<string, { text: string; class: string }> = {
       open: { text: 'Open', class: 'bg-[#238636]' },
-      merged: { text: 'Merged', class: 'bg-[#8657E5]' },
+      merged: { text: 'Closed', class: 'bg-[#8657E5]' },
       closed: { text: 'Closed', class: 'bg-[#DA3633]' },
     }
 
@@ -111,7 +113,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
               className="relative block border-b border-gray-200 p-4 transition-colors hover:bg-gray-50 lg:table-row lg:border-b lg:p-0 dark:border-gray-700 dark:hover:bg-[#2a2e33]"
             >
               {/* Title */}
-              <td className="block pb-3 lg:table-cell lg:px-6 lg:py-4">
+              <td className="block pr-12 pb-3 lg:table-cell lg:px-6 lg:py-4">
                 <div className="flex items-start justify-between gap-3 lg:block">
                   <Tooltip
                     closeDelay={100}
@@ -124,7 +126,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                     <button
                       type="button"
                       onClick={() => handleIssueClick(issue.number)}
-                      className="flex-1 cursor-pointer truncate text-left text-sm font-medium text-blue-600 hover:underline lg:block lg:max-w-md dark:text-blue-400"
+                      className="line-clamp-2 h-12 cursor-pointer overflow-hidden text-left text-sm font-medium text-blue-600 hover:underline lg:max-w-md dark:text-blue-400"
                     >
                       {issue.title}
                     </button>
@@ -141,23 +143,12 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
 
               {/* Labels */}
               <td className="block pb-3 lg:table-cell lg:px-6 lg:py-4">
-                {issue.labels && issue.labels.length > 0 ? (
-                  <div className="flex flex-wrap gap-1 lg:gap-2">
-                    {issue.labels.slice(0, maxVisibleLabels).map((label) => (
-                      <span
-                        key={label}
-                        className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-700 lg:rounded-lg lg:border lg:border-gray-400 lg:bg-transparent lg:hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:lg:border-gray-300 dark:lg:hover:bg-gray-700"
-                      >
-                        {label}
-                      </span>
-                    ))}
-                    {issue.labels.length > maxVisibleLabels && (
-                      <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-500 lg:rounded-lg lg:border lg:border-gray-400 lg:bg-transparent lg:text-gray-700 lg:hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:lg:border-gray-300 dark:lg:text-gray-300 dark:lg:hover:bg-gray-700">
-                        +{issue.labels.length - maxVisibleLabels} more
-                      </span>
-                    )}
-                  </div>
-                ) : null}
+                <LabelList
+                  entityKey={`issue-${issue.objectID}`}
+                  labels={issue.labels ?? []}
+                  maxVisible={maxVisibleLabels}
+                  className="gap-1 lg:gap-2"
+                />
               </td>
 
               {/* Assignee */}
@@ -169,7 +160,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                         height={18}
                         width={18}
                         src={issue.assignees[0].avatarUrl}
-                        alt={issue.assignees[0].login}
+                        alt=""
                         className="rounded-full lg:h-6 lg:w-6"
                       />
                       <span className="max-w-[80px] truncate sm:max-w-[100px] md:max-w-[120px] lg:max-w-[150px]">

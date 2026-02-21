@@ -1,18 +1,22 @@
 import { render, screen } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import ModeToggle from 'components/ModeToggle'
 
-jest.mock('next-themes', () => ({
-  useTheme: () => ({ theme: 'light', setTheme: jest.fn() }),
-}))
-
-expect.extend(toHaveNoViolations)
-
-describe('ModeToggle a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ModeToggle a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { baseElement } = render(<ModeToggle />)
 
-    await screen.findByRole('button', { name: /Enable dark mode/i })
+    await screen.findByRole('button', {
+      name: theme === 'light' ? /Enable dark mode/i : /Enable light mode/i,
+    })
 
     const results = await axe(baseElement)
 
