@@ -25,6 +25,10 @@ from apps.owasp.models import Project
 ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
+NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
+NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines."
+NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
+NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +158,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            msg = "Only mentors of this module can assign issues."
-            raise PermissionDenied(msg)
+            raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -194,8 +197,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            msg = "Only mentors of this module can unassign issues."
-            raise PermissionDenied(msg)
+            raise PermissionDenied(NOT_MENTOR_UNASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
         if gh_user is None:
@@ -236,8 +238,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            msg = "Only mentors of this module can set deadlines."
-            raise PermissionDenied(msg)
+            raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")
@@ -299,8 +300,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
         if not Mentor.objects.filter(nest_user=user, modules=module).exists():
-            msg = "Only mentors of this module can clear deadlines."
-            raise PermissionDenied(msg)
+            raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")

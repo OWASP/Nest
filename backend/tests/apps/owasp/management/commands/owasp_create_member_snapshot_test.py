@@ -1,4 +1,5 @@
 import io
+from argparse import ArgumentParser
 from datetime import UTC, datetime
 from unittest import mock
 
@@ -11,6 +12,15 @@ class TestOwaspCreateMemberSnapshotCommand:
     @pytest.fixture
     def command(self):
         return Command()
+
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args(["testuser"])
+        assert args.username == "testuser"
+        assert args.start_at is None
+        assert args.end_at is None
 
     def test_parse_date_valid(self, command):
         result = command.parse_date("2025-01-15", datetime(2025, 1, 1, tzinfo=UTC))
@@ -501,6 +511,85 @@ class TestOwaspCreateMemberSnapshotCommand:
 
         assert result == {}
 
+    def test_generate_heatmap_data_empty_issues(self, command):
+        """Test generate_heatmap_data with issue outside date range."""
+        start_at = datetime(2025, 1, 1, tzinfo=UTC)
+        end_at = datetime(2025, 1, 3, tzinfo=UTC)
+
+        mock_commit = mock.Mock()
+        mock_commit.created_at = datetime(2025, 1, 1, tzinfo=UTC)
+
+        mock_issue_out_of_range = mock.Mock()
+        mock_issue_out_of_range.created_at = datetime(2025, 2, 1, tzinfo=UTC)
+
+        result = command.generate_heatmap_data(
+            [mock_commit], [], [mock_issue_out_of_range], start_at, end_at
+        )
+
+        assert result["2025-01-01"] == 1
+        assert result["2025-01-02"] == 0
+
+    def test_generate_entity_contributions_unmatched_repos(self, command):
+        """Test entity_contributions where contributions' repos don't match led entities."""
+        start_at = datetime(2025, 1, 1, tzinfo=UTC)
+        end_at = datetime(2025, 10, 1, tzinfo=UTC)
+
+        mock_user = mock.Mock()
+        mock_user.id = 1
+
+        mock_commit = mock.Mock()
+        mock_commit.created_at = datetime(2025, 3, 1, tzinfo=UTC)
+        mock_commit.repository_id = 999
+
+        mock_pr = mock.Mock()
+        mock_pr.created_at = datetime(2025, 3, 1, tzinfo=UTC)
+        mock_pr.repository_id = 999
+
+        mock_issue = mock.Mock()
+        mock_issue.created_at = datetime(2025, 3, 1, tzinfo=UTC)
+        mock_issue.repository_id = 999
+
+        mock_commits = mock.Mock()
+        mock_commits.select_related.return_value = [mock_commit]
+        mock_commits.__iter__ = lambda _: iter([mock_commit])
+
+        mock_prs = mock.Mock()
+        mock_prs.select_related.return_value = [mock_pr]
+        mock_prs.__iter__ = lambda _: iter([mock_pr])
+
+        mock_issues = mock.Mock()
+        mock_issues.select_related.return_value = [mock_issue]
+        mock_issues.__iter__ = lambda _: iter([mock_issue])
+
+        with (
+            mock.patch(
+                "apps.owasp.management.commands.owasp_create_member_snapshot.Chapter"
+            ) as mock_chapter_model,
+            mock.patch(
+                "apps.owasp.management.commands.owasp_create_member_snapshot.ContentType"
+            ) as mock_content_type,
+            mock.patch(
+                "apps.owasp.management.commands.owasp_create_member_snapshot.EntityMember"
+            ) as mock_entity_member,
+        ):
+            mock_content_type.objects.get_for_model.return_value = mock.Mock(id=1)
+            mock_entity_member.objects.filter.return_value.values_list.return_value = [1]
+
+            mock_chapter = mock.Mock()
+            mock_chapter.nest_key = "test-chapter"
+            mock_chapter.owasp_repository_id = 100
+
+            mock_filter = mock.Mock()
+            mock_filter.select_related.return_value = [mock_chapter]
+            mock_filter.__iter__ = lambda _: iter([mock_chapter])
+            mock_chapter_model.objects.filter.return_value = mock_filter
+
+            result = command.generate_entity_contributions(
+                mock_user, mock_commits, mock_prs, mock_issues, "chapter", start_at, end_at
+            )
+
+        assert result == {"test-chapter": 0}
+
 
 class TestHandleMethod:
     """Tests for the handle() method of owasp_create_member_snapshot command."""
@@ -836,6 +925,54 @@ class TestHandleMethod:
         command.handle(username="testuser", start_at=None, end_at=None)
         stdout_calls = [str(call) for call in command.stdout.write.call_args_list]
         assert any("no contributions" in str(call).lower() for call in stdout_calls)
+
+    def test_handle_with_slack_zero_messages(self, command, mocker):
+        """Test handle with valid Slack ID but zero messages."""
+        mock_user = mocker.patch(f"{self.target_module}.User")
+        mock_user_instance = mock.MagicMock()
+        mock_user.objects.get.return_value = mock_user_instance
+
+        mock_snapshot_model = mocker.patch(f"{self.target_module}.MemberSnapshot")
+        mock_snapshot_model.objects.filter.return_value.first.return_value = None
+
+        mock_snapshot = mock.MagicMock()
+        mock_snapshot.id = 1
+        mock_snapshot.total_contributions = 0
+        mock_snapshot.commits_count = 0
+        mock_snapshot.pull_requests_count = 0
+        mock_snapshot.issues_count = 0
+        mock_snapshot.messages_count = 0
+        mock_snapshot_model.objects.create.return_value = mock_snapshot
+
+        mock_commit = mocker.patch(f"{self.target_module}.Commit")
+        mock_commit.objects.filter.return_value.count.return_value = 0
+
+        mock_pr = mocker.patch(f"{self.target_module}.PullRequest")
+        mock_pr.objects.filter.return_value.count.return_value = 0
+
+        mock_issue = mocker.patch(f"{self.target_module}.Issue")
+        mock_issue.objects.filter.return_value.count.return_value = 0
+
+        mock_profile = mocker.patch(f"{self.target_module}.MemberProfile")
+        mock_profile_instance = mock.MagicMock()
+        mock_profile_instance.owasp_slack_id = "U12345"
+        mock_profile.objects.get.return_value = mock_profile_instance
+
+        mock_message = mocker.patch(f"{self.target_module}.Message")
+        mock_msg_qs = mock.MagicMock()
+        mock_msg_qs.select_related.return_value = mock_msg_qs
+        mock_msg_qs.count.return_value = 0
+        mock_message.objects.filter.return_value = mock_msg_qs
+        mock_message.objects.none.return_value = mock_msg_qs
+
+        mocker.patch.object(command, "generate_heatmap_data", return_value={})
+        mocker.patch.object(command, "generate_entity_contributions", return_value={})
+        mocker.patch.object(command, "generate_repository_contributions", return_value={})
+        mocker.patch.object(command, "generate_communication_heatmap_data", return_value={})
+
+        command.handle(username="testuser", start_at=None, end_at=None)
+
+        mock_snapshot.messages.add.assert_not_called()
 
 
 class TestGenerateEntityContributionsChapter:
