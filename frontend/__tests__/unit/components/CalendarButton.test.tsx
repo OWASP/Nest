@@ -172,6 +172,12 @@ describe('CalendarButton', () => {
       const button = screen.getByRole('button')
       expect(button).toHaveAttribute('aria-label', 'Add Untitled to Calendar')
     })
+
+    it('uses "event" as fallback when title is missing', () => {
+      render(<CalendarButton event={{ ...mockEvent, title: '' }} />)
+      const button = screen.getByRole('button')
+      expect(button).toHaveAttribute('aria-label', 'Add event to Calendar')
+    })
   })
 
   describe('className prop', () => {

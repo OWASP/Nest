@@ -4,11 +4,11 @@ on:
   merge_group:
   pull_request:
     branches:
-      - feature/*
+      - feature/**
       - main
   push:
     branches:
-      - feature/*
+      - feature/**
       - main
   workflow_dispatch:
 
@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2
+        uses: github/codeql-action/init@89a39a4e59826350b863aa6b6252a07ad50cf83e
         with:
           languages: ${{ matrix.language }}
 
@@ -55,7 +55,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2
+        uses: github/codeql-action/analyze@89a39a4e59826350b863aa6b6252a07ad50cf83e
         with:
           category: /language:${{ matrix.language }}
     timeout-minutes: 5

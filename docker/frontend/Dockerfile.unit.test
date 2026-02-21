@@ -1,20 +1,18 @@
 FROM node:24.13-alpine3.23
 
 ENV FORCE_COLOR=1 \
-    NPM_CACHE="/app/.npm" \
+    NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
 ENV NPM_CONFIG_RETRY=5 \
     NPM_CONFIG_TIMEOUT=30000 \
     PATH="$PNPM_HOME:$PATH"
 
-RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
-
 WORKDIR /app
 
 COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    corepack enable && corepack install && \
     pnpm install --frozen-lockfile --ignore-scripts && \
     chown node:node /app
 

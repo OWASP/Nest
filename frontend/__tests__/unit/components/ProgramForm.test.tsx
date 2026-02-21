@@ -712,7 +712,7 @@ describe('ProgramForm Component', () => {
       )
 
       const adminInput = screen.getByPlaceholderText('johndoe, jane-doe')
-      await user.type(adminInput, 'newadmin')
+      await user.type(adminInput, 'new_admin')
 
       expect(mockSetFormData).toHaveBeenCalled()
     })
@@ -1182,6 +1182,65 @@ describe('ProgramForm Component', () => {
       // Touch the mentees limit field
       const menteesInput = screen.getByPlaceholderText('Enter mentees limit (0 for unlimited)')
       await user.click(menteesInput)
+
+      const buttons = screen.getAllByRole('button')
+      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
+      if (submitButton) {
+        await user.click(submitButton)
+      }
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
+
+    test('handles string menteesLimit in validation', async () => {
+      const user = userEvent.setup()
+      const stringLimitFormData = { ...filledFormData, menteesLimit: '10' as unknown as number }
+
+      render(
+        <ProgramForm
+          formData={stringLimitFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Test"
+        />
+      )
+
+      const buttons = screen.getAllByRole('button')
+      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
+      if (submitButton) {
+        await user.click(submitButton)
+      }
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
+
+    test('handles undefined menteesLimit in submission', async () => {
+      const user = userEvent.setup()
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: { myPrograms: { programs: [] } },
+        }),
+      })
+
+      const undefinedLimitFormData = {
+        ...filledFormData,
+        menteesLimit: undefined as unknown as number,
+      }
+
+      render(
+        <ProgramForm
+          formData={undefinedLimitFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Test"
+        />
+      )
 
       const buttons = screen.getAllByRole('button')
       const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))

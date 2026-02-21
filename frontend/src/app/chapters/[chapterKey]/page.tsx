@@ -59,7 +59,7 @@ export default function ChapterDetailsPage() {
     `https://owasp.slack.com/archives/${slackChannelId}`
 
   const details = [
-    { label: 'Last Updated', value: formatDate(chapter.updatedAt) ?? '' },
+    { label: 'Last Updated', value: formatDate(chapter.updatedAt) },
     { label: 'Location', value: chapter.suggestedLocation ?? '' },
     { label: 'Region', value: chapter.region ?? '' },
     {
