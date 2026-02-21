@@ -6,6 +6,7 @@ FROM base AS builder
 # to understand why libc6-compat might be needed.
 ENV APK_CACHE_DIR="/app/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
