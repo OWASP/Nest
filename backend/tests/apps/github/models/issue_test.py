@@ -221,7 +221,7 @@ class TestIssueModel:
 
     def test_save_method_when_issue_not_open(self, mock_repository):
         """Test save method when issue is not open."""
-        issue = Issue(repository=mock_repository, state=Issue.State.CLOSED)
+        issue = Issue(repository=mock_repository, state=Issue.IssueState.CLOSED)
         issue.generate_hint = Mock()
         issue.generate_summary = Mock()
 
