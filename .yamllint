@@ -2,14 +2,16 @@ extends: default
 
 rules:
   anchors: enable
-  braces: enable
+  braces:
+    level: error
+    max-spaces-inside: 1
   brackets: enable
   colons: enable
   commas: enable
   comments:
-    level: warning
-  comments-indentation:
-    level: warning
+    level: error
+    min-spaces-from-content: 1
+  comments-indentation: false
   document-end: disable
   document-start: disable
   empty-lines: enable
@@ -22,7 +24,9 @@ rules:
   line-length: disable
   new-line-at-end-of-file: enable
   new-lines: enable
-  octal-values: disable
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
   quoted-strings: disable
   trailing-spaces: enable
   truthy:
