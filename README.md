@@ -1,6 +1,6 @@
 <div align="center">
 
-[![OWASP](https://img.shields.io/badge/Lab-blue?&label=owasp%20level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=OWASP%20Type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=OWASP%20Slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
+[![OWASP](https://img.shields.io/badge/Lab-blue?&label=owasp%20level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=OWASP%20Type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=OWASP%20Slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/archives/project-nest)
 
 [![License](https://img.shields.io/github/license/owasp/nest?color=blue&label=License&style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors)
 
@@ -68,6 +68,6 @@ Over time, OWASP Nest has expanded to address broader OWASP community needs, suc
 
 ### Community and Social Media
 
-- [BlueSky account](https://bsky.app/profile/nest.owasp.org)
-- [LinkedIn group](https://www.linkedin.com/groups/14656108/)
-- [Slack channel](https://owasp.slack.com/archives/project-nest) (join [here](https://owasp.org/slack/invite))
+- [BlueSky](https://bsky.app/profile/nest.owasp.org)
+- [LinkedIn](https://www.linkedin.com/groups/14656108/)
+- [OWASP Slack](https://owasp.slack.com/archives/project-nest) -- join [#project-nest](https://owasp.org/slack/invite)

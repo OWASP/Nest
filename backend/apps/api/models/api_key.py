@@ -17,6 +17,8 @@ class ApiKey(models.Model):
     """API key model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "api_keys"
         verbose_name_plural = "API keys"
         ordering = ["-created_at"]

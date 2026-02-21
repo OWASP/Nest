@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.11-alpine3.23 AS builder
+FROM python:3.13.12-alpine3.23 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -24,8 +24,9 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
 
+COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
+    python -m pip install --requirement /tmp/requirements.build.txt
 
 WORKDIR /home/owasp
 
@@ -33,15 +34,16 @@ USER owasp
 
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry install --no-root --without test --without video
+    poetry install --no-root --verbose --without fuzz --without test --without video
 
-COPY apps apps
+# Less likely to cause cache invalidation items go first.
 COPY entrypoint.sh manage.py wsgi.py ./
 COPY settings settings
-COPY static static
 COPY templates templates
+COPY static static
+COPY apps apps
 
-FROM python:3.13.11-alpine3.23
+FROM python:3.13.12-alpine3.23
 
 ARG OWASP_GID
 ARG OWASP_UID

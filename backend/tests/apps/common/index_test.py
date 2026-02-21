@@ -162,6 +162,21 @@ class TestIndexBase:
                     f"{ENV}_{index_name}", {"replicas": expected_replicas}
                 )
 
+    def test_configure_replicas_empty_indexable_replicas(self):
+        """Test configure_replicas when all replicas are non-indexable."""
+        replicas = {"replica1": ["asc"], "replica2": ["desc"]}
+        index_name = "index_name"
+        is_local = False
+
+        with (
+            patch("apps.common.index.settings.IS_LOCAL_ENVIRONMENT", is_local),
+            patch("apps.common.index.is_indexable") as mock_is_indexable,
+        ):
+            mock_is_indexable.side_effect = lambda name: name == index_name
+
+            IndexBase.configure_replicas(index_name, replicas)
+            self.mock_client.set_settings.assert_not_called()
+
     def test_parse_synonyms_file_empty(self):
         with patch("pathlib.Path.open", mock_open(read_data="\n  \n# comment\n")):
             result = IndexBase._parse_synonyms_file("test.txt")
