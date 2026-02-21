@@ -113,7 +113,7 @@ jobs:
           cache-from: type=gha,scope=cspell
           cache-to: type=gha,scope=cspell,mode=max
           context: cspell
-          file: cspell/Dockerfile
+          file: docker/cspell/Dockerfile
           load: true
           tags: cspell:ci
 

@@ -101,7 +101,7 @@ class TestApiKeyModel:
         key = ApiKey(name="My Revoked Key", is_revoked=True)
         assert str(key) == "My Revoked Key (revoked)"
 
-    @patch("apps.api.models.api_key.User")
+    @patch("apps.api.models.api_key.get_user_model")
     @patch("apps.api.models.api_key.transaction")
     @patch("apps.api.models.api_key.ApiKey.objects.create")
     @patch("apps.api.models.api_key.ApiKey.generate_hash_key", return_value="hashed_key")
@@ -112,10 +112,11 @@ class TestApiKeyModel:
         mock_hash_key,
         mock_create,
         mock_transaction,
-        mock_user_model,
+        mock_get_user_model,
         mock_user,
     ):
         """Test successful API key creation."""
+        mock_user_model = mock_get_user_model.return_value
         mock_transaction.atomic = lambda: MagicMock(
             __enter__=MagicMock(return_value=None),
             __exit__=MagicMock(return_value=False),
@@ -137,10 +138,11 @@ class TestApiKeyModel:
             user=mock_locked_user,
         )
 
-    @patch("apps.api.models.api_key.User")
+    @patch("apps.api.models.api_key.get_user_model")
     @patch("apps.api.models.api_key.transaction")
-    def test_create_max_keys_exceeded(self, mock_transaction, mock_user_model, mock_user):
+    def test_create_max_keys_exceeded(self, mock_transaction, mock_get_user_model, mock_user):
         """Test API key creation fails when max active keys exceeded."""
+        mock_user_model = mock_get_user_model.return_value
         mock_transaction.atomic = lambda: MagicMock(
             __enter__=MagicMock(return_value=None),
             __exit__=MagicMock(return_value=False),
