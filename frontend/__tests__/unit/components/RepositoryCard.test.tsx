@@ -78,6 +78,13 @@ describe('RepositoryCard', () => {
     expect(screen.queryByRole('button', { name: /Show/ })).not.toBeInTheDocument()
   })
 
+  it('returns null when repositories prop is missing', () => {
+    const { container } = render(
+      <RepositoryCard repositories={null as unknown as RepositoryCardProps[]} />
+    )
+    expect(container.querySelector('.grid')).toBeNull()
+  })
+
   it('shows first 4 repositories initially when there are more than 4', () => {
     const repositories = Array.from({ length: 6 }, (_, i) => createMockRepository(i))
 
@@ -337,6 +344,43 @@ describe('RepositoryCard', () => {
       fireEvent.click(repositoryButton)
 
       expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    })
+  })
+
+  describe('Keyboard Navigation', () => {
+    it('navigates to repository page when Enter key is pressed', () => {
+      const repositories = [createMockRepository(0)]
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const repositoryButton = screen.getByText('Repository 0').closest('button')
+      fireEvent.keyDown(repositoryButton!, { key: 'Enter' })
+
+      expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    })
+
+    it('navigates to repository page when Space key is pressed', () => {
+      const repositories = [createMockRepository(0)]
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const repositoryButton = screen.getByText('Repository 0').closest('button')
+      fireEvent.keyDown(repositoryButton!, { key: ' ' })
+
+      expect(mockPush).toHaveBeenCalledWith('/organizations/org-0/repositories/repo-0')
+    })
+
+    it('does not navigate when other keys are pressed', () => {
+      const repositories = [createMockRepository(0)]
+
+      render(<RepositoryCard repositories={repositories} />)
+
+      const repositoryButton = screen.getByText('Repository 0').closest('button')
+      fireEvent.keyDown(repositoryButton!, { key: 'Tab' })
+      fireEvent.keyDown(repositoryButton!, { key: 'Escape' })
+      fireEvent.keyDown(repositoryButton!, { key: 'a' })
+
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 })

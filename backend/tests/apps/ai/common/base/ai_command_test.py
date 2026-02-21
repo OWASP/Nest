@@ -185,7 +185,7 @@ class TestBaseAICommand:
 
         result = command.setup_openai_client()
 
-        assert result is True
+        assert result
         assert command.openai_client == mock_client
         mock_openai_class.assert_called_once_with(api_key="test-api-key")
 
@@ -197,7 +197,7 @@ class TestBaseAICommand:
         with patch.object(command.stdout, "write") as mock_write:
             result = command.setup_openai_client()
 
-            assert result is False
+            assert not result
             assert command.openai_client is None
             mock_write.assert_called_once()
             call_args = mock_write.call_args[0][0]

@@ -2,12 +2,12 @@ import { useQuery } from '@apollo/client/react'
 import { mockAboutData } from '@mockData/mockAboutData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import About from 'app/about/page'
 import {
   GetProjectMetadataDocument,
   GetTopContributorsDocument,
 } from 'types/__generated__/projectQueries.generated'
-import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -44,12 +44,6 @@ jest.mock('components/MarkdownWrapper', () => ({
   __esModule: true,
   default: ({ content }) => <div data-testid="markdown-content">{content}</div>,
 }))
-
-const mockUserData = (username: string) => ({
-  data: { user: mockAboutData.users[username] },
-  loading: false,
-  error: null,
-})
 
 const mockProjectData = {
   data: { project: mockAboutData.project },
@@ -130,7 +124,14 @@ jest.mock('utils/aboutData', () => ({
   ],
 }))
 
-describe('About Page Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('About Page Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   const mockUseQuery = useQuery as unknown as jest.Mock
 
   it('should have no accessibility violations', async () => {
@@ -145,8 +146,6 @@ describe('About Page Accessibility', () => {
         if (key === 'nest') {
           return mockTopContributorsData
         }
-      } else if (query === GetLeaderDataDocument) {
-        return mockUserData(key)
       }
 
       return { loading: true }

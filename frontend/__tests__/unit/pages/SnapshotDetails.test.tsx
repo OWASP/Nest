@@ -188,4 +188,216 @@ describe('SnapshotDetailsPage', () => {
       expect(screen.queryByText('New Releases')).not.toBeInTheDocument()
     })
   })
+
+  test('renders project card with null key (uses name fallback)', async () => {
+    const projectWithNullKey = {
+      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      key: null,
+      name: 'Test Project',
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newProjects: [projectWithNullKey],
+          newChapters: [],
+          newReleases: [],
+        },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+  })
+
+  test('renders project card without level', async () => {
+    const projectWithoutLevel = {
+      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      level: undefined,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newProjects: [projectWithoutLevel],
+          newChapters: [],
+          newReleases: [],
+        },
+      },
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
+    })
+  })
+
+  test('renders project card without summary', async () => {
+    const projectWithoutSummary = {
+      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      summary: undefined,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newProjects: [projectWithoutSummary],
+          newChapters: [],
+          newReleases: [],
+        },
+      },
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Nest')).toBeInTheDocument()
+    })
+  })
+
+  test('renders chapter card without relatedUrls', async () => {
+    const chapterWithoutUrls = {
+      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      relatedUrls: undefined,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newChapters: [chapterWithoutUrls],
+          newProjects: [],
+          newReleases: [],
+        },
+      },
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
+    })
+  })
+
+  test('renders chapter card without summary', async () => {
+    const chapterWithoutSummary = {
+      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      summary: undefined,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newChapters: [chapterWithoutSummary],
+          newProjects: [],
+          newReleases: [],
+        },
+      },
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
+    })
+  })
+
+  test('filters out inactive chapters', async () => {
+    const activeChapter = {
+      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      name: 'Active Chapter',
+      key: 'active-chapter',
+      isActive: true,
+    }
+    const inactiveChapter = {
+      ...mockSnapshotDetailsData.snapshot.newChapters[0],
+      name: 'Inactive Chapter',
+      key: 'inactive-chapter',
+      isActive: false,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newChapters: [activeChapter, inactiveChapter],
+          newProjects: [],
+          newReleases: [],
+        },
+      },
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Chapter')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Inactive Chapter')).not.toBeInTheDocument()
+  })
+
+  test('filters out inactive projects', async () => {
+    const activeProject = {
+      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      name: 'Active Project',
+      key: 'active-project',
+      isActive: true,
+    }
+    const inactiveProject = {
+      ...mockSnapshotDetailsData.snapshot.newProjects[0],
+      name: 'Inactive Project',
+      key: 'inactive-project',
+      isActive: false,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newProjects: [activeProject, inactiveProject],
+          newChapters: [],
+          newReleases: [],
+        },
+      },
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Project')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Inactive Project')).not.toBeInTheDocument()
+  })
+
+  test('renders release without id (uses fallback key)', async () => {
+    const releaseWithoutId = {
+      ...mockSnapshotDetailsData.snapshot.newReleases[0],
+      id: undefined,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newReleases: [releaseWithoutId],
+          newChapters: [],
+          newProjects: [],
+        },
+      },
+      error: null,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('v0.9.2')).toBeInTheDocument()
+    })
+  })
 })

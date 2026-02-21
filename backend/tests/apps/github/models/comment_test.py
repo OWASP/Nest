@@ -68,6 +68,48 @@ class TestComment:
         assert comment.github_id == 12345
         mock_save.assert_called_once()
 
+    def test_update_data_without_save(self, mocker):
+        """Test update_data when save=False."""
+        mocker.patch(
+            "apps.github.models.comment.Comment.objects.get", side_effect=Comment.DoesNotExist
+        )
+        mock_save = mocker.patch.object(Comment, "save")
+
+        gh_comment = mocker.Mock()
+        gh_comment.id = 12345
+        gh_comment.body = "New comment"
+        gh_comment.created_at = "2023-01-01"
+        gh_comment.updated_at = "2023-01-02"
+
+        comment = Comment.update_data(gh_comment, save=False)
+
+        assert comment.github_id == 12345
+        assert comment.body == "New comment"
+        mock_save.assert_not_called()
+
+    def test_bulk_save(self, mocker):
+        """Test bulk_save method."""
+        mock_bulk_save = mocker.patch("apps.github.models.comment.BulkSaveModel.bulk_save")
+        comments = [Comment(github_id=1), Comment(github_id=2)]
+
+        Comment.bulk_save(comments, fields=["body"])
+
+        mock_bulk_save.assert_called_once_with(Comment, comments, fields=["body"])
+
+    def test_from_github_with_none_values(self, mocker):
+        """Test from_github handles None values gracefully."""
+        comment = Comment()
+        gh_comment = mocker.Mock()
+        gh_comment.body = None
+        gh_comment.created_at = None
+        gh_comment.updated_at = "2023-01-01"
+
+        comment.from_github(gh_comment)
+
+        assert comment.body == ""
+        assert comment.created_at is None
+        assert comment.updated_at == "2023-01-01"
+
     def test_str_representation(self):
         comment = Comment(body="A very long comment body that should be truncated", author=None)
         long_body = "A" * 60

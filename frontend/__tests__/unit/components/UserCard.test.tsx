@@ -439,5 +439,50 @@ describe('UserCard', () => {
 
       expect(screen.queryByTestId('icon-medal')).not.toBeInTheDocument()
     })
+
+    it('handles undefined metrics props (all undefined)', () => {
+      const props = { ...defaultProps }
+      Object.assign(props, {
+        followersCount: undefined,
+        repositoriesCount: undefined,
+        badgeCount: undefined,
+      })
+
+      render(<UserCard {...props} />)
+
+      expect(screen.queryByTestId('icon-users')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('icon-folder-open')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('icon-medal')).not.toBeInTheDocument()
+    })
+
+    it('handles mixed defined and undefined metrics', () => {
+      const props = {
+        ...defaultProps,
+        followersCount: 100,
+        repositoriesCount: undefined,
+        badgeCount: 5,
+      } as UserCardProps
+
+      render(<UserCard {...props} />)
+
+      expect(screen.getByText('100')).toBeInTheDocument()
+      expect(screen.queryByTestId('icon-folder-open')).not.toBeInTheDocument()
+      expect(screen.getByText('5')).toBeInTheDocument()
+    })
+
+    it('handles undefined followers and badge count when repositories > 0', () => {
+      const props = {
+        ...defaultProps,
+        repositoriesCount: 50,
+        followersCount: undefined,
+        badgeCount: undefined,
+      } as UserCardProps
+
+      render(<UserCard {...props} />)
+
+      expect(screen.getByText('50')).toBeInTheDocument()
+      expect(screen.queryByTestId('icon-users')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('icon-medal')).not.toBeInTheDocument()
+    })
   })
 })

@@ -100,7 +100,8 @@ const ItemCardList = ({
             const title = 'title' in i ? i.title : ''
             const name = 'name' in i ? i.name : ''
             const url = 'url' in i ? i.url : ''
-            const key = `${repoName || ''}-${title || name || ''}-${url || ''}`
+            const keyParts = [repoName, title || name, url].filter(Boolean)
+            const key = keyParts.join('-')
             return key || `item-${idx}`
           }
           return (

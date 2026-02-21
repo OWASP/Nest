@@ -302,7 +302,7 @@ describe('ContributorsList Component', () => {
   describe('Prop-based behavior', () => {
     it('uses custom label when provided', () => {
       const customLabel = 'Featured Contributors'
-      render(<ContributorsList {...defaultProps} label={customLabel} />)
+      render(<ContributorsList {...defaultProps} title={customLabel} />)
 
       expect(screen.getByText(customLabel)).toBeInTheDocument()
     })
@@ -551,7 +551,7 @@ describe('ContributorsList Component', () => {
     })
 
     it('renders title with proper structure', () => {
-      render(<ContributorsList {...defaultProps} label="Custom Title" />)
+      render(<ContributorsList {...defaultProps} title="Custom Title" />)
 
       expect(screen.getByTestId('anchor-title')).toBeInTheDocument()
       expect(screen.getByText('Custom Title')).toBeInTheDocument()

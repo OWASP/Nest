@@ -63,7 +63,7 @@ def get_gsoc_projects(year: int) -> list:
         list: A list of GSoC projects with their attributes.
 
     """
-    from apps.owasp.index.search.project import get_projects
+    from apps.owasp.index.search.project import get_projects  # noqa: PLC0415
 
     return get_projects(
         attributes=["idx_name", "idx_url"],
@@ -150,7 +150,7 @@ def get_sponsors_data(limit: int = 10) -> QuerySet | None:
         QuerySet or None: A queryset of sponsors, or None if an error occurs.
 
     """
-    from apps.owasp.models.sponsor import Sponsor
+    from apps.owasp.models.sponsor import Sponsor  # noqa: PLC0415
 
     try:
         return Sponsor.objects.all()[:limit]
@@ -170,7 +170,7 @@ def get_posts_data(limit: int = 5) -> QuerySet | None:
         QuerySet or None: A queryset of recent posts, or None if an error occurs.
 
     """
-    from apps.owasp.models.post import Post
+    from apps.owasp.models.post import Post  # noqa: PLC0415
 
     try:
         return Post.recent_posts()[:limit]

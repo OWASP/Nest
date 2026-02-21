@@ -298,6 +298,99 @@ class TestSyncRepository:
         mock_common_deps["User"].update_data.assert_any_call(gh_assignee)
         mock_pr_instance.assignees.add.assert_called_once_with(mock_user_instance)
 
+    def test_milestone_sync_stops_when_older_than_until(
+        self, mock_common_deps, mock_gh_repository, mock_repo, gh_item_factory
+    ):
+        """Tests that milestone syncing stops when an older milestone is reached."""
+        recent_time = timezone.now()
+        old_time = timezone.now() - td(days=60)
+
+        gh_milestone_recent = gh_item_factory(updated_at=recent_time)
+        gh_milestone_old = gh_item_factory(updated_at=old_time)
+        mock_gh_repository.get_milestones.return_value = [gh_milestone_recent, gh_milestone_old]
+
+        sync_repository(mock_gh_repository)
+
+        assert mock_common_deps["Milestone"].update_data.call_count == 1
+
+    def test_pull_request_sync_stops_when_older_than_until(
+        self, mock_common_deps, mock_gh_repository, mock_repo, gh_item_factory
+    ):
+        """Tests that pull request syncing stops when an older PR is reached."""
+        recent_time = timezone.now()
+        old_time = timezone.now() - td(days=60)
+
+        gh_pr_recent = gh_item_factory(updated_at=recent_time)
+        gh_pr_old = gh_item_factory(updated_at=old_time)
+        mock_gh_repository.get_pulls.return_value = [gh_pr_recent, gh_pr_old]
+
+        sync_repository(mock_gh_repository)
+
+        assert mock_common_deps["PullRequest"].update_data.call_count == 1
+
+    def test_issue_assignee_skipped_when_user_update_returns_none(
+        self, mock_common_deps, mock_gh_repository, gh_item_factory
+    ):
+        """Tests that issue assignees are skipped when User.update_data returns None."""
+        gh_assignee_valid = MagicMock()
+        gh_assignee_invalid = MagicMock()
+        gh_issue = gh_item_factory(assignees=[gh_assignee_valid, gh_assignee_invalid])
+        mock_gh_repository.get_issues.return_value = [gh_issue]
+
+        mock_issue_instance = mock_common_deps["Issue"].update_data.return_value
+        valid_user = MagicMock()
+
+        mock_common_deps["User"].update_data.side_effect = [
+            MagicMock(),
+            MagicMock(),
+            valid_user,
+            None,
+        ]
+
+        sync_repository(mock_gh_repository)
+
+        mock_issue_instance.assignees.add.assert_called_once_with(valid_user)
+
+    def test_pull_request_assignee_skipped_when_user_update_returns_none(
+        self, mock_common_deps, mock_gh_repository, gh_item_factory
+    ):
+        """Tests that pull request assignees are skipped when User.update_data returns None."""
+        gh_assignee_valid = MagicMock()
+        gh_assignee_invalid = MagicMock()
+        gh_pr = gh_item_factory(assignees=[gh_assignee_valid, gh_assignee_invalid])
+        mock_gh_repository.get_pulls.return_value = [gh_pr]
+
+        mock_pr_instance = mock_common_deps["PullRequest"].update_data.return_value
+        valid_user = MagicMock()
+
+        mock_common_deps["User"].update_data.side_effect = [
+            MagicMock(),
+            MagicMock(),
+            valid_user,
+            None,
+        ]
+
+        sync_repository(mock_gh_repository)
+
+        mock_pr_instance.assignees.add.assert_called_once_with(valid_user)
+
+    def test_pull_request_label_sync_handles_unknownobjectexception(
+        self, mock_common_deps, mock_gh_repository, gh_item_factory
+    ):
+        """Tests that UnknownObjectException is caught during PR label sync."""
+        gh_pr = gh_item_factory(labels=[MagicMock()])
+        mock_gh_repository.get_pulls.return_value = [gh_pr]
+        mock_common_deps["Label"].update_data.side_effect = UnknownObjectException(
+            status=404, data={}, headers={}
+        )
+        pr_url_mock = mock_common_deps["PullRequest"].update_data.return_value.url
+
+        sync_repository(mock_gh_repository)
+
+        mock_common_deps["logger"].exception.assert_called_with(
+            "Couldn't get GitHub pull request label %s", pr_url_mock
+        )
+
     def test_release_sync_stops_at_existing_release(
         self, mock_common_deps, mock_gh_repository, mock_repo
     ):

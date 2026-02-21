@@ -100,3 +100,122 @@ class TestAppMention:
         client.chat_update.assert_called()
         _, kwargs = client.chat_update.call_args
         assert kwargs["text"] == "Simple query"
+
+    def test_handle_event_with_thread_ts(self, mocker):
+        """Test handle_event uses thread_ts when available."""
+        event = {
+            "channel": "C123456",
+            "text": "Query",
+            "ts": "123.456",
+            "thread_ts": "100.000",
+        }
+        client = mocker.Mock()
+        client.chat_postMessage.return_value = {"ts": "999.999"}
+
+        mock_objects = mocker.Mock()
+        mocker.patch("apps.slack.events.app_mention.Conversation.objects", mock_objects)
+        mock_qs = mocker.Mock()
+        mock_objects.filter.return_value = mock_qs
+        mock_qs.exists.return_value = True
+
+        mocker.patch("apps.slack.events.app_mention.get_blocks", return_value=[])
+
+        handler = AppMention()
+        handler.handle_event(event, client)
+
+        client.chat_postMessage.assert_called()
+        _, kwargs = client.chat_postMessage.call_args
+        assert kwargs["thread_ts"] == "100.000"
+
+    def test_handle_event_blocks_without_text_element(self, mocker):
+        """Test handle_event with blocks but no text elements."""
+        event = {
+            "channel": "C123456",
+            "text": "Fallback text",
+            "blocks": [
+                {
+                    "type": "rich_text",
+                    "elements": [
+                        {
+                            "type": "rich_text_section",
+                            "elements": [{"type": "user", "user_id": "U123"}],
+                        }
+                    ],
+                }
+            ],
+            "ts": "123.456",
+        }
+        client = mocker.Mock()
+        client.chat_postMessage.return_value = {"ts": "999.999"}
+
+        mock_objects = mocker.Mock()
+        mocker.patch("apps.slack.events.app_mention.Conversation.objects", mock_objects)
+        mock_qs = mocker.Mock()
+        mock_objects.filter.return_value = mock_qs
+        mock_qs.exists.return_value = True
+
+        mocker.patch("apps.slack.events.app_mention.get_blocks", return_value=[])
+
+        handler = AppMention()
+        handler.handle_event(event, client)
+
+        client.chat_update.assert_called()
+        _, kwargs = client.chat_update.call_args
+        assert kwargs["text"] == "Fallback text"
+
+    def test_handle_event_blocks_without_rich_text_section(self, mocker):
+        """Test handle_event with blocks but no rich_text_section."""
+        event = {
+            "channel": "C123456",
+            "text": "Fallback text",
+            "blocks": [
+                {
+                    "type": "rich_text",
+                    "elements": [{"type": "other_type", "data": "something"}],
+                }
+            ],
+            "ts": "123.456",
+        }
+        client = mocker.Mock()
+        client.chat_postMessage.return_value = {"ts": "999.999"}
+
+        mock_objects = mocker.Mock()
+        mocker.patch("apps.slack.events.app_mention.Conversation.objects", mock_objects)
+        mock_qs = mocker.Mock()
+        mock_objects.filter.return_value = mock_qs
+        mock_qs.exists.return_value = True
+
+        mocker.patch("apps.slack.events.app_mention.get_blocks", return_value=[])
+
+        handler = AppMention()
+        handler.handle_event(event, client)
+
+        client.chat_update.assert_called()
+        _, kwargs = client.chat_update.call_args
+        assert kwargs["text"] == "Fallback text"
+
+    def test_handle_event_blocks_not_rich_text(self, mocker):
+        """Test handle_event with blocks that are not rich_text type."""
+        event = {
+            "channel": "C123456",
+            "text": "Fallback text",
+            "blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": "Some text"}}],
+            "ts": "123.456",
+        }
+        client = mocker.Mock()
+        client.chat_postMessage.return_value = {"ts": "999.999"}
+
+        mock_objects = mocker.Mock()
+        mocker.patch("apps.slack.events.app_mention.Conversation.objects", mock_objects)
+        mock_qs = mocker.Mock()
+        mock_objects.filter.return_value = mock_qs
+        mock_qs.exists.return_value = True
+
+        mocker.patch("apps.slack.events.app_mention.get_blocks", return_value=[])
+
+        handler = AppMention()
+        handler.handle_event(event, client)
+
+        client.chat_update.assert_called()
+        _, kwargs = client.chat_update.call_args
+        assert kwargs["text"] == "Fallback text"

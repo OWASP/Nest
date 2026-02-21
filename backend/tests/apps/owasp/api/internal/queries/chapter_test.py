@@ -68,3 +68,18 @@ class TestChapterResolution:
         assert result == []
         result = query.recent_chapters(limit=-1)
         assert result == []
+
+    def test_recent_chapters_with_valid_limit(self, mock_info):
+        """Test recent_chapters with valid limit returns chapters."""
+        mock_chapters = [Mock(), Mock()]
+        query = ChapterQuery()
+        with patch.object(Chapter, "active_chapters") as mock_active:
+            mock_qs = Mock()
+            mock_active.order_by.return_value = mock_qs
+            mock_qs.__getitem__ = Mock(return_value=mock_chapters)
+
+            result = query.recent_chapters(limit=5)
+
+            mock_active.order_by.assert_called_once_with("-created_at")
+            mock_qs.__getitem__.assert_called_once_with(slice(None, 5, None))
+            assert result == mock_chapters

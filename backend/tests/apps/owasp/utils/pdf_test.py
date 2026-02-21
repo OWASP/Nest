@@ -9,6 +9,12 @@ from apps.owasp.utils.pdf import generate_latest_metrics_pdf, generate_metrics_o
 
 
 class TestGenerateMetricsPDF:
+    def test_generate_latest_metrics_pdf_with_falsy_metrics(self):
+        """Test generate_latest_metrics_pdf returns None when metrics is falsy."""
+        mock_metrics = MagicMock(__bool__=lambda _self: False)
+        result = generate_latest_metrics_pdf(mock_metrics)
+        assert result is None
+
     @patch("apps.owasp.utils.pdf.ProjectHealthMetrics.get_stats")
     @patch("apps.owasp.utils.pdf.Canvas")
     @patch("apps.owasp.utils.pdf.Table")

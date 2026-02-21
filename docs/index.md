@@ -2,6 +2,7 @@
 title: OWASP Nest
 ---
 
+<!-- markdownlint-disable MD025 -->
 # OWASP Nest
 
 [![OWASP](https://img.shields.io/badge/OWASP-Incubator-blue)](https://owasp.org/www-project-nest/) ![OWASP](https://img.shields.io/badge/OWASP-Code-blue) [![Slack](https://img.shields.io/badge/OWASP-Slack-blue.svg)](https://owasp.slack.com/messages/project-nest)
@@ -32,7 +33,7 @@ OWASP Nest makes it easier for both new and experienced contributors to engage m
 OWASP Nest is led by a dedicated team ensuring the platform aligns with OWASP’s mission and fosters a thriving open-source ecosystem.
 
 | **Leader** | **GitHub Profile** |
-|------------|------------------|
+| ------------ | ------------------ |
 | Arkadii Yakovets | [@arkid15r](https://github.com/arkid15r/) |
 | Kate Golovanova | [@kasya](https://github.com/kasya/) |
 | Starr Brown | [@mamicidal](https://github.com/mamicidal/) |

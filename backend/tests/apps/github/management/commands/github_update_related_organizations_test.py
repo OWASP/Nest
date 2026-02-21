@@ -9,27 +9,6 @@ from apps.github.management.commands.github_update_related_organizations import 
 )
 
 
-@pytest.fixture
-def command():
-    return Command()
-
-
-@pytest.fixture
-def mock_logger():
-    with mock.patch(
-        "apps.github.management.commands.github_update_related_organizations.logger"
-    ) as mock_logger:
-        yield mock_logger
-
-
-@pytest.fixture
-def mock_get_github_client():
-    with mock.patch(
-        "apps.github.management.commands.github_update_related_organizations.get_github_client"
-    ) as mock_get_client:
-        yield mock_get_client
-
-
 def create_mock_organization(login="test-org", num_related_projects=1):
     org = mock.Mock(spec=Organization)
     org.login = login
@@ -86,7 +65,29 @@ class Scenario(NamedTuple):
     expected_sync_calls: int
 
 
-class TestGithubUpdateExternalRepositories:
+class TestGithubUpdateRelatedOrganizations:
+    @pytest.fixture
+    def command(self):
+        return Command()
+
+    @pytest.fixture
+    def mock_logger(self):
+        with mock.patch(
+            "apps.github.management.commands.github_update_related_organizations.logger"
+        ) as mock_logger:
+            yield mock_logger
+
+    def test_add_arguments(self, command):
+        """Test that the command's arguments are correctly added."""
+        parser = mock.Mock()
+        command.add_arguments(parser)
+        parser.add_argument.assert_called_once_with(
+            "--organization",
+            required=False,
+            type=str,
+            help="The organization name (e.g. juice-shop, DefectDojo)",
+        )
+
     @pytest.fixture(autouse=True)
     def setup(self, monkeypatch, command):
         monkeypatch.setenv("GITHUB_TOKEN", "valid-token")
@@ -154,6 +155,7 @@ class TestGithubUpdateExternalRepositories:
         orgs, gh_orgs = setup_organizations(scenario.num_orgs, scenario.num_repos_per_org)
         self._setup_organizations_mock(orgs)
         self.mock_gh.get_organization.side_effect = gh_orgs
+        self.mock_sync_repository.return_value = (mock.Mock(), mock.Mock())
 
         with mock.patch("builtins.print"):
             self.command.handle(organization=None)
@@ -173,6 +175,7 @@ class TestGithubUpdateExternalRepositories:
 
         self._setup_organizations_mock([org])
         self.mock_gh.get_organization.return_value = gh_org
+        self.mock_sync_repository.return_value = (mock.Mock(), mock.Mock())
 
         with mock.patch("builtins.print"):
             self.command.handle(organization="test-org")

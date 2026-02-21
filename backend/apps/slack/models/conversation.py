@@ -16,6 +16,8 @@ class Conversation(TimestampedModel):
     """Slack Conversation model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "slack_conversations"
         verbose_name_plural = "Conversations"
 

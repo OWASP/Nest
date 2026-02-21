@@ -10,6 +10,6 @@ class Command(BaseCommand):
 
     def handle(self, *_args, **_options) -> None:
         """Update replicas for Algolia indices."""
-        print("\n Starting replica configuration...")
+        self.stdout.write("\n Starting replica configuration...\n")
         ProjectIndex.configure_replicas()
-        print("\n Replica have been Successfully created.")
+        self.stdout.write(self.style.SUCCESS("\n Replicas have been successfully created.\n"))

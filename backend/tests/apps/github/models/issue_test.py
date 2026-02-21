@@ -1,4 +1,4 @@
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import pytest
 
@@ -179,7 +179,7 @@ class TestIssueModel:
         assert issue.comments_count == 0
         assert issue.closed_at is None
         assert issue.created_at is None
-        assert issue.is_locked is False
+        assert not issue.is_locked
         assert issue.lock_reason == ""
         assert issue.number == 0
         assert issue.sequence_id == 0
@@ -218,3 +218,63 @@ class TestIssueModel:
             issue.generate_summary.assert_not_called()
         else:
             issue.generate_summary.assert_called_once()
+
+    def test_save_method_when_issue_not_open(self, mock_repository):
+        """Test save method when issue is not open."""
+        issue = Issue(repository=mock_repository, state=Issue.IssueState.CLOSED)
+        issue.generate_hint = Mock()
+        issue.generate_summary = Mock()
+
+        with patch("apps.github.models.issue.BulkSaveModel.save"):
+            issue.save()
+
+        issue.generate_hint.assert_not_called()
+        issue.generate_summary.assert_not_called()
+
+    def test_latest_comment_property(self, mock_repository):
+        """Test latest_comment property returns the expected query result."""
+        issue = Issue(repository=mock_repository)
+
+        mock_comments = MagicMock()
+        mock_ordered = MagicMock()
+        mock_comments.order_by.return_value = mock_ordered
+        mock_ordered.first.return_value = None
+
+        issue._state.db = "default"
+        with patch.object(type(issue), "comments", PropertyMock(return_value=mock_comments)):
+            result = issue.latest_comment
+            assert result is None
+            mock_comments.order_by.assert_called_once_with("-nest_created_at")
+            mock_ordered.first.assert_called_once()
+
+    @patch("apps.github.models.issue.Issue.objects.get")
+    def test_update_data_without_save(self, mock_get):
+        """Test update_data with save=False."""
+        existing_issue = Issue(node_id="12345")
+        mock_get.return_value = existing_issue
+
+        gh_issue_mock = Mock()
+        gh_issue_mock.raw_data = {"node_id": "12345"}
+        gh_issue_mock.title = "Test Issue"
+        gh_issue_mock.body = "Test Body"
+        gh_issue_mock.number = 1
+        gh_issue_mock.state = "open"
+        gh_issue_mock.html_url = "https://github.com/test/issue/1"
+        gh_issue_mock.created_at = None
+        gh_issue_mock.updated_at = None
+        gh_issue_mock.closed_at = None
+        gh_issue_mock.comments = 0
+        gh_issue_mock.locked = False
+        gh_issue_mock.active_lock_reason = None
+        gh_issue_mock.state_reason = None
+        gh_issue_mock.id = 123
+
+        with (
+            patch.object(Issue, "from_github") as mock_from_github,
+            patch.object(Issue, "save") as mock_save,
+        ):
+            result = Issue.update_data(gh_issue_mock, save=False)
+
+            mock_from_github.assert_called_once()
+            mock_save.assert_not_called()
+            assert result == existing_issue

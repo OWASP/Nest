@@ -7,6 +7,8 @@ from django.test import RequestFactory
 
 from apps.api.rest.v0.snapshot import (
     SnapshotDetail,
+    SnapshotIssue,
+    SnapshotRelease,
     get_snapshot,
     list_snapshot_chapters,
     list_snapshot_issues,
@@ -242,8 +244,6 @@ class TestSnapshotAPI:
         assert response[0].tag_name == self.release.tag_name
 
     def test_snapshot_issue_resolver_no_organization(self):
-        from apps.api.rest.v0.snapshot import SnapshotIssue
-
         issue = MagicMock(spec=Issue)
         issue.repository = MagicMock()
         issue.repository.organization = None
@@ -253,8 +253,6 @@ class TestSnapshotAPI:
         assert SnapshotIssue.resolve_repository_name(issue) == "test-repo"
 
     def test_snapshot_release_resolver_no_organization(self):
-        from apps.api.rest.v0.snapshot import SnapshotRelease
-
         release = MagicMock(spec=Release)
         release.repository = MagicMock()
         release.repository.organization = None

@@ -1,4 +1,5 @@
 import json
+from argparse import ArgumentParser
 from io import StringIO
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -9,6 +10,14 @@ from apps.owasp.management.commands.add_project_custom_tags import Command, Proj
 
 
 class TestAddProjectCustomTags:
+    def test_add_arguments(self):
+        """Test add_arguments adds expected arguments."""
+        command = Command()
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args(["test-file.json"])
+        assert getattr(args, "file-name") == "test-file.json"
+
     @pytest.mark.parametrize(
         ("file_exists", "file_content", "expected_output"),
         [

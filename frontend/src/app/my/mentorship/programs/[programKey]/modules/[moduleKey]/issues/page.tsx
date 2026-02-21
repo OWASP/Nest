@@ -2,6 +2,7 @@
 
 import { useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -95,58 +96,60 @@ const IssuesPage = () => {
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 
   return (
-    <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{moduleData.name} Issues</h1>
-          <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
-            <Select
-              labelPlacement="outside-left"
-              size="md"
-              aria-label="Filter by label"
-              label="Label :"
-              classNames={{
-                label:
-                  'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-40',
-                popoverContent: 'text-md min-w-40 dark:bg-[#323232] rounded-none p-0',
-              }}
-              selectedKeys={new Set([selectedLabel])}
-              onSelectionChange={(keys) => {
-                const [key] = Array.from(keys as Set<string>)
-                if (key) handleLabelChange(key)
-              }}
-            >
-              {[LABEL_ALL, ...allLabels].map((l) => (
-                <SelectItem
-                  key={l}
-                  classNames={{
-                    base: 'text-sm hover:bg-[#D1DBE6] dark:hover:bg-[#454545] rounded-none px-3 py-0.5',
-                  }}
-                >
-                  {l === LABEL_ALL ? 'All' : l}
-                </SelectItem>
-              ))}
-            </Select>
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <div className="mt-16 min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-3xl font-bold">{moduleData.name} Issues</h1>
+            <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+              <Select
+                labelPlacement="outside-left"
+                size="md"
+                aria-label="Filter by label"
+                label="Label :"
+                classNames={{
+                  label:
+                    'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
+                  trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-40',
+                  popoverContent: 'text-md min-w-40 dark:bg-[#323232] rounded-none p-0',
+                }}
+                selectedKeys={new Set([selectedLabel])}
+                onSelectionChange={(keys) => {
+                  const [key] = Array.from(keys as Set<string>)
+                  if (key) handleLabelChange(key)
+                }}
+              >
+                {[LABEL_ALL, ...allLabels].map((l) => (
+                  <SelectItem
+                    key={l}
+                    classNames={{
+                      base: 'text-sm hover:bg-[#D1DBE6] dark:hover:bg-[#454545] rounded-none px-3 py-0.5',
+                    }}
+                  >
+                    {l === LABEL_ALL ? 'All' : l}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
           </div>
+
+          <IssuesTable
+            issues={moduleIssues}
+            showAssignee={true}
+            onIssueClick={handleIssueClick}
+            emptyMessage="No issues found for the selected filter."
+          />
+
+          {/* Pagination Controls */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            isLoaded={!loading}
+          />
         </div>
-
-        <IssuesTable
-          issues={moduleIssues}
-          showAssignee={true}
-          onIssueClick={handleIssueClick}
-          emptyMessage="No issues found for the selected filter."
-        />
-
-        {/* Pagination Controls */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          isLoaded={!loading}
-        />
       </div>
-    </div>
+    </BreadcrumbStyleProvider>
   )
 }
 

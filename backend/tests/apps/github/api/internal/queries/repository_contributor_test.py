@@ -145,3 +145,11 @@ class TestRepositoryContributorQuery:
         assert node.name == "Test User"
         assert node.project_key == "www-project-example"
         assert node.project_name == "Example Project"
+
+    @patch("apps.github.models.repository_contributor.RepositoryContributor.get_top_contributors")
+    def test_top_contributors_invalid_limit(self, mock_get_top_contributors):
+        """Test top_contributors returns empty list for invalid limit."""
+        result = RepositoryContributorQuery().top_contributors(limit=0)
+
+        assert result == []
+        mock_get_top_contributors.assert_not_called()

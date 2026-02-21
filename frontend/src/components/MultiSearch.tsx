@@ -86,7 +86,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
   const handleSuggestionClick = useCallback(
     (suggestion: SearchHit, indexName: string) => {
-      setSearchQuery(suggestion.name ?? '')
+      setSearchQuery(suggestion.name || '')
       setShowSuggestions(false)
 
       switch (indexName) {

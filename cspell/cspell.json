@@ -1,5 +1,5 @@
 {
-  "allowCompoundWords": false,
+  "allowCompoundWords": true,
   "caseSensitive": false,
   "language": "en",
   "minWordLength": 3,

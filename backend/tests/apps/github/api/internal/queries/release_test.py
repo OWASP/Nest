@@ -165,3 +165,12 @@ class TestReleaseQuery:
         assert result == [mock_release]
         # Verify login filter was applied
         assert len(mock_queryset.filter.call_args_list) >= 1
+
+    @patch("apps.github.models.release.Release.objects")
+    def test_recent_releases_invalid_limit(self, mock_objects, mock_queryset):
+        """Test recent_releases returns empty list for invalid limit."""
+        mock_objects.filter.return_value = mock_queryset
+
+        result = ReleaseQuery().recent_releases(limit=0)
+
+        assert result == []

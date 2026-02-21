@@ -1,6 +1,6 @@
 """Test cases for ProjectNode."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.api.internal.nodes.milestone import MilestoneNode
@@ -116,8 +116,6 @@ class TestProjectNode(GraphQLNodeBaseTest):
 
     def test_contribution_stats_transforms_snake_case_to_camel_case(self):
         """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
-        from unittest.mock import Mock
-
         mock_project = Mock()
         mock_project.contribution_stats = {
             "commits": 100,
@@ -256,3 +254,82 @@ class TestProjectNodeResolvers:
         result = resolver(None, mock_project)
 
         assert result == ["security", "owasp"]
+
+    def test_recent_pull_requests(self):
+        """Test recent_pull_requests resolver."""
+        resolver = self._get_resolver("recent_pull_requests")
+        mock_project = MagicMock()
+        mock_prs = [MagicMock(), MagicMock()]
+        mock_project.pull_requests.order_by.return_value.__getitem__.return_value = mock_prs
+
+        result = resolver(None, mock_project)
+
+        mock_project.pull_requests.order_by.assert_called_once_with("-created_at")
+        assert result == mock_prs
+
+    def test_recent_releases(self):
+        """Test recent_releases resolver."""
+        resolver = self._get_resolver("recent_releases")
+        mock_project = MagicMock()
+        mock_releases = [MagicMock(), MagicMock()]
+        mock_project.published_releases.order_by.return_value.__getitem__.return_value = (
+            mock_releases
+        )
+
+        result = resolver(None, mock_project)
+
+        mock_project.published_releases.order_by.assert_called_once_with("-published_at")
+        assert result == mock_releases
+
+    def test_repositories(self):
+        """Test repositories resolver."""
+        resolver = self._get_resolver("repositories")
+        mock_project = MagicMock()
+        mock_repos = [MagicMock(), MagicMock()]
+        mock_filtered = MagicMock()
+        mock_filtered.order_by.return_value = mock_repos
+        mock_project.repositories.filter.return_value = mock_filtered
+
+        result = resolver(None, mock_project)
+
+        mock_project.repositories.filter.assert_called_once_with(organization__isnull=False)
+        mock_filtered.order_by.assert_called_once_with("-pushed_at", "-updated_at")
+        assert result == mock_repos
+
+    def test_recent_issues(self):
+        """Test recent_issues resolver."""
+        resolver = self._get_resolver("recent_issues")
+        mock_project = MagicMock()
+        mock_issues = [MagicMock(), MagicMock()]
+        mock_project.issues.order_by.return_value.__getitem__.return_value = mock_issues
+
+        result = resolver(None, mock_project)
+
+        mock_project.issues.order_by.assert_called_once_with("-created_at")
+        assert result == mock_issues
+
+    def test_recent_milestones_with_valid_limit(self):
+        """Test recent_milestones returns milestones with valid limit."""
+        resolver = self._get_resolver("recent_milestones")
+        mock_project = MagicMock()
+        mock_repos = [MagicMock()]
+        mock_project.repositories.all.return_value = mock_repos
+
+        mock_milestones = [MagicMock(), MagicMock()]
+
+        with patch("apps.owasp.api.internal.nodes.project.Milestone") as mock_milestone_cls:
+            mock_filter = MagicMock()
+            mock_select = MagicMock()
+            mock_prefetch = MagicMock()
+            mock_order = MagicMock()
+            mock_order.__getitem__.return_value = mock_milestones
+
+            mock_milestone_cls.objects.filter.return_value = mock_filter
+            mock_filter.select_related.return_value = mock_select
+            mock_select.prefetch_related.return_value = mock_prefetch
+            mock_prefetch.order_by.return_value = mock_order
+
+            result = resolver(None, mock_project, limit=5)
+
+            mock_milestone_cls.objects.filter.assert_called_once()
+            assert result == mock_milestones

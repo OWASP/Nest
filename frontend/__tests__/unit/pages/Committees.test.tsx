@@ -143,4 +143,22 @@ describe('Committees Component', () => {
     //suppose index_key is committee_1
     expect(mockRouter.push).toHaveBeenCalledWith('/committees/committee_1')
   })
+
+  test('renders committee card without summary (uses empty string fallback)', async () => {
+    const committeeWithoutSummary = {
+      ...mockCommitteeData.committees[0],
+      summary: undefined,
+      key: 'committee_no_summary',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [committeeWithoutSummary],
+      totalPages: 1,
+    })
+
+    render(<CommitteesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+    })
+  })
 })

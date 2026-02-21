@@ -126,7 +126,7 @@ class Command(BaseCommand):
                 defaults=self.get_level_requirements(level_code),
             )
 
-            print(
+            self.stdout.write(
                 f"{'Created' if created else 'Updated'} health requirements for "
                 f"{level_name} projects"
             )

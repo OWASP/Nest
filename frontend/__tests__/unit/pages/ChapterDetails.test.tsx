@@ -151,4 +151,63 @@ describe('chapterDetailsPage Component', () => {
       expect(screen.getByText('Chapter Leader')).toBeInTheDocument()
     })
   })
+
+  test('handles missing suggestedLocation gracefully', async () => {
+    const chapterDataWithoutLocation = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        suggestedLocation: null,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithoutLocation,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Test City, Test Country')).not.toBeInTheDocument()
+  })
+
+  test('handles missing region gracefully', async () => {
+    const chapterDataWithoutRegion = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        region: null,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithoutRegion,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+  })
+
+  test('handles missing suggestedLocation and region gracefully', async () => {
+    const chapterDataWithoutLocationAndRegion = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        suggestedLocation: undefined,
+        region: undefined,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithoutLocationAndRegion,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+  })
 })

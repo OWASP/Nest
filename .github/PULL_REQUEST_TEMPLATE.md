@@ -1,4 +1,3 @@
-
 ## STOP AND READ BEFORE SUBMITTING! REMOVE THIS PARAGRAPH BEFORE OPENING THE PR
 
 Thank you for your interest in contributing to OWASP Nest!

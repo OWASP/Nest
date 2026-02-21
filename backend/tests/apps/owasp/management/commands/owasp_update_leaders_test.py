@@ -75,9 +75,9 @@ class TestOwaspUpdateLeaders:
         assert filter_call[1]["member__isnull"]
 
         # Verify all members were matched and saved
-        assert mock_members[0].save.called
-        assert mock_members[1].save.called
-        assert mock_members[2].save.called
+        mock_members[0].save.assert_called_once()
+        mock_members[1].save.assert_called_once()
+        mock_members[2].save.assert_called_once()
 
         # Verify correct member_id assignments
         assert mock_members[0].member_id == 2  # jane.doe
@@ -113,7 +113,7 @@ class TestOwaspUpdateLeaders:
         call_command("owasp_update_leaders", "chapter", "--threshold=95", stdout=out)
 
         # Verify no matches were made
-        assert not mock_members[0].save.called
+        mock_members[0].save.assert_not_called()
         assert "No match found for 'Jone Doe'" in out.getvalue()
         assert "1 leaders remain unmatched" in out.getvalue()
 
@@ -171,7 +171,7 @@ class TestOwaspUpdateLeaders:
         mock_fuzz.token_sort_ratio.assert_not_called()
 
         # Verify member was matched and saved
-        assert mock_members[0].save.called
+        mock_members[0].save.assert_called_once()
         assert mock_members[0].member_id == 1  # john.doe
         assert "Matched 1 out of 1 Chapter leaders" in out.getvalue()
 
@@ -240,6 +240,33 @@ class TestOwaspUpdateLeaders:
 
         match = cmd.find_best_user_match("target", "target", users[1:], 0)
         assert match == users[1]
+
+    def test_handle_invalid_model_direct(self):
+        """Test handle with invalid model_name."""
+        cmd = TestOwaspUpdateLeaders._create_command()
+        cmd.stdout = io.StringIO()
+        with patch(f"{COMMAND_PATH}.User"):
+            cmd.handle(model_name="invalid", threshold=75)
+        output = cmd.stdout.getvalue()
+        assert "Invalid model name" in output
+
+    def test_find_best_user_match_fuzzy_user_no_name(self):
+        """Test fuzzy matching with user that has no name."""
+        cmd = TestOwaspUpdateLeaders._create_command()
+        users = [
+            {"id": 1, "login": "some_long_login", "name": None, "email": "no@email.com"},
+        ]
+        match = cmd.find_best_user_match("some_long_login_x", None, users, 75)
+        assert match == users[0]
+
+    def test_find_best_user_match_fuzzy_login_wins(self):
+        """Test fuzzy matching where login score is the best."""
+        cmd = TestOwaspUpdateLeaders._create_command()
+        users = [
+            {"id": 1, "login": "alice_smith", "name": "Different Person", "email": "x@x.com"},
+        ]
+        match = cmd.find_best_user_match("alice_smith_x", None, users, 50)
+        assert match == users[0]
 
     @staticmethod
     def _create_command():

@@ -3,6 +3,7 @@
 from unittest.mock import Mock, patch
 
 from apps.owasp.api.internal.queries.board_of_directors import BoardOfDirectorsQuery
+from apps.owasp.models.board_of_directors import BoardOfDirectors
 
 
 class TestBoardOfDirectorsQuery:
@@ -23,8 +24,6 @@ class TestBoardOfDirectorsQuery:
             assert result == mock_board
 
     def test_board_of_directors_not_found(self):
-        from apps.owasp.models.board_of_directors import BoardOfDirectors
-
         query = BoardOfDirectorsQuery()
 
         with patch(
@@ -74,3 +73,13 @@ class TestBoardOfDirectorsQuery:
 
             mock_queryset.__getitem__.assert_called_once_with(slice(None, 5, None))
             assert result == mock_boards
+
+    def test_boards_of_directors_with_invalid_limit(self):
+        """Test boards_of_directors returns empty list for invalid limit."""
+        query = BoardOfDirectorsQuery()
+
+        result = query.boards_of_directors(limit=0)
+        assert result == []
+
+        result = query.boards_of_directors(limit=-1)
+        assert result == []

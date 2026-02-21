@@ -136,4 +136,23 @@ describe('<Pagination />', () => {
     renderComponent({ totalPages: 2, currentPage: 2 })
     expect(screen.getAllByRole('button', { name: /^Go to page [12]$/ })).toHaveLength(2)
   })
+  it('does not render trailing ellipsis when currentPage is near the end', () => {
+    renderComponent({ currentPage: 18, totalPages: 20 })
+
+    for (const n of [1, 2, 3]) {
+      expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
+    }
+
+    for (const n of [17, 18, 19]) {
+      expect(screen.getByRole('button', { name: `Go to page ${n}` })).toBeInTheDocument()
+    }
+
+    expect(screen.getByRole('button', { name: 'Go to page 20' })).toBeInTheDocument()
+
+    const ellipsisContainers = document.querySelectorAll('div.flex.h-10.w-10')
+    const ellipses = Array.from(ellipsisContainers).filter((el) =>
+      el.querySelector('svg[aria-hidden="true"]')
+    )
+    expect(ellipses).toHaveLength(1)
+  })
 })

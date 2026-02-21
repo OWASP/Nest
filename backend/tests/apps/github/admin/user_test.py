@@ -34,7 +34,7 @@ class TestMemberProfileInline:
         assert MemberProfileInline.model == MemberProfile
 
     def test_inline_cannot_delete(self):
-        assert MemberProfileInline.can_delete is False
+        assert not MemberProfileInline.can_delete
 
     def test_inline_fields(self):
         assert "owasp_slack_id" in MemberProfileInline.fields

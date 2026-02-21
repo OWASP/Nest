@@ -2,7 +2,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.management.commands.ai_update_slack_message_context import Command
+from apps.slack.models.message import Message
 
 
 @pytest.fixture
@@ -21,14 +23,10 @@ def mock_message():
 class TestAiCreateSlackMessageContextCommand:
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
-        from apps.ai.common.base.context_command import BaseContextCommand
-
         assert isinstance(command, BaseContextCommand)
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Message."""
-        from apps.slack.models.message import Message
-
         assert command.model_class == Message
 
     def test_entity_name_property(self, command):

@@ -54,4 +54,20 @@ describe('Leaders Component', () => {
 
     expect(push).toHaveBeenCalledWith('/members/alice')
   })
+
+  it('navigates to search page when user.member is undefined', () => {
+    const userWithoutMember = [
+      {
+        memberName: 'John Doe',
+        description: 'Team Lead',
+        member: undefined,
+      },
+    ]
+    render(<Leaders users={userWithoutMember} />)
+
+    const viewProfileButton = screen.getByText('View Profile')
+    fireEvent.click(viewProfileButton)
+
+    expect(push).toHaveBeenCalledWith('/members?q=John%20Doe')
+  })
 })

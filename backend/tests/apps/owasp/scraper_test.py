@@ -333,3 +333,33 @@ class TestOwaspScraper:
 
         assert result is None
         assert "Request failed" in caplog.text
+
+    def test_get_audience_skips_empty_text(self, mock_session):
+        """Test get_audience skips components with empty text content."""
+        html_with_empty = b"""
+            <div class="sidebar">
+                <li></li>
+                <p>Builder</p>
+                <li>   </li>
+                <p></p>
+            </div>
+        """
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_empty
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert audience == ["builder"]
+
+    def test_urls_with_none_page_tree(self, mock_session):
+        """Test get_urls returns empty set when request fails (page_tree is None)."""
+        mock_session.get.side_effect = requests.exceptions.RequestException
+
+        scraper = OwaspScraper("https://test.org")
+
+        assert scraper.page_tree is None
+        assert scraper.get_urls() == set()
+        mock_session.get.assert_called_once()

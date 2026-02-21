@@ -11,6 +11,8 @@ class Task(TimestampedModel):
     """Connects a Module, a GitHub Issue, and a Mentee to track work."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_tasks"
         verbose_name_plural = "Tasks"
         unique_together = ("issue", "assignee")

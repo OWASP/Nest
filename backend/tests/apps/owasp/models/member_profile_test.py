@@ -19,7 +19,7 @@ class TestMemberProfileModel:
     def test_github_user_field(self):
         field = MemberProfile._meta.get_field("github_user")
 
-        assert field.one_to_one is True
+        assert field.one_to_one
         assert field.remote_field.on_delete.__name__ == "CASCADE"
         assert field.remote_field.related_name == "owasp_profile"
 
@@ -27,7 +27,7 @@ class TestMemberProfileModel:
         field = MemberProfile._meta.get_field("owasp_slack_id")
 
         assert field.max_length == 20
-        assert field.blank is True
+        assert field.blank
         assert field.default == ""
 
     def test_has_timestamp_fields(self):
@@ -38,7 +38,7 @@ class TestMemberProfileModel:
         field = MemberProfile._meta.get_field("linkedin_page_id")
 
         assert field.max_length == 100
-        assert field.blank is True
+        assert field.blank
         assert field.default == ""
 
     def test_linkedin_page_id_valid_values(self):

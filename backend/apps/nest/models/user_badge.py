@@ -11,6 +11,8 @@ class UserBadge(BulkSaveModel, TimestampedModel):
     """Represents a user badge relation."""
 
     class Meta:
+        """Model options."""
+
         db_table = "nest_user_badges"
         unique_together = (
             "badge",

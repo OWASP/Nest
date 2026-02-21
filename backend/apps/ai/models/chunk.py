@@ -13,6 +13,8 @@ class Chunk(TimestampedModel):
     """AI Chunk model for storing text chunks with embeddings."""
 
     class Meta:
+        """Model options."""
+
         db_table = "ai_chunks"
         verbose_name = "Chunk"
         unique_together = ("context", "text")

@@ -43,42 +43,18 @@ export const GET_ABOUT_PAGE_DATA = gql`
       avatarUrl
       login
       name
-      badgeCount
-      badges {
-        cssClass
-        description
-        id
-        name
-        weight
-      }
     }
     leader2: user(login: $leader2) {
       id
       avatarUrl
       login
       name
-      badgeCount
-      badges {
-        cssClass
-        description
-        id
-        name
-        weight
-      }
     }
     leader3: user(login: $leader3) {
       id
       avatarUrl
       login
       name
-      badgeCount
-      badges {
-        cssClass
-        description
-        id
-        name
-        weight
-      }
     }
   }
 `

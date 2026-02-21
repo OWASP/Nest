@@ -19,19 +19,20 @@ MOCKED_HITS = {
 }
 
 
-@pytest.mark.parametrize(
-    ("query", "page", "expected_hits"),
-    [
-        ("security", 1, MOCKED_HITS),
-        ("web", 2, MOCKED_HITS),
-        ("", 1, MOCKED_HITS),
-    ],
-)
-def test_get_committees(query, page, expected_hits):
-    with patch(
-        "apps.owasp.index.search.committee.raw_search", return_value=expected_hits
-    ) as mock_raw_search:
-        result = get_committees(query=query, page=page)
+class TestGetCommittees:
+    @pytest.mark.parametrize(
+        ("query", "page", "expected_hits"),
+        [
+            ("security", 1, MOCKED_HITS),
+            ("web", 2, MOCKED_HITS),
+            ("", 1, MOCKED_HITS),
+        ],
+    )
+    def test_get_committees(self, query, page, expected_hits):
+        with patch(
+            "apps.owasp.index.search.committee.raw_search", return_value=expected_hits
+        ) as mock_raw_search:
+            result = get_committees(query=query, page=page)
 
-        mock_raw_search.assert_called_once()
-        assert result == expected_hits
+            mock_raw_search.assert_called_once()
+            assert result == expected_hits

@@ -17,6 +17,46 @@ function notifyListeners() {
   registry.listeners.forEach((listener) => listener())
 }
 
+const classNameStack: string[] = []
+const classNameListeners = new Set<() => void>()
+
+function notifyClassNameListeners() {
+  classNameListeners.forEach((listener) => listener())
+}
+
+export function registerBreadcrumbClassName(className: string): () => void {
+  classNameStack.push(className)
+  notifyClassNameListeners()
+
+  return () => {
+    const index = classNameStack.lastIndexOf(className)
+    if (index !== -1) classNameStack.splice(index, 1)
+    notifyClassNameListeners()
+  }
+}
+
+function getCurrentBreadcrumbClassName(): string {
+  return classNameStack.at(-1) ?? ''
+}
+
+export function useBreadcrumbClassName(): string {
+  const [className, setClassName] = useState<string>(() => getCurrentBreadcrumbClassName())
+
+  useEffect(() => {
+    const listener = () => {
+      setClassName(getCurrentBreadcrumbClassName())
+    }
+    classNameListeners.add(listener)
+    listener()
+
+    return () => {
+      classNameListeners.delete(listener)
+    }
+  }, [])
+
+  return className
+}
+
 export function registerBreadcrumb(item: BreadcrumbItem): () => void {
   registry.items.set(item.path, item)
   notifyListeners()
@@ -74,6 +114,20 @@ export function BreadcrumbRoot({ children }: Readonly<{ children: ReactNode }>) 
     const unregister = registerBreadcrumb({ title: 'Home', path: '/' })
     return unregister
   }, [])
+
+  return <>{children}</>
+}
+
+type BreadcrumbStyleProviderProps = Readonly<{
+  className: string
+  children: ReactNode
+}>
+
+export function BreadcrumbStyleProvider({ className, children }: BreadcrumbStyleProviderProps) {
+  useEffect(() => {
+    const unregister = registerBreadcrumbClassName(className)
+    return unregister
+  }, [className])
 
   return <>{children}</>
 }
