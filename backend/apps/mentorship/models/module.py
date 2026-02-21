@@ -103,5 +103,13 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
             self.started_at = self.started_at or self.program.started_at
             self.ended_at = self.ended_at or self.program.ended_at
 
+        if not self.pk and self.program:
+            max_order = (
+                Module.objects.filter(program=self.program)
+                .aggregate(max_order=models.Max("order"))
+                .get("max_order")
+            )
+            self.order = (max_order or 0) + 1
+
         self.key = slugify(self.name)
         super().save(*args, **kwargs)
