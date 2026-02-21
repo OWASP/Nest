@@ -455,35 +455,22 @@ describe('EditProgramPage', () => {
       },
     }
 
-    const mockQueryFn = jest
-      .fn()
-      .mockReturnValueOnce({
-        loading: false,
-        data: validData,
-      })
-      .mockReturnValueOnce({
-        loading: false,
-        data: validData,
-      })
-      .mockReturnValueOnce({
-        loading: false,
-        data: validData,
-      })
-      .mockReturnValue({
-        loading: false,
-        data: nullAdminsData,
-      })
+    let currentData = validData
 
     jest.clearAllMocks()
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin1' } },
       status: 'authenticated',
     })
-    ;(useQuery as jest.Mock).mockImplementation(mockQueryFn)
+    ;(useQuery as unknown as jest.Mock).mockImplementation(() => ({
+      loading: false,
+      data: currentData,
+    }))
     const { rerender } = render(<EditProgramPage />)
     await waitFor(async () => {
       expect(await screen.findByLabelText('Name')).toBeInTheDocument()
     })
+    currentData = nullAdminsData
     rerender(<EditProgramPage />)
     await waitFor(async () => {
       expect(await screen.findByText('Access Denied')).toBeInTheDocument()

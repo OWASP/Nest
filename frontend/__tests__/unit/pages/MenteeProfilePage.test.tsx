@@ -551,13 +551,15 @@ describe('MenteeProfilePage', () => {
       return originalUseState(initialValue)
     })
 
-    mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
-    render(<MenteeProfilePage />)
+    try {
+      mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
 
-    expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
-
-    jest.restoreAllMocks()
+      expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+    } finally {
+      jest.restoreAllMocks()
+    }
   })
 
   it('handles undefined domains and tags', () => {

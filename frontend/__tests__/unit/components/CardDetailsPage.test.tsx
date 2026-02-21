@@ -1627,7 +1627,7 @@ describe('CardDetailsPage', () => {
     })
 
     it('renders Leaders with Unknown when value is null', () => {
-      const propsWithNullLeader: DetailsCardProps = {
+      const propsWithNullLeader = {
         ...defaultProps,
         type: 'chapter',
         details: [{ label: 'Leaders', value: null }],
