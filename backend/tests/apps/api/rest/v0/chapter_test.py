@@ -78,28 +78,32 @@ class TestListChapters:
         """Test listing chapters without filters."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.q = ""
+        mock_filters.filter_q = ""
         mock_queryset = MagicMock()
         mock_chapter_model.active_chapters.order_by.return_value = mock_queryset
         mock_filters.filter.return_value = mock_queryset
 
         result = list_chapters(mock_request, mock_filters, ordering=None)
 
-        mock_chapter_model.active_chapters.order_by.assert_called_with("-created_at")
-        assert result == mock_queryset
+        mock_queryset.order_by.assert_called_with("-created_at")
+        assert result == mock_queryset.order_by.return_value
 
     @patch("apps.api.rest.v0.chapter.ChapterModel")
     def test_list_chapters_with_ordering(self, mock_chapter_model):
         """Test listing chapters with custom ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.q = ""
+        mock_filters.filter_q = ""
         mock_queryset = MagicMock()
         mock_chapter_model.active_chapters.order_by.return_value = mock_queryset
         mock_filters.filter.return_value = mock_queryset
 
         result = list_chapters(mock_request, mock_filters, ordering="latitude")
 
-        mock_chapter_model.active_chapters.order_by.assert_called_with("latitude")
-        assert result == mock_queryset
+        mock_queryset.order_by.assert_called_with("latitude")
+        assert result == mock_queryset.order_by.return_value
 
 
 class TestGetChapter:
