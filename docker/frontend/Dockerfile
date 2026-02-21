@@ -38,9 +38,9 @@ ENV FORCE_STANDALONE=$FORCE_STANDALONE
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=secret,id=RELEASE_VERSION \
     --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-    NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" && \
+    NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" && \
     export NEXT_SENTRY_AUTH_TOKEN && \
-    RELEASE_VERSION="$(cat /run/secrets/RELEASE_VERSION)" && \
+    RELEASE_VERSION="$(cat /run/secrets/RELEASE_VERSION 2>/dev/null || true)" && \
     export RELEASE_VERSION && \
     pnpm run build
 
