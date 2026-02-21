@@ -33,7 +33,7 @@ export const mergeApolloHeadersWithCsrf = (
   headers: ApolloHeaders | undefined,
   csrfToken: string | null
 ): ApolloHeaders => {
-  const mergedHeaders: ApolloHeaders = { ...(headers ?? {}) }
+  const mergedHeaders: ApolloHeaders = headers ? { ...headers } : {}
   const cookieHeaderKeys = Object.keys(mergedHeaders).filter(
     (key) => key.toLowerCase() === COOKIE_HEADER_NAME
   )
