@@ -53,8 +53,8 @@ describe('BreadcrumbContext', () => {
 
   it('registers class name', () => {
     const unregister = registerBreadcrumbClassName('test')
+    cleanupFns.push(unregister)
     expect(unregister).toBeDefined()
-    unregister()
   })
 
   it('handles unregistering already removed class name', () => {

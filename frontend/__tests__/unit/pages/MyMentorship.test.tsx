@@ -440,14 +440,13 @@ describe('MyMentorshipPage', () => {
       error: undefined,
     })
     ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('q=existing'))
-    window.history.replaceState(null, '', '?q=existing')
+    globalThis.history.replaceState(null, '', '?q=existing')
 
+    jest.useFakeTimers()
     try {
       render(<MyMentorshipPage />)
 
       const searchInput = screen.getByTestId('search-input')
-      fireEvent.change(searchInput, { target: { value: 'existing' } })
-      jest.useFakeTimers()
       fireEvent.change(searchInput, { target: { value: 'existing' } })
 
       React.act(() => {
@@ -458,7 +457,7 @@ describe('MyMentorshipPage', () => {
         expect(mockPush).not.toHaveBeenCalled()
       })
     } finally {
-      window.history.replaceState(null, '', '/')
+      globalThis.history.replaceState(null, '', '/')
       jest.useRealTimers()
     }
   })

@@ -425,6 +425,7 @@ describe('SnapshotDetailsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('v0.9.2')).toBeInTheDocument()
+      expect(screen.getByText('Unknown repository')).toBeInTheDocument()
     })
   })
 })

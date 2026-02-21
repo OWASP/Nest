@@ -116,7 +116,7 @@ const IssuesPage = () => {
                 selectedKeys={new Set([selectedLabel])}
                 onSelectionChange={(keys) => {
                   const [key] = Array.from(keys as Set<string>)
-                  handleLabelChange(key as string)
+                  if (key !== undefined) handleLabelChange(key)
                 }}
               >
                 {[LABEL_ALL, ...allLabels].map((l) => (
