@@ -98,8 +98,14 @@ class OpenAi:
             )
 
             return response.choices[0].message.content
+        except openai.AuthenticationError:
+            logger.exception("OpenAI authentication error - check DJANGO_OPEN_AI_SECRET_KEY")
+        except openai.RateLimitError:
+            logger.exception("OpenAI rate limit exceeded - request may be retried")
+        except openai.BadRequestError:
+            logger.exception("Invalid OpenAI request - check model/message format")
         except openai.APIConnectionError:
             logger.exception("A connection error occurred during OpenAI API request.")
-        except Exception:
-            logger.exception("An error occurred during OpenAI API request.")
+        except Exception as e:
+            logger.exception(f"Unexpected error during OpenAI API request: {type(e).__name__}")
         return None
