@@ -57,6 +57,12 @@ updates:
     target-branch: main
 
   - package-ecosystem: npm
+    directory: cspell
+    schedule:
+      interval: daily
+    target-branch: main
+
+  - package-ecosystem: npm
     directory: frontend
     schedule:
       interval: daily
