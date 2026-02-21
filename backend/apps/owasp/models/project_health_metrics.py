@@ -4,7 +4,7 @@ from functools import cached_property
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.functions import Coalesce, ExtractMonth, TruncDate
+from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear, TruncDate
 from django.utils import timezone
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -212,21 +212,25 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
         )
         total = stats["projects_count_total"] or 1  # Avoid division by zero
         monthly_overall_metrics = (
-            ProjectHealthMetrics.objects.annotate(month=ExtractMonth("nest_created_at"))
+            ProjectHealthMetrics.objects.annotate(
+                month=ExtractMonth("nest_created_at"), year=ExtractYear("nest_created_at")
+            )
             .filter(
                 nest_created_at__gte=timezone.now() - timezone.timedelta(days=365)
             )  # Last year data
-            .order_by("month")
-            .values("month")
+            .order_by("year", "month")
+            .values("month", "year")
             .distinct()
             .annotate(
                 score=models.Avg("score"),
             )
         )
         months = []
+        years = []
         scores = []
         for entry in monthly_overall_metrics:
             months.append(entry["month"])
+            years.append(entry["year"])
             scores.append(entry["score"])
 
         return ProjectHealthStatsNode(
@@ -234,6 +238,7 @@ class ProjectHealthMetrics(BulkSaveModel, TimestampedModel):
             # We use all metrics instead of latest metrics to get the monthly trend
             monthly_overall_scores=scores,
             monthly_overall_scores_months=months,
+            monthly_overall_scores_years=years,
             projects_count_healthy=stats["projects_count_healthy"],
             projects_count_need_attention=stats["projects_count_need_attention"],
             projects_count_unhealthy=stats["projects_count_unhealthy"],

@@ -131,9 +131,10 @@ const ProjectsDashboardPage: FC = () => {
               data: stats.monthlyOverallScores,
             },
           ]}
-          labels={stats.monthlyOverallScoresMonths.map((month) => {
-            const date = new Date(2025, month - 1, 1)
-            return date.toLocaleString('default', { month: 'short' })
+          labels={stats.monthlyOverallScoresMonths.map((month, index) => {
+            const year = stats.monthlyOverallScoresYears[index]
+            const date = new Date(year, month - 1, 1)
+            return date.toLocaleString('default', { month: 'short', year: 'numeric' })
           })}
         />
         <DonutBarChart

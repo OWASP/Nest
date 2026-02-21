@@ -6,6 +6,7 @@ export const GET_PROJECT_HEALTH_STATS = gql`
       averageScore
       monthlyOverallScores
       monthlyOverallScoresMonths
+      monthlyOverallScoresYears
       projectsCountHealthy
       projectsCountNeedAttention
       projectsCountUnhealthy
