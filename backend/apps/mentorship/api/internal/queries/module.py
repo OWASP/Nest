@@ -16,18 +16,15 @@ class ModuleQuery:
     """Module queries."""
 
     @strawberry.field
-    def get_program_modules(
-        self, info: strawberry.Info, program_key: str
-    ) -> list[ModuleNode]:
+    def get_program_modules(self, info: strawberry.Info, program_key: str) -> list[ModuleNode]:
         """Get all modules by program Key. Returns an empty list if program is not found."""
         try:
             program = Program.objects.get(key=program_key)
         except Program.DoesNotExist:
             return []
 
-        if (
-            program.status != Program.ProgramStatus.PUBLISHED
-            and not has_program_access(info, program)
+        if program.status != Program.ProgramStatus.PUBLISHED and not has_program_access(
+            info, program
         ):
             return []
 
@@ -67,9 +64,8 @@ class ModuleQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if (
-            module.program.status != Program.ProgramStatus.PUBLISHED
-            and not has_program_access(info, module.program)
+        if module.program.status != Program.ProgramStatus.PUBLISHED and not has_program_access(
+            info, module.program
         ):
             return None
 

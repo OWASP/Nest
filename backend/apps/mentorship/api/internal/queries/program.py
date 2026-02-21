@@ -33,9 +33,10 @@ class ProgramQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if program.status != Program.ProgramStatus.PUBLISHED:
-            if not has_program_access(info, program):
-                return None
+        if program.status != Program.ProgramStatus.PUBLISHED and not has_program_access(
+            info, program
+        ):
+            return None
 
         return program
 

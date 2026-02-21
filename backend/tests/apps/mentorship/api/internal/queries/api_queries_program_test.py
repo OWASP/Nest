@@ -21,6 +21,20 @@ def mock_info() -> MagicMock:
     mock_github_user = MagicMock(spec=GithubUser, id=1, login="testuser")
     mock_user = MagicMock(id=1)
     mock_user.github_user = mock_github_user
+    mock_user.is_authenticated = True
+    mock_request = MagicMock()
+    mock_request.user = mock_user
+    mock_info = MagicMock(spec=strawberry.Info)
+    mock_info.context.request = mock_request
+    return mock_info
+
+
+@pytest.fixture
+def mock_anonymous_info() -> MagicMock:
+    """Fixture for a mock strawberry.Info object with an anonymous user."""
+    mock_user = MagicMock(id=None)
+    mock_user.is_authenticated = False
+    mock_user.github_user = None
     mock_request = MagicMock()
     mock_request.user = mock_user
     mock_info = MagicMock(spec=strawberry.Info)
@@ -35,11 +49,12 @@ class TestGetProgram:
     def test_get_program_success(
         self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
     ) -> None:
-        """Test successful retrieval of a program by key."""
+        """Test successful retrieval of a published program by key."""
         mock_program = MagicMock(spec=Program)
+        mock_program.status = Program.ProgramStatus.PUBLISHED
         mock_program_prefetch_related.return_value.get.return_value = mock_program
 
-        result = api_program_queries.get_program(program_key="program1")
+        result = api_program_queries.get_program(info=mock_info, program_key="program1")
 
         assert result == mock_program
         mock_program_prefetch_related.assert_called_once_with(
@@ -54,13 +69,53 @@ class TestGetProgram:
         """Test when the program does not exist."""
         mock_program_prefetch_related.return_value.get.side_effect = Program.DoesNotExist
 
-        result = api_program_queries.get_program(program_key="nonexistent")
+        result = api_program_queries.get_program(info=mock_info, program_key="nonexistent")
 
         assert result is None
         mock_program_prefetch_related.assert_called_once_with(
             "admins__github_user", "admins__nest_user"
         )
         mock_program_prefetch_related.return_value.get.assert_called_once_with(key="nonexistent")
+
+    @patch("apps.mentorship.api.internal.queries.program.has_program_access")
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_get_draft_program_hidden_for_anonymous_user(
+        self,
+        mock_program_prefetch_related: MagicMock,
+        mock_has_access: MagicMock,
+        mock_anonymous_info: MagicMock,
+        api_program_queries,
+    ) -> None:
+        """Test that a draft program is not visible to anonymous users."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.status = Program.ProgramStatus.DRAFT
+        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_has_access.return_value = False
+
+        result = api_program_queries.get_program(
+            info=mock_anonymous_info, program_key="draft-program"
+        )
+
+        assert result is None
+
+    @patch("apps.mentorship.api.internal.queries.program.has_program_access")
+    @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
+    def test_get_draft_program_visible_for_admin(
+        self,
+        mock_program_prefetch_related: MagicMock,
+        mock_has_access: MagicMock,
+        mock_info: MagicMock,
+        api_program_queries,
+    ) -> None:
+        """Test that a draft program is visible to an admin."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.status = Program.ProgramStatus.DRAFT
+        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_has_access.return_value = True
+
+        result = api_program_queries.get_program(info=mock_info, program_key="draft-program")
+
+        assert result == mock_program
 
 
 class TestMyPrograms:
