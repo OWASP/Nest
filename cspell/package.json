@@ -1,4 +1,5 @@
 {
+  "packageManager": "pnpm@10.30.1",
   "devDependencies": {
     "@cspell/dict-aws": "^4.0.17",
     "@cspell/dict-data-science": "^2.0.13",
@@ -9,6 +10,6 @@
     "@cspell/dict-people-names": "^1.1.16",
     "@cspell/dict-software-terms": "^4.2.5",
     "@cspell/dict-win32": "^2.0.10",
-    "cspell": "^8.19.4"
+    "cspell": "^9.6.4"
   }
 }
