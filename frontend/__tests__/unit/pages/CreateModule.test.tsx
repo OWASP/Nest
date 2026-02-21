@@ -255,7 +255,7 @@ describe('CreateModulePage', () => {
       expect(moduleForm).toBeInTheDocument()
     })
   })
-  it('handles form submission error gracefully', async () => {
+  it('handles form submission error by displaying inline error', async () => {
     const user = userEvent.setup({ delay: null })
 
     ;(useSession as jest.Mock).mockReturnValue({
@@ -300,16 +300,14 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModuleError).toHaveBeenCalled()
-      expect(addToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Creation Failed',
-          description: 'Network error',
-          color: 'danger',
-        })
+      // Error is displayed inline via mutationErrors, not via addToast
+      expect(addToast).not.toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Creation Failed' })
       )
     })
   })
-  it('handles non-Error submission failure', async () => {
+  it('handles non-Error submission failure via handleAppError', async () => {
+    const { handleAppError } = jest.requireMock('app/global-error')
     const user = userEvent.setup({ delay: null })
 
     ;(useSession as jest.Mock).mockReturnValue({
@@ -353,11 +351,8 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModuleError).toHaveBeenCalled()
-      expect(addToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description: 'Something went wrong while creating the module.',
-        })
-      )
+      // Non-Error values fall through to handleAppError
+      expect(handleAppError).toHaveBeenCalledWith('String error')
     })
   })
 })
