@@ -381,6 +381,66 @@ To setup NestBot development environment, follow these steps:
    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
+#### Local Access to Internal Dashboards
+
+When running the project locally, some UI sections are visible only if your user has the required backend roles configured via Django Admin. Follow the steps below to enable access during development.
+
+##### Project Health Dashboard (Staff Access)
+
+The Project Health Dashboard is visible only to users marked as staff.
+
+###### Steps
+
+1. **Start the backend server and open the Django Admin panel**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Log in using your superuser credentials.
+
+2. **Navigate to GitHub Users** and open your user record.
+
+3. **In the Permissions section, enable the custom `is_owasp_staff` field**:
+   - Locate the `is_owasp_staff` checkbox and tick it.
+   - Save the changes.
+
+4. **Clear authentication cookies**:
+   - Open [http://localhost:3000](http://localhost:3000)
+   - Open browser DevTools → Application / Storage
+   - Clear Cookies for the site
+   - Refresh the page and sign in again with GitHub.
+
+After logging in, the Project Health Dashboard will appear in the user menu, or you can navigate directly to:
+[http://localhost:3000/projects/dashboard](http://localhost:3000/projects/dashboard)
+
+##### Mentorship Portal ("My Mentorship")
+
+The "My Mentorship" menu item is shown only if the user is a Project Leader or a Mentor.
+
+###### Option 1: Grant access as a Project Leader (recommended)
+
+1. **Open Django Admin**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Navigate to **OWASP** → **Projects**.
+2. **Open an existing project or create a test project**.
+3. **In the `leaders_raw` field, add your exact GitHub username**.
+4. **Save the project**.
+
+###### Option 2: Grant access as a Mentor
+
+1. Ensure you have logged into the frontend at least once (so your GitHub user exists in the database).
+2. **Open Django Admin** → **Mentorship** → **Mentors**.
+3. Click **Add Mentor**.
+4. Select your GitHub user in the `github_user` field.
+5. Fill in any required fields and save.
+
+###### Refresh session
+
+Role-based access is cached in the authentication cookie.
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Clear Cookies for the site
+3. Refresh and sign in again with GitHub
+
+The "My Mentorship" option will now be visible in the user menu.
+
 ## Code Quality Checks
 
 Nest enforces code quality standards to ensure consistency and maintainability. You can run automated checks locally before pushing your changes:
