@@ -1,4 +1,5 @@
 {
+  "packageManager": "pnpm@10.30.1",
   "devDependencies": {
     "@cspell/dict-aws": "^4.0.17",
     "@cspell/dict-data-science": "^2.0.13",

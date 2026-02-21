@@ -7,7 +7,7 @@ FROM base AS builder
 ENV APK_CACHE_DIR="/app/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
     FORCE_COLOR=1 \
-    NPM_CACHE="/app/.npm" \
+    NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
 ENV PATH="$PNPM_HOME:$PATH"
@@ -21,11 +21,9 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
 
 WORKDIR /app
 
-RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g pnpm@10.30.0 --cache ${NPM_CACHE}
-
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    corepack enable && corepack install && \
     pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
@@ -40,8 +38,10 @@ ENV FORCE_STANDALONE=$FORCE_STANDALONE
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=secret,id=RELEASE_VERSION \
     --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-    export NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
-    export RELEASE_VERSION=$(cat /run/secrets/RELEASE_VERSION) && \
+    NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN)" && \
+    export NEXT_SENTRY_AUTH_TOKEN && \
+    RELEASE_VERSION="$(cat /run/secrets/RELEASE_VERSION)" && \
+    export RELEASE_VERSION && \
     pnpm run build
 
 # Production image, copy all the files and run next.
