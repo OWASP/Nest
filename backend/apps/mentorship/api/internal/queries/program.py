@@ -9,6 +9,7 @@ from apps.common.utils import normalize_limit
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 from apps.mentorship.models.program_admin import ProgramAdmin
+from apps.mentorship.utils import has_program_access
 from apps.nest.api.internal.permissions import IsAuthenticated
 
 PAGE_SIZE = 25
@@ -21,7 +22,7 @@ class ProgramQuery:
     """Program queries."""
 
     @strawberry.field
-    def get_program(self, program_key: str) -> ProgramNode | None:
+    def get_program(self, info: strawberry.Info, program_key: str) -> ProgramNode | None:
         """Get a program by Key."""
         try:
             program = Program.objects.prefetch_related(
@@ -31,6 +32,10 @@ class ProgramQuery:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
             return None
+
+        if program.status != Program.ProgramStatus.PUBLISHED:
+            if not has_program_access(info, program):
+                return None
 
         return program
 
