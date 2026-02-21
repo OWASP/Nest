@@ -101,7 +101,7 @@ class TestApiKeyModel:
         key = ApiKey(name="My Revoked Key", is_revoked=True)
         assert str(key) == "My Revoked Key (revoked)"
 
-    @patch("apps.api.models.api_key.get_user_model")
+    @patch("apps.api.models.api_key.User")
     @patch("apps.api.models.api_key.transaction")
     @patch("apps.api.models.api_key.ApiKey.objects.create")
     @patch("apps.api.models.api_key.ApiKey.generate_hash_key", return_value="hashed_key")
@@ -112,7 +112,7 @@ class TestApiKeyModel:
         mock_hash_key,
         mock_create,
         mock_transaction,
-        mock_get_user_model,
+        mock_user_model,
         mock_user,
     ):
         """Test successful API key creation."""
@@ -122,7 +122,7 @@ class TestApiKeyModel:
         )
         mock_locked_user = MagicMock()
         mock_locked_user.active_api_keys.count.return_value = 0
-        mock_get_user_model.return_value.objects.select_for_update.return_value.get.return_value = mock_locked_user
+        mock_user_model.objects.select_for_update.return_value.get.return_value = mock_locked_user
         mock_instance = MagicMock(spec=ApiKey)
         mock_create.return_value = mock_instance
         expires_at = timezone.now() + timedelta(days=30)
@@ -134,11 +134,12 @@ class TestApiKeyModel:
             expires_at=expires_at,
             hash="hashed_key",
             name="Test Key",
-            user=mock_user,
+            user=mock_locked_user,
         )
-    @patch("apps.api.models.api_key.get_user_model")
+
+    @patch("apps.api.models.api_key.User")
     @patch("apps.api.models.api_key.transaction")
-    def test_create_max_keys_exceeded(self, mock_transaction, mock_get_user_model, mock_user):
+    def test_create_max_keys_exceeded(self, mock_transaction, mock_user_model, mock_user):
         """Test API key creation fails when max active keys exceeded."""
         mock_transaction.atomic = lambda: MagicMock(
             __enter__=MagicMock(return_value=None),
@@ -146,7 +147,7 @@ class TestApiKeyModel:
         )
         mock_locked_user = MagicMock()
         mock_locked_user.active_api_keys.count.return_value = 100
-        mock_get_user_model.return_value.objects.select_for_update.return_value.get.return_value = mock_locked_user
+        mock_user_model.objects.select_for_update.return_value.get.return_value = mock_locked_user
         expires_at = timezone.now() + timedelta(days=30)
 
         result = ApiKey.create.__wrapped__(ApiKey, mock_user, "Test Key", expires_at)
