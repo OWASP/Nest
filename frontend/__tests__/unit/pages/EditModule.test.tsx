@@ -150,7 +150,7 @@ describe('EditModulePage', () => {
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith({
         title: 'Access Denied',
-        description: 'Only program admins can edit modules.',
+        description: 'Only program admins and module mentors can edit this module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,

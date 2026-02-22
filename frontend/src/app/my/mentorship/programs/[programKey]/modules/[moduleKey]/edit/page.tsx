@@ -5,7 +5,7 @@ import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay, handleAppError } from 'app/global-error'
+import { ErrorDisplay } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
@@ -21,7 +21,10 @@ import ModuleForm from 'components/ModuleForm'
 const EditModulePage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
-  const { data: sessionData, status: sessionStatus } = useSession()
+  const { data: sessionData, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
@@ -53,18 +56,22 @@ const EditModulePage = () => {
       return
     }
 
-    const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
+    const currentUserLogin = sessionData?.user?.login
     const isAdmin = data.getProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
-    if (isAdmin) {
+    const isMentor = data.getModule.mentors?.some(
+      (mentor: { login: string }) => mentor.login === currentUserLogin
+    )
+
+    if (isAdmin || isMentor) {
       setAccessStatus('allowed')
     } else {
       setAccessStatus('denied')
       addToast({
         title: 'Access Denied',
-        description: 'Only program admins can edit modules.',
+        description: 'Only program admins and module mentors can edit this module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,
@@ -97,6 +104,11 @@ const EditModulePage = () => {
     if (!formData) return
 
     try {
+      const currentUserLogin = sessionData?.user?.login
+      const isAdmin = data?.getProgram?.admins?.some(
+        (admin: { login: string }) => admin.login === currentUserLogin
+      )
+
       const input: UpdateModuleInput = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
@@ -104,13 +116,16 @@ const EditModulePage = () => {
         experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
         labels: parseCommaSeparated(formData.labels),
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
         name: formData.name,
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
         startedAt: formData.startedAt || '',
         tags: parseCommaSeparated(formData.tags),
+      }
+
+      if (isAdmin) {
+        input.mentorLogins = parseCommaSeparated(formData.mentorLogins)
       }
 
       const result = await updateModule({
@@ -129,7 +144,22 @@ const EditModulePage = () => {
       })
       router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
-      handleAppError(err)
+      let errorMessage = 'Failed to update module. Please try again.'
+
+      if (err instanceof Error) {
+        if (err.message.includes('Permission') || err.message.includes('not have permission')) {
+          errorMessage =
+            'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.'
+        }
+      }
+
+      addToast({
+        title: 'Error',
+        description: errorMessage,
+        color: 'danger',
+        variant: 'solid',
+        timeout: 4000,
+      })
     }
   }
 
