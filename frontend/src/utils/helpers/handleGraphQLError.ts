@@ -28,7 +28,6 @@ export function extractGraphQLErrors(error: unknown): {
 
   if (isApolloErrorLike(error)) {
     for (const gqlError of error.graphQLErrors) {
-      // const extensions = gqlError.extensions
       const extensions = gqlError.extensions as { code?: string; field?: unknown } | undefined
       if (extensions?.code === 'VALIDATION_ERROR' && typeof extensions.field === 'string') {
         validationErrors[extensions.field] = gqlError.message
