@@ -1,7 +1,6 @@
 'use client'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
-
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
@@ -122,7 +121,7 @@ export function useSearchPage<T>({
     return () => {
       controller.abort()
     }
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, _pageTitle])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
