@@ -55,28 +55,16 @@ Follow these steps to set up the infrastructure:
     cd infrastructure/bootstrap/
     ```
 
-- Create a local terraform variables file:
+- Copy the contents from the template file into your new local terraform variables file:
 
     ```bash
-    touch terraform.tfvars
+    cp terraform.tfvars.example terraform.tfvars
     ```
 
-- Copy the contents from the example file:
+- Copy the contents from the template file into your new terraform backend file:
 
     ```bash
-    cat terraform.tfvars.example > terraform.tfvars
-    ```
-
-- Create a local backend configuration file:
-
-    ```bash
-    touch terraform.tfbackend
-    ```
-
-- Copy the contents from the example file:
-
-    ```bash
-    cat terraform.tfbackend.example > terraform.tfbackend
+    cp terraform.tfbackend.example terraform.tfbackend
     ```
 
   > [!NOTE]
@@ -104,28 +92,16 @@ Follow these steps to set up the infrastructure:
     cd ../staging/
     ```
 
-- Create a local variables file:
+- Copy the contents from the template file into your new local terraform variables file:
 
     ```bash
-    touch terraform.tfvars
+    cp terraform.tfvars.example terraform.tfvars
     ```
 
-- Copy the contents from the example file:
+- Copy the contents from the template file into your new local terraform backend file:
 
     ```bash
-    cat terraform.tfvars.example > terraform.tfvars
-    ```
-
-- Create a local backend configuration file:
-
-    ```bash
-    touch terraform.tfbackend
-    ```
-
-- Copy the contents from the example file:
-
-    ```bash
-    cat terraform.tfbackend.example > terraform.tfbackend
+    cp terraform.tfbackend.example terraform.tfbackend
     ```
 
   > [!NOTE]
@@ -173,16 +149,10 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 
 1. **Create Zappa Settings File**:
 
-- Create a local Zappa settings file in the `backend` directory:
+- Copy the contents from the template file into your new local Zappa settings file:
 
     ```bash
-    touch zappa_settings.json
-    ```
-
-- Copy the contents from the template file into your new local environment file:
-
-    ```bash
-    cat zappa_settings.template.json > zappa_settings.json
+    cp zappa_settings.template.json zappa_settings.json
     ```
 
 1. **Populate Settings File**:
