@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from apps.mentorship.models import Program
 
@@ -13,3 +13,14 @@ class TestProgram:
         mock_program_instance = MagicMock(spec=Program)
         mock_program_instance.name = "Security Program"
         assert Program.__str__(mock_program_instance) == "Security Program"
+
+    @patch("apps.common.models.TimestampedModel.save")
+    def test_save_sets_key_from_name(self, mock_super_save):
+        """Test save method sets key from slug name."""
+        mock_program = MagicMock(spec=Program)
+        mock_program.name = "My Test Program"
+
+        Program.save(mock_program)
+
+        assert mock_program.key == "my-test-program"
+        mock_super_save.assert_called_once()

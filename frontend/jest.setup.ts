@@ -114,9 +114,9 @@ beforeAll(() => {
   }
 
   globalThis.ResizeObserver = class {
-    disconnect() {} // NOSONAR: empty mock implementation for test environment.
-    observe() {} // NOSONAR: empty mock implementation for test environment.
-    unobserve() {} // NOSONAR: empty mock implementation for test environment.
+    disconnect = jest.fn()
+    observe = jest.fn()
+    unobserve = jest.fn()
   }
 })
 
@@ -162,6 +162,19 @@ jest.mock('ics', () => {
   return {
     __esModule: true,
     createEvent: jest.fn(),
+  }
+})
+
+jest.mock('@apollo/client/react', () => {
+  const actual = jest.requireActual('@apollo/client/react')
+  const mockUseMutation = jest.fn(() => [
+    jest.fn().mockResolvedValue({ data: {} }),
+    { data: null, loading: false, error: null, called: false },
+  ])
+
+  return {
+    ...actual,
+    useMutation: mockUseMutation,
   }
 })
 

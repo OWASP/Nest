@@ -5,8 +5,8 @@ include frontend/Makefile
 
 .PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
-	security-scan-backend-image security-scan-frontend-image test update \
-	clean-trivy-cache
+	security-scan-backend-image security-scan-frontend-image security-scan-zap \
+	test update clean-trivy-cache
 
 MAKEFLAGS += --no-print-directory
 
@@ -83,36 +83,36 @@ security-scan-code-semgrep:
 		-w /src \
 		$$(grep -E '^FROM semgrep/semgrep:' docker/semgrep/Dockerfile | sed 's/^FROM //') \
 		semgrep \
-			--config p/ci \
-			--config p/command-injection \
-			--config p/cwe-top-25 \
-			--config p/default \
-			--config p/django \
-			--config p/docker \
-			--config p/docker-compose \
-			--config p/dockerfile \
-			--config p/javascript \
-			--config p/nextjs \
-			--config p/nginx \
-			--config p/nodejs \
-			--config p/owasp-top-ten \
-			--config p/python \
-			--config p/r2c-security-audit \
-			--config p/react \
-			--config p/secrets \
-			--config p/secure-defaults \
-			--config p/security-audit \
-			--config p/security-headers \
-			--config p/sql-injection \
-			--config p/terraform \
-			--config p/typescript \
-			--error \
-			--skip-unknown-extensions \
-			--timeout 10 \
-			--timeout-threshold 3 \
-			--text \
-			--text-output=semgrep-security-report.txt \
-	.
+		--config p/ci \
+		--config p/command-injection \
+		--config p/cwe-top-25 \
+		--config p/default \
+		--config p/django \
+		--config p/docker \
+		--config p/docker-compose \
+		--config p/dockerfile \
+		--config p/javascript \
+		--config p/nextjs \
+		--config p/nginx \
+		--config p/nodejs \
+		--config p/owasp-top-ten \
+		--config p/python \
+		--config p/r2c-security-audit \
+		--config p/react \
+		--config p/secrets \
+		--config p/secure-defaults \
+		--config p/security-audit \
+		--config p/security-headers \
+		--config p/sql-injection \
+		--config p/terraform \
+		--config p/typescript \
+		--error \
+		--skip-unknown-extensions \
+		--timeout 10 \
+		--timeout-threshold 3 \
+		--text \
+		--text-output=semgrep-security-report.txt \
+		.
 
 SCANNERS ?= misconfig,vuln
 
@@ -127,6 +127,19 @@ security-scan-code-trivy:
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs --config /trivy.yaml /src
+
+ZAP_TARGET ?= https://nest.owasp.dev
+
+security-scan-zap:
+	@echo "Running ZAP baseline scan against $(ZAP_TARGET)..."
+	@docker run \
+		--rm \
+		-v "$(CURDIR):/zap/wrk:rw" \
+		$$(grep -E '^FROM zaproxy/zap-stable:' docker/zap/Dockerfile | sed 's/^FROM //') \
+		zap-baseline.py \
+		-a \
+		-c .zapconfig \
+		-t $(ZAP_TARGET)
 
 test: \
 	test-nest-app

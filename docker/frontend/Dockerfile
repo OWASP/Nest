@@ -6,8 +6,9 @@ FROM base AS builder
 # to understand why libc6-compat might be needed.
 ENV APK_CACHE_DIR="/app/.cache/apk" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
-    NPM_CACHE="/app/.npm" \
+    NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
 ENV PATH="$PNPM_HOME:$PATH"
@@ -21,12 +22,9 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
 
 WORKDIR /app
 
-RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g npm@latest --cache ${NPM_CACHE} && \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
-
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    corepack enable && corepack install && \
     pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
@@ -41,8 +39,10 @@ ENV FORCE_STANDALONE=$FORCE_STANDALONE
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=secret,id=RELEASE_VERSION \
     --mount=type=secret,id=SENTRY_AUTH_TOKEN \
-    export NEXT_SENTRY_AUTH_TOKEN=$(cat /run/secrets/SENTRY_AUTH_TOKEN) && \
-    export RELEASE_VERSION=$(cat /run/secrets/RELEASE_VERSION) && \
+    NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" && \
+    export NEXT_SENTRY_AUTH_TOKEN && \
+    RELEASE_VERSION="$(cat /run/secrets/RELEASE_VERSION 2>/dev/null || true)" && \
+    export RELEASE_VERSION && \
     pnpm run build
 
 # Production image, copy all the files and run next.
@@ -53,17 +53,17 @@ ENV NODE_ENV=production
 
 WORKDIR /tmp
 
-# Fix CVE-2026-23745: Update npm's bundled tar to 7.5.7 in runner stage
+# Fix CVE-2026-23745, CVE-2026-26960: Update npm's bundled tar to 7.5.8 in runner stage
 # Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
-RUN npm pack tar@7.5.7 && \
-    tar -xzf tar-7.5.7.tgz && \
+RUN npm pack tar@7.5.8 && \
+    tar -xzf tar-7.5.8.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.7.tgz && \
-    grep -q 'version.*7.5.7' "${TAR_DIR}/package.json" && \
+    rm -rf package tar-7.5.8.tgz && \
+    grep -q 'version.*7.5.8' "${TAR_DIR}/package.json" && \
     npm pack @isaacs/brace-expansion@5.0.1 && \
     tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
     BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
