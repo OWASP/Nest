@@ -16,6 +16,9 @@ Note: Refer to the respective `README.md` files for more information.
 
 Follow these steps to set up the infrastructure:
 
+> [!NOTE]
+> All change directory (`cd`) commands are relative to the project root.
+
 1. **Setup Backend (one-time setup)**:
 
 - Prerequisite: Create a `nest-backend` IAM user with the policies defined in `infrastructure/backend/README.md`.
@@ -86,7 +89,7 @@ Follow these steps to set up the infrastructure:
 
 - Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`
 
-- Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
+- Navigate to the main infrastructure directory:
 
     ```bash
     cd infrastructure/staging/
@@ -131,7 +134,7 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 
 1. **Change Directory**:
 
-- Change the directory to `backend/` using the following command:
+- Navigate to the `backend/` directory:
 
     ```bash
     cd backend/
@@ -174,7 +177,14 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 1. **Configure ALB Routing**:
 
 - Run `zappa status staging` to get Zappa details.
-- Update `staging`'s `terraform.tfvars` with the Lambda details:
+
+- Navigate to the main infrastructure directory:
+
+    ```bash
+    cd infrastructure/staging/
+    ```
+
+- Update `terraform.tfvars` with the Lambda details:
 
     ```hcl
     lambda_function_name = "nest-staging"
@@ -190,17 +200,18 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 
 ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
 
+> [!NOTE]
+> Ensure you are in the project root.
+
 1. **Login to ECR**:
 
 - Login to the Elastic Container Registry using the following command:
 
-    > [!NOTE]
-    > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
     > [!WARNING]
     > Configure a credential helper instead of using following command to login.
 
     ```bash
-    aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 000000000000.dkr.ecr.us-east-2.amazonaws.com
+    aws ecr get-login-password --region AWS_REGION | docker login --username AWS --password-stdin AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com
     ```
 
 1. **Upload backend image to ECR**:
@@ -213,20 +224,14 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
 
 - Tag the image:
 
-    > [!NOTE]
-    > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
-
     ```bash
-    docker tag nest-staging-backend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-backend:latest
+    docker tag nest-staging-backend:latest AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/nest-staging-backend:latest
     ```
 
 - Push the image:
 
-    > [!NOTE]
-    > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
-
     ```bash
-    docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-backend:latest
+    docker push AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/nest-staging-backend:latest
     ```
 
 1. **Upload frontend image to ECR**:
@@ -243,20 +248,14 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
 
 - Tag the image:
 
-    > [!NOTE]
-    > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
-
     ```bash
-    docker tag nest-staging-frontend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-frontend:latest
+    docker tag nest-staging-frontend:latest AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/nest-staging-frontend:latest
     ```
 
 - Push the image:
 
-    > [!NOTE]
-    > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
-
     ```bash
-    docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-frontend:latest
+    docker push AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/nest-staging-frontend:latest
     ```
 
 ## Setup Database
@@ -268,7 +267,7 @@ Migrate and load data into the new database.
 - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
 
     ```bash
-    aws s3 cp backend/data/nest.dump s3://nest-fixtures-<RANDOM_ID>/
+    aws s3 cp backend/data/nest.dump s3://nest-fixtures-RANDOM_ID/
     ```
 
 1. **Run ECS Tasks**:
@@ -278,9 +277,9 @@ Migrate and load data into the new database.
 - Select the task definition revision.
 - Click Deploy > Run Task.
 - Use the following configuration:
-  - Environment: Cluster: nest-staging-tasks-cluster
+  - Environment: Cluster: `nest-staging-tasks-cluster`
   - Networking:
-    - VPC: nest-staging-vpc
+    - VPC: `nest-staging-vpc`
     - Subnets: subnets will be auto-selected due to VPC selection.
     - Security group name: select the ECS security group (e.g. `nest-staging-ecs-sg`).
 - Click "Create"
@@ -315,15 +314,12 @@ Migrate and load data into the new database.
 
 - Force a new deployment to pick up the updated configuration:
 
-    > [!NOTE]
-    > Replace `us-east-2` with configured region.
-
     ```bash
     aws ecs update-service \
         --cluster nest-staging-frontend-cluster \
         --service nest-staging-frontend-service \
         --force-new-deployment \
-        --region us-east-2
+        --region AWS_REGION
     ```
 
 ## Cleaning Up
