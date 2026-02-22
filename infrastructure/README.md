@@ -110,9 +110,9 @@ To do this locally:
 
     ```bash
     [profile nest-staging]
+    external_id = AWS_ROLE_EXTERNAL_ID
     role_arn = arn:aws:iam::AWS_ACCOUNT_ID:role/nest-staging-terraform
     source_profile = nest-staging-identity
-    external_id = AWS_ROLE_EXTERNAL_ID
     ```
 
     Use this profile for all `staging` related terraform commands.
