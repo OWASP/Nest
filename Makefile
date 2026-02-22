@@ -5,8 +5,8 @@ include frontend/Makefile
 
 .PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
-	security-scan-backend-image security-scan-frontend-image test update \
-	clean-trivy-cache
+	security-scan-backend-image security-scan-frontend-image security-scan-zap \
+	test update clean-trivy-cache
 
 MAKEFLAGS += --no-print-directory
 
@@ -127,6 +127,19 @@ security-scan-code-trivy:
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
 		fs --config /trivy.yaml /src
+
+ZAP_TARGET ?= https://nest.owasp.dev
+
+security-scan-zap:
+	@echo "Running ZAP baseline scan against $(ZAP_TARGET)..."
+	@docker run \
+		--rm \
+		-v "$(CURDIR):/zap/wrk:rw" \
+		$$(grep -E '^FROM zaproxy/zap-stable:' docker/zap/Dockerfile | sed 's/^FROM //') \
+		zap-baseline.py \
+		-a
+		-c .zapconfig \
+		-t $(ZAP_TARGET)
 
 test: \
 	test-nest-app

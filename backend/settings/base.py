@@ -28,17 +28,12 @@ class Base(Configuration):
 
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
 
+    CSRF_COOKIE_SAMESITE = "Strict"
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_NAME = "nest.session-id"
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = True
-
-    # --- CSRF cookie settings (SPA-safe, OWASP compliant) ---
-    CSRF_COOKIE_SECURE = True
-    CSRF_COOKIE_SAMESITE = "Strict"
-    # CSRF_COOKIE_HTTPONLY is intentionally NOT enabled
-    # Django CSRF cookies must be readable by JS for SPA frameworks
 
     SITE_NAME = "localhost"
     SITE_URL = "http://localhost:8000"
@@ -238,8 +233,5 @@ class Base(Configuration):
     SLACK_SIGNING_SECRET = values.SecretValue()
 
     SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_HSTS_SECONDS = 31536000
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = False
