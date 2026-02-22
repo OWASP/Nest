@@ -1,7 +1,7 @@
 ## Inline Permissions
 
 Use the following inline permissions for the `nest-backend` IAM User
-*Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY_ARN} with appropriate values.
+*Note*: replace the placeholders with appropriate values.
 *Note*: use "*" instead of `AWS_BACKEND_KMS_KEY_ARN` on first `terraform apply`.
 
 ```json
@@ -61,7 +61,7 @@ Use the following inline permissions for the `nest-backend` IAM User
     "dynamodb:UpdateContinuousBackups",
     "dynamodb:UpdateTable"
    ],
-   "Resource": "arn:aws:dynamodb:*:${AWS_ACCOUNT_ID}:table/nest-*-terraform-state-lock"
+   "Resource": "arn:aws:dynamodb:*:AWS_ACCOUNT_ID:table/nest-*-terraform-state-lock"
   },
   {
    "Sid": "KMSCreateManagement",
@@ -93,7 +93,7 @@ Use the following inline permissions for the `nest-backend` IAM User
     "kms:UpdateAlias",
     "kms:UpdateKeyDescription"
    ],
-   "Resource": "${AWS_BACKEND_KMS_KEY_ARN}"
+   "Resource": "AWS_BACKEND_KMS_KEY_ARN"
   }
  ]
 }

@@ -64,6 +64,10 @@ Follow these steps to set up the infrastructure:
     cp terraform.tfvars.example terraform.tfvars
     ```
 
+  > [!NOTE]
+  > Update `AWS_ROLE_EXTERNAL_ID` in `terraform.tfvars` with a randomly generated ID of your choice.
+  > This ID is required in the next step.
+
 - Copy the contents from the template file into your new terraform backend file:
 
     ```bash
@@ -71,7 +75,7 @@ Follow these steps to set up the infrastructure:
     ```
 
   > [!NOTE]
-  > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (bootstrap) created in the previous step.
+  > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (`state_bucket_names["bootstrap"]`) created in the backend step.
 
 - Initialize Terraform if needed:
 
@@ -87,7 +91,31 @@ Follow these steps to set up the infrastructure:
 
 1. **Setup Main Infrastructure (staging)**:
 
-- Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`
+Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`.
+This user must assume the role `nest-staging-terraform` created in the bootstrap step.
+To do this locally:
+
+- Create a new profile at `~/.aws/credentials`:
+
+    ```bash
+    [nest-staging-identity]
+    aws_access_key_id = AWS_ACCESS_KEY_ID
+    aws_secret_access_key = AWS_SECRET_ACCESS_KEY
+    ```
+
+- Create a new profile at `~/.aws/config`:
+
+    > [!NOTE]
+    > Use the previously generated `AWS_ROLE_EXTERNAL_ID`.
+
+    ```bash
+    [profile nest-staging]
+    role_arn = arn:aws:iam::AWS_ACCOUNT_ID:role/nest-staging-terraform
+    source_profile = nest-staging-identity
+    external_id = AWS_ROLE_EXTERNAL_ID
+    ```
+
+    Use this profile for all `staging` related terraform commands.
 
 - Navigate to the main infrastructure directory:
 
