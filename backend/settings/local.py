@@ -22,8 +22,10 @@ class Local(Base):
     LOGGING = {}
     PUBLIC_IP_ADDRESS = values.Value()
 
-    CSRF_COOKIE_SECURE = False
+    # "Lax" is required locally because the frontend (port 3000) and backend (port 8000)
+    # are on different ports, which browsers treat as cross-site for SameSite=Strict cookies.
     CSRF_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SECURE = False
     SECURE_PROXY_SSL_HEADER = None  # type: ignore[assignment]  # Django accepts None to disable.
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False

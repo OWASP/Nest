@@ -137,7 +137,7 @@ security-scan-zap:
 		-v "$(CURDIR):/zap/wrk:rw" \
 		$$(grep -E '^FROM zaproxy/zap-stable:' docker/zap/Dockerfile | sed 's/^FROM //') \
 		zap-baseline.py \
-		-a
+		-a \
 		-c .zapconfig \
 		-t $(ZAP_TARGET)
 

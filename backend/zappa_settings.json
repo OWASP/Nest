@@ -1,0 +1,60 @@
+{
+  "staging": {
+    "apigateway_enabled": false,
+    "app_function": "wsgi.application",
+    "aws_environment_variables": {
+      "AWS_SYSTEMS_MANAGER_PARAM_STORE_PATH": "/nest/staging"
+    },
+    "callbacks": {
+      "post": "zappa_callback.post",
+      "zip": "zappa_callback.clean_package"
+    },
+    "django_settings": "settings.staging",
+    "extra_permissions": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "ssm:GetParametersByPath",
+          "ssm:GetParameter"
+        ],
+        "Resource": [
+          "arn:aws:ssm:us-east-2:160885282306:parameter/nest/staging",
+          "arn:aws:ssm:us-east-2:160885282306:parameter/nest/staging/*"
+        ]
+      }
+    ],
+    "manage_roles": true,
+    "memory_size": 3008,
+    "project_name": "nest",
+    "regex_excludes": [
+      "/boto3/",
+      "/boto3-",
+      "/botocore/",
+      "/botocore-",
+      "/data/",
+      "/generated_videos/",
+      "/pip/",
+      "/pip-",
+      "/setuptools/",
+      "/setuptools-",
+      "/tests/",
+      "/troposphere/"
+    ],
+    "runtime": "python3.13",
+    "s3_bucket": "nest-staging-zappa-deployments-6324890c",
+    "slim_handler": true,
+    "snap_start": "None",
+    "timeout_seconds": 60,
+    "vpc_config": {
+      "SecurityGroupIds": [
+        "sg-0e4d1e94e3ef022b8"
+      ],
+      "SubnetIds": [
+        "subnet-01f6a76f8bea22b24",
+        "subnet-027baec00bf9878d5",
+        "subnet-016ebf7e96e39e9ea"
+      ]
+    },
+    "xray_tracing": true
+  }
+}
