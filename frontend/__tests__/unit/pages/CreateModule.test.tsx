@@ -300,7 +300,7 @@ describe('CreateModulePage', () => {
 
     await waitFor(() => {
       expect(mockCreateModuleError).toHaveBeenCalled()
-      // Error is displayed inline via mutationErrors, not via addToast
+      // Error is displayed inline via validationErrors, not via addToast
       expect(addToast).not.toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Creation Failed' })
       )

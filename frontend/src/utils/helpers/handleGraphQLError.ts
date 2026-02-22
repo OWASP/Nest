@@ -1,4 +1,4 @@
-export type FieldErrors = Record<string, string>
+export type ValidationErrors = Record<string, string>
 
 interface GraphQLErrorLike {
   message: string
@@ -18,19 +18,20 @@ function isApolloErrorLike(error: unknown): error is ApolloErrorLike {
   )
 }
 
-export function extractFieldErrors(error: unknown): {
-  fieldErrors: FieldErrors
-  hasFieldErrors: boolean
+export function extractGraphQLErrors(error: unknown): {
+  validationErrors: ValidationErrors
+  hasValidationErrors: boolean
   unmappedErrors: string[]
 } {
-  const fieldErrors: FieldErrors = {}
+  const validationErrors: ValidationErrors = {}
   const unmappedErrors: string[] = []
 
   if (isApolloErrorLike(error)) {
     for (const gqlError of error.graphQLErrors) {
-      const extensions = gqlError.extensions
-      if (typeof extensions?.field === 'string') {
-        fieldErrors[extensions.field] = gqlError.message
+      // const extensions = gqlError.extensions
+      const extensions = gqlError.extensions as { code?: string; field?: unknown } | undefined
+      if (extensions?.code === 'VALIDATION_ERROR' && typeof extensions.field === 'string') {
+        validationErrors[extensions.field] = gqlError.message
       } else {
         unmappedErrors.push(gqlError.message)
       }
@@ -39,6 +40,6 @@ export function extractFieldErrors(error: unknown): {
     unmappedErrors.push(error.message)
   }
 
-  const hasFieldErrors = Object.keys(fieldErrors).length > 0
-  return { fieldErrors, hasFieldErrors, unmappedErrors }
+  const hasValidationErrors = Object.keys(validationErrors).length > 0
+  return { validationErrors, hasValidationErrors, unmappedErrors }
 }

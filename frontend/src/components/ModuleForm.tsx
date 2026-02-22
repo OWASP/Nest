@@ -7,7 +7,7 @@ import type React from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
-import type { FieldErrors } from 'utils/helpers/handleGraphQLError'
+import type { ValidationErrors } from 'utils/helpers/handleGraphQLError'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
@@ -44,7 +44,7 @@ interface ModuleFormProps {
   submitText?: string
   minDate?: string
   maxDate?: string
-  mutationErrors?: FieldErrors
+  validationErrors?: ValidationErrors
 }
 
 const EXPERIENCE_LEVELS = [
@@ -64,7 +64,7 @@ const ModuleForm = ({
   submitText = 'Save',
   minDate,
   maxDate,
-  mutationErrors,
+  validationErrors,
 }: ModuleFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
@@ -89,8 +89,8 @@ const ModuleForm = ({
   }
 
   const validateNameLocal = (value: string): string | undefined => {
-    if (mutationErrors?.name) {
-      return mutationErrors.name
+    if (validationErrors?.name) {
+      return validationErrors.name
     }
     return validateName(value)
   }
@@ -124,7 +124,7 @@ const ModuleForm = ({
         validator: () => validateExperienceLevel(formData.experienceLevel),
       },
     ],
-    [formData, touched, mutationErrors]
+    [formData, touched, validationErrors]
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -186,7 +186,7 @@ const ModuleForm = ({
                     handleInputChange('name', value)
                     setTouched((prev) => ({ ...prev, name: true }))
                   }}
-                  error={errors.name || mutationErrors?.name}
+                  error={errors.name || validationErrors?.name}
                   touched={touched.name}
                   required
                   className="w-full min-w-0 lg:col-span-2"

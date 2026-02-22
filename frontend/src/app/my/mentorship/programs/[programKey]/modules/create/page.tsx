@@ -13,7 +13,7 @@ import {
 } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
-import { type FieldErrors, extractFieldErrors } from 'utils/helpers/handleGraphQLError'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -62,7 +62,7 @@ const CreateModulePage = () => {
   })
 
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
-  const [mutationErrors, setMutationErrors] = useState<FieldErrors>({})
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
@@ -96,7 +96,7 @@ const CreateModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMutationErrors({})
+    setValidationErrors({})
 
     try {
       const input = {
@@ -130,11 +130,15 @@ const CreateModulePage = () => {
 
       router.push(`/my/mentorship/programs/${programKey}`)
     } catch (error) {
-      const { fieldErrors, hasFieldErrors, unmappedErrors } = extractFieldErrors(error)
-      if (hasFieldErrors) {
-        setMutationErrors(fieldErrors)
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(error)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
       } else if (unmappedErrors.length > 0) {
-        setMutationErrors({ name: unmappedErrors[0] })
+        setValidationErrors({ name: unmappedErrors[0] })
       } else {
         handleAppError(error)
       }
@@ -164,7 +168,7 @@ const CreateModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       isEdit={false}
-      mutationErrors={mutationErrors}
+      validationErrors={validationErrors}
       minDate={
         programData?.getProgram?.startedAt
           ? formatDateForInput(programData.getProgram.startedAt)

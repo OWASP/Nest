@@ -528,7 +528,7 @@ describe('ModuleForm', () => {
     })
   })
 
-  describe('Mutation Error Display (mutationErrors prop)', () => {
+  describe('Mutation Error Display (validationErrors prop)', () => {
     const validFormData = {
       ...defaultFormData,
       name: 'Test Module',
@@ -563,7 +563,7 @@ describe('ModuleForm', () => {
           onSubmit={mockOnSubmit}
           loading={false}
           title="Create Module"
-          mutationErrors={{
+          validationErrors={{
             name: 'This module name already exists in this program.',
           }}
         />
@@ -574,16 +574,16 @@ describe('ModuleForm', () => {
       )
     })
 
-    it('does not display mutation error when mutationErrors is empty', () => {
+    it('does not display mutation error when validationErrors is empty', () => {
       renderModuleForm({
         formData: validFormData,
-        mutationErrors: {},
+        validationErrors: {},
       })
 
       expect(screen.queryByTestId('module-name-error')).not.toBeInTheDocument()
     })
 
-    it('allows resubmission even when mutationErrors.name is set', async () => {
+    it('allows resubmission even when validationErrors.name is set', async () => {
       const { rerender } = render(
         <ModuleForm
           formData={validFormData}
@@ -608,7 +608,7 @@ describe('ModuleForm', () => {
           onSubmit={mockOnSubmit}
           loading={false}
           title="Create Module"
-          mutationErrors={{
+          validationErrors={{
             name: 'This module name already exists in this program.',
           }}
         />
@@ -622,10 +622,10 @@ describe('ModuleForm', () => {
       })
     })
 
-    it('allows submission when mutationErrors has no name error', async () => {
+    it('allows submission when validationErrors has no name error', async () => {
       renderModuleForm({
         formData: validFormData,
-        mutationErrors: {},
+        validationErrors: {},
       })
 
       const form = document.querySelector('form')
@@ -636,7 +636,7 @@ describe('ModuleForm', () => {
       })
     })
 
-    it('allows submission when mutationErrors is undefined', async () => {
+    it('allows submission when validationErrors is undefined', async () => {
       renderModuleForm({
         formData: validFormData,
       })

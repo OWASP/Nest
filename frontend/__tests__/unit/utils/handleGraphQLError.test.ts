@@ -1,8 +1,8 @@
-import { extractFieldErrors } from 'utils/helpers/handleGraphQLError'
+import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 
-describe('extractFieldErrors', () => {
+describe('extractGraphQLErrors', () => {
   describe('ApolloError-like errors with graphQLErrors', () => {
-    it('extracts field errors from graphQLErrors with field extension', () => {
+    it('extracts validation errors when code is VALIDATION_ERROR and field is present', () => {
       const error = {
         graphQLErrors: [
           {
@@ -12,40 +12,40 @@ describe('extractFieldErrors', () => {
         ],
       }
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(true)
-      expect(result.fieldErrors).toEqual({
+      expect(result.hasValidationErrors).toBe(true)
+      expect(result.validationErrors).toEqual({
         name: 'This module name already exists in this program.',
       })
       expect(result.unmappedErrors).toEqual([])
     })
 
-    it('extracts multiple field errors', () => {
+    it('extracts multiple validation errors', () => {
       const error = {
         graphQLErrors: [
           {
             message: 'Name is required.',
-            extensions: { field: 'name' },
+            extensions: { code: 'VALIDATION_ERROR', field: 'name' },
           },
           {
             message: 'Description is too short.',
-            extensions: { field: 'description' },
+            extensions: { code: 'VALIDATION_ERROR', field: 'description' },
           },
         ],
       }
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(true)
-      expect(result.fieldErrors).toEqual({
+      expect(result.hasValidationErrors).toBe(true)
+      expect(result.validationErrors).toEqual({
         name: 'Name is required.',
         description: 'Description is too short.',
       })
       expect(result.unmappedErrors).toEqual([])
     })
 
-    it('puts errors without field extension into unmappedErrors', () => {
+    it('puts errors with non-validation code into unmappedErrors', () => {
       const error = {
         graphQLErrors: [
           {
@@ -55,10 +55,10 @@ describe('extractFieldErrors', () => {
         ],
       }
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual(['Something went wrong.'])
     })
 
@@ -71,19 +71,53 @@ describe('extractFieldErrors', () => {
         ],
       }
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual(['Unauthorized.'])
     })
 
-    it('separates field errors from unmapped errors', () => {
+    it('puts VALIDATION_ERROR without field into unmappedErrors', () => {
+      const error = {
+        graphQLErrors: [
+          {
+            message: 'Validation failed.',
+            extensions: { code: 'VALIDATION_ERROR' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
+      expect(result.unmappedErrors).toEqual(['Validation failed.'])
+    })
+
+    it('puts errors with field but without VALIDATION_ERROR code into unmappedErrors', () => {
+      const error = {
+        graphQLErrors: [
+          {
+            message: 'Field-level error without code.',
+            extensions: { field: 'name' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
+      expect(result.unmappedErrors).toEqual(['Field-level error without code.'])
+    })
+
+    it('separates validation errors from unmapped errors', () => {
       const error = {
         graphQLErrors: [
           {
             message: 'Name already exists.',
-            extensions: { field: 'name' },
+            extensions: { code: 'VALIDATION_ERROR', field: 'name' },
           },
           {
             message: 'Internal server error.',
@@ -92,20 +126,20 @@ describe('extractFieldErrors', () => {
         ],
       }
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(true)
-      expect(result.fieldErrors).toEqual({ name: 'Name already exists.' })
+      expect(result.hasValidationErrors).toBe(true)
+      expect(result.validationErrors).toEqual({ name: 'Name already exists.' })
       expect(result.unmappedErrors).toEqual(['Internal server error.'])
     })
 
     it('handles empty graphQLErrors array', () => {
       const error = { graphQLErrors: [] }
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual([])
     })
   })
@@ -114,54 +148,54 @@ describe('extractFieldErrors', () => {
     it('puts Error message into unmappedErrors', () => {
       const error = new Error('Network error')
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual(['Network error'])
     })
 
     it('puts generic Error message into unmappedErrors', () => {
       const error = new Error('Something went wrong')
 
-      const result = extractFieldErrors(error)
+      const result = extractGraphQLErrors(error)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual(['Something went wrong'])
     })
   })
 
   describe('non-Error values', () => {
     it('returns empty results for string error', () => {
-      const result = extractFieldErrors('string error')
+      const result = extractGraphQLErrors('string error')
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual([])
     })
 
     it('returns empty results for null', () => {
-      const result = extractFieldErrors(null)
+      const result = extractGraphQLErrors(null)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual([])
     })
 
     it('returns empty results for undefined', () => {
-      const result = extractFieldErrors(undefined)
+      const result = extractGraphQLErrors(undefined)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual([])
     })
 
     it('returns empty results for number', () => {
-      const result = extractFieldErrors(42)
+      const result = extractGraphQLErrors(42)
 
-      expect(result.hasFieldErrors).toBe(false)
-      expect(result.fieldErrors).toEqual({})
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
       expect(result.unmappedErrors).toEqual([])
     })
   })

@@ -14,7 +14,7 @@ import { GetProgramAndModulesDocument } from 'types/__generated__/programsQuerie
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
-import { type FieldErrors, extractFieldErrors } from 'utils/helpers/handleGraphQLError'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -29,7 +29,7 @@ const EditModulePage = () => {
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
-  const [mutationErrors, setMutationErrors] = useState<FieldErrors>({})
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
@@ -104,7 +104,7 @@ const EditModulePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData) return
-    setMutationErrors({})
+    setValidationErrors({})
 
     try {
       const currentUserLogin = sessionData?.user?.login
@@ -147,11 +147,15 @@ const EditModulePage = () => {
       })
       router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
-      const { fieldErrors, hasFieldErrors, unmappedErrors } = extractFieldErrors(err)
-      if (hasFieldErrors) {
-        setMutationErrors(fieldErrors)
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(err)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
       } else if (unmappedErrors.length > 0) {
-        setMutationErrors({ name: unmappedErrors[0] })
+        setValidationErrors({ name: unmappedErrors[0] })
       } else {
         handleAppError(err)
       }
@@ -181,7 +185,7 @@ const EditModulePage = () => {
       loading={mutationLoading}
       submitText="Save"
       isEdit
-      mutationErrors={mutationErrors}
+      validationErrors={validationErrors}
       minDate={
         data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
       }
