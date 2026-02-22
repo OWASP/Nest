@@ -1,4 +1,4 @@
-import * as Types from '../../src/types/__generated__/graphql';
+import * as Types from './graphql';
 
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type DeleteModuleMutationVariables = Types.Exact<{

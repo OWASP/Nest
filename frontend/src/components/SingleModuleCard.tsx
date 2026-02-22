@@ -129,6 +129,7 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
             programKey={programKey}
             moduleKey={module.key}
             isAdmin={isAdmin}
+            isMentor={isMentor}
           />
         )}
       </div>

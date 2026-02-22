@@ -166,6 +166,7 @@ const DetailsCard = ({
                       programKey={programKey}
                       moduleKey={entityKey}
                       isAdmin={isAdmin ? true : undefined}
+                      isMentor={isMentor ? true : undefined}
                     />
                   ) : null
                 })()}

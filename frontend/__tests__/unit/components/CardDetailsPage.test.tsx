@@ -446,6 +446,7 @@ jest.mock('components/EntityActions', () => ({
     status: _status,
     setStatus: _setStatus,
     isAdmin,
+    isMentor: _isMentor,
     ...props
   }: {
     type: string
@@ -454,6 +455,7 @@ jest.mock('components/EntityActions', () => ({
     status?: string
     setStatus?: (status: string) => void
     isAdmin?: boolean
+    isMentor?: boolean
     [key: string]: unknown
   }) => (
     <div data-testid="entity-actions" {...props} data-isadmin={isAdmin}>
