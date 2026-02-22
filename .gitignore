@@ -56,3 +56,4 @@ node_modules/
 semgrep-security-report.txt
 TODO
 venv/
+zap.yaml

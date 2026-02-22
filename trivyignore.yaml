@@ -3,6 +3,7 @@ misconfigurations:
     paths:
       - docker/semgrep/Dockerfile
       - docker/trivy/Dockerfile
+      - docker/zap/Dockerfile
 
 vulnerabilities:
   # TODO(arkid15r): Remove when v5.9.3 is no longer current.
