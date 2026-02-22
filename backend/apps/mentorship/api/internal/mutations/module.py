@@ -49,6 +49,20 @@ def resolve_mentors_from_logins(logins: list[str]) -> set[Mentor]:
     return mentors
 
 
+def _is_mentor_of_module(user, module) -> bool:
+    """Check if the given user is a mentor for the module.
+
+    Runs a fallback check against github_user if the mentor hasn't linked
+    their nest_user profile yet.
+    """
+    if Mentor.objects.filter(nest_user=user, modules=module).exists():
+        return True
+    return (
+        hasattr(user, "github_user")
+        and Mentor.objects.filter(github_user=user.github_user, modules=module).exists()
+    )
+
+
 def _validate_module_dates(started_at, ended_at, program_started_at, program_ended_at) -> tuple:
     """Validate and normalize module start/end dates against program constraints."""
     if started_at is None or ended_at is None:
@@ -157,7 +171,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_ASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -196,7 +210,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_UNASSIGN_MSG)
 
         gh_user = GithubUser.objects.filter(login=user_login).first()
@@ -237,7 +251,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
 
         issue = (
@@ -299,7 +313,7 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not Mentor.objects.filter(nest_user=user, modules=module).exists():
+        if not _is_mentor_of_module(user, module):
             raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
 
         issue = (
@@ -332,7 +346,14 @@ class ModuleMutation:
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     @transaction.atomic
     def update_module(self, info: strawberry.Info, input_data: UpdateModuleInput) -> ModuleNode:
-        """Update an existing mentorship module."""
+        """Update an existing mentorship module.
+
+        User must either be:
+        - An admin of the program, or
+        - A mentor explicitly assigned to this module
+
+        Admins and module mentors can edit any field and manage mentor assignments.
+        """
         user = info.context.request.user
 
         try:
@@ -345,7 +366,7 @@ class ModuleMutation:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
 
         is_admin = module.program.admins.filter(nest_user=user).exists()
-        is_mentor = Mentor.objects.filter(nest_user=user, modules=module).exists()
+        is_mentor = _is_mentor_of_module(user, module)
         if not (is_admin or is_mentor):
             msg = "Only admins of the program or mentors of this module can edit modules."
             raise PermissionDenied(msg)
@@ -415,3 +436,44 @@ class ModuleMutation:
         module.program.save(update_fields=["experience_levels"])
 
         return module
+
+    @strawberry.mutation(permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def delete_module(
+        self,
+        info: strawberry.Info,
+        program_key: str,
+        module_key: str,
+    ) -> str:
+        """Delete a mentorship module. User must be an admin of the program."""
+        user = info.context.request.user
+
+        try:
+            module = Module.objects.select_related("program").get(
+                key=module_key, program__key=program_key
+            )
+        except Module.DoesNotExist as e:
+            raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG) from e
+
+        if not module.program.admins.filter(nest_user=user).exists():
+            msg = "Only program admins can delete modules."
+            raise PermissionDenied(msg)
+
+        program = module.program
+        module_name = module.name
+
+        experience_level_to_remove = module.experience_level
+        if (
+            experience_level_to_remove in program.experience_levels
+            and not Module.objects.filter(
+                program=program, experience_level=experience_level_to_remove
+            )
+            .exclude(id=module.id)
+            .exists()
+        ):
+            program.experience_levels.remove(experience_level_to_remove)
+            program.save(update_fields=["experience_levels"])
+
+        module.delete()
+
+        return f"Module '{module_name}' has been deleted successfully."

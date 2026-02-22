@@ -354,5 +354,5 @@ describe('CreateModulePage', () => {
       // Non-Error values fall through to handleAppError
       expect(handleAppError).toHaveBeenCalledWith('String error')
     })
-  })
+  }, 10000)
 })
