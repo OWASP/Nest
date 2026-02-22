@@ -194,7 +194,7 @@ const DetailsCard = ({
                   <strong>{detail.label}:</strong>{' '}
                   <LeadersList
                     entityKey={`${entityKey}-${detail.label}`}
-                    leaders={detail?.value == null ? 'Unknown' : String(detail.value)}
+                    leaders={detail?.value === null ? 'Unknown' : String(detail.value)}
                   />
                 </div>
               ) : (
