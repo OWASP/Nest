@@ -1280,6 +1280,93 @@ class TestModuleMutationUpdateModule:
         mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
 
 
+class TestModuleMutationDeleteModule:
+    """Tests for ModuleMutation.delete_module."""
+
+    def _make_info(self, user):
+        info = MagicMock()
+        info.context.request.user = user
+        return info
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_success_removes_unique_experience_level(self, mock_module):
+        """Test successful deletion removes experience level when no other module uses it."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_mod = MagicMock()
+        mock_mod.name = "Test Module"
+        mock_mod.experience_level = "intermediate"
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.experience_levels = ["beginner", "intermediate"]
+
+        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_module.DoesNotExist = ObjectDoesNotExist
+        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
+
+        mutation = ModuleMutation()
+        result = mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+        assert result == "Module 'Test Module' has been deleted successfully."
+        mock_mod.delete.assert_called_once()
+        mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
+        assert "intermediate" not in mock_mod.program.experience_levels
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_success_keeps_shared_experience_level(self, mock_module):
+        """Test successful deletion keeps experience level when other modules use it."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_mod = MagicMock()
+        mock_mod.name = "Test Module"
+        mock_mod.experience_level = "beginner"
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.experience_levels = ["beginner", "advanced"]
+
+        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_module.DoesNotExist = ObjectDoesNotExist
+        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = True
+
+        mutation = ModuleMutation()
+        result = mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+        assert result == "Module 'Test Module' has been deleted successfully."
+        mock_mod.delete.assert_called_once()
+        assert "beginner" in mock_mod.program.experience_levels
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_not_found(self, mock_module):
+        """Test ObjectDoesNotExist when module is not found."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_module.DoesNotExist = ObjectDoesNotExist
+        mock_module.objects.select_related.return_value.get.side_effect = ObjectDoesNotExist(
+            "not found"
+        )
+
+        mutation = ModuleMutation()
+        with pytest.raises(ObjectDoesNotExist):
+            mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_not_admin(self, mock_module):
+        """Test PermissionDenied when user is not a program admin."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = False
+
+        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_module.DoesNotExist = ObjectDoesNotExist
+
+        mutation = ModuleMutation()
+        with pytest.raises(PermissionDenied):
+            mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+
 class TestModuleMutationReorderModules:
     """Tests for ModuleMutation.reorder_modules."""
 
