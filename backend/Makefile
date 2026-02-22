@@ -73,6 +73,12 @@ exec-db-command-fuzz:
 exec-db-command-fuzz-it:
 	@docker exec -it fuzz-nest-db $(CMD)
 
+exec-db-command-staging:
+	@docker exec -i staging-nest-db $(CMD)
+
+exec-db-command-staging-it:
+	@docker exec -it staging-nest-db $(CMD)
+
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
 
@@ -122,9 +128,9 @@ load-data-fuzz:
 
 load-data-staging:
 	@echo "Truncating content_type table"
-	@CMD="psql -U nest_user_staging -d nest_db_staging -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command-fuzz
+	@CMD="psql -U nest_user_staging -d nest_db_staging -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command-staging
 	@echo "Loading Nest staging data"
-	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-staging
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
