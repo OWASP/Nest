@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="module",
             name="order",
-            field=models.PositiveIntegerField(
+            field=models.PositiveSmallIntegerField(
                 default=0,
                 help_text="Display order of the module within its program.",
                 verbose_name="Order",

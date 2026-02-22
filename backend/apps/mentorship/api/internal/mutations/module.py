@@ -476,15 +476,13 @@ class ModuleMutation:
             msg = "Duplicate module keys are not allowed."
             raise ValidationError(msg)
 
-        modules = list(
-            Module.objects.filter(
-                program=program, key__in=input_data.module_keys
-            ).select_for_update()
-        )
+        modules_query = Module.objects.filter(program=program, key__in=input_data.module_keys)
 
-        if len(modules) != len(input_data.module_keys):
+        if modules_query.count() != len(input_data.module_keys):
             msg = "Provided module keys do not match the program's modules."
             raise ValidationError(msg)
+
+        modules = list(modules_query.select_for_update())
 
         key_to_order = {key: idx for idx, key in enumerate(input_data.module_keys)}
 
