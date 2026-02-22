@@ -89,7 +89,7 @@ Follow these steps to set up the infrastructure:
 - Navigate to the main infrastructure directory. If you are in `infrastructure/backend`, you can use:
 
     ```bash
-    cd ../staging/
+    cd infrastructure/staging/
     ```
 
 - Copy the contents from the template file into your new local terraform variables file:
@@ -134,7 +134,7 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 - Change the directory to `backend/` using the following command:
 
     ```bash
-    cd ../../backend/
+    cd backend/
     ```
 
 1. **Setup Dependencies**:
@@ -174,7 +174,7 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 1. **Configure ALB Routing**:
 
 - Run `zappa status staging` to get Zappa details.
-- Update `terraform.tfvars` with the Lambda details:
+- Update `staging`'s `terraform.tfvars` with the Lambda details:
 
     ```hcl
     lambda_function_name = "nest-staging"
@@ -183,7 +183,6 @@ The Django backend deployment is managed by Zappa. This includes the IAM roles, 
 - Apply the changes to create ALB routing:
 
     ```bash
-    cd ../infrastructure/staging/
     terraform apply
     ```
 
@@ -269,7 +268,7 @@ Migrate and load data into the new database.
 - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
 
     ```bash
-    aws s3 cp data/nest.json.gz s3://nest-fixtures-RANDOM_ID/
+    aws s3 cp data/nest.json.gz s3://nest-fixtures-<RANDOM_ID>/
     ```
 
 1. **Run ECS Tasks**:
