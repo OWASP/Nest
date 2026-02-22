@@ -90,7 +90,7 @@ variable "db_instance_class" {
 variable "db_name" {
   description = "The name of the RDS database."
   type        = string
-  default     = "owasp_nest"
+  default     = "nest_db"
 }
 
 variable "db_password" {
@@ -126,7 +126,7 @@ variable "db_storage_type" {
 variable "db_user" {
   description = "The username for the RDS database."
   type        = string
-  default     = "owasp_nest_db_user"
+  default     = "nest_db_user"
 }
 
 variable "domain_name" {

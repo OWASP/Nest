@@ -239,7 +239,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
 - Build the backend image using the following command:
 
     ```bash
-    docker build -t owasp-nest-staging-backend:latest -f docker/backend/Dockerfile backend/
+    docker build -t nest-staging-backend:latest -f docker/backend/Dockerfile backend/
     ```
 
 - Tag the image:
@@ -248,7 +248,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
 
     ```bash
-    docker tag owasp-nest-staging-backend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
+    docker tag nest-staging-backend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-backend:latest
     ```
 
 - Push the image:
@@ -257,7 +257,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
 
     ```bash
-    docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-backend:latest
+    docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-backend:latest
     ```
 
 1. **Upload frontend image to ECR**:
@@ -269,7 +269,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     > These are injected at build time.
 
     ```bash
-    docker build -t owasp-nest-staging-frontend:latest -f docker/frontend/Dockerfile frontend/
+    docker build -t nest-staging-frontend:latest -f docker/frontend/Dockerfile frontend/
     ```
 
 - Tag the image:
@@ -278,7 +278,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
 
     ```bash
-    docker tag owasp-nest-staging-frontend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-frontend:latest
+    docker tag nest-staging-frontend:latest 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-frontend:latest
     ```
 
 - Push the image:
@@ -287,7 +287,7 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     > Replace `us-east-2` with configured region and `000000000000` with AWS Account ID.
 
     ```bash
-    docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/owasp-nest-staging-frontend:latest
+    docker push 000000000000.dkr.ecr.us-east-2.amazonaws.com/nest-staging-frontend:latest
     ```
 
 ## Setup Database
@@ -299,24 +299,24 @@ Migrate and load data into the new database.
 - Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
 
     ```bash
-    aws s3 cp data/nest.json.gz s3://owasp-nest-fixtures-<id>/
+    aws s3 cp data/nest.json.gz s3://nest-fixtures-RANDOM_ID/
     ```
 
 1. **Run ECS Tasks**:
 
 - Head over to Elastic Container Service in the AWS Console.
-- Click on `owasp-nest-staging-migrate` in `Task Definitions` section.
+- Click on `nest-staging-migrate` in `Task Definitions` section.
 - Select the task definition revision.
 - Click Deploy > Run Task.
 - Use the following configuration:
-  - Environment: Cluster: owasp-nest-staging-tasks-cluster
+  - Environment: Cluster: nest-staging-tasks-cluster
   - Networking:
-    - VPC: owasp-nest-staging-vpc
+    - VPC: nest-staging-vpc
     - Subnets: subnets will be auto-selected due to VPC selection.
-    - Security group name: select the ECS security group (e.g. `owasp-nest-staging-ecs-sg`).
+    - Security group name: select the ECS security group (e.g. `nest-staging-ecs-sg`).
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
-- Follow the same steps for `owasp-nest-staging-load-data` and `owasp-nest-staging-index-data`.
+- Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.
 
 ## Configure Domain and Frontend
 
