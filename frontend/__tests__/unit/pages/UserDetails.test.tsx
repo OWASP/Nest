@@ -1168,7 +1168,7 @@ describe('UserDetailsPage', () => {
       await waitFor(() => {
         const avatar = screen.getByAltText('fallback-login')
         expect(avatar).toBeInTheDocument()
-        expect(screen.getByText('fallback-login')).toBeInTheDocument()
+        expect(screen.getByText('@fallback-login')).toBeInTheDocument()
       })
     })
 
