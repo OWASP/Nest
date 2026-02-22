@@ -84,6 +84,7 @@ certbot
 collectstatic
 coraza
 corsheaders
+credentialless
 csrfguard
 csrfprotector
 csrftoken
@@ -201,6 +202,7 @@ usefixtures
 vcodec
 webgoat
 winsrdf
+wrk
 wsgi
 xapp
 xdg

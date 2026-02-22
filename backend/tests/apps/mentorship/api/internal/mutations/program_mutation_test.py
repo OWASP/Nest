@@ -37,10 +37,10 @@ def _make_info(user):
 class TestResolveAdminsFromLogins:
     """Tests for resolve_admins_from_logins helper function."""
 
-    @patch("apps.mentorship.api.internal.mutations.program.User")
+    @patch("apps.mentorship.api.internal.mutations.program.get_user_model")
     @patch("apps.mentorship.api.internal.mutations.program.Admin")
     @patch("apps.mentorship.api.internal.mutations.program.GithubUser")
-    def test_resolve_success_with_nest_user(self, mock_gh, mock_admin, mock_user):
+    def test_resolve_success_with_nest_user(self, mock_gh, mock_admin, mock_get_user_model):
         """Test resolving logins when admin already has a nest_user."""
         mock_github_user = MagicMock()
         mock_gh.objects.get.return_value = mock_github_user
@@ -54,11 +54,12 @@ class TestResolveAdminsFromLogins:
         assert mock_admin_obj in result
         mock_admin_obj.save.assert_not_called()
 
-    @patch("apps.mentorship.api.internal.mutations.program.User")
+    @patch("apps.mentorship.api.internal.mutations.program.get_user_model")
     @patch("apps.mentorship.api.internal.mutations.program.Admin")
     @patch("apps.mentorship.api.internal.mutations.program.GithubUser")
-    def test_resolve_links_nest_user(self, mock_gh, mock_admin, mock_user):
+    def test_resolve_links_nest_user(self, mock_gh, mock_admin, mock_get_user_model):
         """Test resolving logins links nest_user when missing."""
+        mock_user = mock_get_user_model.return_value
         mock_github_user = MagicMock()
         mock_gh.objects.get.return_value = mock_github_user
 
@@ -76,11 +77,12 @@ class TestResolveAdminsFromLogins:
         mock_admin_obj.save.assert_called_once_with(update_fields=["nest_user"])
         mock_gh.objects.get.assert_called_once_with(login__iexact="new_admin")
 
-    @patch("apps.mentorship.api.internal.mutations.program.User")
+    @patch("apps.mentorship.api.internal.mutations.program.get_user_model")
     @patch("apps.mentorship.api.internal.mutations.program.Admin")
     @patch("apps.mentorship.api.internal.mutations.program.GithubUser")
-    def test_resolve_nest_user_not_found(self, mock_gh, mock_admin, mock_user):
+    def test_resolve_nest_user_not_found(self, mock_gh, mock_admin, mock_get_user_model):
         """Test resolving logins when Nest user does not exist."""
+        mock_user = mock_get_user_model.return_value
         mock_github_user = MagicMock(login="ghost")
         mock_gh.objects.get.return_value = mock_github_user
 

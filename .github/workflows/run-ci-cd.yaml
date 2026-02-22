@@ -40,9 +40,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
-          cache: "poetry"
+          cache: poetry
           cache-dependency-path: backend/poetry.lock
-          python-version: "3.13"
+          python-version: '3.13'
 
       - name: Set up pre-commit cache
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
@@ -79,7 +79,7 @@ jobs:
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version: 24
-          cache: "pnpm"
+          cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Run pnpm format
@@ -113,7 +113,7 @@ jobs:
           cache-from: type=gha,scope=cspell
           cache-to: type=gha,scope=cspell,mode=max
           context: cspell
-          file: cspell/Dockerfile
+          file: docker/cspell/Dockerfile
           load: true
           tags: cspell:ci
 
@@ -760,12 +760,12 @@ jobs:
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           cache-dependency-path: frontend/pnpm-lock.yaml
-          cache: "pnpm"
+          cache: pnpm
           node-version: 24
 
       - name: Run lighthouse-ci
         env:
-          LHCI_BASE_URL: "https://nest.owasp.dev"
+          LHCI_BASE_URL: https://nest.owasp.dev
         run: |
           pnpm run lighthouse-ci
         working-directory: frontend
@@ -786,10 +786,10 @@ jobs:
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: "https://nest.owasp.dev"
+          target: https://nest.owasp.dev
           allow_issue_writing: false
           fail_action: true
-          cmd_options: "-a -c .zapconfig -r report_html.html"
+          cmd_options: -a -c .zapconfig -r report_html.html
 
       - name: Upload report
         if: always()
@@ -1151,10 +1151,10 @@ jobs:
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target: "https://nest.owasp.org"
+          target: https://nest.owasp.org
           allow_issue_writing: false
           fail_action: true
-          cmd_options: "-a -c .zapconfig -r report_html.html"
+          cmd_options: -a -c .zapconfig -r report_html.html
 
       - name: Upload report
         if: always()

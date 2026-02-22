@@ -4,14 +4,14 @@ on:
   workflow_call:
     inputs:
       test-file:
-        description: "The test file to run fuzz tests on"
+        description: The test file to run fuzz tests on
         required: true
         type: string
       rest-url:
-        description: "The REST API URL to test against"
+        description: The REST API URL to test against
         required: false
         type: string
-        default: "http://localhost:9500/api/v0"
+        default: http://localhost:9500/api/v0
 
 jobs:
   run-fuzz-tests:
