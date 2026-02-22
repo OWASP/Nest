@@ -1,3 +1,4 @@
+ARUN
 AVD
 Abhay
 Agentic
@@ -12,8 +13,10 @@ Balbin's
 Birda
 CCSP
 CISSP
+CSSLP
 Cañón
 DRF
+DTZ
 ELEVENLABS
 Emay
 FOSS
@@ -56,6 +59,8 @@ Tarandach
 Truncator
 Turbopack
 Twitterbot
+VCALENDAR
+VEVENT
 WSL
 Whistleblower
 Wörld
@@ -83,6 +88,7 @@ certbot
 collectstatic
 coraza
 corsheaders
+credentialless
 csrfguard
 csrfprotector
 csrftoken
@@ -113,6 +119,7 @@ ics
 igoat
 inlinehilite
 isanori
+isready
 janedoe
 jumpstart
 kasya
@@ -140,6 +147,7 @@ mentees
 mern
 millify
 misconfig
+mkdocstrings
 mkv
 mpim
 navlink
@@ -147,6 +155,7 @@ nestbot
 ngx
 noinput
 nosniff
+notab
 nspname
 numfmt
 openblas
@@ -160,6 +169,7 @@ pentesting
 pgvector
 pil
 pnpmrc
+psql
 psycopg
 pygithub
 pygoat
@@ -167,6 +177,7 @@ pymdownx
 pypoetry
 pyyaml
 quasis
+realip
 relativedelta
 repositorycontributor
 requirepass
@@ -182,6 +193,7 @@ seo
 skillstruck
 slackbot
 slideshare
+someid
 speakerdeck
 superfences
 tgz
@@ -195,6 +207,7 @@ usefixtures
 vcodec
 webgoat
 winsrdf
+wrk
 wsgi
 xapp
 xdg

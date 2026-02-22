@@ -4,12 +4,12 @@ __pycache__
 .cache
 .coverage
 .cursor/rules/snyk_rules.mdc
-backend/fuzzing_results/
 .DS_Store
 .env*
 !.env.example
 !.env.e2e.example
 !.env.fuzz.example
+.github/ansible/.ansible/.lock
 .github/instructions/snyk_rules.instructions.md
 .idea
 .lighthouseci/
@@ -33,6 +33,7 @@ backend/fuzzing_results/
 *.pem
 backend-sbom-local.cdx.json
 backend/data/backup*
+backend/fuzzing_results/
 backend/generated_videos/
 backend/staticfiles
 design/
@@ -49,8 +50,10 @@ frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+infrastructure/
 logs
 node_modules/
 semgrep-security-report.txt
 TODO
 venv/
+zap.yaml

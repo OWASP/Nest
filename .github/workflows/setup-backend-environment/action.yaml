@@ -4,10 +4,10 @@ description: Sets up the Backend environment testing.
 
 inputs:
   db_username:
-    description: "Database username"
+    description: Database username
     required: true
   db_name:
-    description: "Database name"
+    description: Database name
     required: true
 
 runs:

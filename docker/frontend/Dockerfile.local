@@ -4,7 +4,8 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-builder" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
-    NPM_CACHE="/home/owasp/.npm" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    NPM_CONFIG_CACHE="/home/owasp/.npm" \
     PNPM_HOME="/pnpm"
 
 ENV NPM_CONFIG_RETRY=5 \
@@ -20,13 +21,11 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     mkdir -p /home/owasp && \
     chown -R node:node /home/owasp
 
-RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
-
 WORKDIR /home/owasp
 
 COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    corepack enable && corepack install && \
     pnpm install --frozen-lockfile --ignore-scripts
 
 FROM node:24.13-alpine3.23
@@ -35,8 +34,9 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-stage" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
-    NPM_CACHE="/home/owasp/.npm"
+    NPM_CONFIG_CACHE="/home/owasp/.npm"
 
 RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
@@ -47,13 +47,13 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     mkdir -p /home/owasp/.next && \
     chown -R node:node /home/owasp
 
-RUN --mount=type=cache,target=${NPM_CACHE} \
-    npm install --ignore-scripts -g pnpm --cache ${NPM_CACHE}
+WORKDIR /home/owasp
+
+COPY --chmod=444 --chown=root:root package.json ./
+RUN corepack enable && corepack install
 
 COPY --from=builder --chmod=755 --chown=root:root /home/owasp/node_modules /home/owasp/node_modules
 
 EXPOSE 3000
 
 USER node
-
-WORKDIR /home/owasp
