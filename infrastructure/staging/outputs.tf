@@ -23,6 +23,11 @@ output "ecs_security_group_id" {
   value       = module.security.ecs_sg_id
 }
 
+output "fixtures_bucket_name" {
+  description = "The name of the S3 bucket for database fixtures."
+  value       = module.storage.fixtures_s3_bucket_name
+}
+
 output "frontend_cluster_name" {
   description = "The name of the ECS frontend cluster."
   value       = module.frontend.ecs_cluster_name

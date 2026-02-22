@@ -51,8 +51,7 @@ FROM python:3.13.12-alpine3.23
 ARG OWASP_GID
 ARG OWASP_UID
 
-RUN apk update && \
-    apk add --no-cache make postgresql16-client && \
+RUN apk update && apk --no-cache add make postgresql16-client && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 
