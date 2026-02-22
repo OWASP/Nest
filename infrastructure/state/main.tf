@@ -14,7 +14,7 @@ terraform {
 
 locals {
   common_tags = {
-    Environment = "backend"
+    Environment = "state"
     ManagedBy   = "Terraform"
     Project     = var.project_name
   }
@@ -25,7 +25,7 @@ module "kms" {
   source = "../modules/kms"
 
   common_tags  = local.common_tags
-  environment  = "backend"
+  environment  = "state"
   project_name = var.project_name
 }
 

@@ -19,14 +19,14 @@ Follow these steps to set up the infrastructure:
 > [!NOTE]
 > All change directory (`cd`) commands are relative to the project root.
 
-1. **Setup Backend (one-time setup)**:
+1. **Setup State (one-time setup)**:
 
-- Prerequisite: Create a `nest-backend` IAM user with the policies defined in `infrastructure/backend/README.md`.
+- Prerequisite: Create a `nest-state` IAM user with the policies defined in `infrastructure/state/README.md`.
 
-- Navigate to the backend directory:
+- Navigate to the state directory:
 
     ```bash
-    cd infrastructure/backend/
+    cd infrastructure/state/
     ```
 
   > [!NOTE]
@@ -38,15 +38,15 @@ Follow these steps to set up the infrastructure:
     terraform init
     ```
 
-- Apply the changes to create the backend resources:
+- Apply the changes to create the state resources:
 
     ```bash
     terraform apply
     ```
 
   > [!NOTE]
-  > Copy the state bucket name from the output.
-  > It is recommended to not destroy the backend resources unless absolutely necessary.
+  > Copy the state bucket names from the output.
+  > It is recommended to not destroy the state resources unless absolutely necessary.
 
 1. **Bootstrap IAM Role**:
 
@@ -75,7 +75,7 @@ Follow these steps to set up the infrastructure:
     ```
 
   > [!NOTE]
-  > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (`state_bucket_names["bootstrap"]`) created in the backend step.
+  > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket (`state_bucket_names["bootstrap"]`) created in the state creation step.
 
 - Initialize Terraform if needed:
 

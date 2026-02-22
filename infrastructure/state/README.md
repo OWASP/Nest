@@ -1,6 +1,6 @@
 ## Inline Permissions
 
-Use the following inline permissions for the `nest-backend` IAM User
+Use the following inline permissions for the `nest-state` IAM User
 *Note*: replace the placeholders with appropriate values.
 *Note*: use "*" instead of `AWS_BACKEND_KMS_KEY_ARN` on first `terraform apply`.
 
