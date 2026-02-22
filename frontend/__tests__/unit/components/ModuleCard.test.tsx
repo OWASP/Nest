@@ -9,6 +9,54 @@ import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import type { Module } from 'types/mentorship'
 import ModuleCard, { getSimpleDuration } from 'components/ModuleCard'
 
+// Mock @dnd-kit
+jest.mock('@dnd-kit/core', () => ({
+  DndContext: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="dnd-context">{children}</div>
+  ),
+  closestCenter: jest.fn(),
+  useSensor: jest.fn(() => ({})),
+  useSensors: jest.fn(() => []),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  KeyboardSensor: jest.fn(),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  PointerSensor: jest.fn(),
+}))
+
+jest.mock('@dnd-kit/sortable', () => ({
+  SortableContext: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="sortable-context">{children}</div>
+  ),
+  sortableKeyboardCoordinates: jest.fn(),
+  rectSortingStrategy: jest.fn(),
+  useSortable: () => ({
+    attributes: { role: 'button', tabIndex: 0, 'aria-roledescription': 'sortable' },
+    listeners: { onPointerDown: jest.fn() },
+    setNodeRef: jest.fn(),
+    transform: null,
+    transition: null,
+    isDragging: false,
+  }),
+}))
+
+jest.mock('@dnd-kit/utilities', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  CSS: { Transform: { toString: () => null } },
+}))
+
+const mockReorderModules = jest.fn(() => Promise.resolve({ data: {} }))
+jest.mock('@apollo/client/react', () => ({
+  useMutation: () => [mockReorderModules],
+}))
+
+jest.mock('server/mutations/moduleMutations', () => ({
+  REORDER_MODULES: 'REORDER_MODULES_MOCK',
+}))
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
+
 // Mock next/navigation
 const mockPathname = jest.fn()
 jest.mock('next/navigation', () => ({
@@ -71,6 +119,9 @@ jest.mock('react-icons/fa6', () => ({
   ),
   FaChevronUp: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="chevron-up" {...props} />
+  ),
+  FaGripVertical: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="grip-vertical" {...props} />
   ),
   FaTurnUp: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="icon-turnup" {...props} />,
   FaCalendar: (props: React.SVGProps<SVGSVGElement>) => (
@@ -700,6 +751,43 @@ describe('ModuleCard', () => {
 
       const moduleElements = screen.getAllByText('Test Module')
       expect(moduleElements.length).toBe(2)
+    })
+  })
+
+  describe('Drag and Drop for Admins', () => {
+    it('renders drag handles for admin with multiple modules', () => {
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      const gripIcons = screen.getAllByTestId('grip-vertical')
+      expect(gripIcons.length).toBe(2)
+      expect(screen.getByTestId('dnd-context')).toBeInTheDocument()
+      expect(screen.getByTestId('sortable-context')).toBeInTheDocument()
+    })
+
+    it('does not render drag handles for non-admin users', () => {
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} />)
+
+      expect(screen.queryAllByTestId('grip-vertical')).toHaveLength(0)
+      expect(screen.queryByTestId('dnd-context')).not.toBeInTheDocument()
+    })
+
+    it('does not render drag handles for single module even as admin', () => {
+      const modules = [createMockModule()]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      expect(screen.queryAllByTestId('grip-vertical')).toHaveLength(0)
+      expect(screen.getByTestId('single-module-card')).toBeInTheDocument()
     })
   })
 })

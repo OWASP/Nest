@@ -3,6 +3,9 @@ import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
 import ModuleCard from 'components/ModuleCard'
 
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(() => [jest.fn()]),
+}))
 const mockModules = [
   {
     id: '1',

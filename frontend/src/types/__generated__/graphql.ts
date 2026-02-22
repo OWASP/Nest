@@ -326,6 +326,7 @@ export type ModuleNode = {
   mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
   program?: Maybe<ProgramNode>;
   projectId?: Maybe<Scalars['ID']['output']>;
   projectName?: Maybe<Scalars['String']['output']>;
@@ -387,6 +388,7 @@ export type Mutation = {
   createProgram: ProgramNode;
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
+  reorderModules: Array<ModuleNode>;
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
@@ -429,6 +431,11 @@ export type MutationCreateProgramArgs = {
 
 export type MutationGithubAuthArgs = {
   accessToken: Scalars['String']['input'];
+};
+
+
+export type MutationReorderModulesArgs = {
+  inputData: ReorderModulesInput;
 };
 
 
@@ -960,6 +967,11 @@ export type ReleaseNode = Node & {
   repositoryName?: Maybe<Scalars['String']['output']>;
   tagName: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type ReorderModulesInput = {
+  moduleKeys: Array<Scalars['String']['input']>;
+  programKey: Scalars['String']['input'];
 };
 
 export type RepositoryContributorNode = {

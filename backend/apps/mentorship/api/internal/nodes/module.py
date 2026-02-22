@@ -34,6 +34,7 @@ class ModuleNode:
     ended_at: datetime
     experience_level: ExperienceLevelEnum
     labels: list[str] | None = None
+    order: int = 0
     program: ProgramNode | None = None
     project_id: strawberry.ID | None = None
     started_at: datetime
@@ -222,3 +223,11 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+
+
+@strawberry.input
+class ReorderModulesInput:
+    """Input for reordering modules within a program."""
+
+    program_key: str
+    module_keys: list[str]
