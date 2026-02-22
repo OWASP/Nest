@@ -1192,6 +1192,7 @@ describe('UserDetailsPage', () => {
       await waitFor(() => {
         const avatar = screen.getByAltText('User Avatar')
         expect(avatar).toBeInTheDocument()
+        expect(screen.queryByText('@null')).not.toBeInTheDocument()
       })
     })
   })
