@@ -2114,7 +2114,7 @@ describe('CardDetailsPage', () => {
         {
           author: {
             login: 'author-login-only',
-            name: null,
+            name: undefined,
             avatarUrl: 'https://example.com/author-avatar.jpg',
           },
           body: 'Milestone with author no name',

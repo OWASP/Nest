@@ -278,9 +278,14 @@ describe('ModuleForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
     mockQuery.mockResolvedValue({
       data: { searchProjects: [{ id: 'project-1', name: 'Test Project' }] },
     })
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   const renderModuleForm = (props = {}) => {
