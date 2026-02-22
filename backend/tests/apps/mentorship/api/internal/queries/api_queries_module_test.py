@@ -86,12 +86,10 @@ class TestModuleQuery:
         assert result == []
         mock_program_get.assert_called_once_with(key="nonexistent_program")
 
-    @patch("apps.mentorship.api.internal.queries.module.has_program_access")
     @patch("apps.mentorship.api.internal.queries.module.Program.objects.get")
     def test_get_program_modules_hidden_for_draft_program(
         self,
         mock_program_get: MagicMock,
-        mock_has_access: MagicMock,
         mock_anonymous_info: MagicMock,
         api_module_queries,
     ) -> None:
@@ -99,48 +97,13 @@ class TestModuleQuery:
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
         mock_program_get.return_value = mock_program
-        mock_has_access.return_value = False
+        mock_program.user_has_access.return_value = False
 
         result = api_module_queries.get_program_modules(
             info=mock_anonymous_info, program_key="draft-program"
         )
 
         assert result == []
-
-    @patch("apps.mentorship.api.internal.queries.module.Module.objects.filter")
-    def test_get_project_modules_success(
-        self, mock_module_filter: MagicMock, api_module_queries
-    ) -> None:
-        """Test successful retrieval of modules by project key."""
-        mock_module = MagicMock(spec=Module)
-        mock_module_filter_related = mock_module_filter.return_value.select_related.return_value
-        mock_module_filter_related.prefetch_related.return_value.order_by.return_value = [
-            mock_module
-        ]
-
-        result = api_module_queries.get_project_modules(project_key="project1")
-
-        assert result == [mock_module]
-        mock_module_filter.assert_called_once_with(
-            project__key="project1",
-            program__status=Program.ProgramStatus.PUBLISHED,
-        )
-
-    @patch("apps.mentorship.api.internal.queries.module.Module.objects.filter")
-    def test_get_project_modules_empty(
-        self, mock_module_filter: MagicMock, api_module_queries
-    ) -> None:
-        """Test retrieval of modules by project key returns empty list if no modules found."""
-        mock_module_filter_related = mock_module_filter.return_value.select_related.return_value
-        mock_module_filter_related.prefetch_related.return_value.order_by.return_value = []
-
-        result = api_module_queries.get_project_modules(project_key="nonexistent_project")
-
-        assert result == []
-        mock_module_filter.assert_called_once_with(
-            project__key="nonexistent_project",
-            program__status=Program.ProgramStatus.PUBLISHED,
-        )
 
     @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
     def test_get_module_success(
@@ -183,24 +146,22 @@ class TestModuleQuery:
             key="nonexistent", program__key="program1"
         )
 
-    @patch("apps.mentorship.api.internal.queries.module.has_program_access")
     @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
     def test_get_module_hidden_for_draft_program(
         self,
         mock_module_select_related: MagicMock,
-        mock_has_access: MagicMock,
         mock_anonymous_info: MagicMock,
         api_module_queries,
     ) -> None:
         """Test that a module of a draft program is hidden from anonymous users."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
+        mock_program.user_has_access.return_value = False
         mock_module = MagicMock(spec=Module)
         mock_module.program = mock_program
         mock_module_select_related.return_value.prefetch_related.return_value.get.return_value = (
             mock_module
         )
-        mock_has_access.return_value = False
 
         result = api_module_queries.get_module(
             info=mock_anonymous_info, module_key="module1", program_key="draft-program"

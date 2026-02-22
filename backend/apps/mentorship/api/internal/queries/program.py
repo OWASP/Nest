@@ -9,7 +9,6 @@ from apps.common.utils import normalize_limit
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 from apps.mentorship.models.program_admin import ProgramAdmin
-from apps.mentorship.utils import has_program_access
 from apps.nest.api.internal.permissions import IsAuthenticated
 
 PAGE_SIZE = 25
@@ -33,8 +32,8 @@ class ProgramQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if program.status != Program.ProgramStatus.PUBLISHED and not has_program_access(
-            info, program
+        if program.status != Program.ProgramStatus.PUBLISHED and not program.user_has_access(
+            info.context.request.user
         ):
             return None
 

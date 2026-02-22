@@ -77,12 +77,10 @@ class TestGetProgram:
         )
         mock_program_prefetch_related.return_value.get.assert_called_once_with(key="nonexistent")
 
-    @patch("apps.mentorship.api.internal.queries.program.has_program_access")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     def test_get_draft_program_hidden_for_anonymous_user(
         self,
         mock_program_prefetch_related: MagicMock,
-        mock_has_access: MagicMock,
         mock_anonymous_info: MagicMock,
         api_program_queries,
     ) -> None:
@@ -90,7 +88,7 @@ class TestGetProgram:
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
         mock_program_prefetch_related.return_value.get.return_value = mock_program
-        mock_has_access.return_value = False
+        mock_program.user_has_access.return_value = False
 
         result = api_program_queries.get_program(
             info=mock_anonymous_info, program_key="draft-program"
@@ -98,12 +96,10 @@ class TestGetProgram:
 
         assert result is None
 
-    @patch("apps.mentorship.api.internal.queries.program.has_program_access")
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     def test_get_draft_program_visible_for_admin(
         self,
         mock_program_prefetch_related: MagicMock,
-        mock_has_access: MagicMock,
         mock_info: MagicMock,
         api_program_queries,
     ) -> None:
@@ -111,7 +107,7 @@ class TestGetProgram:
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
         mock_program_prefetch_related.return_value.get.return_value = mock_program
-        mock_has_access.return_value = True
+        mock_program.user_has_access.return_value = True
 
         result = api_program_queries.get_program(info=mock_info, program_key="draft-program")
 

@@ -6,7 +6,6 @@ import strawberry
 
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module, Program
-from apps.mentorship.utils import has_program_access
 
 logger = logging.getLogger(__name__)
 
@@ -23,26 +22,13 @@ class ModuleQuery:
         except Program.DoesNotExist:
             return []
 
-        if program.status != Program.ProgramStatus.PUBLISHED and not has_program_access(
-            info, program
+        if program.status != Program.ProgramStatus.PUBLISHED and not program.user_has_access(
+            info.context.request.user
         ):
             return []
 
         return (
             Module.objects.filter(program=program)
-            .select_related("program", "project")
-            .prefetch_related("mentors__github_user")
-            .order_by("started_at")
-        )
-
-    @strawberry.field
-    def get_project_modules(self, project_key: str) -> list[ModuleNode]:
-        """Get all modules by project Key. Returns an empty list if project is not found."""
-        return (
-            Module.objects.filter(
-                project__key=project_key,
-                program__status=Program.ProgramStatus.PUBLISHED,
-            )
             .select_related("program", "project")
             .prefetch_related("mentors__github_user")
             .order_by("started_at")
@@ -64,8 +50,9 @@ class ModuleQuery:
             logger.warning(msg, exc_info=True)
             return None
 
-        if module.program.status != Program.ProgramStatus.PUBLISHED and not has_program_access(
-            info, module.program
+        if (
+            module.program.status != Program.ProgramStatus.PUBLISHED
+            and not module.program.user_has_access(info.context.request.user)
         ):
             return None
 
