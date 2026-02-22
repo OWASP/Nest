@@ -334,12 +334,21 @@ module "load_data_task" {
     "-c",
     <<-EOT
     set -e
+    echo "Downloading fixture from S3..."
     python -c "
     import boto3
     s3 = boto3.client('s3')
-    s3.download_file('${var.fixtures_bucket_name}', 'nest.json.gz', '/tmp/nest.json.gz')
+    s3.download_file('${var.fixtures_bucket_name}', 'nest.dump', '/tmp/nest.dump')
     "
-    python manage.py load_data --fixture-path /tmp/nest.json.gz
+    echo "Restoring database..."
+    PGPASSWORD=$DJANGO_DB_PASSWORD pg_restore \
+      --dbname=$DJANGO_DB_NAME \
+      --host=$DJANGO_DB_HOST \
+      --port=$DJANGO_DB_PORT \
+      --username=$DJANGO_DB_USER \
+      --verbose \
+      /tmp/nest.dump
+    echo "Database restored successfully."
     EOT
   ]
   common_tags                  = var.common_tags
