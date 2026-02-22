@@ -94,23 +94,22 @@ const EditModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData) return
 
     try {
       const input: UpdateModuleInput = {
-        description: formData.description,
-        domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || '',
-        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
+        description: formData!.description,
+        domains: parseCommaSeparated(formData!.domains),
+        endedAt: formData!.endedAt || '',
+        experienceLevel: formData!.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
-        labels: parseCommaSeparated(formData.labels),
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
-        name: formData.name,
+        labels: parseCommaSeparated(formData!.labels),
+        mentorLogins: parseCommaSeparated(formData!.mentorLogins),
+        name: formData!.name,
         programKey: programKey,
-        projectId: formData.projectId,
-        projectName: formData.projectName,
-        startedAt: formData.startedAt || '',
-        tags: parseCommaSeparated(formData.tags),
+        projectId: formData!.projectId,
+        projectName: formData!.projectName,
+        startedAt: formData!.startedAt || '',
+        tags: parseCommaSeparated(formData!.tags),
       }
 
       const result = await updateModule({
@@ -133,10 +132,6 @@ const EditModulePage = () => {
     }
   }
 
-  if (accessStatus === 'checking' || !formData) {
-    return <LoadingSpinner />
-  }
-
   if (accessStatus === 'denied') {
     return (
       <ErrorDisplay
@@ -145,6 +140,10 @@ const EditModulePage = () => {
         message="You do not have permission to edit this module. You will be redirected."
       />
     )
+  }
+
+  if (accessStatus === 'checking' || !formData) {
+    return <LoadingSpinner />
   }
 
   return (

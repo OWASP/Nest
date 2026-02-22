@@ -34,6 +34,11 @@ jest.mock('components/forms/shared/formValidationUtils', () => ({
   validateEndDate: jest.fn(),
 }))
 
+jest.mock('app/global-error', () => ({
+  ErrorDisplay: ({ title }: { title: string }) => <div>{title}</div>,
+  handleAppError: jest.fn(),
+}))
+
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
@@ -156,6 +161,7 @@ describe('EditModulePage', () => {
         timeout: 4000,
       })
     })
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
 
     // Advance timers to trigger the redirect
     act(() => {
@@ -195,11 +201,11 @@ describe('EditModulePage', () => {
       render(<EditModulePage />)
     })
 
-    // When denied but formData is null, component shows spinner
-    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    // When denied, component shows ErrorDisplay
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
   })
 
-  it('shows loading spinner when user is unauthenticated', async () => {
+  it('shows Access Denied when user is unauthenticated', async () => {
     ;(useSession as jest.Mock).mockReturnValue({
       data: null,
       status: 'unauthenticated',
@@ -217,8 +223,8 @@ describe('EditModulePage', () => {
       render(<EditModulePage />)
     })
 
-    // When denied but formData is null, component shows spinner
-    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    // When denied, component shows ErrorDisplay
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
   })
 
   it('handles form submission error gracefully', async () => {

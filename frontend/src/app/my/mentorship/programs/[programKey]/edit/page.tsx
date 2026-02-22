@@ -118,7 +118,7 @@ const EditProgramPage = () => {
         menteesLimit: Number(formData.menteesLimit),
         name: formData.name,
         startedAt: formData.startedAt,
-        status: (formData.status as ProgramStatusEnum) || ProgramStatusEnum.Draft,
+        status: (formData.status ?? ProgramStatusEnum.Draft) as ProgramStatusEnum,
         tags: parseCommaSeparated(formData.tags),
       }
 
