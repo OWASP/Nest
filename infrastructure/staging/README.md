@@ -1,7 +1,7 @@
 ## Inline Permissions
 
 Use the following inline permissions for the `nest-staging` IAM User
-*Note*: replace ${...} with appropriate values.
+*Note*: replace the placeholders with appropriate values.
 
 ```json
 {
@@ -28,7 +28,7 @@ Use the following inline permissions for the `nest-staging` IAM User
     "dynamodb:PutItem",
     "dynamodb:DeleteItem"
    ],
-   "Resource": "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT_ID}:table/nest-staging-terraform-state-lock"
+   "Resource": "arn:aws:dynamodb:AWS_REGION:AWS_ACCOUNT_ID:table/nest-staging-terraform-state-lock"
   },
         {
             "Sid": "KMSStateManagement",
@@ -36,7 +36,7 @@ Use the following inline permissions for the `nest-staging` IAM User
             "Action": [
                 "kms:Decrypt"
             ],
-            "Resource": "${AWS_BACKEND_KMS_KEY_ARN}"
+            "Resource": "AWS_BACKEND_KMS_KEY_ARN"
         },
         {
             "Sid": "STSStateManagement",
@@ -45,7 +45,7 @@ Use the following inline permissions for the `nest-staging` IAM User
                 "sts:AssumeRole",
                 "sts:TagSession"
             ],
-            "Resource": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-staging-terraform"
+            "Resource": "arn:aws:iam::AWS_ACCOUNT_ID:role/nest-staging-terraform"
         }
     ]
 }

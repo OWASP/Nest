@@ -11,7 +11,7 @@ Example: `nest-staging`, `nest-bootstrap`, etc.
 ## Inline Permissions
 
 Use the following inline permissions for the `nest-bootstrap` IAM User
-*Note*: replace ${AWS_ACCOUNT_ID} and ${AWS_BACKEND_KMS_KEY_ARN} with appropriate values.
+*Note*: replace the placeholders with appropriate values.
 
 ```json
 {
@@ -39,7 +39,7 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
     "dynamodb:GetItem",
     "dynamodb:PutItem"
    ],
-   "Resource": "arn:aws:dynamodb:*:${AWS_ACCOUNT_ID}:table/nest-bootstrap-terraform-state-lock"
+   "Resource": "arn:aws:dynamodb:*:AWS_ACCOUNT_ID:table/nest-bootstrap-terraform-state-lock"
   },
   {
    "Sid": "IAMManagement",
@@ -71,8 +71,8 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
     "iam:UpdateRole"
    ],
    "Resource": [
-    "arn:aws:iam::${AWS_ACCOUNT_ID}:role/nest-*-terraform",
-    "arn:aws:iam::${AWS_ACCOUNT_ID}:policy/nest-*-terraform"
+    "arn:aws:iam::AWS_ACCOUNT_ID:role/nest-*-terraform",
+    "arn:aws:iam::AWS_ACCOUNT_ID:policy/nest-*-terraform"
    ]
   },
   {
@@ -81,7 +81,7 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
    "Action": [
     "kms:Decrypt"
    ],
-   "Resource": "${AWS_BACKEND_KMS_KEY_ARN}"
+   "Resource": "AWS_BACKEND_KMS_KEY_ARN"
   }
  ]
 }
