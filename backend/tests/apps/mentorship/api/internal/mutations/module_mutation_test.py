@@ -1315,6 +1315,7 @@ class TestModuleMutationReorderModules:
         mod_c = MagicMock()
         mod_c.key = "mod-c"
 
+        mock_module.objects.filter.return_value.count.return_value = 3
         mock_module.objects.filter.return_value.select_for_update.return_value = [
             mod_a,
             mod_b,
@@ -1390,6 +1391,7 @@ class TestModuleMutationReorderModules:
         mock_prog.admins.filter.return_value.exists.return_value = True
 
         mod_a = MagicMock(key="key-a")
+        mock_module.objects.filter.return_value.count.return_value = 1
         mock_module.objects.filter.return_value.select_for_update.return_value = [mod_a]
 
         mutation = ModuleMutation()

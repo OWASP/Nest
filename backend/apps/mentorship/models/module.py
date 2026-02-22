@@ -48,7 +48,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
-    order = models.PositiveIntegerField(
+    order = models.PositiveSmallIntegerField(
         default=0,
         verbose_name="Order",
         help_text="Display order of the module within its program.",
