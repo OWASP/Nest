@@ -32,3 +32,5 @@ class LocationFilter(FilterSchema):
     longitude_lte: float | None = Field(
         None, description="Longitude less than or equal to", q="longitude__lte"
     )
+    country: str | None = Field(None, q="country__icontains")
+    location: str | None = Field(None, q="location__icontains")
