@@ -1283,6 +1283,13 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Languages: JavaScript')
       expect(screen.queryByText('Topics:')).not.toBeInTheDocument()
     })
+
+    it('handles conditional rendering when languages empty but topics present', () => {
+      render(<CardDetailsPage {...defaultProps} languages={[]} topics={['web']} />)
+
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Topics: web')
+      expect(screen.queryByText('Languages:')).not.toBeInTheDocument()
+    })
   })
 
   describe('Accessibility and Semantic HTML', () => {
@@ -1609,6 +1616,25 @@ describe('CardDetailsPage', () => {
       ).not.toThrow()
 
       expect(screen.getByText('Statistics')).toBeInTheDocument()
+    })
+
+    it('handles undefined topics/languages in grid layout', () => {
+      render(<CardDetailsPage {...defaultProps} languages={['JavaScript']} topics={undefined} />)
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Languages: JavaScript')
+      cleanup()
+      render(<CardDetailsPage {...defaultProps} languages={undefined} topics={['web']} />)
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Topics: web')
+    })
+
+    it('renders Leaders with Unknown when value is null', () => {
+      const propsWithNullLeader = {
+        ...defaultProps,
+        type: 'chapter',
+        details: [{ label: 'Leaders', value: null }],
+      }
+      render(<CardDetailsPage {...propsWithNullLeader} />)
+      expect(screen.getByText('Leaders:')).toBeInTheDocument()
+      expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles mixed valid and invalid data in arrays', () => {
@@ -2083,6 +2109,39 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Milestone No Author')).toBeInTheDocument()
     })
 
+    it('renders milestone author tooltip using login when name is missing', () => {
+      const milestonesWithAuthorNoName = [
+        {
+          author: {
+            login: 'author-login-only',
+            name: undefined,
+            avatarUrl: 'https://example.com/author-avatar.jpg',
+          },
+          body: 'Milestone with author no name',
+          closedIssuesCount: 3,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 1,
+          repositoryName: 'test-repo',
+          organizationName: 'test-org',
+          state: 'open',
+          title: 'Milestone Author No Name',
+          url: 'https://github.com/test/project/milestone/1',
+        },
+      ]
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: milestonesWithAuthorNoName,
+        showAvatar: true,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+      expect(screen.getByTestId('mock-tooltip')).toHaveAttribute('title', 'author-login-only')
+      expect(screen.getByAltText("author-login-only's avatar")).toBeInTheDocument()
+    })
+
     it('renders milestone title without link when URL is missing', () => {
       const milestonesWithoutUrl = [
         {
@@ -2272,6 +2331,52 @@ describe('CardDetailsPage', () => {
 
       expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
       expect(screen.getByTestId('entity-actions')).toHaveTextContent('type=module')
+    })
+
+    it('renders EntityActions for module type when user is a mentor but not admin', () => {
+      const { useSession } = jest.requireMock('next-auth/react')
+      useSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'mentor-user',
+            name: 'Mentor User',
+            email: 'mentor@example.com',
+          },
+        },
+      })
+
+      const adminUser = {
+        id: 'admin-id',
+        login: 'admin-user',
+        name: 'Admin User',
+        avatarUrl: 'https://example.com/admin-avatar.jpg',
+      }
+
+      const mentorUser = {
+        id: 'mentor-id',
+        login: 'mentor-user',
+        name: 'Mentor User',
+        avatarUrl: 'https://example.com/mentor-avatar.jpg',
+      }
+
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        accessLevel: 'admin',
+        admins: [adminUser],
+        mentors: [mentorUser],
+        programKey: 'test-program',
+        entityKey: 'test-module',
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      const entityActions = screen.getByTestId('entity-actions')
+      expect(entityActions).toBeInTheDocument()
+      expect(entityActions).toHaveTextContent('type=module')
+      // isAdmin should be undefined (user is not in admins list)
+      expect(entityActions).not.toHaveAttribute('data-isadmin', 'true')
     })
 
     it('does not render EntityActions for module type when user is not an admin', () => {
