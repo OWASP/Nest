@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 
-from apps.ai.flows import process_query
 from apps.slack.blocks import markdown
 from apps.slack.utils import format_ai_response_for_slack
 
@@ -61,6 +60,8 @@ def process_ai_query(
 
     """
     try:
+        from apps.ai.flows import process_query
+
         return process_query(
             query, images=images, channel_id=channel_id, is_app_mention=is_app_mention
         )

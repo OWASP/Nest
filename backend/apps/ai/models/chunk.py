@@ -1,7 +1,6 @@
 """AI app chunk model."""
 
 from django.db import models
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
 from apps.ai.models.context import Context
@@ -34,6 +33,8 @@ class Chunk(TimestampedModel):
     @staticmethod
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+
         return RecursiveCharacterTextSplitter(
             chunk_size=200,
             chunk_overlap=20,
