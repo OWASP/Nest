@@ -171,14 +171,14 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "algoliasearch"
-version = "4.36.1"
+version = "4.37.0"
 description = "A fully-featured and blazing-fast Python API client to interact with Algolia."
 optional = false
 python-versions = ">=3.8.1"
 groups = ["main"]
 files = [
-    {file = "algoliasearch-4.36.1-py3-none-any.whl", hash = "sha256:a3bfef000632ff66b550278a7ba17de87b19723c3e49ae2b23c4111cfe8daf74"},
-    {file = "algoliasearch-4.36.1.tar.gz", hash = "sha256:5a049efbd191b0a511a0c6ea1d54cc03eba7de01b8146044777328e4cbcc6330"},
+    {file = "algoliasearch-4.37.0-py3-none-any.whl", hash = "sha256:1fcf1e757bc81a62197a3309ec70a62801d0c524dd3a9300a2014c8a6216f1e1"},
+    {file = "algoliasearch-4.37.0.tar.gz", hash = "sha256:9ddae64b96262fdcc62403b65f11d776b80baecd4b4a337fc57bd34d1ec5e962"},
 ]
 
 [package.dependencies]
@@ -275,18 +275,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.42.49"
+version = "1.42.52"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.49-py3-none-any.whl", hash = "sha256:99e1df4361c3f6ff6ade65803c043ea96314826134962dd3b385433b309eb819"},
-    {file = "boto3-1.42.49.tar.gz", hash = "sha256:9cd252f640567b86e92b0a8ffdd4ade9a3018ee357c724bff6a21b8c8a41be0c"},
+    {file = "boto3-1.42.52-py3-none-any.whl", hash = "sha256:7b3e0c4bfd8815a3df64fbe98fc9f87dfb12bd7a783cf63dfc2f166c66798c9d"},
+    {file = "boto3-1.42.52.tar.gz", hash = "sha256:ff4a4afb832f63a1358e11fe6eb321da0f4767979c6721dd32fb02e6eabcebf5"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.49,<1.43.0"
+botocore = ">=1.42.52,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -295,14 +295,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.49"
+version = "1.42.52"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.49-py3-none-any.whl", hash = "sha256:1c33544f72101eed4ccf903ebb667a803e14e25b2af4e0836e4b871da1c0af37"},
-    {file = "botocore-1.42.49.tar.gz", hash = "sha256:333115a64a507697b0c450ade7e2d82bc8b4e21c0051542514532b455712bdcc"},
+    {file = "botocore-1.42.52-py3-none-any.whl", hash = "sha256:c3a0b7138a4c5a534da0eb2444c19763b4d03ba2190c0602c49315e54efd7252"},
+    {file = "botocore-1.42.52.tar.gz", hash = "sha256:3bdef10aee4cee13ff019b6a1423a2ce3ca17352328d9918157a1829e5cc9be1"},
 ]
 
 [package.dependencies]
@@ -1142,14 +1142,14 @@ sftp = ["paramiko (>=1.15)"]
 
 [[package]]
 name = "elevenlabs"
-version = "2.36.0"
+version = "2.36.1"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["video"]
 files = [
-    {file = "elevenlabs-2.36.0-py3-none-any.whl", hash = "sha256:d8c4954666818f52fa0ca5bd47ca60efeea1f217206774de71a439c60c85a231"},
-    {file = "elevenlabs-2.36.0.tar.gz", hash = "sha256:d35e75395caefe97d4e71bd1fd616ba3695a268dee787af064d410177d506106"},
+    {file = "elevenlabs-2.36.1-py3-none-any.whl", hash = "sha256:c60c03b463565704038364703b0d54746fd0b67dea0341c2d53da445c32c75cc"},
+    {file = "elevenlabs-2.36.1.tar.gz", hash = "sha256:9b278f861679824ee03ee06da049d6fd9ca3886950e77d8d49dab2530ed837d3"},
 ]
 
 [package.dependencies]
@@ -2072,14 +2072,14 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.7.3"
+version = "0.7.4"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.7.3-py3-none-any.whl", hash = "sha256:03659bf9274e6efcead361c9c31a7849ea565ae0d6c0d73e1d8b239029eff3be"},
-    {file = "langsmith-0.7.3.tar.gz", hash = "sha256:0223b97021af62d2cf53c8a378a27bd22e90a7327e45b353e0069ae60d5d6f9e"},
+    {file = "langsmith-0.7.4-py3-none-any.whl", hash = "sha256:1d0590dccc7d8b0b2b39a700a1fb8b775858bf07d3b8b5f3a01b6da22bc12726"},
+    {file = "langsmith-0.7.4.tar.gz", hash = "sha256:7a1fe2604424ba1c19d4a39e16a340610bf8f0c94f9eb2f3a292235bb2ee86b0"},
 ]
 
 [package.dependencies]
@@ -2095,6 +2095,7 @@ zstandard = ">=0.23.0"
 
 [package.extras]
 claude-agent-sdk = ["claude-agent-sdk (>=0.1.0) ; python_version >= \"3.10\""]
+google-adk = ["google-adk (>=1.0.0)", "wrapt (>=1.16.0)"]
 langsmith-pyo3 = ["langsmith-pyo3 (>=0.1.0rc2)"]
 openai-agents = ["openai-agents (>=0.0.3)"]
 otel = ["opentelemetry-api (>=1.30.0)", "opentelemetry-exporter-otlp-proto-http (>=1.30.0)", "opentelemetry-sdk (>=1.30.0)"]
@@ -3362,14 +3363,14 @@ typing-extensions = ">=4.14.1"
 
 [[package]]
 name = "pydantic-settings"
-version = "2.13.0"
+version = "2.13.1"
 description = "Settings management using Pydantic"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pydantic_settings-2.13.0-py3-none-any.whl", hash = "sha256:d67b576fff39cd086b595441bf9c75d4193ca9c0ed643b90360694d0f1240246"},
-    {file = "pydantic_settings-2.13.0.tar.gz", hash = "sha256:95d875514610e8595672800a5c40b073e99e4aae467fa7c8f9c263061ea2e1fe"},
+    {file = "pydantic_settings-2.13.1-py3-none-any.whl", hash = "sha256:d56fd801823dbeae7f0975e1f8c8e25c258eb75d278ea7abb5d9cebb01b56237"},
+    {file = "pydantic_settings-2.13.1.tar.gz", hash = "sha256:b4c11847b15237fb0171e1462bf540e294affb9b86db4d9aa5c01730bdbe4025"},
 ]
 
 [package.dependencies]
@@ -3550,34 +3551,34 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pypdfium2"
-version = "5.4.0"
+version = "5.5.0"
 description = "Python bindings to PDFium"
 optional = false
 python-versions = ">=3.6"
 groups = ["video"]
 files = [
-    {file = "pypdfium2-5.4.0-py3-none-android_23_arm64_v8a.whl", hash = "sha256:8bc51a12a8c8eabbdbd7499d3e5ec47bcf56ba18e07b52bdd07d321cc1252c90"},
-    {file = "pypdfium2-5.4.0-py3-none-android_23_armeabi_v7a.whl", hash = "sha256:a414ef5b685824cc6c7acbe19b7dbc735de2023cf473321a8ebfe8d7f5d8a41f"},
-    {file = "pypdfium2-5.4.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0e83657db8da5971434ff5683bf3faa007ee1f3a56b61f245b8aa5b60442c23a"},
-    {file = "pypdfium2-5.4.0-py3-none-macosx_11_0_x86_64.whl", hash = "sha256:e42b1d14db642e96bb3a57167f620b4247e9c843d22b9fb569b16a7c35a18f47"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0698c9a002f839127e74ec0185147e08b64e47a1e6caeaee95df434c05b26e8c"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:22e9d4c73fc48b18b022977ea6fe78df43adf95440e1135020ed35fea9595017"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:4f0619f8a8ae3eb71b2cdc1fbd2a8f5d43f0fc6bee66d1b3aac2c9c23e44a3bf"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:50124415d815c41de8ce7e21cee5450f74f6f1240a140573bb71ccac804d5e5f"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ce482d76e5447e745d761307401eaa366616ca44032b86cf7fbe6be918ade64e"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_27_s390x.manylinux_2_28_s390x.whl", hash = "sha256:16b9c6b07f3dbe7eda209bf7aaf131ca9614e1dae527e9764180dd58bcbaf411"},
-    {file = "pypdfium2-5.4.0-py3-none-manylinux_2_38_riscv64.manylinux_2_39_riscv64.whl", hash = "sha256:3b08d48b7cca3b51aefaad7855bc0e9e251432a6eef1356d532ff438be84855e"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:0a1526e2a2bde7f2f13bec0f471d9fd475f7bbac2c0c860d48c35af8394d5931"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:40cea0bceb1e60a71b3855e2b04d175d2199b7da06212bb80f0c78067d065810"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_i686.whl", hash = "sha256:7a116f8fbeae7aa3a18ff2d1fa331ac647831cc16b589d4fbbbb66d64ecc8793"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_ppc64le.whl", hash = "sha256:55c7fc894718db5fa2981d46dee45fe3a4fcd60d26f5095ad8f7779600fa8b6f"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_riscv64.whl", hash = "sha256:dfc1c0c7e6e7ba258ebb338aaf664eb933bff1854cda76e4ee530886ea39b31a"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_s390x.whl", hash = "sha256:4c0a48ede7180f804c029c509c2b6ea0c66813a3fde9eb9afc390183f947164d"},
-    {file = "pypdfium2-5.4.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:dea22d15c44a275702fd95ad664ba6eaa3c493d53d58b4d69272a04bdfb0df70"},
-    {file = "pypdfium2-5.4.0-py3-none-win32.whl", hash = "sha256:35c643827ed0f4dae9cedf3caf836f94cba5b31bd2c115b80a7c85f004636de9"},
-    {file = "pypdfium2-5.4.0-py3-none-win_amd64.whl", hash = "sha256:f9d9ce3c6901294d6984004d4a797dea110f8248b1bde33a823d25b45d3c2685"},
-    {file = "pypdfium2-5.4.0-py3-none-win_arm64.whl", hash = "sha256:2b78ea216fb92e7709b61c46241ebf2cc0c60cf18ad2fb4633af665d7b4e21e6"},
-    {file = "pypdfium2-5.4.0.tar.gz", hash = "sha256:7219e55048fb3999fc8adcaea467088507207df4676ff9e521a3ae15a67d99c4"},
+    {file = "pypdfium2-5.5.0-py3-none-android_23_arm64_v8a.whl", hash = "sha256:414f0b4aef7413e04df7355043fb752f2efb6f9777e04fd880d302612dacf89f"},
+    {file = "pypdfium2-5.5.0-py3-none-android_23_armeabi_v7a.whl", hash = "sha256:126ff8b131d12f16ce96b3e85b7f413e5073212be06b571f157fe11ad221c274"},
+    {file = "pypdfium2-5.5.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0770bd3f0be5c68443fc4017e43b1b1fe8f36877481cab70fd29b68b2c362e1b"},
+    {file = "pypdfium2-5.5.0-py3-none-macosx_11_0_x86_64.whl", hash = "sha256:5ab41a3b9953d9be44be35c36a2340f1d67c602db98a0d6f70006610871ae43a"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2492a22c3126a004cee2fa208ea4aa03ede2c7e205d05814934ab18f83d073e9"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:83ff93e08b1fadb00040564e2eccc99147fc1a632ba5daff745126b373d78446"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b7e85de3332bedf8e5f157c248063b4eaf968660e1e490353b6e581d9f96a4c6"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:e258365f34b6e334bb415e44dd9b1ee78a6e525bf854a1e74af67af7ede7555b"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bec21d833404ca771f02fa5cefb0b73e2148f05cbdb3b5b9989bdd51d9b5cbac"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_27_s390x.manylinux_2_28_s390x.whl", hash = "sha256:1dd6ccbe1b5e2e778e8b021e47f9485b4fd42eaa6c9bdda2631641724e1fcc04"},
+    {file = "pypdfium2-5.5.0-py3-none-manylinux_2_38_riscv64.manylinux_2_39_riscv64.whl", hash = "sha256:da3eada345570cec5e34872d1472d4ac542f0e650ccdb6c2eac08ae1a5f07c82"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:a087fb4088c7433fd3d78833dbe42cfb66df3d5ac98e3edf66110520fb33c0f0"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:e6418cdc500ef85a90319f9bc7f1c54fc133460379f509429403225d8a4c157f"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_i686.whl", hash = "sha256:8f7b66eedfac26eb2df4b00936e081b0a1c76fb8ee1c12639d85c2e73b0769ef"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_ppc64le.whl", hash = "sha256:faea3246591ce2ea6218cd06679071275e3c65f11c3f5c9091eb7fb07610af6a"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_riscv64.whl", hash = "sha256:aba26d404b51a9de3d3e80c867a95c71abf1c79552001ae22707451e59186b3d"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_s390x.whl", hash = "sha256:e0fa8f81679e6e71f26806f4db853571ee6435dc3bde7a46acdd182ef886a5b9"},
+    {file = "pypdfium2-5.5.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:ee22df3376d350eeb64d2002a1071e3a02c0d874c557a3cd8229a8fc572cdaac"},
+    {file = "pypdfium2-5.5.0-py3-none-win32.whl", hash = "sha256:ec62a00223d1222d2f35c0866dd79cdc24da070738544cdf51b17d332d4a7389"},
+    {file = "pypdfium2-5.5.0-py3-none-win_amd64.whl", hash = "sha256:15c32fbeebb5198afa785dd03e98906ebb4eded9ef8862e10f833c37b4a18786"},
+    {file = "pypdfium2-5.5.0-py3-none-win_arm64.whl", hash = "sha256:f618af0884c16c768539c44933a255039131dbbf39d68eded020da4f14958d73"},
+    {file = "pypdfium2-5.5.0.tar.gz", hash = "sha256:3283c61f54c3c546d140da201ef48a51c18b0ad54293091a010029ac13ece23a"},
 ]
 
 [[package]]
@@ -4262,14 +4263,14 @@ slack_sdk = ">=3.38.0,<4"
 
 [[package]]
 name = "slack-sdk"
-version = "3.40.0"
+version = "3.40.1"
 description = "The Slack API Platform SDK for Python"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "slack_sdk-3.40.0-py2.py3-none-any.whl", hash = "sha256:f2bada5ed3adb10a01e154e90db01d6d8938d0461b5790c12bcb807b2d28bbe2"},
-    {file = "slack_sdk-3.40.0.tar.gz", hash = "sha256:87b9a79d1d6e19a2b1877727a0ec6f016d82d30a6a410389fba87c221c99f10e"},
+    {file = "slack_sdk-3.40.1-py2.py3-none-any.whl", hash = "sha256:cd8902252979aa248092b0d77f3a9ea3cc605bc5d53663ad728e892e26e14a65"},
+    {file = "slack_sdk-3.40.1.tar.gz", hash = "sha256:a215333bc251bc90abf5f5110899497bf61a3b5184b6d9ee35d73ebf09ec3fd0"},
 ]
 
 [package.extras]
@@ -4442,14 +4443,14 @@ sanic = ["sanic (>=20.12.2)"]
 
 [[package]]
 name = "strawberry-graphql-django"
-version = "0.75.1"
+version = "0.75.2"
 description = "Strawberry GraphQL Django extension"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "strawberry_graphql_django-0.75.1-py3-none-any.whl", hash = "sha256:554f96206fbea67fd4cde0416ee9f1efa54b05347ef72bed60f0d449df65b60f"},
-    {file = "strawberry_graphql_django-0.75.1.tar.gz", hash = "sha256:5529b9de45dfd7008d7bc359998b83c4147d0daccdf24a2d7af554fc3b16b5a8"},
+    {file = "strawberry_graphql_django-0.75.2-py3-none-any.whl", hash = "sha256:9b7c898409bb17799f9830e39e2f6028dba847b3b1b5bc98ab894523557965bb"},
+    {file = "strawberry_graphql_django-0.75.2.tar.gz", hash = "sha256:17668295065348330b1dc3630482eac2cb4b953750aab1fe53234c0322888912"},
 ]
 
 [package.dependencies]

@@ -187,3 +187,28 @@ class TestGetUsersBlocks:
 
         assert len(blocks) == 1
         assert "No users found" in blocks[0]["text"]["text"]
+
+    def test_get_blocks_pagination_single_page(self, mocker):
+        """Test that no pagination buttons are added when there is only one page."""
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "User",
+                    "idx_login": "testuser",
+                    "idx_url": "https://github.com/testuser",
+                    "idx_bio": "Bio",
+                    "idx_location": "",
+                    "idx_company": "",
+                    "idx_followers_count": 0,
+                    "idx_following_count": 0,
+                    "idx_public_repositories_count": 0,
+                }
+            ],
+            "nbPages": 1,
+        }
+        mocker.patch("apps.github.index.search.user.get_users", return_value=mock_data)
+        presentation = EntityPresentation(include_feedback=False, include_pagination=True)
+
+        blocks = get_blocks(page=1, presentation=presentation)
+
+        assert not any(block.get("type") == "actions" for block in blocks)
