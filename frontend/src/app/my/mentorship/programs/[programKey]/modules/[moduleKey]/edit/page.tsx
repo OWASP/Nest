@@ -147,7 +147,7 @@ const EditModulePage = () => {
       })
       router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
-            const {
+      const {
         validationErrors: errors,
         hasValidationErrors,
         unmappedErrors,
@@ -160,10 +160,6 @@ const EditModulePage = () => {
         handleAppError(err)
       }
     }
-  }
-
-  if (accessStatus === 'checking' || !formData) {
-    return <LoadingSpinner />
   }
 
   if (accessStatus === 'denied') {
