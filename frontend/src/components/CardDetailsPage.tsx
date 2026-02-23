@@ -153,11 +153,23 @@ const DetailsCard = ({
                 />
               )}
               {type === 'module' &&
-                accessLevel === 'admin' &&
-                programKey &&
-                admins?.some((admin) => admin.login === session?.user?.login) && (
-                  <EntityActions type="module" programKey={programKey} moduleKey={entityKey} />
-                )}
+                (() => {
+                  if (!programKey || !entityKey) return null
+                  const currentUserLogin = session?.user?.login
+                  const isAdmin =
+                    accessLevel === 'admin' &&
+                    admins?.some((admin) => admin.login === currentUserLogin)
+                  const isMentor = mentors?.some((mentor) => mentor.login === currentUserLogin)
+                  return isAdmin || isMentor ? (
+                    <EntityActions
+                      type="module"
+                      programKey={programKey}
+                      moduleKey={entityKey}
+                      isAdmin={isAdmin ? true : undefined}
+                      isMentor={isMentor ? true : undefined}
+                    />
+                  ) : null
+                })()}
               {!isActive && <StatusBadge status="inactive" size="md" />}
               {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
               {IS_PROJECT_HEALTH_ENABLED &&
@@ -204,7 +216,7 @@ const DetailsCard = ({
               )
             )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
-              <SocialLinks urls={socialLinks || []} />
+              <SocialLinks urls={socialLinks} />
             )}
           </SecondaryCard>
           {showStatistics(type) && stats && (
@@ -452,12 +464,7 @@ const DetailsCard = ({
                                 height={24}
                                 width={24}
                                 src={milestone?.author?.avatarUrl}
-                                alt={
-                                  milestone.author &&
-                                  (milestone.author.name || milestone.author.login)
-                                    ? `${milestone.author.name || milestone.author.login}'s avatar`
-                                    : "Author's avatar"
-                                }
+                                alt={`${milestone.author?.name || milestone.author?.login}'s avatar`}
                                 className="mr-2 rounded-full"
                               />
                             </Link>
@@ -537,7 +544,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }: { urls: string[] }) => {
+const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>

@@ -50,8 +50,10 @@ frontend/pnpm-debug.log*
 frontend/test-results/
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+infrastructure/
 logs
 node_modules/
 semgrep-security-report.txt
 TODO
 venv/
+zap.yaml

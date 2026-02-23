@@ -227,12 +227,10 @@ const ModuleIssueDetailsPage = () => {
                       type="button"
                       disabled={!canEditDeadline}
                       onClick={() => {
-                        if (canEditDeadline) {
-                          setDeadlineInput(
-                            taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
-                          )
-                          setIsEditingDeadline(true)
-                        }
+                        setDeadlineInput(
+                          taskDeadline ? new Date(taskDeadline).toISOString().slice(0, 10) : ''
+                        )
+                        setIsEditingDeadline(true)
                       }}
                       className={`inline-flex items-center gap-2 rounded px-2 py-1 text-left transition-colors ${
                         canEditDeadline
@@ -301,7 +299,6 @@ const ModuleIssueDetailsPage = () => {
                       aria-label={`Unassign @${a.login}`}
                       disabled={!issueId || unassigning}
                       onClick={async () => {
-                        if (!issueId || unassigning) return
                         await unassignIssue({
                           variables: {
                             programKey,
@@ -369,7 +366,6 @@ const ModuleIssueDetailsPage = () => {
                     type="button"
                     disabled={!issueId || assigning}
                     onClick={async () => {
-                      if (!issueId || assigning) return
                       await assignIssue({
                         variables: {
                           programKey,

@@ -1,10 +1,12 @@
+.PHONY: check-spelling cspell-install cspell-check cspell-run update-cspell-dependencies
+
 check-spelling: cspell-check
 
 cspell-install:
 	@ # Check if cspell:ci image exists (from CI build step), tag it to 'cspell' if found,
 	@ # otherwise build the image from scratch for local development.
 	@docker image inspect cspell:ci >/dev/null 2>&1 && \
-	@docker tag cspell:ci cspell || docker build -t cspell cspell
+	@docker tag cspell:ci cspell || docker build -t cspell -f docker/cspell/Dockerfile cspell
 
 cspell-check: CMD="--no-progress -r /nest"
 cspell-check: cspell-install cspell-run

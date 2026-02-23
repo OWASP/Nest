@@ -30,6 +30,11 @@ updates:
     schedule:
       interval: daily
 
+  - package-ecosystem: docker
+    directory: docker/zap
+    schedule:
+      interval: daily
+
   - package-ecosystem: docker-compose
     directory: docker-compose/local
     schedule:
@@ -52,6 +57,12 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    schedule:
+      interval: daily
+    target-branch: main
+
+  - package-ecosystem: npm
+    directory: cspell
     schedule:
       interval: daily
     target-branch: main
