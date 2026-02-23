@@ -1024,5 +1024,64 @@ describe('EntityActions', () => {
         )
       })
     })
+
+    it('skips cache update when getProgramModules is not in cache', async () => {
+      const mockCache = {
+        readQuery: jest.fn().mockReturnValue(null),
+        writeQuery: jest.fn(),
+      }
+
+      mockDeleteMutation.mockImplementationOnce(({ update }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (update) update(mockCache as any)
+        return Promise.resolve({ data: { deleteModule: true } })
+      })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(mockCache.readQuery).toHaveBeenCalled()
+        expect(mockCache.writeQuery).not.toHaveBeenCalled()
+        expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+      })
+    })
+
+    it('handles non-Error thrown values gracefully', async () => {
+      mockDeleteMutation.mockRejectedValueOnce('string error')
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Failed to delete module. Please try again.',
+          })
+        )
+      })
+    })
   })
 })
