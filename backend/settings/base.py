@@ -218,18 +218,8 @@ class Base(Configuration):
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
 
-    # django-configurations automatically prefixes with "DJANGO_" and uppercases,
-    # so OPEN_AI_SECRET_KEY becomes DJANGO_OPEN_AI_SECRET_KEY (which is what all
-    # tests and code references use). No need to specify environ_name explicitly.
     OPEN_AI_SECRET_KEY = values.SecretValue()
-    OPEN_AI_MODEL_NAME = values.Value(default="gpt-4o-mini")
-    # Note: GOOGLE_API_KEY uses Value() instead of SecretValue() because it's optional
-    # (only required when LLM_PROVIDER == "google"). SecretValue() requires the env var
-    # to always be set, which breaks setups using only OpenAI. This should still be
-    # treated as a secret and not exposed in logs or configuration output.
     GOOGLE_API_KEY = values.Value(default=None)
-    GOOGLE_MODEL_NAME = values.Value(default="gemini-2.0-flash")
-    LLM_PROVIDER = values.Value(default="openai")
 
     SLACK_BOT_TOKEN = values.SecretValue()
     SLACK_COMMANDS_ENABLED = True

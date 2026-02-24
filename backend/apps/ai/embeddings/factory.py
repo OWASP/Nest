@@ -1,6 +1,6 @@
 """Factory function to get the configured embedder."""
 
-from django.conf import settings
+import os
 
 from apps.ai.embeddings.base import Embedder
 from apps.ai.embeddings.google import GoogleEmbedder
@@ -17,8 +17,7 @@ def get_embedder() -> Embedder:
         Embedder instance configured for the current provider.
 
     """
-    # Currently OpenAI and Google, but can be extended to support other providers
-    if settings.LLM_PROVIDER == "google":
+    if os.getenv("LLM_PROVIDER", "openai") == "google":
         return GoogleEmbedder()
 
     return OpenAIEmbedder()

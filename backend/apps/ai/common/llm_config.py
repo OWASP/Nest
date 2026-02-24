@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from crewai import LLM
 from django.conf import settings
@@ -17,23 +18,24 @@ def get_llm() -> LLM:
         LLM: Configured LLM instance based on settings.
 
     """
-    provider = settings.LLM_PROVIDER
+    provider = os.getenv("LLM_PROVIDER", "openai")
 
     if provider == "openai":
         return LLM(
-            model=settings.OPEN_AI_MODEL_NAME,
+            model=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
             api_key=settings.OPEN_AI_SECRET_KEY,
             temperature=0.1,
         )
     if provider == "google":
+        model_name = os.getenv("GOOGLE_MODEL_NAME", "gemini-2.5-flash")
+        if not model_name.startswith("gemini/"):
+            model_name = f"gemini/{model_name}"
         return LLM(
-            model=settings.GOOGLE_MODEL_NAME,
-            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            model=model_name,
             api_key=settings.GOOGLE_API_KEY,
             temperature=0.1,
         )
 
-    # Fallback to OpenAI if provider not recognized or not specified
     if provider and provider not in ("openai", "google"):
         logger.error(
             "Unrecognized LLM_PROVIDER '%s'. Falling back to OpenAI. "
@@ -41,7 +43,7 @@ def get_llm() -> LLM:
             provider,
         )
     return LLM(
-        model=settings.OPEN_AI_MODEL_NAME,
+        model=os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
         api_key=settings.OPEN_AI_SECRET_KEY,
         temperature=0.1,
     )
