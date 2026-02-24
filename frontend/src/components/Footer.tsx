@@ -2,15 +2,18 @@
 import { Button } from '@heroui/button'
 import Link from 'next/link'
 import { useState, useCallback } from 'react'
-import { FaChevronDown } from 'react-icons/fa6'
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons, footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
+  // State to keep track of the open section in the footer
   const [openSection, setOpenSection] = useState<string | null>(null)
 
+  // Function to toggle the section open/closed
   const toggleSection = useCallback((title: string) => {
+    // If the section is already open, close it, otherwise open it
     setOpenSection((prev) => (prev === title ? null : title))
   }, [])
 
@@ -20,6 +23,7 @@ export default function Footer() {
         <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="flex flex-col gap-4">
+              {/*link*/}
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
@@ -28,25 +32,24 @@ export default function Footer() {
                 aria-controls={`footer-section-${section.title}`}
               >
                 <h3>{section.title}</h3>
-                <div
-                  className="transition-transform duration-300 ease-in-out lg:hidden"
-                  style={{
-                    transform: openSection === section.title ? 'rotate(180deg)' : 'rotate(0deg)',
-                  }}
-                >
-                  <FaChevronDown className="h-4 w-4" />
+                <div className="transition-transform duration-200 lg:hidden">
+                  {openSection === section.title ? (
+                    <FaChevronUp className="h-4 w-4" />
+                  ) : (
+                    <FaChevronDown className="h-4 w-4" />
+                  )}
                 </div>
               </Button>
-
-              {/* Grid-rows trick: animates from grid-rows-[0fr] to grid-rows-[1fr] — buttery smooth */}
               <div
                 id={`footer-section-${section.title}`}
-                className="grid transition-[grid-template-rows] duration-300 ease-in-out lg:grid-rows-[1fr]"
-                style={{
-                  gridTemplateRows: openSection === section.title ? '1fr' : '0fr',
-                }}
+                className={`grid transition-[grid-template-rows] duration-300 ease-in-out lg:grid-rows-[1fr] ${
+                  openSection === section.title ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                }`}
               >
-                <div className="overflow-hidden">
+                <div 
+                  className="overflow-hidden"
+                  inert={openSection !== section.title ? true : undefined}
+                >
                   <div className="flex flex-col gap-2 text-sm">
                     {section.links.map((link) => (
                       <div key={link.href || `span-${link.text}`} className="py-1">
@@ -89,7 +92,6 @@ export default function Footer() {
             )
           })}
         </div>
-
         {/* Footer bottom section with copyright and version */}
         <div className="grid w-full place-content-center">
           <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">
