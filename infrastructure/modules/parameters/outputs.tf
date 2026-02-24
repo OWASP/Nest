@@ -15,6 +15,7 @@ output "django_ssm_parameter_arns" {
     "DJANGO_OPEN_AI_SECRET_KEY"     = aws_ssm_parameter.django_open_ai_secret_key.arn
     "DJANGO_REDIS_HOST"             = aws_ssm_parameter.django_redis_host.arn
     "DJANGO_REDIS_PASSWORD"         = var.redis_password_arn
+    "DJANGO_REDIS_USE_TLS"          = aws_ssm_parameter.django_redis_use_tls.arn
     "DJANGO_SECRET_KEY"             = aws_ssm_parameter.django_secret_key.arn
     "DJANGO_SENTRY_DSN"             = aws_ssm_parameter.django_sentry_dsn.arn
     "DJANGO_SETTINGS_MODULE"        = aws_ssm_parameter.django_settings_module.arn

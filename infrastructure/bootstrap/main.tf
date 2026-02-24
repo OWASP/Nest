@@ -89,6 +89,8 @@ data "aws_iam_policy_document" "part_one" {
     actions = [
       "logs:CreateLogGroup",
       "logs:DeleteLogGroup",
+      "logs:DescribeLogStreams",
+      "logs:FilterLogEvents",
       "logs:ListTagsForResource",
       "logs:ListTagsLogGroup",
       "logs:PutRetentionPolicy",

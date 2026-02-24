@@ -17,7 +17,8 @@ locals {
   backend_paths = [
     "/a",
     "/a/*",
-    "/api/*",
+    "/api/v0",
+    "/api/v0/*",
     "/csrf",
     "/csrf/*",
     "/graphql",

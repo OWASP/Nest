@@ -5,9 +5,34 @@ misconfigurations:
       - docker/trivy/Dockerfile
       - docker/zap/Dockerfile
 
+  # Temporary for staging; will be fixed for production.
+  - id: AVD-AWS-0031  # Mutable ECR tags for staging; IMMUTABLE for production
+    paths:
+      - infrastructure/modules/ecs/main.tf
+      - infrastructure/modules/frontend/main.tf
+  - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
+    paths:
+      - infrastructure/modules/alb/main.tf
+  - id: AVD-AWS-0102  # NACL egress allows all ports; restrict for production
+    paths:
+      - infrastructure/modules/networking/modules/nacl/main.tf
+  - id: AVD-AWS-0104  # Egress 0.0.0.0/0 for ECS/Lambda; restrict for production
+    paths:
+      - infrastructure/modules/security/main.tf
+  - id: AVD-AWS-0132  # SSE-S3 used; SSE-KMS for production (alb logs require SSE-S3)
+    paths:
+      - infrastructure/modules/alb/main.tf
+      - infrastructure/modules/storage/modules/s3-bucket/main.tf
+  - id: AVD-AWS-0164  # Public subnet map_public_ip for ALB/NAT; review for production
+    paths:
+      - infrastructure/modules/networking/main.tf
+
 vulnerabilities:
   # TODO(arkid15r): Remove when v5.9.3 is no longer current.
   - id: CVE-2025-64756  # glob: Command Injection Vulnerability via Malicious Filenames.
   # minimatch ReDoS: Dev-only (eslint-plugin-import, graphql-codegen). Can't upgrade to 10.x;
   # eslint-plugin-import expects CommonJS default export, which minimatch v10 no longer provides.
   - id: CVE-2026-26996  # minimatch: ReDoS via repeated wildcards with non-matching literal.
+  # setuptools vendored deps; setuptools doesn't use affected tarball(). Tracking pypa/setuptools#5138
+  - id: CVE-2026-23949  # jaraco.context: Path traversal via malicious tar (setuptools vendor)
+  - id: CVE-2026-24049  # wheel: Privilege escalation via malicious wheel (setuptools vendor)

@@ -43,7 +43,7 @@ COPY templates templates
 COPY static static
 COPY apps apps
 
-# Required to run make targets
+# Required to run make targets.
 RUN ln -s . backend
 
 FROM python:3.13.12-alpine3.23
