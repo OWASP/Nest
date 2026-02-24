@@ -196,6 +196,22 @@ run "test_django_redis_host_is_string" {
   }
 }
 
+run "test_django_redis_use_tls_path_format" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_redis_use_tls.name == "/${var.project_name}/${var.environment}/DJANGO_REDIS_USE_TLS"
+    error_message = "DJANGO_REDIS_USE_TLS must follow path: /{project}/{environment}/DJANGO_REDIS_USE_TLS."
+  }
+}
+
+run "test_django_redis_use_tls_is_string" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_redis_use_tls.type == "String"
+    error_message = "DJANGO_REDIS_USE_TLS must be stored as String."
+  }
+}
+
 run "test_django_secret_key_path_format" {
   command = plan
   assert {

@@ -72,6 +72,12 @@ variable "redis_password_arn" {
   sensitive   = true
 }
 
+variable "redis_use_tls" {
+  description = "Whether Redis connections should use TLS (required for ElastiCache with transit encryption)."
+  type        = bool
+  default     = true
+}
+
 variable "server_csrf_url" {
   description = "The server-side CSRF URL for Next.js SSR (e.g., https://nest.owasp.dev/csrf/)."
   type        = string

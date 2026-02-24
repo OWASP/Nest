@@ -122,6 +122,7 @@ inlinehilite
 isanori
 isready
 janedoe
+jaraco
 jumpstart
 kasya
 langgraph
@@ -175,6 +176,7 @@ psycopg
 pygithub
 pygoat
 pymdownx
+pypa
 pypoetry
 pyyaml
 quasis

@@ -6,6 +6,7 @@ from base64 import b64decode
 
 import yaml
 from django.db import models
+from github.GithubException import GithubException
 
 from apps.common.models import TimestampedModel
 from apps.github.constants import OWASP_LOGIN
@@ -211,8 +212,6 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
             user (User, optional): The user instance.
 
         """
-        from github.GithubException import GithubException
-
         field_mapping = {
             "created_at": "created_at",
             "default_branch": "default_branch",

@@ -1,6 +1,7 @@
 """Github app common models."""
 
 from django.db import models
+from github.GithubException import UnknownObjectException
 
 
 class GenericUserModel(models.Model):
@@ -87,8 +88,6 @@ class NodeModel(models.Model):
     @staticmethod
     def get_node_id(node):
         """Extract node_id."""
-        from github.GithubException import UnknownObjectException
-
         try:
             return node.raw_data["node_id"]
         except UnknownObjectException:

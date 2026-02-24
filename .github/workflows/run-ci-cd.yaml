@@ -4,12 +4,14 @@ on:
   merge_group:
   pull_request:
     branches:
+      - dev
       - feature/**
       - main
     paths-ignore:
       - backend/data/nest.dump
   push:
     branches:
+      - dev
       - feature/**
       - main
     paths-ignore:
@@ -61,9 +63,12 @@ jobs:
         uses: terraform-linters/setup-tflint@dfcb455ed8d56b55edf6447a37379108181a6707
         with:
           cache: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_version: v0.60.0
 
       - name: Run pre-commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd
 
       - name: Check for uncommitted changes
@@ -420,9 +425,7 @@ jobs:
   run-infrastructure-tests:
     name: Run Infrastructure tests
     needs:
-      - run-security-scan
-      - scan-code
-      - scan-ci-dependencies
+      - run-security-scan-code
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -671,7 +674,7 @@ jobs:
       - name: Prepare terraform variables
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
-          PROJECT_NAME: 'nest'
+          PROJECT_NAME: nest
           AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
         run: |
           umask 377
@@ -763,10 +766,10 @@ jobs:
           CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           ECS_USE_FARGATE_SPOT: true
-          ENVIRONMENT: 'staging'
+          ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
-          LAMBDA_FUNCTION_NAME: 'nest-staging'
-          PROJECT_NAME: 'nest'
+          LAMBDA_FUNCTION_NAME: nest-staging
+          PROJECT_NAME: nest
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfvars <<-EOF
@@ -893,7 +896,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
-          cache: 'poetry'
+          cache: poetry
           cache-dependency-path: backend/poetry.lock
           python-version: '3.13'
 
