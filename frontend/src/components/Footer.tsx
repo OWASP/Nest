@@ -45,8 +45,8 @@ export default function Footer() {
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
                 className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
-                aria-expanded={openSection === section.title}
-                aria-controls={`footer-section-${section.title}`}
+                aria-expanded={isMobile ? openSection === section.title : true}
+                aria-controls={isMobile ? `footer-section-${section.title}` : undefined}
               >
                 <h3>{section.title}</h3>
                 <div className="transition-transform duration-200 lg:hidden">
