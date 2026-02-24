@@ -45,6 +45,19 @@ resource "aws_network_acl_rule" "private_inbound_ephemeral" {
   to_port        = 65535
 }
 
+# NACLs are stateless: return traffic for outbound UDP (e.g. DNS, NTP) from private
+# instances via NAT arrives from internet hosts, so inbound ephemeral UDP must allow
+# 0.0.0.0/0; narrowing to var.vpc_cidr would block those responses.
+resource "aws_network_acl_rule" "private_inbound_ephemeral_udp" {
+  cidr_block     = "0.0.0.0/0"
+  from_port      = 1024
+  network_acl_id = aws_network_acl.private.id
+  protocol       = "udp"
+  rule_action    = "allow"
+  rule_number    = 105
+  to_port        = 65535
+}
+
 resource "aws_network_acl_rule" "private_inbound_https" {
   cidr_block     = var.vpc_cidr
   from_port      = 443
@@ -93,6 +106,16 @@ resource "aws_network_acl_rule" "public_inbound_ephemeral" {
   protocol       = "tcp"
   rule_action    = "allow"
   rule_number    = 100
+  to_port        = 65535
+}
+
+resource "aws_network_acl_rule" "public_inbound_ephemeral_udp" {
+  cidr_block     = "0.0.0.0/0"
+  from_port      = 1024
+  network_acl_id = aws_network_acl.public.id
+  protocol       = "udp"
+  rule_action    = "allow"
+  rule_number    = 105
   to_port        = 65535
 }
 

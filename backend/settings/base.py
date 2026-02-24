@@ -1,6 +1,7 @@
 """OWASP Nest base configuration."""
 
 import os
+import ssl
 from pathlib import Path
 
 from configurations import Configuration, values
@@ -145,7 +146,11 @@ class Base(Configuration):
     REDIS_USE_TLS = values.BooleanValue(environ_name="REDIS_USE_TLS", default=False)
     REDIS_CACHE_OPTIONS: dict = {
         "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        **({"CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None}} if REDIS_USE_TLS else {}),
+        **(
+            {"CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": ssl.CERT_REQUIRED}}
+            if REDIS_USE_TLS
+            else {}
+        ),
         **({"PASSWORD": str(REDIS_PASSWORD)} if REDIS_AUTH_ENABLED else {}),
     }
 
@@ -165,7 +170,7 @@ class Base(Configuration):
             "PASSWORD": REDIS_PASSWORD,
             "DB": 1,
             "DEFAULT_TIMEOUT": 300,
-            **({"SSL": True, "SSL_CERT_REQS": None} if REDIS_USE_TLS else {}),
+            **({"SSL": True, "SSL_CERT_REQS": "required"} if REDIS_USE_TLS else {}),
         }
     }
 
