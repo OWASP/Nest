@@ -1,9 +1,9 @@
 test-infrastructure:
 	@find infrastructure/modules \
 		-name "tests" \
+		-type d \
 		-not -path "*/.terraform/*" \
-		-print0 \
-		-type d | \
+		-print0 | \
 	while IFS= read -r -d '' test_dir; do \
 		module_dir=$$(dirname "$$test_dir"); \
 		echo "Testing $$module_dir..."; \

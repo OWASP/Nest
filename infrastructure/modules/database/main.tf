@@ -29,7 +29,7 @@ resource "aws_db_subnet_group" "main" {
 resource "random_password" "db_password" {
   count  = local.generate_db_password ? 1 : 0
   length = 32
-  # Avoid special characters that might cause issues
+  # Avoid special characters that might cause issues.
   override_special = "!#$%&*()-_=+[]{}<>:?"
   special          = true
 }
@@ -45,6 +45,7 @@ resource "aws_db_instance" "main" {
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
   engine                          = "postgres"
   engine_version                  = var.db_engine_version
+  final_snapshot_identifier       = var.db_skip_final_snapshot ? null : lower("${var.project_name}-${var.environment}-db-final-snapshot")
   identifier                      = lower("${var.project_name}-${var.environment}-db")
   instance_class                  = var.db_instance_class
   maintenance_window              = var.db_maintenance_window

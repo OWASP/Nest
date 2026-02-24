@@ -117,6 +117,8 @@ resource "aws_flow_log" "main" {
     Name = "${var.project_name}-${var.environment}-vpc-flow-log"
   })
   vpc_id = aws_vpc.main.id
+
+  depends_on = [aws_iam_role_policy_attachment.flow_logs]
 }
 
 resource "aws_iam_policy" "flow_logs" {
@@ -125,7 +127,9 @@ resource "aws_iam_policy" "flow_logs" {
     Version = "2012-10-17"
     Statement = [{
       Action = [
+        "logs:CreateLogGroup",
         "logs:CreateLogStream",
+        "logs:DescribeLogGroups",
         "logs:DescribeLogStreams",
         "logs:PutLogEvents",
       ]

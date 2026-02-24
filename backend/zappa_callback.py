@@ -3,7 +3,6 @@
 # ruff: noqa: T201
 
 import re
-import shutil
 import tarfile
 import tempfile
 from pathlib import Path
@@ -39,13 +38,23 @@ def clean_package(zappa):
             for filepath in temp_path.rglob("*"):
                 if filepath == new_archive_path:
                     continue
-                if filepath.is_file() and not any(re.search(p, str(filepath)) for p in excludes):
-                    tf.add(filepath, filepath.relative_to(temp_path))
+                rel = filepath.relative_to(temp_path)
+                if filepath.is_file() and not any(re.search(p, str(rel)) for p in excludes):
+                    tf.add(filepath, rel)
 
-        full_path.unlink()
-        shutil.move(new_archive_path, full_path)
+        new_archive_path.replace(full_path)
 
     print(f"New package size: {full_path.stat().st_size / 1024 / 1024:.2f} MB")
+
+
+def list_all_lambda_versions(client, function_name):
+    """Return all versions for the given Lambda function."""
+    paginator = client.get_paginator("list_versions_by_function")
+    versions = []
+    for page in paginator.paginate(FunctionName=function_name):
+        versions.extend(page.get("Versions", []))
+
+    return versions
 
 
 def update_alias(zappa):
@@ -53,7 +62,7 @@ def update_alias(zappa):
     print("Updating Lambda alias...")
 
     client = boto3.client("lambda")
-    versions = client.list_versions_by_function(FunctionName=zappa.lambda_name)["Versions"]
+    versions = list_all_lambda_versions(client, zappa.lambda_name)
 
     if not (published := [v["Version"] for v in versions if v["Version"] != "$LATEST"]):
         print("No published versions found, skipping alias update")
@@ -73,7 +82,7 @@ def cleanup_versions(zappa, keep=5):
     print("Cleaning up old Lambda versions...")
 
     client = boto3.client("lambda")
-    versions = client.list_versions_by_function(FunctionName=zappa.lambda_name)["Versions"]
+    versions = list_all_lambda_versions(client, zappa.lambda_name)
     published = [v for v in versions if v["Version"] != "$LATEST"]
 
     if len(published) <= keep:

@@ -33,6 +33,8 @@ resource "random_id" "suffix" {
   byte_length = 4
 }
 
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "logs" {
   for_each = local.state_environments
 
@@ -42,6 +44,16 @@ data "aws_iam_policy_document" "logs" {
     resources = ["${aws_s3_bucket.logs[each.key].arn}/*"]
     sid       = "s3-log-delivery"
 
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [aws_s3_bucket.state[each.key].arn]
+    }
     principals {
       identifiers = ["logging.s3.amazonaws.com"]
       type        = "Service"
@@ -223,6 +235,8 @@ resource "aws_s3_bucket_object_lock_configuration" "state" {
 
   bucket = aws_s3_bucket.state[each.key].id
 
+  depends_on = [aws_s3_bucket_versioning.state[each.key]]
+
   rule {
     default_retention {
       days = 30
@@ -246,15 +260,6 @@ resource "aws_s3_bucket_public_access_block" "state" {
   bucket                  = aws_s3_bucket.state[each.key].id
   ignore_public_acls      = true
   restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
-  bucket = aws_s3_bucket.logs.id
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
 }
 
 #trivy:ignore:AVD-AWS-0132

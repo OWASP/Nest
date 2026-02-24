@@ -58,6 +58,14 @@ resource "aws_acm_certificate" "main" {
   }
 }
 
+resource "aws_acm_certificate_validation" "main" {
+  certificate_arn = aws_acm_certificate.main.arn
+
+  validation_record_fqdns = [
+    for dvo in aws_acm_certificate.main.domain_validation_options : dvo.resource_record_name
+  ]
+}
+
 resource "aws_lambda_alias" "live" {
   count            = var.lambda_function_name != null ? 1 : 0
   description      = "Alias pointing to latest published version for SnapStart"
@@ -119,7 +127,7 @@ resource "aws_lb_listener" "http_redirect" {
 }
 
 resource "aws_lb_listener" "https" {
-  certificate_arn   = aws_acm_certificate.main.arn
+  certificate_arn   = aws_acm_certificate_validation.main.certificate_arn
   load_balancer_arn = aws_lb.main.arn
   port              = 443
   protocol          = "HTTPS"
@@ -135,7 +143,7 @@ resource "aws_lb_listener" "https" {
 resource "aws_lb_listener_rule" "backend_https" {
   for_each     = var.lambda_function_name != null ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
   listener_arn = aws_lb_listener.https.arn
-  priority     = 100 + each.key
+  priority     = 100 + tonumber(each.key)
   tags         = var.common_tags
 
   action {
@@ -211,6 +219,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "alb_logs" {
     }
     expiration {
       days = var.log_retention_days
+    }
+    noncurrent_version_expiration {
+      noncurrent_days = var.log_retention_days
     }
   }
 }
