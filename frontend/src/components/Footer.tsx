@@ -1,7 +1,7 @@
 'use client'
 import { Button } from '@heroui/button'
 import Link from 'next/link'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons, footerSections } from 'utils/constants'
@@ -10,11 +10,28 @@ import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 export default function Footer() {
   // State to keep track of the open section in the footer
   const [openSection, setOpenSection] = useState<string | null>(null)
+  // Mobile detection state
+  const [isMobile, setIsMobile] = useState(false)
 
   // Function to toggle the section open/closed
   const toggleSection = useCallback((title: string) => {
     // If the section is already open, close it, otherwise open it
     setOpenSection((prev) => (prev === title ? null : title))
+  }, [])
+
+  // Mobile detection effect
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 1023px)')
+    setIsMobile(mediaQuery.matches)
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches)
+    }
+    
+    mediaQuery.addEventListener('change', handleChange)
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange)
+    }
   }, [])
 
   return (
@@ -48,7 +65,7 @@ export default function Footer() {
               >
                 <div 
                   className="overflow-hidden"
-                  inert={openSection !== section.title ? true : undefined}
+                  inert={isMobile && openSection !== section.title ? true : undefined}
                 >
                   <div className="flex flex-col gap-2 text-sm">
                     {section.links.map((link) => (
