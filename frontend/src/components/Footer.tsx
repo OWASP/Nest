@@ -46,19 +46,19 @@ export default function Footer() {
                 onPress={() => toggleSection(section.title)}
                 className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
                 aria-expanded={isMobile ? openSection === section.title : true}
-                aria-controls={isMobile ? `footer-section-${section.title}` : undefined}
+                aria-controls={isMobile ? `footer-section-${section.title.toLowerCase().replace(/\s+/g, '-')}` : undefined}
               >
                 <h3>{section.title}</h3>
                 <div className="transition-transform duration-200 lg:hidden">
-                  {openSection === section.title ? (
-                    <FaChevronUp className="h-4 w-4" />
-                  ) : (
-                    <FaChevronDown className="h-4 w-4" />
-                  )}
+                  <FaChevronDown 
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      openSection === section.title ? 'rotate-180' : ''
+                    }`} 
+                  />
                 </div>
               </Button>
               <div
-                id={`footer-section-${section.title}`}
+                id={`footer-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}
                 className={`grid transition-[grid-template-rows] duration-300 ease-in-out lg:grid-rows-[1fr] ${
                   openSection === section.title ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
                 }`}
