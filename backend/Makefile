@@ -11,6 +11,11 @@ else
 SHELL := /bin/bash
 endif
 
+# If suffix is 'dev' or empty, use 'nest-db' or 'nest-backend'.
+# Otherwise, use 'suffix-nest-db' or 'suffix-nest-backend'.
+GET_DB_CONTAINER = $(if $(filter-out dev,$1),$(1)-nest-db,nest-db)
+GET_BACKEND_CONTAINER = $(if $(filter-out dev,$1),$(1)-nest-backend,nest-backend)
+
 .PHONY: sbom-backend-image
 
 build-backend-local-image:
@@ -41,55 +46,37 @@ clean-backend-docker:
 create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
+exec-backend-command-%:
+	@docker exec -i $(call GET_BACKEND_CONTAINER,$*) $(CMD)
+
+exec-backend-command-%-it:
+	@docker exec -it $(call GET_BACKEND_CONTAINER,$*) $(CMD)
+
 exec-backend-command:
 ifeq ($(EXEC_MODE),direct)
 	@$(CMD)
 else
-	@docker exec -i nest-backend $(CMD)
+	@$(MAKE) exec-backend-command-dev CMD="$(CMD)"
 endif
 
 exec-backend-command-it:
 ifeq ($(EXEC_MODE),direct)
 	@$(CMD)
 else
-	@docker exec -it nest-backend $(CMD) 2>/dev/null
+	@$(MAKE) exec-backend-command-dev CMD="$(CMD)" 2>/dev/null
 endif
 
-exec-backend-command-e2e:
-	@docker exec -i e2e-nest-backend $(CMD)
+exec-db-command-%:
+	@docker exec -i $(call GET_DB_CONTAINER,$*) $(CMD)
 
-exec-backend-command-e2e-it:
-	@docker exec -it e2e-nest-backend $(CMD)
-
-exec-backend-command-fuzz:
-	@docker exec -i fuzz-nest-backend $(CMD)
-
-exec-backend-command-fuzz-it:
-	@docker exec -it fuzz-nest-backend $(CMD)
+exec-db-command-%-it:
+	@docker exec -it $(call GET_DB_CONTAINER,$*) $(CMD)
 
 exec-db-command:
-	@docker exec -i nest-db $(CMD)
+	@$(MAKE) exec-db-command-dev CMD="$(CMD)"
 
 exec-db-command-it:
-	@docker exec -it nest-db $(CMD)
-
-exec-db-command-e2e:
-	@docker exec -i e2e-nest-db $(CMD)
-
-exec-db-command-e2e-it:
-	@docker exec -it e2e-nest-db $(CMD)
-
-exec-db-command-fuzz:
-	@docker exec -i fuzz-nest-db $(CMD)
-
-exec-db-command-fuzz-it:
-	@docker exec -it fuzz-nest-db $(CMD)
-
-exec-db-command-staging:
-	@docker exec -i staging-nest-db $(CMD)
-
-exec-db-command-staging-it:
-	@docker exec -it staging-nest-db $(CMD)
+	@$(MAKE) exec-db-command-dev-it CMD="$(CMD)"
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -120,29 +107,15 @@ index-data:
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data:
+load-data-%:
+	$(eval ENV := $*)
 	@echo "Truncating content_type table"
-	@CMD="psql -U nest_user_dev -d nest_db_dev -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command
+	@CMD="psql -U nest_user_$(ENV) -d nest_db_$(ENV) -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command-$(ENV)
 	@echo "Loading Nest data"
-	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
+	@CMD="pg_restore -U nest_user_$(ENV) -d nest_db_$(ENV) < ./backend/data/nest.dump" $(MAKE) exec-db-command-$(ENV)
 
-load-data-e2e:
-	@echo "Truncating content_type table"
-	@CMD="psql -U nest_user_e2e -d nest_db_e2e -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command-e2e
-	@echo "Loading Nest e2e data"
-	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) exec-db-command-e2e
-
-load-data-fuzz:
-	@echo "Truncating content_type table"
-	@CMD="psql -U nest_user_fuzz -d nest_db_fuzz -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command-fuzz
-	@echo "Loading Nest fuzz data"
-	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
-
-load-data-staging:
-	@echo "Truncating content_type table"
-	@CMD="psql -U nest_user_staging -d nest_db_staging -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command-staging
-	@echo "Loading Nest staging data"
-	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-staging
+load-data:
+	@$(MAKE) load-data-dev
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
