@@ -93,7 +93,7 @@ class TestAiHandler:
         )
         assert result == [expected_block]
 
-    @patch("apps.slack.common.handlers.ai.process_query")
+    @patch("apps.ai.flows.process_query")
     def test_process_ai_query_success(self, mock_process_query):
         """Test successful AI query processing."""
         query = "What is OWASP?"
@@ -108,7 +108,7 @@ class TestAiHandler:
         )
         assert result == expected_response
 
-    @patch("apps.slack.common.handlers.ai.process_query")
+    @patch("apps.ai.flows.process_query")
     def test_process_ai_query_failure(self, mock_process_query):
         """Test AI query processing failure returns None."""
         query = "What is OWASP?"
@@ -122,7 +122,7 @@ class TestAiHandler:
         )
         assert result is None
 
-    @patch("apps.slack.common.handlers.ai.process_query")
+    @patch("apps.ai.flows.process_query")
     def test_process_ai_query_returns_none(self, mock_process_query):
         """Test AI query processing when process_query returns None."""
         query = "What is OWASP?"
@@ -136,7 +136,7 @@ class TestAiHandler:
         )
         assert result is None
 
-    @patch("apps.slack.common.handlers.ai.process_query")
+    @patch("apps.ai.flows.process_query")
     def test_process_ai_query_non_owasp_question(self, mock_process_query):
         """Test AI query processing when question is not OWASP-related."""
         query = "What is the weather today?"
@@ -150,7 +150,7 @@ class TestAiHandler:
         )
         assert result == get_default_response()
 
-    @patch("apps.slack.common.handlers.ai.process_query")
+    @patch("apps.ai.flows.process_query")
     def test_process_ai_query_with_images(self, mock_process_query):
         """Test process_ai_query passes images through to process_query."""
         query = "Describe this image"
@@ -166,7 +166,7 @@ class TestAiHandler:
         )
         assert result == expected_response
 
-    @patch("apps.slack.common.handlers.ai.process_query")
+    @patch("apps.ai.flows.process_query")
     def test_process_ai_query_with_images_and_channel(self, mock_process_query):
         """Test process_ai_query forwards images along with channel_id and is_app_mention."""
         query = "What is this?"
