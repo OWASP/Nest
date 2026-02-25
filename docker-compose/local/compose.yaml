@@ -152,12 +152,12 @@ services:
       '
     image: nest-local-nestbot
     depends_on:
-      nestbot:
-        condition: service_healthy
       cache:
         condition: service_healthy
       db:
         condition: service_healthy
+      nestbot:
+        condition: service_started
     env_file: ../../backend/.env
     environment:
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
