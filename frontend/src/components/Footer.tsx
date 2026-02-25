@@ -38,35 +38,45 @@ export default function Footer() {
     <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
       <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
         <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
-          {footerSections.map((section: Section) => (
-            <div key={section.title} className="flex flex-col gap-4">
-              {/*link*/}
-              <Button
-                disableAnimation
-                onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
-                aria-expanded={isMobile ? openSection === section.title : true}
-                aria-controls={isMobile ? `footer-section-${section.title.toLowerCase().replaceAll(/\s+/g, '-')}` : undefined}
-              >
-                <h3>{section.title}</h3>
-                <div className="transition-transform duration-200 lg:hidden">
-                  <FaChevronDown 
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      openSection === section.title ? 'rotate-180' : ''
-                    }`} 
-                  />
-                </div>
-              </Button>
-              <div
-                id={`footer-section-${section.title.toLowerCase().replaceAll(/\s+/g, '-')}`}
-                className={`grid transition-[grid-template-rows] duration-300 ease-in-out lg:grid-rows-[1fr] ${
-                  openSection === section.title ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                }`}
-              >
-                <div 
-                  className="overflow-hidden"
-                  inert={isMobile && openSection !== section.title ? true : undefined}
+          {footerSections.map((section: Section) => {
+            const sectionId = `footer-section-${section.title.toLowerCase().replaceAll(/\s+/g, '-')}`
+            const isOpen = openSection === section.title
+            
+            return (
+              <div key={section.title} className="flex flex-col gap-4">
+                {/*link*/}
+                {isMobile ? (
+                  <Button
+                    disableAnimation
+                    onPress={() => toggleSection(section.title)}
+                    className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                    aria-expanded={isOpen}
+                    aria-controls={sectionId}
+                  >
+                    <h3>{section.title}</h3>
+                    <div className="transition-transform duration-200">
+                      <FaChevronDown 
+                        className={`h-4 w-4 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180' : ''
+                        }`} 
+                      />
+                    </div>
+                  </Button>
+                ) : (
+                  <div className="pl-0 text-left text-lg font-semibold">
+                    <h3>{section.title}</h3>
+                  </div>
+                )}
+                <div
+                  id={sectionId}
+                  className={`grid transition-[grid-template-rows] duration-300 ease-in-out lg:grid-rows-[1fr] ${
+                    isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                  }`}
                 >
+                  <div 
+                    className="overflow-hidden"
+                    inert={isMobile && !isOpen ? true : undefined}
+                  >
                   <div className="flex flex-col gap-2 text-sm">
                     {section.links.map((link) => (
                       <div key={link.href || `span-${link.text}`} className="py-1">
@@ -86,9 +96,10 @@ export default function Footer() {
                     ))}
                   </div>
                 </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Social Media Icons Section */}
