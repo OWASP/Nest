@@ -3,6 +3,14 @@ nav:
   - Home: index.md
   - Code of Conduct: code-of-conduct.md
   - Contributing: contributing.md
+  - Backend:
+      - Overview: backend/overview.md
+  - Frontend:
+      - Overview: frontend/overview.md
+  - Schema:
+      - Overview: schema/overview.md
+  - API SDKs:
+      - Overview: sdks/overview.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material
@@ -45,7 +53,9 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      check_paths: true
+      base_path: ["."]
   - admonition
   - pymdownx.arithmatex:
       generic: true
@@ -60,7 +70,7 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: '!!python/name:pymdownx.superfences.fence_code_format'
+          format: "!!python/name:pymdownx.superfences.fence_code_format"
 
 plugins:
   - search
