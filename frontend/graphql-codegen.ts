@@ -36,7 +36,7 @@ const sharedOperationConfig = {
     skipTypeNameForRoot: true,
   },
   plugins: ['typescript-operations', 'typed-document-node'],
-  preset: 'near-operation-file',
+  preset: 'near-operation-file' as const,
   presetConfig: {
     baseTypesPath: './types/__generated__/graphql.ts',
   },
