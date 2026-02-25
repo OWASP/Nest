@@ -101,7 +101,6 @@ const EditModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData) return
 
     try {
       const currentUserLogin = sessionData?.user?.login
@@ -110,22 +109,22 @@ const EditModulePage = () => {
       )
 
       const input: UpdateModuleInput = {
-        description: formData.description,
-        domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || '',
-        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
+        description: formData!.description,
+        domains: parseCommaSeparated(formData!.domains),
+        endedAt: formData!.endedAt || '',
+        experienceLevel: formData!.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
-        labels: parseCommaSeparated(formData.labels),
-        name: formData.name,
+        labels: parseCommaSeparated(formData!.labels),
+        name: formData!.name,
         programKey: programKey,
-        projectId: formData.projectId,
-        projectName: formData.projectName,
-        startedAt: formData.startedAt || '',
-        tags: parseCommaSeparated(formData.tags),
+        projectId: formData!.projectId,
+        projectName: formData!.projectName,
+        startedAt: formData!.startedAt || '',
+        tags: parseCommaSeparated(formData!.tags),
       }
 
       if (isAdmin) {
-        input.mentorLogins = parseCommaSeparated(formData.mentorLogins)
+        input.mentorLogins = parseCommaSeparated(formData!.mentorLogins)
       }
 
       const result = await updateModule({
@@ -163,10 +162,6 @@ const EditModulePage = () => {
     }
   }
 
-  if (accessStatus === 'checking' || !formData) {
-    return <LoadingSpinner />
-  }
-
   if (accessStatus === 'denied') {
     return (
       <ErrorDisplay
@@ -175,6 +170,10 @@ const EditModulePage = () => {
         message="You do not have permission to edit this module. You will be redirected."
       />
     )
+  }
+
+  if (accessStatus === 'checking' || !formData) {
+    return <LoadingSpinner />
   }
 
   return (
