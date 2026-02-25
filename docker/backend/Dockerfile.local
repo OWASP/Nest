@@ -1,5 +1,5 @@
 # python:slim is used as base image to keep the image size small
-FROM python:3.13-slim AS builder
+FROM python:3.13.7-slim AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -13,8 +13,8 @@ ENV OWASP_GID=1000 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libffi-dev \
-        libssl-dev \
         libpq-dev \
+        libssl-dev \
         passwd \
         && rm -rf /var/lib/apt/lists/* && \
     groupadd -g ${OWASP_GID} owasp && \
@@ -31,10 +31,10 @@ WORKDIR /home/owasp
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     --mount=type=cache,target=${PIP_CACHE_DIR} \
-    poetry install --no-root --without dev --without test --without video --without nestbot
+    poetry install --no-root --without dev --without nestbot --without test --without video
 
 # Runtime stage using python:slim
-FROM python:3.13-slim
+FROM python:3.13.7-slim
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -45,14 +45,15 @@ ENV FORCE_COLOR=1 \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        postgresql-client \
+        curl \
         libpq5 \
         passwd \
-        curl \
+        postgresql-client \
         && rm -rf /var/lib/apt/lists/* && \
     groupadd -g 1000 owasp && \
     useradd -u 1000 -g owasp -m -s /bin/bash owasp
 
+# Install poetry for runtime (needed for volume-based development setup)
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
