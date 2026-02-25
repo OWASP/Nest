@@ -4,6 +4,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
+from django.db.models import Q
 from django.http import HttpRequest
 from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -72,6 +73,10 @@ class ChapterFilter(LocationFilter):
     location: str | None = Field(None, q="suggested_location__icontains")
     q: str | None = Field(None, description="Structured search query")
 
+    def filter_q(self, value: str | None) -> Q:
+        """Handle by structured search query."""
+        return Q()
+
 
 @router.get(
     "/",
@@ -105,10 +110,9 @@ def list_chapters(
         query=filters.q,
         field_schema=CHAPTER_SEARCH_SCHEMA,
     )
-    filter_params = filters.dict(exclude_none=True)
-    filter_params.pop("q", None)
+    queryset = filters.filter(queryset)
     order_fields = (ordering, "-updated_at") if ordering else ("-created_at", "-updated_at")
-    return queryset.filter(**filter_params).order_by(*order_fields)
+    return queryset.order_by(*order_fields)
 
 
 @router.get(

@@ -81,7 +81,7 @@ class TestListRepository:
         mock_filters = MagicMock()
         mock_filters.organization_id = "OWASP"
         mock_filters.q = ""
-        mock_filters.dict.return_value = {"organization__login__iexact": "OWASP"}
+        mock_filters.dict.return_value = {"organization_id": "OWASP"}
 
         mock_qs = MagicMock()
         mock_repo_model.objects.select_related.return_value = mock_qs

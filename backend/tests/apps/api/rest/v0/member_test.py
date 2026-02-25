@@ -60,7 +60,7 @@ class TestListMembers:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.q = ""
-        mock_filters.dict.return_value = {}
+        mock_filters.dict.return_value = {"q": ""}
 
         mock_qs = MagicMock()
         mock_qs.all.return_value = mock_qs
@@ -73,6 +73,7 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=None)
 
+        mock_qs.filter.assert_called_with()
         mock_qs.order_by.assert_called_with("-created_at", "-updated_at")
         assert result == mock_qs
 
@@ -82,7 +83,7 @@ class TestListMembers:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.q = ""
-        mock_filters.dict.return_value = {}
+        mock_filters.dict.return_value = {"q": ""}
 
         mock_qs = MagicMock()
         mock_qs.all.return_value = mock_qs
@@ -95,6 +96,7 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering="updated_at")
 
+        mock_qs.filter.assert_called_with()
         mock_qs.order_by.assert_called_with("updated_at", "-updated_at")
         assert result == mock_qs
 

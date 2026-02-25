@@ -92,7 +92,7 @@ def list_repository(
     repositories = apply_structured_search(repositories, filters.q, REPOSITORY_SEARCH_SCHEMA)
     filter_params = filters.dict(exclude_none=True)
     filter_params.pop("q", None)
-
+    filter_params.pop("organization_id", None)
     return repositories.filter(**filter_params).order_by(ordering or "-created_at", "-updated_at")
 
 

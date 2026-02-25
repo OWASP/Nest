@@ -87,6 +87,8 @@ class TestListChapters:
         mock_qs.order_by.return_value = mock_qs
         mock_qs.select_related.return_value = mock_qs
 
+        mock_filters.filter.return_value = mock_qs
+
         mock_chapter_model.active_chapters.all.return_value = mock_qs
         mock_chapter_model.active_chapters.filter.return_value = mock_qs
 
@@ -108,6 +110,8 @@ class TestListChapters:
         mock_qs.filter.return_value = mock_qs
         mock_qs.order_by.return_value = mock_qs
         mock_qs.select_related.return_value = mock_qs
+
+        mock_filters.filter.return_value = mock_qs
 
         mock_chapter_model.active_chapters.all.return_value = mock_qs
         mock_chapter_model.active_chapters.filter.return_value = mock_qs
