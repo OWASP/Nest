@@ -42,7 +42,7 @@
     "framer-motion": "^12.34.3",
     "graphql": "^16.13.0",
     "ics": "^3.8.1",
-    "isomorphic-dompurify": "^2.36.0",
+    "isomorphic-dompurify": "^3.0.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lodash": "^4.17.23",
