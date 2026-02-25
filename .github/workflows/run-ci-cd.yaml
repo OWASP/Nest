@@ -19,6 +19,8 @@ on:
   release:
     types:
       - published
+  schedule:
+    - cron: 0 2 * * *    # Run staging deploy daily at 2am UTC.
   workflow_dispatch:
 
 permissions: {}
@@ -448,7 +450,7 @@ jobs:
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - run-backend-tests
       - run-frontend-a11y-tests
@@ -636,7 +638,7 @@ jobs:
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - scan-staging-images
     permissions:
@@ -717,7 +719,7 @@ jobs:
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - bootstrap-staging-nest
       - scan-staging-images
@@ -821,7 +823,7 @@ jobs:
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
-      github.ref == 'refs/heads/main'
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - plan-staging-nest
     permissions:
