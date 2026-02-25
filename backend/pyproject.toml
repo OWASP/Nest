@@ -55,9 +55,7 @@ ruff = "^0.14.2"
 
 [tool.poetry.group.nestbot.dependencies]
 crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
-langchain = "^0.3.26"
-langchain-community = "^0.3.26"
-langgraph = "^1.0.1"
+langchain-text-splitters = "^1.1.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^9.0.1"
