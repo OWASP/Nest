@@ -63,7 +63,7 @@ exec-backend-command-it:
 ifeq ($(EXEC_MODE),direct)
 	@$(CMD)
 else
-	@$(MAKE) exec-backend-command-dev CMD="$(CMD)" 2>/dev/null
+	@$(MAKE) exec-backend-command-dev-it CMD="$(CMD)" 2>/dev/null
 endif
 
 exec-db-command-%:
