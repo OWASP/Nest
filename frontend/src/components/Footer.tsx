@@ -2,7 +2,7 @@
 import { Button } from '@heroui/button'
 import Link from 'next/link'
 import { useState, useCallback, useEffect } from 'react'
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
+import { FaChevronDown } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons, footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
@@ -21,7 +21,7 @@ export default function Footer() {
 
   // Mobile detection effect
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 1023px)')
+    const mediaQuery = globalThis.matchMedia('(max-width: 1023px)')
     setIsMobile(mediaQuery.matches)
     
     const handleChange = (e: MediaQueryListEvent) => {
@@ -46,7 +46,7 @@ export default function Footer() {
                 onPress={() => toggleSection(section.title)}
                 className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
                 aria-expanded={isMobile ? openSection === section.title : true}
-                aria-controls={isMobile ? `footer-section-${section.title.toLowerCase().replace(/\s+/g, '-')}` : undefined}
+                aria-controls={isMobile ? `footer-section-${section.title.toLowerCase().replaceAll(/\s+/g, '-')}` : undefined}
               >
                 <h3>{section.title}</h3>
                 <div className="transition-transform duration-200 lg:hidden">
@@ -58,7 +58,7 @@ export default function Footer() {
                 </div>
               </Button>
               <div
-                id={`footer-section-${section.title.toLowerCase().replace(/\s+/g, '-')}`}
+                id={`footer-section-${section.title.toLowerCase().replaceAll(/\s+/g, '-')}`}
                 className={`grid transition-[grid-template-rows] duration-300 ease-in-out lg:grid-rows-[1fr] ${
                   openSection === section.title ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
                 }`}
