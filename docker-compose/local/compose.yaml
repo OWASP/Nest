@@ -4,7 +4,7 @@ services:
     command: >
       sh -c '
         python manage.py migrate &&
-        exec python manage.py runserver 0.0.0.0:8000
+        python manage.py runserver 0.0.0.0:8000
       '
     image: nest-local-backend
     build:
@@ -17,7 +17,6 @@ services:
         condition: service_healthy
     env_file: ../../backend/.env
     environment:
-      PYTHONUNBUFFERED: 1
       DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-nest_db_dev}
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-nest_user_dev_password}
