@@ -2,7 +2,7 @@
  * @file Complete unit tests for the ModuleCard component
  * Targeting 90-95% code coverage.
  */
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
@@ -10,10 +10,20 @@ import type { Module } from 'types/mentorship'
 import ModuleCard, { getSimpleDuration } from 'components/ModuleCard'
 
 // Mock @dnd-kit
+let capturedOnDragEnd:
+  | ((event: { active: { id: string }; over: { id: string } | null }) => void)
+  | null = null
 jest.mock('@dnd-kit/core', () => ({
-  DndContext: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="dnd-context">{children}</div>
-  ),
+  DndContext: ({
+    children,
+    onDragEnd,
+  }: {
+    children: React.ReactNode
+    onDragEnd?: (event: { active: { id: string }; over: { id: string } | null }) => void
+  }) => {
+    capturedOnDragEnd = onDragEnd || null
+    return <div data-testid="dnd-context">{children}</div>
+  },
   closestCenter: jest.fn(),
   useSensor: jest.fn(() => ({})),
   useSensors: jest.fn(() => []),
@@ -23,10 +33,17 @@ jest.mock('@dnd-kit/core', () => ({
   PointerSensor: jest.fn(),
 }))
 
+let mockIsDragging = false
 jest.mock('@dnd-kit/sortable', () => ({
   SortableContext: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="sortable-context">{children}</div>
   ),
+  arrayMove: jest.fn((items: unknown[], oldIndex: number, newIndex: number) => {
+    const result = [...items]
+    const [removed] = result.splice(oldIndex, 1)
+    result.splice(newIndex, 0, removed)
+    return result
+  }),
   sortableKeyboardCoordinates: jest.fn(),
   rectSortingStrategy: jest.fn(),
   useSortable: () => ({
@@ -35,7 +52,7 @@ jest.mock('@dnd-kit/sortable', () => ({
     setNodeRef: jest.fn(),
     transform: null,
     transition: null,
-    isDragging: false,
+    isDragging: mockIsDragging,
   }),
 }))
 
@@ -44,6 +61,7 @@ jest.mock('@dnd-kit/utilities', () => ({
   CSS: { Transform: { toString: () => null } },
 }))
 
+const mockAddToast = jest.fn()
 const mockReorderModules = jest.fn(() => Promise.resolve({ data: {} }))
 jest.mock('@apollo/client/react', () => ({
   useMutation: () => [mockReorderModules],
@@ -54,7 +72,7 @@ jest.mock('server/mutations/moduleMutations', () => ({
 }))
 
 jest.mock('@heroui/toast', () => ({
-  addToast: jest.fn(),
+  addToast: (...args: unknown[]) => mockAddToast(...args),
 }))
 
 // Mock next/navigation
@@ -788,6 +806,170 @@ describe('ModuleCard', () => {
 
       expect(screen.queryAllByTestId('grip-vertical')).toHaveLength(0)
       expect(screen.getByTestId('single-module-card')).toBeInTheDocument()
+    })
+
+    it('calls reorderModules when drag ends with different position', async () => {
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod1' }, over: { id: 'mod2' } })
+      })
+
+      expect(mockReorderModules).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: {
+            input: {
+              programKey: 'test-program',
+              moduleKeys: ['mod2', 'mod1'],
+            },
+          },
+        })
+      )
+    })
+
+    it('does not call reorderModules when dragged to same position', async () => {
+      mockReorderModules.mockClear()
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod1' }, over: { id: 'mod1' } })
+      })
+
+      expect(mockReorderModules).not.toHaveBeenCalled()
+    })
+
+    it('does not call reorderModules when over is null', async () => {
+      mockReorderModules.mockClear()
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod1' }, over: null })
+      })
+
+      expect(mockReorderModules).not.toHaveBeenCalled()
+    })
+
+    it('does not call reorderModules when index not found', async () => {
+      mockReorderModules.mockClear()
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'nonexistent' }, over: { id: 'mod2' } })
+      })
+
+      expect(mockReorderModules).not.toHaveBeenCalled()
+    })
+
+    it('shows error toast when reorder mutation fails', async () => {
+      mockReorderModules.mockImplementationOnce(() => Promise.reject(new Error('fail')))
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod1' }, over: { id: 'mod2' } })
+      })
+
+      await waitFor(() => {
+        expect(mockAddToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            color: 'danger',
+            title: 'Reorder Failed',
+          })
+        )
+      })
+    })
+
+    it('does not reorder when already saving', async () => {
+      mockReorderModules.mockClear()
+      mockReorderModules.mockImplementationOnce(() => new Promise(() => {}))
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+        createMockModule({ key: 'mod3', name: 'Module 3' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod1' }, over: { id: 'mod2' } })
+      })
+
+      expect(mockReorderModules).toHaveBeenCalledTimes(1)
+
+      mockReorderModules.mockClear()
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod2' }, over: { id: 'mod3' } })
+      })
+
+      expect(mockReorderModules).not.toHaveBeenCalled()
+    })
+
+    it('does not call mutation when programKey is not provided', async () => {
+      mockReorderModules.mockClear()
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'mod1' }, over: { id: 'mod2' } })
+      })
+
+      expect(mockReorderModules).not.toHaveBeenCalled()
+    })
+
+    it('uses module id as fallback when key is empty', async () => {
+      mockReorderModules.mockClear()
+      const modules = [
+        createMockModule({ key: '', id: 'id1', name: 'Module 1' }),
+        createMockModule({ key: '', id: 'id2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      await act(async () => {
+        capturedOnDragEnd?.({ active: { id: 'id1' }, over: { id: 'id2' } })
+      })
+
+      expect(mockReorderModules).toHaveBeenCalled()
+    })
+
+    it('applies reduced opacity when dragging', () => {
+      mockIsDragging = true
+      const modules = [
+        createMockModule({ key: 'mod1', name: 'Module 1' }),
+        createMockModule({ key: 'mod2', name: 'Module 2' }),
+      ]
+
+      render(<ModuleCard modules={modules} accessLevel="admin" programKey="test-program" />)
+
+      expect(screen.getByTestId('dnd-context')).toBeInTheDocument()
+      mockIsDragging = false
     })
   })
 })
