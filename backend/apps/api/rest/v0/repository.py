@@ -90,7 +90,10 @@ def list_repository(
         repositories = repositories.filter(organization__login__iexact=filters.organization_id)
 
     repositories = apply_structured_search(repositories, filters.q, REPOSITORY_SEARCH_SCHEMA)
-    return repositories.order_by(ordering or "-created_at", "-updated_at")
+    filter_params = filters.dict(exclude_none=True)
+    filter_params.pop("q", None)
+
+    return repositories.filter(**filter_params).order_by(ordering or "-created_at", "-updated_at")
 
 
 @router.get(

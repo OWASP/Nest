@@ -91,7 +91,10 @@ def list_members(
         query=filters.q,
         field_schema=MEMBER_SEARCH_SCHEMA,
     )
-    return filters.filter(queryset).order_by(ordering or "-created_at")
+    filter_params = filters.dict(exclude_none=True)
+    filter_params.pop("q", None)
+    order_fields = (ordering, "-updated_at") if ordering else ("-created_at", "-updated_at")
+    return queryset.filter(**filter_params).order_by(*order_fields)
 
 
 @router.get(

@@ -68,7 +68,8 @@ class ChapterError(Schema):
 class ChapterFilter(LocationFilter):
     """Filter for Chapter."""
 
-    country: str | None = Field(None, description="Country of the chapter")
+    country: str | None = Field(None, description="Country of the chapter", q="country__icontains")
+    location: str | None = Field(None, q="suggested_location__icontains")
     q: str | None = Field(None, description="Structured search query")
 
 
@@ -104,7 +105,10 @@ def list_chapters(
         query=filters.q,
         field_schema=CHAPTER_SEARCH_SCHEMA,
     )
-    return filters.filter(queryset).order_by(ordering or "-created_at")
+    filter_params = filters.dict(exclude_none=True)
+    filter_params.pop("q", None)
+    order_fields = (ordering, "-updated_at") if ordering else ("-created_at", "-updated_at")
+    return queryset.filter(**filter_params).order_by(*order_fields)
 
 
 @router.get(
