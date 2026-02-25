@@ -73,8 +73,9 @@ class TestChapterSerializerValidation:
 class TestListChapters:
     """Tests for list_chapters endpoint."""
 
+    @patch("apps.api.rest.v0.chapter.apply_structured_search")
     @patch("apps.api.rest.v0.chapter.ChapterModel")
-    def test_list_chapters_no_filter(self, mock_chapter_model):
+    def test_list_chapters_no_filter(self, mock_chapter_model, mock_apply_search):
         """Test listing chapters without filters."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
@@ -87,18 +88,19 @@ class TestListChapters:
         mock_qs.order_by.return_value = mock_qs
         mock_qs.select_related.return_value = mock_qs
 
+        mock_apply_search.return_value = mock_qs
         mock_filters.filter.return_value = mock_qs
 
         mock_chapter_model.active_chapters.all.return_value = mock_qs
-        mock_chapter_model.active_chapters.filter.return_value = mock_qs
 
         result = list_chapters(mock_request, mock_filters, ordering=None)
 
         mock_qs.order_by.assert_called_with("-created_at", "-updated_at")
         assert result == mock_qs
 
+    @patch("apps.api.rest.v0.chapter.apply_structured_search")
     @patch("apps.api.rest.v0.chapter.ChapterModel")
-    def test_list_chapters_with_ordering(self, mock_chapter_model):
+    def test_list_chapters_with_ordering(self, mock_chapter_model, mock_apply_search):
         """Test listing chapters with custom ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
@@ -111,10 +113,10 @@ class TestListChapters:
         mock_qs.order_by.return_value = mock_qs
         mock_qs.select_related.return_value = mock_qs
 
+        mock_apply_search.return_value = mock_qs
         mock_filters.filter.return_value = mock_qs
 
         mock_chapter_model.active_chapters.all.return_value = mock_qs
-        mock_chapter_model.active_chapters.filter.return_value = mock_qs
 
         result = list_chapters(mock_request, mock_filters, ordering="latitude")
 
