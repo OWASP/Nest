@@ -47,6 +47,12 @@ exec-backend-command-it:
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
 
+exec-nestbot-command:
+	@docker exec -i nest-nestbot $(CMD)
+
+exec-nestbot-command-it:
+	@docker exec -it nest-nestbot $(CMD) 2>/dev/null
+
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
 

@@ -75,7 +75,7 @@ services:
     container_name: nest-docs
     command: >
       sh -c '
-        mkdocs serve -a 0.0.0.0:8001
+        mkdocs serve -a 0.0.0.0:8002
       '
     build:
       context: ../../
@@ -83,7 +83,7 @@ services:
     networks:
       - nest-network
     ports:
-      - 8002:8001
+      - 8002:8002
     volumes:
       - ../../docs:/home/owasp/docs
       - docs-venv:/home/owasp/.venv
