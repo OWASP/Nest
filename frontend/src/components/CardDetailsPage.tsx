@@ -216,7 +216,7 @@ const DetailsCard = ({
               )
             )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
-              <SocialLinks urls={socialLinks || []} />
+              <SocialLinks urls={socialLinks} />
             )}
           </SecondaryCard>
           {showStatistics(type) && stats && (
@@ -464,12 +464,7 @@ const DetailsCard = ({
                                 height={24}
                                 width={24}
                                 src={milestone?.author?.avatarUrl}
-                                alt={
-                                  milestone.author &&
-                                  (milestone.author.name || milestone.author.login)
-                                    ? `${milestone.author.name || milestone.author.login}'s avatar`
-                                    : "Author's avatar"
-                                }
+                                alt={`${milestone.author?.name || milestone.author?.login}'s avatar`}
                                 className="mr-2 rounded-full"
                               />
                             </Link>
@@ -549,7 +544,7 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }: { urls: string[] }) => {
+const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>
