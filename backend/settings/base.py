@@ -1,6 +1,7 @@
 """OWASP Nest base configuration."""
 
 import os
+import ssl
 from pathlib import Path
 
 from configurations import Configuration, values
@@ -94,6 +95,7 @@ class Base(Configuration):
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
+        "apps.common.middlewares.csrf_referer_fallback.CsrfRefererFallbackMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
         "apps.common.middlewares.block_null_characters.BlockNullCharactersMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -141,16 +143,22 @@ class Base(Configuration):
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
     REDIS_AUTH_ENABLED = values.BooleanValue(environ_name="REDIS_AUTH_ENABLED", default=True)
+    REDIS_USE_TLS = values.BooleanValue(environ_name="REDIS_USE_TLS", default=False)
+    REDIS_CACHE_OPTIONS: dict = {
+        "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        **(
+            {"CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": ssl.CERT_REQUIRED}}
+            if REDIS_USE_TLS
+            else {}
+        ),
+        **({"PASSWORD": str(REDIS_PASSWORD)} if REDIS_AUTH_ENABLED else {}),
+    }
+
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379"
-            # GH actions does not support authenticated redis connections.
-            if REDIS_AUTH_ENABLED
-            else f"redis://{REDIS_HOST}:6379",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
+            "LOCATION": f"{'rediss' if REDIS_USE_TLS else 'redis'}://{REDIS_HOST}:6379",
+            "OPTIONS": REDIS_CACHE_OPTIONS,
             "TIMEOUT": 300,
         }
     }
@@ -162,6 +170,7 @@ class Base(Configuration):
             "PASSWORD": REDIS_PASSWORD,
             "DB": 1,
             "DEFAULT_TIMEOUT": 300,
+            **({"SSL": True, "SSL_CERT_REQS": "required"} if REDIS_USE_TLS else {}),
         }
     }
 

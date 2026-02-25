@@ -44,6 +44,16 @@ repos:
         language_version: python3
         pass_filenames: true
 
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+        files: ^infrastructure/.*\.(tf|tftest\.hcl)$
+      - id: terraform_tflint
+        files: ^infrastructure/.*\.tf$
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.2
     hooks:
@@ -127,6 +137,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.16.1
+    rev: v2.16.2
     hooks:
       - id: pyproject-fmt

@@ -1,0 +1,9 @@
+availability_zones            = ["us-east-2a", "us-east-2b", "us-east-2c"]
+aws_region                    = "us-east-2"
+create_rds_proxy              = false
+domain_name                   = "nest.owasp.dev"
+ecs_use_fargate_spot          = true
+environment                   = "staging"
+frontend_use_fargate_spot     = true
+lambda_function_name          = null
+project_name                  = "nest"
