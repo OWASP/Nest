@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.1.1
+    rev: v26.2.0
     hooks:
       - id: ansible-lint
         additional_dependencies:
@@ -55,7 +55,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.2
+    rev: v0.15.3
     hooks:
       - id: ruff-check
         args:
