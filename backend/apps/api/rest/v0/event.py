@@ -95,8 +95,8 @@ def list_events(
         queryset = EventModel.objects.all()
         order_fields = [ordering] if ordering else ["-start_date", "-end_date"]
 
-    if "-updated_at" not in order_fields:
-        order_fields.append("-updated_at")
+    if "-nest_updated_at" not in order_fields:
+        order_fields.append("-nest_updated_at")
 
     return filters.filter(queryset.order_by(*order_fields))
 

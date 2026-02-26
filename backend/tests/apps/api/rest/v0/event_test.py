@@ -67,7 +67,7 @@ class TestListEvents:
         result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=None)
 
         mock_event_model.objects.all.return_value.order_by.assert_called_with(
-            "-start_date", "-end_date", "-updated_at"
+            "-start_date", "-end_date", "-nest_updated_at"
         )
         assert result == mock_queryset
 
@@ -84,7 +84,7 @@ class TestListEvents:
         result = list_events(mock_request, mock_filters, ordering="latitude", is_upcoming=None)
 
         mock_event_model.objects.all.return_value.order_by.assert_called_with(
-            "latitude", "-updated_at"
+            "latitude", "-nest_updated_at"
         )
         assert result == mock_queryset
 

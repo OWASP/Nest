@@ -90,6 +90,7 @@ class TestListRepository:
 
         result = list_repository(mock_request, mock_filters, ordering="created_at")
 
+        mock_qs.filter.assert_any_call(organization__login__iexact="OWASP")
         mock_qs.order_by.assert_called_with("created_at", "-updated_at")
         assert result == mock_qs
 
