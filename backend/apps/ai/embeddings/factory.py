@@ -10,14 +10,18 @@ from apps.ai.embeddings.openai import OpenAIEmbedder
 def get_embedder() -> Embedder:
     """Get the configured embedder.
 
-    Currently returns OpenAI and Google embedder, but can be extended to support
-    other providers (e.g., Anthropic, Cohere, etc.).
-
     Returns:
         Embedder instance configured for the current provider.
 
     """
-    if os.getenv("LLM_PROVIDER", "openai") == "google":
+    provider = os.getenv("LLM_PROVIDER", "openai")
+
+    if provider == "openai":
+        return OpenAIEmbedder()
+
+    if provider == "google":
         return GoogleEmbedder()
 
-    return OpenAIEmbedder()
+    error_msg = f"Unsupported LLM provider: {provider}"
+
+    raise ValueError(error_msg)

@@ -6,6 +6,7 @@ import math
 
 from django.conf import settings
 from google import genai
+from google.genai.types import HttpOptions
 
 from apps.ai.embeddings.base import Embedder
 
@@ -20,9 +21,12 @@ class GoogleEmbedder(Embedder):
             model: The Google embedding model to use.
 
         """
-        self.client = genai.Client(api_key=settings.GOOGLE_API_KEY)
+        self.client = genai.Client(
+            api_key=settings.GOOGLE_API_KEY,
+            http_options=HttpOptions(timeout=30 * 1000),
+        )
         self.model = model
-        self._dimensions = 1536
+        self._dimensions = 1536  # gemini-embedding-001 dimensions
 
     def _normalize_embedding(self, embedding: list[float]) -> list[float]:
         """Normalize embedding vector to unit length (L2 norm).
@@ -55,13 +59,9 @@ class GoogleEmbedder(Embedder):
         result = self.client.models.embed_content(
             model=self.model,
             contents=text,
-            config={"output_dimensionality": 1536},
+            config={"output_dimensionality": self._dimensions},
         )
-        if not result.embeddings:
-            msg = f"Google embedding API returned no embeddings for model {self.model!r}"
-            raise ValueError(msg)
-        embedding = result.embeddings[0].values
-        return self._normalize_embedding(embedding)
+        return self._normalize_embedding(result.embeddings[0].values)
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for multiple documents.
@@ -73,19 +73,12 @@ class GoogleEmbedder(Embedder):
             List of embedding vectors, one per document.
 
         """
-        results = []
-        for text in texts:
-            result = self.client.models.embed_content(
-                model=self.model,
-                contents=text,
-                config={"output_dimensionality": 1536},
-            )
-            if not result.embeddings:
-                msg = f"Google embedding API returned no embeddings for model {self.model!r}"
-                raise ValueError(msg)
-            embedding = result.embeddings[0].values
-            results.append(self._normalize_embedding(embedding))
-        return results
+        result = self.client.models.embed_content(
+            model=self.model,
+            contents=texts,
+            config={"output_dimensionality": self._dimensions},
+        )
+        return [self._normalize_embedding(e.values) for e in result.embeddings]
 
     def get_dimensions(self) -> int:
         """Get the dimension of embeddings produced by this embedder.
