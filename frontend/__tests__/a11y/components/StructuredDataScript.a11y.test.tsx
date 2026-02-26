@@ -4,6 +4,10 @@ import { useTheme } from 'next-themes'
 import type { ProfilePageStructuredData } from 'types/profilePageStructuredData'
 import StructuredDataScript from 'components/StructuredDataScript'
 
+jest.mock('isomorphic-dompurify', () => ({
+  sanitize: jest.fn((input: string) => input),
+}))
+
 const mockData: ProfilePageStructuredData = {
   '@context': 'https://schema.org',
   '@type': 'ProfilePage',
