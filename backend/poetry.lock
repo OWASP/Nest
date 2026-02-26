@@ -326,18 +326,18 @@ wrapt = "*"
 
 [[package]]
 name = "boto3"
-version = "1.42.56"
+version = "1.42.57"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.56-py3-none-any.whl", hash = "sha256:e09f91170b19e0ecd5e514321d99323be3e91a58dfa73fd58cf73b7b8b179c84"},
-    {file = "boto3-1.42.56.tar.gz", hash = "sha256:8b0779431b349582f4d61b55a2858b943d5295f4b5de62e2d669fdbbcda96bd6"},
+    {file = "boto3-1.42.57-py3-none-any.whl", hash = "sha256:74f47051e3b741a0c1e64d57b891076c2c68f8d7b98aee36b044fab1849b4823"},
+    {file = "boto3-1.42.57.tar.gz", hash = "sha256:b598f1705f231f118a81abbfde0c5b52879b1b1997a1aba513f04d61e7b12cbd"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.56,<1.43.0"
+botocore = ">=1.42.57,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -346,14 +346,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.56"
+version = "1.42.57"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.56-py3-none-any.whl", hash = "sha256:111089dea212438a5197e909e5b528e7c30fd8cbd02c8c7d469359b368929343"},
-    {file = "botocore-1.42.56.tar.gz", hash = "sha256:b1d7d3cf2fbe4cc1804a6567a051fc7141d21bcdcfde0336257b8dd2085272c2"},
+    {file = "botocore-1.42.57-py3-none-any.whl", hash = "sha256:0d26c09955e52ac5090d9cf9e218542df81670077049a606be7c3bd235208e67"},
+    {file = "botocore-1.42.57.tar.gz", hash = "sha256:51f94c602b687a70aa11d8bbea2b741b87b0aef7bddb43e5386247bf4311c479"},
 ]
 
 [package.dependencies]
@@ -2086,40 +2086,40 @@ format-nongpl = ["fqdn", "idna", "isoduration", "jsonpointer (>1.13)", "rfc3339-
 
 [[package]]
 name = "jsonschema-rs"
-version = "0.42.1"
+version = "0.42.2"
 description = "A high-performance JSON Schema validator for Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["fuzz"]
 files = [
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl", hash = "sha256:7d4c2cf89fb1f49399be7f0e601526f189497f4f7bbefc4fac5f4447ca52609c"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:40d53eea48a17876d6802405edc6e0367f07260545713ac6d727054bce8c425f"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0de86325cf5e0d1c35ec14e60ffe2ce4547c8385802ea69ac11540616b822cb2"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c664bd3ffb1cfd70d2b8b8b9587782184a81a8467a70bcc6c71a84cf573ecdf3"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:d7dc31fa2b644205271ac1071aec005f88565b135ad1f983b8c1de2589266e1e"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:d5602f07fe69f108f7dd9d2d05d940a2498517f07a230da2efb8f36bf06e0703"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:005cd79783a4980ad68d21f7a25c913778dc6a0fe8e3d3c76132eabb7a40287a"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-win32.whl", hash = "sha256:6817e5c1fcb10d80b4dda38cd106850c7e3e9dc06d5afe93668b9c99744723c9"},
-    {file = "jsonschema_rs-0.42.1-cp310-abi3-win_amd64.whl", hash = "sha256:b508dd9a114352bf8fc20d8e6d01563fbb18f3f877d11e0ecbbb43c556ec4174"},
-    {file = "jsonschema_rs-0.42.1-cp313-cp313t-macosx_10_12_x86_64.whl", hash = "sha256:4849b65048e4fd53991424a827f8369d0b6c7ad1d9ff05bb854afa685131b954"},
-    {file = "jsonschema_rs-0.42.1-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:98ca39207afab8782149810b789c717d5a0bb7bbb6330bd537827eeecbbeccbb"},
-    {file = "jsonschema_rs-0.42.1-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2a363739a254c3990cbea18a7350de3bc06cdf02307ee1db60ff86fd13e1ff58"},
-    {file = "jsonschema_rs-0.42.1-cp313-cp313t-manylinux_2_28_aarch64.whl", hash = "sha256:28b235ab6263f96ed2448f645291d446e4433c7fa6cc255bff2dcffd2a2b65a9"},
-    {file = "jsonschema_rs-0.42.1-cp313-cp313t-musllinux_1_2_aarch64.whl", hash = "sha256:f50e0baabb3d6d1b250ad776ade46c6bf3599c681e961f686a6a50e925322d64"},
-    {file = "jsonschema_rs-0.42.1-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:fbe6abf63a5523e13257a0e3a8cf58d15a46e00fcaaafc6f92c34c9109575529"},
-    {file = "jsonschema_rs-0.42.1-cp313-cp313t-win_amd64.whl", hash = "sha256:e20154d59e843b36e2e7d6b7415954ae3374e23d97a2ad11670a75fe0884c246"},
-    {file = "jsonschema_rs-0.42.1-cp314-cp314t-macosx_10_12_x86_64.whl", hash = "sha256:2fa26381601a32439ff46c7588476a0fc4d2a0b97a58da756196fd747b99bf01"},
-    {file = "jsonschema_rs-0.42.1-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:0d76660cd5b143e342c5d98bf9690258171dbe1beba7cdc6354bc736eb286f7e"},
-    {file = "jsonschema_rs-0.42.1-cp314-cp314t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:52afd2b1ebf7360a0e9ec40b23cda167b92d776ed8f14f1a6c78a0fc3070453d"},
-    {file = "jsonschema_rs-0.42.1-cp314-cp314t-manylinux_2_28_aarch64.whl", hash = "sha256:1a7869a0c81a12bf7875235e0d4b95b68392655373c1f443fbbacd0e7cc9d289"},
-    {file = "jsonschema_rs-0.42.1-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:cdbed80ae956fff192bf32b5be902f07a46788b12a038c8093928c1e80035a73"},
-    {file = "jsonschema_rs-0.42.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:b6e795ee51b807eea75df5b43a4380f950c6ff3feb586e01b2423b4d31093881"},
-    {file = "jsonschema_rs-0.42.1-cp314-cp314t-win_amd64.whl", hash = "sha256:50bda44a74ddae8bdd1e35785d738c39847b54fcaf4e803f4b51ace095d94a51"},
-    {file = "jsonschema_rs-0.42.1-pp311-pypy311_pp73-macosx_10_12_x86_64.whl", hash = "sha256:5844afa812db3a61b8994ec562f7a13a62208ec7f9806c34784fc22c945ac87c"},
-    {file = "jsonschema_rs-0.42.1-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ad9a5bfc34394d812f88d3e4b320236fbb9b66b34c88f9ec13f9143f97d562a6"},
-    {file = "jsonschema_rs-0.42.1-pp311-pypy311_pp73-manylinux_2_28_aarch64.whl", hash = "sha256:dce9ddf7084bc7d2fbd1bab4a81d69f99413d001971b56ca26403bafd6da5432"},
-    {file = "jsonschema_rs-0.42.1-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:3cf915dc8eeb304c045fb85e34a97d6d3f563aa75e13d8eb2ab6ebb145b3adc4"},
-    {file = "jsonschema_rs-0.42.1.tar.gz", hash = "sha256:4144cd351d39ce457f2c7d45111e7225eb5ed1791e0226dec5b9099d78651e32"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-macosx_10_12_x86_64.macosx_11_0_arm64.macosx_10_12_universal2.whl", hash = "sha256:21927de23353e1bfd1ec248428d647c64e93e8f87c530b2b85980387e2f26205"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:b57fc0e2662b9e4da447fb0bf6a272151e11a507953d3a2b183d176f73a3b4c0"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:e13465a4e20898dc5897fe9e7f6630f0c21d3907f1914f86e528c82734d9bf83"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:38deb0cf1fc24ad3b97f73f7fbc118edbe548bf0c489f776c93e974c86a38a59"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:8ad0122261f961672a268da88f1cbf11be2e4b33fe541468fecbfe5f29f6aff0"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:067f0a6f7147a2193b755032b95cf9e232bae609ecc2ebf664f36287f8e88894"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:7f97a7eb448af45805dc7af6bd27ee370df73e56eaf3198a9ab0a1e654d129af"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-win32.whl", hash = "sha256:25bfe247f0f3817651c511914c6565a35bcf044e5427eee34e6a1c14ed404c71"},
+    {file = "jsonschema_rs-0.42.2-cp310-abi3-win_amd64.whl", hash = "sha256:1454aea84ff49ef0b69d53bb5205c93b6f17e4369d2a1f249a6f64bcc5a69433"},
+    {file = "jsonschema_rs-0.42.2-cp313-cp313t-macosx_10_12_x86_64.whl", hash = "sha256:c0e2e16eb89609e7abde7e81baa9ddda376846ff4adf4bbc6ea9fbeae2b1b03e"},
+    {file = "jsonschema_rs-0.42.2-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:473e772e2c088850b9944407fc6aed56e0bacc98cc5efa744ba85e80d2f0526c"},
+    {file = "jsonschema_rs-0.42.2-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f20800c3cb445b856b638e47eb8d7677f6ef819d8593cf322b00659a4aaeef8f"},
+    {file = "jsonschema_rs-0.42.2-cp313-cp313t-manylinux_2_28_aarch64.whl", hash = "sha256:9e35a179475d2822d4e85c5da0b112e6cf9bc683cc3c69bb2f7f4b0bdf1b72e2"},
+    {file = "jsonschema_rs-0.42.2-cp313-cp313t-musllinux_1_2_aarch64.whl", hash = "sha256:33ad9725fc570747a9e5a8c736f403a7b66c27583580eb4cd8dac11a6cfb7e36"},
+    {file = "jsonschema_rs-0.42.2-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:337f959ec25dd810d4a7f3cb17383f74540a4ab4b6503faa273f8a94df7f5d4b"},
+    {file = "jsonschema_rs-0.42.2-cp313-cp313t-win_amd64.whl", hash = "sha256:034b5bcfe2f9e5a5c6d7e6e0cdc60fe2dc72de8637b5f6cb1150d47bed24b8fa"},
+    {file = "jsonschema_rs-0.42.2-cp314-cp314t-macosx_10_12_x86_64.whl", hash = "sha256:7b2a4dc74c783789197395a4dab54370b075f2718706f54e77259c9ef1231462"},
+    {file = "jsonschema_rs-0.42.2-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:3b79c5c733dacc16d0b39c21fa25bb8f865f08763dfa1262c24d8425471c3b71"},
+    {file = "jsonschema_rs-0.42.2-cp314-cp314t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7e4d15b0c7723c7c9b147c49a9c751cc1bdb93e6e74a7a388652e42efaf9c8e2"},
+    {file = "jsonschema_rs-0.42.2-cp314-cp314t-manylinux_2_28_aarch64.whl", hash = "sha256:139cf8e87b1d9eb07ddd9817ddb5eec34a11858540594cc9840a03b27d2d48bb"},
+    {file = "jsonschema_rs-0.42.2-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:3998f3f0a41b3a275f69d51828afff3b27af10b23ba16dd977b6ae0a77b13a11"},
+    {file = "jsonschema_rs-0.42.2-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:1591ac3a14bf8908e01d4cf8ebe042fa151225b61c8f180e89d6a2becb59989c"},
+    {file = "jsonschema_rs-0.42.2-cp314-cp314t-win_amd64.whl", hash = "sha256:e67bea24a8ea6cb0963b6a9fd2d9eba275e1db01cadb322ec90636ce5ed13222"},
+    {file = "jsonschema_rs-0.42.2-pp311-pypy311_pp73-macosx_10_12_x86_64.whl", hash = "sha256:9e2d0c727a1c36316fc1c2ffd7ddbe6fb6ffb5cd17d75f6b986bda6e72a37527"},
+    {file = "jsonschema_rs-0.42.2-pp311-pypy311_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eef9995030208c7082dcf0c1b21642c2bf2ef3fbe0dab9c15e67e1486a4ad361"},
+    {file = "jsonschema_rs-0.42.2-pp311-pypy311_pp73-manylinux_2_28_aarch64.whl", hash = "sha256:9cbbdad49c33bfa09c49ffa0821c2b61f7e47bf463da4630fbc53812f73719d3"},
+    {file = "jsonschema_rs-0.42.2-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:dc4305895f4aa2fe6e66a9df62e2abe72aa55d2a3559a0a8b15a3b4d525746d5"},
+    {file = "jsonschema_rs-0.42.2.tar.gz", hash = "sha256:8029431510d0c2c20084f92ee797c41a4a5751a29cb0b102466ada09c328c708"},
 ]
 
 [package.extras]
@@ -2329,14 +2329,14 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.7.6"
+version = "0.7.7"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.7.6-py3-none-any.whl", hash = "sha256:28d256584969db723b68189a7dbb065836572728ab4d9597ec5379fe0a1e1641"},
-    {file = "langsmith-0.7.6.tar.gz", hash = "sha256:e8646f8429d3c1641c7bae3c01bfdc3dfa27625994b0ef4303714d6b06fe1ef9"},
+    {file = "langsmith-0.7.7-py3-none-any.whl", hash = "sha256:ef3d0aff77917bf3776368e90f387df5ffd7cb7cff11ece0ec4fd227e433b5de"},
+    {file = "langsmith-0.7.7.tar.gz", hash = "sha256:2294d3c4a5a8205ef38880c1c412d85322e6055858ae999ef6641c815995d437"},
 ]
 
 [package.dependencies]
@@ -2357,6 +2357,7 @@ langsmith-pyo3 = ["langsmith-pyo3 (>=0.1.0rc2)"]
 openai-agents = ["openai-agents (>=0.0.3)"]
 otel = ["opentelemetry-api (>=1.30.0)", "opentelemetry-exporter-otlp-proto-http (>=1.30.0)", "opentelemetry-sdk (>=1.30.0)"]
 pytest = ["pytest (>=7.0.0)", "rich (>=13.9.4)", "vcrpy (>=7.0.0)"]
+sandbox = ["websockets (>=15.0)"]
 vcr = ["vcrpy (>=7.0.0)"]
 
 [[package]]
@@ -4233,14 +4234,14 @@ all = ["numpy"]
 
 [[package]]
 name = "redis"
-version = "7.2.0"
+version = "7.2.1"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "redis-7.2.0-py3-none-any.whl", hash = "sha256:01f591f8598e483f1842d429e8ae3a820804566f1c73dca1b80e23af9fba0497"},
-    {file = "redis-7.2.0.tar.gz", hash = "sha256:4dd5bf4bd4ae80510267f14185a15cba2a38666b941aff68cccf0256b51c1f26"},
+    {file = "redis-7.2.1-py3-none-any.whl", hash = "sha256:49e231fbc8df2001436ae5252b3f0f3dc930430239bfeb6da4c7ee92b16e5d33"},
+    {file = "redis-7.2.1.tar.gz", hash = "sha256:6163c1a47ee2d9d01221d8456bc1c75ab953cbda18cfbc15e7140e9ba16ca3a5"},
 ]
 
 [package.extras]
