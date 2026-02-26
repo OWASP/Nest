@@ -76,7 +76,7 @@ services:
         redis-server --requirepass $$REDIS_PASSWORD --maxmemory 100mb --maxmemory-policy allkeys-lru
       '
     container_name: fuzz-nest-cache
-    image: redis:8.0.5-alpine3.21
+    image: redis:8.6-alpine3.23
     environment:
       REDIS_PASSWORD: ${DJANGO_REDIS_PASSWORD:-nest-fuzz-cache-password}
     healthcheck:
