@@ -62,10 +62,10 @@ class TestUtils:
 
     @patch("apps.ai.common.utils.logger")
     @patch("apps.ai.common.utils.get_embedder")
-    def test_create_chunks_and_embeddings_api_error(self, mock_get_embedder, mock_logger):
+    def test_create_chunks_and_embeddings_error(self, mock_get_embedder, mock_logger):
         """Tests the failure path where the embedder raises an exception."""
         mock_embedder = MagicMock()
-        mock_embedder.embed_documents.side_effect = Exception("API connection failed")
+        mock_embedder.embed_documents.side_effect = TypeError("Type error")
         mock_get_embedder.return_value = mock_embedder
 
         result = create_chunks_and_embeddings(
