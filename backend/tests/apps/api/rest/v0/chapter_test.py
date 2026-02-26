@@ -4,7 +4,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.chapter import ChapterDetail, get_chapter, list_chapters
+from apps.api.rest.v0.chapter import (
+    CHAPTER_SEARCH_SCHEMA,
+    ChapterDetail,
+    get_chapter,
+    list_chapters,
+)
 
 
 class TestChapterSerializerValidation:
@@ -95,6 +100,12 @@ class TestListChapters:
 
         result = list_chapters(mock_request, mock_filters, ordering=None)
 
+        mock_apply_search.assert_called_once_with(
+            queryset=mock_qs,
+            query="",
+            field_schema=CHAPTER_SEARCH_SCHEMA,
+        )
+
         mock_qs.order_by.assert_called_with("-created_at", "-updated_at")
         assert result == mock_qs
 
@@ -119,6 +130,12 @@ class TestListChapters:
         mock_chapter_model.active_chapters.all.return_value = mock_qs
 
         result = list_chapters(mock_request, mock_filters, ordering="latitude")
+
+        mock_apply_search.assert_called_once_with(
+            queryset=mock_qs,
+            query="",
+            field_schema=CHAPTER_SEARCH_SCHEMA,
+        )
 
         mock_qs.order_by.assert_called_with("latitude", "-updated_at")
         assert result == mock_qs
