@@ -21,7 +21,7 @@ class TestLLMConfig:
         result = get_llm()
 
         mock_llm.assert_called_once_with(
-            model="gpt-4o-mini",
+            model="gpt-4.1-mini",
             api_key="test-key",
             temperature=0.1,
         )
@@ -49,24 +49,12 @@ class TestLLMConfig:
         assert result == mock_llm_instance
 
     @patch.dict(os.environ, {"LLM_PROVIDER": "unsupported"})
-    @patch("apps.ai.common.llm_config.settings")
-    @patch("apps.ai.common.llm_config.logger")
-    @patch("apps.ai.common.llm_config.LLM")
-    def test_get_llm_unsupported_provider(self, mock_llm, mock_logger, mock_settings):
-        """Test getting LLM with unsupported provider logs error and falls back to OpenAI."""
-        mock_settings.OPEN_AI_SECRET_KEY = "test-key"  # noqa: S105
-        mock_llm_instance = Mock()
-        mock_llm.return_value = mock_llm_instance
+    def test_get_llm_unsupported_provider(self):
+        """Test getting LLM with unsupported provider raises ValueError."""
+        import pytest
 
-        result = get_llm()
-
-        mock_logger.error.assert_called_once()
-        mock_llm.assert_called_once_with(
-            model="gpt-4o-mini",
-            api_key="test-key",
-            temperature=0.1,
-        )
-        assert result == mock_llm_instance
+        with pytest.raises(ValueError, match="Unsupported LLM provider: unsupported"):
+            get_llm()
 
     @patch.dict(os.environ, {"LLM_PROVIDER": "google"})
     @patch("apps.ai.common.llm_config.settings")

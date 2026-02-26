@@ -209,7 +209,6 @@ class TestBaseChunkCommand:
         mock_context_filter.return_value.first.return_value = mock_context
         mock_split_text.return_value = ["chunk1", "chunk2", "chunk3"]
         mock_create_chunks.return_value = mock_chunks
-        command.openai_client = Mock()
 
         with (
             patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter,
@@ -224,7 +223,6 @@ class TestBaseChunkCommand:
             _, kwargs = mock_create_chunks.call_args
             assert set(kwargs["chunk_texts"]) == {"chunk1", "chunk2", "chunk3"}
             assert kwargs["context"] == mock_context
-            assert kwargs["openai_client"] == command.openai_client
             assert kwargs["save"] is False
             mock_bulk_save.assert_called_once_with(mock_chunks)
             mock_write.assert_has_calls(
@@ -264,7 +262,6 @@ class TestBaseChunkCommand:
         mock_context_filter.return_value.first.return_value = mock_context
         mock_split_text.return_value = ["chunk1", "chunk2"]
         mock_create_chunks.return_value = mock_chunks[:2]
-        command.openai_client = Mock()
 
         with (
             patch("apps.ai.models.chunk.Chunk.objects.filter") as mock_chunk_filter,
@@ -301,7 +298,6 @@ class TestBaseChunkCommand:
         mock_context_filter.return_value.first.return_value = mock_context
         mock_split_text.return_value = ["chunk1", "chunk2"]
         mock_create_chunks.return_value = None
-        command.openai_client = Mock()
 
         result = command.process_chunks_batch([mock_entity])
 
@@ -329,7 +325,6 @@ class TestBaseChunkCommand:
             mock_context_filter.return_value.first.return_value = mock_context
             mock_split_text.return_value = ["chunk1"]
             mock_create_chunks.return_value = [Mock()]
-            command.openai_client = Mock()
 
             with patch.object(
                 command,
@@ -355,43 +350,22 @@ class TestBaseChunkCommand:
 
                 mock_split_text.assert_called_with("prose")
 
-    @patch.object(BaseChunkCommand, "setup_openai_client")
     @patch.object(BaseChunkCommand, "get_queryset")
     @patch.object(BaseChunkCommand, "handle_batch_processing")
-    def test_handle_method_success(
-        self, mock_handle_batch, mock_get_queryset, mock_setup_client, command
-    ):
+    def test_handle_method_success(self, mock_handle_batch, mock_get_queryset, command):
         """Test the handle method with successful setup."""
-        mock_setup_client.return_value = True
         mock_queryset = Mock()
         mock_get_queryset.return_value = mock_queryset
         options = {"batch_size": 10}
 
         command.handle(**options)
 
-        mock_setup_client.assert_called_once()
         mock_get_queryset.assert_called_once_with(options)
         mock_handle_batch.assert_called_once_with(
             queryset=mock_queryset,
             batch_size=10,
             process_batch_func=command.process_chunks_batch,
         )
-
-    @patch.object(BaseChunkCommand, "setup_openai_client")
-    def test_handle_method_openai_setup_fails(self, mock_setup_client, command):
-        """Test the handle method when OpenAI client setup fails."""
-        mock_setup_client.return_value = False
-        options = {"batch_size": 10}
-
-        with (
-            patch.object(command, "get_queryset") as mock_get_queryset,
-            patch.object(command, "handle_batch_processing") as mock_handle_batch,
-        ):
-            command.handle(**options)
-
-            mock_setup_client.assert_called_once()
-            mock_get_queryset.assert_not_called()
-            mock_handle_batch.assert_not_called()
 
     def test_process_chunks_batch_metadata_only_content(
         self, command, mock_entity, mock_context, mock_content_type
@@ -414,7 +388,6 @@ class TestBaseChunkCommand:
             mock_context_filter.return_value.first.return_value = mock_context
             mock_split_text.return_value = ["chunk1"]
             mock_create_chunks.return_value = [Mock()]
-            command.openai_client = Mock()
 
             with patch.object(
                 command,
@@ -453,7 +426,6 @@ class TestBaseChunkCommand:
         mock_context_filter.return_value.first.return_value = mock_context
         mock_split_text.return_value = ["chunk1", "chunk2", "chunk1", "chunk3", "chunk2"]
         mock_create_chunks.return_value = mock_chunks
-        command.openai_client = Mock()
 
         with patch.object(command.stdout, "write"):
             result = command.process_chunks_batch([mock_entity])
@@ -463,7 +435,6 @@ class TestBaseChunkCommand:
             _, kwargs = mock_create_chunks.call_args
             assert set(kwargs["chunk_texts"]) == {"chunk1", "chunk2", "chunk3"}
             assert kwargs["context"] == mock_context
-            assert kwargs["openai_client"] == command.openai_client
             assert kwargs["save"] is False
             mock_bulk_save.assert_called_once_with(mock_chunks)
 

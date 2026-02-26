@@ -1,4 +1,3 @@
-import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -56,9 +55,6 @@ class TestBaseAICommand:
 
     def test_command_inheritance(self, command):
         assert isinstance(command, BaseCommand)
-
-    def test_initialization(self, command):
-        assert command.openai_client is None
 
     def test_abstract_attributes_implemented(self, command):
         assert command.model_class == MockTestModel
@@ -176,32 +172,6 @@ class TestBaseAICommand:
 
         result = command.get_entity_key(entity)
         assert result == "42"
-
-    @patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-api-key"})
-    @patch("apps.ai.common.base.ai_command.openai.OpenAI")
-    def test_setup_openai_client_success(self, mock_openai_class, command):
-        mock_client = Mock()
-        mock_openai_class.return_value = mock_client
-
-        result = command.setup_openai_client()
-
-        assert result is True
-        assert command.openai_client == mock_client
-        mock_openai_class.assert_called_once_with(api_key="test-api-key")
-
-    @patch.dict(os.environ, {}, clear=True)
-    def test_setup_openai_client_no_api_key(self, command):
-        if "DJANGO_OPEN_AI_SECRET_KEY" in os.environ:
-            del os.environ["DJANGO_OPEN_AI_SECRET_KEY"]
-
-        with patch.object(command.stdout, "write") as mock_write:
-            result = command.setup_openai_client()
-
-            assert result is False
-            assert command.openai_client is None
-            mock_write.assert_called_once()
-            call_args = mock_write.call_args[0][0]
-            assert "DJANGO_OPEN_AI_SECRET_KEY environment variable not set" in str(call_args)
 
     def test_handle_batch_processing_empty_queryset(self, command, mock_queryset):
         mock_queryset.count.return_value = 0
