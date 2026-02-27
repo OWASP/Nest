@@ -10,6 +10,7 @@ interface UseSearchPageOptions {
   defaultSortBy?: string
   defaultOrder?: string
   hitsPerPage?: number
+  facetFilters?: string[]
 }
 
 interface UseSearchPageReturn<T> {
@@ -20,10 +21,12 @@ interface UseSearchPageReturn<T> {
   searchQuery: string
   sortBy: string
   order: string
+  facetFilters: string[]
   handleSearch: (query: string) => void
   handlePageChange: (page: number) => void
   handleSortChange: (sort: string) => void
   handleOrderChange: (order: string) => void
+  handleFacetFilterChange: (filters: string[]) => void
 }
 
 export function useSearchPage<T>({
@@ -32,6 +35,7 @@ export function useSearchPage<T>({
   defaultSortBy = '',
   defaultOrder = '',
   hitsPerPage,
+  facetFilters: initialFacetFilters = [],
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -43,6 +47,7 @@ export function useSearchPage<T>({
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
+  const [facetFilters, setFacetFilters] = useState<string[]>(initialFacetFilters)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
@@ -56,8 +61,8 @@ export function useSearchPage<T>({
       const searchQueryChanged = searchQuery !== searchQueryParam
       const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
 
-      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
-      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
+      // Reset page if search query changes (all indices) or if sort/order changes
+      if (searchQueryChanged || sortOrOrderChanged) {
         setCurrentPage(1)
       }
     }
@@ -99,7 +104,8 @@ export function useSearchPage<T>({
           computedIndexName,
           searchQuery,
           currentPage,
-          hitsPerPage
+          hitsPerPage,
+          facetFilters
         )
 
         if ('hits' in response) {
@@ -115,7 +121,7 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle, facetFilters])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -134,6 +140,11 @@ export function useSearchPage<T>({
     setOrder(order)
   }
 
+  const handleFacetFilterChange = (filters: string[]) => {
+    setFacetFilters(filters)
+    setCurrentPage(1)
+  }
+
   return {
     items,
     isLoaded,
@@ -142,9 +153,11 @@ export function useSearchPage<T>({
     searchQuery,
     sortBy,
     order,
+    facetFilters,
     handleSearch,
     handlePageChange,
     handleSortChange,
     handleOrderChange,
+    handleFacetFilterChange,
   }
 }
