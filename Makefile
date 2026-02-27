@@ -52,7 +52,7 @@ check: check-spelling check-backend check-frontend ## Run all code quality check
 check-backend: \
 	pre-commit
 
-check-test: check test \ ## Run all checks and tests
+check-test: check test ## Run all checks and tests
 
 check-test-backend: \
 	pre-commit \
