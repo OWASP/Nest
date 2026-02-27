@@ -74,7 +74,7 @@
     "@lhci/cli": "^0.15.1",
     "@next/eslint-plugin-next": "^16.1.6",
     "@playwright/test": "^1.58.2",
-    "@swc/core": "^1.15.13",
+    "@swc/core": "^1.15.17",
     "@swc/jest": "^0.2.39",
     "@tailwindcss/postcss": "^4.2.1",
     "@testing-library/jest-dom": "^6.9.1",
