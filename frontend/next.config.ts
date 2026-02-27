@@ -15,7 +15,9 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org",
+              isLocal
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org"
+                : "script-src 'self' 'unsafe-inline' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org",
               "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com",
               "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://owasp.org https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://raw.githubusercontent.com",
               "font-src 'self' https://cdn.jsdelivr.net",
