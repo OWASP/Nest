@@ -98,6 +98,7 @@ dump-data:
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
+## @Data Enrich datasets from source systems
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
@@ -108,13 +109,13 @@ enrich-data: \
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 
-index-data:
+index-data: ## @Data Reindex search data
 	@echo "Indexing Nest data"
 	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data:
+load-data: ## @Data Load seed data into the local database
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
 
@@ -218,6 +219,7 @@ shell-backend:
 shell-db:
 	@CMD="/bin/sh" $(MAKE) exec-db-command-it
 
+## @Data Update, enrich, and index data
 sync-data: \
 	update-data \
 	enrich-data \

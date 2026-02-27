@@ -264,7 +264,7 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Run the Application**:
 
-   - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
+   - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run `make help` for a categorized list of available targets. Run the following command to start the application:
 
      ```bash
      make run
