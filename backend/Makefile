@@ -5,7 +5,11 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
+ifeq ($(EXEC_MODE),direct)
+SHELL := /bin/sh
+else
 SHELL := /bin/bash
+endif
 
 .PHONY: sbom-backend-image
 
@@ -38,10 +42,18 @@ create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -i nest-backend $(CMD)
+endif
 
 exec-backend-command-it:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
+endif
 
 exec-backend-command-e2e:
 	@docker exec -i e2e-nest-backend $(CMD)
@@ -143,7 +155,7 @@ recreate-schema:
 	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
-	  	$(MAKE) exec-db-command-it 2>/dev/null
+		$(MAKE) exec-db-command-it 2>/dev/null
 	@$(MAKE) migrate
 
 restore-backup:
@@ -176,11 +188,11 @@ security-scan-backend-image:
 		--rm \
 		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
 		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-	    -v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
-	    -v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
-	    $$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-	    image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
 
 SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
 

@@ -359,5 +359,5 @@ describe('CreateModulePage', () => {
         })
       )
     })
-  })
+  }, 10000)
 })

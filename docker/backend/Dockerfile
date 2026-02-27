@@ -24,8 +24,9 @@ RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     chown -R owasp:owasp /home/owasp
 
+COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
+    python -m pip install --requirement /tmp/requirements.build.txt
 
 WORKDIR /home/owasp
 
@@ -33,22 +34,24 @@ USER owasp
 
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry install --no-root --verbose --without test --without video
+    poetry install --no-root --verbose --without fuzz --without test --without video
 
 # Less likely to cause cache invalidation items go first.
-COPY entrypoint.sh manage.py wsgi.py ./
+COPY entrypoint.sh manage.py wsgi.py Makefile ./
 COPY settings settings
 COPY templates templates
 COPY static static
 COPY apps apps
+
+# Required to run make targets.
+RUN ln -s . backend
 
 FROM python:3.13.12-alpine3.23
 
 ARG OWASP_GID
 ARG OWASP_UID
 
-RUN apk update && \
-    apk add --no-cache postgresql16-client && \
+RUN apk update && apk --no-cache add make postgresql16-client && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 

@@ -5,10 +5,10 @@ SHELL := /bin/bash
 build-frontend-local-image:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 	    --build-arg FORCE_STANDALONE=yes \
-		--no-cache \
-		-f docker/frontend/Dockerfile \
-		-t nest-frontend-local \
-		frontend
+	    --no-cache \
+	    -f docker/frontend/Dockerfile \
+	    -t nest-frontend-local \
+	    frontend
 
 check-frontend: \
 	format-frontend-code \
