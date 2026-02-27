@@ -80,7 +80,9 @@ const ChaptersPage = () => {
       )
       setGeoLocData(data.hits)
     }
-    fetchGeoData()
+    if (selectedCountry) {
+      fetchGeoData()
+    }
   }, [selectedCountry])
 
   const countries = allCountries
