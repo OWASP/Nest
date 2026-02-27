@@ -97,7 +97,8 @@ describe('CommunityPage', () => {
   test('renders Explore Resources section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByTestId('anchor-title')).toHaveTextContent('Explore Resources')
+    const anchorTitles = screen.getAllByTestId('anchor-title')
+    expect(anchorTitles[0]).toHaveTextContent('Explore Resources')
     expect(screen.getByText('Test Chapter')).toBeInTheDocument()
     expect(screen.getByText('Test Description')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Test Chapter/i })
@@ -145,6 +146,8 @@ describe('CommunityPage', () => {
 
     expect(screen.getByTestId('snapshots-section')).toBeInTheDocument()
     expect(screen.getByText(/Explore community snapshots/i)).toBeInTheDocument()
+    const anchorTitles = screen.getAllByTestId('anchor-title')
+    expect(anchorTitles).toContainEqual(expect.toHaveTextContent('Snapshots'))
     const snapshotsLink = screen.getByTestId('snapshots-link')
     expect(snapshotsLink).toHaveAttribute('href', '/community/snapshots')
     expect(screen.getByText(/View All Snapshots/i)).toBeInTheDocument()

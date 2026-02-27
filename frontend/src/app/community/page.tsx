@@ -6,9 +6,6 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import { exploreCards as NAV_SECTIONS, engagementWays, journeySteps } from 'utils/communityData'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
-import dynamic from 'next/dynamic'
-
-const SnapshotsSection = dynamic(() => import('./snapshots/page'), { ssr: false })
 
 export default function CommunityPage() {
   return (
