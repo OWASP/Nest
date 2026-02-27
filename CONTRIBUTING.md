@@ -735,6 +735,14 @@ git checkout -b feature/my-feature-name
     - Select **"Save with Encoding"**.
     - Choose **"UTF-8"** from the list (ensure it's not **"UTF-8 with BOM"**).
   - Restart the application with `make run` and verify the error is resolved.
+- **`exited with code 0` when loading the nest-frontend**
+
+  This error is usually caused by an out of memory (OOM) issue. The Next.js application be several GB of memory within a container. This be solved by increasing the memory your container engine gives to Docker images.
+  To diagnose:
+  - Start up all the containers with `make run`
+  - Run `docker stats nest-frontend` in a separate terminal
+  - Attempt to load the frontend (e.g. <http://localhost:3000>)
+  - Watch as the memory usage increases and then suddenly resets to 0 on the `docker stats` terminal
 
 ## Code of Conduct
 
