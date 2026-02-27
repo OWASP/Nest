@@ -1,4 +1,6 @@
-test-infrastructure:
+##@ Infrastructure
+
+test-infrastructure: ## Run Terraform infrastructure tests
 	@find infrastructure/modules \
 		-name "tests" \
 		-type d \

@@ -10,7 +10,9 @@ build-frontend-local-image:
 	    -t nest-frontend-local \
 	    frontend
 
-check-frontend: \
+##@ Frontend
+
+check-frontend: \ ## Run frontend code quality checks
 	format-frontend-code \
 	lint-frontend-code \
 	generate-graphql-types
@@ -38,7 +40,7 @@ format-frontend-code:
 	  && (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
 	  || (printf "pnpm run format"; for i in $$(seq 1 58); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run format))
 
-graphql-codegen:
+graphql-codegen: ## Generate GraphQL TypeScript types
 	@cd frontend && pnpm run graphql-codegen
 
 lighthouse-ci:
@@ -95,22 +97,19 @@ sbom-frontend-image:
 		--output /work/frontend-sbom-$(SBOM_VERSION).cdx.json \
 		$(FRONTEND_IMAGE_NAME)
 
-shell-frontend:
+shell-frontend: ## Open shell in frontend container
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
-test-frontend: \
-	test-frontend-unit \
-	test-frontend-a11y \
-	test-frontend-e2e
+test-frontend: test-frontend-unit test-frontend-a11y test-frontend-e2e ## Run all frontend tests
 
-test-frontend-a11y:
+test-frontend-a11y: ## Run frontend accessibility tests
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-a11y \
 		-f docker/frontend/Dockerfile.a11y.test frontend \
 		-t nest-test-frontend-a11y
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
-test-frontend-e2e:
+test-frontend-e2e: ## Run frontend end-to-end tests
 	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
 	@DOCKER_BUILDKIT=1 \
@@ -118,7 +117,7 @@ test-frontend-e2e:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local \
 	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend e2e-tests
 
-test-frontend-unit:
+test-frontend-unit: ## Run frontend unit tests
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-unit \
 		-f docker/frontend/Dockerfile.unit.test frontend \
