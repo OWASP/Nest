@@ -67,6 +67,7 @@ const ProjectsPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
+      scopeLabel="Search within projects"
       searchPlaceholder="Search for projects..."
       searchQuery={searchQuery}
       sortChildren={

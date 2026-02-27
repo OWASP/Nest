@@ -59,6 +59,7 @@ const UsersPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
+      scopeLabel="Search within members"
       searchPlaceholder="Search for members..."
       searchQuery={searchQuery}
       totalPages={totalPages}

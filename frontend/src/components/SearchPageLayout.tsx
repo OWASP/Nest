@@ -12,6 +12,7 @@ interface SearchPageLayoutProps {
 
   onPageChange: (page: number) => void
   searchPlaceholder: string
+  scopeLabel?: string
   empty?: string
   indexName: string
   loadingImageUrl?: string
@@ -27,6 +28,7 @@ const SearchPageLayout = ({
   onSearch,
   onPageChange,
   searchPlaceholder,
+  scopeLabel,
   empty,
   indexName,
   loadingImageUrl = '/img/spinner_light.png',
@@ -42,12 +44,19 @@ const SearchPageLayout = ({
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       <div className="flex w-full items-center justify-center">
-        <SearchBar
-          isLoaded={!isFirstLoad}
-          onSearch={onSearch}
-          placeholder={searchPlaceholder}
-          initialValue={searchQuery}
-        />
+        <div className="flex w-full flex-col items-center">
+          {scopeLabel && (
+            <div className="w-full max-w-md px-4 pb-1 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              {scopeLabel}
+            </div>
+          )}
+          <SearchBar
+            isLoaded={!isFirstLoad}
+            onSearch={onSearch}
+            placeholder={searchPlaceholder}
+            initialValue={searchQuery}
+          />
+        </div>
       </div>
       {isLoaded ? (
         <>
