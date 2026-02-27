@@ -39,12 +39,14 @@ const ChaptersPage = () => {
   })
 
   const handleCountryChange = useCallback(
-    (country: string) => {
+    async (country: string) => {
       setSelectedCountry(country)
       if (country) {
         handleFacetFilterChange([`idx_country:${country}`])
       } else {
         handleFacetFilterChange([])
+        const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData('chapters', '', 1, 1000)
+        setGeoLocData(data.hits)
       }
     },
     [handleFacetFilterChange]
@@ -60,23 +62,17 @@ const ChaptersPage = () => {
         }
       }
       setAllCountries(Array.from(countrySet).sort((a, b) => a.localeCompare(b)))
+      setGeoLocData(data.hits)
     }
     fetchAllCountries()
   }, [])
 
   useEffect(() => {
+    if (!selectedCountry) return
     const fetchGeoData = async () => {
-      const facetFilters: string[] = []
-      if (selectedCountry) {
-        facetFilters.push(`idx_country:${selectedCountry}`)
-      }
-      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
-        'chapters',
-        '',
-        1,
-        1000,
-        facetFilters
-      )
+      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData('chapters', '', 1, 1000, [
+        `idx_country:${selectedCountry}`,
+      ])
       setGeoLocData(data.hits)
     }
     fetchGeoData()
