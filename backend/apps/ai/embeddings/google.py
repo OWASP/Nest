@@ -21,6 +21,9 @@ class GoogleEmbedder(Embedder):
             model: The Google embedding model to use.
 
         """
+        if not settings.GOOGLE_API_KEY:
+            msg = "GOOGLE_API_KEY is required but not set"
+            raise ValueError(msg)
         self.client = genai.Client(
             api_key=settings.GOOGLE_API_KEY,
             http_options=HttpOptions(timeout=30 * 1000),

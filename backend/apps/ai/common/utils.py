@@ -43,7 +43,11 @@ def create_chunks_and_embeddings(
         if time_since_last_request < timedelta(seconds=MIN_REQUEST_INTERVAL_SECONDS):
             time.sleep(MIN_REQUEST_INTERVAL_SECONDS - time_since_last_request.total_seconds())
 
-        embeddings = get_embedder().embed_documents(chunk_texts)
+        try:
+            embeddings = get_embedder().embed_documents(chunk_texts)
+        except Exception:
+            logger.exception("Failed to generate embeddings")
+            return []
 
         chunks = []
         for text, embedding in zip(chunk_texts, embeddings, strict=True):
