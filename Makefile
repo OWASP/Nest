@@ -4,7 +4,7 @@ include docs/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
-.PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
+.PHONY: build clean check check-test help pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
 	security-scan-backend-image security-scan-frontend-image security-scan-zap \
 	test update clean-trivy-cache
