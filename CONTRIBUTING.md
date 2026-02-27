@@ -262,6 +262,16 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    - Note: The default write API key should have index write permissions (addObject permission). If you do not use the default write API key, ensure that your API key has this permission.
    - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
+1. **Getting Started**:
+
+   - To see all available commands and their descriptions, run:
+
+     ```bash
+     make help
+     ```
+
+   - This will print a list of all make targets you can use during development.
+
 1. **Run the Application**:
 
    - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:

@@ -2,6 +2,8 @@ SHELL := /bin/bash
 
 .PHONY: sbom-frontend-image
 
+##@ Frontend
+
 build-frontend-local-image:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 	    --build-arg FORCE_STANDALONE=yes \
@@ -10,6 +12,7 @@ build-frontend-local-image:
 	    -t nest-frontend-local \
 	    frontend
 
+check-frontend: ## Run frontend code quality checks
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code \
@@ -98,6 +101,7 @@ sbom-frontend-image:
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
+test-frontend: ## Run all frontend tests
 test-frontend: \
 	test-frontend-unit \
 	test-frontend-a11y \
@@ -110,6 +114,7 @@ test-frontend-a11y:
 		-t nest-test-frontend-a11y
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
+test-frontend-e2e: ## Run frontend e2e tests
 test-frontend-e2e:
 	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
