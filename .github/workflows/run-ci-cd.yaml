@@ -622,7 +622,7 @@ jobs:
           make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
       - name: Upload SBOMs
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: staging-sbom-${{ env.RELEASE_VERSION }}
           path: |
@@ -808,7 +808,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Upload plan artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: tfplan
           path: infrastructure/staging/tfplan
@@ -1049,7 +1049,7 @@ jobs:
 
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
           path: report_html.html
@@ -1414,7 +1414,7 @@ jobs:
 
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: zap-baseline-scan-report-${{ github.run_id }}
           path: report_html.html
