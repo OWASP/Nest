@@ -60,8 +60,7 @@ export default function UserMenu({
   }
 
   const userMenuItemClasses =
-    'block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
-
+  'block w-full cursor-pointer px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
       <button
@@ -70,7 +69,7 @@ export default function UserMenu({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
-        className="w-auto focus:outline-hidden"
+        className="w-auto cursor-pointer focus:outline-hidden"
         disabled={isLoggingOut}
       >
         <div className="h-10 w-10 overflow-hidden rounded-full">
