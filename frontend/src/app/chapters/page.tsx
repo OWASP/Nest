@@ -59,7 +59,7 @@ const ChaptersPage = () => {
           countrySet.add(chapter.country)
         }
       }
-      setAllCountries(Array.from(countrySet).sort())
+      setAllCountries(Array.from(countrySet).sort((a, b) => a.localeCompare(b)))
       setGeoLocData(data.hits)
     }
     fetchAllCountries()
@@ -80,9 +80,7 @@ const ChaptersPage = () => {
       )
       setGeoLocData(data.hits)
     }
-    if (selectedCountry) {
-      fetchGeoData()
-    }
+    fetchGeoData()
   }, [selectedCountry])
 
   const countries = allCountries

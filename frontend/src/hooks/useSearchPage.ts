@@ -55,8 +55,8 @@ export function useSearchPage<T>({
   useEffect(() => {
     if (searchParams) {
       const searchQueryParam = searchParams.get('q') || ''
-      const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'desc'
+      const sortByParam = searchParams.get('sortBy') || defaultSortBy
+      const orderParam = searchParams.get('order') || defaultOrder
 
       const searchQueryChanged = searchQuery !== searchQueryParam
       const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
@@ -66,7 +66,7 @@ export function useSearchPage<T>({
         setCurrentPage(1)
       }
     }
-  }, [searchParams, order, searchQuery, sortBy, indexName])
+  }, [searchParams, order, searchQuery, sortBy, indexName, defaultOrder, defaultSortBy])
   // Sync URL with state changes
   useEffect(() => {
     const params = new URLSearchParams()
