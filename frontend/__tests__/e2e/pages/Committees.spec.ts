@@ -13,15 +13,7 @@ test.describe('Committees Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/committees')
+    await page.goto('/committees', { timeout: 25000 })
   })
 
   test('renders committee data correctly', async ({ page }) => {
@@ -29,6 +21,24 @@ test.describe('Committees Page', () => {
     await expect(page.getByText('This is a summary of Committee 1')).toBeVisible()
     await expect(page.getByRole('link', { name: "Sam Stepanyan's avatar" })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Learn more about Committee' })).toBeVisible()
+  })
+
+  test('handles page change correctly', async ({ page }) => {
+    const nextPageButton = page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
+    await nextPageButton.click()
+    await expect(page).toHaveURL(/page=2/)
+  })
+
+  test('breadcrumb renders correct segments on /committees', async ({ page }) => {
+    await expectBreadCrumbsToBeVisible(page, ['Home', 'Committees'])
+  })
+
+  test('opens window on View Details button click', async ({ page }) => {
+    const contributeButton = page.getByRole('button', { name: 'Learn more about Committee' })
+    await contributeButton.waitFor({ state: 'visible' })
+    await contributeButton.click()
+    await expect(page).toHaveURL('/committees/committee_1')
   })
 
   test('displays "No committees found" when there are no committees', async ({ page }) => {
@@ -40,23 +50,5 @@ test.describe('Committees Page', () => {
     })
     await page.goto('/committees')
     await expect(page.getByText('No committees found')).toBeVisible()
-  })
-
-  test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
-    await nextPageButton.waitFor({ state: 'visible' })
-    await nextPageButton.click()
-    await expect(page).toHaveURL(/page=2/)
-  })
-
-  test('opens window on View Details button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'Learn more about Committee' })
-    await contributeButton.waitFor({ state: 'visible' })
-    await contributeButton.click()
-    await expect(page).toHaveURL('/committees/committee_1')
-  })
-
-  test('breadcrumb renders correct segments on /committees', async ({ page }) => {
-    await expectBreadCrumbsToBeVisible(page, ['Home', 'Committees'])
   })
 })

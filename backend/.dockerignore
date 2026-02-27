@@ -2,9 +2,6 @@
 .bash_history
 .cache
 .dockerignore
-.env
-.env.*
-.envs
 .git
 .gitignore
 .local
@@ -17,7 +14,6 @@
 *.log
 *.pem
 **/__pycache__
-backend/data
 backend/staticfiles
 build
 coverage
@@ -25,5 +21,6 @@ dist
 docker
 Dockerfile.*
 node_modules
+**/node_modules
 npm-debug.log
 venv

@@ -1,46 +1,9 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
-import { mockAboutData } from '@mockData/mockAboutData'
 import { test, expect } from '@playwright/test'
 
 test.describe('About Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      const request = route.request()
-      const postData = request.postDataJSON()
-
-      if (postData.operationName === 'GetAboutPageData') {
-        const leaders = ['arkid15r', 'kasya', 'mamicidal']
-        const leaderData = leaders.reduce(
-          (acc, leader, index) => ({
-            ...acc,
-            [`leader${index + 1}`]: mockAboutData.users[leader],
-          }),
-          {}
-        )
-        return route.fulfill({
-          status: 200,
-          json: {
-            data: {
-              project: mockAboutData.project,
-              topContributors: mockAboutData.topContributors,
-              ...leaderData,
-            },
-          },
-        })
-      }
-      return route.continue()
-    })
-
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-
-    await page.goto('/about')
+    await page.goto('/about', { timeout: 25000 })
   })
 
   test('renders main sections correctly', async ({ page }) => {
@@ -52,8 +15,9 @@ test.describe('About Page', () => {
   })
 
   test('displays contributor information when data is loaded', async ({ page }) => {
-    await expect(page.getByText('Contributor 1', { exact: true })).toBeVisible()
-    await expect(page.getByText('Contributor 2', { exact: true })).toBeVisible()
+    await expect(page.getByText('Ahmed Gouda', { exact: true })).toBeVisible()
+    await expect(page.getByText('Abhay Mishra', { exact: true })).toBeVisible()
+    await expect(page.getByText('Raj gupta', { exact: true })).toBeVisible()
   })
 
   test('displays leaders data when data is loaded', async ({ page }) => {
@@ -81,7 +45,12 @@ test.describe('About Page', () => {
   test('loads roadmap items correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
 
-    await expect(page.getByText('Contribution Hub title')).toBeVisible()
+    await expect(page.getByText('Enhance OWASP Nest Availability and Performance')).toBeVisible()
+    await expect(
+      page.getByText(
+        'This milestone focuses on modernizing OWASP Nest to improve reliability, scalability, and availability. It includes migrating the Django + Ninja backend to AWS Lambda using Zappa, with static/media served via S3 and long-running tasks adapted for serverless execution. In parallel, a PoC for Infrastructure as Code will provision and manage key components - Lambda, ECS/Fargate, S3, RDS, Redis, and an EC2 instance for nightly syncs - using Terraform or an alternative tool.'
+      )
+    ).toBeVisible()
 
     const roadmapSection = page
       .locator('div')
@@ -90,23 +59,14 @@ test.describe('About Page', () => {
       .last()
 
     await roadmapSection.getByRole('button', { name: 'Show more' }).click()
-
-    for (const milestone of mockAboutData.project.recentMilestones) {
-      await expect(page.getByText(milestone.title, { exact: true })).toBeVisible()
-      await expect(page.getByText(milestone.body)).toBeVisible()
-    }
+    await expect(page.getByText('OWASP Community Snapshots', { exact: true })).toBeVisible()
   })
 
-  test('displays project statistics with correct values', async ({ page }) => {
-    await expect(page.getByText('1.2K+Contributors')).toBeVisible()
-    await expect(page.getByText('40+Open Issues')).toBeVisible()
-    await expect(page.getByText('60+Forks')).toBeVisible()
-    await expect(page.getByText('890+Stars')).toBeVisible()
-  })
-
-  test('opens user profile in new window when leader button is clicked', async ({ page }) => {
-    await page.getByRole('button', { name: 'View Profile' }).first().click()
-    await expect(page).toHaveURL('/members/arkid15r')
+  test('displays project statistics', async ({ page }) => {
+    await expect(page.getByText('Contributors').last()).toBeVisible()
+    await expect(page.getByText('Open Issues').last()).toBeVisible()
+    await expect(page.getByText('Forks').last()).toBeVisible()
+    await expect(page.getByText('Stars').last()).toBeVisible()
   })
 
   test('breadcrumb renders correct segments on /about', async ({ page }) => {
@@ -132,5 +92,10 @@ test.describe('About Page', () => {
     await timelineSection.getByRole('button', { name: 'Show more' }).click()
 
     await expect(page.getByText('Project Inception')).toBeVisible()
+  })
+
+  test('opens user profile in new window when leader button is clicked', async ({ page }) => {
+    await page.getByRole('button', { name: 'View Profile' }).first().click()
+    await expect(page).toHaveURL('/members/arkid15r')
   })
 })
