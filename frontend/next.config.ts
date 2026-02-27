@@ -1,3 +1,4 @@
+
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
@@ -6,6 +7,36 @@ const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          ...(isLocal ? [] : [
+            {
+              key: 'Strict-Transport-Security',
+              value: 'max-age=31536000; includeSubDomains; preload'
+            },
+            {
+              key: 'Content-Security-Policy',
+              value: [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline'", 
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: https:",
+                // Removed the jogruber.de API host below
+                "connect-src 'self' https://*.ingest.sentry.io https://us.i.posthog.com"
+              ].join('; '),
+            }
+          ]),
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+    ]
+  },
   images: {
     // This is a list of remote patterns that Next.js will use to determine
     // if an image is allowed to be loaded from a remote source.

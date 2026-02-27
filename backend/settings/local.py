@@ -32,3 +32,7 @@ class Local(Base):
 
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
+
+    # HSTS Overrides for local development
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_PRELOAD = False
