@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .PHONY: sbom-frontend-image
 
 ##@ Frontend
-build-frontend-local-image:
+build-frontend-local-image: ## Build local frontend Docker image
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 	    --build-arg FORCE_STANDALONE=yes \
 	    --no-cache \

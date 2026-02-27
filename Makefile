@@ -47,7 +47,7 @@ clean-docker: \
 clean-trivy-cache: ## Remove Trivy cache
 	@rm -rf $(CURDIR)/.trivy-cache
 
-prune: ## Prune Docker resources older than 72h
+prune: ## Prune unused Docker resources (builders/images older than 72h)
 	@docker builder prune --filter 'until=72h' -a -f
 	@docker image prune --filter 'until=72h' -a -f
 	@docker volume prune -f
