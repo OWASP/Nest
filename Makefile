@@ -31,7 +31,7 @@ build: ## Build all Docker images
 
 ##@ Cleanup & Maintenance
 
-clean: clean-dependencies clean-docker clean-trivy-cache \ ## Remove all build artifacts
+clean: clean-dependencies clean-docker clean-trivy-cache ## Remove all build artifacts
 
 clean-dependencies: \
 	clean-backend-dependencies \

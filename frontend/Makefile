@@ -12,10 +12,7 @@ build-frontend-local-image:
 
 ##@ Frontend
 
-check-frontend: \ ## Run frontend code quality checks
-	format-frontend-code \
-	lint-frontend-code \
-	generate-graphql-types
+check-frontend: format-frontend-code lint-frontend-code generate-graphql-types ## Run frontend code quality checks
 
 clean-frontend-dependencies:
 	@rm -rf frontend/.next

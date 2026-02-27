@@ -211,9 +211,7 @@ Before contributing, ensure you have the following installed:
 
 ## Available Make Commands
 
-Run `make help` to see all available commands grouped by category:
-
-This displays a categorized list of commonly used targets including gettingstarted, code quality, testing, security scanning, data management, and cleanup.
+Run `make help` to see all available commands grouped by category.
 
 ## Setting up the Project
 
