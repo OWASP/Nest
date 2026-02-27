@@ -140,6 +140,16 @@ describe('CommunityPage', () => {
     expect(screen.getByTestId('icon-arrow-right')).toBeInTheDocument()
   })
 
+  test('renders Snapshots section correctly', () => {
+    render(<CommunityPage />)
+
+    expect(screen.getByTestId('snapshots-section')).toBeInTheDocument()
+    expect(screen.getByText(/Explore community snapshots/i)).toBeInTheDocument()
+    const snapshotsLink = screen.getByTestId('snapshots-link')
+    expect(snapshotsLink).toHaveAttribute('href', '/community/snapshots')
+    expect(screen.getByText(/View All Snapshots/i)).toBeInTheDocument()
+  })
+
   test('renders Final Call to Action section correctly', () => {
     render(<CommunityPage />)
 

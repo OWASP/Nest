@@ -6,6 +6,9 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import { exploreCards as NAV_SECTIONS, engagementWays, journeySteps } from 'utils/communityData'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
+import dynamic from 'next/dynamic'
+
+const SnapshotsSection = dynamic(() => import('./snapshots/page'), { ssr: false })
 
 export default function CommunityPage() {
   return (
@@ -140,6 +143,27 @@ export default function CommunityPage() {
             </a>
           </div>
         </SecondaryCard>
+
+        {/* Snapshots Section */}
+        <div data-testid="snapshots-section">
+          <div className="mb-8">
+            <h2 className="mb-4 text-3xl font-bold">
+              <AnchorTitle title="Snapshots" />
+            </h2>
+            <p className="mb-6 text-lg text-gray-600 dark:text-gray-400">
+              Explore community snapshots to see the latest updates, statistics, and milestones
+              from the OWASP community.
+            </p>
+            <Link
+              href="/community/snapshots"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-600"
+              data-testid="snapshots-link"
+            >
+              View All Snapshots
+              <FaChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
 
         {/* Final Call to Action */}
         <SecondaryCard className="text-center">
