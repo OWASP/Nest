@@ -4,7 +4,12 @@ include docs/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
-HELP_MAKEFILES = $(shell find . -name Makefile -print | sort)
+HELP_MAKEFILES = $(shell find . -type f -name Makefile \
+	-not -path './.git/*' \
+	-not -path './node_modules/*' \
+	-not -path './.venv/*' \
+	-not -path './dist/*' \
+	-not -path './build/*' | sort)
 
 .PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
