@@ -4,7 +4,7 @@ include docs/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
-HELP_MAKEFILES := $(shell find . -name Makefile -print | sort)
+HELP_MAKEFILES = $(shell find . -name Makefile -print | sort)
 
 .PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
