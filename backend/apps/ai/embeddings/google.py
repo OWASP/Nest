@@ -44,10 +44,11 @@ class GoogleEmbedder(Embedder):
             Normalized embedding vector with unit length.
 
         """
-        norm = math.sqrt(sum(x * x for x in embedding))
-        if norm == 0:
-            return embedding
-        return [x / norm for x in embedding]
+        return (
+            embedding
+            if (norm := math.sqrt(sum(x * x for x in embedding))) == 0
+            else [x / norm for x in embedding]
+        )
 
     def embed_query(self, text: str) -> list[float]:
         """Generate embedding for a query string.
