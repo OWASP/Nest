@@ -3,6 +3,7 @@ nav:
   - Home: index.md
   - Code of Conduct: code-of-conduct.md
   - Contributing: contributing.md
+  - Windows Setup: windows-setup.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material
