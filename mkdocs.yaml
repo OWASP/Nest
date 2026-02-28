@@ -1,8 +1,15 @@
 site_name: OWASP Nest Documentation
 nav:
-  - Home: index.md
-  - Code of Conduct: code-of-conduct.md
-  - Contributing: contributing.md
+  - Home:
+      - OWASP Nest: index.md
+      - Code of Conduct: code-of-conduct.md
+      - Contributing: contributing.md
+  - API:
+      - Overview: api/overview.md
+  - Backend: backend/overview.md
+  - Frontend: frontend/overview.md
+  - Nestbot: nestbot/overview.md
+  - Schema: schema/overview.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material
@@ -45,7 +52,9 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      check_paths: true
+      base_path: [.]
   - admonition
   - pymdownx.arithmatex:
       generic: true
