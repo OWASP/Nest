@@ -76,7 +76,7 @@ class Command(BaseCommand):
             return
 
         relevant_issues = Issue.objects.filter(
-            repository_id__in=module_repos, state=Issue.State.OPEN
+            repository_id__in=module_repos, state=Issue.IssueState.OPEN
         ).distinct()
 
         self.stdout.write(f"Found {relevant_issues.count()} open issues across repositories")

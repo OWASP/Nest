@@ -37,15 +37,16 @@ const CommitteesPage = () => {
 
     return (
       <Card
-        key={committee.objectID}
-        title={committee.name}
-        url={`/committees/${committee.key}`}
-        summary={committee.summary}
-        icons={filteredIcons}
-        topContributors={committee.topContributors}
         button={submitButton}
+        cardKey={committee.key}
+        icons={filteredIcons}
+        key={committee.key}
         social={formattedUrls}
+        summary={committee.summary ?? ''}
+        title={committee.name}
         tooltipLabel={`Learn more about ${committee.name}`}
+        topContributors={committee.topContributors}
+        url={`/committees/${committee.key}`}
       />
     )
   }
@@ -62,7 +63,7 @@ const CommitteesPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      {committees && committees.map(renderCommitteeCard)}
+      {committees?.map(renderCommitteeCard)}
     </SearchPageLayout>
   )
 }

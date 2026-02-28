@@ -6,6 +6,7 @@ import {
   DropdownSection,
   Button,
 } from '@heroui/react'
+import type { Key } from 'react'
 
 import { FC } from 'react'
 import type { IconType } from 'react-icons'
@@ -14,7 +15,7 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 
 const ProjectsDashboardDropDown: FC<{
-  onAction: (key: string) => void
+  onAction: (key: Key) => void
   selectedKeys?: string[]
   selectedLabels?: string[]
   selectionMode: 'single' | 'multiple'
@@ -52,7 +53,9 @@ const ProjectsDashboardDropDown: FC<{
           <div className="flex flex-col items-center">
             <span className="text-md">{buttonDisplayName}</span>
             {selectedLabels && selectedLabels.length > 0 && (
-              <span className="text-xs text-gray-500">{selectedLabels.join(', ')}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {selectedLabels.join(', ')}
+              </span>
             )}
           </div>
         </Button>

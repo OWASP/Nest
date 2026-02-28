@@ -83,4 +83,95 @@ describe('Organization', () => {
 
     jest.restoreAllMocks()
   })
+
+  test('renders organization cards with fallback values for missing optional fields', async () => {
+    const mockDataWithMissingFields = {
+      hits: [
+        {
+          objectID: 'org-no-optional',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/999999?v=4',
+          collaboratorsCount: 10,
+          company: null,
+          createdAt: 1596744799,
+          description: 'Organization without optional fields',
+          email: null,
+          followersCount: 100,
+          location: null,
+          login: 'no-optional-org',
+          name: 'No Optional Fields Org',
+          publicRepositoriesCount: 50,
+          updatedAt: 1727390473,
+          url: 'https://github.com/no-optional-org',
+        },
+        {
+          objectID: 'org-empty-strings',
+          avatarUrl: 'https://avatars.githubusercontent.com/u/888888?v=4',
+          collaboratorsCount: 20,
+          company: '',
+          createdAt: 1596744799,
+          description: 'Organization with empty strings',
+          email: '',
+          followersCount: 200,
+          location: '',
+          login: 'empty-strings-org',
+          name: 'Empty Strings Org',
+          publicRepositoriesCount: 100,
+          updatedAt: 1727390473,
+          url: 'https://github.com/empty-strings-org',
+        },
+      ],
+      totalPages: 1,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockDataWithMissingFields)
+
+    render(<Organization />)
+
+    await waitFor(() => {
+      expect(screen.getByText('No Optional Fields Org')).toBeInTheDocument()
+      expect(screen.getByText('Empty Strings Org')).toBeInTheDocument()
+    })
+
+    // The fallback for location should show @login
+    expect(screen.getByText('@no-optional-org')).toBeInTheDocument()
+    expect(screen.getByText('@empty-strings-org')).toBeInTheDocument()
+  })
+
+  test('renders organization card with null avatarUrl using fallback', async () => {
+    const mockDataWithNullAvatar = {
+      hits: [
+        {
+          objectID: 'org-null-avatar',
+          avatarUrl: null,
+          collaboratorsCount: 5,
+          company: 'Test Company',
+          createdAt: 1596744799,
+          description: 'Organization with null avatar',
+          email: 'test@example.com',
+          followersCount: 50,
+          location: 'Test Location',
+          login: 'null-avatar-org',
+          name: 'Null Avatar Org',
+          publicRepositoriesCount: 25,
+          updatedAt: 1727390473,
+          url: 'https://github.com/null-avatar-org',
+        },
+      ],
+      totalPages: 1,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockDataWithNullAvatar)
+
+    render(<Organization />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Null Avatar Org')).toBeInTheDocument()
+      expect(screen.queryByAltText("Null Avatar Org's profile picture")).not.toBeInTheDocument()
+    })
+
+    const cards = screen.getAllByRole('button')
+    const nullAvatarCard = cards.find((card) => card.textContent?.includes('Null Avatar Org'))
+    expect(nullAvatarCard).toBeInTheDocument()
+
+    const fallbackContainer = nullAvatarCard?.querySelector('.bg-gray-200')
+    expect(fallbackContainer).toBeInTheDocument()
+  })
 })

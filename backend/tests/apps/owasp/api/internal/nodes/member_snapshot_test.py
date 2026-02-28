@@ -3,9 +3,10 @@
 from unittest.mock import Mock
 
 from apps.owasp.api.internal.nodes.member_snapshot import MemberSnapshotNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestMemberSnapshotNode:
+class TestMemberSnapshotNode(GraphQLNodeBaseTest):
     def test_node_fields(self):
         mock_snapshot = Mock()
         mock_snapshot.start_at = "2025-01-01"
@@ -31,7 +32,8 @@ class TestMemberSnapshotNode:
         mock_snapshot = Mock()
         mock_snapshot.commits_count = 42
 
-        result = MemberSnapshotNode.commits_count(mock_snapshot)
+        field = self._get_field_by_name("commits_count", MemberSnapshotNode)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 42
 
@@ -41,7 +43,8 @@ class TestMemberSnapshotNode:
         mock_snapshot = Mock()
         mock_snapshot.github_user = mock_user
 
-        result = MemberSnapshotNode.github_user(mock_snapshot)
+        field = self._get_field_by_name("github_user", MemberSnapshotNode)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == mock_user
 
@@ -50,7 +53,8 @@ class TestMemberSnapshotNode:
         mock_snapshot = Mock()
         mock_snapshot.issues_count = 15
 
-        result = MemberSnapshotNode.issues_count(mock_snapshot)
+        field = self._get_field_by_name("issues_count", MemberSnapshotNode)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 15
 
@@ -59,7 +63,8 @@ class TestMemberSnapshotNode:
         mock_snapshot = Mock()
         mock_snapshot.pull_requests_count = 23
 
-        result = MemberSnapshotNode.pull_requests_count(mock_snapshot)
+        field = self._get_field_by_name("pull_requests_count", MemberSnapshotNode)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 23
 
@@ -68,7 +73,8 @@ class TestMemberSnapshotNode:
         mock_snapshot = Mock()
         mock_snapshot.messages_count = 100
 
-        result = MemberSnapshotNode.messages_count(mock_snapshot)
+        field = self._get_field_by_name("messages_count", MemberSnapshotNode)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 100
 
@@ -77,6 +83,7 @@ class TestMemberSnapshotNode:
         mock_snapshot = Mock()
         mock_snapshot.total_contributions = 80
 
-        result = MemberSnapshotNode.total_contributions(mock_snapshot)
+        field = self._get_field_by_name("total_contributions", MemberSnapshotNode)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 80

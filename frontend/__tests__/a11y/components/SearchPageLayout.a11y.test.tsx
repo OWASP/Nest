@@ -1,8 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import SearchPageLayout from 'components/SearchPageLayout'
-
-expect.extend(toHaveNoViolations)
 
 const baseProps = {
   currentPage: 1,
@@ -14,7 +13,14 @@ const baseProps = {
   indexName: 'chapters',
 }
 
-describe('SearchPageLayout Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('SearchPageLayout Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   describe('should not have any accessibility violations when isLoaded is true', () => {
     it('has more than one total pages', async () => {
       const { container } = render(

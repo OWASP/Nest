@@ -12,15 +12,20 @@ import { TruncatedText } from 'components/TruncatedText'
  * @returns {JSX.Element} A list of leader links
  */
 
-const LeadersList = ({ leaders }: LeadersListProps) => {
+const LeadersList = ({ entityKey, leaders }: LeadersListProps) => {
   if (!leaders || leaders.trim() === '') return <>Unknown</>
 
-  const leadersArray = leaders.split(',').map((leader) => leader.trim())
+  const leadersArray = leaders
+    .split(',')
+    .map((leader) => leader.trim())
+    .filter((leader) => leader !== '')
+
+  if (leadersArray.length === 0) return <>Unknown</>
 
   return (
     <TruncatedText>
       {leadersArray.map((leader, index) => (
-        <span key={`${leader}-${index}`}>
+        <span key={`${entityKey}-${leader}`}>
           <Link
             href={`/members?q=${encodeURIComponent(leader)}`}
             aria-label={`View profile of ${leader}`}

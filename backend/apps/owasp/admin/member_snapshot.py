@@ -1,6 +1,7 @@
 """Django admin configuration for MemberSnapshot model."""
 
 from django.contrib import admin
+from django.db import models
 
 from apps.owasp.models.member_snapshot import MemberSnapshot
 
@@ -107,10 +108,20 @@ class MemberSnapshotAdmin(admin.ModelAdmin):
         ),
     )
 
-    def get_queryset(self, request):
-        """Optimize queryset with select_related."""
-        queryset = super().get_queryset(request)
-        return queryset.select_related("github_user")
+    def get_queryset(self, request) -> models.QuerySet:
+        """Retrieve optimized queryset with related GitHub user.
+
+        Applies select_related on github_user to reduce database queries when displaying
+        member snapshot lists.
+
+        Args:
+            request: The HTTP request object.
+
+        Returns:
+            QuerySet: MemberSnapshot queryset with select_related("github_user") applied.
+
+        """
+        return super().get_queryset(request).select_related("github_user")
 
 
 admin.site.register(MemberSnapshot, MemberSnapshotAdmin)

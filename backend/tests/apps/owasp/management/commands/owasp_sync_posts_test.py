@@ -13,7 +13,11 @@ class TestUpdateOwaspPostsCommand:
 
     @pytest.fixture
     def command(self):
-        return Command()
+        cmd = Command()
+        cmd.stdout = mock.Mock()
+        cmd.stderr = mock.Mock()
+        cmd.style = mock.Mock()
+        return cmd
 
     @pytest.fixture
     def mock_repository_files(self):
@@ -141,3 +145,95 @@ This is the content of the test post."""
         assert mock_get_content.call_count == self.TOTAL_API_CALLS
         assert mock_update_data.call_count == self.TOTAL_UPDATE_CALLS
         mock_bulk_save.assert_called_once_with([None, None])
+
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_skip_non_md_files(
+        self, mock_bulk_save, mock_update_data, mock_get_content, command
+    ):
+        """Test handle skips non-.md files."""
+        repository_files = [
+            {"name": "readme.txt", "download_url": "https://example.com/readme.txt"},
+            {"name": "image.png", "download_url": "https://example.com/image.png"},
+        ]
+
+        mock_get_content.side_effect = [json.dumps(repository_files)]
+
+        command.handle()
+
+        assert mock_get_content.call_count == 1
+        mock_update_data.assert_not_called()
+        mock_bulk_save.assert_called_once_with([])
+
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_yaml_scanner_error(
+        self, mock_bulk_save, mock_update_data, mock_get_content, command
+    ):
+        """Test handle when YAML content triggers ScannerError."""
+        repository_files = [
+            {
+                "name": "2023-01-01-bad-yaml.md",
+                "download_url": "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/2023-01-01-bad-yaml.md",
+            },
+        ]
+
+        bad_yaml_content = "---\nbad: yaml: {[: invalid\n---\n"
+
+        mock_get_content.side_effect = [json.dumps(repository_files), bad_yaml_content]
+
+        command.handle()
+
+        assert mock_get_content.call_count == 2
+        mock_update_data.assert_not_called()
+        mock_bulk_save.assert_called_once_with([])
+
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_missing_required_fields(
+        self, mock_bulk_save, mock_update_data, mock_get_content, command
+    ):
+        """Test handle when post has valid frontmatter but missing required fields."""
+        repository_files = [
+            {
+                "name": "2023-01-01-incomplete.md",
+                "download_url": "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/2023-01-01-incomplete.md",
+            },
+        ]
+
+        incomplete_content = "---\nauthor_image: /assets/images/people/test.jpg\n---\nContent"
+
+        mock_get_content.side_effect = [json.dumps(repository_files), incomplete_content]
+
+        command.handle()
+
+        assert mock_get_content.call_count == 2
+        mock_update_data.assert_not_called()
+        mock_bulk_save.assert_called_once_with([])
+        command.stderr.write.assert_called()
+
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_no_yaml_match(
+        self, mock_bulk_save, mock_update_data, mock_get_content, command
+    ):
+        """Test handle when content starts with --- but yaml_pattern doesn't match."""
+        repository_files = [
+            {
+                "name": "2023-01-01-no-yaml.md",
+                "download_url": "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/2023-01-01-no-yaml.md",
+            },
+        ]
+        no_yaml_match_content = "---\n---\nContent without valid YAML block"
+
+        mock_get_content.side_effect = [json.dumps(repository_files), no_yaml_match_content]
+
+        command.handle()
+
+        assert mock_get_content.call_count == 2
+        mock_update_data.assert_not_called()
+        mock_bulk_save.assert_called_once_with([])

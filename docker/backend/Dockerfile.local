@@ -10,6 +10,7 @@ ENV OWASP_GID=1000 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
+# hadolint ignore=DL3008,DL3046
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libffi-dev \
@@ -22,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mkdir -p ${POETRY_CACHE_DIR} /home/owasp/.local/share && \
     chown -R owasp:owasp /home/owasp
 
+# hadolint ignore=DL3013
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 
@@ -31,7 +33,7 @@ WORKDIR /home/owasp
 COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     --mount=type=cache,target=${PIP_CACHE_DIR} \
-    poetry install --no-root --without dev --without nestbot --without test --without video
+    poetry install --no-root --without nestbot --without test --without video
 
 # Runtime stage using python:slim
 FROM python:3.13.7-slim
@@ -43,6 +45,7 @@ ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
+# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         curl \
@@ -54,6 +57,7 @@ RUN apt-get update && \
     useradd -u 1000 -g owasp -m -s /bin/bash owasp
 
 # Install poetry for runtime (needed for volume-based development setup)
+# hadolint ignore=DL3013
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
 

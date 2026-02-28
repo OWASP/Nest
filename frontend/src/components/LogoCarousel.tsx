@@ -1,56 +1,63 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
 import type { Sponsor } from 'types/home'
 
 interface MovingLogosProps {
-  sponsors: Sponsor[]
+  readonly sponsors: Sponsor[]
 }
+/**
+ * Corporate Supporters Carousel Component
+ *
+ * Renders an infinite scrolling marquee of corporate supporter logos.
+ *
+ * Key Features:
+ * - **Infinite Loop**: Uses CSS keyframes to scroll continuously.
+ * - **Dark Mode Support**: Wraps logos in white cards to ensure visibility.
+ * - **Normalization**: Enforces consistent sizing for all logos.
+ *
+ * @returns {JSX.Element} The rendered logo carousel component.
+ */
+export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
+  const animationDuration = `${Math.max(sponsors.length, 1) * 3}s`
 
-export default function MovingLogos({ sponsors }: MovingLogosProps) {
-  const scrollerRef = useRef<HTMLDivElement>(null)
+  const renderSponsorCard = (sponsor: Sponsor, index: number, keySuffix: string) => {
+    const keyBase = sponsor.id
+      ? `${sponsor.id}-${index}`
+      : `${sponsor.url || sponsor.name || 'sponsor'}-${index}`
 
-  useEffect(() => {
-    if (scrollerRef.current) {
-      const scrollContainer = scrollerRef.current
-      scrollContainer.innerHTML += scrollContainer.innerHTML
-    }
-  }, [sponsors])
+    return (
+      <div
+        key={`logo-carousel-${keyBase}-${keySuffix}`}
+        className="flex shrink-0 items-center justify-center"
+      >
+        <Link href={sponsor.url} target="_blank" rel="noopener noreferrer">
+          <div className="flex h-20 w-44 items-center justify-center rounded-lg bg-white px-3 py-1 shadow-md">
+            {sponsor.imageUrl ? (
+              <Image
+                alt={sponsor.name ? `${sponsor.name}'s logo` : 'Sponsor logo'}
+                className="h-full w-full object-contain"
+                height={72}
+                src={sponsor.imageUrl}
+                width={168}
+              />
+            ) : (
+              <span className="text-sm text-gray-400">{sponsor.name || 'Sponsor'}</span>
+            )}
+          </div>
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div>
-      <div className="relative overflow-hidden py-2">
+      <div className="group relative overflow-hidden py-2">
         <div
-          ref={scrollerRef}
-          className="animate-scroll flex w-full gap-6"
-          style={{ animationDuration: `${sponsors.length * 2}s` }}
+          className="animate-scroll flex w-max gap-6 group-hover:[animation-play-state:paused]"
+          style={{ animationDuration }}
         >
-          {sponsors.map((sponsor, index) => (
-            <div
-              key={`${sponsor.name}-${index}`}
-              className="flex min-w-[220px] shrink-0 flex-col items-center rounded-lg p-5"
-            >
-              <Link
-                href={sponsor.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-full w-full flex-col items-center justify-center"
-              >
-                <div className="relative mb-4 flex h-16 w-full items-center justify-center">
-                  {sponsor.imageUrl ? (
-                    <Image
-                      fill
-                      alt={sponsor.name ? `${sponsor.name}'s logo` : 'Sponsor logo'}
-                      src={sponsor.imageUrl}
-                      style={{ objectFit: 'contain' }}
-                    />
-                  ) : (
-                    <span className="sr-only">{sponsor.name}</span>
-                  )}
-                </div>
-              </Link>
-            </div>
-          ))}
+          {sponsors.map((sponsor, index) => renderSponsorCard(sponsor, index, 'a'))}
+          {sponsors.map((sponsor, index) => renderSponsorCard(sponsor, index, 'b'))}
         </div>
       </div>
       <div className="text-muted-foreground mt-4 flex w-full flex-col items-center justify-center text-center text-sm">

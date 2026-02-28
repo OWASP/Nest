@@ -65,4 +65,37 @@ describe('PageLayout', () => {
       expect(screen.getByText('OWASP ZAP')).toBeInTheDocument()
     })
   })
+
+  describe('breadcrumbClassName', () => {
+    test('applies default breadcrumb class when breadcrumbClassName is not passed', async () => {
+      ;(usePathname as jest.Mock).mockReturnValue('/projects/zap')
+
+      renderWithProvider(
+        <PageLayout title="OWASP ZAP">
+          <div>Content</div>
+        </PageLayout>
+      )
+
+      await screen.findByRole('navigation', { name: 'breadcrumb' })
+      const breadcrumbNav = screen.getByRole('navigation', { name: 'breadcrumb' })
+      const wrapper = breadcrumbNav.parentElement?.parentElement
+      expect(wrapper).toHaveClass('bg-white')
+      expect(wrapper).toHaveClass('dark:bg-[#212529]')
+    })
+
+    test('applies custom breadcrumb class when breadcrumbClassName is passed', async () => {
+      ;(usePathname as jest.Mock).mockReturnValue('/projects/zap')
+
+      renderWithProvider(
+        <PageLayout title="OWASP ZAP" breadcrumbClassName="custom-bg">
+          <div>Content</div>
+        </PageLayout>
+      )
+
+      await screen.findByRole('navigation', { name: 'breadcrumb' })
+      const breadcrumbNav = screen.getByRole('navigation', { name: 'breadcrumb' })
+      const wrapper = breadcrumbNav.parentElement?.parentElement
+      expect(wrapper).toHaveClass('custom-bg')
+    })
+  })
 })

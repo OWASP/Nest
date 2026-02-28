@@ -12,6 +12,8 @@ class Chunk(TimestampedModel):
     """AI Chunk model for storing text chunks with embeddings."""
 
     class Meta:
+        """Model options."""
+
         db_table = "ai_chunks"
         verbose_name = "Chunk"
         unique_together = ("context", "text")
@@ -33,7 +35,7 @@ class Chunk(TimestampedModel):
     @staticmethod
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
-        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        from langchain_text_splitters import RecursiveCharacterTextSplitter  # noqa: PLC0415
 
         return RecursiveCharacterTextSplitter(
             chunk_size=200,

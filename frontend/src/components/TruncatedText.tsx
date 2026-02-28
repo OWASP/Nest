@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react'
+import React from 'react'
 
 export const TruncatedText = ({
   text,
@@ -9,16 +9,16 @@ export const TruncatedText = ({
   children?: React.ReactNode
   className?: string
 }) => {
-  const textRef = useRef<HTMLSpanElement>(null)
+  const textRef = React.useRef<HTMLSpanElement>(null)
 
-  const checkTruncation = useCallback(() => {
+  const checkTruncation = React.useCallback(() => {
     const element = textRef.current
     if (element) {
       element.title = text || element.textContent || ''
     }
   }, [text])
 
-  useEffect(() => {
+  React.useEffect(() => {
     checkTruncation()
 
     const observer = new ResizeObserver(() => checkTruncation())

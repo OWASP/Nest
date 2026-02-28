@@ -6,12 +6,14 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import ShowMoreButton from 'components/ShowMoreButton'
 
 const ToggleableList = ({
+  entityKey,
   items,
   label,
   icon,
   limit = 10,
   isDisabled = false,
 }: {
+  entityKey: string
   items: string[]
   label: React.ReactNode
   limit?: number
@@ -42,10 +44,10 @@ const ToggleableList = ({
         </div>
       </h2>
       <div className="flex flex-wrap gap-2">
-        {(showAll ? items : items.slice(0, limit)).map((item, index) => (
+        {(showAll ? items : items.slice(0, limit)).map((item) => (
           <button
             type="button"
-            key={`${item}-${index}`}
+            key={`${entityKey}-${item}`}
             className={`rounded-lg border border-gray-400 px-3 py-1 text-sm hover:bg-gray-200 dark:border-gray-300 dark:hover:bg-gray-700 ${isDisabled ? 'cursor-default' : 'cursor-pointer'}`}
             onClick={() => !isDisabled && handleButtonClick({ item })}
             onKeyDown={(e) => !isDisabled && handleKeyDown(e, item)}

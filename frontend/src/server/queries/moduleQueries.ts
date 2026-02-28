@@ -59,6 +59,8 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
   query GetProgramAdminsAndModules($programKey: String!, $moduleKey: String!) {
     getProgram(programKey: $programKey) {
       id
+      startedAt
+      endedAt
       admins {
         id
         login
@@ -90,6 +92,22 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         login
         name
         avatarUrl
+      }
+      recentPullRequests {
+        id
+        title
+        url
+        state
+        createdAt
+        mergedAt
+        organizationName
+        repositoryName
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
       }
     }
   }

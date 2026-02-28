@@ -1,18 +1,23 @@
 """Github pull requests GraphQL queries."""
 
 import strawberry
-from django.db.models import OuterRef, Subquery
+import strawberry_django
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.models.pull_request import PullRequest
 from apps.owasp.models.project import Project
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
 class PullRequestQuery:
     """Pull request queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def recent_pull_requests(
         self,
         *,
@@ -26,7 +31,7 @@ class PullRequestQuery:
         """Resolve recent pull requests.
 
         Args:
-            distinct (bool): Whether to return unique pull requests per author and repository.
+            distinct (bool): Whether to return unique pull requests per author.
             limit (int): Maximum number of pull requests to return.
             login (str, optional): Filter pull requests by a specific author's login.
             organization (str, optional): Filter pull requests by a specific organization's login.
@@ -38,52 +43,47 @@ class PullRequestQuery:
             filtered list of pull requests.
 
         """
-        queryset = (
-            PullRequest.objects.select_related(
-                "author",
-                "repository",
-                "repository__organization",
-            )
-            .exclude(
-                author__is_bot=True,
-            )
-            .order_by(
-                "-created_at",
-            )
+        queryset = PullRequest.objects.exclude(
+            author__is_bot=True,
+        ).order_by(
+            "-created_at",
         )
 
+        filters = {}
         if login:
-            queryset = queryset.filter(author__login=login)
+            filters["author__login"] = login
 
         if organization:
-            queryset = queryset.filter(
-                repository__organization__login=organization,
-            )
+            filters["repository__organization__login"] = organization
+
+        queryset = queryset.filter(**filters)
 
         if project:
-            queryset = queryset.filter(
-                repository_id__in=Project.objects.filter(key__iexact=f"www-project-{project}")
-                .first()
-                .repositories.values_list("id", flat=True)
-            )
+            project_instance = Project.objects.filter(key__iexact=f"www-project-{project}").first()
+            if project_instance:
+                queryset = queryset.filter(
+                    repository_id__in=project_instance.repositories.values_list("id", flat=True)
+                )
+            else:
+                queryset = queryset.none()
 
         if repository:
             queryset = queryset.filter(repository__key__iexact=repository)
 
         if distinct:
-            latest_pull_request_per_author = (
-                queryset.filter(
-                    author_id=OuterRef("author_id"),
+            queryset = (
+                queryset.annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        partition_by=[F("author_id")],
+                        order_by=F("created_at").desc(),
+                    )
                 )
-                .order_by(
-                    "-created_at",
-                )
-                .values("id")[:1]
-            )
-            queryset = queryset.filter(
-                id__in=Subquery(latest_pull_request_per_author),
-            ).order_by(
-                "-created_at",
+                .filter(rank=1)
+                .order_by("-created_at")
             )
 
-        return queryset[:limit]
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return queryset[:normalized_limit]

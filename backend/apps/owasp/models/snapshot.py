@@ -8,10 +8,19 @@ class Snapshot(models.Model):
     """Model representing a snapshot of data processing."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_snapshots"
         verbose_name_plural = "Snapshots"
 
+        indexes = [
+            models.Index(fields=["-created_at"], name="owasp_snapshot_created_at_idx"),
+            models.Index(fields=["key", "status"], name="owasp_snapshot_key_status_idx"),
+        ]
+
     class Status(models.TextChoices):
+        """Snapshot processing status choices."""
+
         PENDING = "pending", "Pending"
         PROCESSING = "processing", "Processing"
         COMPLETED = "completed", "Completed"

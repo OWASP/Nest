@@ -197,7 +197,7 @@ def process_query(  # noqa: PLR0911
                         "directly calling GSoC channel suggestion tool",
                         extra={"query": query[:200]},
                     )
-                    from apps.ai.agents.channel.tools import (
+                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
                         suggest_gsoc_channel,
                     )
 
@@ -219,8 +219,8 @@ def process_query(  # noqa: PLR0911
                         result = func()
                     elif result is None:
                         # Fallback: call render_template directly
-                        from apps.ai.common.decorators import render_template
-                        from apps.slack.constants import OWASP_GSOC_CHANNEL_ID
+                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                        from apps.slack.constants import OWASP_GSOC_CHANNEL_ID  # noqa: PLC0415
 
                         channel_id = OWASP_GSOC_CHANNEL_ID.lstrip("#")
                         result = render_template(
@@ -245,7 +245,7 @@ def process_query(  # noqa: PLR0911
                             "has_contribution_keywords": has_contribution_keywords,
                         },
                     )
-                    from apps.ai.agents.channel.tools import (
+                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
                         suggest_contribute_channel,
                     )
 
@@ -267,8 +267,10 @@ def process_query(  # noqa: PLR0911
                         result = func()
                     elif not result:
                         # Fallback: call render_template directly
-                        from apps.ai.common.decorators import render_template
-                        from apps.slack.constants import OWASP_CONTRIBUTE_CHANNEL_ID
+                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                        from apps.slack.constants import (  # noqa: PLC0415
+                            OWASP_CONTRIBUTE_CHANNEL_ID,
+                        )
 
                         channel_id = OWASP_CONTRIBUTE_CHANNEL_ID.lstrip("#")
                         result = render_template(
@@ -500,7 +502,7 @@ def get_fallback_response() -> str:
         Fallback error message (detailed in development, generic in production)
 
     """
-    from django.conf import settings
+    from django.conf import settings  # noqa: PLC0415
 
     # Only show detailed error message in local/development environment
     if getattr(settings, "IS_LOCAL_ENVIRONMENT", False) or getattr(settings, "DEBUG", False):

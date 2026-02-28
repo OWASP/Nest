@@ -12,6 +12,7 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.chapter import Chapter
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.api.rest.v0.issue import Issue
 from apps.api.rest.v0.member import Member
 from apps.api.rest.v0.project import Project
@@ -130,6 +131,7 @@ def list_snapshots(
     description="Retrieve snapshot details.",
     operation_id="get_snapshot",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: SnapshotError,
         HTTPStatus.OK: SnapshotDetail,
     },

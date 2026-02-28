@@ -199,6 +199,69 @@ class TestProjectExtractor:
         assert "Related URLs: https://valid.com" in metadata
         assert "https://invalid.com" not in metadata
 
+    def test_extract_project_content_all_urls_invalid(self):
+        """Test extraction when all related URLs are invalid."""
+        project = MagicMock()
+        project.description = None
+        project.summary = None
+        project.name = "URL Test Project"
+        project.level = None
+        project.type = None
+        project.languages = []
+        project.topics = []
+        project.licenses = []
+        project.tags = []
+        project.custom_tags = []
+        project.stars_count = None
+        project.forks_count = None
+        project.contributors_count = None
+        project.releases_count = None
+        project.open_issues_count = None
+        project.leaders_raw = []
+        project.related_urls = ["https://invalid1.com", "https://invalid2.com"]
+        project.invalid_urls = ["https://invalid1.com", "https://invalid2.com"]
+        project.created_at = None
+        project.updated_at = None
+        project.released_at = None
+        project.health_score = None
+        project.is_active = True
+        project.owasp_repository = None
+
+        _, metadata = extract_project_content(project)
+        assert "Related URLs:" not in metadata
+
+    def test_extract_project_content_empty_urls_after_filter(self):
+        """Test extraction when related_urls contains only empty strings or None."""
+        project = MagicMock()
+        project.description = None
+        project.summary = None
+        project.name = "Empty URL Project"
+        project.level = None
+        project.type = None
+        project.languages = []
+        project.topics = []
+        project.licenses = []
+        project.tags = []
+        project.custom_tags = []
+        project.stars_count = None
+        project.forks_count = None
+        project.contributors_count = None
+        project.releases_count = None
+        project.open_issues_count = None
+        project.leaders_raw = []
+        project.related_urls = ["", None, ""]
+        project.invalid_urls = []
+        project.created_at = None
+        project.updated_at = None
+        project.released_at = None
+        project.health_score = None
+        project.is_active = True
+        project.owasp_repository = None
+
+        _, metadata = extract_project_content(project)
+
+        assert "Related URLs:" not in metadata
+
     def test_extract_project_content_dates_only(self):
         """Test extraction with only date fields."""
         project = MagicMock()

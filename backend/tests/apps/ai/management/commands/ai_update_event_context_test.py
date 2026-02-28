@@ -4,7 +4,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.management.commands.ai_update_event_context import Command
+from apps.owasp.models.event import Event
 
 
 @pytest.fixture
@@ -23,8 +25,6 @@ def mock_event():
 class TestAiCreateEventContextCommand:
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
-        from apps.ai.common.base.context_command import BaseContextCommand
-
         assert isinstance(command, BaseContextCommand)
 
     def test_command_help_text(self, command):
@@ -33,8 +33,6 @@ class TestAiCreateEventContextCommand:
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Event."""
-        from apps.owasp.models.event import Event
-
         assert command.model_class == Event
 
     def test_entity_name_property(self, command):

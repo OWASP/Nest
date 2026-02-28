@@ -15,9 +15,16 @@ class Milestone(GenericIssueModel):
     closed_milestones = ClosedMilestoneManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_milestones"
         verbose_name_plural = "Milestones"
         ordering = ["-updated_at", "-state"]
+
+        indexes = [
+            models.Index(fields=["-created_at"], name="github_milestone_created_at"),
+            models.Index(fields=["-updated_at"], name="github_milestone_updated_at"),
+        ]
 
     open_issues_count = models.PositiveIntegerField(default=0)
     closed_issues_count = models.PositiveIntegerField(default=0)

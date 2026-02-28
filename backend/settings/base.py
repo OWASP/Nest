@@ -1,6 +1,7 @@
 """OWASP Nest base configuration."""
 
 import os
+import ssl
 from pathlib import Path
 
 from configurations import Configuration, values
@@ -19,13 +20,17 @@ class Base(Configuration):
     DEBUG = False
     GITHUB_APP_ID = None
     GITHUB_APP_INSTALLATION_ID = None
+    IS_E2E_ENVIRONMENT = False
     IS_LOCAL_ENVIRONMENT = False
+    IS_FUZZ_ENVIRONMENT = False
     IS_PRODUCTION_ENVIRONMENT = False
     IS_STAGING_ENVIRONMENT = False
     IS_TEST_ENVIRONMENT = False
 
     RELEASE_VERSION = values.Value(environ_name="RELEASE_VERSION")
 
+    CSRF_COOKIE_SAMESITE = "Strict"
+    CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_NAME = "nest.session-id"
     SESSION_COOKIE_SAMESITE = "Lax"
@@ -90,7 +95,9 @@ class Base(Configuration):
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
+        "apps.common.middlewares.csrf_referer_fallback.CsrfRefererFallbackMiddleware",
         "django.middleware.csrf.CsrfViewMiddleware",
+        "apps.common.middlewares.block_null_characters.BlockNullCharactersMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware",
     ]
@@ -130,20 +137,28 @@ class Base(Configuration):
     API_PAGE_SIZE = 100
     API_CACHE_PREFIX = "api-response"
     API_CACHE_TIME_SECONDS = 86400  # 24 hours.
-    GRAPHQL_RESOLVER_CACHE_PREFIX = "graphql-resolver"
-    GRAPHQL_RESOLVER_CACHE_TIME_SECONDS = 86400  # 24 hours.
     NINJA_PAGINATION_CLASS = "apps.api.rest.v0.pagination.CustomPagination"
     NINJA_PAGINATION_PER_PAGE = API_PAGE_SIZE
 
     REDIS_HOST = values.SecretValue(environ_name="REDIS_HOST")
     REDIS_PASSWORD = values.SecretValue(environ_name="REDIS_PASSWORD")
+    REDIS_AUTH_ENABLED = values.BooleanValue(environ_name="REDIS_AUTH_ENABLED", default=True)
+    REDIS_USE_TLS = values.BooleanValue(environ_name="REDIS_USE_TLS", default=False)
+    REDIS_CACHE_OPTIONS: dict = {
+        "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        **(
+            {"CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": ssl.CERT_REQUIRED}}
+            if REDIS_USE_TLS
+            else {}
+        ),
+        **({"PASSWORD": str(REDIS_PASSWORD)} if REDIS_AUTH_ENABLED else {}),
+    }
+
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:6379",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            },
+            "LOCATION": f"{'rediss' if REDIS_USE_TLS else 'redis'}://{REDIS_HOST}:6379",
+            "OPTIONS": REDIS_CACHE_OPTIONS,
             "TIMEOUT": 300,
         }
     }
@@ -155,6 +170,7 @@ class Base(Configuration):
             "PASSWORD": REDIS_PASSWORD,
             "DB": 1,
             "DEFAULT_TIMEOUT": 300,
+            **({"SSL": True, "SSL_CERT_REQS": "required"} if REDIS_USE_TLS else {}),
         }
     }
 
@@ -224,3 +240,7 @@ class Base(Configuration):
     SLACK_COMMANDS_ENABLED = True
     SLACK_EVENTS_ENABLED = True
     SLACK_SIGNING_SECRET = values.SecretValue()
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = False

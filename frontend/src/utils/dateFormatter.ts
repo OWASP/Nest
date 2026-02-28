@@ -9,7 +9,7 @@ export const formatDate = (input: number | string) => {
       : new Date(input) // ISO date string
 
   if (Number.isNaN(date.getTime())) {
-    throw new Error('Invalid date')
+    throw new TypeError('Invalid date')
   }
 
   return date.toLocaleDateString('en-US', {
@@ -25,7 +25,7 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   const end = typeof endDate === 'number' ? new Date(endDate * 1000) : new Date(endDate)
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new Error('Invalid date')
+    throw new TypeError('Invalid date')
   }
 
   if (
@@ -66,7 +66,7 @@ export const formatDateForInput = (dateStr: string | number) => {
   if (!dateStr) return ''
   const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr)
   if (Number.isNaN(date.getTime())) {
-    throw new Error('Invalid date')
+    throw new TypeError('Invalid date')
   }
   return date.toISOString().slice(0, 10)
 }

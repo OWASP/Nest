@@ -118,6 +118,23 @@ class TestAppMention:
 
     @patch("apps.slack.events.app_mention.Conversation")
     @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_no_query(self, mock_get_blocks, mock_conversation, handler, mock_client):
+        """Test that handler returns early when no query is found."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+
+        event = {
+            "channel": "C123456",
+            "text": "",
+            "ts": "1234567890.123456",
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_get_blocks.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
+
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_extract_query_from_blocks(
         self, mock_get_blocks, mock_conversation, handler, mock_client
     ):
@@ -183,6 +200,65 @@ class TestAppMention:
 
         mock_get_blocks.assert_called_once_with(
             query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        )
+
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_blocks_without_text_element(
+        self, mock_get_blocks, mock_conversation, handler, mock_client
+    ):
+        """Test handle_event with blocks but no text elements falls back to event text."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+
+        event = {
+            "channel": "C123456",
+            "text": "Fallback text",
+            "ts": "1234567890.123456",
+            "blocks": [
+                {
+                    "type": "rich_text",
+                    "elements": [
+                        {
+                            "type": "rich_text_section",
+                            "elements": [{"type": "user", "user_id": "U123"}],
+                        },
+                    ],
+                },
+            ],
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_get_blocks.assert_called_once_with(
+            query="Fallback text", images=[], channel_id="C123456", is_app_mention=True
+        )
+
+    @patch("apps.slack.events.app_mention.Conversation")
+    @patch("apps.slack.events.app_mention.get_blocks")
+    def test_handle_event_blocks_without_rich_text_section(
+        self, mock_get_blocks, mock_conversation, handler, mock_client
+    ):
+        """Test handle_event with blocks but no rich_text_section."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+
+        event = {
+            "channel": "C123456",
+            "text": "Fallback text",
+            "ts": "1234567890.123456",
+            "blocks": [
+                {
+                    "type": "rich_text",
+                    "elements": [{"type": "other_type", "data": "something"}],
+                },
+            ],
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_get_blocks.assert_called_once_with(
+            query="Fallback text", images=[], channel_id="C123456", is_app_mention=True
         )
 
     @patch("apps.slack.events.app_mention.Conversation")

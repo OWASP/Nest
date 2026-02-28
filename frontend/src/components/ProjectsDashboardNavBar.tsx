@@ -26,7 +26,7 @@ const ProjectsDashboardNavBar: React.FC = () => {
   return (
     <Navbar
       classNames={{
-        base: 'flex md:w-64 md:flex-col flex-row items-start justify-start py-4',
+        base: 'flex lg:w-64 lg:flex-col flex-row items-start justify-start py-4',
         item: [
           'data-[active=true]:bg-gray-200',
           'dark:data-[active=true]:bg-gray-800',
@@ -37,7 +37,7 @@ const ProjectsDashboardNavBar: React.FC = () => {
       }}
       position="static"
     >
-      <NavbarContent className="flex h-full justify-center md:flex-col md:items-start">
+      <NavbarContent className="flex h-full justify-center lg:flex-col lg:items-start">
         {NAVIGATION_ITEMS.map(({ href, label, icon }) => (
           <NavbarItem key={href} isActive={isActive(href)}>
             <Link

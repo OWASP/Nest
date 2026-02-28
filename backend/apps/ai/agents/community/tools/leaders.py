@@ -206,7 +206,7 @@ def get_entity_leaders(entity_name: str | None = None, member_name: str | None =
         ).filter(member_name__icontains=member_name)
 
         # Also try matching by GitHub user login if member is linked
-        from apps.github.models.user import User
+        from apps.github.models.user import User  # noqa: PLC0415
 
         try:
             github_user = User.objects.get(login__iexact=member_name)

@@ -16,7 +16,7 @@ def get_gsoc_projects(year: int) -> list[dict[str, str]]:
         - url: Project URL
 
     """
-    from apps.owasp.models.project import Project
+    from apps.owasp.models.project import Project  # noqa: PLC0415
 
     projects = (
         Project.objects.filter(

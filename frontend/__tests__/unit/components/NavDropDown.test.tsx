@@ -294,6 +294,38 @@ describe('NavDropdown Component', () => {
       })
     })
 
+    it('closes dropdown when Escape is pressed on submenu item', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard('{Escape}')
+      await waitFor(() => {
+        expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+      })
+    })
+
+    it('closes dropdown when Space is pressed on submenu item', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard(' ')
+      await waitFor(() => {
+        expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+      })
+    })
+
     it('handles space key to toggle dropdown', async () => {
       const user = userEvent.setup()
       render(<NavDropdown {...defaultProps} />)
@@ -606,6 +638,41 @@ describe('NavDropdown Component', () => {
 
       addEventListenerSpy.mockRestore()
       removeEventListenerSpy.mockRestore()
+    })
+  })
+  describe('Coverage Improvements', () => {
+    it('does nothing when Escape is pressed on dropdown button while closed (line 50)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+      const button = screen.getByRole('button')
+      button.focus()
+
+      await user.keyboard('{Escape}')
+      expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+    })
+
+    it('does nothing when random key is pressed on dropdown button (line 50)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+      const button = screen.getByRole('button')
+      button.focus()
+
+      await user.keyboard('a')
+      expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+    })
+
+    it('does nothing when random key is pressed on submenu item (line 84)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button) // Open it
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard('a')
+      expect(screen.getByText('Getting Started')).toBeInTheDocument()
     })
   })
 })
