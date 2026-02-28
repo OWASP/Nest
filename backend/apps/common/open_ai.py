@@ -81,10 +81,6 @@ class OpenAi:
         Returns
             str: The response content.
 
-        Raises
-            openai.APIConnectionError: If a connection error occurs.
-            Exception: For other errors during the API request.
-
         """
         try:
             response = self.client.chat.completions.create(
@@ -99,12 +95,11 @@ class OpenAi:
 
             return response.choices[0].message.content
         except openai.AuthenticationError:
-            # environment variable name used by the project is OPEN_AI_SECRET_KEY,
-            # the earlier log referenced DJANGO_OPEN_AI_SECRET_KEY which is
-            # inaccurate and could mislead operators troubleshooting auth errors.
-            logger.exception("OpenAI authentication error - check OPEN_AI_SECRET_KEY")
+            # In this project the deployed environment variable is typically
+            # DJANGO_OPEN_AI_SECRET_KEY (mapped to settings.OPEN_AI_SECRET_KEY).
+            logger.exception("OpenAI authentication error - check DJANGO_OPEN_AI_SECRET_KEY")
         except openai.RateLimitError:
-            logger.exception("OpenAI rate limit exceeded - request may be retried")
+            logger.warning("OpenAI rate limit exceeded - request may be retried")
         except openai.BadRequestError:
             logger.exception("Invalid OpenAI request - check model/message format")
         except openai.APIConnectionError:
