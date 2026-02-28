@@ -1,4 +1,4 @@
-Windows Contributor Setup Guide
+# Windows Contributor Setup Guide
 
 This guide provides a dedicated onboarding path for contributors using Windows.
 
