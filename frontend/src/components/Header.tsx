@@ -11,9 +11,11 @@ import {
   FaStar as FaSolidStar,
   FaBars,
   FaTimes,
+  FaSearch,
 } from 'react-icons/fa'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
+import MultiSearchBar from 'components/MultiSearch'
 import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
@@ -22,18 +24,28 @@ import UserMenu from 'components/UserMenu'
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev)
+    setMobileSearchOpen(false)
+  }
+  const toggleMobileSearch = () => {
+    setMobileSearchOpen((prev) => !prev)
+    setMobileMenuOpen(false)
+  }
 
   useEffect(() => {
     const handleResize = () => {
       if (globalThis.innerWidth >= desktopViewMinWidth) {
         setMobileMenuOpen(false)
+        setMobileSearchOpen(false)
       }
     }
 
     const handleOutsideClick = (event: Event) => {
       const navbar = document.getElementById('navbar-sticky')
       const sidebar = document.querySelector('.fixed.inset-y-0')
+      const mobileSearch = document.getElementById('global-search-mobile')
       if (
         mobileMenuOpen &&
         navbar &&
@@ -42,6 +54,15 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         !sidebar.contains(event.target as Node)
       ) {
         setMobileMenuOpen(false)
+      }
+      if (
+        mobileSearchOpen &&
+        mobileSearch &&
+        !mobileSearch.contains(event.target as Node) &&
+        navbar &&
+        !navbar.contains(event.target as Node)
+      ) {
+        setMobileSearchOpen(false)
       }
     }
 
@@ -60,7 +81,10 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         {/* Logo */}
         <Link
           href="/"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={() => {
+            setMobileMenuOpen(false)
+            setMobileSearchOpen(false)
+          }}
           className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <div className="flex h-full items-center">
@@ -108,7 +132,26 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
+        <div className="hidden w-80 items-center lg:flex">
+          <MultiSearchBar
+            autoFocus={false}
+            isLoaded={true}
+            placeholder="Search the OWASP community"
+            indexes={['chapters', 'organizations', 'projects', 'users']}
+            containerClassName="w-full max-w-none p-0"
+            inputClassName="h-10 text-sm"
+          />
+        </div>
         <div className="flex items-center justify-normal gap-4">
+          <div className="lg:hidden">
+            <Button
+              onPress={toggleMobileSearch}
+              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <span className="sr-only">Open search</span>
+              <FaSearch className="h-5 w-5" />
+            </Button>
+          </div>
           <div className="hidden md:flex">
             <NavButton
               href="https://github.com/OWASP/Nest"
@@ -145,6 +188,18 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </div>
       </div>
+      {mobileSearchOpen && (
+        <div id="global-search-mobile" className="bg-owasp-blue px-4 pb-4 lg:hidden dark:bg-slate-800">
+          <MultiSearchBar
+            autoFocus={true}
+            isLoaded={true}
+            placeholder="Search the OWASP community"
+            indexes={['chapters', 'organizations', 'projects', 'users']}
+            containerClassName="w-full max-w-none p-0"
+            inputClassName="h-10 text-base"
+          />
+        </div>
+      )}
       <div
         className={cn(
           'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
@@ -156,7 +211,10 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           <div className="flex flex-col justify-center gap-5">
             <Link
               href="/"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                setMobileMenuOpen(false)
+                setMobileSearchOpen(false)
+              }}
               className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <div className="flex h-full items-center">

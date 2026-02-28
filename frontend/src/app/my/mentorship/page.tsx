@@ -126,6 +126,7 @@ const MyMentorshipPage: React.FC = () => {
           setPage(1)
         }}
         searchQuery={searchQuery}
+        scopeLabel="Search within your programs"
         searchPlaceholder="Search your programs"
         indexName="my-programs"
       >

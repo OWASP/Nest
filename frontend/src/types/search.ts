@@ -10,6 +10,9 @@ export interface MultiSearchBarProps {
   indexes: string[]
   initialValue?: string
   eventData?: Event[]
+  autoFocus?: boolean
+  containerClassName?: string
+  inputClassName?: string
 }
 
 export type Suggestion = {
