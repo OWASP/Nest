@@ -32,8 +32,7 @@ This guide provides a dedicated onboarding path for contributors using Windows.
 
       ```bash
       sudo apt update
-      sudo apt install -y python3 python3-pip python3-venv make
-      pip3 install --user pre-commit
+      sudo apt install -y python3 python3-pip python3-venv pre-commit make
       ```
 
 5. **Node.js (optional for direct frontend tooling)**
@@ -106,8 +105,7 @@ Verify local endpoints:
 Run these from the repository root in WSL:
 
 ```bash
-make check
-make test
+make check-test
 ```
 
 You can also run focused checks:
@@ -234,7 +232,7 @@ If the issue persists, capture the exact command and full error output, then ope
 
 - Keep your terminal in WSL for all Nest commands.
 - Run `pre-commit run -a` before opening a PR.
-- Run `make check` and `make test` before pushing.
+- Run `make check-test` before pushing.
 - If you use VS Code, use the **Remote - WSL** extension so editing and terminal execution stay in the same Linux environment.
 
 ## Related docs
