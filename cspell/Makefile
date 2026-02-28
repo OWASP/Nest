@@ -1,5 +1,8 @@
 .PHONY: check-spelling cspell-install cspell-check cspell-run update-cspell-dependencies
 
+##@ Spelling
+
+check-spelling: ## Run spell checker
 check-spelling: cspell-check
 
 cspell-install:
