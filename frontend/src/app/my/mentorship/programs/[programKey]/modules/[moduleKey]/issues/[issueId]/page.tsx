@@ -154,7 +154,7 @@ const ModuleIssueDetailsPage = () => {
                 </span>
               </div>
             </div>
-            <ActionButton url={issue.url} tooltipLabel="View on GitHub">
+            <ActionButton url={issue.url}>
               <FaLink className="mr-2 inline-block" /> View on GitHub
             </ActionButton>
           </div>
@@ -256,7 +256,11 @@ const ModuleIssueDetailsPage = () => {
                 <span>Labels</span>
               </div>
             </h2>
-            <LabelList entityKey={`issue-${issueId}`} labels={labels} maxVisible={5} />
+            {labels.length > 0 ? (
+              <LabelList entityKey={`issue-${issueId}`} labels={labels} maxVisible={5} />
+              ) : (
+              <span className="text-sm text-gray-400">No labels assigned</span>
+              )}
           </div>
 
           {assignees.length > 0 && (
