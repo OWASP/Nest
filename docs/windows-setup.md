@@ -189,12 +189,6 @@ make test-frontend
 
 **Fixes**
 - Close local services using the same ports.
-- If needed, identify processes from WSL:
-
-  ```bash
-  ss -ltnp
-  ```
-
 
 ## If any error appears while you are setting up
 
