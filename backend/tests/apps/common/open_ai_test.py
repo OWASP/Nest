@@ -66,7 +66,8 @@ class TestOpenAi:
         assert response is None
 
         mock_logger.exception.assert_called_once_with(
-            "Unexpected error during OpenAI API request: Exception"
+            "Unexpected error during OpenAI API request: %s",
+            "Exception",
         )
 
     @patch("apps.common.open_ai.logger")
@@ -125,7 +126,7 @@ class TestOpenAi:
 
         assert response is None
         mock_logger.exception.assert_called_once_with(
-            "OpenAI authentication error - check OPEN_AI_SECRET_KEY"
+            "OpenAI authentication error - check DJANGO_OPEN_AI_SECRET_KEY"
         )
 
     @patch("apps.common.open_ai.logger")
@@ -134,7 +135,11 @@ class TestOpenAi:
         """Test that RateLimitError is caught and logged with specific message."""
         mock_client = MagicMock()
         mock_response = MagicMock()
-        rate_limit_error = openai_module.RateLimitError(response=mock_response, body={})
+        rate_limit_error = openai_module.RateLimitError(
+            "Rate limit exceeded",
+            response=mock_response,
+            body={},
+        )
         mock_client.chat.completions.create.side_effect = rate_limit_error
         mock_openai.return_value = mock_client
         openai_instance = OpenAi()
@@ -142,9 +147,10 @@ class TestOpenAi:
         response = openai_instance.complete()
 
         assert response is None
-        mock_logger.exception.assert_called_once_with(
+        mock_logger.warning.assert_called_once_with(
             "OpenAI rate limit exceeded - request may be retried"
         )
+        mock_logger.exception.assert_not_called()
 
     @patch("apps.common.open_ai.logger")
     @patch("openai.OpenAI")
@@ -152,7 +158,11 @@ class TestOpenAi:
         """Test that BadRequestError is caught and logged with specific message."""
         mock_client = MagicMock()
         mock_response = MagicMock()
-        bad_request_error = openai_module.BadRequestError(response=mock_response, body={})
+        bad_request_error = openai_module.BadRequestError(
+            "Invalid request",
+            response=mock_response,
+            body={},
+        )
         mock_client.chat.completions.create.side_effect = bad_request_error
         mock_openai.return_value = mock_client
         openai_instance = OpenAi()
@@ -177,5 +187,6 @@ class TestOpenAi:
 
         assert response is None
         mock_logger.exception.assert_called_once_with(
-            "Unexpected error during OpenAI API request: ValueError"
+            "Unexpected error during OpenAI API request: %s",
+            "ValueError",
         )
