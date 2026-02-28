@@ -218,7 +218,8 @@ class Base(Configuration):
 
     STATIC_ROOT = BASE_DIR / "staticfiles"
 
-    OPEN_AI_SECRET_KEY = values.SecretValue(environ_name="OPEN_AI_SECRET_KEY")
+    GOOGLE_API_KEY = values.Value(default=None)
+    OPEN_AI_SECRET_KEY = values.SecretValue()
 
     SLACK_BOT_TOKEN = values.SecretValue()
     SLACK_COMMANDS_ENABLED = True
