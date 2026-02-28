@@ -59,6 +59,18 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
         if index_name == "chapters":
             cache_key = f"{cache_key}:{ip_address}"
 
+        app_id = getattr(settings, "ALGOLIA_APPLICATION_ID", "")
+        api_key = getattr(settings, "ALGOLIA_WRITE_API_KEY", "")
+
+        is_app_id_invalid = not app_id or str(app_id).strip().lower() == "none"
+        is_api_key_invalid = not api_key or str(api_key).strip().lower() == "none"
+
+        if is_app_id_invalid or is_api_key_invalid:
+            return JsonResponse(
+                {"error": "Algolia is not configured. Please check your environment variables."},
+                status=HTTPStatus.SERVICE_UNAVAILABLE,
+            )
+
         result = cache.get(cache_key)
         if result is not None:
             return JsonResponse(result)

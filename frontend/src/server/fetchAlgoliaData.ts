@@ -36,7 +36,14 @@ export const fetchAlgoliaData = async <T>(
     })
 
     if (!response.ok) {
-      throw new AppError(response.status, 'Search service error')
+      let errorMessage = 'Search service error'
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData?.error || errorMessage
+      } catch {
+        // Fallback to default error message if parsing fails
+      }
+      throw new AppError(response.status, errorMessage)
     }
 
     const results = await response.json()
@@ -51,7 +58,7 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    if (error instanceof AppError) {
+    if (error instanceof AppError || (error instanceof Error && error.name === 'AppError')) {
       throw error
     }
     throw new AppError(500, 'Search service error')
