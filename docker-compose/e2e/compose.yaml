@@ -47,6 +47,8 @@ services:
       - e2e-nest-network
     command: >
       sh -c '
+        echo "Truncating content_type table" &&
+        psql -h db -U $$POSTGRES_USER -d $$POSTGRES_DB -c "TRUNCATE django_content_type CASCADE;" &&
         echo "Loading data from dump..." &&
         pg_restore -h db -U $$POSTGRES_USER -d $$POSTGRES_DB /data/nest.dump &&
         echo "Data loading completed."
