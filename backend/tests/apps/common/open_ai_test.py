@@ -110,7 +110,13 @@ class TestOpenAi:
     def test_complete_authentication_error(self, mock_openai, mock_logger):
         """Test that AuthenticationError is caught and logged with specific message."""
         mock_client = MagicMock()
-        auth_error = openai_module.AuthenticationError("Invalid API key")
+        # constructors for OpenAI SDK errors require response/body kwargs
+        mock_response = MagicMock()
+        auth_error = openai_module.AuthenticationError(
+            "Invalid API key",
+            response=mock_response,
+            body={},
+        )
         mock_client.chat.completions.create.side_effect = auth_error
         mock_openai.return_value = mock_client
         openai_instance = OpenAi()
@@ -119,7 +125,7 @@ class TestOpenAi:
 
         assert response is None
         mock_logger.exception.assert_called_once_with(
-            "OpenAI authentication error - check DJANGO_OPEN_AI_SECRET_KEY"
+            "OpenAI authentication error - check OPEN_AI_SECRET_KEY"
         )
 
     @patch("apps.common.open_ai.logger")
