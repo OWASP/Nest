@@ -25,12 +25,15 @@ clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
 	@docker container rm -f nest-cache >/dev/null 2>&1 || true
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
+	@docker container rm -f nest-nestbot >/dev/null 2>&1 || true
 	@docker container rm -f nest-worker >/dev/null 2>&1 || true
 	@docker image rm -f nest-backend:base >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
+	@docker image rm -f nest-local-nestbot >/dev/null 2>&1 || true
 	@docker image rm -f nest-snapshot-video >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
+	@docker volume rm -f nest-local_nestbot-venv >/dev/null 2>&1 || true
 
 create-superuser:
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
@@ -43,6 +46,12 @@ exec-backend-command-it:
 
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
+
+exec-nestbot-command:
+	@docker exec -i nest-nestbot $(CMD)
+
+exec-nestbot-command-it:
+	@docker exec -it nest-nestbot $(CMD) 2>/dev/null
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command

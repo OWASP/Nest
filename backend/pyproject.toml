@@ -14,7 +14,6 @@ packages = [ { include = "apps" } ]
 [tool.poetry.dependencies]
 algoliasearch = "^4.13.2"
 algoliasearch-django = "^4.0.0"
-crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
 django = "^6.0"
 django-configurations = "^2.5.1"
 django-cors-headers = "^4.7.0"
@@ -27,9 +26,6 @@ geopy = "^2.4.1"
 gunicorn = "^23.0.0"
 humanize = "^4.11.0"
 jinja2 = "^3.1.6"
-langchain = "^0.3.26"
-langchain-community = "^0.3.26"
-langgraph = "^1.0.1"
 lxml = "^6.0.0"
 markdown = "^3.7"
 openai = "~=1.83.0"
@@ -56,6 +52,10 @@ pyparsing = "^3.2.3"
 djlint = "^1.36.4"
 pre-commit = "^4.1.0"
 ruff = "^0.14.2"
+
+[tool.poetry.group.nestbot.dependencies]
+crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
+langchain-text-splitters = "^1.1.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^9.0.1"
