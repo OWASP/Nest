@@ -3,14 +3,14 @@ import '@testing-library/jest-dom'
 import { LabelList } from 'components/LabelList'
 
 describe('LabelList', () => {
-  it('renders nothing when labels are empty', () => {
-    const { container } = render(<LabelList entityKey="test-1" labels={[]} />)
-    expect(container).toBeEmptyDOMElement()
+  it('renders placeholder when labels are empty', () => {
+    render(<LabelList entityKey="test-1" labels={[]} />)
+    expect(screen.getByText('No labels assigned')).toBeInTheDocument()
   })
 
-  it('renders nothing when labels are undefined', () => {
-    const { container } = render(<LabelList entityKey="test-2" labels={undefined} />)
-    expect(container).toBeEmptyDOMElement()
+  it('renders placeholder when labels are undefined', () => {
+    render(<LabelList entityKey="test-2" labels={undefined} />)
+    expect(screen.getByText('No labels assigned')).toBeInTheDocument()
   })
 
   it('renders labels correctly', () => {

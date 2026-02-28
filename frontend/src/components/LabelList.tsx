@@ -28,7 +28,8 @@ const LabelList: React.FC<LabelListProps> = ({
   maxVisible = 5,
   className = '',
 }) => {
-  if (!labels || labels.length === 0) return null
+  if (!labels || labels.length === 0)
+    return <span className="text-sm text-gray-500 dark:text-gray-400">No labels assigned</span>
 
   const visibleLabels = labels.slice(0, maxVisible)
   const remainingCount = labels.length - maxVisible
