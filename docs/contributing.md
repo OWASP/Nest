@@ -32,28 +32,13 @@ Before contributing, ensure you have the following installed:
         - Virtual environment: `pip install pre-commit`
         - OS package: `apt install pre-commit` / `brew install pre-commit`
         - Other methods depending on your configuration
+### Windows Contributors
 
-### Windows Users Requirements
+If you are contributing from Windows, follow the dedicated guide in the docs:
 
-!!! warning "Windows Setup Requirements"
-    **WSL (Windows Subsystem for Linux)** is required for Windows users to enable Linux compatibility.
+- [Windows Contributor Setup Guide](docs/windows-setup.md)
 
-    1. The `make run` command requires WSL
-    2. You must use WSL terminal (not Windows PowerShell)
-    3. WSL integration must be enabled in Docker Desktop settings
-
-    === "WSL Installation"
-        Follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install)
-
-    === "Docker Desktop Setup"
-        1. Open Docker Desktop
-        2. Go to Settings → Resources → WSL Integration
-        3. Enable WSL integration
-
-    !!! danger "PowerShell Not Supported"
-        Do not report issues if using PowerShell for running commands -- it's not the intended way to run Nest locally.
-
-## Getting Started
+### Getting Started
 
 ### Support the Project
 
