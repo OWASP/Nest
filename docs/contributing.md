@@ -32,11 +32,11 @@ Before contributing, ensure you have the following installed:
         - Virtual environment: `pip install pre-commit`
         - OS package: `apt install pre-commit` / `brew install pre-commit`
         - Other methods depending on your configuration
-### Windows Contributors
+## Windows setup
 
-If you are contributing from Windows, follow the dedicated guide in the docs:
+If you are contributing from Windows, use the dedicated step-by-step guide:
 
-- [Windows Contributor Setup Guide](docs/windows-setup.md)
+- [Windows Contributor Setup Guide](windows-setup.md)
 
 ### Getting Started
 
@@ -71,7 +71,7 @@ If you are contributing from Windows, follow the dedicated guide in the docs:
         ```
         **Copy the contents from the template file into your new local environment file:**
         ```bash
-        cat backend/.env.example > frontend/.env
+        cat frontend/.env.example > frontend/.env
         ```
 
     !!! warning "File Encoding"
