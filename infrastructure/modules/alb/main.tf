@@ -134,6 +134,9 @@ resource "aws_lb_listener" "https" {
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   tags              = var.common_tags
 
+  routing_http_response_strict_transport_security_header_value = "max-age=63072000; includeSubDomains; preload"
+  routing_http_response_x_frame_options_header_value           = "DENY"
+
   default_action {
     target_group_arn = aws_lb_target_group.frontend.arn
     type             = "forward"
