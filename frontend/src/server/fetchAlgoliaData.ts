@@ -58,7 +58,7 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
-    if (error instanceof AppError || (error instanceof Error && error.name === 'AppError')) {
+    if (error instanceof AppError) {
       throw error
     }
     throw new AppError(500, 'Search service error')

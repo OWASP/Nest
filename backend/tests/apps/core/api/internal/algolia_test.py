@@ -33,6 +33,7 @@ def mock_algolia_settings():
     with patch("apps.core.api.internal.algolia.settings") as mock_settings:
         mock_settings.ALGOLIA_APPLICATION_ID = "test-app-id"
         mock_settings.ALGOLIA_WRITE_API_KEY = "test-api-key"
+        mock_settings.ENVIRONMENT = "test"
         yield mock_settings
 
 
