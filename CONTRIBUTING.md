@@ -24,7 +24,13 @@ Before contributing, ensure you have the following installed:
    1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. You can enter the Linux environment by running `wsl`. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
    1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
    1. Cloning or running the project under `/mnt/c` (the Windows C: drive) can lead to significant performance degradation and Docker permission issues.
+   2. 
+## Windows Contributors
 
+If you are contributing from Windows, follow the dedicated guide in the docs:
+
+- [Windows Contributor Setup Guide](docs/windows-setup.md)
+  
 ## Starring the Project
 
 [![GitHub stars](https://img.shields.io/github/stars/OWASP/Nest?style=social)](https://github.com/OWASP/Nest)
