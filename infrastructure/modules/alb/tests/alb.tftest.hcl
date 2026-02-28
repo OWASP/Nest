@@ -215,6 +215,38 @@ run "test_https_listener_ssl_policy" {
   }
 }
 
+run "test_https_listener_sets_hsts_header" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_strict_transport_security_header_value == "max-age=31536000; includeSubDomains; preload"
+    error_message = "HTTPS listener must set HSTS header value."
+  }
+}
+
+run "test_https_listener_sets_x_frame_options_header" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_x_frame_options_header_value == "DENY"
+    error_message = "HTTPS listener must set X-Frame-Options header value."
+  }
+}
+
+run "test_https_listener_sets_x_content_type_options_header" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_x_content_type_options_header_value == "nosniff"
+    error_message = "HTTPS listener must set X-Content-Type-Options header value."
+  }
+}
+
+run "test_https_listener_sets_csp_header" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_content_security_policy_header_value == "default-src 'self'; script-src 'self' 'unsafe-inline' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com; img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://owasp.org https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://raw.githubusercontent.com; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://github-contributions-api.jogruber.de https://*.google-analytics.com https://*.i.posthog.com https://*.sentry.io https://*.tile.openstreetmap.org; object-src 'none'; frame-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    error_message = "HTTPS listener must set Content-Security-Policy header value."
+  }
+}
+
 run "test_backend_listener_rules_not_created_when_null" {
   command = plan
   variables {
