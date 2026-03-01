@@ -156,16 +156,15 @@ describe('SearchBar Component', () => {
     })
 
     it('clears input when clear button is clicked', async () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
-      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      expect(clearButton).toBeInTheDocument()
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
       input.blur()
       // NOSONAR: Verifies input lost focus before testing refocus behavior
       expect(input).not.toHaveFocus()
-      fireEvent.click(clearButton!)
+      fireEvent.click(clearButton)
       expect(input).toHaveValue('')
       // NOSONAR: Verifies input is refocused after clear when shouldAutoFocus is true
       expect(input).toHaveFocus()
@@ -173,11 +172,10 @@ describe('SearchBar Component', () => {
 
     it('does not refocus input after clear when on mobile', async () => {
       ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
-      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      expect(clearButton).toBeInTheDocument()
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
       fireEvent.click(clearButton)
       expect(input).toHaveValue('')
       // NOSONAR: Verifies input is not refocused on mobile when shouldAutoFocus is false
