@@ -11,7 +11,7 @@ from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel
 from apps.common.open_ai import OpenAi
 from apps.core.models.prompt import Prompt
-from apps.github.models.managers.issue import OpenIssueManager
+from apps.github.models.managers.issue import ActiveIssueManager, OpenIssueManager
 
 from .generic_issue_model import GenericIssueModel
 
@@ -21,6 +21,7 @@ class Issue(GenericIssueModel):
 
     objects = models.Manager()
     open_issues = OpenIssueManager()
+    active_issues = ActiveIssueManager()
 
     class Meta:
         """Model options."""
