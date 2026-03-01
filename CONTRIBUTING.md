@@ -96,6 +96,29 @@ Before contributing, ensure you have the following installed:
 - **Example Value**: `https://xyz@sentry.io/123456`
 - **Usage**: Enables real-time error tracking and reporting in the frontend.
 
+#### `NEXTAUTH_SECRET`
+
+- **Description**: A random secret used by NextAuth.js to sign and encrypt session tokens and cookies.
+- **Example Value**: A 32+ character random string (e.g., generated via `openssl rand -base64 32`).
+- **Usage**: **Required** for NextAuth.js to function. Without this, authentication will fail.
+
+#### `NEXTAUTH_URL`
+
+- **Description**: The canonical URL of the NextAuth.js application.
+- **Example Value**: `http://localhost:3000/`
+- **Usage**: Used by NextAuth.js to construct callback URLs during the OAuth flow.
+
+#### `NEXT_SERVER_GITHUB_CLIENT_ID`
+
+- **Description**: The Client ID of your GitHub OAuth App.
+- **Example Value**: `Ov23liABCDEF1234567`
+- **Usage**: **Required** for "Sign in with GitHub" to work locally. Must be a real Client ID from a registered GitHub OAuth App.
+
+#### `NEXT_SERVER_GITHUB_CLIENT_SECRET`
+
+- **Description**: The Client Secret of your GitHub OAuth App.
+- **Usage**: **Required** for completing the GitHub OAuth flow. Pairs with `NEXT_SERVER_GITHUB_CLIENT_ID`.
+
 ---
 
 ### Backend
@@ -246,6 +269,37 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      ```plaintext
      DJANGO_CONFIGURATION=Local
      ```
+
+1. **Set Up GitHub OAuth** (required for "Sign in with GitHub"):
+
+   Without real GitHub OAuth credentials, clicking "Sign in with GitHub" will result in a GitHub 404 error because the placeholder `client_id=your-github-client-id` is invalid.
+
+   - Go to [GitHub Developer Settings → OAuth Apps](https://github.com/settings/developers) and click **"New OAuth App"**.
+   - Fill in the form with the following values:
+
+     | Field | Value |
+     |---|---|
+     | Application name | `OWASP Nest Local` (or any name you prefer) |
+     | Homepage URL | `http://localhost:3000` |
+     | Authorization callback URL | `http://localhost:3000/api/auth/callback/github` |
+
+   - Click **"Register application"**.
+   - On the next page, copy the **Client ID** and click **"Generate a new client secret"** to obtain a **Client Secret**.
+   - Generate a secure `NEXTAUTH_SECRET` by running:
+
+     ```bash
+     openssl rand -base64 32
+     ```
+
+   - Open your `frontend/.env` file and update the following values with the credentials you just obtained:
+
+     ```plaintext
+     NEXTAUTH_SECRET=<output-from-openssl-command>
+     NEXT_SERVER_GITHUB_CLIENT_ID=<your-github-client-id>
+     NEXT_SERVER_GITHUB_CLIENT_SECRET=<your-github-client-secret>
+     ```
+
+   - **Please note you need to restart the application in order to apply any `.env` file changes.**
 
 1. **Set Up Algolia**:
 
