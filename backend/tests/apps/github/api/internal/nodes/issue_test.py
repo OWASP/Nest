@@ -93,7 +93,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_label1.name = "bug"
         mock_label2 = Mock()
         mock_label2.name = "enhancement"
-        mock_issue.labels.all.return_value = [mock_label1, mock_label2]
+        mock_issue.label_names = [mock_label1, mock_label2]
 
         field = self._get_field_by_name("labels", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)

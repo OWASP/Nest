@@ -45,7 +45,6 @@ class TestRepositoryQuery:
         mock_queryset = MagicMock()
         mock_queryset.select_related.return_value = mock_queryset
         mock_queryset.get.side_effect = Repository.DoesNotExist
-
         with patch(
             "apps.github.models.repository.Repository.objects",
             mock_queryset,
