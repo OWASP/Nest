@@ -13,7 +13,7 @@ from ninja.responses import Response
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Leader, ValidationErrorSchema
 from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
-from apps.owasp.models.enums.project import ProjectLevel
+from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project as ProjectModel
 
 PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
@@ -36,6 +36,7 @@ class ProjectBase(Schema):
     created_at: datetime
     key: str
     level: ProjectLevel
+    type: ProjectType
     name: str
     updated_at: datetime
 
@@ -77,6 +78,10 @@ class ProjectFilter(FilterSchema):
         None,
         description="Level of the project",
     )
+    type:  list[ProjectType] | None = Field(
+        None,
+        description="Type of the project",
+    )
     q: str | None = Field(
         None,
         description="Structured search query (e.g. 'name:security stars:>100')",
@@ -108,6 +113,9 @@ def list_projects(
 
     if filters.level is not None:
         queryset = queryset.filter(level=filters.level)
+
+    if filters.type is not None:
+        queryset = queryset.filter(type__in=filters.type)
 
     return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 

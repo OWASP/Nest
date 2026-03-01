@@ -3,6 +3,7 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.test import Client
 
 from apps.api.rest.v0.project import ProjectDetail, get_project, list_projects
 
@@ -74,6 +75,7 @@ class TestListProjects:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.level = None
+        mock_filters.type = None
         mock_filters.q = None
 
         mock_queryset = MagicMock()
@@ -92,6 +94,7 @@ class TestListProjects:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.level = "flagship"
+        mock_filters.type = None
         mock_filters.q = "name:security"
 
         mock_queryset = MagicMock()
@@ -107,6 +110,127 @@ class TestListProjects:
             "created_at", "-stars_count", "-forks_count"
         )
         assert result == mock_filtered_queryset
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_list_projects_with_single_type_filter(self, mock_project_model, mock_apply_search):
+        """Test list projects filtered by a single type."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.level = None
+        mock_filters.type = ["code"]
+        mock_filters.q = None
+
+        mock_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered_queryset
+        mock_filtered_queryset.order_by.return_value = mock_filtered_queryset
+
+        result = list_projects(mock_request, mock_filters, ordering=None)
+
+        mock_queryset.filter.assert_called_with(type__in=["code"])
+        mock_filtered_queryset.order_by.assert_called_with(
+            "-level_raw", "-stars_count", "-forks_count"
+        )
+        assert result == mock_filtered_queryset
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_list_projects_with_multiple_type_filter(
+        self, mock_project_model, mock_apply_search
+    ):
+        """Test list projects filtered by multiple types."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.level = None
+        mock_filters.type = ["code", "tool"]
+        mock_filters.q = None
+
+        mock_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered_queryset
+        mock_filtered_queryset.order_by.return_value = mock_filtered_queryset
+
+        result = list_projects(mock_request, mock_filters, ordering=None)
+
+        mock_queryset.filter.assert_called_with(type__in=["code", "tool"])
+        mock_filtered_queryset.order_by.assert_called_with(
+            "-level_raw", "-stars_count", "-forks_count"
+        )
+        assert result == mock_filtered_queryset
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_list_projects_with_type_and_level_filter(
+        self, mock_project_model, mock_apply_search
+    ):
+        """Test list projects filtered by both type and level."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.level = "flagship"
+        mock_filters.type = ["code"]
+        mock_filters.q = None
+
+        mock_queryset = MagicMock()
+        mock_level_filtered = MagicMock()
+        mock_type_filtered = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_level_filtered
+        mock_level_filtered.filter.return_value = mock_type_filtered
+        mock_type_filtered.order_by.return_value = mock_type_filtered
+
+        result = list_projects(mock_request, mock_filters, ordering=None)
+
+        mock_queryset.filter.assert_called_with(level="flagship")
+        mock_level_filtered.filter.assert_called_with(type__in=["code"])
+        mock_type_filtered.order_by.assert_called_with(
+            "-level_raw", "-stars_count", "-forks_count"
+        )
+        assert result == mock_type_filtered
+
+
+class TestProjectEndpointIntegration:
+    """Integration tests that call the projects endpoint via Django test client."""
+
+    PROJECTS_URL = "/api/v0/projects/"
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_repeated_type_filters_and_ordering(
+        self, mock_project_model, mock_apply_search
+    ):
+        """Test repeated type query params are parsed as a list and ordering is applied."""
+
+        mock_queryset = MagicMock()
+        mock_filtered = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered
+        mock_filtered.order_by.return_value = []
+
+        client = Client()
+        response = client.get(self.PROJECTS_URL, {"type": ["code", "tool"]})
+
+        assert response.status_code == HTTPStatus.OK
+        mock_queryset.filter.assert_called_with(type__in=["code", "tool"])
+        mock_filtered.order_by.assert_called_with(
+            "-level_raw", "-stars_count", "-forks_count"
+        )
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_invalid_type_returns_validation_error(
+        self, mock_project_model, mock_apply_search
+    ):
+        """Test invalid type returns validation error."""
+
+        client = Client()
+        response = client.get(self.PROJECTS_URL, {"type": "invalid"})
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        data = response.json()
+        assert "errors" in data
 
 
 class TestGetProject:
