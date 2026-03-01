@@ -56,7 +56,7 @@ class TestListMembers:
 
     @patch("apps.api.rest.v0.member.UserModel")
     def test_list_members_no_ordering(self, mock_user_model):
-        """Test listing members without ordering."""
+        """Test listing members without ordering applies default '-created_at'."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_ordered_queryset = MagicMock()
@@ -70,21 +70,40 @@ class TestListMembers:
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
 
+    @pytest.mark.parametrize(
+        "ordering",
+        [
+            "created_at",
+            "-created_at",
+            "updated_at",
+            "-updated_at",
+            "name",
+            "-name",
+            "login",
+            "-login",
+        ],
+    )
     @patch("apps.api.rest.v0.member.UserModel")
-    def test_list_members_with_ordering(self, mock_user_model):
-        """Test listing members with custom ordering."""
+    def test_list_members_with_ordering(self, mock_user_model, ordering):
+        """Test listing members with all allowed ordering parameters."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_ordered_queryset = MagicMock()
         mock_filtered_queryset = MagicMock()
+
         mock_user_model.objects.order_by.return_value = mock_ordered_queryset
         mock_filters.filter.return_value = mock_filtered_queryset
 
-        result = list_members(mock_request, mock_filters, ordering="updated_at")
+        result = list_members(mock_request, mock_filters, ordering=ordering)
 
-        mock_user_model.objects.order_by.assert_called_with("updated_at")
+        mock_user_model.objects.order_by.assert_called_with(ordering)
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
+
+    def test_list_members_invalid_ordering(self, client):
+        """Test that invalid ordering returns validation error."""
+        response = client.get("/api/v0/members/?ordering=invalid_field")
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
 class TestGetMember:

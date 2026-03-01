@@ -35,6 +35,8 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         indexes = [
             models.Index(fields=["-created_at"], name="github_user_created_at_desc"),
             models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
+            models.Index(fields=["name"], name="github_user_name_asc"),
+            models.Index(fields=["-name"], name="github_user_name_desc"),
         ]
         verbose_name_plural = "Users"
 
