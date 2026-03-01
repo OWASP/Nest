@@ -28,10 +28,10 @@ repos:
           - --format
           - parsable
           - --strict
-        exclude: (.github|pnpm-lock.yaml)
+        exclude: pnpm-lock.yaml
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.1.1
+    rev: v26.2.0
     hooks:
       - id: ansible-lint
         additional_dependencies:
@@ -44,8 +44,18 @@ repos:
         language_version: python3
         pass_filenames: true
 
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+        files: ^infrastructure/.*\.(tf|tftest\.hcl)$
+      - id: terraform_tflint
+        files: ^infrastructure/.*\.tf$
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.2
+    rev: v0.15.3
     hooks:
       - id: ruff-check
         args:
@@ -78,7 +88,7 @@ repos:
           - --mapping=2
           - --offset=2
           - --sequence=4
-        exclude: (.github|pnpm-lock.yaml)
+        exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.1
@@ -127,6 +137,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.16.1
+    rev: v2.16.2
     hooks:
       - id: pyproject-fmt

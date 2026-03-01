@@ -5,10 +5,9 @@ import secrets
 import uuid
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.utils import timezone
-
-from apps.nest.models.user import User
 
 API_KEY_LENGTH = 32
 MAX_ACTIVE_KEYS = 3
@@ -59,7 +58,7 @@ class ApiKey(models.Model):
     @transaction.atomic
     def create(cls, user, name, expires_at):
         """Create a new API key instance."""
-        user = User.objects.select_for_update().get(pk=user.pk)
+        user = get_user_model().objects.select_for_update().get(pk=user.pk)
         if user.active_api_keys.count() >= MAX_ACTIVE_KEYS:
             return None
 
