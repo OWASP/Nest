@@ -20,8 +20,8 @@ function formatUTCDateTime(date: Date) {
   return `${year}${month}${day}T${hours}${minutes}${seconds}Z`
 }
 
-// All-day events have timestamps at midnight UTC (divisible by 86400 seconds)
-const isAllDayEvent = (timestamp: number) => timestamp % 86400 === 0
+// datetime strings use 'T' in ISO 8601 format to separate date and time (2024-01-15T15:30:00Z)
+const isAllDayEvent = (dateStr: string) => !dateStr.includes('T')
 
 export default function getGoogleCalendarUrl(event: CalendarEvent): string {
   if (!event?.startDate || !event.title) {
@@ -30,12 +30,10 @@ export default function getGoogleCalendarUrl(event: CalendarEvent): string {
 
   const base = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
 
-  const start = new Date(event.startDate * 1000)
+  const start = new Date(event.startDate)
   if (Number.isNaN(start.getTime())) throw new Error('Invalid startDate')
 
-  const end = event.endDate
-    ? new Date(event.endDate * 1000)
-    : new Date(start.getTime() + 60 * 60 * 1000)
+  const end = event.endDate ? new Date(event.endDate) : new Date(start.getTime() + 60 * 60 * 1000)
   if (Number.isNaN(end.getTime())) throw new Error('Invalid endDate')
 
   const isAllDay = isAllDayEvent(event.startDate)

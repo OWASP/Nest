@@ -33,8 +33,8 @@ type Candidate = {
     __typename?: string
     avatarUrl: string
     bio: string
-    createdAt: number
-    firstOwaspContributionAt: number | null
+    createdAt: string
+    firstOwaspContributionAt: string | null
     id: string
     isFormerOwaspStaff: boolean
     isGsocMentor: boolean
@@ -376,7 +376,7 @@ const BoardCandidatesPage = () => {
               <p className="truncate text-sm text-gray-600 dark:text-gray-400">
                 First OWASP contribution made nearly{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
-                  {dayjs(candidate.member.firstOwaspContributionAt * 1000).fromNow()}
+                  {dayjs(candidate.member.firstOwaspContributionAt).fromNow()}
                 </span>{' '}
                 - {formatDate(candidate.member.firstOwaspContributionAt)}
               </p>

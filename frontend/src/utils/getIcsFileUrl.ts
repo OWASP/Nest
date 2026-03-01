@@ -7,9 +7,9 @@ export default function getIcsFileUrl(event: CalendarEvent): Promise<string> {
       reject(new Error('Window not defined (server-side generation not supported)'))
       return
     }
-    const parseDate = (date: number): DateArray => {
-      // Unix timestamp in seconds
-      const d = new Date(date * 1000)
+    const parseDate = (date: string): DateArray => {
+      // ISO date string
+      const d = new Date(date)
       return [d.getFullYear(), d.getMonth() + 1, d.getDate()]
     }
 

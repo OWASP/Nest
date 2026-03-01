@@ -72,7 +72,7 @@ const ItemCardList = ({
   showAvatar?: boolean
   showSingleColumn?: boolean
   renderDetails: (item: {
-    createdAt: number
+    createdAt: string
     commentsCount: number
     organizationName: string
     publishedAt: number
