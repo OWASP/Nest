@@ -1,3 +1,16 @@
+const toISODateString = (input: string): string => {
+  if (input.includes('/')) {
+    const parts = input.split('/')
+    // YYYY/MM/DD format
+    if (parts[0].length === 4) {
+      return `${parts[0]}-${parts[1]}-${parts[2]}`
+    }
+    // MM/DD/YYYY format
+    return `${parts[2]}-${parts[0]}-${parts[1]}`
+  }
+  return input
+}
+
 export const formatDate = (input: number | string) => {
   if (!input) {
     return ''
@@ -6,16 +19,17 @@ export const formatDate = (input: number | string) => {
   const date =
     typeof input === 'number'
       ? new Date(input * 1000) // Unix timestamp in seconds
-      : new Date(input) // ISO date string
+      : new Date(toISODateString(input))
 
   if (Number.isNaN(date.getTime())) {
     throw new TypeError('Invalid date')
   }
 
   return date.toLocaleDateString('en-US', {
-    year: 'numeric',
+
     month: 'short',
     day: 'numeric',
+    year: 'numeric',
     timeZone: 'UTC',
   })
 }
