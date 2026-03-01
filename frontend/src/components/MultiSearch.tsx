@@ -13,6 +13,7 @@ import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { MultiSearchBarProps, Suggestion } from 'types/search'
 import type { User } from 'types/user'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 
@@ -35,6 +36,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   const suggestionCount = 3
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const shouldAutoFocus = useShouldAutoFocusSearch()
 
   const debouncedSearch = useMemo(
     () =>
@@ -158,7 +160,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick])
 
   useEffect(() => {
-    inputRef.current?.focus()
+    if(shouldAutoFocus){
+      inputRef.current?.focus()
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
@@ -171,7 +175,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [])
+  }, [shouldAutoFocus])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
