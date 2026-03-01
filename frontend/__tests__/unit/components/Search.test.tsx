@@ -161,10 +161,13 @@ describe('SearchBar Component', () => {
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      expect(clearButton).toBeInTheDocument()
       input.blur()
+      // NOSONAR: Verifies input lost focus before testing refocus behavior
       expect(input).not.toHaveFocus()
       fireEvent.click(clearButton!)
       expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is refocused after clear when shouldAutoFocus is true
       expect(input).toHaveFocus()
     })
 
@@ -174,8 +177,10 @@ describe('SearchBar Component', () => {
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      expect(clearButton).toBeInTheDocument()
       fireEvent.click(clearButton)
       expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is not refocused on mobile when shouldAutoFocus is false
       expect(input).not.toHaveFocus()
     })
 
