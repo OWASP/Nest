@@ -100,7 +100,7 @@ jest.mock('components/TruncatedText', () => ({
 const mockUser = {
   avatarUrl: 'https://github.com/author1.png',
   contributionsCount: 50,
-  createdAt: 1640995200000,
+  createdAt: '2022-01-01T00:00:00.000Z',
   followersCount: 100,
   followingCount: 50,
   key: 'author1',
@@ -112,7 +112,7 @@ const mockUser = {
 
 const mockIssue: Issue = {
   author: mockUser,
-  createdAt: 1640995200000,
+  createdAt: '2022-01-01T00:00:00.000Z',
   hint: 'Good first issue',
   labels: ['bug', 'help-wanted'],
   number: '123',
@@ -121,7 +121,7 @@ const mockIssue: Issue = {
   projectUrl: 'https://github.com/test-org/test-project',
   summary: 'This is a test issue summary',
   title: 'Test Issue Title',
-  updatedAt: 1641081600000,
+  updatedAt: '2022-01-02T00:00:00.000Z',
   url: 'https://github.com/test-org/test-project/issues/123',
   objectID: 'issue-123',
 }
@@ -137,7 +137,7 @@ const mockMilestone: Milestone = {
   },
   body: 'Milestone description',
   closedIssuesCount: 5,
-  createdAt: 1640995200, // 2022-01-01T00:00:00Z
+  createdAt: '2022-01-01T00:00:00.000Z', // 2022-01-01T00:00:00Z
   openIssuesCount: 3,
   organizationName: 'test-org',
   progress: 62.5,
@@ -157,7 +157,7 @@ const mockPullRequest: PullRequest = {
     avatarUrl: 'https://github.com/author3.png',
     url: 'https://github.com/author3',
   },
-  createdAt: 1640995200, // 2022-01-01T00:00:00Z
+  createdAt: '2022-01-01T00:00:00.000Z', // 2022-01-01T00:00:00Z
   organizationName: 'test-org',
   repositoryName: 'test-repo',
   title: 'Add new feature',
@@ -179,7 +179,7 @@ const mockRelease: Release = {
   isPreRelease: false,
   name: 'v1.0.0',
   organizationName: 'test-org',
-  publishedAt: 1640995200000,
+  publishedAt: '2022-01-01T00:00:00.000Z',
   repositoryName: 'test-repo',
   tagName: 'v1.0.0',
 }

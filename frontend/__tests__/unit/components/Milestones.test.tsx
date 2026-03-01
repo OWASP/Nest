@@ -12,9 +12,10 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('utils/dateFormatter', () => {
-  const mockFormatDate = jest.fn((timestamp: number) => {
-    if (!timestamp) return ''
-    const date = new Date(timestamp * 1000)
+  const mockFormatDate = jest.fn((input: string | null) => {
+    if (input === null || input === '') return ''
+    const date = new Date(input)
+    if (Number.isNaN(date.getTime())) return ''
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -123,15 +124,15 @@ describe('Milestones', () => {
     followingCount: 5,
     publicRepositoriesCount: 20,
     contributionsCount: 50,
-    createdAt: 1640995200000,
-    updatedAt: 1640995200000,
+    createdAt: '2022-01-01T00:00:00.000Z',
+    updatedAt: '2022-01-01T00:00:00.000Z',
   })
 
   const createMockMilestone = (overrides: Partial<Milestone> = {}): Milestone => ({
     author: createMockUser(),
     body: 'Test milestone description',
     closedIssuesCount: 5,
-    createdAt: 1672531200, // 2023-01-01T00:00:00Z
+    createdAt: '2023-01-01T00:00:00.000Z', // 2023-01-01T00:00:00Z
     openIssuesCount: 3,
     organizationName: 'test-org',
     progress: 75,
@@ -183,7 +184,7 @@ describe('Milestones', () => {
 
   it('renders milestone details correctly', () => {
     const milestone = createMockMilestone({
-      createdAt: 1672531200, // 2023-01-01T00:00:00Z
+      createdAt: '2023-01-01T00:00:00.000Z', // 2023-01-01T00:00:00Z
       closedIssuesCount: 10,
       openIssuesCount: 5,
       repositoryName: 'awesome-repo',

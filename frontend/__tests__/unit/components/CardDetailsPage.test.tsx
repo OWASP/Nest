@@ -711,7 +711,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       body: 'Milestone description',
       closedIssuesCount: 5,
-      createdAt: 1672531200,
+      createdAt: '2023-01-01T00:00:00.000Z',
       openIssuesCount: 2,
       repositoryName: 'test-repo',
       state: 'open',

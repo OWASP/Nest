@@ -26,7 +26,7 @@ jest.mock('next/link', () => ({
 const mockUser = {
   avatarUrl: 'https://github.com/author1.png',
   contributionsCount: 50,
-  createdAt: 1640995200000,
+  createdAt: '2022-01-01T00:00:00.000Z',
   followersCount: 100,
   followingCount: 50,
   key: 'author1',
@@ -38,7 +38,7 @@ const mockUser = {
 
 const mockIssue: Issue = {
   author: mockUser,
-  createdAt: 1640995200000,
+  createdAt: '2022-01-01T00:00:00.000Z',
   hint: 'Good first issue',
   labels: ['bug', 'help-wanted'],
   number: '123',
@@ -47,7 +47,7 @@ const mockIssue: Issue = {
   projectUrl: 'https://github.com/test-org/test-project',
   summary: 'This is a test issue summary',
   title: 'Test Issue Title',
-  updatedAt: 1641081600000,
+  updatedAt: '2022-01-02T00:00:00.000Z',
   url: 'https://github.com/test-org/test-project/issues/123',
   objectID: 'issue-123',
 }

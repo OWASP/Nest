@@ -9,8 +9,8 @@ describe('SnapshotCard', () => {
     key: 'test-snapshot-1',
     title: 'Test Snapshot',
     button: { label: 'Open', onclick: mockOnClick },
-    startAt: 1735689600,
-    endAt: 1736467200,
+    startAt: '2025-01-01T00:00:00.000Z',
+    endAt: '2025-01-10T00:00:00.000Z',
   }
 
   beforeEach(() => {

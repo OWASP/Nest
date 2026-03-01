@@ -61,7 +61,7 @@ const baseIssue = {
     login: 'user1',
     name: 'User One',
     contributionsCount: 10,
-    createdAt: 1234567890,
+    createdAt: '2009-02-13T23:31:30.000Z',
     followersCount: 5,
     followingCount: 2,
     key: 'user1',

@@ -31,7 +31,7 @@ const mockUser = {
   bio: 'Test bio',
   company: 'Test Company',
   contributionsCount: 42,
-  createdAt: 1577836800000,
+  createdAt: '2020-01-01T00:00:00.000Z',
   email: 'test@example.com',
   followersCount: 10,
   followingCount: 5,
@@ -47,7 +47,7 @@ const minimalData = [
   {
     id: 'mock-pull-request',
     author: mockUser,
-    createdAt: 1717243200,
+    createdAt: '2024-06-01T12:00:00.000Z',
     organizationName: 'test-org',
     repositoryName: 'test-repo',
     title: 'Test Pull Request',

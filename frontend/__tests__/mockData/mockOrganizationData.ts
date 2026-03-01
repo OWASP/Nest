@@ -5,7 +5,7 @@ export const mockOrganizationData = {
       avatarUrl: 'https://avatars.githubusercontent.com/u/1234567?v=4',
       collaboratorsCount: 50,
       company: 'Test Company',
-      createdAt: 1596744799,
+      createdAt: '2020-08-06T20:13:19.000Z',
       description: 'This is a test organization',
       email: 'org@example.com',
       followersCount: 1000,
@@ -13,7 +13,7 @@ export const mockOrganizationData = {
       login: 'test-org',
       name: 'Test Organization',
       publicRepositoriesCount: 2000,
-      updatedAt: 1727390473,
+      updatedAt: '2024-09-26T22:41:13.000Z',
       url: 'https://github.com/test-org',
     },
     {
@@ -21,7 +21,7 @@ export const mockOrganizationData = {
       avatarUrl: 'https://avatars.githubusercontent.com/u/7654321?v=4',
       collaboratorsCount: 75,
       company: 'Another Company',
-      createdAt: 1496744799,
+      createdAt: '2017-06-06T10:26:39.000Z',
       description: 'Another test organization',
       email: 'another-org@example.com',
       followersCount: 2000,
@@ -29,7 +29,7 @@ export const mockOrganizationData = {
       login: 'another-org',
       name: 'Another Organization',
       publicRepositoriesCount: 1500,
-      updatedAt: 1727390473,
+      updatedAt: '2024-09-26T22:41:13.000Z',
       url: 'https://github.com/another-org',
     },
   ],
@@ -41,13 +41,13 @@ export const mockOrganizationDetailsData = {
     avatarUrl: 'https://avatars.githubusercontent.com/u/1234567?v=4',
     collaboratorsCount: 50,
     company: 'Test Company',
-    createdAt: 1596744799,
+    createdAt: '2020-08-06T20:13:19.000Z',
     email: 'org@example.com',
     followersCount: 1000,
     location: 'San Francisco, CA',
     login: 'test-org',
     name: 'Test Organization',
-    updatedAt: 1727390473,
+    updatedAt: '2024-09-26T22:41:13.000Z',
     url: 'https://github.com/test-org',
     stats: {
       totalRepositories: 25,
@@ -78,7 +78,7 @@ export const mockOrganizationDetailsData = {
     {
       id: 'mock-org-pr-1',
       title: 'Test Pull Request 1',
-      createdAt: 1727390000,
+      createdAt: '2024-09-26T22:33:20.000Z',
       url: 'https://github.com/test-org/test-repo-1/pull/1',
       author: {
         login: 'user1',
@@ -88,7 +88,7 @@ export const mockOrganizationDetailsData = {
     {
       id: 'mock-org-pr-2',
       title: 'Test Pull Request 2',
-      createdAt: 1727380000,
+      createdAt: '2024-09-26T19:46:40.000Z',
       url: 'https://github.com/test-org/test-repo-2/pull/2',
       author: {
         login: 'user2',
@@ -100,7 +100,7 @@ export const mockOrganizationDetailsData = {
     {
       name: 'Release v1.0.0',
       tagName: 'v1.0.0',
-      publishedAt: 1727390000,
+      publishedAt: '2024-09-26T22:33:20.000Z',
       url: 'https://github.com/test-org/test-repo-1/releases/tag/v1.0.0',
       organizationName: 'test-org',
       repositoryName: 'test-repo-1',
@@ -112,7 +112,7 @@ export const mockOrganizationDetailsData = {
     {
       name: 'Release v2.0.0',
       tagName: 'v2.0.0',
-      publishedAt: 1727380000,
+      publishedAt: '2024-09-26T19:46:40.000Z',
       url: 'https://github.com/test-org/test-repo-2/releases/tag/v2.0.0',
       organizationName: 'test-org',
       repositoryName: 'test-repo-2',
@@ -145,7 +145,7 @@ export const mockOrganizationDetailsData = {
   recentIssues: [
     {
       title: 'Test Issue 1',
-      createdAt: 1727390000,
+      createdAt: '2024-09-26T22:33:20.000Z',
       url: 'https://github.com/test-org/test-repo-1/issues/1',
       author: {
         login: 'user1',
@@ -154,7 +154,7 @@ export const mockOrganizationDetailsData = {
     },
     {
       title: 'Test Issue 2',
-      createdAt: 1727380000,
+      createdAt: '2024-09-26T19:46:40.000Z',
       url: 'https://github.com/test-org/test-repo-2/issues/2',
       author: {
         login: 'user2',
@@ -174,7 +174,7 @@ export const mockOrganizationDetailsData = {
       closedIssuesCount: 15,
       repositoryName: 'Project Repo 1',
       organizationName: 'OWASP',
-      createdAt: 1740823200, // 2025-03-01T10:00:00Z
+      createdAt: '2025-03-01T10:00:00.000Z',
       url: 'https://github.com/OWASP/repo-one/milestone/1',
     },
   ],
