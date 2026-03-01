@@ -1,22 +1,10 @@
-export const toUnixTimestamp = (input: string | number | Date): number => {
-  if (typeof input === 'number') return input
-  const date = typeof input === 'string' ? new Date(input) : input
-
-  if (!date || Number.isNaN(date.getTime())) {
-    return Number.NaN
-  }
-  return Math.floor(date.getTime() / 1000)
-}
-
-export const formatDate = (input: number | string | Date | null) => {
-  if (input === null) {
+export const formatDate = (input: string | null) => {
+  if (input === null || input === '') {
     return ''
   }
 
-  const timestamp = toUnixTimestamp(input)
-  if (!Number.isFinite(timestamp)) return ''
-
-  const date = new Date(timestamp * 1000)
+  const date = new Date(input)
+  if (Number.isNaN(date.getTime())) return ''
 
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -26,19 +14,13 @@ export const formatDate = (input: number | string | Date | null) => {
   })
 }
 
-export const formatDateRange = (
-  startDate: number | string | Date,
-  endDate: number | string | Date
-) => {
-  const startTimestamp = toUnixTimestamp(startDate)
-  const endTimestamp = toUnixTimestamp(endDate)
+export const formatDateRange = (startDate: string, endDate: string) => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
 
-  if (!Number.isFinite(startTimestamp) || !Number.isFinite(endTimestamp)) {
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     return ''
   }
-
-  const start = new Date(startTimestamp * 1000)
-  const end = new Date(endTimestamp * 1000)
 
   if (
     start.getTime() === end.getTime() ||
@@ -74,11 +56,10 @@ export const formatDateRange = (
   }
 }
 
-export const formatDateForInput = (input: number | string | Date) => {
-  const timestamp = toUnixTimestamp(input)
-  if (!Number.isFinite(timestamp)) return ''
+export const formatDateForInput = (input: string) => {
+  const date = new Date(input)
+  if (Number.isNaN(date.getTime())) return ''
 
-  const date = new Date(timestamp * 1000)
   return date.toISOString().slice(0, 10)
 }
 
