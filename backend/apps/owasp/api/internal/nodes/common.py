@@ -32,7 +32,7 @@ class GenericEntityNode(strawberry.relay.Node):
         return [RepositoryContributorNode(**tc) for tc in root.idx_top_contributors]
 
     @strawberry_django.field
-    def updated_at(self, root) -> float:
+    def updated_at(self, root) -> str:
         """Resolve updated at."""
         return root.idx_updated_at
 

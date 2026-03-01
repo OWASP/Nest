@@ -34,6 +34,8 @@ export const mockProjectDetailsData = {
     leaders: ['alice', 'bob'],
     level: 'Lab',
     name: 'Test Project',
+    createdAt: '2025-02-05T00:00:00Z', // Feb 5, 2025
+    updatedAt: '2025-02-07T00:00:00Z', // Feb 7, 2025
     recentIssues: [
       {
         author: {
@@ -42,7 +44,7 @@ export const mockProjectDetailsData = {
           name: 'Dave Debugger',
           url: 'https://github.com/arkid15r',
         },
-        createdAt: '2025-02-05T15:20:30Z',
+        createdAt: '2025-02-05T00:00:00Z',
         repositoryName: 'test-repo',
         title: 'Fix authentication bug',
       },
@@ -56,7 +58,7 @@ export const mockProjectDetailsData = {
         },
         isPreRelease: false,
         name: 'v1.2.0',
-        publishedAt: '2025-01-20T10:00:00Z',
+        publishedAt: '2025-01-20T00:00:00Z',
         tagName: 'v1.2.0',
       },
     ],
@@ -93,7 +95,6 @@ export const mockProjectDetailsData = {
     summary: 'An example project showcasing GraphQL and Django integration.',
     topics: ['graphql', 'django', 'backend'],
     type: 'Tool',
-    updatedAt: '2025-02-07T12:34:56Z',
     url: 'https://github.com/example-project',
     recentMilestones: [
       {
@@ -107,7 +108,7 @@ export const mockProjectDetailsData = {
         closedIssuesCount: 15,
         repositoryName: 'Project Repo 1',
         organizationName: 'OWASP',
-        createdAt: '2025-03-01T10:00:00Z',
+        createdAt: '2025-03-01T00:00:00Z',
         url: 'https://github.com/OWASP/repo-one/milestone/1',
       },
     ],
@@ -118,7 +119,7 @@ export const mockProjectDetailsData = {
           avatarUrl: 'https://avatars.githubusercontent.com/u/11111?v=4',
           login: 'user1',
         },
-        createdAt: 1727390000,
+        createdAt: '2024-09-26T00:00:00Z',
         title: 'Test Pull Request 1',
         url: 'https://github.com/test-org/test-repo-1/pull/1',
       },
@@ -128,7 +129,7 @@ export const mockProjectDetailsData = {
           avatarUrl: 'https://avatars.githubusercontent.com/u/22222?v=4',
           login: 'user2',
         },
-        createdAt: 1727380000,
+        createdAt: '2024-09-26T00:00:00Z',
         title: 'Test Pull Request 2',
         url: 'https://github.com/test-org/test-repo-2/pull/2',
       },

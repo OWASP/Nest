@@ -65,14 +65,14 @@ class UserIndexMixin:
         return self.company
 
     @property
-    def idx_created_at(self) -> float:
-        """Get the account creation timestamp for indexing.
+    def idx_created_at(self) -> str:
+        """Get the account creation date for indexing.
 
         Returns:
-            float: Unix timestamp when the account was created.
+            str: ISO format datetime string when the account was created.
 
         """
-        return self.created_at.timestamp()
+        return self.created_at.isoformat()
 
     @property
     def idx_email(self) -> str:
@@ -289,14 +289,14 @@ class UserIndexMixin:
         return self.releases.count()
 
     @property
-    def idx_updated_at(self) -> float:
-        """Get the last profile update timestamp for indexing.
+    def idx_updated_at(self) -> str:
+        """Get the last profile update date for indexing.
 
         Returns:
-            float: Unix timestamp (seconds since epoch) of the last update.
+            str: ISO format datetime string of the last update.
 
         """
-        return self.updated_at.timestamp()
+        return self.updated_at.isoformat()
 
     @property
     def idx_url(self) -> str:

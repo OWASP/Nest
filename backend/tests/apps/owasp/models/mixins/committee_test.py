@@ -25,13 +25,13 @@ class TestCommitteeIndexMixin:
         return mock_committee
 
     def test_idx_created_at_with_value(self):
-        """Test idx_created_at returns timestamp when created_at exists."""
+        """Test idx_created_at returns ISO string when created_at exists."""
         test_datetime = datetime(2024, 3, 15, 10, 30, 0, tzinfo=UTC)
         mock_committee = self.create_mock_committee(created_at=test_datetime)
 
         result = CommitteeIndexMixin.idx_created_at.fget(mock_committee)
 
-        assert result == test_datetime.timestamp()
+        assert result == test_datetime.isoformat()
 
     def test_idx_created_at_none(self):
         """Test idx_created_at returns None when created_at is None."""
@@ -73,13 +73,13 @@ class TestCommitteeIndexMixin:
             assert len(result) == 2
 
     def test_idx_updated_at_with_value(self):
-        """Test idx_updated_at returns timestamp when updated_at exists."""
+        """Test idx_updated_at returns ISO string when updated_at exists."""
         test_datetime = datetime(2024, 8, 20, 14, 0, 0, tzinfo=UTC)
         mock_committee = self.create_mock_committee(updated_at=test_datetime)
 
         result = CommitteeIndexMixin.idx_updated_at.fget(mock_committee)
 
-        assert result == test_datetime.timestamp()
+        assert result == test_datetime.isoformat()
 
     def test_idx_updated_at_none(self):
         """Test idx_updated_at returns None when updated_at is None."""

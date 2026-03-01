@@ -39,7 +39,7 @@ export type ProgramList = {
 export type Module = {
   description: string
   domains?: string[] | null
-  endedAt: string | number
+  endedAt: string
   experienceLevel: ExperienceLevelEnum
   id: string
   key: string
@@ -47,7 +47,7 @@ export type Module = {
   mentees?: Contributor[]
   mentors: Contributor[]
   name: string
-  startedAt: string | number
+  startedAt: string
   status?: ProgramStatusEnum
   tags?: string[] | null
 }

@@ -122,6 +122,6 @@ class ProjectIndexMixin(RepositoryBasedEntityModelMixin):
         return self.type
 
     @property
-    def idx_updated_at(self) -> str | float:
+    def idx_updated_at(self) -> str:
         """Return updated at for indexing."""
-        return self.updated_at.timestamp() if self.updated_at else ""
+        return self.updated_at.isoformat() if self.updated_at else ""

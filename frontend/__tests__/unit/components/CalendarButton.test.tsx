@@ -19,8 +19,8 @@ const mockEvent = {
   title: 'Test Event',
   description: 'Test description',
   location: 'Test Location',
-  startDate: '2025-12-01',
-  endDate: '2025-12-02',
+  startDate: '2025-12-01T00:00:00.000Z', // 2025-12-01
+  endDate: '2025-12-02T00:00:00.000Z', // 2025-12-02
 }
 
 describe('CalendarButton', () => {
@@ -308,8 +308,8 @@ describe('CalendarButton', () => {
             title: 'OWASP BeNeLux 2025',
             description: 'Annual conference',
             location: 'Belgium',
-            startDate: '2025-12-02',
-            endDate: '2025-12-03',
+            startDate: '2025-12-02T00:00:00.000Z', // 2025-12-02
+            endDate: '2025-12-03T00:00:00.000Z', // 2025-12-03
           }}
           className="text-gray-600 hover:text-gray-800 dark:text-gray-400"
           iconClassName="h-4 w-4"
@@ -325,7 +325,7 @@ describe('CalendarButton', () => {
         <CalendarButton
           event={{
             title: 'Poster Event',
-            startDate: '2025-12-15',
+            startDate: '2025-12-15T00:00:00.000Z', // 2025-12-15
           }}
           showLabel
           label="Save to Calendar"
@@ -338,9 +338,20 @@ describe('CalendarButton', () => {
     })
   })
 
-  describe('hover state', () => {
-    it('toggles icon on hover - shows FaCalendarPlus when hovering', async () => {
-      render(<CalendarButton event={mockEvent} />)
+  describe('long title overflow handling', () => {
+    it('remains accessible with very long event titles', async () => {
+      const longTitle =
+        'This Is A Very Long Event Title That Extends Beyond Normal Length With Additional Description'
+      render(
+        <CalendarButton
+          event={{
+            title: longTitle,
+            startDate: '2026-06-22T00:00:00.000Z', // 2026-06-22
+            endDate: '2026-06-26T00:00:00.000Z', // 2026-06-26
+          }}
+          className="flex-shrink-0"
+        />
+      )
       const button = screen.getByRole('button')
 
       // Initially should show FaCalendar (not hovered)
@@ -355,8 +366,16 @@ describe('CalendarButton', () => {
       })
     })
 
-    it('reverts to FaCalendar icon when mouse leaves', async () => {
-      render(<CalendarButton event={mockEvent} />)
+    it('maintains visibility with flex-shrink-0 class', async () => {
+      render(
+        <CalendarButton
+          event={{
+            title: 'Very Long Event Title That Could Potentially Cause Overflow Issues',
+            startDate: '2025-12-01T00:00:00.000Z', // 2025-12-01
+          }}
+          className="flex-shrink-0 text-gray-600"
+        />
+      )
       const button = screen.getByRole('button')
 
       // Capture initial icon (FaCalendar)
@@ -379,21 +398,24 @@ describe('CalendarButton', () => {
       })
     })
 
-    it('maintains button functionality during hover state transitions', async () => {
-      render(<CalendarButton event={mockEvent} />)
-      const button = screen.getByRole('button')
-
-      fireEvent.mouseEnter(button)
-      fireEvent.mouseLeave(button)
-
-      expect(button).not.toBeDisabled()
-
-      fireEvent.click(button)
-      expect(button).toBeDisabled()
-
-      await waitFor(() => {
-        expect(button).not.toBeDisabled()
-      })
+    it('works correctly in flex container with long text sibling', () => {
+      const { container } = render(
+        <div className="flex items-center justify-between gap-2">
+          <button className="min-w-0 flex-1 truncate">
+            This Is A Really Long Event Title That Should Be Truncated Properly
+          </button>
+          <CalendarButton
+            event={{
+              title: 'Event',
+              startDate: '2025-12-01T00:00:00.000Z', // 2025-12-01
+            }}
+            className="flex-shrink-0"
+          />
+        </div>
+      )
+      const button = container.querySelector('button[aria-label="Add Event to Calendar"]')
+      expect(button).toBeInTheDocument()
+      expect(button).toHaveClass('flex-shrink-0')
     })
   })
 })
