@@ -7,12 +7,7 @@ import type { Section } from 'types/section'
 export const headerLinks: Link[] = [
   {
     text: 'Community',
-    submenu: [
-      { text: 'Chapters', href: '/chapters' },
-      { text: 'Members', href: '/members' },
-      { text: 'Organizations', href: '/organizations' },
-      { text: 'Snapshots', href: '/community/snapshots' },
-    ],
+    href: '/community',
   },
   {
     text: 'Projects',
@@ -33,27 +28,27 @@ export const footerIcons: Array<{
   href: string
   label: string
 }> = [
-  {
-    icon: FaBluesky,
-    href: 'https://bsky.app/profile/nest.owasp.org',
-    label: 'Bluesky',
-  },
-  {
-    icon: FaGithub,
-    href: 'https://github.com/owasp/nest',
-    label: 'GitHub',
-  },
-  {
-    icon: FaLinkedin,
-    href: 'https://www.linkedin.com/groups/14656108/',
-    label: 'LinkedIn',
-  },
-  {
-    icon: FaSlack,
-    href: 'https://owasp.slack.com/archives/project-nest',
-    label: 'Slack',
-  },
-]
+    {
+      icon: FaBluesky,
+      href: 'https://bsky.app/profile/nest.owasp.org',
+      label: 'Bluesky',
+    },
+    {
+      icon: FaGithub,
+      href: 'https://github.com/owasp/nest',
+      label: 'GitHub',
+    },
+    {
+      icon: FaLinkedin,
+      href: 'https://www.linkedin.com/groups/14656108/',
+      label: 'LinkedIn',
+    },
+    {
+      icon: FaSlack,
+      href: 'https://owasp.slack.com/archives/project-nest',
+      label: 'Slack',
+    },
+  ]
 
 export const footerSections: Section[] = [
   {

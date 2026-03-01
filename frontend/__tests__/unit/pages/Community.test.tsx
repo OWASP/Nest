@@ -97,7 +97,7 @@ describe('CommunityPage', () => {
   test('renders Explore Resources section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByTestId('anchor-title')).toHaveTextContent('Explore Resources')
+    expect(screen.getAllByTestId('anchor-title')[0]).toHaveTextContent('Explore Resources')
     expect(screen.getByText('Test Chapter')).toBeInTheDocument()
     expect(screen.getByText('Test Description')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Test Chapter/i })
@@ -137,7 +137,7 @@ describe('CommunityPage', () => {
       name: /Join OWASP Community Slack workspace/i,
     })
     expect(slackLink).toHaveAttribute('href', 'https://owasp.org/slack/invite')
-    expect(screen.getByTestId('icon-arrow-right')).toBeInTheDocument()
+    expect(screen.getAllByTestId('icon-arrow-right').length).toBeGreaterThan(0)
   })
 
   test('renders Final Call to Action section correctly', () => {

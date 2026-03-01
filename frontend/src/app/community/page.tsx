@@ -118,6 +118,30 @@ export default function CommunityPage() {
           </div>
         </SecondaryCard>
 
+        {/* Snapshots Section */}
+        <SecondaryCard
+          title={
+            <div className="flex items-center gap-2">
+              <AnchorTitle title="Snapshots" />
+            </div>
+          }
+        >
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="mb-6 text-gray-600 dark:text-gray-400">
+              Explore community snapshots to discover recent activities, milestones,
+              and highlights from OWASP chapters and initiatives worldwide.
+            </p>
+            <Link
+              href="/community/snapshots"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-white transition-colors hover:bg-blue-600"
+            >
+              View Snapshots
+              <FaArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </SecondaryCard>
+
+
         {/* Join the Community Section */}
         <SecondaryCard title="Join the Community">
           <div className="mx-auto max-w-2xl text-center">

@@ -61,7 +61,7 @@ jest.mock('next/navigation', () => ({
 
 describe('MetricsPage', () => {
   beforeEach(() => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockHealthMetricsData,
       loading: false,
       error: null,
@@ -120,7 +120,7 @@ describe('MetricsPage', () => {
   }
 
   test('renders loading state', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -132,7 +132,7 @@ describe('MetricsPage', () => {
   })
 
   test('renders error state', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: false,
       error: graphQLError,
@@ -169,7 +169,7 @@ describe('MetricsPage', () => {
       expect(screen.getAllByText(metric.contributorsCount.toString())[0]).toBeInTheDocument()
       expect(
         screen.getAllByText(
-          new Date(metric.createdAt).toLocaleString('default', {
+          new Date(metric.createdAt).toLocaleString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
@@ -195,12 +195,12 @@ describe('MetricsPage', () => {
       return updateQuery(mockHealthMetricsData, { fetchMoreResult: mockFetchMoreResult })
     })
 
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const nextPageButton = screen.getByText('Next Page')
@@ -214,12 +214,12 @@ describe('MetricsPage', () => {
 
   test('applies health filter - healthy', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const healthyButton = screen.getByRole('button', { name: 'Healthy' })
@@ -232,12 +232,12 @@ describe('MetricsPage', () => {
 
   test('applies health filter - needs attention', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const needsAttentionButton = screen.getByRole('button', { name: 'Need Attention' })
@@ -250,12 +250,12 @@ describe('MetricsPage', () => {
 
   test('applies health filter - unhealthy', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const unhealthyButton = screen.getByRole('button', { name: 'Unhealthy' })
@@ -268,12 +268,12 @@ describe('MetricsPage', () => {
 
   test('applies level filter - incubator', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const incubatorButton = screen.getByRole('button', { name: 'Incubator' })
@@ -286,12 +286,12 @@ describe('MetricsPage', () => {
 
   test('applies level filter - lab', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const labButton = screen.getByRole('button', { name: 'Lab' })
@@ -304,12 +304,12 @@ describe('MetricsPage', () => {
 
   test('applies level filter - production', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const productionButton = screen.getByRole('button', { name: 'Production' })
@@ -322,12 +322,12 @@ describe('MetricsPage', () => {
 
   test('applies level filter - flagship', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const flagshipButton = screen.getByRole('button', { name: 'Flagship' })
@@ -340,12 +340,12 @@ describe('MetricsPage', () => {
 
   test('resets all filters', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const resetButton = screen.getByRole('button', { name: 'Reset All Filters' })
@@ -361,12 +361,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - score descending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const scoreDescButton = screen.getByRole('button', { name: 'Score (High → Low)' })
@@ -379,12 +379,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - score ascending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const scoreAscButton = screen.getByRole('button', { name: 'Score (Low → High)' })
@@ -397,12 +397,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - stars descending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const starsDescButton = screen.getByRole('button', { name: 'Stars (High → Low)' })
@@ -415,12 +415,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - stars ascending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const starsAscButton = screen.getByRole('button', { name: 'Stars (Low → High)' })
@@ -433,12 +433,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - forks descending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const forksDescButton = screen.getByRole('button', { name: 'Forks (High → Low)' })
@@ -451,12 +451,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - forks ascending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const forksAscButton = screen.getByRole('button', { name: 'Forks (Low → High)' })
@@ -469,12 +469,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - contributors descending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const contributorsDescButton = screen.getByRole('button', {
@@ -489,12 +489,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - contributors ascending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const contributorsAscButton = screen.getByRole('button', {
@@ -509,12 +509,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - created at descending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const createdAtDescButton = screen.getByRole('button', {
@@ -529,12 +529,12 @@ describe('MetricsPage', () => {
 
   test('applies sort - created at ascending', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const createdAtAscButton = screen.getByRole('button', {
@@ -549,12 +549,12 @@ describe('MetricsPage', () => {
 
   test('resets sort order', async () => {
     const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const resetSortButton = screen.getByRole('button', { name: 'Reset Sorting' })
@@ -568,7 +568,7 @@ describe('MetricsPage', () => {
   })
 
   test('renders no metrics message when metrics are empty', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    ; (useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         projectHealthMetrics: [],
         projectHealthMetricsDistinctLength: 0,
@@ -586,13 +586,13 @@ describe('MetricsPage', () => {
 
   test('initializes with ascending order from URL params', async () => {
     const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=scoreAsc'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
+      ; (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=scoreAsc'))
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: jest.fn(),
+      })
 
     render(<MetricsPage />)
     await expectHeaderVisible()
@@ -602,13 +602,13 @@ describe('MetricsPage', () => {
 
   test('initializes with descending order from URL params', async () => {
     const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=starsDesc'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
+      ; (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=starsDesc'))
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: jest.fn(),
+      })
 
     render(<MetricsPage />)
     await expectHeaderVisible()
@@ -622,12 +622,12 @@ describe('MetricsPage', () => {
       return updateQuery(mockHealthMetricsData, { fetchMoreResult: null })
     })
 
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: mockFetchMore,
+      })
     render(<MetricsPage />)
 
     const nextPageButton = screen.getByText('Next Page')
@@ -641,13 +641,13 @@ describe('MetricsPage', () => {
 
   test('initializes with health filter from URL params', async () => {
     const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('health=healthy'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
+      ; (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('health=healthy'))
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: jest.fn(),
+      })
 
     render(<MetricsPage />)
     await expectHeaderVisible()
@@ -657,13 +657,13 @@ describe('MetricsPage', () => {
 
   test('initializes with level filter from URL params', async () => {
     const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('level=incubator'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
+      ; (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('level=incubator'))
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: jest.fn(),
+      })
 
     render(<MetricsPage />)
     await expectHeaderVisible()
@@ -673,15 +673,15 @@ describe('MetricsPage', () => {
 
   test('initializes with both health and level filters from URL params', async () => {
     const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams('health=needsAttention&level=production')
-    )
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
+      ; (useSearchParams as jest.Mock).mockReturnValue(
+        new URLSearchParams('health=needsAttention&level=production')
+      )
+      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+        data: mockHealthMetricsData,
+        loading: false,
+        error: null,
+        fetchMore: jest.fn(),
+      })
 
     render(<MetricsPage />)
     await expectHeaderVisible()
