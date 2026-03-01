@@ -323,9 +323,9 @@ class TestProjectHealthMetricsGetStats:
         mock_get_latest.return_value = mock_queryset
         mock_annotate.return_value = _mock_monthly_queryset_chain(
             [
-                {"month": 1, "score": 70.0},
-                {"month": 2, "score": 72.5},
-                {"month": 3, "score": 75.0},
+                {"year": 2024, "month": 11, "score": 70.0},
+                {"year": 2024, "month": 12, "score": 72.5},
+                {"year": 2025, "month": 1, "score": 75.0},
             ]
         )
 
@@ -338,7 +338,8 @@ class TestProjectHealthMetricsGetStats:
             math.isclose(a, b)
             for a, b in zip(result.monthly_overall_scores, [70.0, 72.5, 75.0], strict=True)
         )
-        assert result.monthly_overall_scores_months == [1, 2, 3]
+        assert result.monthly_overall_scores_months == [11, 12, 1]
+        assert result.monthly_overall_scores_years == [2024, 2024, 2025]
 
     @patch.object(ProjectHealthMetrics, "get_latest_health_metrics")
     @patch.object(ProjectHealthMetrics.objects, "annotate")
@@ -363,3 +364,5 @@ class TestProjectHealthMetricsGetStats:
         assert result.projects_percentage_healthy == 0
         assert result.projects_percentage_need_attention == 0
         assert result.projects_percentage_unhealthy == 0
+        assert result.monthly_overall_scores_months == []
+        assert result.monthly_overall_scores_years == []

@@ -56,6 +56,7 @@ class TestProjectHealthMetricsQuery:
             average_score=65.0,
             monthly_overall_scores=[77.5, 60, 40],
             monthly_overall_scores_months=[1, 2, 3],
+            monthly_overall_scores_years=[2024, 2024, 2025],
             projects_count_healthy=1,
             projects_count_need_attention=2,
             projects_count_unhealthy=1,
