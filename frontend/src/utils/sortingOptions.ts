@@ -1,3 +1,9 @@
+export const sortOptionsChapter = [
+  { label: 'Relevancy', key: 'default' },
+  { label: 'Date Created', key: 'created_at' },
+  { label: 'Last Updated', key: 'updated_at' },
+]
+
 export const sortOptionsProject = [
   { label: 'Relevancy', key: 'default' },
   { label: 'Contributors', key: 'contributors_count' },

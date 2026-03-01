@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 interface UseSearchPageOptions {
@@ -10,6 +10,7 @@ interface UseSearchPageOptions {
   defaultSortBy?: string
   defaultOrder?: string
   hitsPerPage?: number
+  facetFilters?: string[]
 }
 
 interface UseSearchPageReturn<T> {
@@ -32,6 +33,7 @@ export function useSearchPage<T>({
   defaultSortBy = '',
   defaultOrder = '',
   hitsPerPage,
+  facetFilters = [],
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -46,6 +48,9 @@ export function useSearchPage<T>({
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
+  const facetFiltersKey = JSON.stringify(facetFilters)
+  const stableFacetFilters = useMemo(() => facetFilters, [facetFiltersKey])
+
   // Sync state with URL changes
   useEffect(() => {
     if (searchParams) {
@@ -56,8 +61,11 @@ export function useSearchPage<T>({
       const searchQueryChanged = searchQuery !== searchQueryParam
       const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
 
-      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
-      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
+      // Reset page if search query changes (all indices) or if sort/order changes (projects/chapters)
+      if (
+        searchQueryChanged ||
+        (['projects', 'chapters'].includes(indexName) && sortOrOrderChanged)
+      ) {
         setCurrentPage(1)
       }
     }
@@ -99,7 +107,8 @@ export function useSearchPage<T>({
           computedIndexName,
           searchQuery,
           currentPage,
-          hitsPerPage
+          hitsPerPage,
+          stableFacetFilters
         )
 
         if ('hits' in response) {
@@ -115,7 +124,16 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [
+    currentPage,
+    searchQuery,
+    order,
+    sortBy,
+    hitsPerPage,
+    indexName,
+    pageTitle,
+    stableFacetFilters,
+  ])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
