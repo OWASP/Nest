@@ -6,7 +6,7 @@ export type GetBoardCandidatesQueryVariables = Types.Exact<{
 }>;
 
 
-export type GetBoardCandidatesQuery = { boardOfDirectors: { __typename: 'BoardOfDirectorsNode', id: string, owaspUrl: string, year: number, candidates: Array<{ __typename: 'EntityMemberNode', id: string, memberName: string, memberEmail: string, description: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string, bio: string, createdAt: number, firstOwaspContributionAt: number | null, isOwaspBoardMember: boolean, isFormerOwaspStaff: boolean, isGsocMentor: boolean, linkedinPageId: string } | null }> } | null };
+export type GetBoardCandidatesQuery = { boardOfDirectors: { __typename: 'BoardOfDirectorsNode', id: string, owaspUrl: string, year: number, candidates: Array<{ __typename: 'EntityMemberNode', id: string, memberName: string, memberEmail: string, description: string, member: { __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string, bio: string, createdAt: string, firstOwaspContributionAt: string | null, isOwaspBoardMember: boolean, isFormerOwaspStaff: boolean, isGsocMentor: boolean, linkedinPageId: string } | null }> } | null };
 
 export type GetMemberSnapshotQueryVariables = Types.Exact<{
   userLogin: Types.Scalars['String']['input'];

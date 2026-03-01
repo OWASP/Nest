@@ -8,7 +8,7 @@ export type Release = {
   name: string
   organizationName?: string | null
   projectName?: string
-  publishedAt: number
+  publishedAt: string
   repository?: RepositoryDetails
   repositoryName?: string | null
   tagName: string

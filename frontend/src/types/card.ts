@@ -106,8 +106,8 @@ export interface UserCardProps {
 
 export interface SnapshotCardProps {
   key: string
-  startAt: number
-  endAt: number
+  startAt: string
+  endAt: string
   title: string
   button: Button
 }

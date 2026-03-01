@@ -5,7 +5,7 @@ export type Milestone = {
   author?: User | null
   body?: string
   closedIssuesCount?: number
-  createdAt?: number
+  createdAt?: string
   openIssuesCount?: number
   organizationName?: string | null
   progress?: number

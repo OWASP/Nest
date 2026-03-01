@@ -1,11 +1,11 @@
 export type Event = {
   category: string
-  endDate?: number
+  endDate?: string
   id: string
   key: string
   name: string
   objectID?: string
-  startDate: number
+  startDate: string
   suggestedLocation?: string
   summary?: string
   url: string

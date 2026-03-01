@@ -3,9 +3,9 @@ import type { Project } from 'types/project'
 import type { Release } from 'types/release'
 
 export type SnapshotDetails = {
-  endAt: number
+  endAt: string
   key: string
-  startAt: number
+  startAt: string
   title: string
   newReleases: Release[]
   newProjects: Project[]
@@ -13,8 +13,8 @@ export type SnapshotDetails = {
 }
 
 export type Snapshot = {
-  endAt: number
+  endAt: string
   key: string
-  startAt: number
+  startAt: string
   title: string
 }

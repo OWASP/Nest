@@ -63,7 +63,7 @@ export type ChapterNode = Node & {
   contributionData: Scalars['JSON']['output'];
   contributionStats?: Maybe<Scalars['JSON']['output']>;
   country: Scalars['String']['output'];
-  createdAt: Scalars['Float']['output'];
+  createdAt: Scalars['String']['output'];
   entityLeaders: Array<EntityMemberNode>;
   geoLocation?: Maybe<GeoLocationType>;
   /** The Globally Unique ID of this object */
@@ -80,14 +80,14 @@ export type ChapterNode = Node & {
   summary: Scalars['String']['output'];
   tags: Scalars['JSON']['output'];
   topContributors: Array<RepositoryContributorNode>;
-  updatedAt: Scalars['Float']['output'];
+  updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
 
 export type CommitteeNode = Node & {
   __typename?: 'CommitteeNode';
   contributorsCount: Scalars['Int']['output'];
-  createdAt?: Maybe<Scalars['Float']['output']>;
+  createdAt?: Maybe<Scalars['String']['output']>;
   entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
@@ -100,7 +100,7 @@ export type CommitteeNode = Node & {
   starsCount: Scalars['Int']['output'];
   summary: Scalars['String']['output'];
   topContributors: Array<RepositoryContributorNode>;
-  updatedAt: Scalars['Float']['output'];
+  updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
 
@@ -654,7 +654,7 @@ export type ProjectNode = Node & {
   topContributors: Array<RepositoryContributorNode>;
   topics: Array<Scalars['String']['output']>;
   type: Scalars['String']['output'];
-  updatedAt: Scalars['Float']['output'];
+  updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
 
@@ -1086,9 +1086,9 @@ export type UserNode = {
   company: Scalars['String']['output'];
   contributionData?: Maybe<Scalars['JSON']['output']>;
   contributionsCount: Scalars['Int']['output'];
-  createdAt: Scalars['Float']['output'];
+  createdAt: Scalars['String']['output'];
   email: Scalars['String']['output'];
-  firstOwaspContributionAt?: Maybe<Scalars['Float']['output']>;
+  firstOwaspContributionAt?: Maybe<Scalars['String']['output']>;
   followersCount: Scalars['Int']['output'];
   followingCount: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
@@ -1103,6 +1103,6 @@ export type UserNode = {
   name: Scalars['String']['output'];
   publicRepositoriesCount: Scalars['Int']['output'];
   releasesCount: Scalars['Int']['output'];
-  updatedAt: Scalars['Float']['output'];
+  updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };

@@ -13,8 +13,8 @@ export type Program = {
   status?: ProgramStatusEnum
   experienceLevels?: ExperienceLevelEnum[]
   menteesLimit?: number
-  startedAt: number
-  endedAt: number
+  startedAt: string
+  endedAt: string
   domains?: string[]
   tags?: string[]
   userRole?: string | null
@@ -39,7 +39,7 @@ export type ProgramList = {
 export type Module = {
   description: string
   domains?: string[] | null
-  endedAt: number
+  endedAt: string
   experienceLevel: ExperienceLevelEnum
   id: string
   key: string
@@ -47,7 +47,7 @@ export type Module = {
   mentees?: Contributor[]
   mentors: Contributor[]
   name: string
-  startedAt: number
+  startedAt: string
   status?: ProgramStatusEnum
   tags?: string[] | null
 }
