@@ -3,8 +3,9 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from ninja.testing import TestClient
 
-from apps.api.rest.v0.member import MemberDetail, get_member, list_members
+from apps.api.rest.v0.member import MemberDetail, get_member, list_members, router
 
 
 class TestMemberSchema:
@@ -85,6 +86,30 @@ class TestListMembers:
         mock_user_model.objects.order_by.assert_called_with("updated_at")
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
+
+    @pytest.mark.parametrize("ordering", ["name", "-name", "login", "-login"])
+    @patch("apps.api.rest.v0.member.UserModel")
+    def test_list_members_with_name_and_login_ordering(self, mock_user_model, ordering):
+        """Test listing members ordered by name or login (asc and desc)."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_ordered_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_user_model.objects.order_by.return_value = mock_ordered_queryset
+        mock_filters.filter.return_value = mock_filtered_queryset
+
+        result = list_members(mock_request, mock_filters, ordering=ordering)
+
+        mock_user_model.objects.order_by.assert_called_with(ordering)
+        mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
+        assert result == mock_filtered_queryset
+
+    def test_list_members_invalid_ordering_returns_422(self):
+        """Test that an invalid ordering field returns a 422 validation error."""
+        client = TestClient(router)
+        response = client.get("/?ordering=invalid_field")
+
+        assert response.status_code == 422
 
 
 class TestGetMember:
