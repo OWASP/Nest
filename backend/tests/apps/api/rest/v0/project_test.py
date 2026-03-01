@@ -190,6 +190,70 @@ class TestListProjects:
         assert result == mock_type_filtered
 
 
+class TestProjectEndpointIntegration:
+    """Integration tests that call the projects endpoint via Django test client."""
+
+    PROJECTS_URL = "/api/v0/projects/"
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_repeated_type_query_params_parsed_as_list(
+        self, mock_project_model, mock_apply_search
+    ):
+        """Test repeated type query params are parsed as a list."""
+        from django.test import Client
+
+        mock_queryset = MagicMock()
+        mock_filtered = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered
+        mock_filtered.order_by.return_value = []
+
+        client = Client()
+        response = client.get(self.PROJECTS_URL, {"type": ["code", "tool"]})
+
+        assert response.status_code == HTTPStatus.OK
+        mock_queryset.filter.assert_called_with(type__in=["code", "tool"])
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_invalid_type_returns_validation_error(
+        self, mock_project_model, mock_apply_search
+    ):
+        """Test invalid type returns validation error."""
+        from django.test import Client
+
+        client = Client()
+        response = client.get(self.PROJECTS_URL, {"type": "invalid"})
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        data = response.json()
+        assert "errors" in data
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_repeated_type_filter_matches_unit_test_behavior(
+        self, mock_project_model, mock_apply_search
+    ):
+        """Test repeated type filter matches unit test behavior."""
+        from django.test import Client
+
+        mock_queryset = MagicMock()
+        mock_filtered = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered
+        mock_filtered.order_by.return_value = []
+
+        client = Client()
+        response = client.get(self.PROJECTS_URL, {"type": ["code", "tool"]})
+
+        assert response.status_code == HTTPStatus.OK
+        mock_queryset.filter.assert_called_with(type__in=["code", "tool"])
+        mock_filtered.order_by.assert_called_with(
+            "-level_raw", "-stars_count", "-forks_count"
+        )
+
+
 class TestGetProject:
     """Tests for get_project endpoint."""
 
