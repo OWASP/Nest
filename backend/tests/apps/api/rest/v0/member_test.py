@@ -3,8 +3,9 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from ninja.testing import TestClient
 
-from apps.api.rest.v0.member import MemberDetail, get_member, list_members
+from apps.api.rest.v0.member import MemberDetail, get_member, list_members, router
 
 
 class TestMemberSchema:
@@ -105,10 +106,6 @@ class TestListMembers:
 
     def test_list_members_invalid_ordering_returns_422(self):
         """Test that an invalid ordering field returns a 422 validation error."""
-        from ninja.testing import TestClient
-
-        from apps.api.rest.v0.member import router
-
         client = TestClient(router)
         response = client.get("/?ordering=invalid_field")
 
