@@ -61,7 +61,10 @@ class FakeModuleNode:
         return _call_module_resolver(self, "project_name")
 
     def mock_issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
-        return _call_module_resolver(self, "issues", limit=limit, offset=offset, label=label)
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+        return _call_module_resolver(self, "issues", info, limit=limit, offset=offset, label=label)
 
     def mock_issues_count(self, label: str | None = None):
         return _call_module_resolver(self, "issues_count", label=label)
@@ -70,16 +73,23 @@ class FakeModuleNode:
         return _call_module_resolver(self, "available_labels")
 
     def mock_issue_by_number(self, number: int):
-        return _call_module_resolver(self, "issue_by_number", number=number)
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+        return _call_module_resolver(self, "issue_by_number", info, number=number)
 
     def mock_interested_users(self, issue_number: int):
         return _call_module_resolver(self, "interested_users", issue_number=issue_number)
 
     def mock_task_deadline(self, issue_number: int):
-        return _call_module_resolver(self, "task_deadline", issue_number=issue_number)
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        return _call_module_resolver(self, "task_deadline", info, issue_number=issue_number)
 
     def mock_task_assigned_at(self, issue_number: int):
-        return _call_module_resolver(self, "task_assigned_at", issue_number=issue_number)
+        info = MagicMock()
+        info.context.task_assigned_at_by_issue = None
+        return _call_module_resolver(self, "task_assigned_at", info, issue_number=issue_number)
 
 
 @pytest.fixture
@@ -186,7 +196,8 @@ class TestModuleNodeResolvers:
 
     def test_module_node_issues_with_label(self, mock_module_node):
         """Test the issues resolver with a label filter."""
-        issues_list = mock_module_node.mock_issues(label="bug")
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues(label="bug")
         assert len(issues_list) == 1
         mock_module_node_qs_related = mock_module_node.issues.select_related.return_value
         mock_module_node_qs_related.prefetch_related.return_value.filter.assert_called_once_with(
@@ -315,7 +326,8 @@ class TestModuleNodeResolvers:
 
     def test_module_node_issues_invalid_limit(self, mock_module_node):
         """Test the issues resolver returns [] when limit is invalid."""
-        issues_list = mock_module_node.mock_issues(limit=0)
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues(limit=0)
         assert issues_list == []
 
     def test_module_node_issues_no_label(self, mock_module_node):
@@ -323,7 +335,8 @@ class TestModuleNodeResolvers:
         mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
         mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
 
-        issues_list = mock_module_node.mock_issues()
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues()
         assert len(issues_list) == 1
         mock_qs.filter.assert_not_called()
 
@@ -332,7 +345,8 @@ class TestModuleNodeResolvers:
         mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
         mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
 
-        issues_list = mock_module_node.mock_issues(label="all")
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues(label="all")
         assert len(issues_list) == 1
 
     def test_module_node_recent_pull_requests(self, mock_module_node):

@@ -132,6 +132,7 @@ export const GET_MODULE_ISSUES = gql`
         state
         isMerged
         labels
+        taskDeadline
         assignees {
           avatarUrl
           login
