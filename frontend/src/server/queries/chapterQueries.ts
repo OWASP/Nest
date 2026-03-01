@@ -30,6 +30,10 @@ export const GET_CHAPTER_DATA = gql`
       summary
       updatedAt
       url
+      entityChannels {
+        name
+        slackChannelId
+      }
     }
     topContributors(chapter: $key) {
       id

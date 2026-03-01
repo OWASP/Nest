@@ -110,6 +110,17 @@ describe('chapterDetailsPage Component', () => {
     })
   })
 
+  test('renders Slack channel link with expected Slack URL', async () => {
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      const slackLink = screen.getByRole('link', { name: 'chapter-test' })
+      expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C123ABC')
+      expect(slackLink).toHaveAttribute('target', '_blank')
+      expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
+    })
+  })
+
   test('handles contributors with missing names gracefully', async () => {
     const chapterDataWithIncompleteContributors = {
       ...mockChapterDetailsData,

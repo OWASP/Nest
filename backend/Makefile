@@ -262,4 +262,5 @@ update-data: \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \
-	slack-sync-data
+	slack-sync-data \
+	slack-match-channels

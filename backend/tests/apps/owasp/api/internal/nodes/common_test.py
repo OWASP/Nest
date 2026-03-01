@@ -19,6 +19,19 @@ class TestGenericEntityNode:
 
         assert result == [mock_leader1, mock_leader2]
 
+    def test_entity_channels_resolver_uses_prefetched_all(self):
+        """Test entity_channels resolver consumes prefetched relation via .all()."""
+        mock_entity = Mock()
+        mock_channels_manager = Mock()
+        mock_channel = Mock()
+        mock_channels_manager.all.return_value = [mock_channel]
+        mock_entity.entity_channels = mock_channels_manager
+
+        result = GenericEntityNode.entity_channels(None, mock_entity)
+
+        mock_channels_manager.all.assert_called_once()
+        assert result == [mock_channel]
+
     def test_leaders_resolver(self):
         """Test leaders returns indexed leaders list."""
         mock_entity = Mock()
