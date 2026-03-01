@@ -80,7 +80,7 @@ class TestUserIndexMixin:
             ("idx_avatar_url", "https://example.com/avatar.png"),
             ("idx_bio", "Developer bio"),
             ("idx_company", "Test Company"),
-            ("idx_created_at", datetime(2021, 1, 1, tzinfo=UTC).timestamp()),
+            ("idx_created_at", datetime(2021, 1, 1, tzinfo=UTC).isoformat()),
             ("idx_email", "test@example.com"),
             ("idx_key", "test_user"),
             ("idx_followers_count", 100),
@@ -91,7 +91,7 @@ class TestUserIndexMixin:
             ("idx_public_repositories_count", 10),
             ("idx_title", "Developer"),
             ("idx_url", "https://github.com/test_user"),
-            ("idx_updated_at", datetime(2021, 1, 2, tzinfo=UTC).timestamp()),
+            ("idx_updated_at", datetime(2021, 1, 2, tzinfo=UTC).isoformat()),
             (
                 "idx_issues",
                 [

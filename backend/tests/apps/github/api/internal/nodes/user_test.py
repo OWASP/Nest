@@ -209,7 +209,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         )
 
     def test_first_owasp_contribution_at_with_profile(self):
-        """Test first_owasp_contribution_at returns timestamp when profile exists."""
+        """Test first_owasp_contribution_at returns ISO string when profile exists."""
         mock_profile = Mock()
         mock_profile.first_contribution_at = datetime(2025, 1, 15, tzinfo=UTC)
 
@@ -219,7 +219,7 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("first_owasp_contribution_at", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
 
-        assert result == mock_profile.first_contribution_at.timestamp()
+        assert result == mock_profile.first_contribution_at.isoformat()
 
     def test_first_owasp_contribution_at_without_profile(self):
         """Test first_owasp_contribution_at returns None when no profile."""
