@@ -3,6 +3,7 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.test import Client
 
 from apps.api.rest.v0.project import ProjectDetail, get_project, list_projects
 
@@ -201,7 +202,6 @@ class TestProjectEndpointIntegration:
         self, mock_project_model, mock_apply_search
     ):
         """Test repeated type query params are parsed as a list and ordering is applied."""
-        from django.test import Client
 
         mock_queryset = MagicMock()
         mock_filtered = MagicMock()
@@ -224,7 +224,6 @@ class TestProjectEndpointIntegration:
         self, mock_project_model, mock_apply_search
     ):
         """Test invalid type returns validation error."""
-        from django.test import Client
 
         client = Client()
         response = client.get(self.PROJECTS_URL, {"type": "invalid"})
