@@ -425,11 +425,21 @@ const DetailsCard = ({
               <>
                 {modulesList.length === 1 ? (
                   <div className="mb-8">
-                    <ModuleCard modules={modulesList} accessLevel={accessLevel} admins={admins} />
+                    <ModuleCard
+                      modules={modulesList}
+                      accessLevel={accessLevel}
+                      admins={admins}
+                      programKey={programKey}
+                    />
                   </div>
                 ) : (
                   <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
-                    <ModuleCard modules={modulesList} accessLevel={accessLevel} admins={admins} />
+                    <ModuleCard
+                      modules={modulesList}
+                      accessLevel={accessLevel}
+                      admins={admins}
+                      programKey={programKey}
+                    />
                   </SecondaryCard>
                 )}
               </>

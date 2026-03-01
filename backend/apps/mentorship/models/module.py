@@ -24,6 +24,7 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         """Model options."""
 
         db_table = "mentorship_modules"
+        ordering = ["order", "started_at"]
         verbose_name_plural = "Modules"
         constraints = [
             models.UniqueConstraint(
@@ -46,6 +47,11 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         verbose_name="Name",
         blank=True,
         default="",
+    )
+    order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name="Order",
+        help_text="Display order of the module within its program.",
     )
 
     # FKs.
@@ -96,6 +102,14 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         if self.program:
             self.started_at = self.started_at or self.program.started_at
             self.ended_at = self.ended_at or self.program.ended_at
+
+        if not self.pk and self.program:
+            max_order = (
+                Module.objects.filter(program=self.program)
+                .aggregate(max_order=models.Max("order"))
+                .get("max_order")
+            )
+            self.order = (max_order or 0) + 1
 
         self.key = slugify(self.name)
         super().save(*args, **kwargs)
