@@ -20,8 +20,14 @@ function formatUTCDateTime(date: Date) {
   return `${year}${month}${day}T${hours}${minutes}${seconds}Z`
 }
 
-// datetime strings use 'T' in ISO 8601 format to separate date and time (2024-01-15T15:30:00Z)
-const isAllDayEvent = (dateStr: string) => !dateStr.includes('T')
+const isAllDayEvent = (dateStr: string) => {
+  // if no time is provided, new Date() parses it as midnight UTC.
+  // '2025-12-01' -> 2025-12-01T00:00:00Z
+  const dateObj = new Date(dateStr)
+  return (
+    dateObj.getUTCHours() === 0 && dateObj.getUTCMinutes() === 0 && dateObj.getUTCSeconds() === 0
+  )
+}
 
 export default function getGoogleCalendarUrl(event: CalendarEvent): string {
   if (!event?.startDate || !event.title) {

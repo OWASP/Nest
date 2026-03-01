@@ -333,7 +333,7 @@ describe('CalendarButton', () => {
   })
 
   describe('long title overflow handling', () => {
-    it('remains accessible with very long event titles', () => {
+    it('remains accessible with very long event titles', async () => {
       const longTitle =
         'This Is A Very Long Event Title That Extends Beyond Normal Length With Additional Description'
       render(
@@ -360,7 +360,7 @@ describe('CalendarButton', () => {
       })
     })
 
-    it('maintains visibility with flex-shrink-0 class', () => {
+    it('maintains visibility with flex-shrink-0 class', async () => {
       render(
         <CalendarButton
           event={{

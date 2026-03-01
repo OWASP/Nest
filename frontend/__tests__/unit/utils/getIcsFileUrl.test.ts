@@ -8,9 +8,8 @@ describe('getIcsFileUrl', () => {
     title: 'Conference',
     description: 'Discuss Q4 goals',
     location: 'Conference Room A',
-    url: 'https://meet.google.com/abc-defg-hij',
-    startDate: 1735689600, // 2025-01-01 00:00:00 UTC
-    endDate: 1735862400, // 2025-01-03 00:00:00 UTC
+    startDate: '2025-01-01T00:00:00Z',
+    endDate: '2025-01-03T00:00:00Z',
   }
 
   beforeAll(() => {
@@ -41,9 +40,8 @@ describe('getIcsFileUrl', () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
     const eventWithTimestamps = {
-      ...mockEvent,
-      startDate: 1735689600, // 2025-01-01 00:00:00 UTC
-      endDate: 1735862400, // 2025-01-03 00:00:00 UTC
+      startDate: '2025-01-01T00:00:00Z',
+      endDate: '2025-01-03T00:00:00Z',
     }
 
     await getIcsFileUrl(eventWithTimestamps)
@@ -61,9 +59,8 @@ describe('getIcsFileUrl', () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
     const eventWithTimestamps = {
-      ...mockEvent,
-      startDate: 1735689600, // 2025-01-01 00:00:00 UTC
-      endDate: 1735862400, // 2025-01-03 00:00:00 UTC
+      startDate: '2025-01-01T00:00:00Z',
+      endDate: '2025-01-03T00:00:00Z',
     }
 
     await getIcsFileUrl(eventWithTimestamps)
@@ -81,9 +78,8 @@ describe('getIcsFileUrl', () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
     const singleDayEvent = {
-      ...mockEvent,
-      startDate: 1735689600, // 2025-01-01 00:00:00 UTC
-      endDate: 1735689600, // 2025-01-01 00:00:00 UTC (same day)
+      startDate: '2025-01-01T00:00:00Z',
+      endDate: '2025-01-01T00:00:00Z',
     }
 
     await getIcsFileUrl(singleDayEvent)

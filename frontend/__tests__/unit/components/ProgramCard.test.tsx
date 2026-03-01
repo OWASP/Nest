@@ -76,8 +76,8 @@ describe('ProgramCard', () => {
     name: 'Test Program',
     description: 'This is a test program description',
     status: ProgramStatusEnum.Published,
-    startedAt: 1704067200,
-    endedAt: 1735646400,
+    startedAt: '2024-01-01T00:00:00Z',
+    endedAt: '2024-12-31T00:00:00Z',
     userRole: 'admin',
   }
 
@@ -338,7 +338,7 @@ describe('ProgramCard', () => {
     })
 
     it('verifies formatDate explicitly uses timeZone UTC option (catches missing timeZone bug)', () => {
-      const testDate = 1704067200
+      const testDate = '2024-01-01T00:00:00Z'
 
       const spy = jest.spyOn(Date.prototype, 'toLocaleDateString')
       formatDate(testDate)
@@ -361,7 +361,7 @@ describe('ProgramCard', () => {
     })
 
     it('shows only start date when endedAt is missing', () => {
-      const startOnlyProgram = { ...baseMockProgram, endedAt: 0 }
+      const startOnlyProgram = { ...baseMockProgram, endedAt: '' }
       render(
         <ProgramCard
           isAdmin={false}
@@ -375,7 +375,7 @@ describe('ProgramCard', () => {
     })
 
     it('shows fallback text when both dates are missing', () => {
-      const noDatesProgram = { ...baseMockProgram, startedAt: 0, endedAt: 0 }
+      const noDatesProgram = { ...baseMockProgram, startedAt: '', endedAt: '' }
 
       render(
         <ProgramCard
@@ -390,7 +390,7 @@ describe('ProgramCard', () => {
     })
 
     it('shows fallback text when startedAt is missing but endedAt exists', () => {
-      const endOnlyProgram = { ...baseMockProgram, startedAt: 0 }
+      const endOnlyProgram = { ...baseMockProgram, startedAt: '' }
 
       render(
         <ProgramCard
@@ -464,8 +464,8 @@ describe('ProgramCard', () => {
         name: 'Minimal Program',
         description: '',
         status: ProgramStatusEnum.Draft,
-        startedAt: 0,
-        endedAt: 0,
+        startedAt: '',
+        endedAt: '',
       }
 
       render(

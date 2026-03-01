@@ -68,7 +68,7 @@ const baseIssue = {
     publicRepositoriesCount: 3,
     url: 'https://github.com/user1',
   },
-  createdAt: 1710000000,
+  createdAt: '2024-03-09T16:00:00Z',
   hint: 'Hint',
   labels: ['bug'],
   organizationName: 'org',
@@ -76,7 +76,7 @@ const baseIssue = {
   projectUrl: 'https://github.com/org/proj',
   summary: 'Summary',
   title: 'Issue Title',
-  updatedAt: 1710000100,
+  updatedAt: '2024-03-09T16:01:40Z',
   url: 'https://github.com/org/proj/issues/1',
   objectID: 'id1',
   repositoryName: 'repo',
@@ -175,13 +175,13 @@ describe('<RecentIssues />', () => {
 
   it('renders with missing props gracefully', () => {
     const minimalIssue: Issue = {
-      createdAt: 1704067200000,
+      createdAt: '2024-01-01T00:00:00Z',
       title: '',
       url: '',
       objectID: 'minimal-issue',
       projectName: '',
       projectUrl: '',
-      updatedAt: 1704067200000,
+      updatedAt: '2024-01-01T00:00:00Z',
     }
     render(<RecentIssues data={[minimalIssue]} showAvatar={false} />)
     expect(screen.getByText('Recent Issues')).toBeInTheDocument()
