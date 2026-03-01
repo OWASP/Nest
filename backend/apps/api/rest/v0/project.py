@@ -7,6 +7,7 @@ from typing import Literal
 from django.http import HttpRequest
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
+from ninja.errors import ValidationError
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
@@ -26,6 +27,45 @@ PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
         "field": "stars_count",
     },
 }
+
+VALID_PROJECT_LEVELS = frozenset(ProjectLevel.values)
+
+
+def parse_type_filter(type_param: str | None) -> list[ProjectLevel] | None:
+    """Parse and validate the type query parameter.
+
+    Args:
+        type_param: Comma-separated string of project levels.
+
+    Returns:
+        List of valid ProjectLevel values, or None if type_param is empty/None.
+
+    Raises:
+        ValidationError: If any value is invalid.
+
+    """
+    if not type_param or not type_param.strip():
+        return None
+
+    values = [v.strip().lower() for v in type_param.split(",") if v.strip()]
+    if not values:
+        return None
+
+    invalid = [v for v in values if v not in VALID_PROJECT_LEVELS]
+    if invalid:
+        raise ValidationError(
+            [
+                {
+                    "loc": ["query", "type"],
+                    "msg": f"Invalid project level(s): {invalid}. "
+                    f"Valid values: {', '.join(sorted(VALID_PROJECT_LEVELS))}",
+                    "type": "value_error",
+                }
+            ]
+        )
+
+    return [ProjectLevel(v) for v in values]
+
 
 router = RouterPaginated(tags=["Projects"])
 
@@ -81,13 +121,21 @@ class ProjectFilter(FilterSchema):
         None,
         description="Structured search query (e.g. 'name:security stars:>100')",
     )
+    type: str | None = Field(
+        None,
+        description="Filter by project level (comma-separated for multiple). "
+        "Valid values: flagship, production, lab, incubator, other",
+    )
 
 
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP projects.",
     operation_id="list_projects",
-    response=list[Project],
+    response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
+        HTTPStatus.OK: list[Project],
+    },
     summary="List projects",
 )
 @decorate_view(cache_response())
@@ -108,6 +156,10 @@ def list_projects(
 
     if filters.level is not None:
         queryset = queryset.filter(level=filters.level)
+
+    type_levels = parse_type_filter(filters.type)
+    if type_levels is not None:
+        queryset = queryset.filter(level__in=type_levels)
 
     return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 
