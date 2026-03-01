@@ -97,7 +97,8 @@ describe('CommunityPage', () => {
   test('renders Explore Resources section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByTestId('anchor-title')).toHaveTextContent('Explore Resources')
+    const anchorTitles = screen.getAllByTestId('anchor-title')
+    expect(anchorTitles[0]).toHaveTextContent('Explore Resources')
     expect(screen.getByText('Test Chapter')).toBeInTheDocument()
     expect(screen.getByText('Test Description')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Test Chapter/i })
@@ -138,6 +139,18 @@ describe('CommunityPage', () => {
     })
     expect(slackLink).toHaveAttribute('href', 'https://owasp.org/slack/invite')
     expect(screen.getByTestId('icon-arrow-right')).toBeInTheDocument()
+  })
+
+  test('renders Snapshots section correctly', () => {
+    render(<CommunityPage />)
+
+    expect(screen.getByTestId('snapshots-section')).toBeInTheDocument()
+    expect(screen.getByText(/Explore community snapshots/i)).toBeInTheDocument()
+    const anchorTitles = screen.getAllByTestId('anchor-title')
+    expect(anchorTitles.some((node) => node.textContent?.trim() === 'Snapshots')).toBe(true)
+    const snapshotsLink = screen.getByTestId('snapshots-link')
+    expect(snapshotsLink).toHaveAttribute('href', '/community/snapshots')
+    expect(screen.getByText(/View All Snapshots/i)).toBeInTheDocument()
   })
 
   test('renders Final Call to Action section correctly', () => {
