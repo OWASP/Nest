@@ -3,8 +3,15 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from ninja.errors import ValidationError
 
-from apps.api.rest.v0.project import ProjectDetail, get_project, list_projects
+from apps.api.rest.v0.project import (
+    ProjectDetail,
+    get_project,
+    list_projects,
+    parse_type_filter,
+)
+from apps.owasp.models.enums.project import ProjectLevel
 
 
 class TestProjectSerializerValidation:
@@ -74,6 +81,7 @@ class TestListProjects:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.level = None
+        mock_filters.type = None
         mock_filters.q = None
 
         mock_queryset = MagicMock()
@@ -92,6 +100,7 @@ class TestListProjects:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.level = "flagship"
+        mock_filters.type = None
         mock_filters.q = "name:security"
 
         mock_queryset = MagicMock()
@@ -107,6 +116,60 @@ class TestListProjects:
             "created_at", "-stars_count", "-forks_count"
         )
         assert result == mock_filtered_queryset
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_list_projects_with_type_filter_single(self, mock_project_model, mock_apply_search):
+        """Test list projects with single type filter."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.level = None
+        mock_filters.type = "flagship"
+        mock_filters.q = None
+
+        mock_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered_queryset
+        mock_filtered_queryset.order_by.return_value = mock_filtered_queryset
+
+        result = list_projects(mock_request, mock_filters, ordering=None)
+
+        mock_queryset.filter.assert_called_with(level__in=[ProjectLevel.FLAGSHIP])
+        assert result == mock_filtered_queryset
+
+    @patch("apps.api.rest.v0.project.apply_structured_search")
+    @patch("apps.api.rest.v0.project.ProjectModel")
+    def test_list_projects_with_type_filter_multiple(self, mock_project_model, mock_apply_search):
+        """Test list projects with multiple type filter."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.level = None
+        mock_filters.type = "flagship,production"
+        mock_filters.q = None
+
+        mock_queryset = MagicMock()
+        mock_filtered_queryset = MagicMock()
+        mock_apply_search.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered_queryset
+        mock_filtered_queryset.order_by.return_value = mock_filtered_queryset
+
+        result = list_projects(mock_request, mock_filters, ordering=None)
+
+        mock_queryset.filter.assert_called_with(
+            level__in=[ProjectLevel.FLAGSHIP, ProjectLevel.PRODUCTION]
+        )
+        assert result == mock_filtered_queryset
+
+    def test_parse_type_filter_invalid_raises_validation_error(self):
+        """Test parse_type_filter with invalid type raises ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            parse_type_filter("invalid_type")
+
+        errors = exc_info.value.errors
+        assert len(errors) == 1
+        assert errors[0]["loc"] == ["query", "type"]
+        assert "Invalid" in errors[0]["msg"]
 
 
 class TestGetProject:
