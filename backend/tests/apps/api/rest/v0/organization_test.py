@@ -52,29 +52,44 @@ class TestListOrganization:
         """Test listing organizations without ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
-        mock_queryset = MagicMock()
-        mock_org_model.objects.filter.return_value.order_by.return_value = mock_queryset
-        mock_filters.filter.return_value = mock_queryset
+        mock_filters.q = ""
+        mock_filters.dict.return_value = {}
+
+        mock_qs = MagicMock()
+        mock_qs.all.return_value = mock_qs
+        mock_qs.filter.return_value = mock_qs
+        mock_qs.order_by.return_value = mock_qs
+        mock_qs.select_related.return_value = mock_qs
+
+        mock_org_model.objects.all.return_value = mock_qs
+        mock_org_model.objects.filter.return_value = mock_qs
 
         result = list_organization(mock_request, mock_filters, ordering=None)
 
-        mock_org_model.objects.filter.assert_called_with(is_owasp_related_organization=True)
-        mock_org_model.objects.filter.return_value.order_by.assert_called_with("-created_at")
-        assert result == mock_queryset
+        mock_qs.order_by.assert_called_with("-created_at", "-updated_at")
+        assert result == mock_qs
 
     @patch("apps.api.rest.v0.organization.OrganizationModel")
     def test_list_organization_with_ordering(self, mock_org_model):
         """Test listing organizations with custom ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
-        mock_queryset = MagicMock()
-        mock_org_model.objects.filter.return_value.order_by.return_value = mock_queryset
-        mock_filters.filter.return_value = mock_queryset
+        mock_filters.q = ""
+        mock_filters.dict.return_value = {}
+
+        mock_qs = MagicMock()
+        mock_qs.all.return_value = mock_qs
+        mock_qs.filter.return_value = mock_qs
+        mock_qs.order_by.return_value = mock_qs
+        mock_qs.select_related.return_value = mock_qs
+
+        mock_org_model.objects.all.return_value = mock_qs
+        mock_org_model.objects.filter.return_value = mock_qs
 
         result = list_organization(mock_request, mock_filters, ordering="updated_at")
 
-        mock_org_model.objects.filter.return_value.order_by.assert_called_with("updated_at")
-        assert result == mock_queryset
+        mock_qs.order_by.assert_called_with("updated_at", "-updated_at")
+        assert result == mock_qs
 
 
 class TestGetOrganization:

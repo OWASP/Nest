@@ -86,12 +86,19 @@ def list_events(
     ),
 ) -> list[Event]:
     """Get list of events."""
-    if is_upcoming:
-        return filters.filter(
-            EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
-        )
+    order_fields: list[str]
 
-    return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
+    if is_upcoming:
+        queryset = EventModel.upcoming_events()
+        order_fields = [ordering] if ordering else ["start_date", "end_date"]
+    else:
+        queryset = EventModel.objects.all()
+        order_fields = [ordering] if ordering else ["-start_date", "-end_date"]
+
+    if "-nest_updated_at" not in order_fields:
+        order_fields.append("-nest_updated_at")
+
+    return filters.filter(queryset.order_by(*order_fields))
 
 
 @router.get(
