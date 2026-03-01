@@ -1,9 +1,8 @@
 'use client'
-import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { IconType } from 'react-icons'
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa'
 import {
@@ -46,29 +45,13 @@ import { TruncatedText } from 'components/TruncatedText'
 interface HomePageClientProps {
     graphQLData: GetMainPageDataQuery
     geoLocData: Chapter[]
-    graphQLError?: string
 }
 
 export default function HomePageClient({
     graphQLData,
     geoLocData,
-    graphQLError,
 }: HomePageClientProps) {
     const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
-
-    // Show toast if the server-side GraphQL fetch failed
-    useEffect(() => {
-        if (graphQLError) {
-            addToast({
-                description: 'Unable to complete the requested operation.',
-                title: 'GraphQL Request Failed',
-                timeout: 3000,
-                shouldShowTimeoutProgress: true,
-                color: 'danger',
-                variant: 'solid',
-            })
-        }
-    }, [graphQLError])
 
     const data = graphQLData
 
