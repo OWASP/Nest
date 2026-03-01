@@ -63,8 +63,6 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
     def test_contribution_stats_transforms_snake_case_to_camel_case(self):
         """Test that contribution_stats resolver transforms snake_case keys to camelCase."""
-        from unittest.mock import Mock
-
         mock_chapter = Mock()
         mock_chapter.contribution_stats = {
             "commits": 75,
@@ -144,8 +142,6 @@ class TestChapterNode(GraphQLNodeBaseTest):
 
     def test_suggested_location_resolver_none(self):
         """Test suggested_location resolver when None."""
-        from unittest.mock import Mock
-
         mock_chapter = Mock()
         mock_chapter.idx_suggested_location = None
 

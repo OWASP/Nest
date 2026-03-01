@@ -367,4 +367,62 @@ describe('Release Component', () => {
     const avatarLink = screen.getByAltText('Release author avatar').closest('a')
     expect(avatarLink).toHaveAttribute('href', '#')
   })
+  it('renders title as plain text when organizationName is missing', () => {
+    const releaseWithoutOrg = { ...mockReleases[0], organizationName: undefined }
+    render(<Release release={releaseWithoutOrg} />)
+
+    const title = screen.getByText('v1.0 The First Release')
+    expect(title).toBeInTheDocument()
+
+    const link = title.closest('a')
+    expect(link).toBeNull()
+  })
+
+  it('renders title as plain text when repositoryName is missing', () => {
+    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: undefined }
+    render(<Release release={releaseWithoutRepo} />)
+
+    const title = screen.getByText('v1.0 The First Release')
+    expect(title).toBeInTheDocument()
+
+    const link = title.closest('a')
+    expect(link).toBeNull()
+  })
+
+  it('renders tag name as plain text when release name AND organizationName are missing', () => {
+    const releaseWithoutOrgAndName = {
+      ...mockReleases[0],
+      organizationName: undefined,
+      name: undefined,
+    }
+    render(<Release release={releaseWithoutOrgAndName} />)
+
+    // Should find the tagName 'v1.0'
+    const title = screen.getByText('v1.0')
+    expect(title).toBeInTheDocument()
+
+    // Should NOT be inside a link
+    const link = title.closest('a')
+    expect(link).toBeNull()
+  })
+
+  it('safely handles keydown on disabled button to verify handler guards', () => {
+    const releaseWithoutOrg = { ...mockReleases[0], organizationName: '' }
+    render(<Release release={releaseWithoutOrg} />)
+
+    const repoButton = screen.getByRole('button')
+
+    fireEvent.keyDown(repoButton, { key: 'Enter' })
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+  it('safely handles keydown when repositoryName is missing', () => {
+    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: '' }
+    render(<Release release={releaseWithoutRepo} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: 'Enter' })
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
 })

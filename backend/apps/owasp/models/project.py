@@ -45,6 +45,8 @@ class Project(
     active_projects = ActiveProjectManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_projects"
         indexes = [
             models.Index(fields=["-created_at"], name="project_created_at_desc_idx"),

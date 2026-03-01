@@ -4,14 +4,14 @@ on:
   workflow_call:
     inputs:
       test-file:
-        description: 'The test file to run fuzz tests on'
+        description: The test file to run fuzz tests on
         required: true
         type: string
       rest-url:
-        description: 'The REST API URL to test against'
+        description: The REST API URL to test against
         required: false
         type: string
-        default: 'http://localhost:9500/api/v0'
+        default: http://localhost:9500/api/v0
 
 jobs:
   run-fuzz-tests:
@@ -91,7 +91,7 @@ jobs:
           echo "Data loading completed."
 
       - name: Build Fuzz-testing image
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
           cache-from: |
             type=gha

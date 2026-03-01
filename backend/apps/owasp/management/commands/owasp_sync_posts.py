@@ -2,6 +2,7 @@
 
 import json
 import re
+from typing import Any
 
 import yaml
 import yaml.scanner
@@ -77,6 +78,7 @@ class Command(BaseCommand):
             if not post_content.startswith("---"):
                 continue
 
+            metadata: dict[str, Any] = {}
             try:
                 if match := yaml_pattern.search(post_content):
                     metadata_yaml = match.group(1)

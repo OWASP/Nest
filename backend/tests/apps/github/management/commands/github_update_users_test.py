@@ -53,9 +53,9 @@ class TestGithubUpdateUsersCommand:
         ]
         mock_repository_contributor.objects = mock_rc_objects
 
-        with patch("builtins.print") as mock_print:
-            command = Command()
-            command.handle(offset=0)
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=0)
 
         mock_user.objects.order_by.assert_called_once_with("-created_at")
         mock_users_queryset.count.assert_called_once()
@@ -64,10 +64,10 @@ class TestGithubUpdateUsersCommand:
         mock_rc_objects.exclude.return_value.values.assert_called_once_with("user_id")
         mock_rc_objects.exclude.return_value.values.return_value.annotate.assert_called_once()
 
-        assert mock_print.call_count == 3
-        mock_print.assert_any_call("1 of 3     User 1")
-        mock_print.assert_any_call("2 of 3     User 2")
-        mock_print.assert_any_call("3 of 3     User 3")
+        assert command.stdout.write.call_count == 3
+        command.stdout.write.assert_any_call("1 of 3     User 1\n")
+        command.stdout.write.assert_any_call("2 of 3     User 2\n")
+        command.stdout.write.assert_any_call("3 of 3     User 3\n")
 
         assert mock_user1.contributions_count == 10
         assert mock_user2.contributions_count == 20
@@ -97,17 +97,17 @@ class TestGithubUpdateUsersCommand:
         ]
         mock_repository_contributor.objects = mock_rc_queryset
 
-        with patch("builtins.print") as mock_print:
-            command = Command()
-            command.handle(offset=1)
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=1)
 
         mock_user.objects.order_by.assert_called_once_with("-created_at")
         mock_users_queryset.count.assert_called_once()
         mock_users_queryset.__getitem__.assert_called_once_with(slice(1, None))
 
-        assert mock_print.call_count == 2
-        mock_print.assert_any_call("2 of 2     User 2")
-        mock_print.assert_any_call("3 of 2     User 3")
+        assert command.stdout.write.call_count == 2
+        command.stdout.write.assert_any_call("2 of 2     User 2\n")
+        command.stdout.write.assert_any_call("3 of 2     User 3\n")
 
         assert mock_user1.contributions_count == 20
         assert mock_user2.contributions_count == 30
@@ -135,13 +135,13 @@ class TestGithubUpdateUsersCommand:
         mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = []
         mock_repository_contributor.objects = mock_rc_queryset
 
-        with patch("builtins.print") as mock_print:
-            command = Command()
-            command.handle(offset=0)
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=0)
 
-        assert mock_print.call_count == 2
-        mock_print.assert_any_call("1 of 2     User 1")
-        mock_print.assert_any_call("2 of 2     User 2")
+        assert command.stdout.write.call_count == 2
+        command.stdout.write.assert_any_call("1 of 2     User 1\n")
+        command.stdout.write.assert_any_call("2 of 2     User 2\n")
 
         assert mock_user1.contributions_count == 0
         assert mock_user2.contributions_count == 0
@@ -168,11 +168,11 @@ class TestGithubUpdateUsersCommand:
         ]
         mock_repository_contributor.objects = mock_rc_queryset
 
-        with patch("builtins.print") as mock_print:
-            command = Command()
-            command.handle(offset=0)
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=0)
 
-        mock_print.assert_called_once_with("1 of 1     User 1")
+        command.stdout.write.assert_called_once_with("1 of 1     User 1\n")
 
         assert mock_user1.contributions_count == 15
 
@@ -194,11 +194,11 @@ class TestGithubUpdateUsersCommand:
         mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = []
         mock_repository_contributor.objects = mock_rc_queryset
 
-        with patch("builtins.print") as mock_print:
-            command = Command()
-            command.handle(offset=0)
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=0)
 
-        mock_print.assert_not_called()
+        command.stdout.write.assert_not_called()
 
         assert mock_user.bulk_save.call_count == 1
         assert mock_user.bulk_save.call_args_list[-1][0][0] == []
@@ -224,13 +224,13 @@ class TestGithubUpdateUsersCommand:
         ]
         mock_repository_contributor.objects = mock_rc_queryset
 
-        with patch("builtins.print") as mock_print:
-            command = Command()
-            command.handle(offset=0)
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=0)
 
-        assert mock_print.call_count == 2
-        mock_print.assert_any_call("1 of 2     User 1")
-        mock_print.assert_any_call("2 of 2     User 2")
+        assert command.stdout.write.call_count == 2
+        command.stdout.write.assert_any_call("1 of 2     User 1\n")
+        command.stdout.write.assert_any_call("2 of 2     User 2\n")
 
         assert mock_user1.contributions_count == 10
         assert mock_user2.contributions_count == 20

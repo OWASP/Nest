@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 from apps.nest.api.internal.nodes.user import AuthUserNode
 
 
@@ -18,3 +20,53 @@ class TestGitHubAuthResult:
             is_owasp_staff_field.type is bool
             or getattr(is_owasp_staff_field.type, "of_type", None) is bool
         )
+
+    def test_is_owasp_staff_with_no_github_user(self):
+        """Test is_owasp_staff returns False when github_user is None."""
+
+        class FakeNode:
+            github_user = None
+
+        node = FakeNode()
+
+        raw_func = AuthUserNode.__strawberry_definition__.get_field(
+            "is_owasp_staff"
+        ).base_resolver.wrapped_func
+        result = raw_func(node)
+        assert not result
+
+    def test_is_owasp_staff_with_github_user_true(self):
+        """Test is_owasp_staff for staff users."""
+
+        class FakeNode:
+            pass
+
+        mock_github_user = Mock()
+        mock_github_user.is_owasp_staff = True
+
+        node = FakeNode()
+        node.github_user = mock_github_user
+
+        raw_func = AuthUserNode.__strawberry_definition__.get_field(
+            "is_owasp_staff"
+        ).base_resolver.wrapped_func
+        result = raw_func(node)
+        assert result
+
+    def test_is_owasp_staff_with_github_user_false(self):
+        """Test is_owasp_staff for non staff users."""
+
+        class FakeNode:
+            pass
+
+        mock_github_user = Mock()
+        mock_github_user.is_owasp_staff = False
+
+        node = FakeNode()
+        node.github_user = mock_github_user
+
+        raw_func = AuthUserNode.__strawberry_definition__.get_field(
+            "is_owasp_staff"
+        ).base_resolver.wrapped_func
+        result = raw_func(node)
+        assert not result

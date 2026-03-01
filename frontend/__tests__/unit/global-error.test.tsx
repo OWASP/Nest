@@ -10,6 +10,7 @@ import GlobalError, {
   ErrorDisplay,
   ErrorWrapper,
   handleAppError,
+  SentryErrorFallback,
 } from 'app/global-error'
 
 // Mocks
@@ -219,5 +220,41 @@ describe('ErrorWrapper component', () => {
     expect(screen.getByText('Server Error')).toBeInTheDocument()
 
     shouldThrowError = false
+  })
+})
+
+describe('SentryErrorFallback component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('captures exception and renders default 500 error display', () => {
+    const error = new Error('Boundary caught error')
+    render(<SentryErrorFallback error={error} />)
+
+    expect(Sentry.captureException).toHaveBeenCalledWith(error)
+    expect(screen.getByText('500')).toBeInTheDocument()
+    expect(screen.getByText('Server Error')).toBeInTheDocument()
+  })
+
+  test('uses custom errorConfig when provided', () => {
+    const error = new Error('Custom error')
+    const customConfig = { statusCode: 404, title: 'Custom Not Found', message: 'Custom message' }
+    render(<SentryErrorFallback error={error} errorConfig={customConfig} />)
+
+    expect(Sentry.captureException).toHaveBeenCalledWith(error)
+    expect(screen.getByText('404')).toBeInTheDocument()
+    expect(screen.getByText('Custom Not Found')).toBeInTheDocument()
+    expect(screen.getByText('Custom message')).toBeInTheDocument()
+  })
+
+  test('wraps non-Error value in Error before capturing', () => {
+    const nonError = 'string error'
+    render(<SentryErrorFallback error={nonError} />)
+
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+    const captured = (Sentry.captureException as jest.Mock).mock.calls[0][0]
+    expect(captured).toBeInstanceOf(Error)
+    expect(captured.message).toBe('string error')
   })
 })

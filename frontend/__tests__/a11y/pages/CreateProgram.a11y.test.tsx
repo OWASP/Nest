@@ -2,6 +2,7 @@ import { useApolloClient, useMutation, useQuery } from '@apollo/client/react'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useSession } from 'next-auth/react'
+import { useTheme } from 'next-themes'
 import CreateProgramPage from 'app/my/mentorship/programs/create/page'
 
 jest.mock('next/navigation', () => ({
@@ -19,7 +20,14 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
 }))
 
-describe('CreateProgramPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('CreateProgramPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   ;(useApolloClient as jest.Mock).mockReturnValue({
     query: jest.fn().mockReturnValue({
       data: {

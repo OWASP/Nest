@@ -324,6 +324,17 @@ describe('SearchBar Component', () => {
       expect(input).toHaveValue('')
       expect(input).toHaveFocus()
     })
+    it('does not send GTM event for whitespace-only input', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: '   ' } })
+
+      jest.advanceTimersByTime(750)
+
+      expect(mockOnSearch).toHaveBeenCalledWith('   ')
+      expect(sendGTMEvent).not.toHaveBeenCalled()
+    })
   })
 
   describe('Keyboard event handling on clear button', () => {

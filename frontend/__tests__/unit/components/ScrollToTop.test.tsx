@@ -1,4 +1,4 @@
-import { render, fireEvent, waitFor } from '@testing-library/react'
+import { render, fireEvent, waitFor, act } from '@testing-library/react'
 import ScrollToTop from 'components/ScrollToTop'
 
 describe('ScrollToTop component test', () => {
@@ -85,6 +85,32 @@ describe('ScrollToTop component test', () => {
 
     expect(clearTimeoutSpy).toHaveBeenCalled()
     clearTimeoutSpy.mockRestore()
+    jest.useRealTimers()
+  })
+
+  test('Should throttle repeated scroll events', () => {
+    jest.useFakeTimers()
+    const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout')
+
+    render(<ScrollToTop />)
+
+    Object.defineProperty(globalThis, 'scrollY', { value: 400, writable: true })
+    globalThis.dispatchEvent(new Event('scroll'))
+
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(1)
+
+    globalThis.dispatchEvent(new Event('scroll'))
+
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(1) // Still 1
+
+    act(() => {
+      jest.advanceTimersByTime(100)
+    })
+
+    globalThis.dispatchEvent(new Event('scroll'))
+    expect(setTimeoutSpy).toHaveBeenCalledTimes(2)
+
+    setTimeoutSpy.mockRestore()
     jest.useRealTimers()
   })
 })

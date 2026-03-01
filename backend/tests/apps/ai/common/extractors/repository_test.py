@@ -256,6 +256,84 @@ class TestRepositoryContentExtractor:
         )
         assert metadata == expected_metadata
 
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_content_with_null_fields(self, mock_get_content, mock_sleep):
+        """Test extraction when repository has None for optional fields."""
+        mock_get_content.return_value = "[]"
+
+        repository = create_mock_repository(
+            name=None, key=None, description=None, organization=None, owner=None
+        )
+
+        json_content, metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert "name" not in data
+        assert "key" not in data
+        assert "description" not in data
+        assert metadata == ""
+
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_tab_files_with_non_dict_items(self, mock_get_content, mock_sleep):
+        """Test that non-dict items are skipped when extracting tab files."""
+        mock_get_content.side_effect = [
+            '["not_a_dict", {"name": "regular.md"}, {"name": "tab_test.md"}]',
+            None,
+            None,
+            None,
+            None,
+            "Tab file content",
+        ]
+
+        owner = MagicMock()
+        owner.login = "test-owner"
+
+        repository = create_mock_repository(
+            name="test-repo", key="test-key", owner=owner, default_branch="main"
+        )
+
+        json_content, _ = extract_repository_content(repository)
+        data = json.loads(json_content)
+
+        assert "markdown_content" in data
+        assert "tab_test.md" in data["markdown_content"]
+        assert data["markdown_content"]["tab_test.md"] == "Tab file content"
+
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_tab_files_without_tab_prefix(self, mock_get_content, mock_sleep):
+        """Test that files without tab_ prefix are not added to tab_files."""
+        mock_get_content.side_effect = [
+            '[{"name": "readme.md"}, {"name": "notab.md"},'
+            ' {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]',
+            "README content",
+            None,
+            None,
+            None,
+            "Valid tab file",
+        ]
+
+        owner = MagicMock()
+        owner.login = "test-owner"
+
+        repository = create_mock_repository(
+            name="test-repo", key="test-key", owner=owner, default_branch="main"
+        )
+
+        json_content, _ = extract_repository_content(repository)
+        data = json.loads(json_content)
+
+        assert "markdown_content" in data
+        assert "tab_valid.md" in data["markdown_content"]
+        assert data["markdown_content"]["tab_valid.md"] == "Valid tab file"
+        assert "tab_missing_ext" not in data["markdown_content"]
+        assert "notab.md" not in data["markdown_content"]
+        assert "readme.md" not in data["markdown_content"]
+        assert "README.md" in data["markdown_content"]
+        assert data["markdown_content"]["README.md"] == "README content"
+
 
 class TestRepositoryMarkdownContentExtractor:
     """Test cases for repository markdown content extraction."""
@@ -619,3 +697,74 @@ class TestRepositoryMarkdownContentExtractor:
         mock_logger.debug.assert_called_once()
         debug_call_args = mock_logger.debug.call_args[0][0]
         assert "Failed to fetch markdown file" in debug_call_args
+
+    def test_extract_repository_no_description(self):
+        """Test extraction when repository has no description."""
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-key",
+            description=None,
+        )
+
+        json_content, _metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert data["name"] == "test-repo"
+        assert data["key"] == "test-key"
+        assert "description" not in data
+
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.logger")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_markdown_file_exception_types(
+        self, mock_get_content, mock_logger, mock_sleep
+    ):
+        """Test that all exception types in handler are caught properly."""
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            organization=organization,
+        )
+
+        mock_get_content.side_effect = [
+            "[]",
+            TypeError("Type error"),
+            "",
+            "",
+            "",
+        ]
+
+        json_content, _ = extract_repository_content(repository)
+        assert json_content is not None
+        mock_logger.debug.assert_called()
+
+        mock_logger.reset_mock()
+
+        mock_get_content.side_effect = [
+            "[]",
+            "",
+            OSError("OS error"),
+            "",
+            "",
+        ]
+
+        json_content, _ = extract_repository_content(repository)
+        assert json_content is not None
+        mock_logger.debug.assert_called()
+
+        mock_logger.reset_mock()
+
+        mock_get_content.side_effect = [
+            "[]",
+            "",
+            "",
+            ValueError("Value error"),
+            "",
+        ]
+
+        json_content, _ = extract_repository_content(repository)
+        assert json_content is not None
+        mock_logger.debug.assert_called()

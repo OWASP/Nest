@@ -153,4 +153,42 @@ describe('ProjectPage Component', () => {
 
     jest.restoreAllMocks()
   })
+
+  test('handles project with null key gracefully', async () => {
+    const projectWithNullKey = {
+      ...mockProjectData.projects[0],
+      key: null,
+      name: 'Project Without Key',
+      isActive: true,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [projectWithNullKey],
+      totalPages: 1,
+    })
+
+    render(<ProjectsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Project Without Key')).toBeInTheDocument()
+    })
+  })
+
+  test('handles project with null summary gracefully', async () => {
+    const projectWithNullSummary = {
+      ...mockProjectData.projects[0],
+      summary: null,
+      name: 'Project Without Summary',
+      isActive: true,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [projectWithNullSummary],
+      totalPages: 1,
+    })
+
+    render(<ProjectsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Project Without Summary')).toBeInTheDocument()
+    })
+  })
 })

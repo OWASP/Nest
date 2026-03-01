@@ -1,6 +1,7 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { screen, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
 import ChaptersPage from 'app/chapters/page'
@@ -20,7 +21,14 @@ jest.mock('components/SearchPageLayout', () => {
   }
 })
 
-describe('ChaptersPage Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ChaptersPage Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should have no accessibility violations', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockChapterData.chapters,

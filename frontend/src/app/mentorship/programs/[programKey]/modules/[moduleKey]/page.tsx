@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import capitalize from 'lodash/capitalize'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
@@ -69,17 +70,19 @@ const ModuleDetailsPage = () => {
   ]
 
   return (
-    <DetailsCard
-      admins={admins ?? undefined}
-      details={moduleDetails}
-      domains={programModule.domains ?? undefined}
-      mentors={programModule.mentors}
-      pullRequests={(programModule.recentPullRequests as unknown as PullRequest[]) ?? []}
-      summary={programModule.description}
-      tags={programModule.tags ?? undefined}
-      title={programModule.name}
-      type="module"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        admins={admins ?? undefined}
+        details={moduleDetails}
+        domains={programModule.domains ?? undefined}
+        mentors={programModule.mentors}
+        pullRequests={(programModule.recentPullRequests as unknown as PullRequest[]) ?? []}
+        summary={programModule.description}
+        tags={programModule.tags ?? undefined}
+        title={programModule.name}
+        type="module"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

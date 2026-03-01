@@ -22,7 +22,7 @@ class IssueBase(Schema):
     """Base schema for Issue (used in list endpoints)."""
 
     created_at: datetime
-    state: GenericIssueModel.State
+    state: GenericIssueModel.IssueState
     title: str
     updated_at: datetime
     url: str
@@ -57,7 +57,7 @@ class IssueFilter(FilterSchema):
         description="Repository that issues belong to",
         example="Nest",
     )
-    state: GenericIssueModel.State | None = Field(
+    state: GenericIssueModel.IssueState | None = Field(
         None,
         description="Issue state",
     )

@@ -18,6 +18,14 @@ export type Scalars = {
   UUID: { input: any; output: any; }
 };
 
+export type AdminNode = {
+  __typename?: 'AdminNode';
+  avatarUrl: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  login: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type ApiKeyNode = Node & {
   __typename?: 'ApiKeyNode';
   createdAt: Scalars['DateTime']['output'];
@@ -377,6 +385,7 @@ export type Mutation = {
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
+  deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
   revokeApiKey: RevokeApiKeyResult;
@@ -416,6 +425,12 @@ export type MutationCreateModuleArgs = {
 
 export type MutationCreateProgramArgs = {
   inputData: CreateProgramInput;
+};
+
+
+export type MutationDeleteModuleArgs = {
+  moduleKey: Scalars['String']['input'];
+  programKey: Scalars['String']['input'];
 };
 
 
@@ -527,7 +542,7 @@ export type PostNode = Node & {
 
 export type ProgramNode = {
   __typename?: 'ProgramNode';
-  admins?: Maybe<Array<MentorNode>>;
+  admins?: Maybe<Array<AdminNode>>;
   description: Scalars['String']['output'];
   domains?: Maybe<Array<Scalars['String']['output']>>;
   endedAt: Scalars['DateTime']['output'];
@@ -1080,7 +1095,6 @@ export type UpdateProgramStatusInput = {
 export type UserNode = {
   __typename?: 'UserNode';
   avatarUrl: Scalars['String']['output'];
-  badgeCount: Scalars['Int']['output'];
   badges: Array<BadgeNode>;
   bio: Scalars['String']['output'];
   company: Scalars['String']['output'];

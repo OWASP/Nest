@@ -161,4 +161,102 @@ describe('ChaptersPage Component', () => {
       expect(screen.getByText('Chapter 1')).toBeInTheDocument()
     })
   })
+
+  test('renders chapter card without relatedUrls', async () => {
+    const chapterWithoutUrls = {
+      ...mockChapterData.chapters[0],
+      relatedUrls: undefined,
+      key: 'chapter_no_urls',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithoutUrls],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('renders chapter card without objectID (uses key fallback)', async () => {
+    const chapterWithoutObjectID = {
+      ...mockChapterData.chapters[0],
+      objectID: undefined,
+      key: 'chapter_no_objectid',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithoutObjectID],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('renders chapter card without summary (uses empty string fallback)', async () => {
+    const chapterWithoutSummary = {
+      ...mockChapterData.chapters[0],
+      summary: undefined,
+      key: 'chapter_no_summary',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithoutSummary],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('filters out inactive chapters', async () => {
+    const activeChapter = {
+      ...mockChapterData.chapters[0],
+      name: 'Active Chapter',
+      key: 'active_chapter',
+      isActive: true,
+    }
+    const inactiveChapter = {
+      ...mockChapterData.chapters[0],
+      name: 'Inactive Chapter',
+      key: 'inactive_chapter',
+      isActive: false,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [activeChapter, inactiveChapter],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Chapter')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Inactive Chapter')).not.toBeInTheDocument()
+  })
+
+  test('renders chapter with null relatedUrls', async () => {
+    const chapterWithNullUrls = {
+      ...mockChapterData.chapters[0],
+      relatedUrls: null,
+      key: 'chapter_null_urls',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithNullUrls],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
 })

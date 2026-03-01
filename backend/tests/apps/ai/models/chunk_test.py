@@ -159,6 +159,4 @@ class TestChunkModel:
 
     def test_context_relationship(self):
         context_field = Chunk._meta.get_field("context")
-        from apps.ai.models.context import Context
-
         assert context_field.related_model == Context

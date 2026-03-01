@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { FaChartPie } from 'react-icons/fa'
 import DonutBarChart from 'components/DonutBarChart'
 
@@ -23,7 +24,14 @@ jest.mock('next/dynamic', () => {
   })
 })
 
-describe('DonutBarChart a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('DonutBarChart a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(
       <DonutBarChart icon={FaChartPie} title="Test Chart" series={[50, 30, 20]} />

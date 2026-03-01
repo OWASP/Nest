@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from unittest import mock
 
 import pytest
@@ -16,6 +17,13 @@ class TestOwaspAggregateProjects:
     @pytest.fixture
     def command(self):
         return Command()
+
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args([])
+        assert args.offset == 0
 
     @pytest.fixture
     def mock_project(self):
@@ -75,17 +83,15 @@ class TestOwaspAggregateProjects:
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
-        with (
-            mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print") as mock_print,
-        ):
+        with mock.patch.object(Project, "active_projects", mock_active_projects):
+            command.stdout = mock.MagicMock()
             command.handle(offset=offset)
 
-        assert mock_bulk_save.called
-        assert mock_print.call_count == projects - offset
+        mock_bulk_save.assert_called()
+        assert command.stdout.write.call_count == projects - offset
 
-        for call in mock_print.call_args_list:
-            args, _ = call
+        for call in command.stdout.write.call_args_list:
+            args = call[0]
             assert "https://owasp.org/www-project-test" in args[0]
 
     @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
@@ -126,14 +132,12 @@ class TestOwaspAggregateProjects:
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
-        with (
-            mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print"),
-        ):
+        with mock.patch.object(Project, "active_projects", mock_active_projects):
+            command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
         assert not mock_project.is_active
-        assert mock_bulk_save.called
+        mock_bulk_save.assert_called()
 
     @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
     @mock.patch.object(Project, "bulk_save", autospec=True)
@@ -169,9 +173,7 @@ class TestOwaspAggregateProjects:
         )
         mock_active_projects.order_by.return_value = mock_active_projects
 
-        with (
-            mock.patch.object(Project, "active_projects", mock_active_projects),
-            mock.patch("builtins.print"),
-        ):
+        with mock.patch.object(Project, "active_projects", mock_active_projects):
+            command.stdout = mock.MagicMock()
             command.handle(offset=0)
-        assert mock_bulk_save.called
+        mock_bulk_save.assert_called()

@@ -222,4 +222,47 @@ describe('CreateProgramPage (comprehensive tests)', () => {
       )
     })
   })
+  test('shows generic error toast if createProgram fails with non-Error object', async () => {
+    ;(mockUseSession as jest.Mock).mockReturnValue({
+      data: {
+        user: {
+          name: 'Test User',
+          email: 'test@example.com',
+          login: 'testuser',
+          isLeader: true,
+        },
+        expires: '2099-01-01T00:00:00.000Z',
+      },
+      status: 'authenticated',
+      loading: false,
+    })
+
+    mockCreateProgram.mockRejectedValue('String error')
+
+    render(<CreateProgramPage />)
+
+    fireEvent.change(screen.getByLabelText('Name'), {
+      target: { value: 'Test Program' },
+    })
+    fireEvent.change(screen.getByLabelText(/^Description/), {
+      target: { value: 'A description' },
+    })
+    fireEvent.change(screen.getByLabelText('Start Date'), {
+      target: { value: '2025-01-01' },
+    })
+    fireEvent.change(screen.getByLabelText('End Date'), {
+      target: { value: '2025-12-31' },
+    })
+
+    fireEvent.submit(screen.getByText('Save').closest('form')!)
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'GraphQL Request Failed',
+          description: 'Unable to complete the requested operation.',
+        })
+      )
+    })
+  })
 })

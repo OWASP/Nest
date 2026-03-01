@@ -92,9 +92,10 @@ class EntityMemberAdmin(admin.ModelAdmin):
             str: HTML link to the entity's OWASP website or '-' if entity is missing.
 
         """
+        entity = obj.entity
         return (
-            format_html('<a href="{}" target="_blank">↗️</a>', obj.entity.owasp_url)
-            if obj.entity
+            format_html('<a href="{}" target="_blank">↗️</a>', entity.owasp_url)
+            if entity and hasattr(entity, "owasp_url")
             else "-"
         )
 

@@ -32,7 +32,7 @@ class Command(BaseCommand):
         committees = []
         for idx, committee in enumerate(active_committees[offset:]):
             prefix = f"{idx + offset + 1} of {active_committees_count}"
-            print(f"{prefix:<10} {committee.owasp_url}")
+            self.stdout.write(f"{prefix:<10} {committee.owasp_url}\n")
 
             scraper = OwaspScraper(committee.owasp_url)
             if scraper.page_tree is None:

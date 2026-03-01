@@ -1,5 +1,6 @@
 import io
 from datetime import UTC, datetime
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -492,3 +493,341 @@ class TestGithubSyncUserCommand:
         )
         assert mock_profile.first_contribution_at == expected_date
         mock_profile.save.assert_called_once()
+
+    @patch("apps.github.management.commands.github_sync_user.logger")
+    def test_populate_first_contribution_pr_search_error(
+        self, mock_logger, command, mock_member_profile, mock_owasp_org, mock_gh
+    ):
+        """Test that PR search errors are handled gracefully."""
+        mock_profile = MagicMock(spec=MemberProfile, first_contribution_at=None)
+        mock_member_profile.get_or_create.return_value = (mock_profile, True)
+
+        mock_commit = _create_mock_contribution(
+            "commit-repo", "OWASP/commit-repo", datetime(2025, 1, 15, tzinfo=UTC), commit=True
+        )
+        mock_gh.search_commits.return_value = MockPaginatedList([mock_commit])
+
+        mock_gh.search_issues.side_effect = [
+            GithubException(500, "Server Error"),
+            MockPaginatedList([]),
+        ]
+
+        command.populate_first_contribution_only("testuser", MagicMock(spec=User), mock_gh)
+
+        expected_date = datetime(2025, 1, 15, tzinfo=UTC)
+        assert mock_profile.first_contribution_at == expected_date
+        mock_logger.warning.assert_any_call("Error searching PRs: %s", mock.ANY)
+
+    @patch("apps.github.management.commands.github_sync_user.logger")
+    def test_populate_first_contribution_issue_search_error(
+        self, mock_logger, command, mock_member_profile, mock_owasp_org, mock_gh
+    ):
+        """Test that issue search errors are handled gracefully."""
+        mock_profile = MagicMock(spec=MemberProfile, first_contribution_at=None)
+        mock_member_profile.get_or_create.return_value = (mock_profile, True)
+
+        mock_pr = _create_mock_contribution(
+            "pr-repo", "OWASP/pr-repo", datetime(2025, 1, 1, tzinfo=UTC)
+        )
+        mock_gh.search_commits.return_value = MockPaginatedList([])
+
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([mock_pr]),
+            GithubException(500, "Server Error"),
+        ]
+
+        command.populate_first_contribution_only("testuser", MagicMock(spec=User), mock_gh)
+
+        expected_date = datetime(2025, 1, 1, tzinfo=UTC)
+        assert mock_profile.first_contribution_at == expected_date
+        mock_logger.warning.assert_any_call("Error searching issues: %s", mock.ANY)
+
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_commit_with_no_committer(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_commit,
+        mock_gh,
+        default_options,
+    ):
+        """Test handling commits where gh_commit.committer is None."""
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
+        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+
+        mock_repository = MagicMock()
+        mock_repository.owner = MagicMock(login="OWASP")
+        mock_repository.name = "test-repo"
+        mock_repo.filter.return_value.select_related.return_value = [mock_repository]
+
+        mock_gh_repo = MagicMock(spec=Repository, full_name="OWASP/test-repo")
+        mock_gh_commit = MagicMock(repository=mock_gh_repo, sha="123", committer=None)
+        mock_gh.search_commits.return_value = MockPaginatedList([mock_gh_commit])
+        mock_gh.search_issues.return_value = MockPaginatedList([])
+
+        command.handle(**default_options)
+
+        assert mock_user.update_data.call_count >= 1
+        mock_commit.bulk_save.assert_called_once()
+
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    @patch("apps.github.management.commands.github_sync_user.logger")
+    def test_handle_pr_repository_not_in_cache(
+        self,
+        mock_logger,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_pr,
+        mock_gh,
+        default_options,
+    ):
+        """Test PR skipped when repository not in cache."""
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
+        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+
+        mock_repo.filter.return_value.select_related.return_value = []
+        mock_gh.search_commits.return_value = MockPaginatedList([])
+        mock_gh_pr = MagicMock(repository=MagicMock(full_name="OWASP/uncached-repo"), number=1)
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([mock_gh_pr]),
+            MockPaginatedList([]),
+        ]
+
+        command.handle(**default_options)
+
+        mock_logger.warning.assert_any_call(
+            "Repository %s not in database, skipping PR", "OWASP/uncached-repo"
+        )
+        mock_pr.bulk_save.assert_not_called()
+
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    @patch("apps.github.management.commands.github_sync_user.logger")
+    def test_handle_pr_get_repo_error(
+        self,
+        mock_logger,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_pr,
+        mock_gh,
+        default_options,
+    ):
+        """Test PR fetch error handling."""
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
+        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+
+        mock_repository = MagicMock()
+        mock_repository.owner = MagicMock(login="OWASP")
+        mock_repository.name = "test-repo"
+        mock_repo.filter.return_value.select_related.return_value = [mock_repository]
+
+        mock_gh.search_commits.return_value = MockPaginatedList([])
+        mock_gh_pr = MagicMock(repository=MagicMock(full_name="OWASP/test-repo"), number=1)
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([mock_gh_pr]),
+            MockPaginatedList([]),
+        ]
+
+        mock_gh.get_repo.side_effect = GithubException(500, "Server Error")
+
+        command.handle(**default_options)
+
+        mock_logger.warning.assert_any_call(
+            "Could not fetch PR #%s from %s: %s", 1, "OWASP/test-repo", mock.ANY
+        )
+        mock_pr.bulk_save.assert_not_called()
+
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    @patch("apps.github.management.commands.github_sync_user.logger")
+    def test_handle_issue_repository_not_in_cache(
+        self,
+        mock_logger,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_issue,
+        mock_gh,
+        default_options,
+    ):
+        """Test issue skipped when repository not in cache."""
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
+        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+
+        mock_repo.filter.return_value.select_related.return_value = []
+        mock_gh.search_commits.return_value = MockPaginatedList([])
+        mock_gh_issue = MagicMock(repository=MagicMock(full_name="OWASP/uncached-repo"), number=2)
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([]),
+            MockPaginatedList([mock_gh_issue]),
+        ]
+
+        command.handle(**default_options)
+
+        mock_logger.warning.assert_any_call(
+            "Repository %s not in database, skipping issue", "OWASP/uncached-repo"
+        )
+        mock_issue.bulk_save.assert_not_called()
+
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_github_exception_on_prs(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_pr,
+        mock_gh,
+        default_options,
+    ):
+        """Test handling GithubException during PR search."""
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
+        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+
+        mock_repo.filter.return_value.select_related.return_value = []
+        mock_gh.search_commits.return_value = MockPaginatedList([])
+        mock_gh.search_issues.side_effect = [
+            GithubException(500, "Server Error"),
+            MockPaginatedList([]),
+        ]
+
+        command.handle(**default_options)
+
+        assert "Error searching PRs in OWASP" in command.stderr.getvalue()
+        mock_pr.bulk_save.assert_not_called()
+
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_github_exception_on_issues(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_issue,
+        mock_gh,
+        default_options,
+    ):
+        """Test handling GithubException during issue search."""
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
+        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+
+        mock_repo.filter.return_value.select_related.return_value = []
+        mock_gh.search_commits.return_value = MockPaginatedList([])
+        mock_gh.search_issues.side_effect = [
+            MockPaginatedList([]),
+            GithubException(500, "Server Error"),
+        ]
+
+        command.handle(**default_options)
+
+        assert "Error searching issues in OWASP" in command.stderr.getvalue()
+        mock_issue.bulk_save.assert_not_called()
+
+    @patch(
+        "apps.github.management.commands.github_sync_user.Command.populate_first_contribution_only"
+    )
+    def test_handle_commit_with_committer_update(
+        self,
+        mock_populate,
+        command,
+        mock_user,
+        mock_repo_contributor,
+        mock_owasp_org,
+        mock_repo,
+        mock_commit,
+        mock_gh,
+        default_options,
+    ):
+        """Test commit committer reference update."""
+        (
+            mock_repo_contributor.filter.return_value.select_related.return_value.exists.return_value
+        ) = True
+        mock_repo_contributor.filter.return_value.values_list.return_value = [1]
+
+        mock_repository = MagicMock()
+        mock_repository.owner = MagicMock(login="OWASP")
+        mock_repository.name = "test-repo"
+        mock_repo.filter.return_value.select_related.return_value = [mock_repository]
+
+        mock_gh_repo = MagicMock(spec=Repository, full_name="OWASP/test-repo")
+        mock_gh_committer = MagicMock()
+        mock_gh_commit_1 = MagicMock(
+            repository=mock_gh_repo, sha="111", committer=mock_gh_committer
+        )
+        mock_gh_commit_2 = MagicMock(
+            repository=mock_gh_repo, sha="222", committer=mock_gh_committer
+        )
+        mock_gh.search_commits.return_value = MockPaginatedList(
+            [mock_gh_commit_1, mock_gh_commit_2]
+        )
+        mock_gh.search_issues.return_value = MockPaginatedList([])
+
+        mock_committer_user = MagicMock()
+        mock_committer_user.node_id = "committer_node_123"
+        mock_author_user = MagicMock()
+        mock_author_user.node_id = "author_node_456"
+        mock_user.update_data.side_effect = [
+            mock_author_user,
+            mock_committer_user,
+            mock_committer_user,
+        ]
+
+        mock_commit_obj_1 = MagicMock()
+        mock_commit_obj_1.committer = mock_committer_user
+        mock_commit_obj_2 = MagicMock()
+        mock_commit_obj_2.committer = mock_committer_user
+        mock_commit.update_data.side_effect = [mock_commit_obj_1, mock_commit_obj_2]
+
+        mock_saved_committer = MagicMock()
+        mock_saved_committer.node_id = "committer_node_123"
+        mock_user.objects.filter.return_value = [mock_saved_committer]
+
+        command.handle(**default_options)
+
+        mock_user.bulk_save.assert_called_once()
+        saved_committers = mock_user.bulk_save.call_args[0][0]
+        assert len(saved_committers) == 1
+        mock_commit.bulk_save.assert_called_once()
+        assert mock_commit_obj_1.committer == mock_saved_committer
+        assert mock_commit_obj_2.committer == mock_saved_committer

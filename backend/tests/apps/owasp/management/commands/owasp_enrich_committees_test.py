@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from unittest import mock
 
 import pytest
@@ -13,6 +14,15 @@ class TestOwaspEnrichCommittees:
     @pytest.fixture
     def command(self):
         return Command()
+
+    def test_add_arguments(self, command):
+        """Test add_arguments adds expected arguments."""
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args([])
+        assert args.offset == 0
+        assert not args.force_update_summary
+        assert args.update_summary
 
     @pytest.fixture
     def mock_committee(self):
@@ -83,8 +93,8 @@ class TestOwaspEnrichCommittees:
             mock.patch.object(
                 Prompt, "get_owasp_committee_summary", mock_prompt.get_owasp_committee_summary
             ),
-            mock.patch("builtins.print") as mock_print,
         ):
+            command.stdout = mock.MagicMock()
             command.handle(
                 offset=offset,
                 force_update_summary=force_update_summary,
@@ -96,12 +106,12 @@ class TestOwaspEnrichCommittees:
         else:
             mock_active_committees_without_summary.count.assert_called_once()
 
-        assert mock_bulk_save.called
+        mock_bulk_save.assert_called()
 
-        assert mock_print.call_count == committees - offset
+        assert command.stdout.write.call_count == committees - offset
 
-        for call in mock_print.call_args_list:
-            args, _ = call
+        for call in command.stdout.write.call_args_list:
+            args = call[0]
             assert "https://owasp.org/www-committee-test" in args[0]
 
         if update_summary:

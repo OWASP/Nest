@@ -177,3 +177,14 @@ class TestIssueQuery:
         # Verify organization filter was applied
         mock_queryset.filter.assert_called_once_with(repository__organization__login="owasp")
         mock_queryset.__getitem__.assert_called_with(slice(None, 10))
+
+    @patch("apps.github.models.issue.Issue.objects")
+    def test_recent_issues_invalid_limit(self, mock_objects):
+        """Test recent_issues returns empty list for invalid limit."""
+        mock_queryset = MagicMock()
+        mock_queryset.order_by.return_value = mock_queryset
+        mock_objects.order_by.return_value = mock_queryset
+
+        result = IssueQuery().recent_issues(limit=0)
+
+        assert result == []

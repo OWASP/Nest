@@ -103,4 +103,49 @@ describe('ProgramDetailsPage', () => {
       expect(screen.getByText('N/A')).toBeInTheDocument()
     })
   })
+
+  test('renders program without admins (uses undefined fallback)', async () => {
+    const mockDataWithoutAdmins = {
+      getProgram: { ...mockProgramDetailsData.getProgram, admins: null },
+      getProgramModules: mockProgramDetailsData.getProgramModules,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutAdmins,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Program')).toBeInTheDocument()
+    })
+  })
+
+  test('renders program without domains (uses undefined fallback)', async () => {
+    const mockDataWithoutDomains = {
+      getProgram: { ...mockProgramDetailsData.getProgram, domains: null },
+      getProgramModules: mockProgramDetailsData.getProgramModules,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutDomains,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Program')).toBeInTheDocument()
+    })
+  })
+
+  test('renders program without tags (uses undefined fallback)', async () => {
+    const mockDataWithoutTags = {
+      getProgram: { ...mockProgramDetailsData.getProgram, tags: null },
+      getProgramModules: mockProgramDetailsData.getProgramModules,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: mockDataWithoutTags,
+    })
+    render(<ProgramDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Test Program')).toBeInTheDocument()
+    })
+  })
 })
