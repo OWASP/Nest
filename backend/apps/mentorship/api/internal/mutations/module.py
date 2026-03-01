@@ -6,7 +6,9 @@ from datetime import datetime
 import strawberry
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.utils import IntegrityError
 from django.utils import timezone
+from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.module import (
@@ -114,18 +116,29 @@ class ModuleMutation:
             program.ended_at,
         )
 
-        module = Module.objects.create(
-            name=input_data.name,
-            description=input_data.description,
-            experience_level=input_data.experience_level.value,
-            started_at=started_at,
-            ended_at=ended_at,
-            domains=input_data.domains,
-            labels=input_data.labels,
-            tags=input_data.tags,
-            program=program,
-            project=project,
-        )
+        try:
+            with transaction.atomic():
+                module = Module.objects.create(
+                    name=input_data.name,
+                    description=input_data.description,
+                    experience_level=input_data.experience_level.value,
+                    started_at=started_at,
+                    ended_at=ended_at,
+                    domains=input_data.domains,
+                    labels=input_data.labels,
+                    tags=input_data.tags,
+                    program=program,
+                    project=project,
+                )
+        except IntegrityError as e:
+            error_message = str(e)
+            if "unique_module_key_in_program" in error_message:
+                msg = "This module name already exists in this program."
+                raise GraphQLError(
+                    msg,
+                    extensions={"code": "VALIDATION_ERROR", "field": "name"},
+                ) from e
+            raise
 
         if module.experience_level not in program.experience_levels:
             program.experience_levels.append(module.experience_level)
@@ -392,7 +405,18 @@ class ModuleMutation:
             mentors_to_set = resolve_mentors_from_logins(input_data.mentor_logins)
             module.mentors.set(mentors_to_set)
 
-        module.save()
+        try:
+            with transaction.atomic():
+                module.save()
+        except IntegrityError as e:
+            error_message = str(e)
+            if "unique_module_key_in_program" in error_message:
+                msg = "This module name already exists in this program."
+                raise GraphQLError(
+                    msg,
+                    extensions={"code": "VALIDATION_ERROR", "field": "name"},
+                ) from e
+            raise
 
         if module.experience_level not in module.program.experience_levels:
             module.program.experience_levels.append(module.experience_level)
