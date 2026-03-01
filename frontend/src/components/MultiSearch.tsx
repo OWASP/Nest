@@ -160,7 +160,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick])
 
   useEffect(() => {
-    if(shouldAutoFocus){
+    if(isLoaded && shouldAutoFocus){
       inputRef.current?.focus()
     }
 
@@ -175,7 +175,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [shouldAutoFocus])
+  }, [isLoaded, shouldAutoFocus])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
