@@ -56,7 +56,9 @@ export const formatDateRange = (startDate: string, endDate: string) => {
   }
 }
 
-export const formatDateForInput = (input: string) => {
+export const formatDateForInput = (input: string | null) => {
+  if (!input) return ''
+
   const date = new Date(input)
   if (Number.isNaN(date.getTime())) return ''
 
