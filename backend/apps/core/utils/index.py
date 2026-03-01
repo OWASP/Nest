@@ -134,6 +134,7 @@ def get_params_for_index(index_name: str) -> dict:
         case "chapters":
             params["attributesToRetrieve"] = [
                 "_geoloc",
+                "idx_country",
                 "idx_created_at",
                 "idx_is_active",
                 "idx_key",
