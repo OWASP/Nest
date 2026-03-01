@@ -3,10 +3,10 @@ import type { CalendarEvent } from 'types/calendar'
 
 const pad = (n: number, width = 2) => String(n).padStart(width, '0')
 
-function formatLocalDate(date: Date) {
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
+function formatUTCDate(date: Date) {
+  const year = date.getUTCFullYear()
+  const month = pad(date.getUTCMonth() + 1)
+  const day = pad(date.getUTCDate())
   return `${year}${month}${day}`
 }
 
@@ -46,9 +46,9 @@ export default function getGoogleCalendarUrl(event: CalendarEvent): string {
 
   let datesParam: string
   if (isAllDay) {
-    const s = formatLocalDate(start)
+    const s = formatUTCDate(start)
     const endExclusive = new Date(end.getTime() + 24 * 60 * 60 * 1000)
-    const e = formatLocalDate(endExclusive)
+    const e = formatUTCDate(endExclusive)
     datesParam = `${s}/${e}`
   } else {
     const s = formatUTCDateTime(start)

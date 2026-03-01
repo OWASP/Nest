@@ -363,11 +363,7 @@ const BoardCandidatesPage = () => {
               <p className="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">
                 GitHub account created{' '}
                 <span className="font-semibold text-gray-800 dark:text-gray-300">
-                  {dayjs(
-                    typeof candidate.member.createdAt === 'number'
-                      ? candidate.member.createdAt * 1000
-                      : candidate.member.createdAt
-                  ).fromNow()}
+                  {dayjs(candidate.member.createdAt).fromNow()}
                 </span>{' '}
                 - {formatDate(candidate.member.createdAt)}
               </p>

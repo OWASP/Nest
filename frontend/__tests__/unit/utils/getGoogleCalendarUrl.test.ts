@@ -24,7 +24,7 @@ describe('getGoogleCalendarUrl', () => {
   })
 
   describe('timestamp handling', () => {
-    it('handles Unix timestamps correctly', () => {
+    it('handles ISO date timestamps correctly', () => {
       const url = getGoogleCalendarUrl({
         title: 'Event',
         startDate: '2025-12-01T00:00:00Z',
