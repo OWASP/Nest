@@ -86,6 +86,20 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
         """
         return self.name
 
+    def user_has_access(self, user) -> bool:
+        """Check if the given user has admin or mentor access to this program.
+
+        Returns True if the user is authenticated and is either an admin or
+        a mentor of this program, False otherwise.
+        """
+        if not user.is_authenticated:
+            return False
+
+        return self.admins.filter(nest_user=user).exists() or bool(
+            user.github_user
+            and self.modules.filter(mentors__github_user=user.github_user).exists()
+        )
+
     def save(self, *args, **kwargs) -> None:
         """Save program."""
         self.key = slugify(self.name)

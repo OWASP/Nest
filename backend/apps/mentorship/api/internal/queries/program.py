@@ -21,7 +21,7 @@ class ProgramQuery:
     """Program queries."""
 
     @strawberry.field
-    def get_program(self, program_key: str) -> ProgramNode | None:
+    def get_program(self, info: strawberry.Info, program_key: str) -> ProgramNode | None:
         """Get a program by Key."""
         try:
             program = Program.objects.prefetch_related(
@@ -30,6 +30,11 @@ class ProgramQuery:
         except Program.DoesNotExist:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
+            return None
+
+        if program.status != Program.ProgramStatus.PUBLISHED and not program.user_has_access(
+            info.context.request.user
+        ):
             return None
 
         return program

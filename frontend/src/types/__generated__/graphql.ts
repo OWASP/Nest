@@ -710,7 +710,6 @@ export type Query = {
   getModule?: Maybe<ModuleNode>;
   getProgram?: Maybe<ProgramNode>;
   getProgramModules: Array<ModuleNode>;
-  getProjectModules: Array<ModuleNode>;
   isMentor: Scalars['Boolean']['output'];
   isProjectLeader: Scalars['Boolean']['output'];
   memberSnapshot?: Maybe<MemberSnapshotNode>;
@@ -792,11 +791,6 @@ export type QueryGetProgramArgs = {
 
 export type QueryGetProgramModulesArgs = {
   programKey: Scalars['String']['input'];
-};
-
-
-export type QueryGetProjectModulesArgs = {
-  projectKey: Scalars['String']['input'];
 };
 
 
