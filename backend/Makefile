@@ -5,6 +5,7 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
+##@ Backend
 ifeq ($(EXEC_MODE),direct)
 SHELL := /bin/sh
 else
@@ -38,7 +39,7 @@ clean-backend-docker:
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
-create-superuser:
+create-superuser: ## Create Django admin superuser
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
@@ -88,16 +89,17 @@ exec-db-command-fuzz-it:
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
 
-collect-static:
+collect-static: ## Collect static files
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
-django-shell:
+django-shell: ## Open Django interactive shell
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
-dump-data:
+dump-data: ## Dump database data
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
+enrich-data: ## Enrich data from external sources
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
@@ -108,13 +110,13 @@ enrich-data: \
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 
-index-data:
+index-data: ## Index data for Algolia search
 	@echo "Indexing Nest data"
 	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data:
+load-data: ## Load initial data from fixtures
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
 
@@ -133,10 +135,10 @@ load-data-staging:
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
-migrate:
+migrate: ## Run database migrations
 	@CMD="python manage.py migrate" $(MAKE) exec-backend-command
 
-migrations:
+migrations: ## Generate new migrations
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
 migrations-empty:
@@ -218,12 +220,13 @@ shell-backend:
 shell-db:
 	@CMD="/bin/sh" $(MAKE) exec-db-command-it
 
+sync-data: ## Sync, enrich, and index all data
 sync-data: \
 	update-data \
 	enrich-data \
 	index-data
 
-test-backend:
+test-backend: ## Run backend tests
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
 		-f docker/backend/Dockerfile.test backend \
@@ -248,6 +251,7 @@ test-fuzz:
 update-backend-dependencies:
 	@cd backend && poetry update
 
+update-data: ## Update data from GitHub and OWASP
 update-data: \
 	github-update-owasp-organization \
 	owasp-scrape-chapters \

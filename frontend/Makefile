@@ -2,7 +2,8 @@ SHELL := /bin/bash
 
 .PHONY: sbom-frontend-image
 
-build-frontend-local-image:
+##@ Frontend
+build-frontend-local-image: ## Build local frontend Docker image
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 	    --build-arg FORCE_STANDALONE=yes \
 	    --no-cache \
@@ -10,6 +11,7 @@ build-frontend-local-image:
 	    -t nest-frontend-local \
 	    frontend
 
+check-frontend: ## Run frontend code quality checks
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code \
@@ -98,6 +100,7 @@ sbom-frontend-image:
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
+test-frontend: ## Run all frontend tests
 test-frontend: \
 	test-frontend-unit \
 	test-frontend-a11y \
