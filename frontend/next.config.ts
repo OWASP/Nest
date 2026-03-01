@@ -4,8 +4,71 @@ import type { NextConfig } from 'next'
 const forceStandalone = process.env.FORCE_STANDALONE === 'yes'
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
+const securityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline'${isLocal ? " 'unsafe-eval'" : ''} https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org`,
+      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com",
+      "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://owasp.org https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://raw.githubusercontent.com",
+      "font-src 'self' https://cdn.jsdelivr.net",
+      "connect-src 'self' https://github-contributions-api.jogruber.de https://*.google-analytics.com https://*.i.posthog.com https://*.sentry.io https://*.tile.openstreetmap.org",
+      "object-src 'none'",
+      "frame-src 'self'",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; '),
+  },
+  {
+    key: 'Cross-Origin-Embedder-Policy',
+    value: 'credentialless',
+  },
+  {
+    key: 'Cross-Origin-Opener-Policy',
+    value: 'same-origin',
+  },
+  {
+    key: 'Cross-Origin-Resource-Policy',
+    value: 'same-origin',
+  },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), fullscreen=(self), geolocation=(self), microphone=()',
+  },
+  {
+    key: 'Referrer-Policy',
+    value: 'strict-origin-when-cross-origin',
+  },
+  {
+    key: 'Strict-Transport-Security',
+    value: 'max-age=31536000; includeSubDomains; preload',
+  },
+  {
+    key: 'X-Content-Type-Options',
+    value: 'nosniff',
+  },
+  {
+    key: 'X-Frame-Options',
+    value: 'DENY',
+  },
+  {
+    key: 'X-Permitted-Cross-Domain-Policies',
+    value: 'none',
+  },
+]
+
 const nextConfig: NextConfig = {
   devIndicators: false,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: securityHeaders,
+      },
+    ]
+  },
   images: {
     // This is a list of remote patterns that Next.js will use to determine
     // if an image is allowed to be loaded from a remote source.
