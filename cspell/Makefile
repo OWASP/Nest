@@ -1,6 +1,8 @@
 .PHONY: check-spelling cspell-install cspell-check cspell-run update-cspell-dependencies
 
-check-spelling: cspell-check
+##@ Spelling
+
+check-spelling: cspell-check ## Run spell checking
 
 cspell-install:
 	@ # Check if cspell:ci image exists (from CI build step), tag it to 'cspell' if found,

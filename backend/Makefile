@@ -38,7 +38,9 @@ clean-backend-docker:
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
-create-superuser:
+##@ Backend
+
+create-superuser: ## Create a Django superuser
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
@@ -85,16 +87,16 @@ exec-db-command-fuzz:
 exec-db-command-fuzz-it:
 	@docker exec -it fuzz-nest-db $(CMD)
 
-clear-cache:
+clear-cache: ## Clear the application cache
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
 
 collect-static:
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
-django-shell:
+django-shell: ## Open Django interactive shell
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
-dump-data:
+dump-data: ## Dump database data to file
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
@@ -105,16 +107,16 @@ enrich-data: \
 	owasp-enrich-events \
 	owasp-enrich-projects
 
-generate-sitemap:
+generate-sitemap: ## Generate sitemap
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 
-index-data:
+index-data: ## Index data in Algolia search
 	@echo "Indexing Nest data"
 	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data:
+load-data: ## Load initial data into database
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
 
@@ -133,10 +135,10 @@ load-data-staging:
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
-migrate:
+migrate: ## Run database migrations
 	@CMD="python manage.py migrate" $(MAKE) exec-backend-command
 
-migrations:
+migrations: ## Create new database migrations
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
 migrations-empty:
@@ -151,7 +153,7 @@ purge-data-e2e:
 purge-data-fuzz:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-fuzz
 
-recreate-schema:
+recreate-schema: ## Drop and recreate database schema
 	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
@@ -212,18 +214,15 @@ sbom-backend-image:
 		--output /work/backend-sbom-$(SBOM_VERSION).cdx.json \
 		$(BACKEND_IMAGE_NAME)
 
-shell-backend:
+shell-backend: ## Open shell in backend container
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
-shell-db:
+shell-db: ## Open shell in database container
 	@CMD="/bin/sh" $(MAKE) exec-db-command-it
 
-sync-data: \
-	update-data \
-	enrich-data \
-	index-data
+sync-data: update-data enrich-data index-data ## Sync, enrich, and index all data
 
-test-backend:
+test-backend: ## Run backend tests
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
 		-f docker/backend/Dockerfile.test backend \

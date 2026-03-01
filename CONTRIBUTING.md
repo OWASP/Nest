@@ -209,6 +209,10 @@ Before contributing, ensure you have the following installed:
 - **Description**: The token for accessing GitHub APIs.
 - **Usage**: Used for making authenticated requests to GitHub (e.g., issues, releases).
 
+## Available Make Commands
+
+Run `make help` to see all available commands grouped by category.
+
 ## Setting up the Project
 
 Follow these steps to set up the OWASP Nest application:
