@@ -3,6 +3,7 @@
 import logging
 
 import strawberry
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 
@@ -17,7 +18,6 @@ from apps.mentorship.api.internal.nodes.program import (
 from apps.mentorship.models import Admin, Program
 from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
-from apps.nest.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -25,16 +25,17 @@ logger = logging.getLogger(__name__)
 def resolve_admins_from_logins(logins: list[str]) -> set:
     """Resolve a list of GitHub logins to a set of Admin objects."""
     admins = set()
+    user_model = get_user_model()
     for login in logins:
         try:
             github_user = GithubUser.objects.get(login__iexact=login.lower())
             admin, _ = Admin.objects.get_or_create(github_user=github_user)
             if not admin.nest_user:
                 try:
-                    nest_user = User.objects.get(github_user=github_user)
+                    nest_user = user_model.objects.get(github_user=github_user)
                     admin.nest_user = nest_user
                     admin.save(update_fields=["nest_user"])
-                except User.DoesNotExist:
+                except user_model.DoesNotExist:
                     logger.info(
                         "No Nest user found for GitHub user '%s'; leaving admin.nest_user unset.",
                         github_user.login,

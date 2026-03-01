@@ -392,12 +392,40 @@ describe('SnapshotDetailsPage', () => {
         },
       },
       error: null,
+      loading: false,
     })
 
     render(<SnapshotDetailsPage />)
 
     await waitFor(() => {
       expect(screen.getByText('v0.9.2')).toBeInTheDocument()
+    })
+  })
+
+  test('renders release without id and repositoryName (uses unknown fallback)', async () => {
+    const releaseWithoutIdAndRepo = {
+      ...mockSnapshotDetailsData.snapshot.newReleases[0],
+      id: undefined,
+      repositoryName: undefined,
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        snapshot: {
+          ...mockSnapshotDetailsData.snapshot,
+          newReleases: [releaseWithoutIdAndRepo],
+          newChapters: [],
+          newProjects: [],
+        },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<SnapshotDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('v0.9.2')).toBeInTheDocument()
+      expect(screen.getByText('Unknown repository')).toBeInTheDocument()
     })
   })
 })
