@@ -102,6 +102,7 @@ export const mockOrganizationDetailsData = {
       tagName: 'v1.0.0',
       publishedAt: 1727390000,
       url: 'https://github.com/test-org/test-repo-1/releases/tag/v1.0.0',
+      organizationName: 'test-org',
       repositoryName: 'test-repo-1',
       author: {
         login: 'user1',
@@ -113,6 +114,7 @@ export const mockOrganizationDetailsData = {
       tagName: 'v2.0.0',
       publishedAt: 1727380000,
       url: 'https://github.com/test-org/test-repo-2/releases/tag/v2.0.0',
+      organizationName: 'test-org',
       repositoryName: 'test-repo-2',
       author: {
         login: 'user2',

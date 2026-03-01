@@ -1,10 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import Footer from 'components/Footer'
 
-expect.extend(toHaveNoViolations)
-
-describe('Footer a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('Footer a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<Footer />)
 
@@ -16,7 +22,7 @@ describe('Footer a11y', () => {
   it('should not have any accessibility violations when section is opened', async () => {
     const { container } = render(<Footer />)
 
-    const button = screen.getByTestId('footer-section-button-Resources')
+    const button = screen.getByRole('button', { name: /Resources/ })
     fireEvent.click(button)
 
     const results = await axe(container)

@@ -1,17 +1,22 @@
 """GraphQL queries for handling GitHub issues."""
 
 import strawberry
-from django.db.models import OuterRef, Subquery
+import strawberry_django
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
+from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import IssueNode
 from apps.github.models.issue import Issue
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
 class IssueQuery:
     """GraphQL query class for retrieving GitHub issues."""
 
-    @strawberry.field
+    @strawberry_django.field
     def recent_issues(
         self,
         *,
@@ -23,7 +28,7 @@ class IssueQuery:
         """Resolve recent issues with optional filtering.
 
         Args:
-            distinct (bool): Whether to return unique issues per author and repository.
+            distinct (bool): Whether to return unique issues per author.
             limit (int): Maximum number of issues to return.
             login (str, optional): Filter issues by a specific author's login.
             organization (str, optional): Filter issues by a specific organization's login.
@@ -32,34 +37,32 @@ class IssueQuery:
             list[IssueNode]: List of issue nodes.
 
         """
-        queryset = Issue.objects.select_related(
-            "author",
-            "repository",
-            "repository__organization",
-        ).order_by(
+        queryset = Issue.objects.order_by(
             "-created_at",
         )
+        filters = {}
 
         if login:
-            queryset = queryset.filter(
-                author__login=login,
-            )
-
+            filters["author__login"] = login
         if organization:
-            queryset = queryset.filter(
-                repository__organization__login=organization,
-            )
+            filters["repository__organization__login"] = organization
+
+        queryset = queryset.filter(**filters)
 
         if distinct:
-            latest_issue_per_author = (
-                queryset.filter(author_id=OuterRef("author_id"))
+            queryset = (
+                queryset.annotate(
+                    rank=Window(
+                        expression=Rank(),
+                        partition_by=[F("author_id")],
+                        order_by=F("created_at").desc(),
+                    )
+                )
+                .filter(rank=1)
                 .order_by("-created_at")
-                .values("id")[:1]
-            )
-            queryset = queryset.filter(
-                id__in=Subquery(latest_issue_per_author),
-            ).order_by(
-                "-created_at",
             )
 
-        return queryset[:limit]
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return queryset[:normalized_limit]

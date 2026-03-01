@@ -15,10 +15,14 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     objects = models.Manager()
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_sponsors"
         verbose_name_plural = "Sponsors"
 
     class SponsorType(models.TextChoices):
+        """Sponsor type choices."""
+
         DIAMOND = "Diamond"
         PLATINUM = "Platinum"
         GOLD = "Gold"
@@ -27,6 +31,8 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         NOT_SPONSOR = "Not a Sponsor"
 
     class MemberType(models.TextChoices):
+        """Member type choices."""
+
         PLATINUM = "Platinum"
         GOLD = "Gold"
         SILVER = "Silver"

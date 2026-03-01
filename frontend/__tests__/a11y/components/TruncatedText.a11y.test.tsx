@@ -1,10 +1,16 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { TruncatedText } from 'components/TruncatedText'
 
-expect.extend(toHaveNoViolations)
-
-describe('TruncatedText Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('TruncatedText Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const longText = 'This is a long text that should be truncated'
     const { container } = render(<TruncatedText text={longText} />)

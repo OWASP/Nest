@@ -68,3 +68,22 @@ class TestOwaspHandler:
             Owasp().handler(ack=MagicMock(), command=mock_command, client=mock_client)
             blocks = mock_client.chat_postMessage.call_args[1]["blocks"]
             assert blocks[0]["text"]["text"] == f"{subcommand} called"
+
+    def test_find_command_returns_command_instance(self):
+        """Test find_command returns a command instance for valid command."""
+        owasp = Owasp()
+        result = owasp.find_command("chapters")
+        assert result is not None
+        assert result.__class__.__name__ == "Chapters"
+
+    def test_find_command_returns_none_for_empty_string(self):
+        """Test find_command returns None for empty command name."""
+        owasp = Owasp()
+        result = owasp.find_command("")
+        assert result is None
+
+    def test_find_command_returns_none_for_invalid_command(self):
+        """Test find_command returns None for invalid command."""
+        owasp = Owasp()
+        result = owasp.find_command("nonexistent")
+        assert result is None

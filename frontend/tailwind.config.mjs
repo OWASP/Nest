@@ -58,11 +58,11 @@ export default {
       keyframes: {
         scroll: {
           '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-500%)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
       animation: {
-        scroll: 'scroll 0.5s linear infinite',
+        scroll: 'scroll 30s linear infinite',
       },
     },
   },

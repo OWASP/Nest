@@ -1,9 +1,10 @@
 """OWASP user GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.github.api.internal.nodes.repository import RepositoryNode
-from apps.github.api.internal.nodes.user import UserNode
+from apps.github.api.internal.nodes.user import USER_BADGES_PREFETCH, UserNode
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
 
@@ -12,7 +13,7 @@ from apps.github.models.user import User
 class UserQuery:
     """User queries."""
 
-    @strawberry.field
+    @strawberry_django.field
     def top_contributed_repositories(
         self,
         login: str,
@@ -36,7 +37,7 @@ class UserQuery:
             .order_by("-contributions_count")
         ]
 
-    @strawberry.field
+    @strawberry_django.field
     def user(
         self,
         login: str,
@@ -50,4 +51,8 @@ class UserQuery:
             User or None: The user object if found, otherwise None.
 
         """
-        return User.objects.filter(has_public_member_page=True, login=login).first()
+        return (
+            User.objects.filter(has_public_member_page=True, login=login)
+            .prefetch_related(USER_BADGES_PREFETCH)
+            .first()
+        )

@@ -16,14 +16,14 @@ The project uses a **containerized approach** for both development and productio
 
 Before contributing, ensure you have the following installed:
 
-1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
-1. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using virtual environment with `pip install pre-commit` command, as OS package with `apt install pre-commit` / `brew install pre-commit` or any other method depending on your configuration.
-
-1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+1. **Docker**: Required for running the Nest instance - [Docker documentation](https://docs.docker.com/).
+1. **pre-commit**: Required to automate code checks - [pre-commit documentation](https://pre-commit.com/)
+1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL documentation](https://docs.microsoft.com/en-us/windows/wsl/).
    1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
       If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
-   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
+   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. You can enter the Linux environment by running `wsl`. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
    1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
+   1. Cloning or running the project under `/mnt/c` (the Windows C: drive) can lead to significant performance degradation and Docker permission issues.
 
 ## Starring the Project
 
@@ -275,6 +275,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Load Initial Data**:
 
+   - Make sure you have `gzip` installed on your machine.
+
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
    ```bash
@@ -379,6 +381,66 @@ To setup NestBot development environment, follow these steps:
    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
+#### Local Access to Internal Dashboards
+
+When running the project locally, some UI sections are visible only if your user has the required backend roles configured via Django Admin. Follow the steps below to enable access during development.
+
+##### Project Health Dashboard (Staff Access)
+
+The Project Health Dashboard is visible only to users marked as staff.
+
+###### Steps
+
+1. **Start the backend server and open the Django Admin panel**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Log in using your superuser credentials.
+
+2. **Navigate to GitHub Users** and open your user record.
+
+3. **In the Permissions section, enable the custom `is_owasp_staff` field**:
+   - Locate the `is_owasp_staff` checkbox and tick it.
+   - Save the changes.
+
+4. **Clear authentication cookies**:
+   - Open [http://localhost:3000](http://localhost:3000)
+   - Open browser DevTools → Application / Storage
+   - Clear Cookies for the site
+   - Refresh the page and sign in again with GitHub.
+
+After logging in, the Project Health Dashboard will appear in the user menu, or you can navigate directly to:
+[http://localhost:3000/projects/dashboard](http://localhost:3000/projects/dashboard)
+
+##### Mentorship Portal ("My Mentorship")
+
+The "My Mentorship" menu item is shown only if the user is a Project Leader or a Mentor.
+
+###### Option 1: Grant access as a Project Leader (recommended)
+
+1. **Open Django Admin**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Navigate to **OWASP** → **Projects**.
+2. **Open an existing project or create a test project**.
+3. **In the `leaders_raw` field, add your exact GitHub username**.
+4. **Save the project**.
+
+###### Option 2: Grant access as a Mentor
+
+1. Ensure you have logged into the frontend at least once (so your GitHub user exists in the database).
+2. **Open Django Admin** → **Mentorship** → **Mentors**.
+3. Click **Add Mentor**.
+4. Select your GitHub user in the `github_user` field.
+5. Fill in any required fields and save.
+
+###### Refresh session
+
+Role-based access is cached in the authentication cookie.
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Clear Cookies for the site
+3. Refresh and sign in again with GitHub
+
+The "My Mentorship" option will now be visible in the user menu.
+
 ## Code Quality Checks
 
 Nest enforces code quality standards to ensure consistency and maintainability. You can run automated checks locally before pushing your changes:
@@ -403,6 +465,95 @@ make test
 
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
+
+### Running Security Scan
+
+Run the security scans for vulnerabilities and anti-patterns with the following command:
+
+```bash
+make security-scan
+```
+
+This command automatically:
+
+- Performs local Semgrep and Trivy scans
+- Outputs findings to the terminal for immediate review
+
+For addressing findings:
+
+- Review the output for specific file paths and line numbers
+- Follow the documentation links provided in the output for remediation guidance
+- Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
+
+#### Running Code Scans Only
+
+You can run code scan part separately via
+
+```bash
+make security-scan-code
+```
+
+#### Running Image Scans Only
+
+You can run image scan part separately via
+
+```bash
+make security-scan-images
+```
+
+### Running e2e Tests
+
+Run the frontend e2e tests with the following command:
+
+```bash
+make test-frontend-e2e
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the e2e tests
+- Cleans up containers when done
+
+For debugging, you can run the e2e backend separately:
+
+```bash
+make run-backend-e2e
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-e2e
+```
+
+### Running Fuzz Tests
+
+Run the fuzz tests with the following command:
+
+```bash
+make test-fuzz
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the fuzz tests
+- Cleans up containers when done
+
+For debugging, you can run the fuzz backend separately:
+
+```bash
+make run-backend-fuzz
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-fuzz
+```
 
 ### Test Coverage
 
@@ -492,9 +643,40 @@ flowchart TD
     linkStyle 24 stroke:#f44336,stroke-width:2px
 ```
 
+### Keep Your Fork in Sync with Upstream
+
+To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP Nest repository.
+
+<details>
+<summary>Setting up the upstream remote</summary>
+
+If you haven't added the upstream remote yet, add it using:
+
+```bash
+git remote add upstream https://github.com/OWASP/Nest.git
+```
+
+Verify that the upstream remote has been added by running:
+
+```bash
+git remote -v
+```
+
+This should show both `origin` (your fork) and `upstream` (the main repository) remotes.
+
+</details>
+
+Before working on a **new** feature or issue, update your local `main` branch from `upstream/main`:
+
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main
+```
+
 ### 1. Find Something to Work On
 
-- Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)
+- Check the **Issues** tab for open issues: [https://github.com/OWASP/Nest/issues](https://github.com/OWASP/Nest/issues)
 - Found a bug or have a feature request? Open a new issue.
 - Want to work on an existing issue? Ask the maintainers to assign it to you before submitting a pull request.
 - New to the project? Start with issues labeled `good first issue` for an easier onboarding experience.

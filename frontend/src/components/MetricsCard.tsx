@@ -3,51 +3,77 @@ import Link from 'next/link'
 import { FC } from 'react'
 import { HealthMetricsProps } from 'types/healthMetrics'
 const MetricsCard: FC<{ metric: HealthMetricsProps }> = ({ metric }) => {
+  const score = metric.score ?? 0
   return (
     <Link
       href={`/projects/dashboard/metrics/${metric.projectKey}`}
       className="text-gray-800 no-underline dark:text-gray-200"
     >
-      <div className="grid grid-cols-[4fr_1fr_1fr_1fr_1.5fr_1fr] rounded-lg bg-white p-4 transition-colors duration-200 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
-        <div className="truncate">
-          <p
+      <div className="space-y-4 rounded-lg bg-white p-4 transition-colors duration-200 hover:bg-gray-100 lg:px-8 lg:py-4 dark:bg-gray-800 dark:hover:bg-gray-700">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 truncate">
+            <p
+              className={clsx(
+                'text-md truncate font-semibold lg:text-xl',
+                metric.projectName === '' ? 'text-gray-500' : 'text-gray-800 dark:text-gray-200'
+              )}
+            >
+              {metric.projectName === '' ? 'No name' : metric.projectName}
+            </p>
+          </div>
+          <div
             className={clsx(
-              'text-md font-semibold',
-              metric.projectName === '' ? 'text-gray-500' : 'text-gray-800 dark:text-gray-200'
+              'flex-shrink-0 rounded px-3 py-1.5 text-center text-white lg:px-4 lg:py-2 dark:text-gray-900',
+              {
+                'bg-green-500': score >= 75,
+                'bg-orange-500': score >= 50 && score < 75,
+                'bg-red-500': score < 50,
+              }
             )}
           >
-            {metric.projectName === '' ? 'No name' : metric.projectName}
-          </p>
+            <p className="text-sm font-semibold lg:text-base">Score: {score}</p>
+          </div>
         </div>
-        <div className="truncate text-center">
-          <p className="text-md">{metric.starsCount}</p>
-        </div>
-        <div className="truncate text-center">
-          <p className="text-md">{metric.forksCount}</p>
-        </div>
-        <div className="truncate text-center">
-          <p className="text-md">{metric.contributorsCount}</p>
-        </div>
-        <div className="truncate text-center">
-          <p className="text-md">
-            {new Date(metric.createdAt).toLocaleString('default', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            })}
-          </p>
-        </div>
-        <div
-          className={clsx(
-            'truncate rounded border-l-1 border-l-gray-200 bg-linear-to-br from-white/20 to-transparent dark:border-l-gray-600',
-            {
-              'bg-green-500 text-green-900': metric.score >= 75,
-              'bg-orange-500 text-orange-900': metric.score >= 50 && metric.score < 75,
-              'bg-red-500 text-red-900': metric.score < 50,
-            }
-          )}
-        >
-          <p className="text-center text-xl font-semibold">{metric.score}</p>
+        <hr className="my-4 border-0 border-t border-gray-200 dark:border-gray-600" />
+        <div className="grid grid-cols-3 gap-4 md:grid-cols-4">
+          <div>
+            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+              Stars
+            </p>
+            <p className="text-md font-semibold text-gray-800 lg:text-xl dark:text-gray-200">
+              {metric.starsCount}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+              Forks
+            </p>
+            <p className="text-md font-semibold text-gray-800 lg:text-xl dark:text-gray-200">
+              {metric.forksCount}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+              Contributors
+            </p>
+            <p className="text-md font-semibold text-gray-800 lg:text-xl dark:text-gray-200">
+              {metric.contributorsCount}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-gray-600 lg:text-base dark:text-gray-400">
+              Health Checked
+            </p>
+            <p className="text-sm text-gray-800 lg:text-lg dark:text-gray-200">
+              {metric.createdAt
+                ? new Date(metric.createdAt).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'N/A'}
+            </p>
+          </div>
         </div>
       </div>
     </Link>

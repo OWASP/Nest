@@ -1,10 +1,9 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { IconType } from 'react-icons'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'
-
-expect.extend(toHaveNoViolations)
 
 jest.mock('components/BarChart', () => (props: { title: string; icon?: IconType }) => (
   <div
@@ -55,7 +54,14 @@ const getMockHealthMetric = (): HealthMetricsProps[] => [
   },
 ]
 
-describe('HealthMetrics a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('HealthMetrics a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<HealthMetrics data={getMockHealthMetric()} />)
 

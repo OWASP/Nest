@@ -28,6 +28,17 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
+jest.mock('components/forms/shared/formValidationUtils', () => ({
+  ...jest.requireActual('components/forms/shared/formValidationUtils'),
+  validateStartDate: jest.fn(),
+  validateEndDate: jest.fn(),
+}))
+
+jest.mock('app/global-error', () => ({
+  ErrorDisplay: ({ title }: { title: string }) => <div>{title}</div>,
+  handleAppError: jest.fn(),
+}))
+
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
@@ -144,12 +155,13 @@ describe('EditModulePage', () => {
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith({
         title: 'Access Denied',
-        description: 'Only program admins can edit modules.',
+        description: 'Only program admins and module mentors can edit this module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,
       })
     })
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
 
     // Advance timers to trigger the redirect
     act(() => {
@@ -171,5 +183,301 @@ describe('EditModulePage', () => {
     render(<EditModulePage />)
 
     expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+  })
+
+  it('shows loading spinner when query returns an error', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      error: new Error('GraphQL error'),
+      data: null,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+    await act(async () => {
+      render(<EditModulePage />)
+    })
+
+    // When denied, component shows ErrorDisplay
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+  })
+
+  it('shows Access Denied when user is unauthenticated', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: null,
+      status: 'unauthenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: { admins: [{ login: 'admin-user' }] },
+        getModule: { name: 'Module' },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+
+    await act(async () => {
+      render(<EditModulePage />)
+    })
+
+    // When denied, component shows ErrorDisplay
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+  })
+
+  it('handles form submission error gracefully', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+        },
+        getModule: {
+          name: 'Existing Module',
+          description: 'Old description',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
+          startedAt: '2025-07-01',
+          endedAt: '2025-07-31',
+          domains: ['AI'],
+          tags: ['graphql'],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [{ login: 'mentor1' }],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockRejectedValue(new Error('Mutation failed')),
+      { loading: false },
+    ])
+
+    render(<EditModulePage />)
+
+    await act(async () => {
+      jest.runAllTimers()
+    })
+
+    expect(await screen.findByDisplayValue('Existing Module')).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Save/i }))
+    })
+
+    await waitFor(() => {
+      expect(mockUpdateModule).toHaveBeenCalled()
+    })
+  })
+
+  it('shows permission denied error when mutation throws Permission error', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+        },
+        getModule: {
+          name: 'Test Module',
+          description: 'Description',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
+          startedAt: '2025-07-01',
+          endedAt: '2025-07-31',
+          domains: ['AI'],
+          tags: ['graphql'],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [{ login: 'mentor1' }],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockRejectedValue(
+        new Error('Permission denied: You do not have permission to edit this module')
+      ),
+      { loading: false },
+    ])
+
+    render(<EditModulePage />)
+
+    await act(async () => {
+      jest.runAllTimers()
+    })
+
+    expect(await screen.findByDisplayValue('Test Module')).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Save/i }))
+    })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Error',
+          description:
+            'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.',
+          color: 'danger',
+        })
+      )
+    })
+  })
+
+  it('renders form with module having missing optional fields', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+        },
+        getModule: {
+          name: 'Minimal Module',
+          description: '',
+          experienceLevel: null,
+          startedAt: null,
+          endedAt: null,
+          domains: null,
+          tags: null,
+          projectName: null,
+          projectId: null,
+          mentors: null,
+          labels: null,
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockResolvedValue({ data: { updateModule: { key: 'new-key' } } }),
+      { loading: false },
+    ])
+
+    render(<EditModulePage />)
+
+    await act(async () => {
+      jest.runAllTimers()
+    })
+
+    expect(await screen.findByDisplayValue('Minimal Module')).toBeInTheDocument()
+    // Verify form renders with empty/fallback values for missing optional fields
+    expect(screen.getByLabelText('Name')).toHaveValue('Minimal Module')
+  })
+
+  it('renders form without program dates', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: null,
+          endedAt: null,
+        },
+        getModule: {
+          name: 'Test Module',
+          description: 'Test description',
+          experienceLevel: ExperienceLevelEnum.Advanced,
+          startedAt: '',
+          endedAt: '',
+          domains: [],
+          tags: [],
+          projectName: '',
+          projectId: '',
+          mentors: [],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+    render(<EditModulePage />)
+
+    await act(async () => {
+      jest.runAllTimers()
+    })
+
+    expect(await screen.findByDisplayValue('Test Module')).toBeInTheDocument()
+  })
+  it('submits form with null dates using mocked validation', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: null,
+          endedAt: null,
+        },
+        getModule: {
+          name: null,
+          description: 'Desc',
+          experienceLevel: ExperienceLevelEnum.Beginner,
+          startedAt: null,
+          endedAt: null,
+          domains: [],
+          tags: [],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockResolvedValue({ data: { updateModule: { key: 'mod-key' } } }),
+      { loading: false },
+    ])
+
+    render(<EditModulePage />)
+
+    // Wait for form to load with fallback empty name
+    expect(await screen.findByLabelText('Name')).toHaveValue('')
+
+    await act(async () => {
+      // Fill required fields that aren't dates
+      fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Valid Name' } })
+
+      // Project is already "valid" from mock data (projectId: '123')
+      // Dates are null/empty, but we mocked validators to return undefined (valid).
+
+      // Advance timers
+      jest.runAllTimers()
+
+      // Submit the form
+      fireEvent.click(screen.getByRole('button', { name: /Save/i }))
+    })
+
+    await waitFor(() => {
+      expect(mockUpdateModule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            input: expect.objectContaining({
+              name: 'Valid Name',
+              projectId: '123',
+              startedAt: '',
+              endedAt: '',
+            }),
+          }),
+        })
+      )
+    })
   })
 })

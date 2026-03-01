@@ -71,6 +71,7 @@ jest.mock('next/image', () => ({
 const now = Date.now()
 const mockReleases: ReleaseType[] = [
   {
+    id: 'release-test-1',
     name: 'v1.0 The First Release',
     publishedAt: now,
     repositoryName: 'our-awesome-project',
@@ -91,6 +92,7 @@ const mockReleases: ReleaseType[] = [
     },
   },
   {
+    id: 'release-test-2',
     name: 'v2.0 The Second Release',
     publishedAt: now,
     repositoryName: 'another-cool-project',
@@ -293,5 +295,134 @@ describe('Release Component', () => {
         'This is a very long release name that should be handled properly by the component'
       )
     ).toBeInTheDocument()
+  })
+
+  it('navigates to repository page when Enter key is pressed', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: 'Enter' })
+
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/organizations/our-org/repositories/our-awesome-project'
+    )
+  })
+
+  it('navigates to repository page when Space key is pressed', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: ' ' })
+
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/organizations/our-org/repositories/our-awesome-project'
+    )
+  })
+
+  it('does not navigate when other keys are pressed', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: 'Tab' })
+    fireEvent.keyDown(repoButton, { key: 'Escape' })
+    fireEvent.keyDown(repoButton, { key: 'a' })
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when clicking repository button with missing org', () => {
+    const releaseWithoutOrg = { ...mockReleases[0], organizationName: '' }
+    render(<Release release={releaseWithoutOrg} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.click(repoButton)
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('does not navigate when clicking repository button with missing repo', () => {
+    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: '' }
+    render(<Release release={releaseWithoutRepo} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.click(repoButton)
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+
+  it('renders author avatar link with correct href', () => {
+    render(<Release release={mockReleases[0]} />)
+
+    const avatarLink = screen.getByRole('link', { name: /Test User's avatar/i })
+    expect(avatarLink).toHaveAttribute('href', '/members/testuser')
+  })
+
+  it('renders author avatar link with # when login is missing', () => {
+    const releaseWithoutLogin = {
+      ...mockReleases[0],
+      author: { ...mockReleases[0].author, login: '', name: '' },
+    }
+    render(<Release release={releaseWithoutLogin} />)
+
+    const avatarLink = screen.getByAltText('Release author avatar').closest('a')
+    expect(avatarLink).toHaveAttribute('href', '#')
+  })
+  it('renders title as plain text when organizationName is missing', () => {
+    const releaseWithoutOrg = { ...mockReleases[0], organizationName: undefined }
+    render(<Release release={releaseWithoutOrg} />)
+
+    const title = screen.getByText('v1.0 The First Release')
+    expect(title).toBeInTheDocument()
+
+    const link = title.closest('a')
+    expect(link).toBeNull()
+  })
+
+  it('renders title as plain text when repositoryName is missing', () => {
+    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: undefined }
+    render(<Release release={releaseWithoutRepo} />)
+
+    const title = screen.getByText('v1.0 The First Release')
+    expect(title).toBeInTheDocument()
+
+    const link = title.closest('a')
+    expect(link).toBeNull()
+  })
+
+  it('renders tag name as plain text when release name AND organizationName are missing', () => {
+    const releaseWithoutOrgAndName = {
+      ...mockReleases[0],
+      organizationName: undefined,
+      name: undefined,
+    }
+    render(<Release release={releaseWithoutOrgAndName} />)
+
+    // Should find the tagName 'v1.0'
+    const title = screen.getByText('v1.0')
+    expect(title).toBeInTheDocument()
+
+    // Should NOT be inside a link
+    const link = title.closest('a')
+    expect(link).toBeNull()
+  })
+
+  it('safely handles keydown on disabled button to verify handler guards', () => {
+    const releaseWithoutOrg = { ...mockReleases[0], organizationName: '' }
+    render(<Release release={releaseWithoutOrg} />)
+
+    const repoButton = screen.getByRole('button')
+
+    fireEvent.keyDown(repoButton, { key: 'Enter' })
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
+  })
+  it('safely handles keydown when repositoryName is missing', () => {
+    const releaseWithoutRepo = { ...mockReleases[0], repositoryName: '' }
+    render(<Release release={releaseWithoutRepo} />)
+
+    const repoButton = screen.getByRole('button')
+    fireEvent.keyDown(repoButton, { key: 'Enter' })
+
+    expect(mockRouterPush).not.toHaveBeenCalled()
   })
 })

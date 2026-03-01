@@ -112,10 +112,6 @@ const ProgramForm = ({
 
   const checkNameUniquenessSync = useCallback(
     async (name: string): Promise<string | undefined> => {
-      if (!name.trim()) {
-        return undefined
-      }
-
       try {
         const { data } = await client.query({
           query: GetMyProgramsDocument,
@@ -251,7 +247,7 @@ const ProgramForm = ({
             type="number"
             label="Mentees Limit"
             placeholder="Enter mentees limit (0 for unlimited)"
-            value={formData.menteesLimit.toString()}
+            value={formData.menteesLimit?.toString() ?? ''}
             onValueChange={(value) => handleInputChange('menteesLimit', Number(value) || 0)}
             error={errors.menteesLimit}
             touched={touched.menteesLimit}

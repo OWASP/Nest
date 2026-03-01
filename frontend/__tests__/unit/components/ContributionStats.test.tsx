@@ -57,12 +57,12 @@ describe('ContributionStats', () => {
     it('renders all react-icons correctly', () => {
       render(<ContributionStats {...defaultProps} />)
 
-      const container = screen.getByTestId('contribution-stats')
+      const container = screen.getByRole('region')
       const icons = container.querySelectorAll('svg')
       expect(icons).toHaveLength(5) // Title icon + 4 stat icons
 
       // Verify specific icon data attributes
-      expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
+      expect(screen.getByRole('region')).toBeInTheDocument()
       expect(screen.getByText('Test Contribution Activity')).toBeInTheDocument()
     })
 
@@ -229,7 +229,7 @@ describe('ContributionStats', () => {
       render(<ContributionStats {...defaultProps} />)
 
       // Check that the container exists and the grid has proper classes
-      const container = screen.getByTestId('contribution-stats')
+      const container = screen.getByRole('region')
       expect(container).toBeInTheDocument()
 
       // The mb-6 class is on the grid div, not the container
@@ -293,7 +293,7 @@ describe('ContributionStats', () => {
     it('renders with proper CSS classes for styling', () => {
       render(<ContributionStats {...defaultProps} />)
 
-      const container = screen.getByTestId('contribution-stats')
+      const container = screen.getByRole('region')
       expect(container).toBeInTheDocument()
 
       const heading = container.querySelector('h2')
@@ -307,7 +307,7 @@ describe('ContributionStats', () => {
     it('renders all required icons with proper attributes', () => {
       render(<ContributionStats {...defaultProps} />)
 
-      const container = screen.getByTestId('contribution-stats')
+      const container = screen.getByRole('region')
       const icons = container.querySelectorAll('svg')
       expect(icons).toHaveLength(5)
 

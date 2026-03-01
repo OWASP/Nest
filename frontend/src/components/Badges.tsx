@@ -29,7 +29,7 @@ const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
   return (
     <div className="inline-flex items-center">
       <Tooltip content={name} isDisabled={!showTooltip}>
-        <IconWrapper icon={icon} className="h-4 w-4" data-testid="badge-icon" />
+        <IconWrapper icon={icon} className="h-4 w-4" />
       </Tooltip>
     </div>
   )

@@ -1,7 +1,7 @@
 """GitHub app Repository model admin."""
 
 from django.contrib import admin
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from apps.github.models.repository import Repository
 
@@ -46,8 +46,10 @@ class RepositoryAdmin(admin.ModelAdmin):
             str: A safe HTML link to the repository on GitHub.
 
         """
-        return mark_safe(  # noqa: S308
-            f"<a href='https://github.com/{obj.owner.login}/{obj.name}' target='_blank'>↗️</a>"
+        return format_html(
+            "<a href='https://github.com/{}/{}' target='_blank'>↗️</a>",
+            obj.owner.login,
+            obj.name,
         )
 
     def custom_field_title(self, obj: Repository) -> str:

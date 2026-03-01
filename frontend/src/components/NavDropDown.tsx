@@ -5,19 +5,18 @@ import type { Link as LinkType } from 'types/link'
 import { cn } from 'utils/utility'
 
 interface NavDropDownProps {
-  pathname: string
-  link: LinkType
+  readonly pathname: string
+  readonly link: LinkType
 }
-
-export default function NavDropdown({ link, pathname }: NavDropDownProps) {
+export default function NavDropdown({ link, pathname }: Readonly<NavDropDownProps>) {
   const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
 
   // For closing dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
@@ -67,9 +66,9 @@ export default function NavDropdown({ link, pathname }: NavDropDownProps) {
           id={dropdownId}
           className="absolute top-full left-0 z-10 mt-1 w-48 overflow-hidden rounded-md bg-white shadow-lg dark:bg-slate-800"
         >
-          {link.submenu?.map((submenu, idx) => (
+          {link.submenu?.map((submenu) => (
             <Link
-              key={`${submenu.href}-${idx}`}
+              key={`${submenu.href}`}
               href={submenu.href || '/'}
               className={cn(
                 'block w-full px-4 py-2 text-left text-sm transition-colors',

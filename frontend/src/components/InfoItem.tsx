@@ -44,7 +44,7 @@ export const TextInfoItem = ({
   value: string
 }) => {
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-400">
+    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
       <IconWrapper icon={icon} className="text-xs" />
       <span className="font-medium">{label}:</span> {value}
     </div>

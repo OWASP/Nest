@@ -47,7 +47,7 @@ def render_template(
     if context_factory:
         context = context_factory()
         context.update(kwargs)
-        return template.render(**context).strip()
+        return template.render(**context).strip()  # nosemgrep: direct-use-of-jinja2
     if kwargs:
-        return template.render(**kwargs).strip()
-    return template.render().strip()
+        return template.render(**kwargs).strip()  # nosemgrep: direct-use-of-jinja2
+    return template.render().strip()  # nosemgrep: direct-use-of-jinja2

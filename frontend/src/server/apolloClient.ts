@@ -1,13 +1,12 @@
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+import { ApolloClient, InMemoryCache, HttpLink, NormalizedCacheObject } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import { cookies } from 'next/headers'
 import { fetchCsrfTokenServer } from 'server/fetchCsrfTokenServer'
 
 async function createApolloClient() {
   const authLink = setContext(async (_, { headers }) => {
-    let csrfToken = null
     const cookieValue = await getCsrfTokenOnServer()
-    csrfToken = cookieValue
+    const csrfToken = cookieValue
     return {
       headers: {
         ...headers,
@@ -22,7 +21,9 @@ async function createApolloClient() {
   })
 
   return new ApolloClient({
-    cache: new InMemoryCache().restore(globalThis.__APOLLO_STATE__ ?? {}),
+    cache: new InMemoryCache().restore(
+      (globalThis as unknown as { __APOLLO_STATE__?: NormalizedCacheObject }).__APOLLO_STATE__ ?? {}
+    ),
     link: authLink.concat(httpLink),
     ssrMode: true,
   })

@@ -12,6 +12,8 @@ class MentorModule(ExperienceLevel, MatchingAttributes, TimestampedModel):
     """Mentor module model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_mentor_modules"
         unique_together = ("mentor", "module")
         verbose_name = "Mentor module"

@@ -18,6 +18,8 @@ const RepositoryCard: React.FC<RepositoryCardListProps> = ({
 
   const toggleRepositories = () => setShowAllRepositories(!showAllRepositories)
 
+  if (!repositories) return null
+
   const displayedRepositories = showAllRepositories
     ? repositories
     : repositories.slice(0, maxInitialDisplay)

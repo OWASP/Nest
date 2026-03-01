@@ -2,7 +2,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.common.index import IndexBase
 from apps.github.models.repository import Repository
 from apps.github.models.user import User
 from apps.owasp.models.committee import Committee
@@ -27,10 +26,11 @@ class TestCommitteeModel:
         ],
     )
     def test_active_committees_count(self, value):
-        with patch.object(IndexBase, "get_total_count", return_value=value) as mock_count:
+        with patch.object(Committee.objects, "filter") as mock_filter:
+            mock_filter.return_value.count.return_value = value
             count = Committee.active_committees_count()
             assert count == value
-            mock_count.assert_called_once_with("committees")
+            mock_filter.assert_called_once_with(has_active_repositories=True)
 
     @pytest.mark.parametrize(
         ("summary"),
@@ -99,3 +99,70 @@ class TestCommitteeModel:
         assert committee.created_at == owasp_repository.created_at
         assert committee.name == owasp_repository.title
         assert committee.updated_at == owasp_repository.updated_at
+
+    def test_nest_key(self):
+        """Test nest_key property strips www-committee- prefix."""
+        committee = Committee(key="www-committee-chapter")
+        assert committee.nest_key == "chapter"
+
+    def test_nest_key_complex(self):
+        """Test nest_key with multi-word key."""
+        committee = Committee(key="www-committee-web-security")
+        assert committee.nest_key == "web-security"
+
+    def test_update_data_creates_new(self):
+        """Test update_data creates new committee when not found."""
+        mock_gh_repository = Mock()
+        mock_gh_repository.name = "www-committee-test"
+
+        mock_repository = Mock()
+
+        with patch.object(Committee, "objects") as mock_manager:
+            mock_manager.get.side_effect = Committee.DoesNotExist
+
+            with (
+                patch.object(Committee, "from_github") as mock_from_github,
+                patch.object(Committee, "save") as mock_save,
+            ):
+                result = Committee.update_data(mock_gh_repository, mock_repository, save=True)
+
+                mock_manager.get.assert_called_once_with(key="www-committee-test")
+                mock_from_github.assert_called_once_with(mock_repository)
+                mock_save.assert_called_once()
+                assert isinstance(result, Committee)
+
+    def test_update_data_updates_existing(self):
+        """Test update_data updates existing committee."""
+        mock_gh_repository = Mock()
+        mock_gh_repository.name = "www-committee-existing"
+
+        mock_repository = Mock()
+        existing_committee = Mock(spec=Committee)
+
+        with patch.object(Committee, "objects") as mock_manager:
+            mock_manager.get.return_value = existing_committee
+
+            result = Committee.update_data(mock_gh_repository, mock_repository, save=False)
+
+            mock_manager.get.assert_called_once_with(key="www-committee-existing")
+            existing_committee.from_github.assert_called_once_with(mock_repository)
+            existing_committee.save.assert_not_called()
+            assert result == existing_committee
+
+    def test_update_data_with_save_false(self):
+        """Test update_data does not save when save=False."""
+        mock_gh_repository = Mock()
+        mock_gh_repository.name = "www-committee-nosave"
+
+        mock_repository = Mock()
+
+        with patch.object(Committee, "objects") as mock_manager:
+            mock_manager.get.side_effect = Committee.DoesNotExist
+
+            with (
+                patch.object(Committee, "from_github"),
+                patch.object(Committee, "save") as mock_save,
+            ):
+                Committee.update_data(mock_gh_repository, mock_repository, save=False)
+
+                mock_save.assert_not_called()

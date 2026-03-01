@@ -47,10 +47,11 @@ const ProjectsPage = () => {
     return (
       <Card
         button={submitButton}
+        cardKey={project.key ?? ''}
         icons={filteredIcons}
-        key={project.key}
+        key={project.key ?? project.name}
         level={level[`${project.level as keyof typeof level}`]}
-        summary={project.summary}
+        summary={project.summary ?? ''}
         title={project.name}
         topContributors={project.topContributors}
         url={`/projects/${project.key}`}
@@ -79,7 +80,7 @@ const ProjectsPage = () => {
       }
       totalPages={totalPages}
     >
-      {projects && projects.filter((project) => project.isActive).map(renderProjectCard)}
+      {projects?.filter((project) => project.isActive).map(renderProjectCard)}
     </SearchPageLayout>
   )
 }

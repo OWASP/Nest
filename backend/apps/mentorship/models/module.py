@@ -21,6 +21,8 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
     published_modules = PublishedModuleManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_modules"
         verbose_name_plural = "Modules"
         constraints = [

@@ -6,10 +6,10 @@ export type ApexLineChartSeries = {
 export type ApexBarChartDataSeries = {
   x: string
   y: number
-  fill?
+  fill?: string
   fillColor?: string
   strokeColor?: string
-  meta?
+  meta?: unknown
   goals?: {
     barHeightOffset?: number
     columnWidthOffset?: number

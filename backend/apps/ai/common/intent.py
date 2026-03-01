@@ -3,7 +3,7 @@
 from enum import Enum
 
 
-class Intent(str, Enum):
+class Intent(str, Enum):  # noqa: UP042
     """Intent classification enum."""
 
     CHAPTER = "chapter"

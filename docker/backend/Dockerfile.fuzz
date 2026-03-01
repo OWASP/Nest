@@ -1,0 +1,44 @@
+FROM python:3.13.11-alpine3.23 AS builder
+
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+ENV APK_CACHE_DIR="/home/owasp/.cache/apk-fuzz" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    PIP_CACHE_DIR="/home/owasp/.cache/pip" \
+    POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    PYTHONUNBUFFERED=1
+
+RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
+    ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+
+COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
+RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
+    python -m pip install --requirement /tmp/requirements.build.txt
+
+WORKDIR /home/owasp
+
+COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
+RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
+    poetry install --only fuzz --no-root
+
+FROM python:3.13.11-alpine3.23
+
+SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+
+RUN addgroup -S owasp && \
+    adduser -S -h /home/owasp -G owasp owasp && \
+    apk add --no-cache curl jq
+
+ENV FORCE_COLOR=1 \
+    PATH="/home/owasp/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /home/owasp
+
+COPY --from=builder --chmod=555 --chown=root:root /home/owasp/.venv .venv
+COPY --chown=root:root --chmod=755 entrypoint.fuzz.sh entrypoint.sh
+COPY --chown=root:root --chmod=555 tests/fuzz tests
+
+USER owasp
+ENTRYPOINT ["./entrypoint.sh"]

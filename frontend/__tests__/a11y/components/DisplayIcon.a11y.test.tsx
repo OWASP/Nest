@@ -1,9 +1,8 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { Icon } from 'types/icon'
 import DisplayIcon from 'components/DisplayIcon'
-
-expect.extend(toHaveNoViolations)
 
 const mockIcons: Icon = {
   starsCount: 1250,
@@ -14,7 +13,14 @@ const mockIcons: Icon = {
   license: 'MIT',
 }
 
-describe('DisplayIcon a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('DisplayIcon a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<DisplayIcon item="starsCount" icons={mockIcons} />)
 

@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.github.models.repository import Repository as RepositoryModel
 
 router = RouterPaginated(tags=["Repositories"])
@@ -85,6 +86,7 @@ def list_repository(
     description="Retrieve a specific GitHub repository by organization and repository name.",
     operation_id="get_repository",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: RepositoryError,
         HTTPStatus.OK: RepositoryDetail,
     },

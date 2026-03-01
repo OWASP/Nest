@@ -55,6 +55,12 @@ def user_index_mixin_instance():
         )
     ]
     instance.releases.count.return_value = 3
+
+    instance.user_badges = MagicMock()
+    instance.user_badges.filter.return_value.count.return_value = 2
+
+    instance.contributions_count = 150
+
     return instance
 
 
@@ -106,8 +112,88 @@ class TestUserIndexMixin:
                 ],
             ),
             ("idx_issues_count", 5),
+            ("idx_contributions_count", 150),
             ("idx_releases_count", 3),
         ],
     )
     def test_user_index_fields(self, user_index_mixin_instance, attr, expected):
         assert getattr(user_index_mixin_instance, attr) == expected
+
+    def test_idx_badge_count(self, user_index_mixin_instance):
+        """Test idx_badge_count property."""
+        assert user_index_mixin_instance.idx_badge_count == 2
+        user_index_mixin_instance.user_badges.filter.assert_called_once_with(is_active=True)
+
+    def test_idx_releases_with_owner_key(self, user_index_mixin_instance):
+        """Test idx_releases includes owner_key in repository dict."""
+        releases = user_index_mixin_instance.idx_releases
+        assert len(releases) == 1
+        assert releases[0]["repository"]["owner_key"] == "owner_login"
+
+    def test_idx_releases_with_tag_name(self):
+        """Test idx_releases includes tag_name in release dict."""
+        instance = UserIndexMixin()
+
+        mock_release = MagicMock()
+        mock_release.is_pre_release = False
+        mock_release.name = "Release Name"
+        mock_release.published_at = datetime(2021, 1, 1, tzinfo=UTC)
+        mock_release.tag_name = "v1.0.0"
+        mock_release.repository.key = "repo_key"
+        mock_release.repository.owner.login = "owner_login"
+
+        instance.releases = MagicMock()
+        instance.releases.select_related.return_value.order_by.return_value = [mock_release]
+
+        releases = instance.idx_releases
+        assert len(releases) == 1
+        assert releases[0]["tag_name"] == "v1.0.0"
+
+    def test_idx_contributions_with_and_without_latest_release(self):
+        """Test idx_contributions with latest_release truthy and None."""
+        instance = UserIndexMixin()
+        instance.get_non_indexable_logins = MagicMock(return_value=set())
+
+        rc_with_release = MagicMock()
+        rc_with_release.contributions_count = 10
+        rc_with_release.repository.contributors_count = 5
+        rc_with_release.repository.description = "Test repo"
+        rc_with_release.repository.forks_count = 3
+        rc_with_release.repository.key = "Test-Repo"
+        rc_with_release.repository.name = "test-repo"
+        rc_with_release.repository.latest_release = MagicMock(summary="v1.0 release")
+        rc_with_release.repository.license = "MIT"
+        rc_with_release.repository.owner.login = "Test-Owner"
+        rc_with_release.repository.stars_count = 50
+
+        rc_without_release = MagicMock()
+        rc_without_release.contributions_count = 5
+        rc_without_release.repository.contributors_count = 3
+        rc_without_release.repository.description = "Another repo"
+        rc_without_release.repository.forks_count = 1
+        rc_without_release.repository.key = "Other-Repo"
+        rc_without_release.repository.name = "other-repo"
+        rc_without_release.repository.latest_release = None
+        rc_without_release.repository.license = "Apache-2.0"
+        rc_without_release.repository.owner.login = "Other-Owner"
+        rc_without_release.repository.stars_count = 10
+
+        with patch(
+            "apps.github.models.repository_contributor.RepositoryContributor.objects"
+        ) as mock_objects:
+            mock_qs = mock_objects.filter.return_value
+            mock_qs.exclude.return_value = mock_qs
+            mock_qs.order_by.return_value = mock_qs
+            mock_qs.select_related.return_value.__getitem__.return_value = [
+                rc_with_release,
+                rc_without_release,
+            ]
+
+            contributions = instance.idx_contributions
+
+        assert len(contributions) == 2
+        assert contributions[0]["repository_latest_release"] == "v1.0 release"
+        assert contributions[0]["repository_key"] == "test-repo"
+        assert contributions[0]["repository_owner_key"] == "test-owner"
+        assert contributions[1]["repository_latest_release"] == ""
+        assert contributions[1]["repository_key"] == "other-repo"

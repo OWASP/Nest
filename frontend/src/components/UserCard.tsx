@@ -59,24 +59,24 @@ const UserCard = ({
           )}
         </div>
 
-        {(followersCount > 0 || repositoriesCount > 0 || badgeCount > 0) && (
+        {((followersCount ?? 0) > 0 || (repositoriesCount ?? 0) > 0 || (badgeCount ?? 0) > 0) && (
           <div className="flex flex-wrap justify-center gap-3 px-2">
-            {followersCount > 0 && (
+            {(followersCount ?? 0) > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
                 <HiUserGroup className="h-4 w-4" />
-                <span>{millify(followersCount, { precision: 1 })}</span>
+                <span>{millify(followersCount as number, { precision: 1 })}</span>
               </div>
             )}
-            {repositoriesCount > 0 && (
+            {(repositoriesCount ?? 0) > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
                 <FaFolderOpen className="h-3.5 w-3.5" />
-                <span>{millify(repositoriesCount, { precision: 1 })}</span>
+                <span>{millify(repositoriesCount as number, { precision: 1 })}</span>
               </div>
             )}
-            {badgeCount > 0 && (
+            {(badgeCount ?? 0) > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
                 <FaMedal className="h-3.5 w-3.5" aria-label="badges" />
-                <span>{millify(badgeCount, { precision: 1 })}</span>
+                <span>{millify(badgeCount as number, { precision: 1 })}</span>
               </div>
             )}
           </div>
