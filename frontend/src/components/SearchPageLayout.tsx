@@ -1,3 +1,4 @@
+import { Skeleton } from '@heroui/skeleton'
 import React, { useEffect, useState } from 'react'
 import Pagination from 'components/Pagination'
 import SearchBar from 'components/Search'
@@ -46,14 +47,27 @@ const SearchPageLayout = ({
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       <div className="flex w-full items-center justify-center gap-2">
-        {filterChildren}
+        {filterChildren &&
+          (isFirstLoad ? (
+            <Skeleton className="h-12 w-52 rounded-lg" aria-hidden="true" />
+          ) : (
+            filterChildren
+          ))}
         <SearchBar
           isLoaded={!isFirstLoad}
           onSearch={onSearch}
           placeholder={searchPlaceholder}
           initialValue={searchQuery}
         />
-        {inlineSort && sortChildren && <div className="flex items-center">{sortChildren}</div>}
+        {inlineSort &&
+          sortChildren &&
+          (isFirstLoad ? (
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-12 w-52 rounded-lg" aria-hidden="true" />
+            </div>
+          ) : (
+            <div className="flex items-center">{sortChildren}</div>
+          ))}
       </div>
       {isLoaded ? (
         <>

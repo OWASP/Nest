@@ -36,6 +36,9 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
             'bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg min-w-44 max-h-60 p-1 focus:outline-none overflow-y-auto',
           listbox: 'p-0 focus:outline-none',
         }}
+        scrollShadowProps={{
+          isEnabled: false,
+        }}
         selectedKeys={[selectedCountry]}
         onChange={(e) => {
           onCountryChange((e.target as HTMLSelectElement).value)

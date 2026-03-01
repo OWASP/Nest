@@ -15,7 +15,6 @@ export type GetChapterMetadataQueryVariables = Types.Exact<{
 
 export type GetChapterMetadataQuery = { chapter: { __typename: 'ChapterNode', id: string, name: string, summary: string } | null };
 
-
 export type GetChapterCountriesQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 

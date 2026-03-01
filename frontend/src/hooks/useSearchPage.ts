@@ -49,6 +49,7 @@ export function useSearchPage<T>({
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
   const facetFiltersKey = JSON.stringify(facetFilters)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableFacetFilters = useMemo(() => facetFilters, [facetFiltersKey])
 
   // Sync state with URL changes
