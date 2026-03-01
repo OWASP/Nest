@@ -10,6 +10,14 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
+  useQuery: jest.fn(() => ({
+    data: { chapterCountries: ['Japan', 'United States'] },
+    loading: false,
+  })),
+}))
+
 const mockRouter = {
   push: jest.fn(),
 }
