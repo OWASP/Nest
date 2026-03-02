@@ -10,6 +10,8 @@ from google.genai.types import HttpOptions
 
 from apps.ai.embeddings.base import Embedder
 
+GEMINI_EMBEDDING_DIMENSIONS = 1536
+
 
 class GoogleEmbedder(Embedder):
     """Google implementation of embedder."""
@@ -29,7 +31,7 @@ class GoogleEmbedder(Embedder):
             http_options=HttpOptions(timeout=30 * 1000),
         )
         self.model = model
-        self._dimensions = 1536  # gemini-embedding-001 dimensions
+        self._dimensions = GEMINI_EMBEDDING_DIMENSIONS
 
     def _normalize_embedding(self, embedding: list[float]) -> list[float]:
         """Normalize embedding vector to unit length (L2 norm).
