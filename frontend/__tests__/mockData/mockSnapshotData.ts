@@ -10,6 +10,7 @@ export const mockSnapshotDetailsData = {
     errorMessage: '',
     newReleases: [
       {
+        id: 'release-1',
         name: 'v0.9.2',
         publishedAt: '2024-12-13T14:43:46+00:00',
         tagName: 'v0.9.2',
@@ -24,6 +25,7 @@ export const mockSnapshotDetailsData = {
         },
       },
       {
+        id: 'release-2',
         name: 'Latest pre-release',
         publishedAt: '2024-12-13T13:17:30+00:00',
         tagName: 'pre-release',

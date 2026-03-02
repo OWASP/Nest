@@ -70,7 +70,8 @@ export const getCommonValidationRules = (
     },
     {
       field: 'endedAt',
-      shouldValidate: (touched.endedAt ?? false) || (touched.startedAt && !!formData.endedAt),
+      shouldValidate:
+        (touched.endedAt ?? false) || ((touched.startedAt ?? false) && !!formData.endedAt),
       validator: () => validateEndDateLocal(formData.endedAt),
     },
   ]

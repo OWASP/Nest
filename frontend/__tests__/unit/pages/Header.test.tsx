@@ -1,9 +1,12 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, within } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
 import React from 'react'
 import Header from 'components/Header'
 import '@testing-library/jest-dom'
+
+// Define EventListener type
+type EventListener = (evt: Event) => void
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -92,30 +95,28 @@ jest.mock('components/UserMenu', () => {
 })
 
 // Mock constants
-jest.mock('utils/constants', () => ({
-  desktopViewMinWidth: 768,
-  headerLinks: [
-    {
-      text: 'Home',
-      href: '/',
-    },
-    {
-      text: 'About',
-      href: '/about',
-    },
-    {
-      text: 'Services',
-      submenu: [
-        { text: 'Web Development', href: '/services/web' },
-        { text: 'Mobile Development', href: '/services/mobile' },
-      ],
-    },
-    {
-      text: 'Contact',
-      href: '/contact',
-    },
-  ],
-}))
+jest.mock('utils/constants', () => {
+  const actual = jest.requireActual('utils/constants')
+  return {
+    ...actual,
+    desktopViewMinWidth: 768,
+    headerLinks: [
+      { text: 'Home', href: '/' },
+      { text: 'About', href: '/about' },
+      { text: 'Dashboard', href: '/dashboard', requiresGitHubAuth: true },
+      {
+        text: 'Services',
+        submenu: [
+          { text: 'Web Development', href: '/services/web' },
+          { text: 'Mobile Development', href: '/services/mobile' },
+          { text: 'SubNoHref' },
+        ],
+      },
+      { text: 'Contact', href: '/contact' },
+      { text: 'NoHref' },
+    ],
+  }
+})
 
 // Mock utility function
 jest.mock('utils/utility', () => ({
@@ -161,7 +162,7 @@ const findMobileMenu = () => {
 // Helper function to check if mobile menu is open
 const isMobileMenuOpen = () => {
   const menu = findMobileMenu()
-  if (menu && menu.getAttribute('aria-expanded') === 'true') {
+  if (menu?.getAttribute('aria-expanded') === 'true') {
     return true
   }
   return menu?.className.includes('translate-x-0') || false
@@ -170,7 +171,7 @@ const isMobileMenuOpen = () => {
 // Helper function to check if mobile menu is closed
 const isMobileMenuClosed = () => {
   const menu = findMobileMenu()
-  if (menu && menu.getAttribute('aria-expanded') === 'false') {
+  if (menu?.getAttribute('aria-expanded') === 'false') {
     return true
   }
   return menu?.className.includes('-translate-x-full') || false
@@ -211,8 +212,9 @@ describe('Header Component', () => {
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2) // One in desktop header, one in mobile menu
 
-      const userMenu = screen.getByTestId('user-menu')
-      expect(userMenu).toHaveAttribute('data-github-auth', 'true')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('renders successfully with GitHub auth disabled', () => {
@@ -226,8 +228,9 @@ describe('Header Component', () => {
       const brandTexts = screen.getAllByText('Nest')
       expect(brandTexts.length).toBe(2)
 
-      const userMenu = screen.getByTestId('user-menu')
-      expect(userMenu).toHaveAttribute('data-github-auth', 'false')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'false')
     })
   })
 
@@ -386,15 +389,42 @@ describe('Header Component', () => {
       expect(isMobileMenuOpen()).toBe(true)
 
       // Find and click the logo link in mobile menu
-      const logoLinks = screen.getAllByRole('link')
-      const mobileLogoLink = logoLinks.find(
-        (link) => link.getAttribute('href') === '/' && link.querySelector('img[alt="OWASP Logo"]')
-      )
+      const mobileMenu = findMobileMenu() as HTMLElement
+      expect(mobileMenu).not.toBeNull()
+
+      const mobileLogoLink = within(mobileMenu)
+        .getAllByRole('link')
+        .find((link) => link.querySelector('img[alt="OWASP Logo"]'))
 
       // Assert that mobileLogoLink is not null before clicking
-      expect(mobileLogoLink).not.toBeNull()
+      expect(mobileLogoLink).toBeDefined()
       await act(async () => {
-        fireEvent.click(mobileLogoLink)
+        fireEvent.click(mobileLogoLink!)
+      })
+      expect(isMobileMenuClosed()).toBe(true)
+    })
+
+    it('closes mobile menu when desktop logo is clicked', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      const navbar = document.getElementById('navbar-sticky')
+      expect(navbar).toBeInTheDocument()
+
+      const desktopLogoLink = within(navbar!)
+        .getAllByRole('link')
+        .find((link) => link.querySelector('img[alt="OWASP Logo"]'))
+
+      expect(desktopLogoLink).toBeDefined()
+      await act(async () => {
+        fireEvent.click(desktopLogoLink!)
       })
       expect(isMobileMenuClosed()).toBe(true)
     })
@@ -414,7 +444,7 @@ describe('Header Component', () => {
       const allAboutLinks = screen.getAllByText('About')
       const allContactLinks = screen.getAllByText('Contact')
 
-      expect(allHomeLinks.length).toBeGreaterThan(1) // Desktop + Mobile
+      expect(allHomeLinks.length).toBeGreaterThan(1)
       expect(allAboutLinks.length).toBeGreaterThan(1)
       expect(allContactLinks.length).toBeGreaterThan(1)
     })
@@ -423,7 +453,6 @@ describe('Header Component', () => {
       const navButtons = screen.getAllByTestId('nav-button')
       expect(navButtons.length).toBeGreaterThanOrEqual(2)
 
-      // Check for the specific button texts from the actual component
       const starButton = navButtons.find((btn) => btn.textContent?.includes('Star'))
       const sponsorButton = navButtons.find((btn) => btn.textContent?.includes('Sponsor'))
 
@@ -441,7 +470,9 @@ describe('Header Component', () => {
     it('renders UserMenu component', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(screen.getByTestId('user-menu')).toBeInTheDocument()
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toBeInTheDocument()
     })
 
     it('renders ModeToggle component', () => {
@@ -477,40 +508,33 @@ describe('Header Component', () => {
       expect(window.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     })
 
-    // Simplified resize test - just check that the functionality works
     it('handles window resize events', async () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      // Open mobile menu first
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
       })
 
-      // Simulate resize event
       await act(async () => {
         globalThis.dispatchEvent(new Event('resize'))
       })
 
-      // Test passes if no errors are thrown
       expect(true).toBe(true)
     })
 
     it('handles outside click correctly', async () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      // Open mobile menu
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
         fireEvent.click(toggleButton)
       })
 
-      // Click outside
       await act(async () => {
         document.body.click()
       })
 
-      // Verify the event listener is set up
       expect(window.addEventListener).toHaveBeenCalledWith('click', expect.any(Function))
     })
   })
@@ -540,7 +564,6 @@ describe('Header Component', () => {
       mockUsePathname.mockReturnValue('/')
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      // Find the Home links that should be active
       const homeLinks = screen.getAllByRole('link', { name: 'Home' })
       const activeHomeLinks = homeLinks.filter(
         (link) => link.getAttribute('aria-current') === 'page'
@@ -581,13 +604,17 @@ describe('Header Component', () => {
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when true', () => {
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'true')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'true')
     })
 
     it('passes isGitHubAuthEnabled prop to UserMenu correctly when false', () => {
       renderWithSession(<Header isGitHubAuthEnabled={false} />)
 
-      expect(screen.getByTestId('user-menu')).toHaveAttribute('data-github-auth', 'false')
+      const userMenus = screen.getAllByTestId('user-menu')
+      expect(userMenus.length).toBeGreaterThanOrEqual(1)
+      expect(userMenus[0]).toHaveAttribute('data-github-auth', 'false')
     })
   })
 
@@ -728,6 +755,429 @@ describe('Header Component', () => {
         (link) => link.getAttribute('aria-current') === 'page'
       )
       expect(activeAboutLinks.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Resize Handler', () => {
+    it('closes mobile menu when window resizes to desktop width', async () => {
+      // Restore real event listeners for this test
+      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+      const removeEventListenerSpy = jest.spyOn(globalThis, 'removeEventListener')
+
+      // Start with mobile width
+      Object.defineProperty(globalThis, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 500,
+      })
+
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Get the resize handler that was registered
+      const resizeCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'resize')
+      expect(resizeCall).toBeDefined()
+      const resizeHandler = resizeCall![1] as EventListener
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Simulate resize to desktop width
+      Object.defineProperty(globalThis, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 1024,
+      })
+
+      await act(async () => {
+        resizeHandler(new Event('resize'))
+      })
+
+      expect(isMobileMenuClosed()).toBe(true)
+
+      addEventListenerSpy.mockRestore()
+      removeEventListenerSpy.mockRestore()
+    })
+
+    it('does not close mobile menu when window resizes but stays below desktop width', async () => {
+      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+
+      // Start with mobile width
+      Object.defineProperty(globalThis, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 400,
+      })
+
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const resizeCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'resize')
+      const resizeHandler = resizeCall![1] as EventListener
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Simulate resize but still below desktop width
+      Object.defineProperty(globalThis, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 600,
+      })
+
+      await act(async () => {
+        resizeHandler(new Event('resize'))
+      })
+
+      // Menu should still be open
+      expect(isMobileMenuOpen()).toBe(true)
+
+      addEventListenerSpy.mockRestore()
+    })
+  })
+
+  describe('Outside Click Handler', () => {
+    it('closes mobile menu when clicking outside navbar and sidebar', async () => {
+      // Track handlers registered
+      const clickHandlers: EventListener[] = []
+
+      const addEventListenerSpy = jest
+        .spyOn(globalThis, 'addEventListener')
+        .mockImplementation((type, handler) => {
+          if (type === 'click') {
+            clickHandlers.push(handler as EventListener)
+          }
+        })
+
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Open mobile menu - this triggers effect re-run and registers new handlers
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      // Check that menu is open
+      const menu = findMobileMenu()
+      expect(menu?.className.includes('translate-x-0')).toBe(true)
+
+      // Get the LATEST click handler (registered after menu opened)
+      const latestClickHandler = clickHandlers.at(-1)
+      expect(latestClickHandler).toBeDefined()
+
+      // Create an outside element and simulate click
+      const outsideElement = document.createElement('div')
+      document.body.append(outsideElement)
+
+      await act(async () => {
+        latestClickHandler({ target: outsideElement } as unknown as Event)
+      })
+
+      // Menu should close
+      expect(isMobileMenuClosed()).toBe(true)
+
+      outsideElement.remove()
+      addEventListenerSpy.mockRestore()
+    })
+
+    it('sets up click handler for outside clicks', async () => {
+      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Verify the click handler is registered
+      const clickCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'click')
+      expect(clickCall).toBeDefined()
+
+      addEventListenerSpy.mockRestore()
+    })
+
+    it('does not close mobile menu when clicking inside navbar', async () => {
+      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Get the click handler
+      const clickCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'click')
+      const clickHandler = clickCall![1] as EventListener
+
+      // Click inside navbar
+      const navbar = document.getElementById('navbar-sticky')
+      expect(navbar).not.toBeNull()
+
+      await act(async () => {
+        clickHandler({ target: navbar } as unknown as Event)
+      })
+
+      // Menu should still be open
+      expect(isMobileMenuOpen()).toBe(true)
+
+      addEventListenerSpy.mockRestore()
+    })
+
+    it('does not close mobile menu when clicking inside sidebar', async () => {
+      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Get the click handler
+      const clickCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'click')
+      const clickHandler = clickCall![1] as EventListener
+
+      // Click inside sidebar (mobile menu)
+      const sidebar = document.querySelector('.fixed.inset-y-0')
+      expect(sidebar).not.toBeNull()
+
+      await act(async () => {
+        clickHandler({ target: sidebar } as unknown as Event)
+      })
+
+      // Menu should still be open
+      expect(isMobileMenuOpen()).toBe(true)
+
+      addEventListenerSpy.mockRestore()
+    })
+
+    it('does not close menu when mobile menu is already closed', async () => {
+      const addEventListenerSpy = jest.spyOn(globalThis, 'addEventListener')
+
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Don't open mobile menu - it starts closed
+      expect(isMobileMenuClosed()).toBe(true)
+
+      // Get the click handler
+      const clickCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'click')
+      const clickHandler = clickCall![1] as EventListener
+
+      // Create an outside element and simulate click
+      const outsideElement = document.createElement('div')
+      document.body.appendChild(outsideElement)
+
+      await act(async () => {
+        clickHandler({ target: outsideElement } as unknown as Event)
+      })
+
+      // Menu should still be closed
+      expect(isMobileMenuClosed()).toBe(true)
+
+      outsideElement.remove()
+      addEventListenerSpy.mockRestore()
+    })
+  })
+
+  describe('GitHub Auth Filtering', () => {
+    it('shows Dashboard link when GitHub auth is enabled', () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Dashboard link (with requiresGitHubAuth: true) should be visible when auth is enabled
+      const dashboardLinks = screen.getAllByText('Dashboard')
+      expect(dashboardLinks.length).toBeGreaterThan(0)
+    })
+
+    it('hides Dashboard link when GitHub auth is disabled', () => {
+      renderWithSession(<Header isGitHubAuthEnabled={false} />)
+
+      // Dashboard link should NOT be present when auth is disabled
+      const dashboardLinks = screen.queryAllByText('Dashboard')
+      expect(dashboardLinks.length).toBe(0)
+    })
+
+    it('shows regular links regardless of auth state when enabled', () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Regular links without requiresGitHubAuth should be present
+      const homeLinks = screen.getAllByText('Home')
+      const aboutLinks = screen.getAllByText('About')
+      const contactLinks = screen.getAllByText('Contact')
+
+      expect(homeLinks.length).toBeGreaterThan(0)
+      expect(aboutLinks.length).toBeGreaterThan(0)
+      expect(contactLinks.length).toBeGreaterThan(0)
+    })
+
+    it('shows regular links regardless of auth state when disabled', () => {
+      renderWithSession(<Header isGitHubAuthEnabled={false} />)
+
+      // Regular links without requiresGitHubAuth should still be present
+      const homeLinks = screen.getAllByText('Home')
+      const aboutLinks = screen.getAllByText('About')
+      const contactLinks = screen.getAllByText('Contact')
+
+      expect(homeLinks.length).toBeGreaterThan(0)
+      expect(aboutLinks.length).toBeGreaterThan(0)
+      expect(contactLinks.length).toBeGreaterThan(0)
+    })
+
+    it('filters Dashboard link in both desktop and mobile views when auth is disabled', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled={false} />)
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      // Dashboard should not appear in either desktop or mobile menu
+      const dashboardLinks = screen.queryAllByText('Dashboard')
+      expect(dashboardLinks.length).toBe(0)
+    })
+
+    it('shows Dashboard link in both desktop and mobile views when auth is enabled', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      // Dashboard should appear in both desktop and mobile menu
+      const dashboardLinks = screen.getAllByText('Dashboard')
+      expect(dashboardLinks.length).toBe(2) // One in desktop, one in mobile
+    })
+  })
+
+  describe('Event Listener Cleanup', () => {
+    it('removes event listeners on unmount', () => {
+      const removeEventListenerSpy = jest.spyOn(globalThis, 'removeEventListener')
+
+      const { unmount } = renderWithSession(<Header isGitHubAuthEnabled />)
+
+      unmount()
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function))
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function))
+
+      removeEventListenerSpy.mockRestore()
+    })
+  })
+
+  describe('Mobile Menu Link Clicks', () => {
+    it('closes mobile menu when clicking a navigation link', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Find and click a navigation link in the mobile menu
+      const aboutLinks = screen.getAllByRole('link', { name: 'About' })
+      const mobileAboutLink = aboutLinks.find((link) => {
+        // Find the one in the mobile menu (has the transition class)
+        return link.className.includes('transition')
+      })
+
+      expect(mobileAboutLink).toBeDefined()
+      if (mobileAboutLink) {
+        await act(async () => {
+          fireEvent.click(mobileAboutLink)
+        })
+      }
+
+      // Menu should close after clicking a link
+      expect(isMobileMenuClosed()).toBe(true)
+    })
+
+    it('renders submenu links in mobile menu', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Open mobile menu
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      expect(isMobileMenuOpen()).toBe(true)
+
+      // Find submenu links in the mobile menu
+      const submenuLinks = screen.getAllByRole('link', { name: 'Web Development' })
+      expect(submenuLinks.length).toBeGreaterThan(0)
+
+      // Verify they have click handlers
+      const mobileSubmenuLink = submenuLinks.find(
+        (link) => link.closest('.fixed.inset-y-0') !== null
+      )
+      expect(mobileSubmenuLink).toBeDefined()
+    })
+  })
+
+  describe('Mobile Menu Aria Attributes', () => {
+    it('has proper aria-expanded attribute when menu is closed', () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const menu = findMobileMenu()
+      // Check the menu exists and verify its state
+      expect(menu).not.toBeNull()
+      expect(isMobileMenuClosed()).toBe(true)
+    })
+
+    it('verifies menu state changes correctly', async () => {
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      const toggleButton = screen.getByRole('button', { name: /open main menu/i })
+
+      // Initially closed
+      expect(isMobileMenuClosed()).toBe(true)
+
+      await act(async () => {
+        fireEvent.click(toggleButton)
+      })
+
+      // After toggle, should be open
+      expect(isMobileMenuOpen()).toBe(true)
+    })
+  })
+
+  describe('Active Submenu Link Styling', () => {
+    it('applies active styling to current submenu link', () => {
+      mockUsePathname.mockReturnValue('/services/web')
+      renderWithSession(<Header isGitHubAuthEnabled />)
+
+      // Verify the dropdown is rendered with submenu items
+      const dropdowns = screen.getAllByTestId('nav-dropdown')
+      expect(dropdowns.length).toBeGreaterThan(0)
+
+      // Check for the active submenu link in the mock
+      const webDevLinks = screen.getAllByRole('link', { name: 'Web Development' })
+      const activeLinks = webDevLinks.filter((link) => link.className.includes('active'))
+      expect(activeLinks.length).toBeGreaterThan(0)
     })
   })
 })

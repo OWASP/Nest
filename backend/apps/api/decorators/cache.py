@@ -13,7 +13,8 @@ def generate_key(
     prefix: str,
 ):
     """Generate a cache key for a request."""
-    return f"{prefix}:{request.get_full_path()}"
+    # Suppress warning as this generates an internal cache key, not a user-facing HTML response.
+    return f"{prefix}:{request.get_full_path()}"  # NOSEMGREP: python.flask.security.audit.directly-returned-format-string.directly-returned-format-string  # noqa: E501
 
 
 def cache_response(

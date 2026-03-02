@@ -26,7 +26,7 @@ class TestUpdateReplicasCommand:
 
             expected_output = (
                 "\n Starting replica configuration...\n"
-                "\n Replica have been Successfully created.\n"
+                "\n Replicas have been successfully created.\n"
             )
             assert fake_out.getvalue() == expected_output
             self.mock_replica_update.assert_called_once()

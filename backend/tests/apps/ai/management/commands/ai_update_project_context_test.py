@@ -2,7 +2,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from apps.ai.common.base.context_command import BaseContextCommand
 from apps.ai.management.commands.ai_update_project_context import Command
+from apps.owasp.models.project import Project
 
 
 @pytest.fixture
@@ -21,8 +23,6 @@ def mock_project():
 class TestAiCreateProjectContextCommand:
     def test_command_inheritance(self, command):
         """Test that the command inherits from BaseContextCommand."""
-        from apps.ai.common.base.context_command import BaseContextCommand
-
         assert isinstance(command, BaseContextCommand)
 
     def test_command_help_text(self, command):
@@ -31,8 +31,6 @@ class TestAiCreateProjectContextCommand:
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Project."""
-        from apps.owasp.models.project import Project
-
         assert command.model_class == Project
 
     def test_entity_name_property(self, command):

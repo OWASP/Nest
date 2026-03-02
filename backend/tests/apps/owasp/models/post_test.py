@@ -94,6 +94,46 @@ class TestPostModel:
         mock_post.save.assert_called_once()
         assert result == mock_post
 
+    @patch("apps.owasp.models.post.Post.save")
+    @patch("apps.owasp.models.post.Post.objects.get")
+    def test_update_data_creates_new_post(self, mock_get, mock_save):
+        """Test update_data creates new post when it doesn't exist."""
+        mock_get.side_effect = Post.DoesNotExist
+        data = {
+            "url": "https://new.com",
+            "title": "New Title",
+            "author_name": "New Author",
+            "author_image_url": "https://newimage.com",
+            "published_at": datetime(2023, 1, 1, tzinfo=UTC),
+        }
+
+        with patch.object(Post, "from_dict"):
+            result = Post.update_data(data)
+
+        mock_get.assert_called_once_with(url=data["url"])
+        assert isinstance(result, Post)
+        assert result.url == "https://new.com"
+
+    @patch("apps.owasp.models.post.Post.objects.get")
+    def test_update_data_with_save_false(self, mock_get):
+        """Test update_data with save=False doesn't call save."""
+        mock_post = Mock()
+        mock_get.return_value = mock_post
+        data = {
+            "url": "https://existing.com",
+            "title": "Updated Title",
+            "author_name": "Updated Author",
+            "author_image_url": "https://updatedimage.com",
+            "published_at": datetime(2023, 1, 1, tzinfo=UTC),
+        }
+
+        result = Post.update_data(data, save=False)
+
+        mock_get.assert_called_once_with(url=data["url"])
+        mock_post.from_dict.assert_called_once_with(data)
+        mock_post.save.assert_not_called()
+        assert result == mock_post
+
     @patch("apps.owasp.models.post.Post.objects.filter")
     def test_recent_posts_ordering(self, mock_filter):
         """Test recent_posts uses correct ordering."""

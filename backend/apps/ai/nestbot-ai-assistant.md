@@ -28,7 +28,6 @@ The current AI assistant in NestBot is far from production readiness due to:
    - RAG-required questions (complex questions needing context retrieval)
    - Clarification needed (unclear or out-of-scope)
 
-
 2. **Expert Agent Responses**: Route queries to specialized expert agents:
    - **Contribution Expert**: Provides contribution guidance, GSoC information, and suggests #contribute channel
    - **Project Expert**: Provides project information by level (flagship, production, lab, incubator) or search
@@ -37,16 +36,16 @@ The current AI assistant in NestBot is far from production readiness due to:
    - **RAG Agent**: Handles complex questions requiring context retrieval
    - **Clarification Agent**: Handles unclear or out-of-scope questions
 
-4. **RAG Processing**: Answer complex questions using:
+3. **RAG Processing**: Answer complex questions using:
    - Semantic search over OWASP content (www-* repositories)
    - Context-aware generation
    - Citation of sources
 
-5. **Clarification Handling**: For unclear or out-of-scope questions:
+4. **Clarification Handling**: For unclear or out-of-scope questions:
    - Ask for clarification
    - State scope limitations (OWASP-related only)
 
-6. **OWASP Relevance Check**: Ensure all responses are OWASP-related
+5. **OWASP Relevance Check**: Ensure all responses are OWASP-related
 
 ### Non-Functional Requirements
 
@@ -114,6 +113,7 @@ flowchart TD
 ### Core Components
 
 #### 1. Router Agent (Top Level)
+
 - **Location**: `apps/ai/router/`
 - **Role**: Intent Classifier with Confidence Scoring
 - **Goal**: Accurately classify user queries with confidence scores and route to appropriate expert agent
@@ -125,6 +125,7 @@ flowchart TD
   - Route to appropriate expert agent
 
 #### 2. Project Expert Agent
+
 - **Location**: `apps/ai/agents/project/`
 - **Role**: OWASP Project Specialist
 - **Goal**: Provide accurate, detailed information about OWASP projects
@@ -138,6 +139,7 @@ flowchart TD
   - `get_project_age`: Get project creation date or list all projects with creation dates
 
 #### 3. Contribution Expert Agent
+
 - **Location**: `apps/ai/agents/contribution/`
 - **Role**: OWASP Contribution and GSoC Specialist
 - **Goal**: Help users understand how to contribute to OWASP projects and participate in Google Summer of Code
@@ -148,6 +150,7 @@ flowchart TD
   - `get_gsoc_project_info`: Get GSoC projects for a specific year (in `gsoc_project_info.py`)
 
 #### 4. Chapter Expert Agent
+
 - **Location**: `apps/ai/agents/chapter/`
 - **Role**: OWASP Chapter Specialist
 - **Goal**: Help users find and connect with OWASP chapters
@@ -156,6 +159,7 @@ flowchart TD
   - `search_chapters`: Search for OWASP chapters by location or name
 
 #### 5. Community Expert Agent
+
 - **Location**: `apps/ai/agents/community/`
 - **Role**: OWASP Community Specialist
 - **Goal**: Help users find community members, entity leaders, channels, and suggest appropriate channels for questions
@@ -167,6 +171,7 @@ flowchart TD
   - `suggest_gsoc_channel`: Suggest #gsoc channel for GSoC questions (in `suggest_channel/gsoc.py`)
 
 #### 6. RAG Agent
+
 - **Location**: `apps/ai/agents/rag/`
 - **Role**: OWASP Knowledge Specialist
 - **Goal**: Answer complex OWASP questions using retrieved context
@@ -175,6 +180,7 @@ flowchart TD
   - `semantic_search`: Search OWASP content using embeddings (vendor-agnostic)
 
 #### 7. Clarification Agent
+
 - **Location**: `apps/ai/agents/clarification/`
 - **Role**: Clarification Specialist
 - **Goal**: Handle unclear or out-of-scope questions
@@ -650,33 +656,41 @@ def analyze_query(query: str) -> Dict[str, Any]:
 The architecture includes several mechanisms to improve response accuracy:
 
 #### 1. Multi-Step Task Execution
+
 Complex queries are broken into subtasks with tool chaining. For example:
+
 - **Analysis Task**: Understand query and plan tool usage
 - **Execution Task**: Execute tools based on plan
 - **Synthesis Task**: Combine results into coherent answer
 
 #### 2. Enhanced Router with Confidence Scoring
+
 Router provides:
+
 - **Confidence scores** (0.0-1.0) for each classification
 - **Alternative intents** when confidence is low
 - **Reasoning** for the classification decision
 - **Fallback to clarification** when confidence < 0.7
 
 #### 3. Agent Collaboration with Query Decomposition
+
 Query decomposition identifies when multiple agents are needed, then collaborative flows orchestrate them:
 
 **Query Decomposition Analysis**:
+
 - Analyzes query to identify required agents and tools
 - Breaks down complex queries into sub-queries
 - Determines execution order and dependencies
 
 **Collaborative Flow Execution**:
+
 - Uses identified agents from query analysis
 - Executes tasks in proper sequence
 - Passes results between agents as context
 - Synthesizes final response
 
 **Example**: "How can I contribute to flagship projects?"
+
 - Query Analyzer identifies: `required_agents: ["project", "contribution"]`
 - Query Analyzer identifies: `required_tools: ["get_flagship_projects", "get_contribute_info"]`
 - Collaborative flow:
@@ -685,25 +699,32 @@ Query decomposition identifies when multiple agents are needed, then collaborati
   3. Synthesizer combines both results into final answer
 
 #### 4. Self-Correction
+
 Agents refine their own answers through iterative refinement:
+
 - **Initial Answer Task**: First attempt at answering
 - **Correction Task**: Review and refine for accuracy, completeness, and clarity
 
 #### 5. Context-Aware Tool Selection
+
 Explicit tool selection step before execution:
+
 - **Tool Selection Task**: Analyze query and select appropriate tools
 - **Execution Task**: Execute selected tools based on plan
 
 #### 6. Query Decomposition
+
 Query analyzer breaks down complex queries and drives collaborative flow decisions:
 
 **Analysis Output**:
+
 - `is_simple`: Boolean indicating if query needs one tool or multiple steps
 - `sub_queries`: List of decomposed sub-queries for complex queries
 - `required_agents`: List of agent names needed (e.g., ["project", "contribution"])
 - `required_tools`: List of tool names needed (e.g., ["get_flagship_projects", "get_contribute_info"])
 
 **Usage in Collaborative Flows**:
+
 - Query decomposition happens FIRST before routing
 - If `required_agents` has multiple agents → use collaborative flow
 - Collaborative flow uses `required_agents` and `required_tools` to:
@@ -713,6 +734,7 @@ Query analyzer breaks down complex queries and drives collaborative flow decisio
   - Orchestrate execution order
 
 **Example Analysis**:
+
 ```python
 Query: "How can I contribute to flagship projects in London?"
 
@@ -730,14 +752,18 @@ Analysis Result:
 ```
 
 #### 7. Enhanced Task Descriptions
+
 Tasks include:
+
 - **Examples**: Show correct tool usage patterns
 - **Guidelines**: Best practices for tool usage
 - **Constraints**: Formatting and structure requirements
 - **Expected Output**: Clear description of desired result
 
 #### 8. Result Synthesis
+
 Dedicated synthesizer agent combines multiple tool results:
+
 - Removes duplicates
 - Organizes by relevance
 - Ensures completeness
@@ -773,6 +799,7 @@ def handle_collaborative_query(...) -> str:
 ```
 
 **Error Handling Strategies**:
+
 - **Tool Failures**: Catch tool exceptions, log, and continue with available tools
 - **Agent Failures**: Fallback to clarification agent
 - **LLM Failures**: Retry with exponential backoff, then fallback response
@@ -857,6 +884,7 @@ def process_query(query: str) -> str:
 ```
 
 **Monitoring Metrics**:
+
 - Query processing time
 - Agent execution time
 - Tool call counts and durations
@@ -928,11 +956,13 @@ def create_contribution_agent() -> Agent:
 ```
 
 **Template Rendering**:
+
 - The `render_template()` function (in `apps/ai/common/decorators.py`) is used to render Jinja2 templates
 - Templates are stored in `apps/ai/templates/agents/<agent>/tools/`
 - Context can be provided via `context_factory` parameter for dynamic values
 
 **Tool Best Practices**:
+
 - Clear, descriptive tool names with `get_` prefix
 - File names without `get_` prefix (e.g., `contribute_info.py` contains `get_contribute_info()`)
 - Comprehensive docstrings with usage examples
@@ -1053,6 +1083,7 @@ apps/ai/
 ```
 
 **File Naming Convention**:
+
 - Tool files: No `get_` prefix (e.g., `contribute_info.py`, `gsoc_info.py`, `gsoc_project_info.py`)
 - Tool functions: `get_` prefix (e.g., `get_contribute_info()`, `get_gsoc_info()`, `get_gsoc_project_info()`)
 
@@ -1061,6 +1092,7 @@ apps/ai/
 ### Phase 1: Foundation (Week 1-2)
 
 1. **Add CrewAI dependency**:
+
    ```toml
    # pyproject.toml
    crewai = "^0.80.0"
@@ -1227,6 +1259,7 @@ apps/ai/
 **Purpose**: Fast, deterministic tests for logic and structure
 
 **Scope**:
+
 - Tool implementations (mocked external dependencies)
 - Agent initialization and configuration
 - Flow structure and routing logic
@@ -1234,6 +1267,7 @@ apps/ai/
 - Semantic cache logic
 
 **Example**:
+
 ```python
 # tests/apps/ai/crewai/tools/test_static.py
 def test_get_contribute_info(mocker):
@@ -1248,6 +1282,7 @@ def test_get_contribute_info(mocker):
 **Purpose**: Validate actual LLM behavior and response quality
 
 **Scope**:
+
 - End-to-end flow execution
 - Agent interactions
 - Tool-agent integration
@@ -1255,6 +1290,7 @@ def test_get_contribute_info(mocker):
 - Response quality assessment
 
 **Example**:
+
 ```python
 # tests/apps/ai/crewai/integration/test_flow.py
 @pytest.mark.integration
@@ -1270,6 +1306,7 @@ def test_router_classifies_static_query():
 **Purpose**: Measure and track response quality over time
 
 **Scope**:
+
 - Intent classification accuracy
 - Response relevance
 - Response completeness
@@ -1277,6 +1314,7 @@ def test_router_classifies_static_query():
 - Tool selection accuracy
 
 **Test Suite**:
+
 ```python
 # tests/apps/ai/crewai/evaluation/test_quality.py
 QUALITY_TEST_CASES = [
@@ -1308,6 +1346,7 @@ def test_response_quality():
 **Purpose**: Ensure response times meet requirements
 
 **Scope**:
+
 - Static response latency (< 5s)
 - Tool response latency (< 5s)
 - RAG response latency (< 15s)
@@ -1318,6 +1357,7 @@ def test_response_quality():
 **Purpose**: Test full Slack integration
 
 **Scope**:
+
 - Slack event handling
 - Response formatting
 - Error handling
@@ -1382,7 +1422,7 @@ tests/apps/ai/crewai/
    - `backend/apps/ai/templates/agents/` (Jinja2 templates)
    - `backend/apps/ai/templates/router/` (Router templates)
 
-4. **Tests**:
+3. **Tests**:
    - `backend/tests/apps/ai/crewai/unit/`
    - `backend/tests/apps/ai/crewai/integration/`
    - `backend/tests/apps/ai/crewai/evaluation/`
@@ -1397,6 +1437,7 @@ tests/apps/ai/crewai/
 ## Rollback Plan
 
 1. **Feature Flag**: Add feature flag to toggle between old and new implementation
+
    ```python
    # settings/base.py
    USE_CREWAI_ASSISTANT = False  # Default to old implementation

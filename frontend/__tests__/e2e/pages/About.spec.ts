@@ -8,18 +8,27 @@ test.describe('About Page', () => {
       const request = route.request()
       const postData = request.postDataJSON()
 
-      if (postData.query?.includes('user')) {
-        const username = postData.variables.key
-        const userData = mockAboutData.users[username]
-        await route.fulfill({ status: 200, json: { data: { user: userData } } })
-      } else if (postData.query?.includes('topContributors')) {
-        await route.fulfill({
+      if (postData.operationName === 'GetAboutPageData') {
+        const leaders = ['arkid15r', 'kasya', 'mamicidal']
+        const leaderData = leaders.reduce(
+          (acc, leader, index) => ({
+            ...acc,
+            [`leader${index + 1}`]: mockAboutData.users[leader],
+          }),
+          {}
+        )
+        return route.fulfill({
           status: 200,
-          json: { data: { topContributors: mockAboutData.topContributors } },
+          json: {
+            data: {
+              project: mockAboutData.project,
+              topContributors: mockAboutData.topContributors,
+              ...leaderData,
+            },
+          },
         })
-      } else {
-        await route.fulfill({ status: 200, json: { data: { project: mockAboutData.project } } })
       }
+      return route.continue()
     })
 
     await page.context().addCookies([
@@ -71,8 +80,19 @@ test.describe('About Page', () => {
 
   test('loads roadmap items correctly', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Roadmap' })).toBeVisible()
+
+    await expect(page.getByText('Contribution Hub title')).toBeVisible()
+
+    const roadmapSection = page
+      .locator('div')
+      .filter({ has: page.getByRole('heading', { name: 'Roadmap' }) })
+      .filter({ has: page.getByRole('button', { name: 'Show more' }) })
+      .last()
+
+    await roadmapSection.getByRole('button', { name: 'Show more' }).click()
+
     for (const milestone of mockAboutData.project.recentMilestones) {
-      await expect(page.getByText(milestone.title)).toBeVisible()
+      await expect(page.getByText(milestone.title, { exact: true })).toBeVisible()
       await expect(page.getByText(milestone.body)).toBeVisible()
     }
   })
@@ -99,7 +119,18 @@ test.describe('About Page', () => {
   })
 
   test('renders project history timeline section', async ({ page }) => {
-    await expect(page.getByText('Project Timeline')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project Timeline' })).toBeVisible()
+
+    await expect(page.getByText('OWASP Nest Logo Introduction')).toBeVisible()
+
+    const timelineSection = page
+      .locator('div')
+      .filter({ has: page.getByRole('heading', { name: 'Project Timeline' }) })
+      .filter({ has: page.getByRole('button', { name: 'Show more' }) })
+      .last()
+
+    await timelineSection.getByRole('button', { name: 'Show more' }).click()
+
     await expect(page.getByText('Project Inception')).toBeVisible()
   })
 })

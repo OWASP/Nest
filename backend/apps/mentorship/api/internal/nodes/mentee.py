@@ -27,4 +27,4 @@ class MenteeNode:
     @strawberry.field(name="experienceLevel")
     def resolve_experience_level(self) -> str:
         """Get the experience level of the mentee."""
-        return self.experience_level if self.experience_level else "beginner"
+        return self.experience_level or "beginner"

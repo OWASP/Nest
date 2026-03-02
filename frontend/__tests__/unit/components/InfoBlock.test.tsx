@@ -265,6 +265,15 @@ describe('InfoBlock Component', () => {
 
         expect(mockMillify).toHaveBeenCalledWith(1234, { precision: 1 })
       })
+
+      it('should use default value of 0 when value is not provided', () => {
+        mockMillify.mockReturnValue('0')
+        mockPluralize.mockReturnValue('items')
+
+        render(<InfoBlock icon={FaUser} />)
+
+        expect(screen.getByText('No items')).toBeInTheDocument()
+      })
     })
 
     describe('Text and content rendering', () => {

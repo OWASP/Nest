@@ -1,8 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import SponsorCard from 'components/SponsorCard'
-
-expect.extend(toHaveNoViolations)
 
 const defaultProps = {
   target: 'test-target',
@@ -10,7 +9,14 @@ const defaultProps = {
   type: 'project',
 }
 
-describe('SponsorCard Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('SponsorCard Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<SponsorCard {...defaultProps} />)
     const results = await axe(container)

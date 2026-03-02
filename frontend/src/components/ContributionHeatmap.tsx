@@ -179,7 +179,15 @@ const getChartOptions = (isDarkMode: boolean, unit: string) => ({
     style: {
       fontSize: '12px',
     },
-    custom: ({ seriesIndex, dataPointIndex, w }) => {
+    custom: ({
+      seriesIndex,
+      dataPointIndex,
+      w,
+    }: {
+      seriesIndex: number
+      dataPointIndex: number
+      w: { config: { series: Array<{ data: Array<{ y: number; date: string }> }> } }
+    }) => {
       const data = w.config.series[seriesIndex].data[dataPointIndex]
       if (!data) return ''
 
@@ -249,7 +257,7 @@ interface ContributionHeatmapProps {
   endDate: string
   title?: string
   unit?: string
-  variant?: 'default' | 'compact'
+  variant?: 'default' | 'medium' | 'compact'
 }
 
 const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
@@ -262,7 +270,6 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 }) => {
   const { theme } = useTheme()
   const isDarkMode = theme === 'dark'
-  const isCompact = variant === 'compact'
 
   const { heatmapSeries } = useMemo(
     () => generateHeatmapSeries(startDate, endDate, contributionData),
@@ -274,20 +281,33 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
   const calculateChartWidth = useMemo(() => {
     const weeksCount = heatmapSeries[0]?.data?.length || 0
 
-    if (isCompact) {
+    if (variant === 'compact') {
       const pixelPerWeek = 13.4
       const padding = 40
       const calculatedWidth = weeksCount * pixelPerWeek + padding
       return Math.max(400, calculatedWidth)
     }
 
+    if (variant === 'medium') {
+      const pixelPerWeek = 16
+      const padding = 45
+      const calculatedWidth = weeksCount * pixelPerWeek + padding
+      return Math.max(500, calculatedWidth)
+    }
+
     const pixelPerWeek = 19.5
     const padding = 50
     const calculatedWidth = weeksCount * pixelPerWeek + padding
     return Math.max(600, calculatedWidth)
-  }, [heatmapSeries, isCompact])
+  }, [heatmapSeries, variant])
 
   const chartWidth = calculateChartWidth
+
+  const getChartHeight = () => {
+    if (variant === 'compact') return 150
+    if (variant === 'medium') return 172
+    return 195
+  }
 
   return (
     <div className="w-full">
@@ -316,7 +336,7 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
 
         <div className="inline-block">
           <Chart
-            height={isCompact ? 150 : 195}
+            height={getChartHeight()}
             options={options}
             series={heatmapSeries}
             type="heatmap"

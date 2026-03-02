@@ -1,7 +1,7 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ChaptersPage from 'app/chapters/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -17,7 +17,7 @@ const mockRouter = {
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
   useRouter: jest.fn(() => mockRouter),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
 jest.mock('components/Pagination', () =>
@@ -143,6 +143,120 @@ describe('ChaptersPage Component', () => {
         fireEvent.click(link)
         expect(mockRouter.push).toHaveBeenCalledWith(`/chapters/chapter_${index + 1}`)
       }
+    })
+  })
+
+  test('uses chapters data for map when searchQuery is present', async () => {
+    const searchParams = new URLSearchParams('q=test')
+    jest.mocked(useSearchParams).mockReturnValue(searchParams as never)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      totalPages: 2,
+    })
+
+    render(<ChaptersPage />)
+
+    // When searchQuery is present, chapters data should be used for the map instead of geoLocData
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('renders chapter card without relatedUrls', async () => {
+    const chapterWithoutUrls = {
+      ...mockChapterData.chapters[0],
+      relatedUrls: undefined,
+      key: 'chapter_no_urls',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithoutUrls],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('renders chapter card without objectID (uses key fallback)', async () => {
+    const chapterWithoutObjectID = {
+      ...mockChapterData.chapters[0],
+      objectID: undefined,
+      key: 'chapter_no_objectid',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithoutObjectID],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('renders chapter card without summary (uses empty string fallback)', async () => {
+    const chapterWithoutSummary = {
+      ...mockChapterData.chapters[0],
+      summary: undefined,
+      key: 'chapter_no_summary',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithoutSummary],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('filters out inactive chapters', async () => {
+    const activeChapter = {
+      ...mockChapterData.chapters[0],
+      name: 'Active Chapter',
+      key: 'active_chapter',
+      isActive: true,
+    }
+    const inactiveChapter = {
+      ...mockChapterData.chapters[0],
+      name: 'Inactive Chapter',
+      key: 'inactive_chapter',
+      isActive: false,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [activeChapter, inactiveChapter],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Active Chapter')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Inactive Chapter')).not.toBeInTheDocument()
+  })
+
+  test('renders chapter with null relatedUrls', async () => {
+    const chapterWithNullUrls = {
+      ...mockChapterData.chapters[0],
+      relatedUrls: null,
+      key: 'chapter_null_urls',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [chapterWithNullUrls],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
     })
   })
 })

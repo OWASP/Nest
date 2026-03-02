@@ -56,6 +56,7 @@ export const GET_PROJECT_DATA = gql`
         url
       }
       recentReleases {
+        id
         author {
           id
           avatarUrl

@@ -134,6 +134,30 @@ class TestRepositoryFromGithub:
 
         assert repository.is_empty
 
+    def test_from_github_with_non_409_github_exception(self, gh_repository_setup):
+        """Test from_github with GithubException where status is not 409."""
+        commits_mock = MagicMock()
+        type(commits_mock).totalCount = PropertyMock(
+            side_effect=GithubException(
+                status=500, data={"message": "Internal error", "status": "500"}
+            )
+        )
+
+        repository = Repository()
+        repository.from_github(gh_repository_setup, commits=commits_mock)
+
+        assert not repository.is_empty
+
+    def test_from_github_with_contributors(self, gh_repository_setup):
+        """Test from_github with contributors parameter."""
+        contributors_mock = MagicMock()
+        contributors_mock.totalCount = 42
+
+        repository = Repository()
+        repository.from_github(gh_repository_setup, contributors=contributors_mock)
+
+        assert repository.contributors_count == 42
+
     def test_from_github_calculates_languages(self, gh_repository_setup):
         """Test that from_github correctly calculates language percentages."""
         languages = {"Python": 300, "JavaScript": 600, "HTML": 100}
@@ -275,6 +299,11 @@ class TestRepositoryProperties:
         _owner, repository = repository_setup
         assert repository.path == "test-owner/test-repo"
 
+    def test_str_method(self, repository_setup):
+        """Test __str__ returns the repository path."""
+        _owner, repository = repository_setup
+        assert str(repository) == "test-owner/test-repo"
+
     def test_project(self, repository_setup):
         """Test the project property to ensure it returns the associated project."""
         _owner, repository = repository_setup
@@ -298,17 +327,18 @@ class TestRepositoryProperties:
                 is_draft=False, is_pre_release=False, published_at__isnull=False
             )
 
-    def test_recent_milestones(self, mocker, repository_setup):
+    def test_recent_milestones(self, repository_setup):
         """Test the recent_milestones property to ensure it returns milestones.
 
         ordered by creation date.
         """
         _owner, repository = repository_setup
-        mock_filter = mocker.patch("apps.github.models.repository.Milestone.objects.filter")
-        mock_filter.return_value.order_by.return_value = "recent_milestones"
-        assert repository.recent_milestones == "recent_milestones"
-        mock_filter.assert_called_with(repository=repository)
-        mock_filter.return_value.order_by.assert_called_with("-created_at")
+        with patch.object(Repository, "milestones", new_callable=PropertyMock) as mock_prop:
+            mock_manager = mock_prop.return_value
+            mock_manager.order_by.return_value = "recent_milestones"
+            repository.pk = 123
+            assert repository.recent_milestones == "recent_milestones"
+            mock_manager.order_by.assert_called_with("-created_at")
 
     def test_top_languages(self, repository_setup):
         """Test the top_languages property to ensure it returns a sorted list of.
@@ -328,3 +358,37 @@ class TestRepositoryProperties:
         """Test the url property to ensure it returns the correct GitHub URL."""
         _owner, repository = repository_setup
         assert repository.url == "https://github.com/test-owner/test-repo"
+
+    def test_update_data_without_save(self, mocker):
+        """Test update_data with save=False."""
+        gh_repository_mock = MagicMock()
+        gh_repository_mock.raw_data = {"node_id": "repo_node_123"}
+
+        mock_repository = mocker.Mock(spec=Repository)
+        mocker.patch(
+            "apps.github.models.repository.Repository.objects.get", return_value=mock_repository
+        )
+
+        repository = Repository.update_data(gh_repository_mock, save=False)
+
+        mock_repository.from_github.assert_called_once()
+        mock_repository.save.assert_not_called()
+        assert repository == mock_repository
+
+    def test_update_data_creates_new_repository(self, mocker):
+        """Test update_data creates a new repository when it doesn't exist."""
+        gh_repository_mock = MagicMock()
+        gh_repository_mock.raw_data = {"node_id": "new_repo_node"}
+
+        mocker.patch(
+            "apps.github.models.repository.Repository.objects.get",
+            side_effect=Repository.DoesNotExist,
+        )
+        mock_from_github = mocker.patch("apps.github.models.repository.Repository.from_github")
+        mock_save = mocker.patch("apps.github.models.repository.Repository.save")
+
+        repository = Repository.update_data(gh_repository_mock)
+
+        assert repository.node_id == "new_repo_node"
+        mock_from_github.assert_called_once()
+        mock_save.assert_called_once()

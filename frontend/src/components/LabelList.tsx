@@ -8,7 +8,7 @@ interface LabelProps {
 const Label: React.FC<LabelProps> = ({ label, className = '' }) => {
   return (
     <span
-      className={`inline-block rounded-lg border border-gray-400 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-200 dark:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700 ${className}`}
+      className={`flex items-center justify-center gap-2 rounded-md border border-zinc-500 bg-transparent px-2 py-1 text-xs text-zinc-800 transition-all hover:bg-zinc-500 hover:text-white dark:border-zinc-300 dark:text-white dark:hover:bg-zinc-300 dark:hover:text-black ${className}`}
     >
       {label}
     </span>
@@ -16,21 +16,26 @@ const Label: React.FC<LabelProps> = ({ label, className = '' }) => {
 }
 
 interface LabelListProps {
+  entityKey: string
   labels: string[]
   maxVisible?: number
   className?: string
 }
 
-const LabelList: React.FC<LabelListProps> = ({ labels, maxVisible = 5, className = '' }) => {
+const LabelList: React.FC<LabelListProps> = ({
+  entityKey,
+  labels,
+  maxVisible = 5,
+  className = '',
+}) => {
   if (!labels || labels.length === 0) return null
 
   const visibleLabels = labels.slice(0, maxVisible)
   const remainingCount = labels.length - maxVisible
-
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
-      {visibleLabels.map((label, index) => (
-        <Label key={`${label}-${index}`} label={label} />
+      {visibleLabels.map((label) => (
+        <Label key={`${entityKey}-${label}`} label={label} />
       ))}
       {remainingCount > 0 && <Label label={`+${remainingCount} more`} />}
     </div>

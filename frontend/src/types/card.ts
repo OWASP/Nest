@@ -19,8 +19,10 @@ import type { CardType } from 'components/CardDetailsPage'
 
 export type CardProps = {
   button: Button
+  cardKey: string
   icons?: Icon
   isActive?: boolean
+  labels?: string[]
   level?: Level
   projectLink?: string
   projectName?: string

@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
@@ -18,8 +19,9 @@ const ProgramDetailsPage = () => {
     error: graphQLRequestError,
     loading: isLoading,
   } = useQuery(GetProgramAndModulesDocument, {
-    variables: { programKey },
+    fetchPolicy: 'cache-and-network',
     skip: !programKey,
+    variables: { programKey },
   })
 
   const program = data?.getProgram
@@ -29,9 +31,9 @@ const ProgramDetailsPage = () => {
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
     }
-  }, [graphQLRequestError, programKey])
+  }, [graphQLRequestError])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (graphQLRequestError) {
     return (
@@ -65,15 +67,22 @@ const ProgramDetailsPage = () => {
   ]
 
   return (
-    <DetailsCard
-      details={programDetails}
-      domains={program.domains}
-      modules={modules}
-      summary={program.description}
-      tags={program.tags}
-      title={program.name}
-      type="program"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        admins={program.admins ?? undefined}
+        details={programDetails}
+        domains={program.domains ?? undefined}
+        modules={modules}
+        recentMilestones={
+          (program.recentMilestones as unknown as import('types/milestone').Milestone[]) ??
+          undefined
+        }
+        summary={program.description}
+        tags={program.tags ?? undefined}
+        title={program.name}
+        type="program"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

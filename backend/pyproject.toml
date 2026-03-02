@@ -8,7 +8,6 @@ version = "0.0.0"
 description = "Your gateway to OWASP"
 authors = [ "Arkadii Yakovets <arkadii.yakovets@owasp.org>" ]
 readme = "README.md"
-
 packages = [ { include = "apps" } ]
 
 [tool.poetry.dependencies]
@@ -75,7 +74,6 @@ weasyprint = "^67.0"
 
 [tool.ruff]
 target-version = "py313"
-
 line-length = 99
 lint.select = [ "ALL" ]
 lint.extend-select = [ "I" ]
@@ -87,7 +85,6 @@ lint.ignore = [
   "D407",    # https://docs.astral.sh/ruff/rules/missing-dashed-underline-after-section/
   "DJ012",   # https://docs.astral.sh/ruff/rules/django-unordered-body-content-in-model/
   "FIX002",  # https://docs.astral.sh/ruff/rules/line-contains-todo/
-  "PLC0415", # https://docs.astral.sh/ruff/rules/import-outside-top-level/
   "PLR0912", # https://docs.astral.sh/ruff/rules/too-many-branches/
   "PLR0913", # https://docs.astral.sh/ruff/rules/too-many-arguments/
   "PLR0915", # https://docs.astral.sh/ruff/rules/too-many-statements/
@@ -98,31 +95,36 @@ lint.per-file-ignores."**/__init__.py" = [
   "D104", # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "F401", # https://docs.astral.sh/ruff/rules/unused-import/
 ]
-lint.per-file-ignores."**/management/commands/*.py" = [
+lint.per-file-ignores."apps/**/management/commands/*.py" = [
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D102",   # https://docs.astral.sh/ruff/rules/undocumented-public-method/
   "SLF001", # https://docs.astral.sh/ruff/rules/private-member-access/
-  "T201",   # https://docs.astral.sh/ruff/rules/print/
 ]
-lint.per-file-ignores."**/migrations/*.py" = [
+lint.per-file-ignores."apps/**/migrations/*.py" = [
   "D100",   # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",   # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D104",   # https://docs.astral.sh/ruff/rules/undocumented-public-package/
   "E501",   # https://docs.astral.sh/ruff/rules/line-too-long/
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
-lint.per-file-ignores."**/models/*.py" = [
-  "D106", # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
+lint.per-file-ignores."apps/api/rest/**/*.py" = [
+  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
+  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
 ]
-lint.per-file-ignores."**/settings/*.py" = [
+lint.per-file-ignores."apps/github/models/mixins/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/commands/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/common/handlers/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."apps/slack/events/**/*.py" = [ "PLC0415" ]
+lint.per-file-ignores."settings/*.py" = [
   "RUF012", # https://docs.astral.sh/ruff/rules/mutable-class-default/
 ]
-lint.per-file-ignores."**/tests/**/*.py" = [
+lint.per-file-ignores."tests/**/*.py" = [
   "ARG001",  # https://docs.astral.sh/ruff/rules/unused-function-argument/
   "D100",    # https://docs.astral.sh/ruff/rules/undocumented-public-module/
   "D101",    # https://docs.astral.sh/ruff/rules/undocumented-public-class/
   "D102",    # https://docs.astral.sh/ruff/rules/undocumented-public-method/
   "D103",    # https://docs.astral.sh/ruff/rules/undocumented-public-function/
+  "D106",    # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class/
   "D107",    # https://docs.astral.sh/ruff/rules/undocumented-public-init/
   "PLR2004", # https://docs.astral.sh/ruff/rules/magic-value-comparison/
   "RUF012",  # https://docs.astral.sh/ruff/rules/mutable-class-default/
@@ -130,19 +132,15 @@ lint.per-file-ignores."**/tests/**/*.py" = [
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
 
-lint.per-file-ignores."apps/api/rest/**/*.py" = [
-  "ARG001", # https://docs.astral.sh/ruff/rules/unused-function-argument/
-  "B008",   # https://docs.astral.sh/ruff/rules/function-call-in-default-argument/
-]
-
-[tool.pytest.ini_options]
-DJANGO_CONFIGURATION = "Test"
-DJANGO_SETTINGS_MODULE = "settings.test"
-addopts = [
+[tool.pytest]
+ini_options.DJANGO_CONFIGURATION = "Test"
+ini_options.DJANGO_SETTINGS_MODULE = "settings.test"
+ini_options.addopts = [
   "--cov-config=pyproject.toml",
-  "--cov-fail-under=80",
+  "--cov-fail-under=95",
   "--cov-precision=2",
   "--cov-report=term-missing",
+  "--cov-report=xml",
   "--cov=.",
   "--dist=loadscope",
   "--durations-min=1",
@@ -150,21 +148,18 @@ addopts = [
   "--no-cov-on-fail",
   "--numprocesses=auto",
 ]
-filterwarnings = [
+ini_options.filterwarnings = [
   "ignore::DeprecationWarning:pytest_cov",
   "ignore::DeprecationWarning:xdist",
   "ignore::pydantic.warnings.PydanticDeprecatedSince20",
 ]
-log_level = "INFO"
+ini_options.log_level = "INFO"
 
-[tool.coverage.run]
-branch = true
-omit = [
-  "__init__.py",
-  "**/admin.py",
-  "**/apps.py",
+[tool.coverage]
+run.branch = true
+run.omit = [
   "**/migrations/*",
-  "**/mentorship/*", # TODO: work in progress
+  "__init__.py",
   "manage.py",
   "settings/*",
   "tests/*",

@@ -28,7 +28,7 @@ class SlackConfig(AppConfig):
     def ready(self):
         """Configure Slack events when the app is ready."""
         super().ready()
-        from apps.slack.events import configure_slack_events
+        from apps.slack.events import configure_slack_events  # noqa: PLC0415
 
         configure_slack_events()
 
@@ -66,7 +66,7 @@ if SlackConfig.app:
             next (function): The next middleware function in the chain.
 
         """
-        from apps.slack.models.event import Event
+        from apps.slack.models.event import Event  # noqa: PLC0415
 
         try:
             Event.create(context, payload)

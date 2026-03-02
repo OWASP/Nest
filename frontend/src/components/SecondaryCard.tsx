@@ -12,7 +12,7 @@ const SecondaryCard = ({
   icon?: IconType
   children?: React.ReactNode
   className?: string
-} = {}) => (
+}) => (
   <div className={`mb-8 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 ${className}`}>
     {title && (
       <h2 className="mb-4 flex flex-row items-center gap-2 text-2xl font-semibold">

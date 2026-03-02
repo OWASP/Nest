@@ -13,7 +13,7 @@ export type Chapter = {
   }
   createdAt?: number
   entityLeaders?: Leader[]
-  geoLocation?: GeoLocation
+  geoLocation?: GeoLocation | null
   isActive?: boolean
   key: string
   leaders?: string[]

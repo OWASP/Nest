@@ -22,6 +22,8 @@ class Context(TimestampedModel):
     source = models.CharField(max_length=100, blank=True, default="")
 
     class Meta:
+        """Model options."""
+
         db_table = "ai_contexts"
         verbose_name = "Context"
         unique_together = ("entity_type", "entity_id", "source")

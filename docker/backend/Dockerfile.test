@@ -11,6 +11,7 @@ ENV OWASP_GID=1000 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
+# hadolint ignore=DL3008,DL3046
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         libffi-dev \
@@ -22,8 +23,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mkdir -p ${POETRY_CACHE_DIR} /home/owasp/.local/share && \
     chown -R owasp:owasp /home/owasp
 
+COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
-    python -m pip install poetry --cache-dir ${PIP_CACHE_DIR}
+    python -m pip install --requirement /tmp/requirements.build.txt
 
 USER owasp
 WORKDIR /home/owasp
@@ -37,18 +39,19 @@ USER owasp
 
 # Update lock file if pyproject.toml changed (e.g., Python version upgrade)
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
-    poetry lock || true
-RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     --mount=type=cache,target=${PIP_CACHE_DIR} \
-    poetry install --no-root
+    poetry install --no-root --verbose --without fuzz
 
+# Less likely to cause cache invalidation items go first.
 COPY .env.example .env.example
-COPY apps apps
 COPY manage.py wsgi.py ./
+COPY tests/__init__.py tests/__init__.py
+COPY tests/conftest.py tests/conftest.py
 COPY settings settings
 COPY static static
 COPY templates templates
-COPY tests tests
+COPY apps apps
+COPY tests/apps tests/apps
 
 # Use -dev variant for runtime stage to allow installing runtime dependencies
 # Still hardened, just includes shell and package manager for flexibility
@@ -63,6 +66,7 @@ ENV FORCE_COLOR=1 \
     VIRTUAL_ENV="/home/owasp/.venv" \
     PYTHONUNBUFFERED=1
 
+# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         postgresql-client \
@@ -73,6 +77,7 @@ RUN apt-get update && \
     useradd -u 1000 -g owasp -m -s /bin/bash owasp
 
 # Install poetry for runtime (needed for volume-based development setup)
+# hadolint ignore=DL3013
 RUN --mount=type=cache,target=/root/.cache/pip \
     python3 -m pip install poetry --cache-dir /root/.cache/pip
 
@@ -93,6 +98,7 @@ RUN if [ -d /home/owasp/.venv ]; then \
 USER owasp
 
 # Verify virtualenv is working and packages are accessible
+# hadolint ignore=SC2015
 RUN /home/owasp/.venv/bin/python -c "import sys; print(sys.executable)" && \
     /home/owasp/.venv/bin/python -c "import configurations; print('configurations module found')" || \
     (echo "Warning: modules not found in virtualenv" && exit 1)

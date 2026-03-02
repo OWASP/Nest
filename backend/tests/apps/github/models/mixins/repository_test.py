@@ -5,31 +5,35 @@ import pytest
 from apps.github.models.mixins.repository import RepositoryIndexMixin
 from apps.github.models.release import Release
 
+COMMITS_COUNT = 100
 CONTRIBUTORS_COUNT = 5
 FORKS_COUNT = 5
 OPEN_ISSUES_COUNT = 5
+REPOSITORY_SIZE = 1024
 STARS_COUNT = 5
+SUBSCRIBERS_COUNT = 10
 
 
 @pytest.fixture
 def repository_index_mixin_instance():
     instance = RepositoryIndexMixin()
+    instance.commits_count = COMMITS_COUNT
     instance.contributors_count = CONTRIBUTORS_COUNT
+    instance.created_at = datetime(2020, 1, 1, tzinfo=UTC)
     instance.description = "Description"
     instance.forks_count = FORKS_COUNT
-    instance.languages = ["Python", "JavaScript"]
-    instance.name = "Name"
-    instance.open_issues_count = OPEN_ISSUES_COUNT
-    instance.pushed_at = datetime(2021, 1, 1, tzinfo=UTC)
-    instance.stars_count = STARS_COUNT
-    instance.topics = ["Topic1", "Topic2"]
-    instance.created_at = datetime(2020, 1, 1, tzinfo=UTC)
-    instance.size = 1024
     instance.has_funding_yml = True
+    instance.languages = ["Python", "JavaScript"]
     instance.license = "MIT"
-    instance.project = None
-    instance.commits_count = 100
+    instance.name = "Name"
     instance.nest_key = "nest/key"
+    instance.open_issues_count = OPEN_ISSUES_COUNT
+    instance.project = None
+    instance.pushed_at = datetime(2021, 1, 1, tzinfo=UTC)
+    instance.size = REPOSITORY_SIZE
+    instance.stars_count = STARS_COUNT
+    instance.subscribers_count = SUBSCRIBERS_COUNT
+    instance.topics = ["Topic1", "Topic2"]
     return instance
 
 
@@ -104,22 +108,22 @@ class TestRepositoryIndexMixin:
     @pytest.mark.parametrize(
         ("attr", "expected"),
         [
+            ("idx_commits_count", 100),
             ("idx_contributors_count", CONTRIBUTORS_COUNT),
+            ("idx_created_at", datetime(2020, 1, 1, tzinfo=UTC).timestamp()),
             ("idx_description", "Description"),
             ("idx_forks_count", FORKS_COUNT),
+            ("idx_has_funding_yml", True),
+            ("idx_key", "nest/key"),
             ("idx_languages", ["Python", "JavaScript"]),
+            ("idx_license", "MIT"),
             ("idx_name", "Name"),
             ("idx_open_issues_count", OPEN_ISSUES_COUNT),
             ("idx_pushed_at", datetime(2021, 1, 1, tzinfo=UTC).timestamp()),
-            ("idx_stars_count", STARS_COUNT),
-            ("idx_topics", ["Topic1", "Topic2"]),
-            ("idx_created_at", datetime(2020, 1, 1, tzinfo=UTC).timestamp()),
-            ("idx_has_funding_yml", True),
-            ("idx_license", "MIT"),
-            ("idx_subscribers_count", STARS_COUNT),
-            ("idx_commits_count", 100),
             ("idx_size", 1024),
-            ("idx_key", "nest/key"),
+            ("idx_stars_count", STARS_COUNT),
+            ("idx_subscribers_count", SUBSCRIBERS_COUNT),
+            ("idx_topics", ["Topic1", "Topic2"]),
         ],
     )
     def test_repository_index(self, repository_index_mixin_instance, attr, expected):

@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import { toHaveNoViolations } from 'jest-axe'
 import React from 'react'
 
 globalThis.React = React
@@ -113,9 +114,9 @@ beforeAll(() => {
   }
 
   globalThis.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
+    disconnect = jest.fn()
+    observe = jest.fn()
+    unobserve = jest.fn()
   }
 })
 
@@ -151,9 +152,30 @@ beforeEach(() => {
   globalThis.runAnimationFrameCallbacks = jest.fn()
 })
 
+jest.mock('next-themes', () => ({
+  useTheme: jest.fn(() => ({ theme: 'light', setTheme: jest.fn() })),
+  ThemeProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement('div', null, children),
+}))
+
 jest.mock('ics', () => {
   return {
     __esModule: true,
     createEvent: jest.fn(),
   }
 })
+
+jest.mock('@apollo/client/react', () => {
+  const actual = jest.requireActual('@apollo/client/react')
+  const mockUseMutation = jest.fn(() => [
+    jest.fn().mockResolvedValue({ data: {} }),
+    { data: null, loading: false, error: null, called: false },
+  ])
+
+  return {
+    ...actual,
+    useMutation: mockUseMutation,
+  }
+})
+
+expect.extend(toHaveNoViolations)

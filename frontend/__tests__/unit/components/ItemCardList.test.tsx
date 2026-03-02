@@ -167,6 +167,7 @@ const mockPullRequest: PullRequest = {
 }
 
 const mockRelease: Release = {
+  id: 'release-item-card',
   author: {
     ...mockUser,
     login: 'author4',
@@ -536,10 +537,81 @@ describe('ItemCardList Component', () => {
         />
       )
 
+      // When URL is missing, the title should render as plain text, not a link.
+      const titleText = screen.getByText('Test Issue Title')
+      expect(titleText).toBeInTheDocument()
+
+      // Verify it's not wrapped in a link.
+      const titleLinks = screen.queryAllByTestId('link')
+      const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
+      expect(titleLink).toBeUndefined()
+    })
+
+    it('renders title as link when valid url is present', () => {
+      const itemWithUrl = { ...mockIssue, url: 'https://example.com/issue' }
+
+      render(
+        <ItemCardList
+          title="With URL"
+          data={[itemWithUrl]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
       const titleLinks = screen.getAllByTestId('link')
       const titleLink = titleLinks.find((link) => link.textContent?.includes('Test Issue Title'))
+      expect(titleLink).toHaveAttribute('href', 'https://example.com/issue')
+    })
 
-      expect(titleLink).toHaveAttribute('href', '')
+    it('uses id as key when objectID is not present', () => {
+      const itemWithId = { ...mockIssue, objectID: undefined, id: 'test-id-123' }
+
+      render(
+        <ItemCardList
+          title="With ID"
+          data={[itemWithId]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
+      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+    })
+
+    it('generates fallback key when no identifiers are present', () => {
+      const itemWithoutIds = {
+        ...mockIssue,
+        objectID: undefined,
+        id: undefined,
+        repositoryName: '',
+        title: '',
+        name: '',
+        url: '',
+      }
+
+      render(
+        <ItemCardList
+          title="Fallback Key"
+          data={[itemWithoutIds]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
+      // Component should render without crashing
+      expect(screen.getByText('Fallback Key')).toBeInTheDocument()
+    })
+
+    it('uses objectID as primary key identifier', () => {
+      const itemWithObjectId = { ...mockIssue, objectID: 'object-123' }
+
+      render(
+        <ItemCardList
+          title="With ObjectID"
+          data={[itemWithObjectId]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
+      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
     })
   })
 
@@ -714,7 +786,7 @@ describe('ItemCardList Component', () => {
       expect(avatarImage).toHaveAttribute('alt', `${issueWithoutAuthor.author.login}'s avatar`)
     })
 
-    it('uses generic fallback alt text when author is missing', () => {
+    it('shows fallback icon when author is missing', () => {
       const issueWithoutAuthor = {
         ...mockIssue,
         author: null,
@@ -729,11 +801,11 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
+      const avatarImage = screen.queryByTestId('avatar-image')
+      expect(avatarImage).not.toBeInTheDocument()
     })
 
-    it('uses generic fallback alt text when author name and login are missing', () => {
+    it('shows fallback icon when author name and login are missing', () => {
       const issueWithEmptyAuthor = {
         ...mockIssue,
         author: {
@@ -752,8 +824,8 @@ describe('ItemCardList Component', () => {
         />
       )
 
-      const avatarImage = screen.getByTestId('avatar-image')
-      expect(avatarImage).toHaveAttribute('alt', "Author's avatar")
+      const avatarImage = screen.queryByTestId('avatar-image')
+      expect(avatarImage).not.toBeInTheDocument()
     })
 
     it('opens external links in new tab', () => {
@@ -784,6 +856,166 @@ describe('ItemCardList Component', () => {
       const tooltip = screen.getByTestId('tooltip')
       expect(tooltip).toHaveAttribute('data-content', mockIssue.author.name)
       expect(tooltip).toHaveAttribute('data-id', 'avatar-tooltip-0')
+    })
+  })
+  describe('Additional Code Coverage', () => {
+    it('shows fallback avatar when author exists but avatarUrl is missing', () => {
+      const issueNoAvatarUrl = {
+        ...mockIssue,
+        author: {
+          ...mockIssue.author,
+          avatarUrl: '',
+        },
+      }
+
+      render(
+        <ItemCardList
+          title="No Avatar URL"
+          data={[issueNoAvatarUrl]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      expect(screen.queryByTestId('avatar-image')).not.toBeInTheDocument()
+
+      const links = screen.getAllByTestId('link')
+      const profileLink = links.find(
+        (link) => link.getAttribute('href') === `/members/${mockIssue.author.login}`
+      )
+      expect(profileLink).toBeInTheDocument()
+    })
+
+    it('renders avatar without link when login is missing but name exists', () => {
+      const authorNoLogin = {
+        avatarUrl: 'https://example.com/avatar.png',
+        name: 'Just Name',
+        login: '',
+      }
+
+      const issueNoLogin = {
+        ...mockIssue,
+        author: authorNoLogin,
+      } as unknown as Issue
+
+      render(
+        <ItemCardList
+          title="No Login"
+          data={[issueNoLogin]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      expect(screen.getByTestId('avatar-image')).toBeInTheDocument()
+      const links = screen.queryAllByTestId('link')
+      const profileLink = links.find((link) => link.getAttribute('href')?.startsWith('/members/'))
+      expect(profileLink).toBeUndefined()
+    })
+
+    it('handles item with no title and no name gracefully', () => {
+      const bareItem = {
+        id: 'bare-item',
+        author: mockUser,
+        url: 'https://example.com',
+      } as unknown as Issue
+
+      render(
+        <ItemCardList
+          title="Bare Item"
+          data={[bareItem]}
+          renderDetails={defaultProps.renderDetails}
+        />
+      )
+
+      const truncatedText = screen.getByTestId('truncated-text')
+      expect(truncatedText).toHaveTextContent('')
+    })
+
+    it('handles item with no identifiers for key generation coverage', () => {
+      const noIdItem = {
+        author: mockUser,
+      } as unknown as Issue
+
+      render(
+        <ItemCardList
+          title="No ID Item"
+          data={[noIdItem]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const truncatedText = screen.getByTestId('truncated-text')
+      expect(truncatedText).toHaveTextContent('')
+    })
+
+    it('handles item with no URL, no title, no name for TruncatedText coverage', () => {
+      const noUrlNoInfoItem = {
+        id: 'no-url-item',
+        author: {
+          ...mockUser,
+          login: '',
+        },
+      } as unknown as Issue
+
+      render(
+        <ItemCardList
+          title="No URL Item"
+          data={[noUrlNoInfoItem]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const truncatedText = screen.getByTestId('truncated-text')
+      expect(truncatedText).toHaveTextContent('')
+      expect(screen.queryByTestId('link')).not.toBeInTheDocument()
+    })
+
+    it('handles item with URL and name (but no title) correctly', () => {
+      const itemWithNameAndUrl = {
+        id: 'name-only-link-item',
+        author: mockUser,
+        url: 'https://example.com/name',
+        name: 'Item Name',
+      } as unknown as Issue
+
+      render(
+        <ItemCardList
+          title="Name Link Item"
+          data={[itemWithNameAndUrl]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const links = screen.getAllByTestId('link')
+      const itemLink = links.find((l) => l.getAttribute('href') === 'https://example.com/name')
+      expect(itemLink).toBeInTheDocument()
+      expect(itemLink).toHaveTextContent('Item Name')
+    })
+
+    it('handles item with URL but no title and no name', () => {
+      const itemWithUrlOnly = {
+        id: 'url-only-item',
+        author: mockUser,
+        url: 'https://example.com/empty',
+      } as unknown as Issue
+
+      render(
+        <ItemCardList
+          title="Empty Link Item"
+          data={[itemWithUrlOnly]}
+          renderDetails={defaultProps.renderDetails}
+          showAvatar={true}
+        />
+      )
+
+      const links = screen.getAllByTestId('link')
+      const itemLink = links.find((l) => l.getAttribute('href') === 'https://example.com/empty')
+      expect(itemLink).toBeInTheDocument()
+      expect(itemLink).toHaveTextContent('')
     })
   })
 })

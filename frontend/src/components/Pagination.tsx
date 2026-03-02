@@ -37,18 +37,14 @@ const Pagination: React.FC<PaginationProps> = ({
       i <= Math.min(totalPages - 1, currentPage + 1);
       i++
     ) {
-      if (!pageNumbers.includes(i)) {
-        pageNumbers.push(i)
-      }
+      pageNumbers.push(i)
     }
 
     if (currentPage < totalPages - 3) {
       pageNumbers.push('...')
     }
 
-    if (totalPages > 3 && !pageNumbers.includes(totalPages)) {
-      pageNumbers.push(totalPages)
-    }
+    pageNumbers.push(totalPages)
 
     return pageNumbers
   }
@@ -69,7 +65,8 @@ const Pagination: React.FC<PaginationProps> = ({
           Prev
         </Button>
         {pageNumbers.map((number, index) => (
-          <React.Fragment key={`${number}-${index}`}>
+          // eslint-disable-next-line react/no-array-index-key
+          <React.Fragment key={`pagination-${index}-${number}`}>
             {number === '...' ? (
               <div className="flex h-10 w-10 items-center justify-center text-gray-600 dark:text-gray-400">
                 <FaEllipsis className="h-5 w-5" aria-hidden="true" />

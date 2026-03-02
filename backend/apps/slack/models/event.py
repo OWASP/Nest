@@ -12,6 +12,8 @@ class Event(TimestampedModel):
     """Event model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "slack_events"
         verbose_name_plural = "Events"
 

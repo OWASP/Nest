@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { ReactNode } from 'react'
 import BarChart from 'components/BarChart'
 
@@ -37,13 +38,6 @@ jest.mock('next/dynamic', () => {
   }
 })
 
-jest.mock('next-themes', () => ({
-  ThemeProvider: ({ children, ...props }: { children: ReactNode; [key: string]: unknown }) => (
-    <div {...props}>{children}</div>
-  ),
-  useTheme: () => ({ theme: 'light', setTheme: jest.fn() }),
-}))
-
 jest.mock('components/AnchorTitle', () => {
   return function MockAnchorTitle({ title }: { title: string }) {
     return <div data-testid="anchor-title">{title}</div>
@@ -70,9 +64,14 @@ jest.mock('components/SecondaryCard', () => {
   }
 })
 
-expect.extend(toHaveNoViolations)
-
-describe('BarChart Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('BarChart Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<BarChart {...mockProps} />)
 

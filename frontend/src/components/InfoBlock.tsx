@@ -10,8 +10,8 @@ const InfoBlock = ({
   label = '',
   pluralizedName,
   precision = 1,
-  unit,
-  value,
+  unit = '',
+  value = 0,
 }: {
   className?: string
   icon: IconType
@@ -19,7 +19,7 @@ const InfoBlock = ({
   pluralizedName?: string
   precision?: number
   unit?: string
-  value: number
+  value?: number
 }) => {
   const name = pluralizedName ? pluralize(value, unit, pluralizedName) : pluralize(value, unit)
   const formattedValue = value ? `${millify(value, { precision })} ${name}` : `No ${name}`

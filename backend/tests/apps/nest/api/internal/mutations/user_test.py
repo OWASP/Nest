@@ -148,3 +148,23 @@ class TestUserMutations:
             result = user_mutations.github_auth(info, "token")
             assert not result.ok
             assert "authentication request failed" in result.message.lower()
+
+    def test_logout_user_not_authenticated(self, user_mutations):
+        """Test logout when user is not authenticated."""
+        info = mock_info()
+        info.context.request.user.is_authenticated = False
+
+        result = user_mutations.logout_user(info)
+        assert not result.ok
+        assert result.message == "User is not logged in."
+
+    def test_logout_user_success(self, user_mutations):
+        """Test successful user logout."""
+        with patch("apps.nest.api.internal.mutations.user.logout") as mock_logout:
+            info = mock_info()
+            info.context.request.user.is_authenticated = True
+
+            result = user_mutations.logout_user(info)
+            assert result.ok
+            assert result.message == "User logged out successfully."
+            mock_logout.assert_called_once_with(info.context.request)

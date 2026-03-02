@@ -84,7 +84,7 @@ export default function RootLayout({
           </BreadcrumbRoot>
         </Providers>
       </body>
-      <GoogleAnalytics gaId={GTM_ID} />
+      {GTM_ID && <GoogleAnalytics gaId={GTM_ID} />}
     </html>
   )
 }

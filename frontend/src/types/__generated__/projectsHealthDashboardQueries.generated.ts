@@ -4,7 +4,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 export type GetProjectHealthStatsQueryVariables = Types.Exact<{ [key: string]: never; }>;
 
 
-export type GetProjectHealthStatsQuery = { projectHealthStats: { __typename: 'ProjectHealthStatsNode', averageScore: number, monthlyOverallScores: Array<number>, monthlyOverallScoresMonths: Array<number>, projectsCountHealthy: number, projectsCountNeedAttention: number, projectsCountUnhealthy: number, projectsPercentageHealthy: number, projectsPercentageNeedAttention: number, projectsPercentageUnhealthy: number, totalContributors: number, totalForks: number, totalStars: number } };
+export type GetProjectHealthStatsQuery = { projectHealthStats: { __typename: 'ProjectHealthStatsNode', averageScore: number | null, monthlyOverallScores: Array<number>, monthlyOverallScoresMonths: Array<number>, projectsCountHealthy: number, projectsCountNeedAttention: number, projectsCountUnhealthy: number, projectsPercentageHealthy: number, projectsPercentageNeedAttention: number, projectsPercentageUnhealthy: number, totalContributors: number, totalForks: number, totalStars: number } };
 
 export type GetProjectHealthMetricsQueryVariables = Types.Exact<{
   filters: Types.ProjectHealthMetricsFilter;

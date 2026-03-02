@@ -20,6 +20,7 @@ interface FormDateInputProps {
   touched?: boolean
   required?: boolean
   min?: string
+  max?: string
 }
 
 export const FormDateInput = ({
@@ -31,6 +32,7 @@ export const FormDateInput = ({
   touched,
   required = false,
   min,
+  max,
 }: FormDateInputProps) => {
   return (
     <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
@@ -45,6 +47,7 @@ export const FormDateInput = ({
         isInvalid={touched && !!error}
         errorMessage={touched ? error : undefined}
         min={min}
+        max={max}
         classNames={COMMON_INPUT_CLASS_NAMES}
       />
     </div>

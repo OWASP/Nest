@@ -3,6 +3,7 @@
 from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.db import connection
+from psycopg2 import sql
 
 
 class Command(BaseCommand):
@@ -22,5 +23,10 @@ class Command(BaseCommand):
                     apps.get_app_config(nest_app).get_models(),
                     key=lambda m: m.__name__,
                 ):
-                    cursor.execute(f"TRUNCATE TABLE {model._meta.db_table} CASCADE")  # NOSONAR
-                    print(f"Purged {nest_app}.{model.__name__}")
+                    # Suppress false positive sqlalchemy warning.
+                    cursor.execute(  # NOSEMGREP: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query  # noqa: E501
+                        sql.SQL("TRUNCATE TABLE {} CASCADE").format(
+                            sql.Identifier(model._meta.db_table)
+                        )
+                    )
+                    self.stdout.write(f"Purged {nest_app}.{model.__name__}")

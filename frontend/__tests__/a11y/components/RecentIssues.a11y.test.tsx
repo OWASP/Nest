@@ -1,8 +1,7 @@
 import { render } from '@testing-library/react'
-import { axe, toHaveNoViolations } from 'jest-axe'
+import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import RecentIssues from 'components/RecentIssues'
-
-expect.extend(toHaveNoViolations)
 
 const baseIssue = {
   author: {
@@ -31,7 +30,14 @@ const baseIssue = {
   repositoryName: 'repo',
 }
 
-describe('RecentIssues a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('RecentIssues a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<RecentIssues data={[baseIssue]} />)
 

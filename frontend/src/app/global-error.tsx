@@ -91,19 +91,29 @@ export const handleAppError = (error: unknown) => {
 export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <Sentry.ErrorBoundary
-      fallback={({ error }) => {
-        Sentry.captureException(error)
-        const errorConfig = ERROR_CONFIGS['500']
-        return <ErrorDisplay {...errorConfig} />
-      }}
+      fallback={(props) => <SentryErrorFallback {...props} errorConfig={ERROR_CONFIGS['500']} />}
     >
       {children}
     </Sentry.ErrorBoundary>
   )
 }
 
-export default function GlobalError({ error }: { error: Error }) {
-  Sentry.captureException(error)
+export const SentryErrorFallback: React.FC<{
+  error: unknown
+  errorConfig?: ErrorDisplayProps
+}> = ({ error, errorConfig = ERROR_CONFIGS['500'] }) => {
+  React.useEffect(() => {
+    Sentry.captureException(error instanceof Error ? error : new Error(String(error)))
+  }, [error])
+
+  return <ErrorDisplay {...errorConfig} />
+}
+
+export default function GlobalError({ error }: Readonly<{ error: Error }>) {
+  React.useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
   const errorConfig = ERROR_CONFIGS['500']
   return <ErrorDisplay {...errorConfig} />
 }

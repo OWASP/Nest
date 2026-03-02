@@ -15,6 +15,8 @@ class MemberSnapshot(TimestampedModel):
     """
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_member_snapshots"
         verbose_name_plural = "Member Snapshots"
         unique_together = ("github_user", "start_at", "end_at")

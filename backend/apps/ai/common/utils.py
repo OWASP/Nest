@@ -32,8 +32,6 @@ def create_chunks_and_embeddings(
         list[Chunk]: List of created Chunk instances (empty if failed)
 
     """
-    from apps.ai.models.chunk import Chunk
-
     try:
         last_request_time = datetime.now(UTC) - timedelta(
             seconds=DEFAULT_LAST_REQUEST_OFFSET_SECONDS
@@ -73,9 +71,9 @@ def extract_json_from_markdown(content: str) -> str:
 
     """
     if "```json" in content:
-        return content.split("```json")[1].split("```")[0].strip()
+        return content.split("```json")[1].split("```", maxsplit=1)[0].strip()
     if "```" in content:
-        return content.split("```")[1].split("```")[0].strip()
+        return content.split("```")[1].split("```", maxsplit=1)[0].strip()
     return content
 
 
@@ -86,8 +84,6 @@ def regenerate_chunks_for_context(context: Context):
       context (Context): The specific context instance to be updated.
 
     """
-    from apps.ai.models.chunk import Chunk
-
     context.chunks.all().delete()
     new_chunk_texts = Chunk.split_text(context.content)
 

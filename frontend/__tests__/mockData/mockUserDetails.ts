@@ -13,6 +13,13 @@ export const mockUserDetailsData = {
     publicRepositoriesCount: 3,
     createdAt: 1723002473,
     contributionsCount: 100,
+    contributionData: {
+      '2025-01-01': 5,
+      '2025-01-02': 3,
+      '2025-01-03': 8,
+      '2025-01-04': 0,
+      '2025-01-05': 12,
+    },
     badges: [
       {
         id: '1',

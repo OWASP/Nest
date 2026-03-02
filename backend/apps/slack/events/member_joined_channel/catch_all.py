@@ -26,11 +26,13 @@ if SlackConfig.app:
     SlackConfig.app.event(
         "member_joined_channel",
         matchers=[
-            lambda event: f"#{event['channel']}"
-            not in {
-                OWASP_CONTRIBUTE_CHANNEL_ID,
-                OWASP_GSOC_CHANNEL_ID,
-                OWASP_PROJECT_NEST_CHANNEL_ID,
-            }
+            lambda event: (
+                f"#{event['channel']}"
+                not in {
+                    OWASP_CONTRIBUTE_CHANNEL_ID,
+                    OWASP_GSOC_CHANNEL_ID,
+                    OWASP_PROJECT_NEST_CHANNEL_ID,
+                }
+            )
         ],
     )(catch_all_handler)

@@ -4,9 +4,10 @@ import math
 from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.milestone import MilestoneNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestMilestoneNode:
+class TestMilestoneNode(GraphQLNodeBaseTest):
     """Test cases for MilestoneNode class."""
 
     def test_milestone_node_type(self):
@@ -30,15 +31,6 @@ class TestMilestoneNode:
         }
         assert field_names == expected_field_names
 
-    def test_author_field(self):
-        """Test author field resolution."""
-        mock_milestone = Mock()
-        mock_author = Mock()
-        mock_milestone.author = mock_author
-
-        result = MilestoneNode.author(mock_milestone)
-        assert result == mock_author
-
     def test_organization_name_with_organization(self):
         """Test organization_name field when organization exists."""
         mock_milestone = Mock()
@@ -48,7 +40,8 @@ class TestMilestoneNode:
         mock_repository.organization = mock_organization
         mock_milestone.repository = mock_repository
 
-        result = MilestoneNode.organization_name(mock_milestone)
+        field = self._get_field_by_name("organization_name", MilestoneNode)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result == "test-org"
 
     def test_organization_name_without_organization(self):
@@ -58,7 +51,8 @@ class TestMilestoneNode:
         mock_repository.organization = None
         mock_milestone.repository = mock_repository
 
-        result = MilestoneNode.organization_name(mock_milestone)
+        field = self._get_field_by_name("organization_name", MilestoneNode)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result is None
 
     def test_organization_name_without_repository(self):
@@ -66,7 +60,8 @@ class TestMilestoneNode:
         mock_milestone = Mock()
         mock_milestone.repository = None
 
-        result = MilestoneNode.organization_name(mock_milestone)
+        field = self._get_field_by_name("organization_name", MilestoneNode)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result is None
 
     def test_progress_with_issues(self):
@@ -75,7 +70,8 @@ class TestMilestoneNode:
         mock_milestone.closed_issues_count = 7
         mock_milestone.open_issues_count = 3
 
-        result = MilestoneNode.progress(mock_milestone)
+        field = self._get_field_by_name("progress", MilestoneNode)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert math.isclose(result, 70.0)
 
     def test_progress_without_issues(self):
@@ -84,7 +80,8 @@ class TestMilestoneNode:
         mock_milestone.closed_issues_count = 0
         mock_milestone.open_issues_count = 0
 
-        result = MilestoneNode.progress(mock_milestone)
+        field = self._get_field_by_name("progress", MilestoneNode)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert math.isclose(result, 0.0)
 
     def test_repository_name_with_repository(self):
@@ -94,7 +91,8 @@ class TestMilestoneNode:
         mock_repository.name = "test-repo"
         mock_milestone.repository = mock_repository
 
-        result = MilestoneNode.repository_name(mock_milestone)
+        field = self._get_field_by_name("repository_name", MilestoneNode)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result == "test-repo"
 
     def test_repository_name_without_repository(self):
@@ -102,5 +100,6 @@ class TestMilestoneNode:
         mock_milestone = Mock()
         mock_milestone.repository = None
 
-        result = MilestoneNode.repository_name(mock_milestone)
+        field = self._get_field_by_name("repository_name", MilestoneNode)
+        result = field.base_resolver.wrapped_func(None, mock_milestone)
         assert result is None

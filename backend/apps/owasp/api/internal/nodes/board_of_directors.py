@@ -10,25 +10,25 @@ from apps.owasp.models.board_of_directors import BoardOfDirectors
 @strawberry_django.type(
     BoardOfDirectors,
     fields=[
-        "year",
         "created_at",
         "updated_at",
+        "year",
     ],
 )
 class BoardOfDirectorsNode(strawberry.relay.Node):
     """Board of Directors node."""
 
-    @strawberry.field
-    def candidates(self) -> list[EntityMemberNode]:
+    @strawberry_django.field
+    def candidates(self, root: BoardOfDirectors) -> list[EntityMemberNode]:
         """Resolve board election candidates."""
-        return self.get_candidates()  # type: ignore[call-arg]
+        return root.get_candidates()  # type: ignore[call-arg]
 
-    @strawberry.field
-    def members(self) -> list[EntityMemberNode]:
+    @strawberry_django.field
+    def members(self, root: BoardOfDirectors) -> list[EntityMemberNode]:
         """Resolve board members."""
-        return self.get_members()  # type: ignore[call-arg]
+        return root.get_members()  # type: ignore[call-arg]
 
-    @strawberry.field
-    def owasp_url(self) -> str:
+    @strawberry_django.field
+    def owasp_url(self, root: BoardOfDirectors) -> str:
         """Resolve OWASP board election URL."""
-        return self.owasp_url
+        return root.owasp_url

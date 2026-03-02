@@ -9,6 +9,12 @@ import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
+import type { HealthMetricsProps } from 'types/healthMetrics'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -109,14 +115,14 @@ const ProjectDetailsPage = () => {
       endDate={endDate}
       entityKey={project.key}
       entityLeaders={project.entityLeaders}
-      healthMetricsData={project.healthMetricsList}
+      healthMetricsData={project.healthMetricsList as unknown as HealthMetricsProps[]}
       isActive={project.isActive}
       languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
+      pullRequests={project.recentPullRequests as unknown as PullRequest[]}
+      recentIssues={project.recentIssues as unknown as Issue[]}
+      recentMilestones={project.recentMilestones as unknown as Milestone[]}
+      recentReleases={project.recentReleases as unknown as Release[]}
+      repositories={project.repositories as unknown as RepositoryCardProps[]}
       startDate={startDate}
       stats={projectStats}
       summary={project.summary}

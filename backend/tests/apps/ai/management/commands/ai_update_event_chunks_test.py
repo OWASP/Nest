@@ -6,6 +6,7 @@ import pytest
 from django.core.management.base import BaseCommand
 
 from apps.ai.management.commands.ai_update_event_chunks import Command
+from apps.owasp.models.event import Event
 
 
 @pytest.fixture
@@ -32,8 +33,6 @@ class TestAiCreateEventChunksCommand:
 
     def test_model_class_property(self, command):
         """Test the model_class property returns Event."""
-        from apps.owasp.models.event import Event
-
         assert command.model_class == Event
 
     def test_entity_name_property(self, command):

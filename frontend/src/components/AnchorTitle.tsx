@@ -4,7 +4,6 @@ import { scrollToAnchor, scrollToAnchorWithHistory } from 'utils/scrollToAnchor'
 import slugify from 'utils/slugify'
 
 interface AnchorTitleProps {
-  className?: string
   title: string
 }
 

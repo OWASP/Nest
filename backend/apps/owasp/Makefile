@@ -2,10 +2,14 @@ owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
 
-owasp-aggregate-contributions:
+owasp-aggregate-entity-contributions:
 	@echo "Aggregating OWASP contributions"
-	@CMD="python manage.py owasp_aggregate_contributions --entity-type chapter" $(MAKE) exec-backend-command
-	@CMD="python manage.py owasp_aggregate_contributions --entity-type project" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_aggregate_entity_contributions --entity-type chapter" $(MAKE) exec-backend-command
+	@CMD="python manage.py owasp_aggregate_entity_contributions --entity-type project" $(MAKE) exec-backend-command
+
+owasp-aggregate-member-contributions:
+	@echo "Aggregating OWASP community member contributions"
+	@CMD="python manage.py owasp_aggregate_member_contributions" $(MAKE) exec-backend-command
 
 owasp-create-project-metadata-file:
 	@echo "Generating metadata"
@@ -37,7 +41,7 @@ owasp-generate-community-snapshot-video:
 	@mkdir -p backend/generated_videos
 	@docker run \
 		--env-file backend/.env \
-		--mount type=bind,src="$(PWD)/backend/generated_videos",dst=/home/owasp/generated_videos \
+		--mount type=bind,src="$(CURDIR)/backend/generated_videos",dst=/home/owasp/generated_videos \
 		--network nest-local_nest-network \
 		--rm \
 		nest-snapshot-video \

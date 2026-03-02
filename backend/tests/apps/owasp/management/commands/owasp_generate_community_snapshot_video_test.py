@@ -113,8 +113,6 @@ class TestHandleMethod:
         mock_slide_builder.assert_called_once()
         mock_generator.assert_called_once()
         assert mock_generator_instance.append_slide.call_count == 4
-        from pathlib import Path
-
         mock_generator_instance.generate_video.assert_called_once()
         args = mock_generator_instance.generate_video.call_args
         assert isinstance(args[0][0], Path)

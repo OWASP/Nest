@@ -100,7 +100,7 @@ def get_user_ip_address(request: HttpRequest) -> str:
         str: The user's IP address.
 
     """
-    if settings.IS_LOCAL_ENVIRONMENT:
+    if settings.IS_LOCAL_ENVIRONMENT or settings.IS_E2E_ENVIRONMENT:
         return settings.PUBLIC_IP_ADDRESS
 
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
@@ -215,6 +215,28 @@ def truncate(text: str, limit: int, truncate: str = "...") -> str:
     return Truncator(text).chars(limit, truncate=truncate)
 
 
+def normalize_limit(limit: int, max_limit: int = 1000) -> int | None:
+    """Normalize and validate a limit parameter.
+
+    Args:
+        limit (int): The requested limit.
+        max_limit (int): The maximum allowed limit. Defaults to 1000.
+
+    Returns:
+        int | None: The normalized limit capped at max_limit, or None if invalid.
+
+    """
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        return None
+
+    if limit <= 0:
+        return None
+
+    return min(limit, max_limit)
+
+
 def validate_url(url: str | None) -> bool:
     """Validate that a URL has proper scheme and netloc.
 
@@ -225,12 +247,31 @@ def validate_url(url: str | None) -> bool:
         bool: True if URL is valid, False otherwise.
 
     """
-    if not url:
+    max_url_length = 2048
+    if (
+        not url
+        or len(url) > max_url_length
+        # ASCII control characters.
+        or re.search(r"[\x00-\x1f\x7f]", url)
+    ):
         return False
 
     try:
         parsed = urlparse(url)
+
+        min_port = 1
+        max_port = 65535
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.netloc
+            or not re.search(r"[a-zA-Z0-9]", parsed.netloc)
+            or not (hostname := parsed.hostname)
+            or hostname.startswith((".", "-"))
+            or hostname.endswith("-")
+            or (parsed.port is not None and not (min_port <= parsed.port <= max_port))
+        ):
+            return False
     except ValueError:
         return False
 
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    return True

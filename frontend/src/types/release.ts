@@ -1,13 +1,16 @@
 import type { RepositoryDetails, User } from 'types/user'
 
 export type Release = {
-  author?: User
+  __typename?: string
+  author?: User | null
+  id: string
   isPreRelease?: boolean
   name: string
-  organizationName?: string
+  organizationName?: string | null
   projectName?: string
   publishedAt: number
   repository?: RepositoryDetails
-  repositoryName: string
+  repositoryName?: string | null
   tagName: string
+  url?: string
 }

@@ -1,16 +1,16 @@
 'use client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
 import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import type { Module, Program } from 'types/mentorship'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
@@ -22,9 +22,6 @@ const ProgramDetailsPage = () => {
   const { data: session } = useSession()
   const username = (session as ExtendedSession)?.user?.login
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
-
   const [updateProgram] = useMutation(UpdateProgramStatusDocument, {
     onError: handleAppError,
   })
@@ -32,10 +29,13 @@ const ProgramDetailsPage = () => {
   const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
+    fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   })
 
   const isLoading = isQueryLoading
+  const program = data?.getProgram ?? null
+  const modules = data?.getProgramModules ?? []
 
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
@@ -47,14 +47,25 @@ const ProgramDetailsPage = () => {
     return true
   }, [isAdmin, program])
 
-  const updateStatus = async (newStatus: ProgramStatusEnum) => {
+  const updateStatus = async (newStatus: string) => {
+    if (!Object.values(ProgramStatusEnum).includes(newStatus as ProgramStatusEnum)) {
+      addToast({
+        color: 'danger',
+        description: 'The provided status is not valid.',
+        timeout: 3000,
+        title: 'Invalid Status',
+        variant: 'solid',
+      })
+      return
+    }
+
     if (!program || !isAdmin) {
       addToast({
-        title: 'Permission Denied',
-        description: 'Only admins can update the program status.',
-        variant: 'solid',
         color: 'danger',
+        description: 'Only admins can update the program status.',
         timeout: 3000,
+        title: 'Permission Denied',
+        variant: 'solid',
       })
       return
     }
@@ -65,7 +76,7 @@ const ProgramDetailsPage = () => {
           inputData: {
             key: program.key,
             name: program.name,
-            status: newStatus,
+            status: newStatus as ProgramStatusEnum,
           },
         },
       })
@@ -82,14 +93,7 @@ const ProgramDetailsPage = () => {
     }
   }
 
-  useEffect(() => {
-    if (data?.getProgram) {
-      setProgram(data.getProgram)
-      setModules(data.getProgramModules || [])
-    }
-  }, [data])
-
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading && !data) return <LoadingSpinner />
 
   if (!program && !isLoading) {
     return (
@@ -102,32 +106,34 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: titleCaseWord(program.status) },
-    { label: 'Start Date', value: formatDate(program.startedAt) },
-    { label: 'End Date', value: formatDate(program.endedAt) },
-    { label: 'Mentees Limit', value: String(program.menteesLimit) },
+    { label: 'Status', value: titleCaseWord(program?.status ?? '') },
+    { label: 'Start Date', value: formatDate(program?.startedAt ?? '') },
+    { label: 'End Date', value: formatDate(program?.endedAt ?? '') },
+    { label: 'Mentees Limit', value: String(program?.menteesLimit ?? 0) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
+      value: program?.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
     },
   ]
 
   return (
-    <DetailsCard
-      accessLevel="admin"
-      admins={program.admins}
-      canUpdateStatus={canUpdateStatus}
-      details={programDetails}
-      domains={program.domains}
-      modules={modules}
-      programKey={program.key}
-      setStatus={updateStatus}
-      status={program.status}
-      summary={program.description}
-      tags={program.tags}
-      title={program.name}
-      type="program"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        accessLevel="admin"
+        admins={program?.admins ?? undefined}
+        canUpdateStatus={canUpdateStatus}
+        details={programDetails}
+        domains={program?.domains ?? undefined}
+        modules={modules}
+        programKey={program?.key ?? ''}
+        setStatus={updateStatus}
+        status={program?.status ?? ''}
+        summary={program?.description ?? ''}
+        tags={program?.tags ?? undefined}
+        title={program?.name ?? ''}
+        type="program"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

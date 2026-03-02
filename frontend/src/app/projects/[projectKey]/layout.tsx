@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{
     projectKey: string
   }>
-}): Promise<Metadata> {
+}): Promise<Metadata | undefined> {
   const { projectKey } = await params
   const data = await getProjectMetadata(projectKey)
   const project = data?.project
@@ -35,7 +35,7 @@ export async function generateMetadata({
         keywords: ['owasp', 'project', projectKey, project.name],
         title: project.name,
       })
-    : null
+    : undefined
 }
 
 export default async function ProjectDetailsLayout({

@@ -11,4 +11,4 @@ class MentorshipConfig(AppConfig):
 
     def ready(self):
         """Ready."""
-        import apps.mentorship.signals  # noqa: F401
+        import apps.mentorship.signals  # noqa: F401, PLC0415

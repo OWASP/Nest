@@ -29,33 +29,47 @@ jest.mock('next/image', () => {
   return function MockImage({
     src,
     alt,
-    style,
-    fill,
+    className,
+    width,
+    height,
   }: {
     src: string
     alt: string
-    style?: React.CSSProperties
-    fill?: boolean
+    className?: string
+    width?: number
+    height?: number
   }) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} style={style} data-testid="sponsor-image" data-fill={fill} />
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- mock for unit tests
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        width={width}
+        height={height}
+        data-testid="sponsor-image"
+      />
+    )
   }
 })
 
 const mockSponsors: Sponsor[] = [
   {
+    id: 'sponsor-1',
     name: 'Test Sponsor 1',
     imageUrl: 'https://example.com/logo1.png',
     url: 'https://sponsor1.com',
     sponsorType: 'Gold',
   },
   {
+    id: 'sponsor-2',
     name: 'Test Sponsor 2',
     imageUrl: 'https://example.com/logo2.png',
     url: 'https://sponsor2.com',
     sponsorType: 'Silver',
   },
   {
+    id: 'sponsor-3',
     name: 'Test Sponsor 3',
     imageUrl: '',
     url: 'https://sponsor3.com',
@@ -65,6 +79,7 @@ const mockSponsors: Sponsor[] = [
 
 const mockSponsorsWithoutImages: Sponsor[] = [
   {
+    id: 'sponsor-no-image',
     name: 'No Image Sponsor',
     imageUrl: '',
     url: 'https://noimage.com',
@@ -129,6 +144,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('renders different sponsors based on props', () => {
       const customSponsors: Sponsor[] = [
         {
+          id: 'sponsor-custom',
           name: 'Custom Sponsor',
           imageUrl: 'https://custom.com/logo.png',
           url: 'https://custom.com',
@@ -151,20 +167,20 @@ describe('MovingLogos (LogoCarousel)', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
       const scroller = document.querySelector('.animate-scroll')
-      expect(scroller).toHaveStyle('animation-duration: 6s')
+      expect(scroller).toHaveStyle('animation-duration: 9s')
     })
 
     it('updates animation duration when sponsors change', () => {
       const { rerender } = render(<MovingLogos sponsors={mockSponsors} />)
 
       let scroller = document.querySelector('.animate-scroll')
-      expect(scroller).toHaveStyle('animation-duration: 6s')
+      expect(scroller).toHaveStyle('animation-duration: 9s')
 
       const newSponsors = [...mockSponsors, ...mockSponsors]
       rerender(<MovingLogos sponsors={newSponsors} />)
 
       scroller = document.querySelector('.animate-scroll')
-      expect(scroller).toHaveStyle('animation-duration: 12s')
+      expect(scroller).toHaveStyle('animation-duration: 18s')
     })
   })
 
@@ -230,7 +246,13 @@ describe('MovingLogos (LogoCarousel)', () => {
 
       const newSponsors = [
         ...mockSponsors,
-        { name: 'New Sponsor', imageUrl: '', url: 'https://new.com', sponsorType: 'Bronze' },
+        {
+          id: 'sponsor-new',
+          name: 'New Sponsor',
+          imageUrl: '',
+          url: 'https://new.com',
+          sponsorType: 'Bronze',
+        },
       ]
       rerender(<MovingLogos sponsors={newSponsors} />)
 
@@ -249,7 +271,7 @@ describe('MovingLogos (LogoCarousel)', () => {
 
       const scroller = document.querySelector('.animate-scroll')
       expect(scroller).toBeInTheDocument()
-      expect(scroller).toHaveClass('animate-scroll', 'flex', 'w-full', 'gap-6')
+      expect(scroller).toHaveClass('animate-scroll', 'flex', 'w-max', 'gap-6')
     })
   })
 
@@ -273,14 +295,17 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('provides fallback for empty imageUrl', () => {
       render(<MovingLogos sponsors={mockSponsorsWithoutImages} />)
 
-      const imageContainer = document.querySelector('.relative.mb-4')
-      expect(imageContainer).toBeInTheDocument()
-      expect(imageContainer?.querySelector('img')).not.toBeInTheDocument()
+      const images = screen.queryAllByTestId('sponsor-image')
+      expect(images).toHaveLength(0)
+
+      const fallbackText = screen.getAllByText('No Image Sponsor')
+      expect(fallbackText.length).toBeGreaterThan(0)
     })
 
     it('uses generic fallback alt text when sponsor name is missing', () => {
       const sponsorWithoutName: Sponsor[] = [
         {
+          id: 'sponsor-no-name',
           name: '',
           imageUrl: 'https://example.com/logo.png',
           url: 'https://example.com',
@@ -338,6 +363,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('handles sponsors with very long names', () => {
       const longNameSponsors: Sponsor[] = [
         {
+          id: 'sponsor-long-name',
           name: 'A'.repeat(1000),
           imageUrl: 'https://example.com/logo.png',
           url: 'https://example.com',
@@ -355,6 +381,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('handles sponsors with special characters in names', () => {
       const specialCharSponsors: Sponsor[] = [
         {
+          id: 'sponsor-special-chars',
           name: 'Sponsor & Co. (Ltd.) - "Special" <Characters>',
           imageUrl: 'https://example.com/logo.png',
           url: 'https://example.com',
@@ -378,6 +405,7 @@ describe('MovingLogos (LogoCarousel)', () => {
     it('handles invalid URLs gracefully', () => {
       const invalidUrlSponsors: Sponsor[] = [
         {
+          id: 'sponsor-invalid-url',
           name: 'Invalid URL Sponsor',
           imageUrl: 'not-a-valid-url',
           url: 'also-not-valid',
@@ -398,6 +426,7 @@ describe('MovingLogos (LogoCarousel)', () => {
 
     it('handles very large number of sponsors', () => {
       const manySponsors: Sponsor[] = Array.from({ length: 100 }, (_, i) => ({
+        id: `sponsor-${i}`,
         name: `Sponsor ${i}`,
         imageUrl: `https://example.com/logo${i}.png`,
         url: `https://sponsor${i}.com`,
@@ -410,7 +439,57 @@ describe('MovingLogos (LogoCarousel)', () => {
       expect(screen.getAllByTestId('sponsor-image')).toHaveLength(200)
 
       const scroller = document.querySelector('.animate-scroll')
-      expect(scroller).toHaveStyle('animation-duration: 200s')
+      expect(scroller).toHaveStyle('animation-duration: 300s')
+    })
+  })
+
+  describe('Coverage Edge Cases', () => {
+    it('uses url for key generation when id is missing', () => {
+      const sponsor: Sponsor = {
+        id: undefined as unknown as string,
+        name: 'Name',
+        imageUrl: 'https://img.com',
+        url: 'https://url.com',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByTestId('sponsor-link')).toHaveLength(4)
+    })
+
+    it('uses name for key generation when id and url are missing', () => {
+      const sponsor: Sponsor = {
+        id: undefined as unknown as string,
+        name: 'Name',
+        imageUrl: 'https://img.com',
+        url: '',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByTestId('sponsor-link')).toHaveLength(4)
+    })
+
+    it('uses generic fallback for key generation when id, url, and name are missing', () => {
+      const sponsor: Sponsor = {
+        id: undefined as unknown as string,
+        name: '',
+        imageUrl: 'https://img.com',
+        url: '',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByTestId('sponsor-link')).toHaveLength(4)
+    })
+
+    it('renders generic "Sponsor" text when name and image are missing', () => {
+      const sponsor: Sponsor = {
+        id: '1',
+        name: '',
+        imageUrl: '',
+        url: 'https://url.com',
+        sponsorType: 'Gold',
+      }
+      render(<MovingLogos sponsors={[sponsor]} />)
+      expect(screen.getAllByText('Sponsor')).toHaveLength(2)
     })
   })
 
@@ -466,11 +545,8 @@ describe('MovingLogos (LogoCarousel)', () => {
       const overflowContainer = document.querySelector('.relative.overflow-hidden.py-2')
       expect(overflowContainer).toBeInTheDocument()
 
-      const scroller = document.querySelector('.animate-scroll.flex.w-full.gap-6')
+      const scroller = document.querySelector('.animate-scroll.flex.w-max.gap-6')
       expect(scroller).toBeInTheDocument()
-
-      const sponsorContainers = document.querySelectorAll('[class*="min-w-[220px]"]')
-      expect(sponsorContainers).toHaveLength(6)
     })
 
     it('applies correct styles to images', () => {
@@ -478,8 +554,7 @@ describe('MovingLogos (LogoCarousel)', () => {
 
       const images = screen.getAllByTestId('sponsor-image')
       for (const image of images) {
-        expect(image).toHaveAttribute('style', 'object-fit: contain;')
-        expect(image).toHaveAttribute('data-fill', 'true')
+        expect(image).toHaveClass('h-full', 'w-full', 'object-contain')
       }
     })
 
@@ -492,14 +567,11 @@ describe('MovingLogos (LogoCarousel)', () => {
       const scroller = overflowContainer?.querySelector('.animate-scroll')
       expect(scroller).toBeInTheDocument()
 
-      const sponsorContainer = scroller?.querySelector('[class*="min-w-[220px]"]')
-      expect(sponsorContainer).toBeInTheDocument()
-
-      const link = sponsorContainer?.querySelector('a')
+      const link = scroller?.querySelector('a')
       expect(link).toBeInTheDocument()
 
-      const imageContainer = link?.querySelector('.relative.mb-4')
-      expect(imageContainer).toBeInTheDocument()
+      const logoWrapper = link?.querySelector('.bg-white.rounded-lg.shadow-md')
+      expect(logoWrapper).toBeInTheDocument()
     })
 
     it('applies correct footer styling', () => {
@@ -531,14 +603,14 @@ describe('MovingLogos (LogoCarousel)', () => {
       expect(donateLink).toHaveClass('text-primary', 'font-medium', 'hover:underline')
     })
 
-    it('sets correct minimum width for sponsor containers', () => {
+    it('wraps logos in white containers for dark mode visibility', () => {
       render(<MovingLogos sponsors={mockSponsors} />)
 
-      const sponsorContainers = document.querySelectorAll('[class*="min-w-[220px]"]')
-      expect(sponsorContainers).toHaveLength(6)
+      const logoWrappers = document.querySelectorAll('.bg-white.rounded-lg.shadow-md')
+      expect(logoWrappers).toHaveLength(6)
 
-      for (const container of sponsorContainers) {
-        expect(container).toHaveClass('min-w-[220px]')
+      for (const wrapper of logoWrappers) {
+        expect(wrapper).toHaveClass('bg-white', 'rounded-lg', 'shadow-md')
       }
     })
   })
