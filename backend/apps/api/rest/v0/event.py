@@ -84,14 +84,22 @@ def list_events(
         None,
         description="Filter for upcoming events",
     ),
+    category: str | None = Query(
+        None,
+        description="Filter by event category (comma-separated for multiple values)",
+    ),
 ) -> list[Event]:
     """Get list of events."""
     if is_upcoming:
-        return filters.filter(
-            EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
-        )
+        queryset = EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
+    else:
+        queryset = EventModel.objects.order_by(ordering or "-start_date", "-end_date")
 
-    return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
+    if isinstance(category, str) and category:
+        categories = [c.strip() for c in category.split(",") if c.strip()]
+        queryset = queryset.filter(category__in=categories)
+
+    return filters.filter(queryset)
 
 
 @router.get(

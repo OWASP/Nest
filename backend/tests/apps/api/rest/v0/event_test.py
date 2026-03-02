@@ -96,6 +96,94 @@ class TestListEvents:
         mock_event_model.upcoming_events.assert_called_once()
         assert result == mock_upcoming_qs
 
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_with_single_category(self, mock_event_model):
+        """Test listing events filtered by a single category."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+
+        mock_event_model.objects.order_by.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_events(
+            mock_request,
+            mock_filters,
+            ordering=None,
+            is_upcoming=None,
+            category="conference",
+        )
+
+        mock_queryset.filter.assert_called_with(category__in=["conference"])
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_with_multiple_categories(self, mock_event_model):
+        """Test listing events filtered by multiple categories."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+
+        mock_event_model.objects.order_by.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_events(
+            mock_request,
+            mock_filters,
+            ordering=None,
+            is_upcoming=None,
+            category="conference, meetup",
+        )
+
+        mock_queryset.filter.assert_called_with(category__in=["conference", "meetup"])
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_category_with_spaces(self, mock_event_model):
+        """Test category filtering trims whitespace."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+
+        mock_event_model.objects.order_by.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_events(
+            mock_request,
+            mock_filters,
+            ordering=None,
+            is_upcoming=None,
+            category="  conference ,  meetup  ",
+        )
+
+        mock_queryset.filter.assert_called_with(category__in=["conference", "meetup"])
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_empty_category_values(self, mock_event_model):
+        """Test category filtering with empty comma values."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+
+        mock_event_model.objects.order_by.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_events(
+            mock_request,
+            mock_filters,
+            ordering=None,
+            is_upcoming=None,
+            category=", ,",
+        )
+
+        mock_queryset.filter.assert_called_with(category__in=[])
+        assert result == mock_queryset
+
 
 class TestGetEvent:
     """Tests for get_event endpoint."""
