@@ -113,7 +113,7 @@ export function useSearchPage<T>({
           searchQuery,
           currentPage,
           hitsPerPage,
-          stableFacetFilters
+          [...stableFacetFilters]
         )
 
         if ('hits' in response) {

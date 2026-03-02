@@ -4,7 +4,7 @@ import CountryFilter from 'components/CountryFilter'
 
 describe('<CountryFilter />', () => {
   const defaultProps = {
-    countries: ['United States', 'Germany', 'Japan'],
+    countries: ['United States', 'Germany', 'Japan', 'India', 'Indonesia'],
     selectedCountry: '',
     onCountryChange: jest.fn(),
     isLoading: false,

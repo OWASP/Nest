@@ -1,5 +1,6 @@
 import { Select, SelectItem } from '@heroui/select'
 import type React from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 interface CountryFilterProps {
   countries: string[]
@@ -14,10 +15,27 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   onCountryChange,
   isLoading = false,
 }) => {
-  const options = [
-    { key: '', label: 'All Countries' },
-    ...countries.map((c) => ({ key: c, label: c })),
-  ]
+  const [filterText, setFilterText] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const allOptions = useMemo(
+    () => [{ key: '', label: 'All Countries' }, ...countries.map((c) => ({ key: c, label: c }))],
+    [countries]
+  )
+
+  const filteredOptions = useMemo(
+    () =>
+      filterText
+        ? allOptions.filter((o) => o.label.toLowerCase().includes(filterText.toLowerCase()))
+        : allOptions,
+    [allOptions, filterText]
+  )
+
+  useEffect(() => {
+    if (filterText) {
+      requestAnimationFrame(() => inputRef.current?.focus())
+    }
+  }, [filterText])
 
   return (
     <div className="inline-flex h-12 items-center rounded-lg border border-gray-300 bg-gray-100 pl-3 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-600 dark:bg-[#323232]">
@@ -33,18 +51,41 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
           value: 'text-gray-800 dark:text-gray-200 font-medium',
           selectorIcon: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
           popoverContent:
-            'bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg min-w-44 max-h-60 p-1 focus:outline-none overflow-y-auto',
+            'bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg min-w-44 max-h-72 p-1 focus:outline-none overflow-y-auto',
           listbox: 'p-0 focus:outline-none',
         }}
         scrollShadowProps={{
           isEnabled: false,
         }}
+        listboxProps={{
+          topContent: (
+            <div className="sticky top-0 z-10 bg-white px-2 pt-1 pb-1.5 dark:bg-[#2a2a2a]">
+              <input
+                ref={inputRef}
+                type="text"
+                className="w-full rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm text-gray-800 outline-none placeholder:text-gray-400 focus:border-blue-400 dark:border-gray-600 dark:bg-[#383838] dark:text-gray-200 dark:placeholder:text-gray-500 dark:focus:border-blue-500"
+                placeholder="Type to search..."
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              />
+            </div>
+          ),
+        }}
         selectedKeys={[selectedCountry]}
+        onOpenChange={(open) => {
+          if (open) {
+            setTimeout(() => inputRef.current?.focus(), 0)
+          } else {
+            setFilterText('')
+          }
+        }}
         onChange={(e) => {
           onCountryChange((e.target as HTMLSelectElement).value)
         }}
       >
-        {options.map((option) => (
+        {filteredOptions.map((option) => (
           <SelectItem
             key={option.key}
             classNames={{
