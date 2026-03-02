@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 describe('<SearchPageLayout />', () => {
@@ -407,7 +407,9 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    expect(screen.getByText('Inline Sort')).toBeInTheDocument()
+    const inlineContainer = screen.getByTestId('sort-inline')
+    expect(inlineContainer).toBeInTheDocument()
+    expect(within(inlineContainer).getByText('Inline Sort')).toBeInTheDocument()
   })
 
   it('renders sortChildren below search when inlineSort is false (default)', () => {
@@ -428,7 +430,9 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    expect(screen.getByText('Below Sort')).toBeInTheDocument()
+    const belowContainer = screen.getByTestId('sort-below')
+    expect(belowContainer).toBeInTheDocument()
+    expect(within(belowContainer).getByText('Below Sort')).toBeInTheDocument()
   })
 
   it('renders both filterChildren and inlineSort together', () => {

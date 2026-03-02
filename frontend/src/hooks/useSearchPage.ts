@@ -52,6 +52,10 @@ export function useSearchPage<T>({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableFacetFilters = useMemo(() => facetFilters, [facetFiltersKey])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [stableFacetFilters])
+
   // Sync state with URL changes
   useEffect(() => {
     if (searchParams) {

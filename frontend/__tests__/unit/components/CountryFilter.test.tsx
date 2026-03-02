@@ -30,9 +30,7 @@ describe('<CountryFilter />', () => {
     render(<CountryFilter {...defaultProps} />)
 
     await act(async () => {
-      const hiddenSelect = document.querySelector(
-        '[data-testid="hidden-select-container"] select'
-      )
+      const hiddenSelect = document.querySelector('[data-testid="hidden-select-container"] select')
       if (hiddenSelect) {
         fireEvent.change(hiddenSelect, { target: { value: 'Germany' } })
       }

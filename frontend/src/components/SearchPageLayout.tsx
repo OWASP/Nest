@@ -66,14 +66,18 @@ const SearchPageLayout = ({
               <Skeleton className="h-12 w-52 rounded-lg" aria-hidden="true" />
             </div>
           ) : (
-            <div className="flex items-center">{sortChildren}</div>
+            <div className="flex items-center" data-testid="sort-inline">
+              {sortChildren}
+            </div>
           ))}
       </div>
       {isLoaded ? (
         <>
           <div>
             {!inlineSort && totalPages !== 0 && (
-              <div className="flex justify-end">{sortChildren}</div>
+              <div className="flex justify-end" data-testid="sort-below">
+                {sortChildren}
+              </div>
             )}
             {totalPages === 0 && <div className="text m-4 text-xl dark:text-white">{empty}</div>}
             {children}

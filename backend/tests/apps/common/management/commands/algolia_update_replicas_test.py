@@ -16,9 +16,7 @@ class TestUpdateReplicasCommand:
         """Set up test environment."""
         self.stdout = StringIO()
         with (
-            patch(
-                "apps.owasp.index.ChapterIndex.configure_replicas"
-            ) as chapter_replica_patch,
+            patch("apps.owasp.index.ChapterIndex.configure_replicas") as chapter_replica_patch,
             patch("apps.owasp.index.ProjectIndex.configure_replicas") as project_replica_patch,
         ):
             self.mock_chapter_replica_update = chapter_replica_patch
