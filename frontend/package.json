@@ -125,6 +125,7 @@
   "pnpm": {
     "overrides": {
       "glob": "^11.1.0",
+      "serialize-javascript": "^7.0.3",
       "test-exclude": "^7.0.1"
     }
   },
