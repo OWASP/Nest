@@ -3,6 +3,8 @@
 import os
 from unittest.mock import Mock, patch
 
+import pytest
+
 from apps.ai.common.llm_config import get_llm
 
 
@@ -51,8 +53,6 @@ class TestLLMConfig:
     @patch.dict(os.environ, {"LLM_PROVIDER": "unsupported"})
     def test_get_llm_unsupported_provider(self):
         """Test getting LLM with unsupported provider raises ValueError."""
-        import pytest
-
         with pytest.raises(ValueError, match="Unsupported LLM provider: unsupported"):
             get_llm()
 
