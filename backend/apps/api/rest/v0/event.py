@@ -95,10 +95,12 @@ def list_events(
     else:
         queryset = EventModel.objects.order_by(ordering or "-start_date", "-end_date")
 
-    if isinstance(category, str) and category:
-        categories = [c.strip() for c in category.split(",") if c.strip()]
-        queryset = queryset.filter(category__in=categories)
-
+    if isinstance(category, str):
+        if category.strip() == "":
+            queryset = queryset.none()
+        else:
+            categories = [c.strip() for c in category.split(",") if c.strip()]
+            queryset = queryset.filter(category__in=categories)
     return filters.filter(queryset)
 
 
