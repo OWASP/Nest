@@ -3,6 +3,7 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.test import Client
 from django.utils import timezone
 
 from apps.api.rest.v0.event import EventDetail, get_event, list_events
@@ -60,13 +61,17 @@ class TestListEvents:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_queryset = MagicMock()
-        mock_event_model.objects.order_by.return_value = mock_queryset
-        mock_filters.filter.return_value = mock_queryset
+        mock_ordered_qs = MagicMock()
+        
+        mock_event_model.objects.all.return_value = mock_queryset
+        mock_queryset.order_by.return_value = mock_ordered_qs
+        mock_filters.filter.return_value = mock_ordered_qs
 
         result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=None)
 
-        mock_event_model.objects.order_by.assert_called_with("-start_date", "-end_date")
-        assert result == mock_queryset
+        mock_queryset.order_by.assert_called_with("-start_date", "-end_date")
+        mock_filters.filter.assert_called_with(mock_ordered_qs)
+        assert result == mock_ordered_qs
 
     @patch("apps.api.rest.v0.event.EventModel")
     def test_list_events_with_ordering(self, mock_event_model):
@@ -74,13 +79,58 @@ class TestListEvents:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_queryset = MagicMock()
-        mock_event_model.objects.order_by.return_value = mock_queryset
-        mock_filters.filter.return_value = mock_queryset
+        mock_ordered_qs = MagicMock()
+
+        mock_event_model.objects.all.return_value = mock_queryset
+        mock_queryset.order_by.return_value = mock_ordered_qs
+        mock_filters.filter.return_value = mock_ordered_qs
 
         result = list_events(mock_request, mock_filters, ordering="latitude", is_upcoming=None)
 
-        mock_event_model.objects.order_by.assert_called_with("latitude", "-end_date")
-        assert result == mock_queryset
+        mock_queryset.order_by.assert_called_with("latitude")
+        mock_filters.filter.assert_called_with(mock_ordered_qs)
+        assert result == mock_ordered_qs
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_single_category(self, mock_event_model):
+        """Test listing events with single category."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_upcoming_qs = MagicMock()
+        mock_filtered_qs = MagicMock()
+        mock_ordered_qs = MagicMock()
+
+        mock_event_model.upcoming_events.return_value = mock_upcoming_qs
+        mock_upcoming_qs.filter.return_value = mock_filtered_qs
+        mock_filtered_qs.order_by.return_value = mock_ordered_qs
+        mock_filters.filter.return_value = mock_ordered_qs
+
+        result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=True, category=["global"])
+
+        mock_upcoming_qs.filter.assert_called_with(category__in=["global"])
+        mock_filtered_qs.order_by.assert_called_with("start_date", "end_date")
+        mock_filters.filter.assert_called_with(mock_ordered_qs)
+        assert result == mock_ordered_qs
+    
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_multiple_categories(self, mock_event_model):
+        """Test listing events with multiple categories filtering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_upcoming_qs = MagicMock()
+        mock_filtered_qs = MagicMock()
+        mock_ordered_qs = MagicMock()
+
+        mock_event_model.upcoming_events.return_value = mock_upcoming_qs
+        mock_upcoming_qs.filter.return_value = mock_filtered_qs
+        mock_filtered_qs.order_by.return_value = mock_ordered_qs
+        mock_filters.filter.return_value = mock_ordered_qs
+
+        result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=True, category=["global", "appsec_days"])
+
+        mock_upcoming_qs.filter.assert_called_with(category__in=["global", "appsec_days"])
+        mock_filtered_qs.order_by.assert_called_with("start_date", "end_date")
+        assert result == mock_ordered_qs
 
     @patch("apps.api.rest.v0.event.EventModel")
     def test_list_events_upcoming(self, mock_event_model):
@@ -88,13 +138,80 @@ class TestListEvents:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_upcoming_qs = MagicMock()
-        mock_event_model.upcoming_events.return_value.order_by.return_value = mock_upcoming_qs
-        mock_filters.filter.return_value = mock_upcoming_qs
+        mock_ordered_qs = MagicMock()
+
+        mock_event_model.upcoming_events.return_value = mock_upcoming_qs
+        mock_upcoming_qs.order_by.return_value = mock_ordered_qs
+        mock_filters.filter.return_value = mock_ordered_qs
 
         result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=True)
 
         mock_event_model.upcoming_events.assert_called_once()
-        assert result == mock_upcoming_qs
+        mock_upcoming_qs.order_by.assert_called_with("start_date", "end_date")
+        assert result == mock_ordered_qs
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_category_without_upcoming(self, mock_event_model):
+        """Test listing events with category filter but without is_upcoming."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+        mock_filtered_qs = MagicMock()
+        mock_ordered_qs = MagicMock()
+
+        mock_event_model.objects.all.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered_qs
+        mock_filtered_qs.order_by.return_value = mock_ordered_qs
+        mock_filters.filter.return_value = mock_ordered_qs
+
+        result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=None, category=["global"])
+
+        mock_queryset.filter.assert_called_with(category__in=["global"])
+        mock_filtered_qs.order_by.assert_called_with("-start_date", "-end_date")
+        mock_filters.filter.assert_called_with(mock_ordered_qs)
+        assert result == mock_ordered_qs
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_category_with_ordering(self, mock_event_model):
+        """Test listing events with category and custom ordering."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_queryset = MagicMock()
+        mock_filtered_qs = MagicMock()
+        mock_ordered_qs = MagicMock()
+
+        mock_event_model.objects.all.return_value = mock_queryset
+        mock_queryset.filter.return_value = mock_filtered_qs
+        mock_filtered_qs.order_by.return_value = mock_ordered_qs
+        mock_filters.filter.return_value = mock_ordered_qs
+
+        result = list_events(mock_request, mock_filters, ordering="latitude", is_upcoming=None, category=["global"])
+
+        mock_queryset.filter.assert_called_with(category__in=["global"])
+        mock_filtered_qs.order_by.assert_called_with("latitude")
+        mock_filters.filter.assert_called_with(mock_ordered_qs)
+        assert result == mock_ordered_qs
+
+
+@pytest.mark.django_db
+class TestEventEndpointIntegration:
+    """Tests for event endpoint."""
+
+    def test_list_events(self):
+        """Test listing events."""
+        client = Client()
+        response = client.get("/api/v0/events/")
+        assert response.status_code == HTTPStatus.OK
+
+    def test_invalid_category_returns_validation_error(self):
+        """Test invalid category returns validation error."""
+
+        client = Client()
+        response = client.get("/api/v0/events/", {"category": "invalid"})
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        data = response.json()
+        assert "errors" in data
 
 
 class TestGetEvent:

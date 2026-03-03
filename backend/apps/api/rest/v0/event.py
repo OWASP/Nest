@@ -26,6 +26,7 @@ class EventBase(Schema):
     name: str
     start_date: str
     url: str | None = None
+    category: str | None = None
 
     @staticmethod
     def resolve_end_date(event: EventModel) -> str | None:
@@ -36,6 +37,11 @@ class EventBase(Schema):
     def resolve_start_date(event: EventModel) -> str:
         """Resolve start date."""
         return event.start_date.isoformat()
+
+    @staticmethod
+    def resolve_category(event: EventModel) -> str | None:
+        """Resolve category."""
+        return event.category
 
 
 class Event(EventBase):
@@ -84,14 +90,26 @@ def list_events(
         None,
         description="Filter for upcoming events",
     ),
+    category: list[EventModel.Category] | None = Query(
+        None,
+        description="Filter by category",
+    ),
 ) -> list[Event]:
     """Get list of events."""
+    queryset = EventModel.objects.all()
     if is_upcoming:
-        return filters.filter(
-            EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
-        )
+        queryset = EventModel.upcoming_events()
 
-    return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
+    if category:
+        queryset = queryset.filter(category__in=category)
+
+    if ordering:
+        return filters.filter(queryset.order_by(ordering))
+
+    default_order = "start_date" if is_upcoming else "-start_date"
+    secondary_order = "end_date" if is_upcoming else "-end_date"
+
+    return filters.filter(queryset.order_by(default_order, secondary_order))
 
 
 @router.get(
