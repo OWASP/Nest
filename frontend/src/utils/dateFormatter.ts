@@ -11,6 +11,13 @@ const toISODateString = (input: string): string => {
   return input
 }
 
+/**
+ * Formats a date value into a human-readable string (e.g., "Sep 1, 2023").
+ *
+ * @param input - A Unix timestamp in seconds or a date string (ISO 8601, MM/DD/YYYY, or YYYY/MM/DD).
+ * @returns A formatted date string in "MMM D, YYYY" format, or an empty string if input is falsy.
+ * @throws {TypeError} If the input cannot be parsed into a valid date.
+ */
 export const formatDate = (input: number | string) => {
   if (!input) {
     return ''
@@ -26,7 +33,6 @@ export const formatDate = (input: number | string) => {
   }
 
   return date.toLocaleDateString('en-US', {
-
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -34,6 +40,20 @@ export const formatDate = (input: number | string) => {
   })
 }
 
+/**
+ * Formats a date range into a concise human-readable string.
+ *
+ * Produces compact output depending on whether dates share the same month, year, or neither:
+ * - Same day: "Sep 1, 2025"
+ * - Same month: "Sep 1 — 4, 2025"
+ * - Same year: "Sep 29 — Oct 2, 2025"
+ * - Different years: "Dec 30, 2025 — Jan 3, 2026"
+ *
+ * @param startDate - The range start as a Unix timestamp in seconds or a date string.
+ * @param endDate - The range end as a Unix timestamp in seconds or a date string.
+ * @returns A formatted date range string.
+ * @throws {TypeError} If either date cannot be parsed into a valid date.
+ */
 export const formatDateRange = (startDate: number | string, endDate: number | string) => {
   const start = typeof startDate === 'number' ? new Date(startDate * 1000) : new Date(startDate)
   const end = typeof endDate === 'number' ? new Date(endDate * 1000) : new Date(endDate)
@@ -76,6 +96,13 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
   }
 }
 
+/**
+ * Formats a date value into an ISO date string suitable for HTML date inputs ("YYYY-MM-DD").
+ *
+ * @param dateStr - A Unix timestamp in seconds or a date string.
+ * @returns A date string in "YYYY-MM-DD" format, or an empty string if input is falsy.
+ * @throws {TypeError} If the input cannot be parsed into a valid date.
+ */
 export const formatDateForInput = (dateStr: string | number) => {
   if (!dateStr) return ''
   const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr)
@@ -117,6 +144,15 @@ function calculateStartDate(today: Date, years: number, months: number, days: nu
   return startDate
 }
 
+/**
+ * Calculates a date range by subtracting the specified duration from today's date.
+ *
+ * When only `years` is specified, the range is aligned to end on the nearest preceding
+ * Saturday and span 364 days (52 full weeks).
+ *
+ * @param options - An object specifying the duration to subtract, with optional `years`, `months`, and `days` fields.
+ * @returns An object containing `startDate` and `endDate` as ISO date strings ("YYYY-MM-DD").
+ */
 export function getDateRange(options: DateRangeOptions = {}): DateRangeResult {
   const { years = 0, months = 0, days = 0 } = options
 
