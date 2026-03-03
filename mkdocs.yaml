@@ -4,12 +4,11 @@ nav:
       - OWASP Nest: index.md
       - Code of Conduct: code-of-conduct.md
       - Contributing: contributing.md
-  - API:
-      - Overview: api/overview.md
-  - Backend: backend/overview.md
-  - Frontend: frontend/overview.md
-  - Nestbot: nestbot/overview.md
-  - Schema: schema/overview.md
+  - API: api/index.md
+  - Backend: backend/index.md
+  - Frontend: frontend/index.md
+  - NestBot: nestbot/index.md
+  - Schema: schema/index.md
 repo_url: https://github.com/OWASP/Nest
 theme:
   name: material

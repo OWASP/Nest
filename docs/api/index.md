@@ -13,5 +13,6 @@ Each API endpoint **must have a unique `operationId`** in the OpenAPI spec. Dupl
 ### 2. Stable Authentication Class Name
 
 The authentication class in `backend/apps/api/rest/auth/api_key.py` **must be named `ApiKey`**.
+
 - The client's `api_key` parameter is automatically derived from this class name.
 - **Do not rename this class.**

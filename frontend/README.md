@@ -1,4 +1,4 @@
-# Frontend Overview
+# Frontend
 
 The OWASP Nest frontend is a modern web application built with [Next.js](https://nextjs.org/).
 
