@@ -1,4 +1,4 @@
-FROM node:24.13.1-alpine3.23 AS base
+FROM node:24.14-alpine3.23 AS base
 
 # Install dependencies and build the project.
 FROM base AS builder
@@ -59,6 +59,7 @@ WORKDIR /tmp
 
 # Fix CVE-2026-23745, CVE-2026-26960: Update npm's bundled tar to 7.5.8 in runner stage
 # Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
+# Fix CVE-2026-27903, CVE-2026-27904: Update npm's bundled minimatch to 10.2.3
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN npm pack tar@7.5.8 && \
     tar -xzf tar-7.5.8.tgz && \
@@ -77,6 +78,14 @@ RUN npm pack tar@7.5.8 && \
     chmod -R 755 "${BRACE_DIR}" && \
     rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
     grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json" && \
+    npm pack minimatch@10.2.3 && \
+    tar -xzf minimatch-10.2.3.tgz && \
+    MINIMATCH_DIR="/usr/local/lib/node_modules/npm/node_modules/minimatch" && \
+    rm -rf "${MINIMATCH_DIR}" && \
+    cp -r package "${MINIMATCH_DIR}" && \
+    chmod -R 755 "${MINIMATCH_DIR}" && \
+    rm -rf package minimatch-10.2.3.tgz && \
+    grep -q '"version": "10.2.3"' "${MINIMATCH_DIR}/package.json" && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
 
