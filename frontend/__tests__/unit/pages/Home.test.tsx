@@ -129,11 +129,11 @@ describe('Home', () => {
     })
   })
 
-  test('renders MultiSearchBar component', async () => {
+  test('renders search keyboard shortcut hint', async () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search the OWASP community')).toBeInTheDocument()
+      expect(screen.getByText(/to search across projects, chapters, and more/)).toBeInTheDocument()
     })
   })
 
@@ -403,7 +403,7 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search the OWASP community')).toBeInTheDocument()
+      expect(screen.getByText(/to search across projects, chapters, and more/)).toBeInTheDocument()
       expect(screen.queryByText('Top Contributors')).not.toBeInTheDocument()
 
       const zeroStats = screen.getAllByText('Active Projects')

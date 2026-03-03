@@ -40,7 +40,6 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Milestones from 'components/Milestones'
 import DialogComp from 'components/Modal'
-import MultiSearchBar from 'components/MultiSearch'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -145,14 +144,13 @@ export default function Home() {
             <p className="text-muted-foreground max-w-[700px] pt-6 md:text-xl">
               Your gateway to OWASP. Discover, engage, and help shape the future!
             </p>
-          </div>
-          <div className="mx-auto mb-8 flex max-w-2xl justify-center">
-            <MultiSearchBar
-              eventData={data?.upcomingEvents ?? []}
-              isLoaded={true}
-              placeholder="Search the OWASP community"
-              indexes={['chapters', 'organizations', 'projects', 'users']}
-            />
+            <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
+              Press{' '}
+              <kbd className="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs dark:border-gray-600 dark:bg-gray-700">
+                ⌘K
+              </kbd>{' '}
+              to search across projects, chapters, and more.
+            </p>
           </div>
         </div>
         <SecondaryCard
