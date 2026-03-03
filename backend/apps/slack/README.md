@@ -22,7 +22,7 @@ The Nestbot code lives in `backend/apps/slack/`. Key directories include:
 
 ## Key Commands
 
-The project provides `Makefile` targets to manage Slack data:
+Run these `Makefile` targets to manage Slack data:
 
 | Task                             | Command                                            |
 | -------------------------------- | -------------------------------------------------- |
