@@ -84,6 +84,14 @@ Product Security Engineer at Splunk
 
 Raja Nagori is a Product Security Engineer at Splunk with a strong focus on information security and continuous learning. He holds a Bachelor's degree in Computer Science and Engineering and has experience in penetration testing, threat modeling, and DevSecOps. Raja is an active member of the OWASP community and leads the Nightingale project, a Docker-based environment for penetration testers.
 
+### Rishi Mondal
+
+SRE at Obmondo | Maintainer of CNCF KubeStellar
+
+[GitHub](https://github.com/MAVRICK-1/) • [LinkedIn](https://www.linkedin.com/in/rishi-mondal-5238b2282/) • [Slack](https://owasp.slack.com/team/U0AHVMYHMJB) • [India (IST)](https://time-time.net/time/kolkata-india.php) • [About me](https://mentorship.lfx.linuxfoundation.org/mentor/711a2840-0900-42c7-b115-b59799027e80)
+
+Rishi Mondal is a Site Reliability Engineer (SRE) at Obmondo and a CNCF KubeStellar Maintainer. He is a Linux Foundation Mentor and active open-source contributor, specializing in Kubernetes, cloud-native infrastructure, Terraform, and AWS. He builds and maintains scalable, production-grade distributed systems.
+
 ---
 
 ## Google Summer of Code 2025
@@ -111,16 +119,3 @@ Full-Stack Software Engineer
 [GitHub](https://github.com/aramattamara/) • [LinkedIn](https://www.linkedin.com/in/aramattamara/) • [Slack](https://owasp.slack.com/team/U0881RRPBDY) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
 Tamara is a Fullstack Engineer who builds web applications from scratch using Node.js (Express), React, Tailwind, and MySQL. She graduated from Hackbright Academy (April 2023), is a quick learner who enjoys challenges, and collaborates well in teams.
-
-
-### Rishi Mondal
-
-SRE at Obmondo | Maintainer of CNCF kubestellar
-
-[GitHub](https://github.com/MAVRICK-1/) • [LinkedIn](https://www.linkedin.com/in/rishi-mondal-5238b2282/) • [Slack](https://owasp.slack.com/team/U0AHVMYHMJB) • [India (IST)](https://time-time.net/time/kolkata-india.php) • [About me](https://mentorship.lfx.linuxfoundation.org/mentor/711a2840-0900-42c7-b115-b59799027e80)
-
-Rishi Mondal is a Site Reliability Engineer (SRE) at Obmondo and a CNCF KubeStellar Maintainer. He is a Linux Foundation Mentor and active open-source contributor, specializing in Kubernetes, cloud-native infrastructure, Terraform, and AWS. He builds and maintains scalable, production-grade distributed systems.
-
-
-
-
