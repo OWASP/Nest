@@ -4,8 +4,28 @@ import type { NextConfig } from 'next'
 const forceStandalone = process.env.FORCE_STANDALONE === 'yes'
 const isLocal = process.env.NEXT_PUBLIC_ENVIRONMENT === 'local'
 
+const headers = [
+  { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), fullscreen=(self), geolocation=(self), microphone=()',
+  },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
+]
+
 const nextConfig: NextConfig = {
   devIndicators: false,
+  async headers() {
+    return [
+      {
+        headers,
+        source: '/:path*',
+      },
+    ]
+  },
   images: {
     // This is a list of remote patterns that Next.js will use to determine
     // if an image is allowed to be loaded from a remote source.
