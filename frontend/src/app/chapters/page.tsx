@@ -47,6 +47,11 @@ const ChaptersPage = () => {
     facetFilters: initialCountry ? [`idx_country:${initialCountry}`] : [],
   })
 
+  useEffect(() => {
+    const urlCountry = searchParams?.get('country') || ''
+    setSelectedCountry(urlCountry)
+  }, [searchParams])
+
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
     if (country) {
@@ -139,7 +144,7 @@ const ChaptersPage = () => {
     >
       {chapters.length > 0 && (
         <ChapterMapWrapper
-          geoLocData={searchQuery || selectedCountry ? chapters : geoLocData}
+          geoLocData={searchQuery ? chapters : geoLocData}
           showLocal={true}
           showLocationSharing={true}
           style={{

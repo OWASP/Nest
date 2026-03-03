@@ -408,7 +408,7 @@ describe('ChaptersPage Component', () => {
 
   test('initializes country filter from URL param', async () => {
     const searchParams = new URLSearchParams('country=Japan')
-    jest.mocked(useSearchParams).mockReturnValue(searchParams as never)
+    jest.mocked(useSearchParams).mockReturnValueOnce(searchParams as never)
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockChapterData.chapters,
       totalPages: 1,
