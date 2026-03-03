@@ -111,3 +111,12 @@ Full-Stack Software Engineer
 [GitHub](https://github.com/aramattamara/) • [LinkedIn](https://www.linkedin.com/in/aramattamara/) • [Slack](https://owasp.slack.com/team/U0881RRPBDY) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
 
 Tamara is a Fullstack Engineer who builds web applications from scratch using Node.js (Express), React, Tailwind, and MySQL. She graduated from Hackbright Academy (April 2023), is a quick learner who enjoys challenges, and collaborates well in teams.
+
+
+### Rishi Mondal
+
+SRE at Obmondo | Maintainer of CNCF kubestellar
+
+[GitHub](https://github.com/MAVRICK-1/) • [LinkedIn](https://www.linkedin.com/in/rishi-mondal-5238b2282/) • [Slack](https://owasp.slack.com/team/U0AHVMYHMJB) • [India (IST)](https://time-time.net/time/kolkata-india.php) • [About me](https://mentorship.lfx.linuxfoundation.org/mentor/711a2840-0900-42c7-b115-b59799027e80)
+
+
