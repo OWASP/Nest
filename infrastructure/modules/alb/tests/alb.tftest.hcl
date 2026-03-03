@@ -246,8 +246,47 @@ run "test_https_listener_sets_csp_header" {
   command = plan
 
   assert {
-    condition     = aws_lb_listener.https.routing_http_response_content_security_policy_header_value == "default-src 'self'; script-src 'self' 'unsafe-inline' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com; img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://owasp.org https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://raw.githubusercontent.com; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://github-contributions-api.jogruber.de https://*.google-analytics.com https://*.i.posthog.com https://*.sentry.io https://*.tile.openstreetmap.org; object-src 'none'; frame-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    condition     = aws_lb_listener.https.routing_http_response_content_security_policy_header_value == local.content_security_policy
     error_message = "HTTPS listener must set Content-Security-Policy header value."
+  }
+}
+
+run "test_https_listener_sets_all_security_headers" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      aws_lb_listener.https.routing_http_response_content_security_policy_header_value != "",
+      aws_lb_listener.https.routing_http_response_strict_transport_security_header_value != "",
+      aws_lb_listener.https.routing_http_response_x_content_type_options_header_value != "",
+      aws_lb_listener.https.routing_http_response_x_frame_options_header_value != ""
+    ])
+    error_message = "HTTPS listener must set all four security response headers."
+  }
+}
+
+run "test_csp_contains_required_directives" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      strcontains(local.content_security_policy, "default-src 'self'"),
+      strcontains(local.content_security_policy, "object-src 'none'"),
+      strcontains(local.content_security_policy, "frame-ancestors 'none'"),
+      strcontains(local.content_security_policy, "script-src"),
+      strcontains(local.content_security_policy, "style-src"),
+      strcontains(local.content_security_policy, "base-uri 'self'")
+    ])
+    error_message = "Content-Security-Policy must contain required security directives."
+  }
+}
+
+run "test_csp_directive_count" {
+  command = plan
+
+  assert {
+    condition     = length(regexall("[^;]+", trimspace(local.content_security_policy))) == 11
+    error_message = "Content-Security-Policy must contain 11 directives."
   }
 }
 
