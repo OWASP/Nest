@@ -564,6 +564,14 @@ export enum ProgramStatusEnum {
   Published = 'PUBLISHED'
 }
 
+export type ProjectFilter = {
+  AND?: InputMaybe<ProjectFilter>;
+  DISTINCT?: InputMaybe<Scalars['Boolean']['input']>;
+  NOT?: InputMaybe<ProjectFilter>;
+  OR?: InputMaybe<ProjectFilter>;
+  type?: InputMaybe<ProjectType>;
+};
+
 export type ProjectHealthMetricsFilter = {
   AND?: InputMaybe<ProjectHealthMetricsFilter>;
   DISTINCT?: InputMaybe<Scalars['Boolean']['input']>;
@@ -683,6 +691,23 @@ export type ProjectNodeRecentMilestonesArgs = {
   limit?: Scalars['Int']['input'];
 };
 
+export type ProjectOrder = {
+  contributorsCount?: InputMaybe<Ordering>;
+  createdAt?: InputMaybe<Ordering>;
+  forksCount?: InputMaybe<Ordering>;
+  level?: InputMaybe<Ordering>;
+  name?: InputMaybe<Ordering>;
+  starsCount?: InputMaybe<Ordering>;
+  updatedAt?: InputMaybe<Ordering>;
+};
+
+export enum ProjectType {
+  Code = 'CODE',
+  Documentation = 'DOCUMENTATION',
+  Other = 'OTHER',
+  Tool = 'TOOL'
+}
+
 export type PullRequestNode = Node & {
   __typename?: 'PullRequestNode';
   author?: Maybe<UserNode>;
@@ -722,6 +747,7 @@ export type Query = {
   projectHealthMetrics: Array<ProjectHealthMetricsNode>;
   projectHealthMetricsDistinctLength: Scalars['Int']['output'];
   projectHealthStats: ProjectHealthStatsNode;
+  projects: Array<ProjectNode>;
   recentChapters: Array<ChapterNode>;
   recentIssues: Array<IssueNode>;
   recentMilestones: Array<MilestoneNode>;
@@ -843,11 +869,20 @@ export type QueryProjectHealthMetricsArgs = {
   filters?: InputMaybe<ProjectHealthMetricsFilter>;
   ordering?: InputMaybe<Array<ProjectHealthMetricsOrder>>;
   pagination?: InputMaybe<OffsetPaginationInput>;
+  query?: Scalars['String']['input'];
 };
 
 
 export type QueryProjectHealthMetricsDistinctLengthArgs = {
   filters?: InputMaybe<ProjectHealthMetricsFilter>;
+  query?: Scalars['String']['input'];
+};
+
+
+export type QueryProjectsArgs = {
+  filters?: InputMaybe<ProjectFilter>;
+  ordering?: InputMaybe<Array<ProjectOrder>>;
+  pagination?: InputMaybe<OffsetPaginationInput>;
 };
 
 
@@ -914,7 +949,10 @@ export type QueryRepositoryArgs = {
 
 
 export type QuerySearchProjectsArgs = {
-  query: Scalars['String']['input'];
+  filters?: InputMaybe<ProjectFilter>;
+  ordering?: InputMaybe<Array<ProjectOrder>>;
+  pagination?: InputMaybe<OffsetPaginationInput>;
+  query?: Scalars['String']['input'];
 };
 
 

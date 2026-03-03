@@ -13,7 +13,7 @@ from ninja.responses import Response
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Leader, ValidationErrorSchema
 from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
-from apps.owasp.models.enums.project import ProjectLevel
+from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project as ProjectModel
 
 PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
@@ -24,6 +24,14 @@ PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
     "stars": {
         "type": "number",
         "field": "stars_count",
+    },
+    "contributors": {
+        "type": "number",
+        "field": "contributors_count",
+    },
+    "forks": {
+        "type": "number",
+        "field": "forks_count",
     },
 }
 
@@ -77,6 +85,10 @@ class ProjectFilter(FilterSchema):
         None,
         description="Level of the project",
     )
+    type: ProjectType | None = Field(
+        None,
+        description="Type (category) of the project",
+    )
     q: str | None = Field(
         None,
         description="Structured search query (e.g. 'name:security stars:>100')",
@@ -94,7 +106,23 @@ class ProjectFilter(FilterSchema):
 def list_projects(
     request: HttpRequest,
     filters: ProjectFilter = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+    ordering: Literal[
+        "created_at",
+        "-created_at",
+        "updated_at",
+        "-updated_at",
+        "contributors_count",
+        "-contributors_count",
+        "forks_count",
+        "-forks_count",
+        "stars_count",
+        "-stars_count",
+        "name",
+        "-name",
+        "level",
+        "-level",
+    ]
+    | None = Query(
         None,
         description="Ordering field",
     ),
@@ -108,6 +136,9 @@ def list_projects(
 
     if filters.level is not None:
         queryset = queryset.filter(level=filters.level)
+
+    if filters.type is not None:
+        queryset = queryset.filter(type=filters.type)
 
     return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 

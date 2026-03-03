@@ -13,6 +13,7 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 MAX_LIMIT = 1000
 MAX_OFFSET = 10000
+MIN_SEARCH_QUERY_LENGTH = 3
 
 
 @strawberry.type
@@ -28,13 +29,15 @@ class ProjectHealthMetricsQuery:
     )
     def project_health_metrics(
         self,
+        query: str = "",
         filters: ProjectHealthMetricsFilter | None = None,
         pagination: strawberry_django.pagination.OffsetPaginationInput | None = None,
         ordering: list[ProjectHealthMetricsOrder] | None = None,
     ) -> list[ProjectHealthMetricsNode]:
-        """Resolve project health metrics based on filters, pagination, and ordering.
+        """Resolve project health metrics based on search query, filters, pagination, and ordering.
 
         Args:
+            query (str): The search query string for project name (minimum 3 characters).
             filters (ProjectHealthMetricsFilter): Filters to apply on the metrics.
             pagination (strawberry_django.pagination.OffsetPaginationInput): Pagination parameters.
             ordering (list[ProjectHealthMetricsOrder], optional): Ordering parameters.
@@ -53,7 +56,16 @@ class ProjectHealthMetricsQuery:
                     return []
                 pagination.limit = min(pagination.limit, MAX_LIMIT)
 
-        return ProjectHealthMetrics.get_latest_health_metrics()
+        queryset = ProjectHealthMetrics.get_latest_health_metrics()
+
+        cleaned_query = query.strip() if query else ""
+        if cleaned_query and len(cleaned_query) >= MIN_SEARCH_QUERY_LENGTH:
+            queryset = queryset.filter(project__name__icontains=cleaned_query)
+
+        if filters:
+            queryset = strawberry_django.filters.apply(filters, queryset)
+
+        return queryset
 
     @strawberry_django.field(
         permission_classes=[HasDashboardAccess],
@@ -72,11 +84,13 @@ class ProjectHealthMetricsQuery:
     )
     def project_health_metrics_distinct_length(
         self,
+        query: str = "",
         filters: ProjectHealthMetricsFilter | None = None,
     ) -> int:
         """Get the distinct length of project health metrics.
 
         Args:
+            query (str): The search query string for project name (minimum 3 characters).
             filters (ProjectHealthMetricsFilter | None): Filters to apply on the metrics.
 
         Returns:
@@ -84,6 +98,10 @@ class ProjectHealthMetricsQuery:
 
         """
         queryset = ProjectHealthMetrics.get_latest_health_metrics()
+
+        cleaned_query = query.strip() if query else ""
+        if cleaned_query and len(cleaned_query) >= MIN_SEARCH_QUERY_LENGTH:
+            queryset = queryset.filter(project__name__icontains=cleaned_query)
 
         if filters:
             queryset = strawberry_django.filters.apply(filters, queryset)

@@ -10,6 +10,10 @@ interface SearchProps {
   onSearch: (query: string) => void
   placeholder: string
   initialValue?: string
+  containerClassName?: string
+  inputClassName?: string
+  inputId?: string
+  testId?: string
 }
 
 const SearchBar: React.FC<SearchProps> = ({
@@ -17,6 +21,10 @@ const SearchBar: React.FC<SearchProps> = ({
   onSearch,
   placeholder,
   initialValue = '',
+  containerClassName = 'w-full max-w-md p-4',
+  inputClassName = 'h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300',
+  inputId,
+  testId,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -74,7 +82,7 @@ const SearchBar: React.FC<SearchProps> = ({
   }
 
   return (
-    <div className="w-full max-w-md p-4">
+    <div className={containerClassName}>
       <div className="relative">
         {isLoaded ? (
           <>
@@ -84,11 +92,12 @@ const SearchBar: React.FC<SearchProps> = ({
             />
             <input
               ref={inputRef}
+              id={inputId}
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300"
+              className={inputClassName}
             />
             {searchQuery && (
               <button

@@ -11,7 +11,7 @@ export const fetchAlgoliaData = async <T>(
   facetFilters: string[] = []
 ): Promise<AlgoliaResponse<T>> => {
   try {
-    if (['projects', 'chapters'].includes(indexName)) {
+    if (indexName.startsWith('projects') || indexName === 'chapters') {
       facetFilters.push('idx_is_active:true')
     }
 
