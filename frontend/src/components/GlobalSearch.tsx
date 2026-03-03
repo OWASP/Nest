@@ -17,7 +17,7 @@ import type { User } from 'types/user'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 
-const INDEXES = ['chapters', 'organizations', 'projects', 'users']
+const INDEXES = ['chapters', 'events', 'organizations', 'projects', 'users']
 const SUGGESTION_COUNT = 3
 
 export default function GlobalSearch() {
@@ -29,10 +29,12 @@ export default function GlobalSearch() {
     index: number
     subIndex: number
   } | null>(null)
+  const [searchError, setSearchError] = useState(false)
 
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const searchVersionRef = useRef(0)
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -64,6 +66,7 @@ export default function GlobalSearch() {
       setSuggestions([])
       setShowSuggestions(false)
       setHighlightedIndex(null)
+      setSearchError(false)
     }
   }, [isOpen])
 
@@ -74,22 +77,37 @@ export default function GlobalSearch() {
           sendGAEvent({
             event: 'globalSearch',
             path: globalThis.location.pathname,
-            value: query,
+            value: query.length,
           })
         }
         if (query.length > 0) {
+          const version = ++searchVersionRef.current
+          setSearchError(false)
+          let failedCount = 0
           const results = await Promise.all(
             INDEXES.map(async (index) => {
-              const data = await fetchAlgoliaData(index, query, 1, SUGGESTION_COUNT)
-              return {
-                indexName: index,
-                hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
-                totalPages: data.totalPages || 0,
+              try {
+                const data = await fetchAlgoliaData(index, query, 1, SUGGESTION_COUNT)
+                return {
+                  indexName: index,
+                  hits: data.hits as Chapter[] | Event[] | Organization[] | Project[] | User[],
+                  totalPages: data.totalPages || 0,
+                }
+              } catch {
+                failedCount++
+                return { indexName: index, hits: [] as never[], totalPages: 0 }
               }
             })
           )
-          setSuggestions(results.filter((result) => result.hits.length > 0) as Suggestion[])
-          setShowSuggestions(true)
+          if (version !== searchVersionRef.current) return
+          if (failedCount === INDEXES.length) {
+            setSuggestions([])
+            setShowSuggestions(false)
+            setSearchError(true)
+          } else {
+            setSuggestions(results.filter((result) => result.hits.length > 0) as Suggestion[])
+            setShowSuggestions(true)
+          }
         } else {
           setSuggestions([])
           setShowSuggestions(false)
@@ -113,7 +131,7 @@ export default function GlobalSearch() {
           router.push(`/chapters/${suggestion.key}`)
           break
         case 'events':
-          window.open((suggestion as Event).url, '_blank', 'noopener,noreferrer')
+          globalThis.open((suggestion as Event).url, '_blank', 'noopener,noreferrer')
           break
         case 'organizations':
           if ('login' in suggestion && suggestion.login) {
@@ -233,6 +251,93 @@ export default function GlobalSearch() {
     }
   }
 
+  const renderSuggestionItem = (
+    hit: SearchHit,
+    indexName: string,
+    index: number,
+    subIndex: number
+  ) => {
+    const hitRecord = hit as unknown as Record<string, string | undefined>
+    const isHighlighted =
+      highlightedIndex?.index === index && highlightedIndex?.subIndex === subIndex
+
+    return (
+      <li
+        key={`global-search-${indexName}-${hitRecord.key || hitRecord.login || hitRecord.url}`}
+        className={`mx-2 rounded-lg ${
+          isHighlighted
+            ? 'bg-blue-50 dark:bg-blue-900/30'
+            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => handleSuggestionClick(hit, indexName)}
+          onKeyDown={(e) => handleSuggestionKeyDown(e, hit, indexName)}
+          className="flex w-full items-center overflow-hidden border-none bg-transparent px-3 py-2.5 text-left text-sm text-gray-700 focus:rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-300"
+        >
+          {getIconForIndex(indexName)}
+          <span className="block max-w-full truncate">{hitRecord.name || hitRecord.login}</span>
+        </button>
+      </li>
+    )
+  }
+
+  const renderSuggestionGroup = (suggestion: Suggestion, index: number) => (
+    <div key={suggestion.indexName}>
+      <div className="px-4 pt-3 pb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+        {getIndexLabel(suggestion.indexName)}
+      </div>
+      <ul>
+        {suggestion.hits.map((hit, subIndex) =>
+          renderSuggestionItem(hit, suggestion.indexName, index, subIndex)
+        )}
+      </ul>
+    </div>
+  )
+
+  const renderSearchContent = () => {
+    if (showSuggestions && suggestions.length > 0) {
+      return (
+        <>
+          {suggestions.map(renderSuggestionGroup)}
+          <a
+            aria-label="Search by Algolia (opens in a new tab)"
+            className="flex items-center justify-center gap-2 border-t border-gray-200 py-2.5 text-gray-400 hover:text-gray-600 dark:border-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
+            href="https://www.algolia.com"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <SiAlgolia className="h-3 w-3" aria-hidden="true" />
+            <span className="text-xs">Search by Algolia</span>
+          </a>
+        </>
+      )
+    }
+
+    if (searchError) {
+      return (
+        <div className="px-4 py-8 text-center text-sm text-red-500 dark:text-red-400">
+          Search service is temporarily unavailable. Please try again later.
+        </div>
+      )
+    }
+
+    if (searchQuery && showSuggestions) {
+      return (
+        <div className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+          No results found for &ldquo;{searchQuery}&rdquo;
+        </div>
+      )
+    }
+
+    return (
+      <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+        Start typing to search across projects, chapters, events, organizations, and members.
+      </div>
+    )
+  }
+
   return (
     <>
       <button
@@ -249,11 +354,11 @@ export default function GlobalSearch() {
       </button>
 
       {isOpen && (
-        <div
-          role="dialog"
+        <dialog
+          open
           aria-modal="true"
           aria-label="Global search"
-          className="fixed inset-0 z-100 flex items-start justify-center px-3 pt-[10vh] sm:px-0 sm:pt-[15vh]"
+          className="fixed inset-0 z-[100] m-0 flex h-full max-h-full w-full max-w-full items-start justify-center border-none bg-transparent p-0 px-3 pt-[10vh] sm:px-0 sm:pt-[15vh]"
         >
           {/* Backdrop */}
           <button
@@ -293,67 +398,9 @@ export default function GlobalSearch() {
               )}
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto">
-              {showSuggestions && suggestions.length > 0 ? (
-                <>
-                  {suggestions.map((suggestion, index) => (
-                    <div key={suggestion.indexName}>
-                      <div className="px-4 pt-3 pb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                        {getIndexLabel(suggestion.indexName)}
-                      </div>
-                      <ul>
-                        {suggestion.hits.map((hit, subIndex) => (
-                          <li
-                            key={`global-search-${suggestion.indexName}-${(hit as unknown as Record<string, string | undefined>).key || (hit as unknown as Record<string, string | undefined>).login || (hit as unknown as Record<string, string | undefined>).url}`}
-                            className={`mx-2 rounded-lg ${
-                              highlightedIndex?.index === index &&
-                              highlightedIndex?.subIndex === subIndex
-                                ? 'bg-blue-50 dark:bg-blue-900/30'
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                            }`}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => handleSuggestionClick(hit, suggestion.indexName)}
-                              onKeyDown={(e) =>
-                                handleSuggestionKeyDown(e, hit, suggestion.indexName)
-                              }
-                              className="flex w-full items-center overflow-hidden border-none bg-transparent px-3 py-2.5 text-left text-sm text-gray-700 focus:rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:text-gray-300"
-                            >
-                              {getIconForIndex(suggestion.indexName)}
-                              <span className="block max-w-full truncate">
-                                {(hit as unknown as Record<string, string | undefined>).name ||
-                                  (hit as unknown as Record<string, string | undefined>).login}
-                              </span>
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                  <a
-                    aria-label="Search by Algolia (opens in a new tab)"
-                    className="flex items-center justify-center gap-2 border-t border-gray-200 py-2.5 text-gray-400 hover:text-gray-600 dark:border-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
-                    href="https://www.algolia.com"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    <SiAlgolia className="h-3 w-3" aria-hidden="true" />
-                    <span className="text-xs">Search by Algolia</span>
-                  </a>
-                </>
-              ) : searchQuery && showSuggestions ? (
-                <div className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                  No results found for &ldquo;{searchQuery}&rdquo;
-                </div>
-              ) : (
-                <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
-                  Start typing to search across projects, chapters, organizations, and members.
-                </div>
-              )}
-            </div>
+            <div className="max-h-[60vh] overflow-y-auto">{renderSearchContent()}</div>
           </div>
-        </div>
+        </dialog>
       )}
     </>
   )

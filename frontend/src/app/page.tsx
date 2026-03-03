@@ -149,6 +149,10 @@ export default function Home() {
               <kbd className="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs dark:border-gray-600 dark:bg-gray-700">
                 ⌘K
               </kbd>{' '}
+              /{' '}
+              <kbd className="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs dark:border-gray-600 dark:bg-gray-700">
+                Ctrl+K
+              </kbd>{' '}
               to search across projects, chapters, and more.
             </p>
           </div>

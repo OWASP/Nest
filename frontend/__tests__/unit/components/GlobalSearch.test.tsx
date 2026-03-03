@@ -55,12 +55,14 @@ jest.mock('react-icons/si', () => ({
 }))
 
 const mockRouter = { push: jest.fn() }
+const mockWindowOpen = jest.fn()
 
 describe('GlobalSearch', () => {
   beforeEach(() => {
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
     jest.clearAllMocks()
+    Object.defineProperty(globalThis, 'open', { value: mockWindowOpen, writable: true })
   })
 
   test('renders search trigger button', () => {
@@ -331,6 +333,101 @@ describe('GlobalSearch', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Search by Algolia')).toBeInTheDocument()
+    })
+  })
+
+  test('shows error message when search fails', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockRejectedValue(new Error('Search service error'))
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Search service is temporarily unavailable. Please try again later.')
+      ).toBeInTheDocument()
+    })
+  })
+
+  test('opens event URL when clicking an event suggestion', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'events') {
+        return Promise.resolve({
+          hits: [{ key: 'test-event', name: 'Test Event', url: 'https://example.com/event' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'test')
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Event')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('Test Event'))
+
+    expect(mockWindowOpen).toHaveBeenCalledWith(
+      'https://example.com/event',
+      '_blank',
+      'noopener,noreferrer'
+    )
+  })
+
+  test('ignores stale search responses', async () => {
+    let resolveFirst: (value: { hits: { key: string; name: string }[]; totalPages: number }) => void
+    const firstPromise = new Promise<{ hits: { key: string; name: string }[]; totalPages: number }>(
+      (resolve) => {
+        resolveFirst = resolve
+      }
+    )
+
+    ;(fetchAlgoliaData as jest.Mock)
+      .mockImplementationOnce(() => firstPromise)
+      .mockImplementationOnce(() => firstPromise)
+      .mockImplementationOnce(() => firstPromise)
+      .mockImplementationOnce(() => firstPromise)
+      .mockImplementationOnce(() => firstPromise)
+      .mockImplementation((index: string) => {
+        if (index === 'projects') {
+          return Promise.resolve({
+            hits: [{ key: 'second-result', name: 'Second Result' }],
+            totalPages: 1,
+          })
+        }
+        return Promise.resolve({ hits: [], totalPages: 0 })
+      })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+
+    // Type first query (triggers slow request)
+    await userEvent.type(input, 'a')
+
+    // Type second query (triggers fast request that resolves first)
+    await userEvent.type(input, 'b')
+
+    await waitFor(() => {
+      expect(screen.getByText('Second Result')).toBeInTheDocument()
+    })
+
+    // Now resolve the stale first request
+    resolveFirst!({ hits: [{ key: 'stale-result', name: 'Stale Result' }], totalPages: 1 })
+
+    // Wait a tick and verify stale result did NOT overwrite
+    await waitFor(() => {
+      expect(screen.getByText('Second Result')).toBeInTheDocument()
+      expect(screen.queryByText('Stale Result')).not.toBeInTheDocument()
     })
   })
 })
