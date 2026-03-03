@@ -110,8 +110,7 @@ describe('GlobalSearch', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
 
-    const overlay = screen.getByRole('dialog').parentElement as HTMLElement
-    fireEvent.click(overlay)
+    fireEvent.click(screen.getByLabelText('Close search'))
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -130,9 +129,14 @@ describe('GlobalSearch', () => {
   })
 
   test('shows search results when typing', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [{ key: 'test-project', name: 'Test Project' }],
-      totalPages: 1,
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'test-project', name: 'Test Project' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
     })
 
     render(<GlobalSearch />)
@@ -164,9 +168,14 @@ describe('GlobalSearch', () => {
   })
 
   test('clears search when clear button is clicked', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [{ key: 'test-project', name: 'Test Project' }],
-      totalPages: 1,
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'test-project', name: 'Test Project' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
     })
 
     render(<GlobalSearch />)
@@ -265,9 +274,14 @@ describe('GlobalSearch', () => {
   })
 
   test('resets state when overlay is closed', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [{ key: 'test-project', name: 'Test Project' }],
-      totalPages: 1,
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'test-project', name: 'Test Project' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
     })
 
     render(<GlobalSearch />)
@@ -299,9 +313,14 @@ describe('GlobalSearch', () => {
   })
 
   test('shows Algolia attribution link in results', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
-      hits: [{ key: 'test-project', name: 'Test Project' }],
-      totalPages: 1,
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'test-project', name: 'Test Project' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
     })
 
     render(<GlobalSearch />)
