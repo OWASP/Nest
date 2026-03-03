@@ -1,6 +1,5 @@
 """Filters for OWASP Project."""
 
-import strawberry
 import strawberry_django
 from django.db.models import Q
 

@@ -204,8 +204,6 @@ export const GET_PROJECTS_LIST = gql`
       url
       topics
     }
-    projectsTotal: searchProjects(query: $query, filters: $filters) {
-      id
-    }
+    projectsTotal: searchProjectsCount(query: $query, filters: $filters)
   }
 `

@@ -758,6 +758,7 @@ export type Query = {
   repositories: Array<RepositoryNode>;
   repository?: Maybe<RepositoryNode>;
   searchProjects: Array<ProjectNode>;
+  searchProjectsCount: Scalars['Int']['output'];
   snapshot?: Maybe<SnapshotNode>;
   snapshots: Array<SnapshotNode>;
   sponsors: Array<SponsorNode>;
@@ -952,6 +953,12 @@ export type QuerySearchProjectsArgs = {
   filters?: InputMaybe<ProjectFilter>;
   ordering?: InputMaybe<Array<ProjectOrder>>;
   pagination?: InputMaybe<OffsetPaginationInput>;
+  query?: Scalars['String']['input'];
+};
+
+
+export type QuerySearchProjectsCountArgs = {
+  filters?: InputMaybe<ProjectFilter>;
   query?: Scalars['String']['input'];
 };
 

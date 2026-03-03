@@ -39,13 +39,9 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
       searchQuery={externalQuery}
       totalPages={totalPages}
       searchBarChildren={
-        <div
-          className="flex w-full flex-col items-center gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-        >
+        <div className="flex w-full flex-col items-center gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           {categoryOptions && categoryOptions.length > 1 && (
-            <div
-              className="inline-flex h-12 items-center rounded-lg border border-gray-300 bg-gray-100 pl-3 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-600 dark:bg-[#323232]"
-            >
+            <div className="inline-flex h-12 items-center rounded-lg border border-gray-300 bg-gray-100 pl-3 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-600 dark:bg-[#323232]">
               <Select
                 aria-label="Filter by category"
                 labelPlacement="outside-left"
@@ -63,7 +59,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
                     'bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg min-w-36 p-1 focus:outline-none',
                   listbox: 'p-0 focus:outline-none',
                 }}
-                selectedKeys={[category || '']}
+                selectedKeys={new Set([category || ''])}
                 onChange={(e) => {
                   onCategoryChange((e.target as HTMLSelectElement).value)
                 }}

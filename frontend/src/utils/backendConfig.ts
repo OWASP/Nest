@@ -21,7 +21,7 @@ export type SearchBackend = keyof typeof SEARCH_BACKENDS
 export function getSearchBackendPreference(): SearchBackend {
   const envBackend = process.env.NEXT_PUBLIC_SEARCH_BACKEND
 
-  if (envBackend && envBackend in SEARCH_BACKENDS) {
+  if (envBackend && Object.prototype.hasOwnProperty.call(SEARCH_BACKENDS, envBackend)) {
     return envBackend as SearchBackend
   }
 

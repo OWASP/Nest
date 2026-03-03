@@ -118,7 +118,7 @@ const MetricsPage: FC = () => {
   const levelFilter = searchParams.get('level')
 
   let currentFilters = {}
-  const currentCategory = healthFilter || levelFilter || ''
+  const currentCategory = levelFilter || healthFilter || ''
   const searchQueryParam = searchParams.get('search') || ''
 
   if (healthFilter && healthFilter in healthFiltersMapping) {
@@ -227,25 +227,16 @@ const MetricsPage: FC = () => {
     const newParams = new URLSearchParams(searchParams.toString())
     let newFilters = {}
 
-    if (!category) {
-      // Reset all filters
-      newParams.delete('health')
-      newParams.delete('level')
-    } else if (category in healthFiltersMapping) {
-      // Health filter selected
-      newParams.delete('level')
+    // Single-select behavior: clear both scopes, then apply one.
+    newParams.delete('health')
+    newParams.delete('level')
+
+    if (category in healthFiltersMapping) {
       newParams.set('health', category)
       newFilters = healthFiltersMapping[category as keyof typeof healthFiltersMapping]
     } else if (category in levelFiltersMapping) {
-      const existingHealth = searchParams.get('health')
       newParams.set('level', category)
       newFilters = levelFiltersMapping[category as keyof typeof levelFiltersMapping]
-      if (existingHealth && existingHealth in healthFiltersMapping) {
-        newFilters = {
-          ...newFilters,
-          ...healthFiltersMapping[existingHealth as keyof typeof healthFiltersMapping],
-        }
-      }
     }
 
     setFilters(newFilters)
@@ -254,7 +245,7 @@ const MetricsPage: FC = () => {
 
   const getSortFieldKey = () => {
     if (!urlKey) return 'scoreDesc'
-    const field = urlKey.replace(/Asc|Desc$/, '')
+    const field = urlKey.replace(/(?:Asc|Desc)$/, '')
     return `${field}Desc`
   }
 

@@ -56,7 +56,8 @@ export function useSearchPage<T>({
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
-  // Use GraphQL hook if backend is graphql
+  // Only run GraphQL queries when GraphQL backend is selected
+  const isGraphQLBackend = useBackend === 'graphql'
   const {
     items: graphqlItems,
     isLoaded: graphqlIsLoaded,
@@ -64,6 +65,7 @@ export function useSearchPage<T>({
     error: graphqlError,
   } = useSearchProjectsGraphQL(searchQuery, category, sortBy, order, currentPage, hitsPerPage, {
     pageSize: hitsPerPage,
+    enabled: isGraphQLBackend,
   })
 
   useEffect(() => {
@@ -156,7 +158,7 @@ export function useSearchPage<T>({
       if (JSON.stringify(prev) === JSON.stringify(newItems)) return prev
       return newItems
     })
-    const calculatedTotalPages = Math.ceil(graphqlTotalCount / hitsPerPage) || 1
+    const calculatedTotalPages = Math.ceil(graphqlTotalCount / hitsPerPage)
     setTotalPages((prev) => (prev === calculatedTotalPages ? prev : calculatedTotalPages))
     setIsLoaded((prev) => (prev === graphqlIsLoaded ? prev : graphqlIsLoaded))
   }, [graphqlItems, graphqlIsLoaded, graphqlError, graphqlTotalCount, hitsPerPage, useBackend])

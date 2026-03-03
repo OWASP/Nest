@@ -141,6 +141,36 @@ class ProjectQuery:
 
         return base_queryset
 
+    @strawberry.field
+    def search_projects_count(
+        self,
+        query: str = "",
+        filters: ProjectFilter | None = None,
+    ) -> int:
+        """Get count of active projects matching the search query and filters.
+
+        Excludes pagination to return the total matching count.
+
+        Args:
+            query (str): The search query string (can be empty to get all projects count).
+            filters (ProjectFilter, optional): Filters to apply on the count.
+
+        Returns:
+            int: Count of projects matching the search query and filters.
+
+        """
+        cleaned_query = query.strip()
+
+        base_queryset = Project.objects.filter(is_active=True)
+
+        if cleaned_query and len(cleaned_query) >= MIN_SEARCH_QUERY_LENGTH:
+            base_queryset = base_queryset.filter(name__icontains=cleaned_query)
+
+        if filters:
+            base_queryset = strawberry_django.filters.apply(filters, base_queryset)
+
+        return base_queryset.count()
+
     @strawberry_django.field
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:
         """Check if a GitHub login or name is listed as a project leader."""

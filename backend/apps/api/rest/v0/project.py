@@ -119,6 +119,8 @@ def list_projects(
         "-stars_count",
         "name",
         "-name",
+        "level_raw",
+        "-level_raw",
         "level",
         "-level",
     ]

@@ -13,7 +13,6 @@ interface SearchProps {
   containerClassName?: string
   inputClassName?: string
   inputId?: string
-  testId?: string
 }
 
 const SearchBar: React.FC<SearchProps> = ({
@@ -24,7 +23,6 @@ const SearchBar: React.FC<SearchProps> = ({
   containerClassName = 'w-full max-w-md p-4',
   inputClassName = 'h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300',
   inputId,
-  testId,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const inputRef = useRef<HTMLInputElement>(null)

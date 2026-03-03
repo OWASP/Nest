@@ -13,7 +13,6 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 
 MAX_LIMIT = 1000
 MAX_OFFSET = 10000
-MIN_SEARCH_QUERY_LENGTH = 3
 
 
 @strawberry.type
@@ -37,7 +36,7 @@ class ProjectHealthMetricsQuery:
         """Resolve project health metrics based on search query, filters, pagination, and ordering.
 
         Args:
-            query (str): The search query string for project name (minimum 3 characters).
+            query (str): The search query string for project name.
             filters (ProjectHealthMetricsFilter): Filters to apply on the metrics.
             pagination (strawberry_django.pagination.OffsetPaginationInput): Pagination parameters.
             ordering (list[ProjectHealthMetricsOrder], optional): Ordering parameters.
@@ -59,7 +58,7 @@ class ProjectHealthMetricsQuery:
         queryset = ProjectHealthMetrics.get_latest_health_metrics()
 
         cleaned_query = query.strip() if query else ""
-        if cleaned_query and len(cleaned_query) >= MIN_SEARCH_QUERY_LENGTH:
+        if cleaned_query:
             queryset = queryset.filter(project__name__icontains=cleaned_query)
 
         if filters:
@@ -90,7 +89,7 @@ class ProjectHealthMetricsQuery:
         """Get the distinct length of project health metrics.
 
         Args:
-            query (str): The search query string for project name (minimum 3 characters).
+            query (str): The search query string for project name.
             filters (ProjectHealthMetricsFilter | None): Filters to apply on the metrics.
 
         Returns:
@@ -100,7 +99,7 @@ class ProjectHealthMetricsQuery:
         queryset = ProjectHealthMetrics.get_latest_health_metrics()
 
         cleaned_query = query.strip() if query else ""
-        if cleaned_query and len(cleaned_query) >= MIN_SEARCH_QUERY_LENGTH:
+        if cleaned_query:
             queryset = queryset.filter(project__name__icontains=cleaned_query)
 
         if filters:

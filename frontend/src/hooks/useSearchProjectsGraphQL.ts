@@ -8,6 +8,7 @@ import type { Project } from 'types/project'
 
 interface UseSearchProjectsGraphQLOptions {
   pageSize?: number
+  enabled?: boolean
 }
 
 interface UseSearchProjectsGraphQLReturn {
@@ -37,13 +38,13 @@ export function useSearchProjectsGraphQL(
   order = '',
   currentPage = 1,
   pageSize = 25,
-  _options?: UseSearchProjectsGraphQLOptions
+  options?: UseSearchProjectsGraphQLOptions
 ): UseSearchProjectsGraphQLReturn {
   const filters = useMemo<ProjectFilterInput | undefined>(() => {
     const newFilters: ProjectFilterInput = {}
 
     if (category && category !== '' && category !== 'idx_type:') {
-      const typeMatch = category.match(/idx_type:(\w+)/i)
+      const typeMatch = /idx_type:(\w+)/i.exec(category)
       if (typeMatch) {
         const typeValue = typeMatch[1].toUpperCase()
         if (['CODE', 'TOOL', 'DOCUMENTATION', 'OTHER'].includes(typeValue)) {
@@ -65,12 +66,13 @@ export function useSearchProjectsGraphQL(
         ['stars_count', 'starsCount'],
         ['updated_at', 'updatedAt'],
         ['created_at', 'createdAt'],
+        ['level_raw', 'level'],
         ['level', 'level'],
         ['name', 'name'],
         ['default', ''],
       ])
 
-      const graphQLField = fieldMapping[sortBy] || sortBy
+      const graphQLField = fieldMapping[sortBy]
       if (graphQLField) {
         return [{ [graphQLField]: orderDirection }]
       }
@@ -93,10 +95,11 @@ export function useSearchProjectsGraphQL(
       },
     },
     errorPolicy: 'all',
+    skip: options?.enabled === false,
   })
 
   const projects = data?.searchProjects || []
-  const totalProjects = data?.projectsTotal?.length || 0
+  const totalProjects = data?.projectsTotal || 0
 
   return {
     items: projects as Project[],
