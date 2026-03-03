@@ -10,6 +10,9 @@ from apps.ai.template_loader import env
 def create_chapter_agent(allow_delegation: bool = False) -> Agent:
     """Create Chapter Expert Agent.
 
+    Args:
+        allow_delegation (bool): Whether the agent can delegate tasks. Defaults to False.
+
     Returns:
         Agent: Chapter Expert Agent configured with chapter tools
 

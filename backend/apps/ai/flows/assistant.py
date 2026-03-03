@@ -170,25 +170,14 @@ def process_query(  # noqa: PLR0911
                     "alternatives": router_result.get("alternative_intents"),
                 },
             )
-            # Get all relevant intents
             all_intents = [intent, *router_result.get("alternative_intents", [])]
-            all_intents = list(set(all_intents))  # Deduplicate
-
-            # Map intents to agent creation functions
-            agent_creators = {
-                Intent.CHAPTER.value: create_chapter_agent,
-                Intent.COMMUNITY.value: create_community_agent,
-                Intent.CONTRIBUTION.value: create_contribution_agent,
-                Intent.GSOC.value: create_contribution_agent,  # GSOC uses contribution agent
-                Intent.PROJECT.value: create_project_agent,
-                Intent.RAG.value: create_rag_agent,
-            }
+            all_intents = list(set(all_intents))
 
             agents = []
             tasks = []
 
             for intent_value in all_intents:
-                if creator := agent_creators.get(intent_value):
+                if creator := INTENT_TO_AGENT.get(intent_value):
                     agent = creator(allow_delegation=True)
                     agents.append(agent)
                     tasks.append(
@@ -203,33 +192,37 @@ def process_query(  # noqa: PLR0911
                         )
                     )
 
-            # Ensure RAG agent is included for synthesis if multiple intents
-            if len(agents) > 1 and Intent.RAG.value not in all_intents:
-                rag_agent = create_rag_agent(allow_delegation=False)
-                agents.append(rag_agent)
+            if not agents:
+                logger.warning(
+                    "No agents created for collaborative flow, falling back to single agent",
+                    extra={"intent": intent, "all_intents": all_intents},
+                )
+            else:
+                if len(agents) > 1 and Intent.RAG.value not in all_intents:
+                    rag_agent = create_rag_agent(allow_delegation=False)
+                    agents.append(rag_agent)
 
-            # Final synthesis task
-            synthesis_task = Task(
-                description=(
-                    f"Using all previous observations, synthesize a complete, "
-                    f"accurate, and concise answer to the user query: '{query}'. "
-                    "Ensure all parts of the query are addressed and formatted nicely for Slack."
-                ),
-                agent=agents[-1],  # Use the last agent (likely RAG or the last expert)
-                expected_output="Final comprehensive answer for Slack",
-            )
-            tasks.append(synthesis_task)
+                synthesis_task = Task(
+                    description=(
+                        f"Using all previous observations, synthesize a complete, "
+                        f"accurate, and concise answer to the user query: '{query}'. "
+                        "Ensure all parts of the query are addressed and formatted nicely for Slack."
+                    ),
+                    agent=agents[-1],
+                    expected_output="Final comprehensive answer for Slack",
+                )
+                tasks.append(synthesis_task)
 
-            crew = Crew(
-                agents=agents,
-                tasks=tasks,
-                process=Process.sequential,
-                verbose=True,
-                max_iter=5,
-                max_rpm=10,
-            )
-            result = crew.kickoff()
-            return str(result)
+                crew = Crew(
+                    agents=agents,
+                    tasks=tasks,
+                    process=Process.sequential,
+                    verbose=True,
+                    max_iter=5,
+                    max_rpm=10,
+                )
+                result = crew.kickoff()
+                return str(result)
 
         # Step 2: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent

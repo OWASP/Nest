@@ -1,12 +1,15 @@
 """Router agent for intent classification."""
 
 import contextlib
+import logging
 
 from crewai import Agent, Crew, Task
 
 from apps.ai.common.intent import Intent
 from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
+
+logger = logging.getLogger(__name__)
 
 
 def create_router_agent() -> Agent:
@@ -45,10 +48,6 @@ def route(query: str) -> dict:
         Dictionary with 'intent', 'confidence', 'reasoning', and 'alternative_intents'
 
     """
-    import logging
-
-    logger = logging.getLogger(__name__)
-
     router_agent = create_router_agent()
 
     task_template = env.get_template("router/tasks/route.jinja")
@@ -129,12 +128,17 @@ def route(query: str) -> dict:
         elif line_lower.startswith("confidence:"):
             with contextlib.suppress(ValueError):
                 confidence = float(line.split(":", 1)[1].strip())
+                confidence = max(0.0, min(1.0, confidence))
         elif line_lower.startswith("reasoning:"):
             reasoning = line.split(":", 1)[1].strip()
         elif line_lower.startswith("alternatives:"):
             alt_str = line.split(":", 1)[1].strip().lower()
             if alt_str and alt_str != "none":
-                alternatives = [a.strip() for a in alt_str.split(",")]
+                alternatives = [
+                    a.strip().lower()
+                    for a in alt_str.split(",")
+                    if a.strip().lower() in Intent.values()
+                ]
 
     # Default to RAG if intent not found (most general fallback)
     if not intent:
@@ -153,6 +157,8 @@ def route(query: str) -> dict:
         extra={
             "intent": intent,
             "confidence": confidence,
+            "has_alternatives": bool(alternatives),
+            "alternative_count": len(alternatives),
         },
     )
 
