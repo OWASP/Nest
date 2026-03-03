@@ -1,7 +1,7 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
 import { useSearchPage } from 'hooks/useSearchPage'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -18,10 +18,9 @@ import SortBy from 'components/SortBy'
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
-  const searchParams = useSearchParams()
+
   const router = useRouter()
-  const initialCountry = searchParams?.get('country') || ''
-  const [selectedCountry, setSelectedCountry] = useState<string>(initialCountry)
+  const [selectedCountry, setSelectedCountry] = useState<string>('')
 
   const { data: countriesData } = useQuery(GetChapterCountriesDocument)
   const countries = countriesData?.chapterCountries ?? []
@@ -44,13 +43,8 @@ const ChaptersPage = () => {
     pageTitle: 'OWASP Chapters',
     defaultSortBy: 'default',
     defaultOrder: 'desc',
-    facetFilters: initialCountry ? [`idx_country:${initialCountry}`] : [],
+    facetFilters: [],
   })
-
-  useEffect(() => {
-    const urlCountry = searchParams?.get('country') || ''
-    setSelectedCountry(urlCountry)
-  }, [searchParams])
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country)
@@ -59,15 +53,6 @@ const ChaptersPage = () => {
     } else {
       handleFacetFilterChange([])
     }
-
-    // Sync country to URL
-    const params = new URLSearchParams(searchParams?.toString() || '')
-    if (country) {
-      params.set('country', country)
-    } else {
-      params.delete('country')
-    }
-    router.push(`?${params.toString()}`)
   }
 
   useEffect(() => {
