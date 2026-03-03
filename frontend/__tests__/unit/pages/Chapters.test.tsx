@@ -10,6 +10,14 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
+  useQuery: jest.fn(() => ({
+    data: { chapterCountries: ['Japan', 'United States'] },
+    loading: false,
+  })),
+}))
+
 const mockRouter = {
   push: jest.fn(),
 }
@@ -396,5 +404,35 @@ describe('ChaptersPage Component', () => {
 
     const countryLabels = screen.getAllByText('Country :')
     expect(countryLabels.length).toBeGreaterThan(0)
+  })
+
+  test('initializes country filter from URL param', async () => {
+    const searchParams = new URLSearchParams('country=Japan')
+    jest.mocked(useSearchParams).mockReturnValue(searchParams as never)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(fetchAlgoliaData).toHaveBeenCalledWith('chapters', '', 1, 1000, ['idx_country:Japan'])
+    })
+  })
+
+  test('handles missing GraphQL data gracefully', async () => {
+    const { useQuery } = jest.requireMock('@apollo/client/react')
+    useQuery.mockReturnValueOnce({ data: undefined, loading: true })
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
   })
 })
