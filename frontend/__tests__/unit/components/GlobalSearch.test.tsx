@@ -390,21 +390,22 @@ describe('GlobalSearch', () => {
       }
     )
 
-    ;(fetchAlgoliaData as jest.Mock)
-      .mockImplementationOnce(() => firstPromise)
-      .mockImplementationOnce(() => firstPromise)
-      .mockImplementationOnce(() => firstPromise)
-      .mockImplementationOnce(() => firstPromise)
-      .mockImplementationOnce(() => firstPromise)
-      .mockImplementation((index: string) => {
-        if (index === 'projects') {
-          return Promise.resolve({
-            hits: [{ key: 'second-result', name: 'Second Result' }],
-            totalPages: 1,
-          })
-        }
-        return Promise.resolve({ hits: [], totalPages: 0 })
-      })
+    let callCount = 0
+    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      callCount++
+      // First batch of calls (first keystroke) returns a slow, pending promise
+      if (callCount <= 5) {
+        return firstPromise
+      }
+      // Second batch (second keystroke) resolves immediately
+      if (index === 'projects') {
+        return Promise.resolve({
+          hits: [{ key: 'second-result', name: 'Second Result' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
 
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))

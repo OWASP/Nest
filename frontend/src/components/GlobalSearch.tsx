@@ -35,6 +35,7 @@ export default function GlobalSearch() {
   const inputRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const searchVersionRef = useRef(0)
+  const previousFocusRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -49,6 +50,7 @@ export default function GlobalSearch() {
 
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement
       const timer = setTimeout(() => inputRef.current?.focus(), 50)
       document.body.style.overflow = 'hidden'
       return () => {
@@ -57,11 +59,14 @@ export default function GlobalSearch() {
       }
     } else {
       document.body.style.overflow = ''
+      previousFocusRef.current?.focus()
+      previousFocusRef.current = null
     }
   }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) {
+      searchVersionRef.current++
       setSearchQuery('')
       setSuggestions([])
       setShowSuggestions(false)
@@ -109,6 +114,7 @@ export default function GlobalSearch() {
             setShowSuggestions(true)
           }
         } else {
+          searchVersionRef.current++
           setSuggestions([])
           setShowSuggestions(false)
         }
@@ -194,6 +200,37 @@ export default function GlobalSearch() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, suggestions, highlightedIndex, handleSuggestionClick])
 
+  useEffect(() => {
+    if (!isOpen || !panelRef.current) return
+
+    const handleFocusTrap = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+
+      const focusableElements = panelRef.current?.querySelectorAll<HTMLElement>(
+        'input, button, a, [tabindex]:not([tabindex="-1"])'
+      )
+      if (!focusableElements || focusableElements.length === 0) return
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement.focus()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleFocusTrap)
+    return () => document.removeEventListener('keydown', handleFocusTrap)
+  }, [isOpen])
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
     setSearchQuery(newQuery)
@@ -202,6 +239,7 @@ export default function GlobalSearch() {
   }
 
   const handleClearSearch = () => {
+    searchVersionRef.current++
     setSearchQuery('')
     setSuggestions([])
     setShowSuggestions(false)
