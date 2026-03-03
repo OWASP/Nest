@@ -93,16 +93,14 @@ class Chunk(TimestampedModel):
             # Only raise error in production/staging environments (never in test/local)
             is_test = getattr(settings, "IS_TEST_ENVIRONMENT", False)
             is_local = getattr(settings, "IS_LOCAL_ENVIRONMENT", False)
-            
+
             # Skip validation errors in test/local environments
             if not is_test and not is_local:
-                is_production_or_staging = getattr(settings, "IS_PRODUCTION_ENVIRONMENT", False) or getattr(
-                    settings, "IS_STAGING_ENVIRONMENT", False
-                )
+                is_production_or_staging = getattr(
+                    settings, "IS_PRODUCTION_ENVIRONMENT", False
+                ) or getattr(settings, "IS_STAGING_ENVIRONMENT", False)
                 if is_production_or_staging:
-                    error_msg = (
-                        f"{warning_msg} Ensure the embedding provider matches the configured dimension."
-                    )
+                    error_msg = f"{warning_msg} Ensure the embedding provider matches the configured dimension."
                     raise ValueError(error_msg)
 
         if Chunk.objects.filter(context=context, text=text).exists():

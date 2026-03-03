@@ -206,7 +206,8 @@ def process_query(  # noqa: PLR0911
                     description=(
                         f"Using all previous observations, synthesize a complete, "
                         f"accurate, and concise answer to the user query: '{query}'. "
-                        "Ensure all parts of the query are addressed and formatted nicely for Slack."
+                        "Ensure all parts of the query are addressed and formatted "
+                        "nicely for Slack."
                     ),
                     agent=agents[-1],
                     expected_output="Final comprehensive answer for Slack",
@@ -502,8 +503,7 @@ def process_query(  # noqa: PLR0911
             )
             # Return a fallback response instead
             return get_fallback_response()
-
-        return result_str if result_str else result
+        return result_str if result_str else result  # noqa: TRY300
 
     except Exception as e:
         logger.exception(

@@ -7,7 +7,7 @@ from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
 
 
-def create_rag_agent(allow_delegation: bool = False) -> Agent:
+def create_rag_agent(allow_delegation: bool = False) -> Agent:  # noqa: FBT001, FBT002
     """Create RAG Agent.
 
     Args:

@@ -96,8 +96,9 @@ def route(query: str) -> dict:
         }
 
     # Additional validation: check if result looks like routing format
+    min_result_length = 50
     has_intent_line = any("intent:" in line.lower() for line in result_str.split("\n")[:10])
-    if not has_intent_line and len(result_str) < 50:
+    if not has_intent_line and len(result_str) < min_result_length:
         # If result is very short and doesn't have "intent:" line, it's probably wrong
         logger.error(
             "Router result doesn't look like routing format",
