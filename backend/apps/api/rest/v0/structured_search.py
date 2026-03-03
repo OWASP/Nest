@@ -54,6 +54,8 @@ def apply_structured_search(
     if not query:
         return queryset
 
+    query = str(query) if not isinstance(query, str) else query
+
     parser_schema: dict[str, str] = {
         name: config.get("type", "") for name, config in field_schema.items()
     }

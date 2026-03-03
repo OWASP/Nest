@@ -58,15 +58,21 @@ class TestListRepository:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.organization_id = None
+        mock_filters.q = ""
+        mock_filters.dict.return_value = {}
 
-        mock_queryset = MagicMock()
-        mock_repo_model.objects.select_related.return_value = mock_queryset
-        mock_queryset.order_by.return_value = mock_queryset
+        mock_qs_after_select = MagicMock()
+        mock_qs_after_filter = MagicMock()
+        mock_final_qs = MagicMock()
+
+        mock_repo_model.objects.select_related.return_value = mock_qs_after_select
+        mock_qs_after_select.filter.return_value = mock_qs_after_filter
+        mock_qs_after_filter.order_by.return_value = mock_final_qs
 
         result = list_repository(mock_request, mock_filters, ordering=None)
 
-        mock_queryset.order_by.assert_called_with("-created_at", "-updated_at")
-        assert result == mock_queryset
+        mock_qs_after_filter.order_by.assert_called_with("-created_at", "-updated_at")
+        assert result == mock_final_qs
 
     @patch("apps.api.rest.v0.repository.RepositoryModel")
     def test_list_repository_with_organization_filter(self, mock_repo_model):
@@ -74,18 +80,19 @@ class TestListRepository:
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_filters.organization_id = "OWASP"
+        mock_filters.q = ""
+        mock_filters.dict.return_value = {"organization_id": "OWASP"}
 
-        mock_queryset = MagicMock()
-        mock_filtered_queryset = MagicMock()
-        mock_repo_model.objects.select_related.return_value = mock_queryset
-        mock_queryset.filter.return_value = mock_filtered_queryset
-        mock_filtered_queryset.order_by.return_value = mock_filtered_queryset
+        mock_qs = MagicMock()
+        mock_repo_model.objects.select_related.return_value = mock_qs
+        mock_qs.filter.return_value = mock_qs
+        mock_qs.order_by.return_value = mock_qs
 
         result = list_repository(mock_request, mock_filters, ordering="created_at")
 
-        mock_queryset.filter.assert_called_with(organization__login__iexact="OWASP")
-        mock_filtered_queryset.order_by.assert_called_with("created_at", "-updated_at")
-        assert result == mock_filtered_queryset
+        mock_qs.filter.assert_any_call(organization__login__iexact="OWASP")
+        mock_qs.order_by.assert_called_with("created_at", "-updated_at")
+        assert result == mock_qs
 
 
 class TestGetRepository:
