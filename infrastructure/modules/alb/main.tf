@@ -33,6 +33,19 @@ locals {
     "/status/*",
   ]
   backend_path_chunks = chunklist(local.backend_paths, 5)
+  content_security_policy = join("; ", [
+    "base-uri 'self'",
+    "connect-src 'self' https://github-contributions-api.jogruber.de https://*.google-analytics.com https://*.i.posthog.com https://*.sentry.io https://*.tile.openstreetmap.org",
+    "default-src 'self'",
+    "font-src 'self' https://cdn.jsdelivr.net",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "frame-src 'self'",
+    "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://owasp.org https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://raw.githubusercontent.com",
+    "object-src 'none'",
+    "script-src 'self' 'unsafe-inline' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org",
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com",
+  ])
 }
 
 data "aws_elb_service_account" "main" {}
@@ -127,12 +140,16 @@ resource "aws_lb_listener" "http_redirect" {
 }
 
 resource "aws_lb_listener" "https" {
-  certificate_arn   = aws_acm_certificate_validation.main.certificate_arn
-  load_balancer_arn = aws_lb.main.arn
-  port              = 443
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  tags              = var.common_tags
+  certificate_arn                                              = aws_acm_certificate_validation.main.certificate_arn
+  load_balancer_arn                                            = aws_lb.main.arn
+  port                                                         = 443
+  protocol                                                     = "HTTPS"
+  routing_http_response_content_security_policy_header_value   = local.content_security_policy
+  routing_http_response_strict_transport_security_header_value = "max-age=31536000; includeSubDomains; preload"
+  routing_http_response_x_content_type_options_header_value    = "nosniff"
+  routing_http_response_x_frame_options_header_value           = "DENY"
+  ssl_policy                                                   = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  tags                                                         = var.common_tags
 
   default_action {
     target_group_arn = aws_lb_target_group.frontend.arn
