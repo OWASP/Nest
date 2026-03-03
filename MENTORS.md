@@ -119,7 +119,7 @@ SRE at Obmondo | Maintainer of CNCF kubestellar
 
 [GitHub](https://github.com/MAVRICK-1/) • [LinkedIn](https://www.linkedin.com/in/rishi-mondal-5238b2282/) • [Slack](https://owasp.slack.com/team/U0AHVMYHMJB) • [India (IST)](https://time-time.net/time/kolkata-india.php) • [About me](https://mentorship.lfx.linuxfoundation.org/mentor/711a2840-0900-42c7-b115-b59799027e80)
 
-Rishi Mondal is a Site Reliability Engineer (SRE) at Obmondo and a CNCF KubeStellar Maintainer and Docker captain, specializing in cloud-native infrastructure, Kubernetes, distributed systems, and DevOps automation.
+Rishi Mondal is a Site Reliability Engineer (SRE) at Obmondo and a CNCF KubeStellar Maintainer. He is a Linux Foundation Mentor and active open-source contributor, specializing in Kubernetes, cloud-native infrastructure, Terraform, and AWS. He builds and maintains scalable, production-grade distributed systems.
 
 
 
