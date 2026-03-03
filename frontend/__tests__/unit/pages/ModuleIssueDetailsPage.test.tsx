@@ -139,9 +139,21 @@ describe('ModuleIssueDetailsPage', () => {
     expect(screen.getByText('org/repo • #123')).toBeInTheDocument()
     expect(screen.getAllByText('Open')[0]).toBeInTheDocument()
     expect(screen.getByText('bug')).toBeInTheDocument()
+    expect(screen.queryByText('No labels assigned')).not.toBeInTheDocument()
     expect(screen.getByText('user1')).toBeInTheDocument()
     expect(screen.getByText('Fix for test issue')).toBeInTheDocument()
     expect(screen.getByText('@user2')).toBeInTheDocument()
+  })
+
+
+  it('renders "View on GitHub" link without a redundant tooltip', () => {
+    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+    const viewOnGitHubLink = screen.getByRole('link', { name: /View on GitHub/i })
+    expect(viewOnGitHubLink).toBeInTheDocument()
+    expect(viewOnGitHubLink).toHaveAttribute('href', 'https://github.com/issue/123')
+    expect(viewOnGitHubLink).not.toHaveAttribute('aria-label')
+    expect(viewOnGitHubLink).not.toHaveAttribute('data-tooltip-content')
   })
 
   it('calls assignIssue when assigning an interested user', async () => {
@@ -208,6 +220,22 @@ describe('ModuleIssueDetailsPage', () => {
     mockUseQuery.mockReturnValue({ data: noInterestedData, loading: false, error: undefined })
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('No interested users yet.')).toBeInTheDocument()
+  })
+
+
+  it('shows "No labels assigned" when there are no labels', () => {
+    const noLabelsData = {
+      getModule: {
+        ...mockIssueData.getModule,
+        issueByNumber: {
+          ...mockIssueData.getModule.issueByNumber,
+          labels: [],
+        },
+      },
+    }
+    mockUseQuery.mockReturnValue({ data: noLabelsData, loading: false, error: undefined })
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.getByText('No labels assigned')).toBeInTheDocument()
   })
 
   describe('Task Timeline and Deadline', () => {
@@ -612,6 +640,7 @@ describe('ModuleIssueDetailsPage', () => {
     render(<ModuleIssueDetailsPage />)
 
     expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+    expect(screen.getByText('No labels assigned')).toBeInTheDocument()
   })
 
   it('does not trigger mutations when they are already in progress', () => {
