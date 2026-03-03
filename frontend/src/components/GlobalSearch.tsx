@@ -136,9 +136,16 @@ export default function GlobalSearch() {
         case 'chapters':
           router.push(`/chapters/${suggestion.key}`)
           break
-        case 'events':
-          globalThis.open((suggestion as Event).url, '_blank', 'noopener,noreferrer')
+        case 'events': {
+          const eventUrl = (suggestion as Event).url
+          if (
+            typeof eventUrl === 'string' &&
+            (eventUrl.startsWith('https://') || eventUrl.startsWith('http://'))
+          ) {
+            globalThis.open(eventUrl, '_blank', 'noopener,noreferrer')
+          }
           break
+        }
         case 'organizations':
           if ('login' in suggestion && suggestion.login) {
             router.push(`/organizations/${suggestion.login}`)
@@ -219,11 +226,9 @@ export default function GlobalSearch() {
           e.preventDefault()
           lastElement.focus()
         }
-      } else {
-        if (document.activeElement === lastElement) {
-          e.preventDefault()
-          firstElement.focus()
-        }
+      } else if (document.activeElement === lastElement) {
+        e.preventDefault()
+        firstElement.focus()
       }
     }
 
