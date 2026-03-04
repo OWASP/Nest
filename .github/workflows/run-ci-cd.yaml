@@ -508,6 +508,7 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
+          sbom: true
           tags: |
             owasp/nest:backend-staging
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
@@ -562,6 +563,7 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
+          sbom: true
           secrets: |
             RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -1102,6 +1104,7 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
+          sbom: true
           tags: owasp/nest:backend-production
 
       - name: Get backend image size
@@ -1152,6 +1155,7 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
+          sbom: true
           secrets: |
             RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
