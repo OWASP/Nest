@@ -14,7 +14,7 @@ from apps.owasp.models.project import Project
 
 MAX_RECENT_PROJECTS_LIMIT = 1000
 MAX_SEARCH_QUERY_LENGTH = 100
-MIN_SEARCH_QUERY_LENGTH = 3
+MIN_SEARCH_QUERY_LENGTH = 1
 MAX_PROJECTS_LIMIT = 1000
 MAX_OFFSET = 10000
 
@@ -166,11 +166,13 @@ class ProjectQuery:
         """
         cleaned_query = query.strip()
 
+        if len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH:
+            return 0
+
         base_queryset = Project.objects.filter(is_active=True)
 
         if cleaned_query:
-            bounded_query = cleaned_query[:MAX_SEARCH_QUERY_LENGTH]
-            base_queryset = base_queryset.filter(name__icontains=bounded_query)
+            base_queryset = base_queryset.filter(name__icontains=cleaned_query)
 
         if filters:
             base_queryset = strawberry_django.filters.apply(filters, base_queryset)

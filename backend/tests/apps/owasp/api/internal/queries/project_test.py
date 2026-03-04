@@ -118,12 +118,32 @@ class TestSearchProjectsResolution:
             # Returns the queryset directly so strawberry-django can apply ordering/pagination
             assert result == mock_queryset.order_by.return_value
 
-    def test_search_projects_query_too_short(self):
-        """Test search_projects returns empty for query < MIN_SEARCH_QUERY_LENGTH."""
-        query = ProjectQuery()
-        result = query.__class__.__dict__["search_projects"](query, query="ab")
+    def test_search_projects_single_char_query_returns_results(self):
+        """Test search_projects returns results for 1-character queries.
 
-        assert result == []
+        MIN_SEARCH_QUERY_LENGTH is now 1.
+        """
+        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
+            mock_queryset = MagicMock()
+            mock_queryset.filter.return_value = mock_queryset
+            mock_filter.return_value = mock_queryset
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["search_projects"](query, query="a")
+
+            assert result != []
+
+    def test_search_projects_two_char_query_returns_results(self):
+        """Test search_projects returns results for 2-character queries (previously blocked)."""
+        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
+            mock_queryset = MagicMock()
+            mock_queryset.filter.return_value = mock_queryset
+            mock_filter.return_value = mock_queryset
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["search_projects"](query, query="ab")
+
+            assert result != []
 
     def test_search_projects_query_too_long(self):
         """Test search_projects returns empty for query > MAX_SEARCH_QUERY_LENGTH."""
@@ -133,12 +153,17 @@ class TestSearchProjectsResolution:
 
         assert result == []
 
-    def test_search_projects_whitespace_trimmed(self):
-        """Test search_projects trims whitespace before checking length."""
-        query = ProjectQuery()
-        result = query.__class__.__dict__["search_projects"](query, query="  ab  ")
+    def test_search_projects_whitespace_only_shows_all_projects(self):
+        """Test search_projects treats whitespace-only input as empty query."""
+        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
+            mock_queryset = MagicMock()
+            mock_filter.return_value = mock_queryset
 
-        assert result == []
+            query = ProjectQuery()
+            result = query.__class__.__dict__["search_projects"](query, query="   ")
+
+            mock_queryset.filter.assert_not_called()
+            assert result == mock_queryset.order_by.return_value
 
 
 class TestIsProjectLeaderResolution:
@@ -496,21 +521,13 @@ class TestSearchProjectsCountResolution:
             mock_queryset.filter.assert_called_with(name__icontains="test")
 
     def test_search_projects_count_with_long_query_bounded(self):
-        """Test search_projects_count bounds long queries to MAX_SEARCH_QUERY_LENGTH."""
+        """Test search_projects_count returns 0 for query > MAX_SEARCH_QUERY_LENGTH."""
         long_query = "a" * 150
 
-        with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
-            mock_queryset = MagicMock()
-            mock_filtered = MagicMock()
-            mock_filtered.count.return_value = 3
-            mock_queryset.filter.return_value = mock_filtered
-            mock_filter.return_value = mock_queryset
+        query = ProjectQuery()
+        result = query.__class__.__dict__["search_projects_count"](query, query=long_query)
 
-            query = ProjectQuery()
-            result = query.__class__.__dict__["search_projects_count"](query, query=long_query)
-
-            assert result == 3
-            mock_queryset.filter.assert_called_with(name__icontains="a" * 100)
+        assert result == 0
 
     def test_search_projects_count_with_filters(self):
         """Test search_projects_count applies filters when provided."""
