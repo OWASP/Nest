@@ -131,7 +131,8 @@ class TestSearchProjectsResolution:
             query = ProjectQuery()
             result = query.__class__.__dict__["search_projects"](query, query="a")
 
-            assert result != []
+            assert result == mock_queryset.order_by.return_value
+            mock_queryset.filter.assert_called_once_with(name__icontains="a")
 
     def test_search_projects_two_char_query_returns_results(self):
         """Test search_projects returns results for 2-character queries (previously blocked)."""
