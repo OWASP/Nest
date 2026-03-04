@@ -96,12 +96,11 @@ def list_events(
     ),
 ) -> list[Event]:
     """Get list of events."""
-    if is_upcoming:
-        qs = EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
-    else:
-        qs = EventModel.objects.order_by(ordering or "-start_date", "-end_date")
-
-    return filters.filter(qs)
+    return filters.filter(
+        EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
+        if is_upcoming
+        else EventModel.objects.order_by(ordering or "-start_date", "-end_date")
+    )
 
 
 @router.get(
