@@ -106,19 +106,17 @@ class TestSearchProjectsResolution:
     """Test cases for resolving search_projects field."""
 
     def test_search_projects_with_valid_query(self):
-        """Test search_projects returns matching projects."""
-        mock_projects = [Mock(spec=Project)]
-
+        """Test search_projects returns a queryset for a valid query."""
         with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
             mock_queryset = MagicMock()
-            mock_queryset.order_by.return_value.__getitem__.return_value = mock_projects
             mock_queryset.filter.return_value = mock_queryset  # filter returns itself for chaining
             mock_filter.return_value = mock_queryset
 
             query = ProjectQuery()
             result = query.__class__.__dict__["search_projects"](query, query="test")
 
-            assert result == mock_projects
+            # Returns the queryset directly so strawberry-django can apply ordering/pagination
+            assert result == mock_queryset.order_by.return_value
 
     def test_search_projects_query_too_short(self):
         """Test search_projects returns empty for query < MIN_SEARCH_QUERY_LENGTH."""
@@ -377,14 +375,12 @@ class TestSearchProjectsPagination:
 
     def test_search_projects_pagination_offset_capped_to_max(self):
         """Test search_projects caps offset to MAX_OFFSET."""
-        mock_projects = [Mock(spec=Project)]
         pagination = MagicMock()
         pagination.offset = 20000
         pagination.limit = None
 
         with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
             mock_queryset = MagicMock()
-            mock_queryset.order_by.return_value.__getitem__.return_value = mock_projects
             mock_filter.return_value = mock_queryset
 
             query = ProjectQuery()
@@ -394,14 +390,12 @@ class TestSearchProjectsPagination:
 
     def test_search_projects_pagination_limit_capped_to_max(self):
         """Test search_projects caps limit to MAX_PROJECTS_LIMIT."""
-        mock_projects = [Mock(spec=Project)]
         pagination = MagicMock()
         pagination.offset = 0
         pagination.limit = 5000
 
         with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
             mock_queryset = MagicMock()
-            mock_queryset.order_by.return_value.__getitem__.return_value = mock_projects
             mock_filter.return_value = mock_queryset
 
             query = ProjectQuery()
@@ -411,7 +405,6 @@ class TestSearchProjectsPagination:
 
     def test_search_projects_pagination_limit_unset(self):
         """Test search_projects handles UNSET limit gracefully."""
-        mock_projects = [Mock(spec=Project)]
         pagination = MagicMock()
         pagination.offset = 0
         pagination.limit = strawberry.UNSET
@@ -419,7 +412,6 @@ class TestSearchProjectsPagination:
         with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
             mock_queryset = MagicMock()
             mock_queryset.filter.return_value = mock_queryset
-            mock_queryset.order_by.return_value.__getitem__.return_value = mock_projects
             mock_filter.return_value = mock_queryset
 
             query = ProjectQuery()
@@ -427,7 +419,8 @@ class TestSearchProjectsPagination:
                 query, query="test", pagination=pagination
             )
 
-            assert result == mock_projects
+            # The raw queryset (after name filter + default ordering) is returned
+            assert result == mock_queryset.filter.return_value.order_by.return_value
 
     def test_search_projects_with_ordering(self):
         """Test search_projects does not apply default ordering when ordering provided."""
@@ -442,20 +435,18 @@ class TestSearchProjectsPagination:
             mock_queryset.order_by.assert_not_called()
 
     def test_search_projects_empty_query_shows_all(self):
-        """Test search_projects with empty query returns all projects."""
-        mock_projects = [Mock(spec=Project)]
-
+        """Test search_projects with empty query returns queryset of all projects."""
         with patch("apps.owasp.models.project.Project.objects.filter") as mock_filter:
             mock_queryset = MagicMock()
-            mock_queryset.order_by.return_value.__getitem__.return_value = mock_projects
             mock_filter.return_value = mock_queryset
 
             query = ProjectQuery()
             result = query.__class__.__dict__["search_projects"](query, query="")
 
-            assert result == mock_projects
             # Should not filter by name when query is empty
             mock_queryset.filter.assert_not_called()
+            # Returns the queryset (after default ordering) for strawberry-django to paginate
+            assert result == mock_queryset.order_by.return_value
 
 
 class TestSearchProjectsCountResolution:

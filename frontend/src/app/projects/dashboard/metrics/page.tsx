@@ -135,11 +135,12 @@ const MetricsPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState(searchQueryParam)
 
   const handleSearchChange = (query: string) => {
-    setSearchQuery(query)
+    const normalizedQuery = query.trim()
+    setSearchQuery(normalizedQuery)
     setPagination({ offset: 0, limit: PAGINATION_LIMIT })
     const newParams = new URLSearchParams(searchParams.toString())
-    if (query) {
-      newParams.set('search', query)
+    if (normalizedQuery) {
+      newParams.set('search', normalizedQuery)
     } else {
       newParams.delete('search')
     }

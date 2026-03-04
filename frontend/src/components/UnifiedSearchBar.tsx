@@ -60,13 +60,15 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
                   listbox: 'p-0 focus:outline-none',
                 }}
                 selectedKeys={new Set([category || ''])}
-                onChange={(e) => {
-                  onCategoryChange((e.target as HTMLSelectElement).value)
+                onSelectionChange={(keys) => {
+                  const [key] = Array.from(keys as Set<React.Key>)
+                  onCategoryChange(String(key ?? ''))
                 }}
               >
                 {categoryOptions.map((option) => (
                   <SelectItem
                     key={option.key}
+                    textValue={option.key}
                     classNames={{
                       base: 'text-sm text-gray-700 dark:text-gray-300 hover:bg-transparent dark:hover:bg-transparent focus:bg-gray-100 dark:focus:bg-[#404040] focus:outline-none rounded-sm px-3 py-2 cursor-pointer data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-900/20 data-[selected=true]:text-blue-600 dark:data-[selected=true]:text-blue-400 data-[focus=true]:bg-gray-100 dark:data-[focus=true]:bg-[#404040]',
                     }}

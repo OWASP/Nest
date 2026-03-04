@@ -86,17 +86,13 @@ class ProjectFilter(FilterSchema):
         None,
         description="Level of the project",
     )
-    type: ProjectType | None = Field(
+    type: list[ProjectType] | None = Field(
         None,
         description="Type (category) of the project",
     )
     q: str | None = Field(
         None,
         description="Structured search query (e.g. 'name:security stars:>100')",
-    )
-    type: list[ProjectType] | None = Field(
-        None,
-        description="Type of the project",
     )
 
 
@@ -144,7 +140,7 @@ def list_projects(
     if filters.level is not None:
         queryset = queryset.filter(level=filters.level)
 
-    if filters.type is not None:
+    if filters.type:
         queryset = queryset.filter(type__in=filters.type)
 
     return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")

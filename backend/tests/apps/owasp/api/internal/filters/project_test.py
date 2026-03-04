@@ -15,9 +15,7 @@ class TestProjectFilter:
 
     def test_filter_fields(self):
         """Test if the filter fields are correctly defined."""
-        filter_fields = {
-            field.name for field in ProjectFilter.__strawberry_definition__.fields
-        }
+        filter_fields = {field.name for field in ProjectFilter.__strawberry_definition__.fields}
         assert "type" in filter_fields
 
     def test_type_filter_with_valid_value(self):

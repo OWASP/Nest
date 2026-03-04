@@ -15,7 +15,6 @@ from apps.owasp.models.project import Project
 MAX_RECENT_PROJECTS_LIMIT = 1000
 MAX_SEARCH_QUERY_LENGTH = 100
 MIN_SEARCH_QUERY_LENGTH = 3
-SEARCH_PROJECTS_LIMIT = 3
 MAX_PROJECTS_LIMIT = 1000
 MAX_OFFSET = 10000
 
@@ -145,7 +144,7 @@ class ProjectQuery:
                     return []
                 pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)
 
-        return list(base_queryset[:SEARCH_PROJECTS_LIMIT])
+        return base_queryset
 
     @strawberry.field
     def search_projects_count(

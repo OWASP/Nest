@@ -6,25 +6,23 @@ jest.mock('@heroui/select', () => ({
   Select: function Mock({
     children,
     selectedKeys,
-    onChange,
+    onSelectionChange,
     'aria-label': label,
     ...props
   }: unknown) {
     const selectedValue = selectedKeys instanceof Set ? Array.from(selectedKeys)[0] || '' : ''
-    const {
-      classNames: _c,
-      labelPlacement: _l,
-      size: _s,
-      label: _lab,
-      ...safeProps
-    } = props as Record<string, unknown>
-    void [_c, _l, _s, _lab]
+    // Filter out HeroUI-specific props that shouldn't be on HTML select
+    const safeProps = Object.fromEntries(
+      Object.entries(props as Record<string, unknown>).filter(
+        ([key]) => !['classNames', 'labelPlacement', 'size', 'label'].includes(key)
+      )
+    )
     return (
       <select
         aria-label={label}
         value={selectedValue}
         onChange={(e) => {
-          onChange(e)
+          ;(onSelectionChange as (keys: Set<string>) => void)(new Set([e.target.value]))
         }}
         {...safeProps}
       >
@@ -32,9 +30,13 @@ jest.mock('@heroui/select', () => ({
       </select>
     )
   },
-  SelectItem: function Mock({ children, classNames: _cn, ...props }: unknown) {
-    void _cn
-    return <option {...props}>{children}</option>
+
+  SelectItem: function Mock({ children, classNames: _cn, textValue, ...props }: unknown) {
+    return (
+      <option value={textValue as string} {...(props as object)}>
+        {children}
+      </option>
+    )
   },
 }))
 
@@ -183,8 +185,9 @@ describe('UnifiedSearchBar', () => {
     const categorySelect = screen.getByLabelText('Filter by category') as HTMLSelectElement
     fireEvent.change(categorySelect, { target: { value: 'tech' } })
 
-    // Just verify the select exists and received the change event
-    expect(categorySelect).toBeInTheDocument()
+    await waitFor(() => {
+      expect(mockOnCategoryChange).toHaveBeenCalledWith('tech')
+    })
   })
 
   test('calls onSearch when search input changes', async () => {
@@ -369,7 +372,7 @@ describe('UnifiedSearchBar', () => {
     const categorySelect = screen.getByLabelText('Filter by category') as HTMLSelectElement
     const options = categorySelect.querySelectorAll('option')
 
-    expect(options).toHaveLength(defaultProps.categoryOptions!.length)
+    expect(options).toHaveLength(defaultProps.categoryOptions.length)
   })
 
   test('handles undefined categoryOptions gracefully', () => {
@@ -431,7 +434,10 @@ describe('UnifiedSearchBar', () => {
     const categorySelect = screen.getByLabelText('Filter by category') as HTMLSelectElement
     fireEvent.change(categorySelect, { target: { value: 'tech' } })
 
-    expect(categorySelect).toBeInTheDocument()
+    await waitFor(() => {
+      expect(mockOnCategoryChange).toHaveBeenCalledWith('tech')
+      expect(mockOnCategoryChange).toHaveBeenCalledTimes(1)
+    })
   })
 
   test('renders with all props variations', () => {

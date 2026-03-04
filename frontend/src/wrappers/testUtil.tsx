@@ -6,18 +6,9 @@ import { createMockApolloClient } from 'utils/helpers/mockApolloClient'
 
 const mockApolloClient = createMockApolloClient()
 
-let ApolloProvider: React.ComponentType<Record<string, unknown>> | null = null
-
-;(async () => {
-  try {
-    const apolloModule = (await import('@apollo/client/react')) as Record<string, unknown>
-    ApolloProvider = apolloModule.ApolloProvider as React.ComponentType<
-      Record<string, unknown>
-    > | null
-  } catch {
-    // Module may be mocked in tests, will handle gracefully below
-  }
-})()
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const ApolloProvider = (require('@apollo/client/react') as Record<string, unknown>)
+  .ApolloProvider as React.ComponentType<Record<string, unknown>> | null
 
 function render(ui: React.ReactElement, options = {}) {
   const wrapper = ({ children }: { children: React.ReactNode }) => {
