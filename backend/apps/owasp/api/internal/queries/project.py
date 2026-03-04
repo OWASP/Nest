@@ -121,6 +121,11 @@ class ProjectQuery:
         """
         cleaned_query = query.strip()
 
+        if cleaned_query and len(cleaned_query) < MIN_SEARCH_QUERY_LENGTH:
+            return []
+        if len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH:
+            return []
+
         base_queryset = Project.objects.filter(is_active=True)
 
         if cleaned_query:
@@ -140,7 +145,7 @@ class ProjectQuery:
                     return []
                 pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)
 
-        return base_queryset
+        return list(base_queryset[:SEARCH_PROJECTS_LIMIT])
 
     @strawberry.field
     def search_projects_count(

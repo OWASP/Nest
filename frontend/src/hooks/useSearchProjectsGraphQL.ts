@@ -3,8 +3,8 @@
 import type { ErrorLike } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { useMemo } from 'react'
-import { GET_PROJECTS_LIST } from 'server/queries/projectQueries'
 import { ProjectLevel, ProjectType } from 'types/__generated__/graphql'
+import { GetProjectsListDocument } from 'types/__generated__/projectQueries.generated'
 import type { Project } from 'types/project'
 
 interface UseSearchProjectsGraphQLOptions {
@@ -85,7 +85,7 @@ export function useSearchProjectsGraphQL(
 
   const searchParam = searchQuery.trim()
 
-  const { data, loading, error } = useQuery(GET_PROJECTS_LIST, {
+  const { data, loading, error } = useQuery(GetProjectsListDocument, {
     variables: {
       query: searchParam,
       filters: Object.keys(filters || {}).length > 0 ? filters : undefined,

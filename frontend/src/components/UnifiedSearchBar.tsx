@@ -86,7 +86,6 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
             containerClassName="relative w-full flex-1"
             inputClassName="h-12 w-full rounded-lg border border-gray-300 bg-white pr-10 pl-10 text-base text-black shadow-sm transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300"
             inputId="unified-search-input"
-            testId="unified-search-input"
           />
 
           <SortBy

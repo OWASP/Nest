@@ -75,6 +75,7 @@ class TestListProjects:
         mock_filters = MagicMock()
         mock_filters.level = None
         mock_filters.q = None
+        mock_filters.type = None
 
         mock_queryset = MagicMock()
         mock_apply_search.return_value = mock_queryset
@@ -93,6 +94,7 @@ class TestListProjects:
         mock_filters = MagicMock()
         mock_filters.level = "flagship"
         mock_filters.q = "name:security"
+        mock_filters.type = None
 
         mock_queryset = MagicMock()
         mock_filtered_queryset = MagicMock()
