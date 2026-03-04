@@ -85,6 +85,7 @@ class TestProjectSerializerValidation:
         assert project.leaders[1].name == "Bob"
         assert project.level == project_data["level"]
         assert project.name == project_data["name"]
+        assert project.type == project_data["type"]
         assert project.updated_at == datetime.fromisoformat(project_data["updated_at"])
 
 
