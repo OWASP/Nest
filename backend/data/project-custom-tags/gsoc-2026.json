@@ -1,0 +1,16 @@
+{
+  "projects": [
+    "www-project-bug-logging-tool",
+    "www-project-cornucopia",
+    "www-project-devsecops-maturity-model",
+    "www-project-genai-security",
+    "www-project-honeypot",
+    "www-project-juice-shop",
+    "www-project-nest",
+    "www-project-nettacker",
+    "www-project-opencre",
+    "www-project-owtf",
+    "www-project-pygoat"
+  ],
+  "tags": ["gsoc2026"]
+}
