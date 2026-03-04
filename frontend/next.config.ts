@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     return [
       {
         headers,
-        source: '/:path*',
+        source: '/(.*)',
       },
     ]
   },

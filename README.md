@@ -22,7 +22,7 @@
 # [OWASP Nest](https://nest.owasp.org/)
 
 </div>
-
+<!-- --8<-- [start:docs] -->
 **OWASP Nest** is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
 Key features of the platform include:
@@ -71,3 +71,4 @@ Over time, OWASP Nest has expanded to address broader OWASP community needs, suc
 - [BlueSky](https://bsky.app/profile/nest.owasp.org)
 - [LinkedIn](https://www.linkedin.com/groups/14656108/)
 - [OWASP Slack](https://owasp.slack.com/archives/project-nest) -- join [#project-nest](https://owasp.org/slack/invite)
+<!-- --8<-- [end:docs] -->
