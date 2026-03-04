@@ -77,14 +77,13 @@ const SkeletonBase = ({
   }
   return (
     <div className="flex w-full flex-col items-center justify-center">
-      {indexName === 'chapters' ? (
+      {indexName === 'chapters' && (
         <Skeleton className="mb-2 h-96 w-full max-w-6xl" />
-      ) : (
-        <CardSkeleton {...componentProps} />
       )}
-      <CardSkeleton {...componentProps} />
-      <CardSkeleton {...componentProps} />
-      <CardSkeleton {...componentProps} />
+      {Array.from({ length: indexName === 'chapters' ? 3 : 4 }).map((_, index) => (
+        <CardSkeleton key={`card-skeleton-${index}`} {...componentProps} />
+
+      ))}
     </div>
   )
 }

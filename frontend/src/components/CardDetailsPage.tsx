@@ -194,7 +194,7 @@ const DetailsCard = ({
                   <strong>{detail.label}:</strong>{' '}
                   <LeadersList
                     entityKey={`${entityKey}-${detail.label}`}
-                    leaders={detail?.value === null ? 'Unknown' : String(detail.value)}
+                    leaders={String(detail?.value ?? 'Unknown')}
                   />
                 </div>
               ) : (
@@ -454,7 +454,7 @@ const DetailsCard = ({
                                 src={milestone?.author?.avatarUrl}
                                 alt={
                                   milestone.author &&
-                                  (milestone.author.name || milestone.author.login)
+                                    (milestone.author.name || milestone.author.login)
                                     ? `${milestone.author.name || milestone.author.login}'s avatar`
                                     : "Author's avatar"
                                 }
