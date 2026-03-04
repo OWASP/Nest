@@ -82,11 +82,11 @@ export function useSearchProjectsGraphQL(
 
   const offset = (currentPage - 1) * pageSize
 
-  const searchParam = searchQuery.trim().length >= 3 ? searchQuery.trim() : ''
+  const searchParam = searchQuery.trim()
 
   const { data, loading, error } = useQuery(GET_PROJECTS_LIST, {
     variables: {
-      query: searchParam || '', // Pass empty string if query is too short
+      query: searchParam,
       filters: Object.keys(filters || {}).length > 0 ? filters : undefined,
       ordering: ordering && ordering.length > 0 ? ordering : undefined,
       pagination: {

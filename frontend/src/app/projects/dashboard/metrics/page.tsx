@@ -121,17 +121,10 @@ const MetricsPage: FC = () => {
   const currentCategory = levelFilter || healthFilter || ''
   const searchQueryParam = searchParams.get('search') || ''
 
-  if (healthFilter && healthFilter in healthFiltersMapping) {
-    currentFilters = {
-      ...currentFilters,
-      ...healthFiltersMapping[healthFilter as keyof typeof healthFiltersMapping],
-    }
-  }
-  if (levelFilter && levelFilter in levelFiltersMapping) {
-    currentFilters = {
-      ...currentFilters,
-      ...levelFiltersMapping[levelFilter as keyof typeof levelFiltersMapping],
-    }
+  if (currentCategory && currentCategory in healthFiltersMapping) {
+    currentFilters = healthFiltersMapping[currentCategory as keyof typeof healthFiltersMapping]
+  } else if (currentCategory && currentCategory in levelFiltersMapping) {
+    currentFilters = levelFiltersMapping[currentCategory as keyof typeof levelFiltersMapping]
   }
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])

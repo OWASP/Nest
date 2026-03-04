@@ -123,8 +123,9 @@ class ProjectQuery:
 
         base_queryset = Project.objects.filter(is_active=True)
 
-        if cleaned_query and len(cleaned_query) >= MIN_SEARCH_QUERY_LENGTH:
-            base_queryset = base_queryset.filter(name__icontains=cleaned_query)
+        if cleaned_query:
+            bounded_query = cleaned_query[:MAX_SEARCH_QUERY_LENGTH]
+            base_queryset = base_queryset.filter(name__icontains=bounded_query)
 
         if not ordering:
             base_queryset = base_queryset.order_by("-stars_count", "-created_at")
@@ -163,8 +164,9 @@ class ProjectQuery:
 
         base_queryset = Project.objects.filter(is_active=True)
 
-        if cleaned_query and len(cleaned_query) >= MIN_SEARCH_QUERY_LENGTH:
-            base_queryset = base_queryset.filter(name__icontains=cleaned_query)
+        if cleaned_query:
+            bounded_query = cleaned_query[:MAX_SEARCH_QUERY_LENGTH]
+            base_queryset = base_queryset.filter(name__icontains=bounded_query)
 
         if filters:
             base_queryset = strawberry_django.filters.apply(filters, base_queryset)
