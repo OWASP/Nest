@@ -45,6 +45,7 @@ class ProjectBase(Schema):
     key: str
     level: ProjectLevel
     name: str
+    type: ProjectType
     updated_at: datetime
 
     @staticmethod
@@ -93,6 +94,10 @@ class ProjectFilter(FilterSchema):
         None,
         description="Structured search query (e.g. 'name:security stars:>100')",
     )
+    type: list[ProjectType] | None = Field(
+        None,
+        description="Type of the project",
+    )
 
 
 @router.get(
@@ -140,7 +145,7 @@ def list_projects(
         queryset = queryset.filter(level=filters.level)
 
     if filters.type is not None:
-        queryset = queryset.filter(type=filters.type)
+        queryset = queryset.filter(type__in=filters.type)
 
     return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 
