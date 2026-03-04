@@ -1,12 +1,15 @@
 """Router agent for intent classification."""
 
 import contextlib
+import logging
 
 from crewai import Agent, Crew, Task
 
 from apps.ai.common.intent import Intent
 from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
+
+logger = logging.getLogger(__name__)
 
 
 def create_router_agent() -> Agent:
@@ -28,7 +31,7 @@ def create_router_agent() -> Agent:
             "Classify user queries into one of these expert agents: "
             f"{', '.join(Intent.values())}. Provide confidence score and reasoning."
         ),
-        backstory=backstory_template.render(**context).strip(),  # nosemgrep: direct-use-of-jinja2
+        backstory=backstory_template.render(**context).strip(),
         llm=get_llm(),
         verbose=True,
         allow_delegation=False,
@@ -48,7 +51,7 @@ def route(query: str) -> dict:
     router_agent = create_router_agent()
 
     task_template = env.get_template("router/tasks/route.jinja")
-    task_description = task_template.render(  # nosemgrep: direct-use-of-jinja2
+    task_description = task_template.render(
         query=query,
         intent_values=", ".join(Intent.values()),
     ).strip()
@@ -66,10 +69,51 @@ def route(query: str) -> dict:
         max_iter=5,
         max_rpm=10,
     )
+
     result = crew.kickoff()
 
     # Parse result
-    result_str = str(result)
+    result_str = str(result).strip()
+
+    # Validate result - if it's just "YES" or "NO", something went wrong
+    result_upper = result_str.upper().strip()
+    # Check if result is exactly "YES" or "NO" (with or without whitespace)
+    if result_upper in {"YES", "NO"}:
+        logger.error(
+            "Router returned Question Detector output instead of routing result",
+            extra={
+                "result_str": result_str,
+                "result_length": len(result_str),
+                "query": query[:200],
+            },
+        )
+        # Default to RAG as fallback
+        return {
+            "intent": Intent.RAG.value,
+            "confidence": 0.3,
+            "reasoning": "Router returned invalid output, defaulting to RAG",
+            "alternative_intents": [],
+        }
+
+    # Additional validation: check if result looks like routing format
+    min_result_length = 50
+    has_intent_line = any("intent:" in line.lower() for line in result_str.split("\n")[:10])
+    if not has_intent_line and len(result_str) < min_result_length:
+        # If result is very short and doesn't have "intent:" line, it's probably wrong
+        logger.error(
+            "Router result doesn't look like routing format",
+            extra={
+                "result_str": result_str[:200],
+                "query": query[:200],
+            },
+        )
+        return {
+            "intent": Intent.RAG.value,
+            "confidence": 0.3,
+            "reasoning": "Router returned invalid format, defaulting to RAG",
+            "alternative_intents": [],
+        }
+
     intent = None
     confidence = 0.5
     reasoning = ""
@@ -85,17 +129,39 @@ def route(query: str) -> dict:
         elif line_lower.startswith("confidence:"):
             with contextlib.suppress(ValueError):
                 confidence = float(line.split(":", 1)[1].strip())
+                confidence = max(0.0, min(1.0, confidence))
         elif line_lower.startswith("reasoning:"):
             reasoning = line.split(":", 1)[1].strip()
         elif line_lower.startswith("alternatives:"):
             alt_str = line.split(":", 1)[1].strip().lower()
             if alt_str and alt_str != "none":
-                alternatives = [a.strip() for a in alt_str.split(",")]
+                alternatives = [
+                    a.strip().lower()
+                    for a in alt_str.split(",")
+                    if a.strip().lower() in Intent.values()
+                ]
 
     # Default to RAG if intent not found (most general fallback)
     if not intent:
+        logger.warning(
+            "Router did not return a valid intent, defaulting to RAG",
+            extra={
+                "result_str": result_str[:500],
+                "parsed_intent": intent,
+            },
+        )
         intent = Intent.RAG.value
         confidence = 0.3
+
+    logger.info(
+        "Router completed",
+        extra={
+            "intent": intent,
+            "confidence": confidence,
+            "has_alternatives": bool(alternatives),
+            "alternative_count": len(alternatives),
+        },
+    )
 
     return {
         "intent": intent,
