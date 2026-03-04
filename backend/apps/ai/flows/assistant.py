@@ -13,8 +13,10 @@ from apps.ai.agents.community import create_community_agent
 from apps.ai.agents.contribution import create_contribution_agent
 from apps.ai.agents.project import create_project_agent
 from apps.ai.agents.rag import create_rag_agent
+from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
 from apps.ai.common.intent import Intent
 from apps.ai.router import route
+from apps.common.open_ai import OpenAi
 from apps.slack.constants import (
     OWASP_COMMUNITY_CHANNEL_ID,
 )
@@ -22,6 +24,12 @@ from apps.slack.constants import (
 logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.7
+
+IMAGE_DESCRIPTION_PROMPT = (
+    "Describe what is shown in these images. Focus on any text, "
+    "error messages, code snippets, UI elements, or technical details. "
+    "Be concise."
+)
 
 
 def normalize_channel_id(channel_id: str) -> str:
@@ -48,7 +56,11 @@ INTENT_TO_AGENT = {
 
 
 def process_query(  # noqa: PLR0911
-    query: str, channel_id: str | None = None, *, is_app_mention: bool = False
+    query: str,
+    images: list[str] | None = None,
+    channel_id: str | None = None,
+    *,
+    is_app_mention: bool = False,
 ) -> str | None:
     """Process query using multi-agent architecture.
 
@@ -56,6 +68,7 @@ def process_query(  # noqa: PLR0911
 
     Args:
         query: User's question
+        images: Optional list of base64 encoded image data URIs
         channel_id: Optional Slack channel ID where the query originated
         is_app_mention: Whether this is an explicit app mention (vs channel monitored message)
 
@@ -65,6 +78,17 @@ def process_query(  # noqa: PLR0911
 
     """
     try:
+        # Process images if provided - enrich query with image context
+        if images:
+            image_context = (
+                OpenAi(model=DEFAULT_VISION_MODEL)
+                .set_prompt(IMAGE_DESCRIPTION_PROMPT)
+                .set_input(query)
+                .set_images(images)
+                .complete()
+            )
+            if image_context:
+                query = f"{query}{DELIMITER}Image context: {image_context}"
         # Step 0: Handle simple greetings and non-question messages
         query_lower = query.strip().lower()
         # Common greetings and simple acknowledgments (standalone only)
@@ -161,8 +185,18 @@ def process_query(  # noqa: PLR0911
             },
         )
 
+        # Step 2: Check if query is from owasp-community channel (must be handled first)
+        # Normalize channel IDs for comparison
+        normalized_channel_id = normalize_channel_id(channel_id) if channel_id else ""
+        community_channel_id = normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
+        is_community_channel = normalized_channel_id == community_channel_id
+
         # Collaborative flow: if low confidence or multiple intents, invoke all expert agents
-        if confidence < CONFIDENCE_THRESHOLD or router_result.get("alternative_intents"):
+        # Skip collaborative flow for owasp-community channel to preserve channel suggestion routing
+        if (
+            (confidence < CONFIDENCE_THRESHOLD or router_result.get("alternative_intents"))
+            and not is_community_channel
+        ):
             logger.info(
                 "Low confidence or multiple intents detected, invoking collaborative flow",
                 extra={
@@ -170,8 +204,10 @@ def process_query(  # noqa: PLR0911
                     "alternatives": router_result.get("alternative_intents"),
                 },
             )
+            # Collect all intents while preserving order: primary intent first, then alternatives
+            # Use dict.fromkeys() for deterministic deduplication (preserves insertion order)
             all_intents = [intent, *router_result.get("alternative_intents", [])]
-            all_intents = list(set(all_intents))
+            all_intents = list(dict.fromkeys(all_intents))
 
             agents = []
             tasks = []
@@ -211,7 +247,7 @@ def process_query(  # noqa: PLR0911
                     ),
                     agent=agents[-1],
                     expected_output="Final comprehensive answer for Slack",
-        )
+                )
                 tasks.append(synthesis_task)
 
                 crew = Crew(
@@ -228,10 +264,7 @@ def process_query(  # noqa: PLR0911
         # Step 2: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
         # for channel suggestions regardless of intent
-        if channel_id:
-            normalized_channel_id = normalize_channel_id(channel_id)
-            community_channel_id = normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
-
+        if channel_id and is_community_channel:
             logger.debug(
                 "Checking channel suggestion",
                 extra={
@@ -241,10 +274,6 @@ def process_query(  # noqa: PLR0911
                     "intent": intent,
                 },
             )
-
-            # If question is asked in owasp-community channel, route to community agent
-            # for channel suggestions
-            if normalized_channel_id == community_channel_id:
                 # Pre-check for contribution keywords to help guide the agent
                 contribution_keywords = [
                     "contribute",
@@ -318,7 +347,7 @@ def process_query(  # noqa: PLR0911
                         "directly calling GSoC channel suggestion tool",
                         extra={"query": query[:200]},
                     )
-                    from apps.ai.agents.channel.tools import (
+                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
                         suggest_gsoc_channel,
                     )
 
@@ -340,8 +369,8 @@ def process_query(  # noqa: PLR0911
                         result = func()
                     elif result is None:
                         # Fallback: call render_template directly
-                        from apps.ai.common.decorators import render_template
-                        from apps.slack.constants import OWASP_GSOC_CHANNEL_ID
+                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                        from apps.slack.constants import OWASP_GSOC_CHANNEL_ID  # noqa: PLC0415
 
                         channel_id = OWASP_GSOC_CHANNEL_ID.lstrip("#")
                         result = render_template(
@@ -366,7 +395,7 @@ def process_query(  # noqa: PLR0911
                             "has_contribution_keywords": has_contribution_keywords,
                         },
                     )
-                    from apps.ai.agents.channel.tools import (
+                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
                         suggest_contribute_channel,
                     )
 
@@ -388,8 +417,10 @@ def process_query(  # noqa: PLR0911
                         result = func()
                     elif not result:
                         # Fallback: call render_template directly
-                        from apps.ai.common.decorators import render_template
-                        from apps.slack.constants import OWASP_CONTRIBUTE_CHANNEL_ID
+                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                        from apps.slack.constants import (  # noqa: PLC0415
+                            OWASP_CONTRIBUTE_CHANNEL_ID,
+                        )
 
                         channel_id = OWASP_CONTRIBUTE_CHANNEL_ID.lstrip("#")
                         result = render_template(
@@ -503,7 +534,7 @@ def process_query(  # noqa: PLR0911
             )
             # Return a fallback response instead
             return get_fallback_response()
-        return result_str if result_str else result  # noqa: TRY300
+        return result_str or result  # noqa: TRY300
 
     except Exception as e:
         logger.exception(

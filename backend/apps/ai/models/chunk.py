@@ -3,7 +3,6 @@
 import logging
 
 from django.db import models
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
 from apps.ai.models.context import Context
@@ -38,6 +37,8 @@ class Chunk(TimestampedModel):
     @staticmethod
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
+        from langchain.text_splitter import RecursiveCharacterTextSplitter  # noqa: PLC0415
+
         return RecursiveCharacterTextSplitter(
             chunk_size=200,
             chunk_overlap=20,
@@ -81,7 +82,7 @@ class Chunk(TimestampedModel):
         if actual_dimension != expected_dimension:
             # Log warning but only raise error in production/staging environments
             # This allows tests to use different dimensions while catching real issues
-            from django.conf import settings
+            from django.conf import settings  # noqa: PLC0415
 
             warning_msg = (
                 f"Embedding dimension mismatch: expected {expected_dimension}, "
@@ -90,16 +91,17 @@ class Chunk(TimestampedModel):
             )
             logger.warning(warning_msg, extra={"context_id": context.id if context else None})
 
-            # Only raise error in production/staging environments (never in test/local)
+            # Enforce validation in production/staging environments only
+            # Skip validation in test/local environments to allow flexibility during development
+            # In other environments (dev, preview, etc.), log warning but don't fail
             is_test = getattr(settings, "IS_TEST_ENVIRONMENT", False)
             is_local = getattr(settings, "IS_LOCAL_ENVIRONMENT", False)
 
-            # Skip validation errors in test/local environments
+            # Enforce validation in production/staging (skip only in test/local)
             if not is_test and not is_local:
-                is_production_or_staging = getattr(
-                    settings, "IS_PRODUCTION_ENVIRONMENT", False
-                ) or getattr(settings, "IS_STAGING_ENVIRONMENT", False)
-                if is_production_or_staging:
+                is_production = getattr(settings, "IS_PRODUCTION_ENVIRONMENT", False)
+                is_staging = getattr(settings, "IS_STAGING_ENVIRONMENT", False)
+                if is_production or is_staging:
                     error_msg = (
                         f"{warning_msg} Ensure the embedding provider matches "
                         "the configured dimension."
