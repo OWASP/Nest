@@ -36,8 +36,8 @@ class ProjectBase(Schema):
     created_at: datetime
     key: str
     level: ProjectLevel
-    type: ProjectType
     name: str
+    type: ProjectType
     updated_at: datetime
 
     @staticmethod
@@ -78,13 +78,13 @@ class ProjectFilter(FilterSchema):
         None,
         description="Level of the project",
     )
-    type:  list[ProjectType] | None = Field(
-        None,
-        description="Type of the project",
-    )
     q: str | None = Field(
         None,
         description="Structured search query (e.g. 'name:security stars:>100')",
+    )
+    type: list[ProjectType] | None = Field(
+        None,
+        description="Type of the project",
     )
 
 
