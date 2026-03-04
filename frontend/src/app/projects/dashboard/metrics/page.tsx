@@ -166,6 +166,26 @@ const MetricsPage: FC = () => {
     if (JSON.stringify(nextOrdering) !== JSON.stringify(ordering)) {
       setOrdering(nextOrdering)
     }
+
+    const nextSearch = searchParams.get('search') || ''
+    if (nextSearch !== searchQuery) {
+      setSearchQuery(nextSearch)
+      setPagination({ offset: 0, limit: PAGINATION_LIMIT })
+    }
+
+    const nextHealth = searchParams.get('health')
+    const nextLevel = searchParams.get('level')
+    const nextCategory = nextLevel || nextHealth || ''
+    let nextFilters = {}
+    if (nextCategory && nextCategory in healthFiltersMapping) {
+      nextFilters = healthFiltersMapping[nextCategory as keyof typeof healthFiltersMapping]
+    } else if (nextCategory && nextCategory in levelFiltersMapping) {
+      nextFilters = levelFiltersMapping[nextCategory as keyof typeof levelFiltersMapping]
+    }
+    if (JSON.stringify(nextFilters) !== JSON.stringify(filters)) {
+      setFilters(nextFilters)
+      setPagination({ offset: 0, limit: PAGINATION_LIMIT })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 

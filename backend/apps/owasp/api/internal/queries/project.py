@@ -88,7 +88,7 @@ class ProjectQuery:
                 return []
             pagination.offset = min(pagination.offset, MAX_OFFSET)
 
-            if pagination.limit is not None:
+            if pagination.limit is not None and pagination.limit is not strawberry.UNSET:
                 if pagination.limit <= 0:
                     return []
                 pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)
@@ -135,7 +135,7 @@ class ProjectQuery:
                 return []
             pagination.offset = min(pagination.offset, MAX_OFFSET)
 
-            if pagination.limit is not None:
+            if pagination.limit is not None and pagination.limit is not strawberry.UNSET:
                 if pagination.limit <= 0:
                     return []
                 pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)

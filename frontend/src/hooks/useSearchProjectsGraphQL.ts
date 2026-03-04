@@ -1,6 +1,7 @@
 'use client'
 
-import { useQuery, ApolloError } from '@apollo/client/react'
+import type { ErrorLike } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { useMemo } from 'react'
 import { GET_PROJECTS_LIST } from 'server/queries/projectQueries'
 import { ProjectLevel, ProjectType } from 'types/__generated__/graphql'
@@ -15,7 +16,7 @@ interface UseSearchProjectsGraphQLReturn {
   items: Project[]
   isLoaded: boolean
   totalCount: number
-  error: ApolloError | undefined
+  error: ErrorLike | undefined
 }
 
 interface ProjectFilterInput {
