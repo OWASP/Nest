@@ -1,9 +1,10 @@
-FROM node:24.13-alpine3.23 AS builder
+FROM node:24.14-alpine3.23 AS builder
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-builder" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NPM_CONFIG_CACHE="/home/owasp/.npm" \
     PNPM_HOME="/pnpm"
 
@@ -27,12 +28,13 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack enable && corepack install && \
     pnpm install --frozen-lockfile --ignore-scripts
 
-FROM node:24.13-alpine3.23
+FROM node:24.14-alpine3.23
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-frontend-stage" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/home/owasp/.npm"
 

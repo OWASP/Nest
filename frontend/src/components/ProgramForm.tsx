@@ -112,10 +112,6 @@ const ProgramForm = ({
 
   const checkNameUniquenessSync = useCallback(
     async (name: string): Promise<string | undefined> => {
-      if (!name.trim()) {
-        return undefined
-      }
-
       try {
         const { data } = await client.query({
           query: GetMyProgramsDocument,

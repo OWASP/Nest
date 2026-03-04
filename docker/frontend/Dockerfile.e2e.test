@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/playwright:v1.58.2-jammy
 
-ENV FORCE_COLOR=1 \
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    FORCE_COLOR=1 \
     NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 

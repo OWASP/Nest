@@ -16,11 +16,14 @@ The project uses a **containerized approach** for both development and productio
 
 Before contributing, ensure you have the following installed:
 
-1. **Docker**: Required for running the Nest instance - [Docker documentation](https://docs.docker.com/).
-1. **pre-commit**: Required to automate code checks - [pre-commit documentation](https://pre-commit.com/)
-1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+1. [Docker](https://docs.docker.com/engine/install/) for running the Nest containers.
+1. [pre-commit](https://pre-commit.com/#install) for automated code checks.
+1. [terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform) and [tflint](https://github.com/terraform-linters/tflint?tab=readme-ov-file#installation) for IaC.
+
+Optional steps for Windows:
+
+1. [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows Subsystem for Linux) for Windows users to enable Linux compatibility
    1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
-      If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
    1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. You can enter the Linux environment by running `wsl`. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
    1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
    1. Cloning or running the project under `/mnt/c` (the Windows C: drive) can lead to significant performance degradation and Docker permission issues.
@@ -380,6 +383,66 @@ To setup NestBot development environment, follow these steps:
 1. **Set up Slack application**:
    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+
+#### Local Access to Internal Dashboards
+
+When running the project locally, some UI sections are visible only if your user has the required backend roles configured via Django Admin. Follow the steps below to enable access during development.
+
+##### Project Health Dashboard (Staff Access)
+
+The Project Health Dashboard is visible only to users marked as staff.
+
+###### Steps
+
+1. **Start the backend server and open the Django Admin panel**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Log in using your superuser credentials.
+
+2. **Navigate to GitHub Users** and open your user record.
+
+3. **In the Permissions section, enable the custom `is_owasp_staff` field**:
+   - Locate the `is_owasp_staff` checkbox and tick it.
+   - Save the changes.
+
+4. **Clear authentication cookies**:
+   - Open [http://localhost:3000](http://localhost:3000)
+   - Open browser DevTools → Application / Storage
+   - Clear Cookies for the site
+   - Refresh the page and sign in again with GitHub.
+
+After logging in, the Project Health Dashboard will appear in the user menu, or you can navigate directly to:
+[http://localhost:3000/projects/dashboard](http://localhost:3000/projects/dashboard)
+
+##### Mentorship Portal ("My Mentorship")
+
+The "My Mentorship" menu item is shown only if the user is a Project Leader or a Mentor.
+
+###### Option 1: Grant access as a Project Leader (recommended)
+
+1. **Open Django Admin**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Navigate to **OWASP** → **Projects**.
+2. **Open an existing project or create a test project**.
+3. **In the `leaders_raw` field, add your exact GitHub username**.
+4. **Save the project**.
+
+###### Option 2: Grant access as a Mentor
+
+1. Ensure you have logged into the frontend at least once (so your GitHub user exists in the database).
+2. **Open Django Admin** → **Mentorship** → **Mentors**.
+3. Click **Add Mentor**.
+4. Select your GitHub user in the `github_user` field.
+5. Fill in any required fields and save.
+
+###### Refresh session
+
+Role-based access is cached in the authentication cookie.
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Clear Cookies for the site
+3. Refresh and sign in again with GitHub
+
+The "My Mentorship" option will now be visible in the user menu.
 
 ## Code Quality Checks
 

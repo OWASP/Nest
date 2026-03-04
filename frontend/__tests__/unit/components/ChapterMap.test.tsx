@@ -219,6 +219,30 @@ describe('ChapterMap Refactored Tests', () => {
       })
     })
 
+    it('removes existing zoom control before adding a new one on re-activation', async () => {
+      const { getByText, container } = render(<ChapterMap {...defaultProps} />)
+
+      fireEvent.click(getByText('Unlock map').closest('button'))
+      await waitFor(() => {
+        expect(L.control.zoom).toHaveBeenCalledTimes(1)
+        expect(mockZoomControl.addTo).toHaveBeenCalledTimes(1)
+      })
+
+      fireEvent.mouseLeave(container.firstChild as HTMLElement)
+      await waitFor(() => {
+        expect(mockZoomControl.remove).toHaveBeenCalled()
+        expect(getByText('Unlock map')).toBeInTheDocument()
+      })
+
+      jest.clearAllMocks()
+
+      fireEvent.click(getByText('Unlock map').closest('button'))
+      await waitFor(() => {
+        expect(L.control.zoom).toHaveBeenCalledTimes(1)
+        expect(mockZoomControl.addTo).toHaveBeenCalledTimes(1)
+      })
+    })
+
     it('locks map again on mouse leave', async () => {
       const { getByText, container } = render(<ChapterMap {...defaultProps} />)
 
@@ -264,6 +288,32 @@ describe('ChapterMap Refactored Tests', () => {
 
       await waitFor(() => {
         expect(mockMap.setView).toHaveBeenCalledWith([35.6762, 139.6503], 7)
+      })
+    })
+
+    it('handles zero container height (aspect ratio 1)', async () => {
+      mockMap.getContainer.mockReturnValueOnce({
+        clientWidth: 800,
+        clientHeight: 0,
+      })
+
+      render(<ChapterMap {...defaultProps} />)
+      await waitFor(() => {
+        expect(mockMap.setMinZoom).toHaveBeenCalledWith(2)
+        expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
+      })
+    })
+
+    it('adjusts minZoom for wide aspect ratio (> 2)', async () => {
+      mockMap.getContainer.mockReturnValueOnce({
+        clientWidth: 1600,
+        clientHeight: 600,
+      })
+
+      render(<ChapterMap {...defaultProps} />)
+      await waitFor(() => {
+        expect(mockMap.setMinZoom).toHaveBeenCalledWith(1)
+        expect(mockMap.setView).toHaveBeenCalledWith([20, 0], 2)
       })
     })
   })

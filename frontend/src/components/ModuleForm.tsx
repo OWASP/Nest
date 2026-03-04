@@ -399,7 +399,6 @@ export const ProjectSelector = ({
   }, [inputValue, fetchSuggestions])
 
   const handleSelectionChange = (keys: React.Key | null) => {
-    if (keys === null) return
     const selectedKey = keys as string
     if (selectedKey) {
       const selectedProject = items.find((item) => item.id === selectedKey)

@@ -62,6 +62,29 @@
   }
 }
 
+button,
+a,
+[role='button'],
+[role='menuitem'],
+[role='link'],
+[role='tab'],
+[role='option'],
+input[type='submit'],
+input[type='button'],
+input[type='reset'],
+select,
+summary,
+[tabindex]:not([tabindex='-1']) {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
 @layer base {
   :root {
     --background: #f4f6fc;

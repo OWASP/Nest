@@ -34,6 +34,11 @@ jest.mock('components/forms/shared/formValidationUtils', () => ({
   validateEndDate: jest.fn(),
 }))
 
+jest.mock('app/global-error', () => ({
+  ErrorDisplay: ({ title }: { title: string }) => <div>{title}</div>,
+  handleAppError: jest.fn(),
+}))
+
 describe('EditModulePage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()
@@ -150,12 +155,13 @@ describe('EditModulePage', () => {
     await waitFor(() => {
       expect(addToast).toHaveBeenCalledWith({
         title: 'Access Denied',
-        description: 'Only program admins can edit modules.',
+        description: 'Only program admins and module mentors can edit this module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,
       })
     })
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
 
     // Advance timers to trigger the redirect
     act(() => {
@@ -195,11 +201,11 @@ describe('EditModulePage', () => {
       render(<EditModulePage />)
     })
 
-    // When denied but formData is null, component shows spinner
-    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    // When denied, component shows ErrorDisplay
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
   })
 
-  it('shows loading spinner when user is unauthenticated', async () => {
+  it('shows Access Denied when user is unauthenticated', async () => {
     ;(useSession as jest.Mock).mockReturnValue({
       data: null,
       status: 'unauthenticated',
@@ -217,8 +223,8 @@ describe('EditModulePage', () => {
       render(<EditModulePage />)
     })
 
-    // When denied but formData is null, component shows spinner
-    expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    // When denied, component shows ErrorDisplay
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
   })
 
   it('handles form submission error gracefully', async () => {
@@ -266,6 +272,63 @@ describe('EditModulePage', () => {
 
     await waitFor(() => {
       expect(mockUpdateModule).toHaveBeenCalled()
+    })
+  })
+
+  it('shows permission denied error when mutation throws Permission error', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin-user' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+        },
+        getModule: {
+          name: 'Test Module',
+          description: 'Description',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
+          startedAt: '2025-07-01',
+          endedAt: '2025-07-31',
+          domains: ['AI'],
+          tags: ['graphql'],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [{ login: 'mentor1' }],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockRejectedValue(
+        new Error('Permission denied: You do not have permission to edit this module')
+      ),
+      { loading: false },
+    ])
+
+    render(<EditModulePage />)
+
+    await act(async () => {
+      jest.runAllTimers()
+    })
+
+    expect(await screen.findByDisplayValue('Test Module')).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Save/i }))
+    })
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Error',
+          description:
+            'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.',
+          color: 'danger',
+        })
+      )
     })
   })
 
