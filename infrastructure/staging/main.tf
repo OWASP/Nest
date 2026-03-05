@@ -190,7 +190,7 @@ module "storage" {
 module "tasks" {
   source = "../modules/tasks"
 
-  assign_public_ip              = var.ecs_assign_public_ip
+  assign_public_ip              = var.tasks_assign_public_ip
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns
@@ -202,6 +202,6 @@ module "tasks" {
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   kms_key_arn                   = module.kms.key_arn
   project_name                  = var.project_name
-  subnet_ids                    = var.ecs_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
+  subnet_ids                    = var.tasks_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
   use_fargate_spot              = var.tasks_use_fargate_spot
 }

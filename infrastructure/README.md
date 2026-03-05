@@ -273,18 +273,6 @@ Migrate and load data into the new database.
 - Update the frontend server (`NEXT_SERVER_*`) parameters using the backend ALB URL from Terraform outputs.
 - Populate all `DJANGO_*` parameters that have `to-be-set-in-aws-console` value.
 
-1. **Restart Frontend ECS Tasks**:
-
-- Force a new deployment to pick up the updated configuration:
-
-    ```bash
-    aws ecs update-service \
-        --cluster nest-staging-frontend-cluster \
-        --service nest-staging-frontend-service \
-        --force-new-deployment \
-        --region AWS_REGION
-    ```
-
 1. **Restart Backend ECS Tasks**:
 
 - Force a new deployment to pick up the updated configuration:
@@ -293,6 +281,18 @@ Migrate and load data into the new database.
     aws ecs update-service \
         --cluster nest-staging-backend-cluster \
         --service nest-staging-backend-service \
+        --force-new-deployment \
+        --region AWS_REGION
+    ```
+
+1. **Restart Frontend ECS Tasks**:
+
+- Force a new deployment to pick up the updated configuration:
+
+    ```bash
+    aws ecs update-service \
+        --cluster nest-staging-frontend-cluster \
+        --service nest-staging-frontend-service \
         --force-new-deployment \
         --region AWS_REGION
     ```
