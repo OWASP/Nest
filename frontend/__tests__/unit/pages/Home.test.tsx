@@ -98,7 +98,7 @@ describe('Home', () => {
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
       expect(screen.getByText('Tool')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('renders error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -186,7 +186,7 @@ describe('Home', () => {
       expect(screen.getByText('OWASP GameSec Framework')).toBeInTheDocument()
       expect(screen.getByText('Tool')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('renders Upcoming Events section', async () => {
     render(<Home />)

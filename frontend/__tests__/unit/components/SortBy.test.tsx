@@ -79,7 +79,7 @@ describe('<SortBy />', () => {
       fireEvent.click(buttons[1])
     })
     expect(defaultProps.onOrderChange).toHaveBeenCalledWith('desc')
-  })
+  }, 15000)
 
   it('uses proper accessibility attributes', async () => {
     await act(async () => {

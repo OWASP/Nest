@@ -50,13 +50,14 @@ export type IndexedObject = {
 }
 
 export const getCsrfToken = async (): Promise<string> => {
-  const csrfToken = document.cookie
-    ? document.cookie
-        .split(';')
-        .map((cookie) => cookie.split('='))
-        .find(([key]) => key.trim() === 'csrftoken')?.[1]
-        ?.trim()
-    : undefined
+  const csrfToken =
+    typeof document !== 'undefined' && document.cookie
+      ? document.cookie
+          .split(';')
+          .map((cookie) => cookie.split('='))
+          .find(([key]) => key.trim() === 'csrftoken')?.[1]
+          ?.trim()
+      : undefined
 
   if (csrfToken) {
     return csrfToken

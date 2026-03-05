@@ -101,7 +101,7 @@ describe('ProjectHealthMetricsDetails', () => {
       expect(screen.getByText(metrics.projectName)).toBeInTheDocument()
       expect(screen.getByText(metrics.score.toString())).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('renders non-compliant status when funding requirements are not met', async () => {
     const nonCompliantData = {

@@ -106,6 +106,7 @@ test.describe('About Page', () => {
 
   test('opens user profile in new window when leader button is clicked', async ({ page }) => {
     await page.getByRole('button', { name: 'View Profile' }).first().click()
+    await page.waitForURL('**/members/**', { timeout: 15000 })
     await expect(page).toHaveURL('/members/arkid15r')
   })
 

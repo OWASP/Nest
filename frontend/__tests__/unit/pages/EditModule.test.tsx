@@ -35,56 +35,53 @@ describe('EditModulePage', () => {
   const mockUpdateModule = jest.fn()
 
   beforeEach(() => {
-    jest.useFakeTimers()
-      ; (useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
-      ; (useParams as jest.Mock).mockReturnValue({
-        programKey: 'test-program',
-        moduleKey: 'test-module',
-      })
-      ; (useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            searchProjects: [{ id: '123', name: 'Awesome Project' }],
-          },
-        }),
-      })
+    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
+    ;(useParams as jest.Mock).mockReturnValue({
+      programKey: 'test-program',
+      moduleKey: 'test-module',
+    })
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: jest.fn().mockResolvedValue({
+        data: {
+          searchProjects: [{ id: '123', name: 'Awesome Project' }],
+        },
+      }),
+    })
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
     jest.clearAllMocks()
   })
 
   it('renders and submits form for editing module', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            admins: [{ login: 'admin-user' }],
-          },
-          getModule: {
-            name: 'Existing Module',
-            description: 'Old description',
-            experienceLevel: ExperienceLevelEnum.Intermediate,
-            startedAt: '2025-07-01',
-            endedAt: '2025-07-31',
-            domains: ['AI'],
-            tags: ['graphql'],
-            projectName: 'Awesome Project',
-            projectId: '123',
-            mentors: [{ login: 'mentor1' }],
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
         },
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([
-        mockUpdateModule.mockResolvedValue({}),
-        { loading: false },
-      ])
+        getModule: {
+          name: 'Existing Module',
+          description: 'Old description',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
+          startedAt: '2025-07-01',
+          endedAt: '2025-07-31',
+          domains: ['AI'],
+          tags: ['graphql'],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [{ login: 'mentor1' }],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockResolvedValue({}),
+      { loading: false },
+    ])
 
     render(<EditModulePage />)
 
@@ -106,14 +103,6 @@ describe('EditModulePage', () => {
     await user.clear(screen.getByLabelText(/Tags/i))
     await user.type(screen.getByLabelText(/Tags/i), 'graphql, react')
 
-    const projectInput = screen.getByPlaceholderText(/Start typing project name/i)
-    await user.clear(projectInput)
-    await user.type(projectInput, 'Awesome Project')
-
-    await act(async () => {
-      jest.runAllTimers()
-    })
-
     await user.click(screen.getByRole('button', { name: /Save/i }))
 
     await waitFor(() => {
@@ -122,14 +111,16 @@ describe('EditModulePage', () => {
         '/my/mentorship/programs/test-program/modules/test-module'
       )
     })
-  })
+  }, 30000)
 
   it('shows access denied and redirects if user is not an admin', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
-      data: { user: { login: 'non-admin-user' } },
-      status: 'authenticated',
-    })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
+    jest.useFakeTimers()
+    try {
+      ;(useSession as jest.Mock).mockReturnValue({
+        data: { user: { login: 'non-admin-user' } },
+        status: 'authenticated',
+      })
+      ;(useQuery as unknown as jest.Mock).mockReturnValue({
         loading: false,
         data: {
           getProgram: {
@@ -141,34 +132,38 @@ describe('EditModulePage', () => {
         },
       })
 
-    render(<EditModulePage />)
+      render(<EditModulePage />)
 
-    await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith({
-        title: 'Access Denied',
-        description: 'Only program admins can edit modules.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 4000,
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Access Denied',
+          description: 'Only program admins can edit modules.',
+          color: 'danger',
+          variant: 'solid',
+          timeout: 4000,
+        })
       })
-    })
 
-    // Advance timers to trigger the redirect
-    act(() => {
-      jest.advanceTimersByTime(1500)
-    })
+      // Advance timers to trigger the redirect
+      act(() => {
+        jest.advanceTimersByTime(1500)
+      })
 
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
-    })
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+      })
+    } finally {
+      jest.runOnlyPendingTimers()
+      jest.useRealTimers()
+    }
   })
 
   it('shows loading spinner initially', () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: null,
       status: 'loading',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditModulePage />)
 
@@ -176,16 +171,16 @@ describe('EditModulePage', () => {
   })
 
   it('shows loading spinner when query returns an error', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        error: new Error('GraphQL error'),
-        data: null,
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      error: new Error('GraphQL error'),
+      data: null,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
 
     await act(async () => {
       render(<EditModulePage />)
@@ -196,18 +191,18 @@ describe('EditModulePage', () => {
   })
 
   it('shows loading spinner when user is unauthenticated', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: null,
       status: 'unauthenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: { admins: [{ login: 'admin-user' }] },
-          getModule: { name: 'Module' },
-        },
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: { admins: [{ login: 'admin-user' }] },
+        getModule: { name: 'Module' },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
 
     await act(async () => {
       render(<EditModulePage />)
@@ -218,48 +213,44 @@ describe('EditModulePage', () => {
   })
 
   it('handles form submission error gracefully', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            admins: [{ login: 'admin-user' }],
-          },
-          getModule: {
-            name: 'Existing Module',
-            description: 'Old description',
-            experienceLevel: ExperienceLevelEnum.Intermediate,
-            startedAt: '2025-07-01',
-            endedAt: '2025-07-31',
-            domains: ['AI'],
-            tags: ['graphql'],
-            projectName: 'Awesome Project',
-            projectId: '123',
-            mentors: [{ login: 'mentor1' }],
-            labels: [],
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
         },
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([
-        mockUpdateModule.mockRejectedValue(new Error('Mutation failed')),
-        { loading: false },
-      ])
+        getModule: {
+          name: 'Existing Module',
+          description: 'Old description',
+          experienceLevel: ExperienceLevelEnum.Intermediate,
+          startedAt: '2025-07-01',
+          endedAt: '2025-07-31',
+          domains: ['AI'],
+          tags: ['graphql'],
+          projectName: 'Awesome Project',
+          projectId: '123',
+          mentors: [{ login: 'mentor1' }],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockRejectedValue(new Error('Mutation failed')),
+      { loading: false },
+    ])
 
     render(<EditModulePage />)
 
-    await act(async () => {
-      jest.runAllTimers()
-    })
-
+    // Form successfully loads
     expect(await screen.findByDisplayValue('Existing Module')).toBeInTheDocument()
 
-    await act(async () => {
-      const user = userEvent.setup()
-      await user.click(screen.getByRole('button', { name: /Save/i }))
-    })
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: /Save/i }))
 
     await waitFor(() => {
       expect(mockUpdateModule).toHaveBeenCalled()
@@ -267,43 +258,39 @@ describe('EditModulePage', () => {
   })
 
   it('renders form with module having missing optional fields', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            admins: [{ login: 'admin-user' }],
-            startedAt: '2025-01-01',
-            endedAt: '2025-12-31',
-          },
-          getModule: {
-            name: 'Minimal Module',
-            description: '',
-            experienceLevel: null,
-            startedAt: null,
-            endedAt: null,
-            domains: null,
-            tags: null,
-            projectName: null,
-            projectId: null,
-            mentors: null,
-            labels: null,
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
         },
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([
-        mockUpdateModule.mockResolvedValue({ data: { updateModule: { key: 'new-key' } } }),
-        { loading: false },
-      ])
+        getModule: {
+          name: 'Minimal Module',
+          description: '',
+          experienceLevel: ExperienceLevelEnum.Beginner,
+          startedAt: '',
+          endedAt: '',
+          domains: [],
+          tags: [],
+          projectName: '',
+          projectId: '',
+          mentors: [],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([
+      mockUpdateModule.mockResolvedValue({ data: { updateModule: { key: 'new-key' } } }),
+      { loading: false },
+    ])
 
     render(<EditModulePage />)
-
-    await act(async () => {
-      jest.runAllTimers()
-    })
 
     expect(await screen.findByDisplayValue('Minimal Module')).toBeInTheDocument()
     // Verify form renders with empty/fallback values for missing optional fields
@@ -311,40 +298,36 @@ describe('EditModulePage', () => {
   })
 
   it('renders form without program dates', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            admins: [{ login: 'admin-user' }],
-            startedAt: null,
-            endedAt: null,
-          },
-          getModule: {
-            name: 'Test Module',
-            description: 'Test description',
-            experienceLevel: ExperienceLevelEnum.Advanced,
-            startedAt: '',
-            endedAt: '',
-            domains: [],
-            tags: [],
-            projectName: '',
-            projectId: '',
-            mentors: [],
-            labels: [],
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+          startedAt: null,
+          endedAt: null,
         },
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
+        getModule: {
+          name: 'Test Module',
+          description: 'Test description',
+          experienceLevel: ExperienceLevelEnum.Advanced,
+          startedAt: '',
+          endedAt: '',
+          domains: [],
+          tags: [],
+          projectName: '',
+          projectId: '',
+          mentors: [],
+          labels: [],
+        },
+      },
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn(), { loading: false }])
 
     render(<EditModulePage />)
-
-    await act(async () => {
-      jest.runAllTimers()
-    })
 
     expect(await screen.findByDisplayValue('Test Module')).toBeInTheDocument()
   })

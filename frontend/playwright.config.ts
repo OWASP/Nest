@@ -1,4 +1,3 @@
-import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
@@ -25,14 +24,13 @@ export default defineConfig({
   testDir: './__tests__/e2e',
   timeout: 120_000,
   use: {
-    baseURL: 'http://localhost:3000',
-    headless: true,
-    trace: 'off',
+    baseURL: 'http://localhost:3001',
   },
   webServer: {
-    command: 'pnpm run build && NEXT_SERVER_DISABLE_SSR=true pnpm run start',
-    timeout: 120_000,
-    url: 'http://localhost:3000',
+    command: 'pnpm run build && cross-env NEXT_SERVER_DISABLE_SSR=true pnpm run start -p 3001',
+    timeout: 300_000,
+    url: 'http://localhost:3001',
+    reuseExistingServer: false,
   },
-  workers: os.cpus().length,
+  workers: process.env.CI ? 1 : 2,
 })

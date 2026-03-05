@@ -31,6 +31,7 @@ import ContributionHeatmap from 'components/ContributionHeatmap'
 import ContributionStats from 'components/ContributionStats'
 import ContributorsList from 'components/ContributorsList'
 import EntityActions from 'components/EntityActions'
+import ErrorBoundary from 'components/ErrorBoundary'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
 import Leaders from 'components/Leaders'
@@ -515,9 +516,13 @@ const DetailsCard = ({
           </SecondaryCard>
         )}
         {IS_PROJECT_HEALTH_ENABLED &&
-          type === 'project' &&
-          healthMetricsData &&
-          healthMetricsData.length > 0 && <HealthMetrics data={healthMetricsData} />}
+        type === 'project' &&
+        healthMetricsData &&
+        healthMetricsData.length > 0 ? (
+          <ErrorBoundary fallback={<div>Health metrics unavailable</div>}>
+            <HealthMetrics data={healthMetricsData} />
+          </ErrorBoundary>
+        ) : null}
         {entityKey &&
           ['chapter', 'project', 'repository'].includes(type) &&
           (projectName || title) &&

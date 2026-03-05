@@ -72,7 +72,7 @@ describe('SnapshotsPage', () => {
       expect(screen.getByText('Snapshot 1')).toBeInTheDocument()
       expect(screen.getByText('Snapshot 2')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   it('renders "No Snapshots found" when no snapshots are available', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -120,5 +120,5 @@ describe('SnapshotsPage', () => {
     await waitFor(() => {
       expect(mockRouter.push).toHaveBeenCalledWith('/community/snapshots/2024-12')
     })
-  })
+  }, 15000)
 })

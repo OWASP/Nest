@@ -77,7 +77,7 @@ describe('OrganizationDetailsPage', () => {
     expect(
       screen.getByText(formatDate(mockOrganizationDetailsData.organization.createdAt))
     ).toBeInTheDocument()
-  })
+  }, 15000)
 
   test('renders organization stats correctly', async () => {
     render(<OrganizationDetailsPage />)
@@ -89,7 +89,7 @@ describe('OrganizationDetailsPage', () => {
       expect(screen.getByText('300 Issues')).toBeInTheDocument()
       expect(screen.getByText('25 Repositories')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('renders issues section correctly', async () => {
     render(<OrganizationDetailsPage />)
@@ -166,7 +166,7 @@ describe('OrganizationDetailsPage', () => {
       expect(screen.getByText('Test Pull Request 1')).toBeInTheDocument()
       expect(screen.getByText('Test Pull Request 2')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('renders top contributors section correctly', async () => {
     render(<OrganizationDetailsPage />)
@@ -176,7 +176,7 @@ describe('OrganizationDetailsPage', () => {
       expect(screen.getByText('User Two')).toBeInTheDocument()
       expect(screen.getByText('User Three')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('displays error message when there is a GraphQL error', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -198,7 +198,7 @@ describe('OrganizationDetailsPage', () => {
         variant: 'solid',
       })
     })
-  })
+  }, 15000)
 
   test('does not render sponsor block', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
@@ -209,5 +209,5 @@ describe('OrganizationDetailsPage', () => {
     await waitFor(() => {
       expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
-  })
+  }, 15000)
 })

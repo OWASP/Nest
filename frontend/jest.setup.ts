@@ -4,6 +4,17 @@ import React from 'react'
 
 globalThis.React = React
 
+// Mock AbortController globally for all tests to prevent hangs
+// from debounced search and request cancellation logic.
+if (typeof globalThis.AbortController === 'undefined') {
+  globalThis.AbortController = class {
+    signal = { aborted: false, addEventListener: jest.fn(), removeEventListener: jest.fn() }
+    abort() {
+      ;(this.signal as unknown as { aborted: boolean }).aborted = true
+    }
+  } as unknown as typeof AbortController
+}
+
 // Mock framer-motion due to how Jest 30 ESM resolution treats
 // motion-dom's internal .mjs imports as "outside test scope".
 jest.mock('framer-motion', () => {

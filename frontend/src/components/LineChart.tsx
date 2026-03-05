@@ -4,6 +4,7 @@ import React from 'react'
 import type { IconType } from 'react-icons'
 import type { ApexLineChartSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
+import ErrorBoundary from 'components/ErrorBoundary'
 import SecondaryCard from 'components/SecondaryCard'
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
 const Chart = dynamic(() => import('react-apexcharts'), {
@@ -22,39 +23,43 @@ const LineChart: React.FC<{
 
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
-      <Chart
-        key={theme}
-        options={{
-          chart: {
-            toolbar: {
-              show: false,
+      <ErrorBoundary fallback={<div>LineChart error</div>}>
+        <Chart
+          key={theme}
+          options={{
+            chart: {
+              animations: { enabled: false },
+              toolbar: {
+                show: false,
+              },
+              foreColor: color,
             },
-            foreColor: color,
-          },
-          tooltip: {
-            theme: theme,
-          },
-          xaxis: {
-            categories: labels,
-            tickAmount: 10,
-          },
-          yaxis: {
-            labels: {
-              formatter: (value: number) => {
-                if (value >= 1000) {
-                  return `${(value / 1000).toFixed(1)}K`
-                }
-                return `${value.toFixed(round ? 0 : 2)}`
+            tooltip: {
+              theme: theme,
+            },
+            xaxis: {
+              categories: labels,
+              tickAmount: 10,
+            },
+            yaxis: {
+              labels: {
+                formatter: (value: number) => {
+                  if (value >= 1000) {
+                    return `${(value / 1000).toFixed(1)}K`
+                  }
+                  return `${value.toFixed(round ? 0 : 2)}`
+                },
               },
             },
-          },
-          stroke: {
-            curve: 'smooth',
-          },
-        }}
-        series={series}
-        height={200}
-      />
+            stroke: {
+              curve: 'smooth',
+            },
+          }}
+          series={series}
+          height={200}
+          width="100%"
+        />
+      </ErrorBoundary>
     </SecondaryCard>
   )
 }

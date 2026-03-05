@@ -16,6 +16,18 @@ export const mockProjectDetailsData = {
     forksCount: 10,
     healthMetricsList: [
       {
+        openIssuesCount: 4,
+        unassignedIssuesCount: 1,
+        unansweredIssuesCount: 0,
+        openPullRequestsCount: 2,
+        starsCount: 18,
+        forksCount: 9,
+        lastCommitDays: 4,
+        lastReleaseDays: 8,
+        score: 80,
+        createdAt: '2025-02-05T12:00:00Z',
+      },
+      {
         openIssuesCount: 5,
         unassignedIssuesCount: 2,
         unansweredIssuesCount: 1,
@@ -25,6 +37,7 @@ export const mockProjectDetailsData = {
         lastCommitDays: 5,
         lastReleaseDays: 10,
         score: 85,
+        createdAt: '2025-02-07T12:00:00Z',
       },
     ],
     isActive: true,

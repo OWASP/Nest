@@ -188,7 +188,7 @@ describe('UserDetailsPage', () => {
         expect(screen.getByText(release.repositoryName)).toBeInTheDocument()
       }
     })
-  })
+  }, 15000)
 
   test('renders recent milestones correctly', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({

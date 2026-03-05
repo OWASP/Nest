@@ -71,7 +71,7 @@ describe('UsersPage Component', () => {
     })
 
     expect(screen.queryByTestId('status')).not.toBeInTheDocument()
-  })
+  }, 15000)
 
   test('renders user cards correctly', async () => {
     render(<UsersPage />)

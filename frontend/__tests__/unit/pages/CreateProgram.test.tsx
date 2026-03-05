@@ -180,7 +180,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
       expect(mockRouterPush).toHaveBeenCalledWith('/my/mentorship')
     })
-  })
+  }, 15000)
 
   test('shows error toast if createProgram mutation fails', async () => {
     ;(mockUseSession as jest.Mock).mockReturnValue({

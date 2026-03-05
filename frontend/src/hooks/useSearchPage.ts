@@ -52,12 +52,10 @@ export function useSearchPage<T>({
       const current = new URLSearchParams(Array.from(searchParams.entries()))
 
       Object.entries(params).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === '') {
-          current.delete(key)
-          return
-        }
+        const isEmpty =
+          value === undefined || value === null || value === '' || value === 1 || value === '1'
 
-        if (key === 'page' && (value === 1 || value === '1')) {
+        if (isEmpty) {
           current.delete(key)
           return
         }

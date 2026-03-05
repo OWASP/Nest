@@ -229,7 +229,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
           onChange={handleSearchChange}
           placeholder={placeholder}
           aria-label={placeholder || 'Search'}
-          className="h-12 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-10 text-lg"
+          className="h-12 w-full rounded-lg border border-gray-300 bg-white pr-10 pl-10 text-lg"
           onKeyDown={handleKeyDown}
         />
 
@@ -255,11 +255,12 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
                     <button
                       key={safeHit.key || safeHit.login || safeHit.url}
                       onClick={() => handleSuggestionClick(hit, group.indexName)}
-                      className={`flex w-full items-center px-4 py-3 text-left text-gray-700 dark:text-gray-200 ${highlightedIndex?.index === groupIndex &&
+                      className={`flex w-full items-center px-4 py-3 text-left text-gray-700 dark:text-gray-200 ${
+                        highlightedIndex?.index === groupIndex &&
                         highlightedIndex?.subIndex === hitIndex
-                        ? 'bg-gray-100 dark:bg-gray-700'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
+                          ? 'bg-gray-100 dark:bg-gray-700'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
                     >
                       {getIconForIndex(group.indexName)}
                       <span className="truncate">{safeHit.name || safeHit.login}</span>

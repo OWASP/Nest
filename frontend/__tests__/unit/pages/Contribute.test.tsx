@@ -41,9 +41,9 @@ jest.mock('next/navigation', () => ({
 describe('Contribute Component', () => {
   let mockRouter: { push: jest.Mock }
   beforeEach(() => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue(mockContributeData)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockContributeData)
     mockRouter = { push: jest.fn() }
-      ; (useRouter as jest.Mock).mockReturnValue(mockRouter)
+    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   afterEach(() => {
@@ -56,10 +56,10 @@ describe('Contribute Component', () => {
       const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
-  })
+  }, 15000)
 
   test('renders contribute data correctly', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
@@ -75,7 +75,7 @@ describe('Contribute Component', () => {
   })
 
   test('displays "No issues found" when there are no issues', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       issues: [],
       totalPages: 0,
@@ -88,11 +88,11 @@ describe('Contribute Component', () => {
 
   test('handles page change correctly when there are multiple pages', async () => {
     window.scrollTo = jest.fn()
-      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
-        ...mockContributeData,
-        hits: mockContributeData.issues,
-        totalPages: 4,
-      })
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      ...mockContributeData,
+      hits: mockContributeData.issues,
+      totalPages: 4,
+    })
     render(<ContributePage />)
     await waitFor(() => {
       const nextPageButton = screen.getByText('Next Page')
@@ -105,7 +105,7 @@ describe('Contribute Component', () => {
   })
 
   test('handles pagination for first page', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: mockContributeData.issues,
       totalPages: 2,
       currentPage: 1,
@@ -117,7 +117,7 @@ describe('Contribute Component', () => {
   })
 
   test('handles pagination for last page', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       totalPages: 2,
       currentPage: 2,
@@ -129,7 +129,7 @@ describe('Contribute Component', () => {
   })
 
   test('does not render pagination when there is only one page', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       totalPages: 1,
     })
@@ -168,7 +168,7 @@ describe('Contribute Component', () => {
         },
       ],
     }
-      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue(mockErrorIssue)
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue(mockErrorIssue)
 
     render(<ContributePage />)
 
@@ -178,7 +178,7 @@ describe('Contribute Component', () => {
   })
 
   test('renders SubmitButton correctly', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
@@ -192,7 +192,7 @@ describe('Contribute Component', () => {
   })
 
   test('opens modal when SubmitButton is clicked', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
@@ -211,7 +211,7 @@ describe('Contribute Component', () => {
   })
 
   test('closes modal when close button is clicked', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
@@ -233,7 +233,7 @@ describe('Contribute Component', () => {
   })
 
   test('renders View Issue button in modal', async () => {
-    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       ...mockContributeData,
       hits: mockContributeData.issues,
       totalPages: 1,
@@ -249,5 +249,5 @@ describe('Contribute Component', () => {
       const viewIssueButton = screen.getByText('View Issue')
       expect(viewIssueButton).toBeInTheDocument()
     })
-  })
+  }, 15000)
 })

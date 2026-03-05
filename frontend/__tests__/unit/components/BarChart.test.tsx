@@ -202,7 +202,7 @@ describe('<BarChart />', () => {
     const chartElement = screen.getByTestId('mock-chart')
     const options = JSON.parse(chartElement.dataset.options || '{}')
 
-    expect(options.chart.animations.enabled).toBe(true)
+    expect(options.chart.animations.enabled).toBe(false)
     expect(options.chart.animations.speed).toBe(1000)
     expect(options.chart.toolbar.show).toBe(false)
     expect(options.plotOptions.bar.horizontal).toBe(true)
@@ -525,7 +525,7 @@ describe('<BarChart />', () => {
     // Test chart configuration
     expect(options.chart).toBeDefined()
     expect(options.chart.animations).toBeDefined()
-    expect(options.chart.animations.enabled).toBe(true)
+    expect(options.chart.animations.enabled).toBe(false)
     expect(options.chart.animations.speed).toBe(1000)
     expect(options.chart.toolbar).toBeDefined()
     expect(options.chart.toolbar.show).toBe(false)

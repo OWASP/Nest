@@ -4,6 +4,7 @@ import React from 'react'
 import type { IconType } from 'react-icons'
 import { ApexBarChartDataSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
+import ErrorBoundary from 'components/ErrorBoundary'
 import SecondaryCard from 'components/SecondaryCard'
 
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
@@ -47,82 +48,86 @@ const BarChart: React.FC<{
   }))
   return (
     <SecondaryCard title={<AnchorTitle title={title} />} icon={icon}>
-      <Chart
-        key={theme}
-        options={{
-          chart: {
-            animations: {
-              enabled: true,
-              speed: 1000,
+      <ErrorBoundary fallback={<div>BarChart error</div>}>
+        <Chart
+          key={theme}
+          options={{
+            chart: {
+              animations: {
+                enabled: false,
+                speed: 1000,
+              },
+              toolbar: {
+                show: false,
+              },
+              foreColor: themeColor,
             },
-            toolbar: {
-              show: false,
+            plotOptions: {
+              bar: {
+                horizontal: true,
+                columnWidth: '70%',
+              },
             },
-            foreColor: themeColor,
-          },
-          plotOptions: {
-            bar: {
-              horizontal: true,
-              columnWidth: '70%',
+            tooltip: {
+              theme: theme,
             },
-          },
-          tooltip: {
-            theme: theme,
-          },
-          dataLabels: {
-            formatter: (val: number, opts) => {
-              const goal = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex].goals[0]
-              if (goal) {
-                return `${val} / ${goal.value}`
-              }
-              return val.toString()
+            dataLabels: {
+              formatter: (val: number, opts) => {
+                const goal =
+                  opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex].goals[0]
+                if (goal) {
+                  return `${val} / ${goal.value}`
+                }
+                return val.toString()
+              },
             },
-          },
-          colors: [
-            function ({
-              value,
-              dataPointIndex,
-              _,
-            }: {
-              value: number
-              dataPointIndex: number
-              _: unknown
-            }) {
-              const requirement = requirements[dataPointIndex]
-              if (reverseColors?.[dataPointIndex]) {
-                if (value < requirement * 0.75) {
-                  return orangeColor
-                } else if (value < requirement) {
+            colors: [
+              function ({
+                value,
+                dataPointIndex,
+                _,
+              }: {
+                value: number
+                dataPointIndex: number
+                _: unknown
+              }) {
+                const requirement = requirements[dataPointIndex]
+                if (reverseColors?.[dataPointIndex]) {
+                  if (value < requirement * 0.75) {
+                    return orangeColor
+                  } else if (value < requirement) {
+                    return redColor
+                  }
+                  return greenColor
+                }
+                if (value > requirement) {
                   return redColor
+                } else if (value > requirement * 0.75) {
+                  return orangeColor
                 }
                 return greenColor
-              }
-              if (value > requirement) {
-                return redColor
-              } else if (value > requirement * 0.75) {
-                return orangeColor
-              }
-              return greenColor
+              },
+            ],
+            legend: {
+              show: true,
+              showForSingleSeries: true,
+              customLegendItems: ['Actual', 'Requirement'],
+              markers: {
+                fillColors: [greenColor, redColor],
+              },
             },
-          ],
-          legend: {
-            show: true,
-            showForSingleSeries: true,
-            customLegendItems: ['Actual', 'Requirement'],
-            markers: {
-              fillColors: [greenColor, redColor],
+          }}
+          series={[
+            {
+              name: 'Actual',
+              data: seriesData,
             },
-          },
-        }}
-        series={[
-          {
-            name: 'Actual',
-            data: seriesData,
-          },
-        ]}
-        height={300}
-        type="bar"
-      />
+          ]}
+          height={300}
+          width="100%"
+          type="bar"
+        />
+      </ErrorBoundary>
     </SecondaryCard>
   )
 }

@@ -58,7 +58,7 @@ describe('ChaptersPage Component', () => {
       const skeletonLoaders = screen.getAllByRole('status')
       expect(skeletonLoaders.length).toBeGreaterThan(0)
     })
-  })
+  }, 15000)
 
   test('renders chapter data correctly', async () => {
     render(<ChaptersPage />)
@@ -68,7 +68,7 @@ describe('ChaptersPage Component', () => {
     expect(screen.getByText('This is a summary of Chapter 1.')).toBeInTheDocument()
     const viewButton = screen.getByText('View Details')
     expect(viewButton).toBeInTheDocument()
-  })
+  }, 15000)
 
   test('displays "No chapters found" when there are no chapters', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })

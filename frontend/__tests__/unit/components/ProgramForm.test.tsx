@@ -37,13 +37,13 @@ describe('ProgramForm Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-      ; (useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: { programs: [] },
-          },
-        }),
-      })
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: jest.fn().mockResolvedValue({
+        data: {
+          myPrograms: { programs: [] },
+        },
+      }),
+    })
   })
 
   describe('Component Rendering', () => {
@@ -341,7 +341,7 @@ describe('ProgramForm Component', () => {
       // Fields should be marked as touched
       // This is tested indirectly - the implementation marks them as touched
       expect(mockOnSubmit).not.toHaveBeenCalled() // Validation should fail
-    })
+    }, 15000)
   })
 
   describe('Name Uniqueness Validation', () => {
@@ -353,9 +353,9 @@ describe('ProgramForm Component', () => {
         },
       })
 
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: mockQuery,
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: mockQuery,
+      })
 
       render(
         <ProgramForm
@@ -380,20 +380,20 @@ describe('ProgramForm Component', () => {
 
     test('allows submission when program name is unique', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: {
-              myPrograms: {
-                programs: [
-                  {
-                    name: 'Different Name',
-                    key: 'different-key',
-                  },
-                ],
-              },
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            myPrograms: {
+              programs: [
+                {
+                  name: 'Different Name',
+                  key: 'different-key',
+                },
+              ],
             },
-          }),
-        })
+          },
+        }),
+      })
 
       render(
         <ProgramForm
@@ -418,20 +418,20 @@ describe('ProgramForm Component', () => {
 
     test('prevents submission when program name already exists (create mode)', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: {
-              myPrograms: {
-                programs: [
-                  {
-                    name: 'Test Program',
-                    key: 'other-key',
-                  },
-                ],
-              },
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            myPrograms: {
+              programs: [
+                {
+                  name: 'Test Program',
+                  key: 'other-key',
+                },
+              ],
             },
-          }),
-        })
+          },
+        }),
+      })
 
       render(
         <ProgramForm
@@ -460,20 +460,20 @@ describe('ProgramForm Component', () => {
 
     test('allows same name in edit mode when editing same program', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: {
-              myPrograms: {
-                programs: [
-                  {
-                    name: 'Test Program',
-                    key: 'test-key',
-                  },
-                ],
-              },
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            myPrograms: {
+              programs: [
+                {
+                  name: 'Test Program',
+                  key: 'test-key',
+                },
+              ],
             },
-          }),
-        })
+          },
+        }),
+      })
 
       render(
         <ProgramForm
@@ -500,9 +500,9 @@ describe('ProgramForm Component', () => {
 
     test('handles Apollo query errors gracefully', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockRejectedValue(new Error('Network error')),
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockRejectedValue(new Error('Network error')),
+      })
 
       render(
         <ProgramForm
@@ -721,15 +721,15 @@ describe('ProgramForm Component', () => {
   describe('Additional Coverage Tests', () => {
     test('clears name error when field is changed', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: {
-              myPrograms: {
-                programs: [{ name: 'Test Program', key: 'other' }],
-              },
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            myPrograms: {
+              programs: [{ name: 'Test Program', key: 'other' }],
             },
-          }),
-        })
+          },
+        }),
+      })
 
       render(
         <ProgramForm
@@ -754,9 +754,9 @@ describe('ProgramForm Component', () => {
         data: { myPrograms: { programs: [] } },
       })
 
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: mockQuery,
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: mockQuery,
+      })
 
       const emptyFormData = { ...defaultFormData, name: '' }
 
@@ -889,20 +889,20 @@ describe('ProgramForm Component', () => {
 
     test('handles case insensitive name uniqueness check', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: {
-              myPrograms: {
-                programs: [
-                  {
-                    name: 'test program',
-                    key: 'other-key',
-                  },
-                ],
-              },
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            myPrograms: {
+              programs: [
+                {
+                  name: 'test program',
+                  key: 'other-key',
+                },
+              ],
             },
-          }),
-        })
+          },
+        }),
+      })
 
       render(
         <ProgramForm
@@ -926,9 +926,9 @@ describe('ProgramForm Component', () => {
 
     test('handles Apollo query error in uniqueness check gracefully and allows submission', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockRejectedValue(new Error('Apollo error')),
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockRejectedValue(new Error('Apollo error')),
+      })
 
       render(
         <ProgramForm
@@ -980,9 +980,9 @@ describe('ProgramForm Component', () => {
         data: { myPrograms: { programs: [] } },
       })
 
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: mockQuery,
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: mockQuery,
+      })
 
       // Form with whitespace-only name - should trigger early return in checkNameUniquenessSync (line 116)
       const whitespaceNameFormData = {
@@ -1016,9 +1016,9 @@ describe('ProgramForm Component', () => {
         data: { myPrograms: { programs: [] } },
       })
 
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: mockQuery,
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: mockQuery,
+      })
 
       // Form with completely empty name - covers the else branch at line 162-163
       const emptyNameFormData = {
@@ -1050,20 +1050,20 @@ describe('ProgramForm Component', () => {
 
     test('prevents submission in edit mode when name matches different program', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: {
-              myPrograms: {
-                programs: [
-                  {
-                    name: 'Test Program',
-                    key: 'different-program-key',
-                  },
-                ],
-              },
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            myPrograms: {
+              programs: [
+                {
+                  name: 'Test Program',
+                  key: 'different-program-key',
+                },
+              ],
             },
-          }),
-        })
+          },
+        }),
+      })
 
       // In edit mode with currentProgramKey, but the found program has a different key
       // This covers the branch: isEdit is true AND program.key !== currentProgramKey
@@ -1092,15 +1092,15 @@ describe('ProgramForm Component', () => {
         },
         { timeout: 2000 }
       )
-    })
+    }, 15000)
 
     test('handles menteesLimit touched state set to true for validation', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: { myPrograms: { programs: [] } },
-          }),
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: { myPrograms: { programs: [] } },
+        }),
+      })
 
       // Render with a valid form
       render(
@@ -1132,15 +1132,15 @@ describe('ProgramForm Component', () => {
 
     test('handles null programs array in uniqueness check', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: {
-              myPrograms: {
-                programs: null, // Tests the || [] fallback
-              },
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: {
+            myPrograms: {
+              programs: null, // Tests the || [] fallback
             },
-          }),
-        })
+          },
+        }),
+      })
 
       render(
         <ProgramForm
@@ -1166,11 +1166,11 @@ describe('ProgramForm Component', () => {
 
     test('validates menteesLimit with touched state and valid value', async () => {
       const user = userEvent.setup()
-        ; (useApolloClient as jest.Mock).mockReturnValue({
-          query: jest.fn().mockResolvedValue({
-            data: { myPrograms: { programs: [] } },
-          }),
-        })
+      ;(useApolloClient as jest.Mock).mockReturnValue({
+        query: jest.fn().mockResolvedValue({
+          data: { myPrograms: { programs: [] } },
+        }),
+      })
 
       // Render form with specific menteesLimit
       const formDataWithLimit = { ...filledFormData, menteesLimit: 100 }

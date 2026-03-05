@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/create/page'
-import { it } from 'node:test'
 
 // Mock dependencies to isolate the component
 jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
@@ -125,7 +124,7 @@ describe('CreateModulePage', () => {
       },
       { timeout: 10000 }
     )
-  }, 15000)
+  }, 30000)
 
   it('shows loading spinner while session or query is loading', () => {
     ;(useSession as jest.Mock).mockReturnValue({

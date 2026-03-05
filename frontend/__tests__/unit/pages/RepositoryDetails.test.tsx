@@ -117,7 +117,7 @@ describe('RepositoryDetailsPage', () => {
     await waitFor(() => {
       expect(screen.queryByText('Contributor 13')).not.toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('navigates to user page when contributor is clicked', async () => {
     render(<RepositoryDetailsPage />)

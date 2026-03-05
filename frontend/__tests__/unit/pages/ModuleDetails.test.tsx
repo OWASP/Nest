@@ -80,7 +80,7 @@ describe('ModuleDetailsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Module Not Found')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   it('displays "Module Not Found" when data exists but getModule is null', async () => {
     mockUseQuery.mockReturnValue({

@@ -2,6 +2,7 @@ import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 import React, { useMemo } from 'react'
 import { pluralize } from 'utils/pluralize'
+import ErrorBoundary from 'components/ErrorBoundary'
 
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -90,6 +91,7 @@ const generateHeatmapSeries = (
 const getChartOptions = (isDarkMode: boolean, unit: string) => ({
   chart: {
     type: 'heatmap' as const,
+    animations: { enabled: false },
     toolbar: {
       show: false,
     },
@@ -335,13 +337,15 @@ const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({
         </style>
 
         <div className="inline-block">
-          <Chart
-            height={getChartHeight()}
-            options={options}
-            series={heatmapSeries}
-            type="heatmap"
-            width={chartWidth}
-          />
+          <ErrorBoundary fallback={<div>Heatmap error</div>}>
+            <Chart
+              height={getChartHeight()}
+              options={options}
+              series={heatmapSeries}
+              type="heatmap"
+              width={chartWidth}
+            />
+          </ErrorBoundary>
         </div>
       </div>
     </div>

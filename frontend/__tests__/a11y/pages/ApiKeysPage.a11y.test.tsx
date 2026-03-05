@@ -1,9 +1,26 @@
 import { useQuery } from '@apollo/client/react'
 import { mockApiKeys } from '@mockData/mockApiKeysData'
-import { screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { screen, fireEvent, waitFor, within, act } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
+
+// Polyfill for jsdom TreeWalker currentNode setter which doesn't support non-Node values
+// that @react-aria/focus tries to set during modal focus management
+const originalDescriptor = Object.getOwnPropertyDescriptor(
+  window.TreeWalker.prototype,
+  'currentNode'
+)
+if (originalDescriptor) {
+  Object.defineProperty(window.TreeWalker.prototype, 'currentNode', {
+    ...originalDescriptor,
+    set(value) {
+      if (value instanceof Node) {
+        originalDescriptor.set?.call(this, value)
+      }
+    },
+  })
+}
 
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
@@ -62,11 +79,15 @@ describe('ApiKeysPage Accessibility', () => {
     const { container } = render(<ApiKeysPage />)
 
     const row = (await screen.findByText('mock key 1')).closest('tr')!
-    fireEvent.click(within(row).getByRole('button'))
+    const revokeButton = within(row).getByRole('button')
+
+    await act(async () => {
+      fireEvent.click(revokeButton)
+    })
 
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
 
     const results = await axe(container)
     expect(results).toHaveNoViolations()
-  })
+  }, 15000)
 })

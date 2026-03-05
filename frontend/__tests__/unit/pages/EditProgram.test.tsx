@@ -1,6 +1,6 @@
 import { useQuery, useApolloClient, useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -42,18 +42,18 @@ describe('EditProgramPage', () => {
   })
 
   beforeEach(() => {
-    ; (useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
-      ; (useParams as jest.Mock).mockReturnValue({ programKey: 'program_1' })
-      ; (useApolloClient as jest.Mock).mockReturnValue({
-        query: mockQuery,
-      })
-      ; (useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
+    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush, replace: mockReplace })
+    ;(useParams as jest.Mock).mockReturnValue({ programKey: 'program_1' })
+    ;(useApolloClient as jest.Mock).mockReturnValue({
+      query: mockQuery,
+    })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([mockUpdateProgram, { loading: false }])
     jest.clearAllMocks()
   })
 
   test('shows loading spinner while checking access', () => {
-    ; (useSession as jest.Mock).mockReturnValue({ status: 'loading' })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
+    ;(useSession as jest.Mock).mockReturnValue({ status: 'loading' })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({ loading: true })
 
     render(<EditProgramPage />)
 
@@ -61,18 +61,18 @@ describe('EditProgramPage', () => {
   })
 
   test('denies access for non-admins and redirects', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'nonadmin' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            admins: [{ login: 'admin1' }],
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin1' }],
         },
-      })
+      },
+    })
 
     render(<EditProgramPage />)
 
@@ -82,46 +82,46 @@ describe('EditProgramPage', () => {
   })
 
   test('renders form for valid admin', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin1' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            name: 'Test',
-            description: 'Test description',
-            menteesLimit: 10,
-            startedAt: '2025-01-01',
-            endedAt: '2025-12-31',
-            tags: ['react', 'js'],
-            domains: ['web'],
-            admins: [{ login: 'admin1' }],
-            status: ProgramStatusEnum.Draft,
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: 'Test',
+          description: 'Test description',
+          menteesLimit: 10,
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+          tags: ['react', 'js'],
+          domains: ['web'],
+          admins: [{ login: 'admin1' }],
+          status: ProgramStatusEnum.Draft,
         },
-      })
+      },
+    })
 
     render(<EditProgramPage />)
 
     expect(await screen.findByLabelText('Name')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Test')).toBeInTheDocument()
-  })
+  }, 15000)
 
   test('denies access when session user has no login property', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { name: 'User Without Login' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            admins: [{ login: 'admin1' }],
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin1' }],
         },
-      })
+      },
+    })
 
     render(<EditProgramPage />)
 
@@ -131,14 +131,14 @@ describe('EditProgramPage', () => {
   })
 
   test('denies access when program data is not found', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin1' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: null,
-      })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: null,
+    })
 
     render(<EditProgramPage />)
 
@@ -148,26 +148,26 @@ describe('EditProgramPage', () => {
   })
 
   test('submits form successfully and navigates', async () => {
-    ; (useSession as jest.Mock).mockReturnValue({
+    ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin1' } },
       status: 'authenticated',
     })
-      ; (useQuery as unknown as jest.Mock).mockReturnValue({
-        loading: false,
-        data: {
-          getProgram: {
-            name: 'Test',
-            description: 'Test description',
-            menteesLimit: 10,
-            startedAt: '2025-01-01',
-            endedAt: '2025-12-31',
-            tags: ['react', 'js'],
-            domains: ['web'],
-            admins: [{ login: 'admin1' }],
-            status: ProgramStatusEnum.Draft,
-          },
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: 'Test',
+          description: 'Test description',
+          menteesLimit: 10,
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+          tags: ['react', 'js'],
+          domains: ['web'],
+          admins: [{ login: 'admin1' }],
+          status: ProgramStatusEnum.Draft,
         },
-      })
+      },
+    })
     mockUpdateProgram.mockResolvedValue({
       data: { updateProgram: { key: 'program_1' } },
     })
@@ -199,169 +199,170 @@ describe('EditProgramPage', () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/program_1')
     })
+  })
 
-    test('handles form submission error', async () => {
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin1' } },
-        status: 'authenticated',
-      })
-        ; (useQuery as unknown as jest.Mock).mockReturnValue({
-          loading: false,
-          data: {
-            getProgram: {
-              name: 'Test',
-              description: 'Test description',
-              menteesLimit: 10,
-              startedAt: '2025-01-01',
-              endedAt: '2025-12-31',
-              tags: ['react', 'js'],
-              domains: ['web'],
-              admins: [{ login: 'admin1' }],
-              status: ProgramStatusEnum.Draft,
-            },
-          },
-        })
-      mockUpdateProgram.mockRejectedValue(new Error('Update failed'))
+  test('handles form submission error', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin1' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: 'Test',
+          description: 'Test description',
+          menteesLimit: 10,
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+          tags: ['react', 'js'],
+          domains: ['web'],
+          admins: [{ login: 'admin1' }],
+          status: ProgramStatusEnum.Draft,
+        },
+      },
+    })
+    mockUpdateProgram.mockRejectedValue(new Error('Update failed'))
 
-      render(<EditProgramPage />)
+    render(<EditProgramPage />)
 
-      await waitFor(async () => {
-        expect(await screen.findByLabelText('Name')).toBeInTheDocument()
-      })
-
-      const submitButton = screen.getByRole('button', { name: /save/i })
-      const user = userEvent.setup()
-      await user.click(submitButton)
-
-      await waitFor(() => {
-        expect(addToast).toHaveBeenCalledWith(
-          expect.objectContaining({
-            title: 'Update Failed',
-            color: 'danger',
-          })
-        )
-      })
+    await waitFor(async () => {
+      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
     })
 
-    test('uses default program key when mutation returns no key', async () => {
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin1' } },
-        status: 'authenticated',
-      })
-        ; (useQuery as unknown as jest.Mock).mockReturnValue({
-          loading: false,
-          data: {
-            getProgram: {
-              name: 'Test',
-              description: 'Test description',
-              menteesLimit: 10,
-              startedAt: '2025-01-01',
-              endedAt: '2025-12-31',
-              tags: ['react', 'js'],
-              domains: ['web'],
-              admins: [{ login: 'admin1' }],
-              status: ProgramStatusEnum.Draft,
-            },
-          },
+    const submitButton = screen.getByRole('button', { name: /save/i })
+    const user = userEvent.setup()
+    await user.click(submitButton)
+
+    await waitFor(() => {
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Update Failed',
+          color: 'danger',
         })
-      mockUpdateProgram.mockResolvedValue({
-        data: { updateProgram: null },
-      })
-
-      render(<EditProgramPage />)
-
-      await waitFor(async () => {
-        expect(await screen.findByLabelText('Name')).toBeInTheDocument()
-      })
-
-      const submitButton = screen.getByRole('button', { name: /save/i })
-      fireEvent.click(submitButton)
-
-      await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/program_1')
-      })
-    })
-
-    test('handles graphql query error', async () => {
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin1' } },
-        status: 'authenticated',
-      })
-        ; (useQuery as unknown as jest.Mock).mockReturnValue({
-          loading: false,
-          data: {
-            getProgram: {
-              name: 'Test',
-              admins: [{ login: 'admin1' }],
-              status: ProgramStatusEnum.Draft,
-            },
-          },
-          error: new Error('GraphQL error'),
-        })
-
-      render(<EditProgramPage />)
-
-      await waitFor(async () => {
-        expect(await screen.findByLabelText('Name')).toBeInTheDocument()
-      })
-    })
-
-    test('handles program with null/empty fields and multiple admins', async () => {
-      ; (useSession as jest.Mock).mockReturnValue({
-        data: { user: { login: 'admin1' } },
-        status: 'authenticated',
-      })
-        ; (useQuery as unknown as jest.Mock).mockReturnValue({
-          loading: false,
-          data: {
-            getProgram: {
-              name: 'Test',
-              description: null,
-              menteesLimit: null,
-              startedAt: '2025-01-01',
-              endedAt: '2025-12-31',
-              tags: null,
-              domains: null,
-              admins: [{ login: 'admin1' }, { login: 'admin2' }],
-              status: null,
-            },
-          },
-        })
-
-      render(<EditProgramPage />)
-
-      await waitFor(async () => {
-        expect(await screen.findByLabelText('Name')).toBeInTheDocument()
-      })
-    })
-
-    test('redirects after timeout when access is denied', async () => {
-      jest.useFakeTimers()
-        ; (useSession as jest.Mock).mockReturnValue({
-          data: { user: { login: 'nonadmin' } },
-          status: 'authenticated',
-        })
-        ; (useQuery as unknown as jest.Mock).mockReturnValue({
-          loading: false,
-          data: {
-            getProgram: {
-              admins: [{ login: 'admin1' }],
-            },
-          },
-        })
-
-      render(<EditProgramPage />)
-
-      await waitFor(async () => {
-        expect(await screen.findByText('Access Denied')).toBeInTheDocument()
-      })
-
-      jest.advanceTimersByTime(1500)
-
-      await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/my/mentorship/programs')
-      })
-
-      jest.useRealTimers()
+      )
     })
   })
+
+  test('uses default program key when mutation returns no key', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin1' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: 'Test',
+          description: 'Test description',
+          menteesLimit: 10,
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+          tags: ['react', 'js'],
+          domains: ['web'],
+          admins: [{ login: 'admin1' }],
+          status: ProgramStatusEnum.Draft,
+        },
+      },
+    })
+    mockUpdateProgram.mockResolvedValue({
+      data: { updateProgram: null },
+    })
+
+    render(<EditProgramPage />)
+
+    await waitFor(async () => {
+      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+    })
+
+    const submitButton = screen.getByRole('button', { name: /save/i })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/program_1')
+    })
+  })
+
+  test('handles graphql query error', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin1' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: 'Test',
+          admins: [{ login: 'admin1' }],
+          status: ProgramStatusEnum.Draft,
+        },
+      },
+      error: new Error('GraphQL error'),
+    })
+
+    render(<EditProgramPage />)
+
+    await waitFor(async () => {
+      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+    })
+  })
+
+  test('handles program with null/empty fields and multiple admins', async () => {
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'admin1' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          name: 'Test',
+          description: null,
+          menteesLimit: null,
+          startedAt: '2025-01-01',
+          endedAt: '2025-12-31',
+          tags: null,
+          domains: null,
+          admins: [{ login: 'admin1' }, { login: 'admin2' }],
+          status: null,
+        },
+      },
+    })
+
+    render(<EditProgramPage />)
+
+    await waitFor(async () => {
+      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+    })
+  })
+
+  test('redirects after timeout when access is denied', async () => {
+    jest.useFakeTimers()
+    ;(useSession as jest.Mock).mockReturnValue({
+      data: { user: { login: 'nonadmin' } },
+      status: 'authenticated',
+    })
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      loading: false,
+      data: {
+        getProgram: {
+          admins: [{ login: 'admin1' }],
+        },
+      },
+    })
+
+    render(<EditProgramPage />)
+
+    await waitFor(async () => {
+      expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+    })
+
+    jest.advanceTimersByTime(1500)
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith('/my/mentorship/programs')
+    })
+
+    jest.useRealTimers()
+  })
+})

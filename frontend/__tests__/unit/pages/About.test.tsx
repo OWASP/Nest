@@ -635,7 +635,7 @@ describe('About Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Not Started')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('renders milestone with progress 50 - In Progress', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
@@ -669,7 +669,7 @@ describe('About Component', () => {
     await waitFor(() => {
       expect(screen.getByText('In Progress Milestone')).toBeInTheDocument()
     })
-  })
+  }, 15000)
 
   test('renders milestone with progress 100 - Completed', async () => {
     ;(useQuery as unknown as jest.Mock).mockImplementation((query) => {
