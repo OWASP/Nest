@@ -260,7 +260,7 @@ Migrate and load data into the new database.
   - Networking:
     - VPC: `nest-staging-vpc`
     - Subnets: subnets will be auto-selected due to VPC selection.
-    - Security group name: select the ECS security group (e.g. `nest-staging-ecs-sg`).
+    - Security group name: select the ECS security group (e.g. `nest-staging-tasks-sg`).
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.

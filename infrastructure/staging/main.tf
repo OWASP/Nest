@@ -33,24 +33,27 @@ module "alb" {
 }
 
 module "backend" {
-  source = "../modules/backend"
+  source = "../modules/service"
 
-  aws_region              = var.aws_region
-  backend_parameters_arns = module.parameters.django_ssm_parameter_arns
-  backend_sg_id           = module.security.backend_sg_id
-  common_tags             = local.common_tags
-  desired_count           = var.backend_desired_count
-  ecr_repository_arn      = module.tasks.ecr_repository_arn
-  enable_auto_scaling     = var.backend_enable_auto_scaling
-  environment             = var.environment
-  image_url               = "${module.tasks.ecr_repository_url}:latest"
-  kms_key_arn             = module.kms.key_arn
-  max_count               = var.backend_max_count
-  min_count               = var.backend_min_count
-  private_subnet_ids      = module.networking.private_subnet_ids
-  project_name            = var.project_name
-  target_group_arn        = module.alb.backend_target_group_arn
-  use_fargate_spot        = var.backend_use_fargate_spot
+  aws_region          = var.aws_region
+  command             = ["./entrypoint.sh"]
+  common_tags         = local.common_tags
+  container_cpu       = 1024
+  container_memory    = 2048
+  container_port      = 8000
+  desired_count       = var.backend_desired_count
+  enable_auto_scaling = var.backend_enable_auto_scaling
+  environment         = var.environment
+  kms_key_arn         = module.kms.key_arn
+  max_count           = var.backend_max_count
+  min_count           = var.backend_min_count
+  parameters_arns     = module.parameters.django_ssm_parameter_arns
+  private_subnet_ids  = module.networking.private_subnet_ids
+  project_name        = var.project_name
+  security_group_id   = module.security.backend_sg_id
+  service_name        = "backend"
+  target_group_arn    = module.alb.backend_target_group_arn
+  use_fargate_spot    = var.backend_use_fargate_spot
 }
 
 module "cache" {
@@ -93,22 +96,24 @@ module "database" {
 }
 
 module "frontend" {
-  source = "../modules/frontend"
+  source = "../modules/service"
 
-  aws_region               = var.aws_region
-  common_tags              = local.common_tags
-  desired_count            = var.frontend_desired_count
-  enable_auto_scaling      = var.frontend_enable_auto_scaling
-  environment              = var.environment
-  frontend_parameters_arns = module.parameters.frontend_ssm_parameter_arns
-  frontend_sg_id           = module.security.frontend_sg_id
-  kms_key_arn              = module.kms.key_arn
-  max_count                = var.frontend_max_count
-  min_count                = var.frontend_min_count
-  private_subnet_ids       = module.networking.private_subnet_ids
-  project_name             = var.project_name
-  target_group_arn         = module.alb.frontend_target_group_arn
-  use_fargate_spot         = var.frontend_use_fargate_spot
+  aws_region          = var.aws_region
+  common_tags         = local.common_tags
+  container_port      = 3000
+  desired_count       = var.frontend_desired_count
+  enable_auto_scaling = var.frontend_enable_auto_scaling
+  environment         = var.environment
+  kms_key_arn         = module.kms.key_arn
+  max_count           = var.frontend_max_count
+  min_count           = var.frontend_min_count
+  parameters_arns     = module.parameters.frontend_ssm_parameter_arns
+  private_subnet_ids  = module.networking.private_subnet_ids
+  project_name        = var.project_name
+  security_group_id   = module.security.frontend_sg_id
+  service_name        = "frontend"
+  target_group_arn    = module.alb.frontend_target_group_arn
+  use_fargate_spot    = var.frontend_use_fargate_spot
 }
 
 module "kms" {
@@ -189,7 +194,9 @@ module "tasks" {
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns
-  ecs_sg_id                     = module.security.ecs_sg_id
+  ecr_repository_arn            = module.backend.ecr_repository_arn
+  ecr_repository_url            = module.backend.ecr_repository_url
+  ecs_sg_id                     = module.security.tasks_sg_id
   environment                   = var.environment
   fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn

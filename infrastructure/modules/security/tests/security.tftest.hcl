@@ -84,11 +84,11 @@ run "test_alb_to_frontend_rule_type" {
   }
 }
 
-run "test_ecs_security_group_name_format" {
+run "test_ecs_tasks_security_group_name_format" {
   command = plan
 
   assert {
-    condition     = aws_security_group.ecs.name == "${var.project_name}-${var.environment}-ecs-sg"
+    condition     = aws_security_group.tasks.name == "${var.project_name}-${var.environment}-ecs-sg"
     error_message = "ECS security group name must follow format: {project}-{environment}-ecs-sg."
   }
 }
