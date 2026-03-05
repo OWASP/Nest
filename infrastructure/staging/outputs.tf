@@ -15,7 +15,7 @@ output "alb_dns_name" {
 
 output "backend_ecr_repository_url" {
   description = "The URL of the backend ECR repository."
-  value       = module.ecs.ecr_repository_url
+  value       = module.tasks.ecr_repository_url
 }
 
 output "ecs_security_group_id" {
@@ -65,5 +65,5 @@ output "private_subnet_ids" {
 
 output "tasks_cluster_name" {
   description = "The name of the ECS tasks cluster."
-  value       = module.ecs.ecs_cluster_name
+  value       = module.tasks.ecs_cluster_name
 }

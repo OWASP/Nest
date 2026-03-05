@@ -314,10 +314,6 @@ Migrate and load data into the new database.
   terraform destroy
   ```
 
-> [!NOTE]
-> The `nest-staging` Lambda function was previously created by Zappa and is **not managed by Terraform**.
-> Delete it manually from the AWS Console after confirming the ECS backend is working.
-
 ## Helpful Commands
 
 - Force a new backend deployment:
