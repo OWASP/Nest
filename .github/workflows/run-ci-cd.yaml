@@ -881,25 +881,25 @@ jobs:
         run: |
           echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
           echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
-          echo "ecs_security_group_id=$(terraform output -raw ecs_security_group_id)" >> $GITHUB_OUTPUT
           echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
           echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
           echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
           echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
+          echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
 
       - name: Run ECS migrate task
         id: migrate-task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          ECS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.ecs_security_group_id }}
           PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: nest-staging-migrate
         run: |
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
@@ -931,15 +931,15 @@ jobs:
       - name: Run ECS index-data task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          ECS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.ecs_security_group_id }}
           PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: nest-staging-index-data
         run: |
           aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
           echo "Index-data task started (runs async, ~30 min)"
 
       - name: Force new backend deployment
