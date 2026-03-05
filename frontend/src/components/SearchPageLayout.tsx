@@ -54,7 +54,7 @@ const SearchPageLayout = ({
       {isLoaded ? (
         <>
           <div className={`${totalPages === 0 ? 'mx-auto w-full max-w-[90%]' : 'w-auto'}`}>
-            <div className="mb-4 flex justify-between">
+            <div className={`mb-4 flex ${filterChildren ? 'justify-between' : 'justify-end'}`}>
               {filterChildren}
               {totalPages !== 0 && sortChildren}
             </div>

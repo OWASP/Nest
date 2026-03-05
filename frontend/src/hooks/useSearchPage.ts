@@ -143,7 +143,7 @@ export function useSearchPage<T>({
 
   const handleFilterChange = (option: string) => {
     setCurrentPage(1)
-    setFacetFilters([option])
+    setFacetFilters(option.trim() ? [option] : [])
   }
 
   return {

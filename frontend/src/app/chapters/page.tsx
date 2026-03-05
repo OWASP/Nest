@@ -54,7 +54,7 @@ const ChaptersPage = () => {
         searchParams.query,
         searchParams.currentPage,
         searchParams.hitsPerPage,
-        facetFilters
+        [...facetFilters]
       )
       setGeoLocData(data.hits)
     }
@@ -65,7 +65,8 @@ const ChaptersPage = () => {
 
   const handleCountryChange = (value: string) => {
     setSelectedCountry(value)
-    handleFilterChange(`idx_country: ${value}`)
+    const filterValue = value && value !== 'All Countries' ? `idx_country: ${value}` : ''
+    handleFilterChange(filterValue)
   }
 
   const router = useRouter()
