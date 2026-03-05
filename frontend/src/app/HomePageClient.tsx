@@ -319,7 +319,7 @@ export default function HomePageClient({
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
                         {data?.recentPosts.map((post) => (
                             <div
-                                key={post.title}
+                                key={post.url}
                                 className="overflow-hidden rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
                             >
                                 <h3 className="mb-1 text-lg font-semibold">
