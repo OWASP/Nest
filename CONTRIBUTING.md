@@ -16,11 +16,14 @@ The project uses a **containerized approach** for both development and productio
 
 Before contributing, ensure you have the following installed:
 
-1. **Docker**: Required for running the Nest instance - [Docker documentation](https://docs.docker.com/).
-1. **pre-commit**: Required to automate code checks - [pre-commit documentation](https://pre-commit.com/)
-1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+1. [Docker](https://docs.docker.com/engine/install/) for running the Nest containers.
+1. [pre-commit](https://pre-commit.com/#install) for automated code checks.
+1. [terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform) and [tflint](https://github.com/terraform-linters/tflint?tab=readme-ov-file#installation) for IaC.
+
+Optional steps for Windows:
+
+1. [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows Subsystem for Linux) for Windows users to enable Linux compatibility
    1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
-      If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
    1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. You can enter the Linux environment by running `wsl`. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
    1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
    1. Cloning or running the project under `/mnt/c` (the Windows C: drive) can lead to significant performance degradation and Docker permission issues.
