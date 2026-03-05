@@ -61,7 +61,7 @@ def create_chunks_and_embeddings(
             if chunk is not None:
                 chunks.append(chunk)
 
-    except (OpenAIError, AttributeError, TypeError):
+    except (OpenAIError, AttributeError, TypeError, ValueError):
         logger.exception("Failed to create chunks and embeddings")
         return []
     else:

@@ -37,7 +37,7 @@ class Chunk(TimestampedModel):
     @staticmethod
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
-        from langchain.text_splitter import RecursiveCharacterTextSplitter  # noqa: PLC0415
+        from langchain_text_splitters import RecursiveCharacterTextSplitter  # noqa: PLC0415
 
         return RecursiveCharacterTextSplitter(
             chunk_size=200,

@@ -211,11 +211,15 @@ def process_query(  # noqa: PLR0911
 
             agents = []
             tasks = []
+            rag_agent = None
 
             for intent_value in all_intents:
                 if creator := INTENT_TO_AGENT.get(intent_value):
                     agent = creator(allow_delegation=True)
                     agents.append(agent)
+                    # Track RAG agent for synthesis
+                    if intent_value == Intent.RAG.value:
+                        rag_agent = agent
                     tasks.append(
                         Task(
                             description=(
@@ -234,9 +238,14 @@ def process_query(  # noqa: PLR0911
                     extra={"intent": intent, "all_intents": all_intents},
                 )
             else:
-                if len(agents) > 1 and Intent.RAG.value not in all_intents:
+                # Add RAG agent for synthesis if not already present and we have multiple agents
+                if len(agents) > 1 and rag_agent is None:
                     rag_agent = create_rag_agent(allow_delegation=False)
                     agents.append(rag_agent)
+
+                # Use RAG agent for synthesis if available (best suited for synthesis)
+                # RAG has access to all knowledge and is ideal for synthesizing multiple perspectives
+                synthesis_agent = rag_agent if rag_agent is not None else agents[-1]
 
                 synthesis_task = Task(
                     description=(
@@ -245,7 +254,7 @@ def process_query(  # noqa: PLR0911
                         "Ensure all parts of the query are addressed and formatted "
                         "nicely for Slack."
                     ),
-                    agent=agents[-1],
+                    agent=synthesis_agent,
                     expected_output="Final comprehensive answer for Slack",
                 )
                 tasks.append(synthesis_task)
@@ -259,7 +268,25 @@ def process_query(  # noqa: PLR0911
                     max_rpm=10,
                 )
                 result = crew.kickoff()
-                return str(result)
+                result_str = str(result).strip() if result else ""
+
+                # Validate result - if it's just "YES" or "NO", something went wrong
+                # This prevents leaking Question Detector output to users
+                if result_str and result_str.upper() in ("YES", "NO"):
+                    logger.error(
+                        "Collaborative flow returned Question Detector output instead of proper response",
+                        extra={
+                            "intent": intent,
+                            "all_intents": all_intents,
+                            "result": result_str,
+                            "result_length": len(result_str),
+                            "query": query[:200],
+                        },
+                    )
+                    # Return a fallback response instead
+                    return get_fallback_response()
+
+                return result_str or str(result)
 
         # Step 2: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
