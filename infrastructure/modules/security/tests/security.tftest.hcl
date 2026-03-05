@@ -62,6 +62,28 @@ run "test_alb_https_rule_type" {
   }
 }
 
+run "test_alb_to_backend_rule_port" {
+  command = plan
+
+  assert {
+    condition     = aws_security_group_rule.alb_to_backend.from_port == 8000
+    error_message = "ALB to Backend rule must allow from_port 8000."
+  }
+  assert {
+    condition     = aws_security_group_rule.alb_to_backend.to_port == 8000
+    error_message = "ALB to Backend rule must allow to_port 8000."
+  }
+}
+
+run "test_alb_to_backend_rule_type" {
+  command = plan
+
+  assert {
+    condition     = aws_security_group_rule.alb_to_backend.type == "egress"
+    error_message = "ALB to Backend rule must be of type egress."
+  }
+}
+
 run "test_alb_to_frontend_rule_port" {
   command = plan
 
@@ -84,40 +106,96 @@ run "test_alb_to_frontend_rule_type" {
   }
 }
 
-run "test_ecs_tasks_security_group_name_format" {
+run "test_backend_security_group_name_format" {
   command = plan
-
   assert {
-    condition     = aws_security_group.tasks.name == "${var.project_name}-${var.environment}-ecs-sg"
-    error_message = "ECS security group name must follow format: {project}-{environment}-ecs-sg."
+    condition     = aws_security_group.backend.name == "${var.project_name}-${var.environment}-backend-sg"
+    error_message = "Backend security group name must follow format: {project}-{environment}-backend-sg."
   }
 }
 
-run "test_ecs_egress_all_rule_port" {
+run "test_backend_from_alb_rule_port" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.ecs_egress_all.from_port == 0
-    error_message = "ECS egress rule must allow from_port 0."
+    condition     = aws_security_group_rule.backend_from_alb.from_port == 8000
+    error_message = "Backend ingress from ALB must allow from_port 8000."
   }
   assert {
-    condition     = aws_security_group_rule.ecs_egress_all.to_port == 0
-    error_message = "ECS egress rule must allow to_port 0."
-  }
-}
-
-run "test_ecs_egress_all_rule_protocol" {
-  command = plan
-  assert {
-    condition     = aws_security_group_rule.ecs_egress_all.protocol == "-1"
-    error_message = "ECS egress rule must use protocol -1 (all)."
+    condition     = aws_security_group_rule.backend_from_alb.to_port == 8000
+    error_message = "Backend ingress from ALB must allow to_port 8000."
   }
 }
 
-run "test_ecs_egress_all_rule_type" {
+run "test_backend_from_alb_rule_type" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.ecs_egress_all.type == "egress"
-    error_message = "ECS egress rule must be of type egress."
+    condition     = aws_security_group_rule.backend_from_alb.type == "ingress"
+    error_message = "Backend ingress from ALB must be of type ingress."
+  }
+}
+
+run "test_backend_egress_all_rule_port" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.backend_egress_all.from_port == 0
+    error_message = "Backend egress rule must allow from_port 0."
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_egress_all.to_port == 0
+    error_message = "Backend egress rule must allow to_port 0."
+  }
+}
+
+run "test_backend_egress_all_rule_protocol" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.backend_egress_all.protocol == "-1"
+    error_message = "Backend egress rule must use protocol -1 (all)."
+  }
+}
+
+run "test_backend_egress_all_rule_type" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.backend_egress_all.type == "egress"
+    error_message = "Backend egress rule must be of type egress."
+  }
+}
+
+run "test_tasks_security_group_name_format" {
+  command = plan
+
+  assert {
+    condition     = aws_security_group.tasks.name == "${var.project_name}-${var.environment}-tasks-sg"
+    error_message = "Tasks security group name must follow format: {project}-{environment}-tasks-sg."
+  }
+}
+
+run "test_task_egress_all_rule_port" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.task_egress_all.from_port == 0
+    error_message = "Task egress rule must allow from_port 0."
+  }
+  assert {
+    condition     = aws_security_group_rule.task_egress_all.to_port == 0
+    error_message = "Task egress rule must allow to_port 0."
+  }
+}
+
+run "test_task_egress_all_rule_protocol" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.task_egress_all.protocol == "-1"
+    error_message = "Task egress rule must use protocol -1 (all)."
+  }
+}
+
+run "test_task_egress_all_rule_type" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.task_egress_all.type == "egress"
+    error_message = "Task egress rule must be of type egress."
   }
 }
 
@@ -169,42 +247,6 @@ run "test_frontend_https_rule_type" {
   }
 }
 
-run "test_lambda_security_group_name_format" {
-  command = plan
-  assert {
-    condition     = aws_security_group.lambda.name == "${var.project_name}-${var.environment}-lambda-sg"
-    error_message = "Lambda security group name must follow format: {project}-{environment}-lambda-sg."
-  }
-}
-
-run "test_lambda_egress_all_rule_port" {
-  command = plan
-  assert {
-    condition     = aws_security_group_rule.lambda_egress_all.from_port == 0
-    error_message = "Lambda egress rule must allow from_port 0."
-  }
-  assert {
-    condition     = aws_security_group_rule.lambda_egress_all.to_port == 0
-    error_message = "Lambda egress rule must allow to_port 0."
-  }
-}
-
-run "test_lambda_egress_all_rule_protocol" {
-  command = plan
-  assert {
-    condition     = aws_security_group_rule.lambda_egress_all.protocol == "-1"
-    error_message = "Lambda egress rule must use protocol -1 (all)."
-  }
-}
-
-run "test_lambda_egress_all_rule_type" {
-  command = plan
-  assert {
-    condition     = aws_security_group_rule.lambda_egress_all.type == "egress"
-    error_message = "Lambda egress rule must be of type egress."
-  }
-}
-
 run "test_rds_security_group_name_format" {
   command = plan
   assert {
@@ -224,55 +266,55 @@ run "test_rds_proxy_security_group_name_format" {
   }
 }
 
-run "test_rds_from_ecs_rule_port" {
+run "test_rds_from_backend_rule_port" {
   command = plan
   variables {
     create_rds_proxy = false
   }
   assert {
-    condition     = aws_security_group_rule.rds_from_ecs[0].from_port == var.db_port
-    error_message = "RDS ingress from ECS must allow database port."
+    condition     = aws_security_group_rule.rds_from_backend[0].from_port == var.db_port
+    error_message = "RDS ingress from backend must allow database port."
   }
   assert {
-    condition     = aws_security_group_rule.rds_from_ecs[0].to_port == var.db_port
-    error_message = "RDS ingress from ECS must allow database port."
+    condition     = aws_security_group_rule.rds_from_backend[0].to_port == var.db_port
+    error_message = "RDS ingress from backend must allow database port."
   }
 }
 
-run "test_rds_from_ecs_rule_type" {
+run "test_rds_from_backend_rule_type" {
   command = plan
   variables {
     create_rds_proxy = false
   }
   assert {
-    condition     = aws_security_group_rule.rds_from_ecs[0].type == "ingress"
-    error_message = "RDS ingress from ECS must be of type ingress."
+    condition     = aws_security_group_rule.rds_from_backend[0].type == "ingress"
+    error_message = "RDS ingress from backend must be of type ingress."
   }
 }
 
-run "test_rds_from_lambda_rule_port" {
+run "test_rds_from_task_rule_port" {
   command = plan
   variables {
     create_rds_proxy = false
   }
   assert {
-    condition     = aws_security_group_rule.rds_from_lambda[0].from_port == var.db_port
-    error_message = "RDS ingress from Lambda must allow database port."
+    condition     = aws_security_group_rule.rds_from_task[0].from_port == var.db_port
+    error_message = "RDS ingress from ECS task must allow database port."
   }
   assert {
-    condition     = aws_security_group_rule.rds_from_lambda[0].to_port == var.db_port
-    error_message = "RDS ingress from Lambda must allow database port."
+    condition     = aws_security_group_rule.rds_from_task[0].to_port == var.db_port
+    error_message = "RDS ingress from ECS task must allow database port."
   }
 }
 
-run "test_rds_from_lambda_rule_type" {
+run "test_rds_from_task_rule_type" {
   command = plan
   variables {
     create_rds_proxy = false
   }
   assert {
-    condition     = aws_security_group_rule.rds_from_lambda[0].type == "ingress"
-    error_message = "RDS ingress from Lambda must be of type ingress."
+    condition     = aws_security_group_rule.rds_from_task[0].type == "ingress"
+    error_message = "RDS ingress from ECS task must be of type ingress."
   }
 }
 
@@ -328,55 +370,55 @@ run "test_proxy_to_rds_rule_type" {
   }
 }
 
-run "test_rds_proxy_from_ecs_rule_port" {
+run "test_rds_proxy_from_backend_rule_port" {
   command = plan
   variables {
     create_rds_proxy = true
   }
   assert {
-    condition     = aws_security_group_rule.rds_proxy_from_ecs[0].from_port == var.db_port
-    error_message = "RDS Proxy ingress from ECS must allow database port."
+    condition     = aws_security_group_rule.rds_proxy_from_backend[0].from_port == var.db_port
+    error_message = "RDS Proxy ingress from backend must allow database port."
   }
   assert {
-    condition     = aws_security_group_rule.rds_proxy_from_ecs[0].to_port == var.db_port
-    error_message = "RDS Proxy ingress from ECS must allow database port."
+    condition     = aws_security_group_rule.rds_proxy_from_backend[0].to_port == var.db_port
+    error_message = "RDS Proxy ingress from backend must allow database port."
   }
 }
 
-run "test_rds_proxy_from_ecs_rule_type" {
+run "test_rds_proxy_from_backend_rule_type" {
   command = plan
   variables {
     create_rds_proxy = true
   }
   assert {
-    condition     = aws_security_group_rule.rds_proxy_from_ecs[0].type == "ingress"
-    error_message = "RDS Proxy ingress from ECS must be of type ingress."
+    condition     = aws_security_group_rule.rds_proxy_from_backend[0].type == "ingress"
+    error_message = "RDS Proxy ingress from backend must be of type ingress."
   }
 }
 
-run "test_rds_proxy_from_lambda_rule_port" {
+run "test_rds_proxy_from_task_rule_port" {
   command = plan
   variables {
     create_rds_proxy = true
   }
   assert {
-    condition     = aws_security_group_rule.rds_proxy_from_lambda[0].from_port == var.db_port
-    error_message = "RDS Proxy ingress from Lambda must allow database port."
+    condition     = aws_security_group_rule.rds_proxy_from_task[0].from_port == var.db_port
+    error_message = "RDS Proxy ingress from ECS task must allow database port."
   }
   assert {
-    condition     = aws_security_group_rule.rds_proxy_from_lambda[0].to_port == var.db_port
-    error_message = "RDS Proxy ingress from Lambda must allow database port."
+    condition     = aws_security_group_rule.rds_proxy_from_task[0].to_port == var.db_port
+    error_message = "RDS Proxy ingress from ECS task must allow database port."
   }
 }
 
-run "test_rds_proxy_from_lambda_rule_type" {
+run "test_rds_proxy_from_task_rule_type" {
   command = plan
   variables {
     create_rds_proxy = true
   }
   assert {
-    condition     = aws_security_group_rule.rds_proxy_from_lambda[0].type == "ingress"
-    error_message = "RDS Proxy ingress from Lambda must be of type ingress."
+    condition     = aws_security_group_rule.rds_proxy_from_task[0].type == "ingress"
+    error_message = "RDS Proxy ingress from ECS task must be of type ingress."
   }
 }
 
@@ -388,72 +430,99 @@ run "test_redis_security_group_name_format" {
   }
 }
 
-run "test_redis_from_ecs_rule_port" {
+run "test_redis_from_backend_rule_port" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.redis_from_ecs.from_port == var.redis_port
-    error_message = "Redis ingress from ECS must allow redis port."
+    condition     = aws_security_group_rule.redis_from_backend.from_port == var.redis_port
+    error_message = "Redis ingress from backend must allow redis port."
   }
   assert {
-    condition     = aws_security_group_rule.redis_from_ecs.to_port == var.redis_port
-    error_message = "Redis ingress from ECS must allow redis port."
+    condition     = aws_security_group_rule.redis_from_backend.to_port == var.redis_port
+    error_message = "Redis ingress from backend must allow redis port."
   }
 }
 
-run "test_redis_from_ecs_rule_type" {
+run "test_redis_from_backend_rule_type" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.redis_from_ecs.type == "ingress"
-    error_message = "Redis ingress from ECS must be of type ingress."
+    condition     = aws_security_group_rule.redis_from_backend.type == "ingress"
+    error_message = "Redis ingress from backend must be of type ingress."
   }
 }
 
-run "test_redis_from_lambda_rule_port" {
+run "test_redis_from_task_rule_port" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.redis_from_lambda.from_port == var.redis_port
-    error_message = "Redis ingress from Lambda must allow redis port."
+    condition     = aws_security_group_rule.redis_from_task.from_port == var.redis_port
+    error_message = "Redis ingress from ECS task must allow redis port."
   }
   assert {
-    condition     = aws_security_group_rule.redis_from_lambda.to_port == var.redis_port
-    error_message = "Redis ingress from Lambda must allow redis port."
+    condition     = aws_security_group_rule.redis_from_task.to_port == var.redis_port
+    error_message = "Redis ingress from ECS task must allow redis port."
   }
 }
 
-run "test_redis_from_lambda_rule_type" {
+run "test_redis_from_task_rule_type" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.redis_from_lambda.type == "ingress"
-    error_message = "Redis ingress from Lambda must be of type ingress."
+    condition     = aws_security_group_rule.redis_from_task.type == "ingress"
+    error_message = "Redis ingress from ECS task must be of type ingress."
   }
 }
 
-
-run "test_ecs_to_vpc_endpoints_rule_port" {
+run "test_backend_to_vpc_endpoints_rule_port" {
   command = plan
   variables {
     create_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
-    condition     = aws_security_group_rule.ecs_to_vpc_endpoints[0].from_port == 443
-    error_message = "ECS to VPC endpoints rule must use port 443."
+    condition     = aws_security_group_rule.backend_to_vpc_endpoints[0].from_port == 443
+    error_message = "Backend to VPC endpoints rule must use port 443."
   }
   assert {
-    condition     = aws_security_group_rule.ecs_to_vpc_endpoints[0].to_port == 443
-    error_message = "ECS to VPC endpoints rule must use port 443."
+    condition     = aws_security_group_rule.backend_to_vpc_endpoints[0].to_port == 443
+    error_message = "Backend to VPC endpoints rule must use port 443."
   }
 }
 
-run "test_ecs_to_vpc_endpoints_rule_type" {
+run "test_backend_to_vpc_endpoints_rule_type" {
   command = plan
   variables {
     create_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
-    condition     = aws_security_group_rule.ecs_to_vpc_endpoints[0].type == "egress"
-    error_message = "ECS to VPC endpoints rule must be of type egress."
+    condition     = aws_security_group_rule.backend_to_vpc_endpoints[0].type == "egress"
+    error_message = "Backend to VPC endpoints rule must be of type egress."
+  }
+}
+
+run "test_task_to_vpc_endpoints_rule_port" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_vpc_endpoints[0].from_port == 443
+    error_message = "Task to VPC endpoints rule must use port 443."
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_vpc_endpoints[0].to_port == 443
+    error_message = "Task to VPC endpoints rule must use port 443."
+  }
+}
+
+run "test_task_to_vpc_endpoints_rule_type" {
+  command = plan
+  variables {
+    create_vpc_endpoint_rules = true
+    vpc_endpoint_sg_id        = "sg-endpoint123"
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_vpc_endpoints[0].type == "egress"
+    error_message = "Task to VPC endpoints rule must be of type egress."
   }
 }
 
@@ -482,33 +551,5 @@ run "test_frontend_to_vpc_endpoints_rule_type" {
   assert {
     condition     = aws_security_group_rule.frontend_to_vpc_endpoints[0].type == "egress"
     error_message = "Frontend to VPC endpoints rule must be of type egress."
-  }
-}
-
-run "test_lambda_to_vpc_endpoints_rule_port" {
-  command = plan
-  variables {
-    create_vpc_endpoint_rules = true
-    vpc_endpoint_sg_id        = "sg-endpoint123"
-  }
-  assert {
-    condition     = aws_security_group_rule.lambda_to_vpc_endpoints[0].from_port == 443
-    error_message = "Lambda to VPC endpoints rule must use port 443."
-  }
-  assert {
-    condition     = aws_security_group_rule.lambda_to_vpc_endpoints[0].to_port == 443
-    error_message = "Lambda to VPC endpoints rule must use port 443."
-  }
-}
-
-run "test_lambda_to_vpc_endpoints_rule_type" {
-  command = plan
-  variables {
-    create_vpc_endpoint_rules = true
-    vpc_endpoint_sg_id        = "sg-endpoint123"
-  }
-  assert {
-    condition     = aws_security_group_rule.lambda_to_vpc_endpoints[0].type == "egress"
-    error_message = "Lambda to VPC endpoints rule must be of type egress."
   }
 }
