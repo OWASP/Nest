@@ -448,16 +448,15 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: staging
-    # if: |
-    #   github.repository == 'OWASP/Nest' &&
-    #   (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    # if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
-      # - run-backend-tests
-      # - run-frontend-a11y-tests
-      # - run-frontend-e2e-tests
-      # - run-frontend-unit-tests
-      # - run-infrastructure-tests
+      - run-backend-tests
+      - run-frontend-a11y-tests
+      - run-frontend-e2e-tests
+      - run-frontend-unit-tests
+      - run-infrastructure-tests
       - set-release-version
     permissions:
       contents: read
@@ -472,11 +471,11 @@ jobs:
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
 
-      # - name: Login to Docker Hub
-      #   uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
@@ -499,21 +498,19 @@ jobs:
           build-args: |
             OWASP_GID=1001
             OWASP_UID=1001
-          cache-from: type=gha
-          # cache-from: |
-          #   type=gha
-          #   type=registry,ref=owasp/nest:backend-staging-cache
-          # cache-to: |
-          #   type=registry,ref=owasp/nest:backend-staging-cache
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:backend-staging-cache
+          cache-to: |
+            type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
           file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
-          # tags: |
-          #   owasp/nest:backend-staging
-          #   ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
+          tags: |
+            owasp/nest:backend-staging
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
 
       - name: Prepare frontend public environment
         env:
@@ -547,7 +544,7 @@ jobs:
       - name: Get backend image size
         id: backend-size
         run: |
-          IMAGE_NAME="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest"  # IMAGE_NAME="owasp/nest:backend-staging"
+          IMAGE_NAME="owasp/nest:backend-staging"
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
@@ -555,12 +552,11 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
         with:
-          cache-from: type=gha
-          # cache-from: |
-          #   type=gha
-          #   type=registry,ref=owasp/nest:frontend-staging-cache
-          # cache-to: |
-          #   type=registry,ref=owasp/nest:frontend-staging-cache
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:frontend-staging-cache
+          cache-to: |
+            type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
           file: docker/frontend/Dockerfile
           load: true
@@ -569,15 +565,14 @@ jobs:
           secrets: |
             RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
-          # tags: |
-          #   owasp/nest:frontend-staging
-          #   ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
+          tags: |
+            owasp/nest:frontend-staging
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
 
       - name: Get frontend image size
         id: frontend-size
         run: |
-          IMAGE_NAME="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest"  # IMAGE_NAME="owasp/nest:frontend-staging"
+          IMAGE_NAME="owasp/nest:frontend-staging"
           RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
           DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
           echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
@@ -615,20 +610,16 @@ jobs:
 
       - name: Run Trivy security scan via Makefile
         run: |
-          # make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
-          # make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
-          make security-scan-backend-image BACKEND_IMAGE_NAME=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
-          make security-scan-frontend-image FRONTEND_IMAGE_NAME=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
+          make security-scan-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
+          make security-scan-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
       - name: Generate SBOM for backend image
         run: |
-          # make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
-          make sbom-backend-image BACKEND_IMAGE_NAME=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
+          make sbom-backend-image BACKEND_IMAGE_NAME=owasp/nest:backend-staging
 
       - name: Generate SBOM for frontend image
         run: |
-          # make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
-          make sbom-frontend-image FRONTEND_IMAGE_NAME=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
+          make sbom-frontend-image FRONTEND_IMAGE_NAME=owasp/nest:frontend-staging
 
       - name: Upload SBOMs
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
@@ -645,12 +636,11 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    # if: |
-    #   github.repository == 'OWASP/Nest' &&
-    #   (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    # if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    # needs:
-    #   - scan-staging-images
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    needs:
+      - scan-staging-images
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -727,14 +717,13 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    # if: |
-    #   github.repository == 'OWASP/Nest' &&
-    #   (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    # if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - bootstrap-staging-nest
-      # - scan-staging-images
-      # - set-release-version
+      - scan-staging-images
+      - set-release-version
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -838,10 +827,9 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    # if: |
-    #   github.repository == 'OWASP/Nest' &&
-    #   (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    # if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
       - plan-staging-nest
     permissions:
