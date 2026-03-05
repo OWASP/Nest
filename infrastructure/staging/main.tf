@@ -203,5 +203,5 @@ module "tasks" {
   kms_key_arn                   = module.kms.key_arn
   project_name                  = var.project_name
   subnet_ids                    = var.ecs_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
-  use_fargate_spot              = var.ecs_use_fargate_spot
+  use_fargate_spot              = var.tasks_use_fargate_spot
 }

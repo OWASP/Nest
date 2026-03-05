@@ -170,12 +170,6 @@ variable "ecs_assign_public_ip" {
   default     = false
 }
 
-variable "ecs_use_fargate_spot" {
-  description = "Whether to use Fargate Spot for backend ECS tasks."
-  type        = bool
-  default     = true
-}
-
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
@@ -292,6 +286,12 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
+}
+
+variable "tasks_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend ECS tasks."
+  type        = bool
+  default     = true
 }
 
 variable "vpc_cidr" {
