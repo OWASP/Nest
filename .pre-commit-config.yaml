@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.2.0
+    rev: v26.3.0
     hooks:
       - id: ansible-lint
         additional_dependencies:
