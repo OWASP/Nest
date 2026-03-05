@@ -784,12 +784,6 @@ jobs:
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
-
-          secret_recovery_window_in_days = 0
-          db_backup_retention_period     = 0
-          db_deletion_protection         = false
-          db_skip_final_snapshot         = true
-
           EOF
 
       - name: Terraform Init
