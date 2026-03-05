@@ -81,7 +81,7 @@ export default function CommunityPage() {
         </SecondaryCard>
 
         {/* Community Journey Section */}
-        <SecondaryCard title="Your Community Journey">
+        <SecondaryCard>
           <div className="relative">
             {/* Desktop view - horizontal */}
             <div className="hidden items-center justify-between md:flex">
@@ -119,7 +119,7 @@ export default function CommunityPage() {
         </SecondaryCard>
 
         {/* Join the Community Section */}
-        <SecondaryCard title="Join the Community">
+        <SecondaryCard>
           <div className="mx-auto max-w-2xl text-center">
             <div className="mb-6 inline-flex rounded-full bg-blue-50 p-4 dark:bg-blue-900/20">
               <FaSlack className="h-8 w-8 text-blue-500" aria-hidden="true" />
