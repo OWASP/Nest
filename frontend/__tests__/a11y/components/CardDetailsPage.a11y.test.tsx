@@ -70,6 +70,10 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({ data: null, status: 'unauthenticated' })),
 }))
 
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(() => [jest.fn()]),
+}))
+
 const mockHealthMetricsData = [
   {
     ageDays: 365,
