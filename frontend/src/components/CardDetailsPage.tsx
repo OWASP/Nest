@@ -464,7 +464,7 @@ const DetailsCard = ({
                                 height={24}
                                 width={24}
                                 src={milestone?.author?.avatarUrl}
-                                alt={`${milestone?.author?.name || milestone?.author?.login || 'Author'}'s avatar`}
+                                alt={`${milestone.author?.name || milestone.author?.login}'s avatar`}
                                 className="mr-2 rounded-full"
                               />
                             </Link>
