@@ -156,28 +156,9 @@ To do this locally:
 - Visit the AWS Console > Systems Manager > Parameter Store.
 - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
 
-## Deploying the Backend ECS Service
-
-The Django backend is deployed as an ECS Fargate service. The Docker image is built from
-`docker/backend/Dockerfile` and pushed to ECR. The ECS service is defined in
-`infrastructure/modules/backend/`.
-
-Once the image is in ECR and Terraform has been applied (which creates the ECS service),
-the CI/CD pipeline handles subsequent deployments automatically via `aws ecs update-service --force-new-deployment`.
-
-For a first-time manual deploy:
-
-1. Build and push the backend image (see **Populate ECR Repositories** below).
-1. Run `terraform apply` in `infrastructure/staging/` — this creates the ECS cluster, service, task definition, and ALB target group.
-1. The ECS service will pull the image and start automatically.
-
-> [!NOTE]
-> Populate all `DJANGO_*` secrets in AWS Systems Manager Parameter Store before running the service.
-> The ECS task reads these at startup via the task definition secrets injection.
-
 ## Populate ECR Repositories
 
-ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
+ECR Repositories are used to store images used by ECS (Frontend + Backend + Scheduled Tasks)
 
 > [!NOTE]
 > Ensure you are in the project root.
@@ -265,7 +246,7 @@ Migrate and load data into the new database.
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.
 
-## Configure Domain and Frontend
+## Configure Domain
 
 1. **Validate ACM Certificate**:
 
@@ -285,9 +266,12 @@ Migrate and load data into the new database.
 
 - Add a CNAME record and point the domain to the frontend ALB.
 
+## Redeploy Frontend and Backend
+
 1. **Configure Frontend Parameters**:
 
 - Update the frontend server (`NEXT_SERVER_*`) parameters using the backend ALB URL from Terraform outputs.
+- Populate all `DJANGO_*` parameters that have `to-be-set-in-aws-console` value.
 
 1. **Restart Frontend ECS Tasks**:
 
@@ -297,6 +281,18 @@ Migrate and load data into the new database.
     aws ecs update-service \
         --cluster nest-staging-frontend-cluster \
         --service nest-staging-frontend-service \
+        --force-new-deployment \
+        --region AWS_REGION
+    ```
+
+1. **Restart Backend ECS Tasks**:
+
+- Force a new deployment to pick up the updated configuration:
+
+    ```bash
+    aws ecs update-service \
+        --cluster nest-staging-backend-cluster \
+        --service nest-staging-backend-service \
         --force-new-deployment \
         --region AWS_REGION
     ```
@@ -312,21 +308,4 @@ Migrate and load data into the new database.
 
   ```bash
   terraform destroy
-  ```
-
-## Helpful Commands
-
-- Force a new backend deployment:
-
-  ```bash
-  aws ecs update-service \
-      --cluster nest-staging-backend-cluster \
-      --service nest-staging-backend-service \
-      --force-new-deployment
-  ```
-
-- View backend ECS service logs:
-
-  ```bash
-  aws logs tail /aws/ecs/nest-staging-backend --follow
   ```
