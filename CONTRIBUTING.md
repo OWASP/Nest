@@ -270,37 +270,6 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      DJANGO_CONFIGURATION=Local
      ```
 
-1. **Set Up GitHub OAuth** (required for "Sign in with GitHub"):
-
-   Without real GitHub OAuth credentials, clicking "Sign in with GitHub" will result in a GitHub 404 error because the placeholder `client_id=your-github-client-id` is invalid.
-
-   - Go to [GitHub Developer Settings → OAuth Apps](https://github.com/settings/developers) and click **"New OAuth App"**.
-   - Fill in the form with the following values:
-
-     | Field | Value |
-     |---|---|
-     | Application name | `OWASP Nest Local` (or any name you prefer) |
-     | Homepage URL | `http://localhost:3000` |
-     | Authorization callback URL | `http://localhost:3000/api/auth/callback/github` |
-
-   - Click **"Register application"**.
-   - On the next page, copy the **Client ID** and click **"Generate a new client secret"** to obtain a **Client Secret**.
-   - Generate a secure `NEXTAUTH_SECRET` by running:
-
-     ```bash
-     openssl rand -base64 32
-     ```
-
-   - Open your `frontend/.env` file and update the following values with the credentials you just obtained:
-
-     ```plaintext
-     NEXTAUTH_SECRET=<output-from-openssl-command>
-     NEXT_SERVER_GITHUB_CLIENT_ID=<your-github-client-id>
-     NEXT_SERVER_GITHUB_CLIENT_SECRET=<your-github-client-secret>
-     ```
-
-   - **Please note you need to restart the application in order to apply any `.env` file changes.**
-
 1. **Set Up Algolia**:
 
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
@@ -351,6 +320,41 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      - [GraphQL](http://localhost:8000/graphql/)
 
 ### Optional Steps
+
+#### GitHub OAuth Setup
+
+If you want to use the "Sign in with GitHub" feature locally, you need to register a GitHub OAuth App and update your `frontend/.env` with real credentials. Without this, clicking "Sign in with GitHub" will result in a GitHub 404 error because the placeholder `client_id=your-github-client-id` is invalid.
+
+1. Go to [GitHub Developer Settings → OAuth Apps](https://github.com/settings/developers) and click **"New OAuth App"**.
+1. Fill in the form with the following values:
+
+   | Field | Value |
+   |---|---|
+   | Application name | `OWASP Nest Local` (or any name you prefer) |
+   | Homepage URL | `http://localhost:3000` |
+   | Authorization callback URL | `http://localhost:3000/api/auth/callback/github` |
+
+1. Click **"Register application"**.
+1. On the next page, copy the **Client ID** and click **"Generate a new client secret"** to obtain a **Client Secret**.
+1. Generate a secure `NEXTAUTH_SECRET` by running:
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+1. Open your `frontend/.env` file and update the following values with the credentials you just obtained:
+
+   ```plaintext
+   NEXTAUTH_SECRET=<output-from-openssl-command>
+   NEXT_SERVER_GITHUB_CLIENT_ID=<your-github-client-id>
+   NEXT_SERVER_GITHUB_CLIENT_SECRET=<your-github-client-secret>
+   ```
+
+1. Restart the application to apply the changes:
+
+   ```bash
+   make run
+   ```
 
 #### GitHub Data Fetch
 
