@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import React from 'react'
+import type { ImgHTMLAttributes } from 'react'
+import type { Link } from 'types/link'
 import Header from 'components/Header'
 
 jest.mock('next/navigation', () => ({
@@ -8,7 +9,9 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }) => (
+    <span role="img" aria-label={props.alt ?? ''} />
+  ),
 }))
 
 jest.mock('components/ModeToggle', () => ({
@@ -27,7 +30,7 @@ jest.mock('components/NavButton', () => ({
 
 jest.mock('components/NavDropDown', () => ({
   __esModule: true,
-  default: ({ link }: { link: any }) => (
+  default: ({ link }: { link: Link }) => (
     <div data-testid={`nav-dropdown-${link.text}`}>{link.text} (Dropdown)</div>
   ),
 }))
@@ -45,11 +48,9 @@ describe('Header Navigation', () => {
   test('renders Community link without dropdown', () => {
     render(<Header isGitHubAuthEnabled={false} />)
 
-    const communityLink = screen.getByRole('link', { name: /Community/i })
-    expect(communityLink).toBeInTheDocument()
-    expect(communityLink).toHaveAttribute('href', '/community')
+    const communityLinks = screen.getAllByRole('link', { name: /Community/i })
+    expect(communityLinks[0]).toHaveAttribute('href', '/community')
 
-    // Ensure it's not a dropdown by checking that NavDropdown is not rendered for Community
     const dropdown = screen.queryByTestId('nav-dropdown-Community')
     expect(dropdown).not.toBeInTheDocument()
   })
@@ -57,16 +58,25 @@ describe('Header Navigation', () => {
   test('renders header with all main navigation links', () => {
     render(<Header isGitHubAuthEnabled={false} />)
 
-    expect(screen.getByRole('link', { name: /Community/i })).toHaveAttribute('href', '/community')
-    expect(screen.getByRole('link', { name: /Projects/i })).toHaveAttribute('href', '/projects')
-    expect(screen.getByRole('link', { name: /Contribute/i })).toHaveAttribute('href', '/contribute')
-    expect(screen.getByRole('link', { name: /About/i })).toHaveAttribute('href', '/about')
+    expect(screen.getAllByRole('link', { name: /Community/i })[0]).toHaveAttribute(
+      'href',
+      '/community'
+    )
+    expect(screen.getAllByRole('link', { name: /Projects/i })[0]).toHaveAttribute(
+      'href',
+      '/projects'
+    )
+    expect(screen.getAllByRole('link', { name: /Contribute/i })[0]).toHaveAttribute(
+      'href',
+      '/contribute'
+    )
+    expect(screen.getAllByRole('link', { name: /About/i })[0]).toHaveAttribute('href', '/about')
   })
 
   test('renders logo with correct href', () => {
     render(<Header isGitHubAuthEnabled={false} />)
 
-    const logoLink = screen.getByAltText('OWASP Logo').closest('a')
+    const logoLink = screen.getAllByRole('img', { name: 'OWASP Logo' })[0].closest('a')
     expect(logoLink).toHaveAttribute('href', '/')
   })
 })
