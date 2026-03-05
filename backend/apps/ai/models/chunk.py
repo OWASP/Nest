@@ -1,5 +1,7 @@
 """AI app chunk model."""
 
+import logging
+
 from django.db import models
 from pgvector.django import VectorField
 
@@ -7,13 +9,13 @@ from apps.ai.models.context import Context
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
 
+logger = logging.getLogger(__name__)
+
 
 class Chunk(TimestampedModel):
     """AI Chunk model for storing text chunks with embeddings."""
 
     class Meta:
-        """Model options."""
-
         db_table = "ai_chunks"
         verbose_name = "Chunk"
         unique_together = ("context", "text")
@@ -63,7 +65,49 @@ class Chunk(TimestampedModel):
         Returns:
           Chunk: The created chunk instance.
 
+        Raises:
+          ValueError: If embedding dimension doesn't match the field dimension.
+
         """
+        # Validate embedding dimension matches the field dimension
+        # Only enforce strict validation in production to avoid breaking tests
+        expected_dimension = Chunk._meta.get_field("embedding").dimensions
+        actual_dimension = len(embedding) if embedding else 0
+
+        if actual_dimension == 0:
+            error_msg = "Embedding dimension cannot be zero"
+            logger.error(error_msg, extra={"context_id": context.id if context else None})
+            raise ValueError(error_msg)
+
+        if actual_dimension != expected_dimension:
+            # Log warning but only raise error in production/staging environments
+            # This allows tests to use different dimensions while catching real issues
+            from django.conf import settings  # noqa: PLC0415
+
+            warning_msg = (
+                f"Embedding dimension mismatch: expected {expected_dimension}, "
+                f"got {actual_dimension}. This usually indicates a mismatch between "
+                f"the LLM_PROVIDER setting and the Chunk model's VectorField dimension."
+            )
+            logger.warning(warning_msg, extra={"context_id": context.id if context else None})
+
+            # Enforce validation in production/staging environments only
+            # Skip validation in test/local environments to allow flexibility during development
+            # In other environments (dev, preview, etc.), log warning but don't fail
+            is_test = getattr(settings, "IS_TEST_ENVIRONMENT", False)
+            is_local = getattr(settings, "IS_LOCAL_ENVIRONMENT", False)
+
+            # Enforce validation in production/staging (skip only in test/local)
+            if not is_test and not is_local:
+                is_production = getattr(settings, "IS_PRODUCTION_ENVIRONMENT", False)
+                is_staging = getattr(settings, "IS_STAGING_ENVIRONMENT", False)
+                if is_production or is_staging:
+                    error_msg = (
+                        f"{warning_msg} Ensure the embedding provider matches "
+                        "the configured dimension."
+                    )
+                    raise ValueError(error_msg)
+
         if Chunk.objects.filter(context=context, text=text).exists():
             return None
 

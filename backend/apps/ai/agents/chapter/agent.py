@@ -7,8 +7,11 @@ from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
 
 
-def create_chapter_agent() -> Agent:
+def create_chapter_agent(allow_delegation: bool = False) -> Agent:  # noqa: FBT001, FBT002
     """Create Chapter Expert Agent.
+
+    Args:
+        allow_delegation (bool): Whether the agent can delegate tasks. Defaults to False.
 
     Returns:
         Agent: Chapter Expert Agent configured with chapter tools
@@ -25,6 +28,6 @@ def create_chapter_agent() -> Agent:
         tools=[search_chapters],
         llm=get_llm(),
         verbose=True,
-        allow_delegation=False,
+        allow_delegation=allow_delegation,
         memory=False,
     )
