@@ -17,6 +17,7 @@ interface SearchPageLayoutProps {
   loadingImageUrl?: string
   children?: React.ReactNode
   sortChildren?: React.ReactNode
+  filterChildren?: React.ReactNode
 }
 
 const SearchPageLayout = ({
@@ -32,6 +33,7 @@ const SearchPageLayout = ({
   loadingImageUrl = '/img/spinner_light.png',
   sortChildren,
   children,
+  filterChildren,
 }: SearchPageLayoutProps) => {
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true)
   useEffect(() => {
@@ -51,9 +53,14 @@ const SearchPageLayout = ({
       </div>
       {isLoaded ? (
         <>
-          <div>
-            {totalPages !== 0 && <div className="flex justify-end">{sortChildren}</div>}
-            {totalPages === 0 && <div className="text m-4 text-xl dark:text-white">{empty}</div>}
+          <div className={`${totalPages === 0 ? 'mx-auto w-full max-w-[90%]' : 'w-auto'}`}>
+            <div className="mb-4 flex justify-between">
+              {filterChildren}
+              {totalPages !== 0 && sortChildren}
+            </div>
+            {totalPages === 0 && (
+              <div className="m-4 text-center text-xl dark:text-white">{empty}</div>
+            )}
             {children}
           </div>
           {totalPages > 1 && (

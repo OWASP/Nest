@@ -1,18 +1,25 @@
 'use client'
+import { useQuery } from '@apollo/client/react'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import { GetChapterCountriesDocument } from 'types/__generated__/chapterQueries.generated'
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
+import { sortOptionsChapter } from 'utils/sortingOptions'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import FilterBy from 'components/FilterBy'
 import SearchPageLayout from 'components/SearchPageLayout'
+import SortBy from 'components/SortBy'
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
+  const [selectedCountry, setSelectedCountry] = useState<string>('')
+
   const {
     items: chapters,
     isLoaded,
@@ -21,9 +28,17 @@ const ChaptersPage = () => {
     searchQuery,
     handleSearch,
     handlePageChange,
+    handleOrderChange,
+    handleSortChange,
+    handleFilterChange,
+    sortBy,
+    order,
+    facetFilters,
   } = useSearchPage<Chapter>({
     indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
+    defaultSortBy: 'default',
+    defaultOrder: 'desc',
   })
 
   useEffect(() => {
@@ -38,12 +53,20 @@ const ChaptersPage = () => {
         searchParams.indexName,
         searchParams.query,
         searchParams.currentPage,
-        searchParams.hitsPerPage
+        searchParams.hitsPerPage,
+        facetFilters
       )
       setGeoLocData(data.hits)
     }
     fetchData()
-  }, [currentPage])
+  }, [currentPage, facetFilters])
+
+  const { data, loading } = useQuery(GetChapterCountriesDocument)
+
+  const handleCountryChange = (value: string) => {
+    setSelectedCountry(value)
+    handleFilterChange(`idx_country: ${value}`)
+  }
 
   const router = useRouter()
   const renderChapterCard = (chapter: Chapter) => {
@@ -87,6 +110,25 @@ const ChaptersPage = () => {
       searchPlaceholder="Search for chapters..."
       searchQuery={searchQuery}
       totalPages={totalPages}
+      sortChildren={
+        <SortBy
+          onOrderChange={handleOrderChange}
+          onSortChange={handleSortChange}
+          selectedOrder={order}
+          selectedSortOption={sortBy}
+          sortOptions={sortOptionsChapter}
+        />
+      }
+      filterChildren={
+        <FilterBy
+          filterOptions={data?.countries}
+          onFilterChange={handleCountryChange}
+          selectedOption={selectedCountry}
+          defaultValue="All Countries"
+          customFilter="Country"
+          isLoaded={!loading}
+        />
+      }
     >
       {chapters.length > 0 && (
         <ChapterMapWrapper

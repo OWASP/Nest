@@ -83,3 +83,26 @@ class TestChapterResolution:
             mock_active.order_by.assert_called_once_with("-created_at")
             mock_qs.__getitem__.assert_called_once_with(slice(None, 5, None))
             assert result == mock_chapters
+
+    def test_countries_resolution(self, mock_info):
+        """Ensure the countries field returns a sorted, distinct list excluding blanks."""
+        query = ChapterQuery()
+        mock_active = Mock()
+        mock_exclude = Mock()
+        mock_values = Mock()
+        mock_distinct = Mock()
+        expected = ["CA", "US"]
+
+        mock_active.exclude.return_value = mock_exclude
+        mock_exclude.values_list.return_value = mock_values
+        mock_values.distinct.return_value = mock_distinct
+        mock_distinct.order_by.return_value = expected
+
+        with patch.object(Chapter, "active_chapters", mock_active):
+            result = query.countries()
+
+        mock_active.exclude.assert_called_once_with(country="")
+        mock_exclude.values_list.assert_called_once_with("country", flat=True)
+        mock_values.distinct.assert_called_once()
+        mock_distinct.order_by.assert_called_once_with("country")
+        assert result == expected

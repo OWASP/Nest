@@ -7,3 +7,9 @@ export const sortOptionsProject = [
   { label: 'Name', key: 'name' },
   { label: 'Stars', key: 'stars_count' },
 ]
+
+export const sortOptionsChapter = [
+  { label: 'Relevancy', key: 'default' },
+  { label: 'Date Created', key: 'created_at' },
+  { label: 'Last Updated', key: 'updated_at' },
+]
