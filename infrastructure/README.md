@@ -156,73 +156,24 @@ To do this locally:
 - Visit the AWS Console > Systems Manager > Parameter Store.
 - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
 
-## Setting up Zappa
+## Deploying the Backend ECS Service
 
-The Django backend deployment is managed by Zappa. This includes the IAM roles, and Lambda Function provision.
+The Django backend is deployed as an ECS Fargate service. The Docker image is built from
+`docker/backend/Dockerfile` and pushed to ECR. The ECS service is defined in
+`infrastructure/modules/backend/`.
 
-1. **Change Directory**:
+Once the image is in ECR and Terraform has been applied (which creates the ECS service),
+the CI/CD pipeline handles subsequent deployments automatically via `aws ecs update-service --force-new-deployment`.
 
-- Navigate to the `backend/` directory:
+For a first-time manual deploy:
 
-    ```bash
-    cd backend/
-    ```
+1. Build and push the backend image (see **Populate ECR Repositories** below).
+1. Run `terraform apply` in `infrastructure/staging/` — this creates the ECS cluster, service, task definition, and ALB target group.
+1. The ECS service will pull the image and start automatically.
 
-1. **Setup Dependencies**:
-
-- This step may differ for different operating systems.
-- The goal is to install dependencies listed in `pyproject.toml`.
-- Steps for Linux:
-
-    ```bash
-    poetry sync --without test --without video && eval $(poetry env activate)
-    ```
-
-1. **Create Zappa Settings File**:
-
-- Copy the contents from the template file into your new local Zappa settings file:
-
-    ```bash
-    cp zappa_settings.template.json zappa_settings.json
-    ```
-
-1. **Populate Settings File**:
-
-- Replace all `${...}` variables in `zappa_settings.json` with appropriate output variables.
-
-1. **Deploy**:
-
-  > [!NOTE]
-  > Make sure to populate all `DJANGO_*` secrets that are set as `to-be-set-in-aws-console` in the Parameter Store. The deployment might fail with no logs if secrets such as `DJANGO_SLACK_BOT_TOKEN` are invalid.
-
-  ```bash
-  zappa deploy staging
-  ```
-
-  > [!NOTE]
-  > If the deployment is successful but returns a `5xx` error, resolve the issues and use `zappa undeploy staging` & `zappa deploy staging`. The command `zappa update staging` may not work.
-
-1. **Configure ALB Routing**:
-
-- Run `zappa status staging` to get Zappa details.
-
-- Navigate to the main infrastructure directory:
-
-    ```bash
-    cd infrastructure/staging/
-    ```
-
-- Update `terraform.tfvars` with the Lambda details:
-
-    ```hcl
-    lambda_function_name = "nest-staging"
-    ```
-
-- Apply the changes to create ALB routing:
-
-    ```bash
-    terraform apply
-    ```
+> [!NOTE]
+> Populate all `DJANGO_*` secrets in AWS Systems Manager Parameter Store before running the service.
+> The ECS task reads these at startup via the task definition secrets injection.
 
 ## Populate ECR Repositories
 
@@ -336,7 +287,7 @@ Migrate and load data into the new database.
 
 1. **Configure Frontend Parameters**:
 
-- Update the frontend server (`NEXT_SERVER_*`) parameters using the Lambda URL from Terraform outputs.
+- Update the frontend server (`NEXT_SERVER_*`) parameters using the backend ALB URL from Terraform outputs.
 
 1. **Restart Frontend ECS Tasks**:
 
@@ -352,12 +303,6 @@ Migrate and load data into the new database.
 
 ## Cleaning Up
 
-- To delete the deployment use the following command:
-
-  ```bash
-  zappa undeploy staging
-  ```
-
 - Ensure all buckets and ECR repositories are empty.
 
 > [!NOTE]
@@ -369,16 +314,23 @@ Migrate and load data into the new database.
   terraform destroy
   ```
 
+> [!NOTE]
+> The `nest-staging` Lambda function was previously created by Zappa and is **not managed by Terraform**.
+> Delete it manually from the AWS Console after confirming the ECS backend is working.
+
 ## Helpful Commands
 
-- To view logs for a `staging` deployment run:
+- Force a new backend deployment:
 
   ```bash
-  zappa tail staging
+  aws ecs update-service \
+      --cluster nest-staging-backend-cluster \
+      --service nest-staging-backend-service \
+      --force-new-deployment
   ```
 
-- To update a Zappa `staging` deployment run:
+- View backend ECS service logs:
 
   ```bash
-  zappa update staging
+  aws logs tail /aws/ecs/nest-staging-backend --follow
   ```

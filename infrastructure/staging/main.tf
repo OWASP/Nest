@@ -16,7 +16,6 @@ locals {
     Project     = var.project_name
   }
   fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
-  zappa_bucket_name    = coalesce(var.zappa_bucket_name, "${var.project_name}-${var.environment}-zappa-deployments")
 }
 
 module "alb" {
@@ -28,10 +27,30 @@ module "alb" {
   environment                = var.environment
   frontend_health_check_path = "/"
   frontend_port              = 3000
-  lambda_function_name       = var.lambda_function_name
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
   vpc_id                     = module.networking.vpc_id
+}
+
+module "backend" {
+  source = "../modules/backend"
+
+  aws_region              = var.aws_region
+  backend_parameters_arns = module.parameters.django_ssm_parameter_arns
+  backend_sg_id           = module.security.backend_sg_id
+  common_tags             = local.common_tags
+  desired_count           = var.backend_desired_count
+  ecr_repository_arn      = module.ecs.ecr_repository_arn
+  enable_auto_scaling     = var.backend_enable_auto_scaling
+  environment             = var.environment
+  image_url               = "${module.ecs.ecr_repository_url}:latest"
+  kms_key_arn             = module.kms.key_arn
+  max_count               = var.backend_max_count
+  min_count               = var.backend_min_count
+  private_subnet_ids      = module.networking.private_subnet_ids
+  project_name            = var.project_name
+  target_group_arn        = module.alb.backend_target_group_arn
+  use_fargate_spot        = var.backend_use_fargate_spot
 }
 
 module "cache" {
@@ -140,10 +159,7 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  allowed_hosts = join(",", [
-    var.domain_name,
-    "zappa",
-  ])
+  allowed_hosts      = var.domain_name
   allowed_origins    = "https://${var.domain_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
@@ -181,5 +197,4 @@ module "storage" {
   environment          = var.environment
   fixtures_bucket_name = local.fixtures_bucket_name
   project_name         = var.project_name
-  zappa_bucket_name    = local.zappa_bucket_name
 }

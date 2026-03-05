@@ -134,6 +134,36 @@ variable "domain_name" {
   type        = string
 }
 
+variable "backend_desired_count" {
+  description = "The desired number of backend tasks."
+  type        = number
+  default     = 2
+}
+
+variable "backend_enable_auto_scaling" {
+  description = "Whether to enable auto scaling for backend."
+  type        = bool
+  default     = false
+}
+
+variable "backend_max_count" {
+  description = "The maximum number of backend tasks for auto scaling."
+  type        = number
+  default     = 6
+}
+
+variable "backend_min_count" {
+  description = "The minimum number of backend tasks for auto scaling."
+  type        = number
+  default     = 2
+}
+
+variable "backend_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend tasks."
+  type        = bool
+  default     = true
+}
+
 variable "ecs_assign_public_ip" {
   description = "Whether to assign public IP to backend ECS tasks."
   type        = bool
@@ -190,12 +220,6 @@ variable "frontend_use_fargate_spot" {
   description = "Whether to use Fargate Spot for frontend tasks."
   type        = bool
   default     = true
-}
-
-variable "lambda_function_name" {
-  description = "The name of the Zappa Lambda function."
-  type        = string
-  default     = null
 }
 
 variable "private_subnet_cidrs" {
@@ -279,10 +303,4 @@ variable "vpc_cidr" {
     condition     = can(cidrhost(var.vpc_cidr, 0))
     error_message = "VPC CIDR must be a valid IPv4 CIDR block (e.g., 10.0.0.0/16)."
   }
-}
-
-variable "zappa_bucket_name" {
-  description = "The name of the S3 bucket for Zappa deployments."
-  type        = string
-  default     = null
 }

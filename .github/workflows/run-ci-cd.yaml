@@ -770,7 +770,6 @@ jobs:
           ECS_USE_FARGATE_SPOT: true
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
-          LAMBDA_FUNCTION_NAME: nest-staging
           PROJECT_NAME: nest
         run: |
           umask 377
@@ -782,7 +781,6 @@ jobs:
           ecs_use_fargate_spot=$ECS_USE_FARGATE_SPOT
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
-          lambda_function_name="$LAMBDA_FUNCTION_NAME"
           project_name="$PROJECT_NAME"
           EOF
 
@@ -881,45 +879,13 @@ jobs:
         id: tf-outputs
         working-directory: infrastructure/staging
         run: |
+          echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
+          echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
           echo "ecs_security_group_id=$(terraform output -raw ecs_security_group_id)" >> $GITHUB_OUTPUT
           echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
           echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "lambda_security_group_id=$(terraform output -raw lambda_security_group_id)" >> $GITHUB_OUTPUT
-          echo "private_subnet_a=$(terraform output -json private_subnet_ids | jq -r '.[0]')" >> $GITHUB_OUTPUT
-          echo "private_subnet_b=$(terraform output -json private_subnet_ids | jq -r '.[1]')" >> $GITHUB_OUTPUT
-          echo "private_subnet_c=$(terraform output -json private_subnet_ids | jq -r '.[2]')" >> $GITHUB_OUTPUT
           echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
           echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
-          echo "zappa_s3_bucket=$(terraform output -raw zappa_s3_bucket_name)" >> $GITHUB_OUTPUT
-
-      - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
-        with:
-          cache: poetry
-          cache-dependency-path: backend/poetry.lock
-          python-version: '3.13'
-
-      - name: Install backend dependencies
-        working-directory: backend
-        run: poetry sync --no-root --without test --without video
-
-      - name: Prepare Zappa settings
-        env:
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_PRIVATE_SUBNET_A: ${{ steps.tf-outputs.outputs.private_subnet_a }}
-          AWS_PRIVATE_SUBNET_B: ${{ steps.tf-outputs.outputs.private_subnet_b }}
-          AWS_PRIVATE_SUBNET_C: ${{ steps.tf-outputs.outputs.private_subnet_c }}
-          AWS_REGION: ${{ vars.AWS_REGION }}
-          ZAPPA_S3_BUCKET: ${{ steps.tf-outputs.outputs.zappa_s3_bucket }}
-          ZAPPA_VPC_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.lambda_security_group_id }}
-        run: envsubst < backend/zappa_settings.template.json > backend/zappa_settings.json
-
-      - name: Update Zappa deployment
-        working-directory: backend
-        run: poetry run zappa update staging
 
       - name: Run ECS migrate task
         id: migrate-task
@@ -976,6 +942,16 @@ jobs:
             --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
           echo "Index-data task started (runs async, ~30 min)"
 
+      - name: Force new backend deployment
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs update-service \
+            --cluster "$CLUSTER_NAME" \
+            --service "$SERVICE_NAME" \
+            --force-new-deployment
+
       - name: Force new frontend deployment
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
@@ -985,6 +961,15 @@ jobs:
             --cluster "$CLUSTER_NAME" \
             --service "$SERVICE_NAME" \
             --force-new-deployment
+
+      - name: Wait for backend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
 
       - name: Wait for frontend service stability
         env:

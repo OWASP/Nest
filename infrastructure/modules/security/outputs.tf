@@ -13,9 +13,9 @@ output "frontend_sg_id" {
   value       = aws_security_group.frontend.id
 }
 
-output "lambda_sg_id" {
-  description = "The ID of the Lambda security group."
-  value       = aws_security_group.lambda.id
+output "backend_sg_id" {
+  description = "The ID of the backend ECS security group."
+  value       = aws_security_group.backend.id
 }
 
 output "rds_proxy_sg_id" {

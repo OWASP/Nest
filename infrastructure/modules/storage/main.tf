@@ -38,12 +38,3 @@ resource "aws_iam_policy" "fixtures_read_only" {
   })
   tags = var.common_tags
 }
-
-module "zappa_bucket" {
-  source = "./modules/s3-bucket"
-
-  bucket_name = "${var.zappa_bucket_name}-${random_id.suffix.hex}"
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-zappa-deployments"
-  })
-}
