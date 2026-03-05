@@ -81,6 +81,7 @@ const SkeletonBase = ({
         <Skeleton className="mb-2 h-96 w-full max-w-6xl" />
       )}
       {Array.from({ length: indexName === 'chapters' ? 3 : 4 }).map((_, index) => (
+        // eslint-disable-next-line react/no-array-index-key
         <CardSkeleton key={`card-skeleton-${index}`} {...componentProps} />
 
       ))}
