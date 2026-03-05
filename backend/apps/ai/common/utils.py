@@ -34,10 +34,10 @@ def create_chunks_and_embeddings(
         save (bool): Whether to save chunks immediately
 
     Returns:
-        list[Chunk]: List of created Chunk instances (empty if failed)
+        list[Chunk]: List of created Chunk instances (empty if API/transient errors occur)
 
     Raises:
-        ValueError: If context is None or invalid
+        ValueError: If embedding dimension mismatch occurs (configuration error)
 
     """
     try:
@@ -61,7 +61,7 @@ def create_chunks_and_embeddings(
             if chunk is not None:
                 chunks.append(chunk)
 
-    except (OpenAIError, AttributeError, TypeError, ValueError):
+    except (OpenAIError, AttributeError, TypeError):
         logger.exception("Failed to create chunks and embeddings")
         return []
     else:
