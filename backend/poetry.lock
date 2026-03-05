@@ -1187,14 +1187,14 @@ files = [
 
 [[package]]
 name = "elevenlabs"
-version = "2.37.0"
+version = "2.38.0"
 description = ""
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["video"]
 files = [
-    {file = "elevenlabs-2.37.0-py3-none-any.whl", hash = "sha256:8b65d54b47e7b3025d2b03b9ce86d3d02a11ea171f3b0efc3d0dc8cfcd42d3ff"},
-    {file = "elevenlabs-2.37.0.tar.gz", hash = "sha256:95f99039c5a377d91f5a1b32e1a708196ed441d71394844862f8f3e69d7ae27b"},
+    {file = "elevenlabs-2.38.0-py3-none-any.whl", hash = "sha256:48eda1760a88dbb8d2645235844b8854e1fd8d38f4d6b7f00b2edd4f1ac32b1e"},
+    {file = "elevenlabs-2.38.0.tar.gz", hash = "sha256:c285c82f93ea02e0658d647956fbdde43cbaa8eca5368b0abaf307c2043d3c4f"},
 ]
 
 [package.dependencies]
