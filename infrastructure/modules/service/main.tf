@@ -281,7 +281,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_ssm_policy_attachm
 }
 
 resource "aws_iam_role_policy_attachment" "task_role_policies" {
-  count      = length(var.task_role_policy_arns)
-  policy_arn = var.task_role_policy_arns[count.index]
+  for_each   = toset(var.task_role_policy_arns)
+  policy_arn = each.value
   role       = aws_iam_role.ecs_task_role.name
 }
