@@ -5,7 +5,7 @@ import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
@@ -14,6 +14,7 @@ import { GetProgramAndModulesDocument } from 'types/__generated__/programsQuerie
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -28,6 +29,7 @@ const EditModulePage = () => {
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
@@ -101,6 +103,8 @@ const EditModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData) return
+    setValidationErrors({})
 
     try {
       const currentUserLogin = sessionData?.user?.login
@@ -143,22 +147,18 @@ const EditModulePage = () => {
       })
       router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
-      let errorMessage = 'Failed to update module. Please try again.'
-
-      if (err instanceof Error) {
-        if (err.message.includes('Permission') || err.message.includes('not have permission')) {
-          errorMessage =
-            'You do not have permission to edit this module. Only program admins and assigned mentors can edit modules.'
-        }
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(err)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
+      } else if (unmappedErrors.length > 0) {
+        setValidationErrors({ name: unmappedErrors[0] })
+      } else {
+        handleAppError(err)
       }
-
-      addToast({
-        title: 'Error',
-        description: errorMessage,
-        color: 'danger',
-        variant: 'solid',
-        timeout: 4000,
-      })
     }
   }
 
@@ -185,6 +185,7 @@ const EditModulePage = () => {
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      validationErrors={validationErrors}
       minDate={
         data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
       }
