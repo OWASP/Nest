@@ -283,13 +283,13 @@ variable "secret_recovery_window_in_days" {
 }
 
 variable "tasks_assign_public_ip" {
-  description = "Whether to assign public IP to backend ECS tasks."
+  description = "Whether to assign public IP to ECS tasks."
   type        = bool
   default     = false
 }
 
 variable "tasks_use_fargate_spot" {
-  description = "Whether to use Fargate Spot for backend ECS tasks."
+  description = "Whether to use Fargate Spot for ECS tasks."
   type        = bool
   default     = true
 }
