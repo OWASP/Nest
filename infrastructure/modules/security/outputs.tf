@@ -3,19 +3,14 @@ output "alb_sg_id" {
   value       = aws_security_group.alb.id
 }
 
-output "ecs_sg_id" {
-  description = "The ID of the ECS security group."
-  value       = aws_security_group.ecs.id
-}
-
 output "frontend_sg_id" {
   description = "The ID of the frontend ECS security group."
   value       = aws_security_group.frontend.id
 }
 
-output "lambda_sg_id" {
-  description = "The ID of the Lambda security group."
-  value       = aws_security_group.lambda.id
+output "backend_sg_id" {
+  description = "The ID of the backend ECS security group."
+  value       = aws_security_group.backend.id
 }
 
 output "rds_proxy_sg_id" {
@@ -31,4 +26,9 @@ output "rds_sg_id" {
 output "redis_sg_id" {
   description = "The ID of the Redis security group."
   value       = aws_security_group.redis.id
+}
+
+output "tasks_sg_id" {
+  description = "The ID of the ECS tasks security group."
+  value       = aws_security_group.tasks.id
 }
