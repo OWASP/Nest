@@ -89,6 +89,18 @@ def _validate_module_dates(started_at, ended_at, program_started_at, program_end
     return started_at, ended_at
 
 
+def _handle_module_save_integrity_error(exc: IntegrityError) -> None:
+    """Translate module save IntegrityError to GraphQLError for known constraints."""
+    error_message = str(exc)
+    if "unique_module_key_in_program" in error_message:
+        msg = "This module name already exists in this program."
+        raise GraphQLError(
+            msg,
+            extensions={"code": "VALIDATION_ERROR", "field": "name"},
+        ) from exc
+    raise exc
+
+
 @strawberry.type
 class ModuleMutation:
     """GraphQL mutations related to the mentorship Module model."""
@@ -131,14 +143,7 @@ class ModuleMutation:
                     project=project,
                 )
         except IntegrityError as e:
-            error_message = str(e)
-            if "unique_module_key_in_program" in error_message:
-                msg = "This module name already exists in this program."
-                raise GraphQLError(
-                    msg,
-                    extensions={"code": "VALIDATION_ERROR", "field": "name"},
-                ) from e
-            raise
+            _handle_module_save_integrity_error(e)
 
         if module.experience_level not in program.experience_levels:
             program.experience_levels.append(module.experience_level)
@@ -409,14 +414,7 @@ class ModuleMutation:
             with transaction.atomic():
                 module.save()
         except IntegrityError as e:
-            error_message = str(e)
-            if "unique_module_key_in_program" in error_message:
-                msg = "This module name already exists in this program."
-                raise GraphQLError(
-                    msg,
-                    extensions={"code": "VALIDATION_ERROR", "field": "name"},
-                ) from e
-            raise
+            _handle_module_save_integrity_error(e)
 
         if module.experience_level not in module.program.experience_levels:
             module.program.experience_levels.append(module.experience_level)
