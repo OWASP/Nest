@@ -129,14 +129,6 @@ describe('Home', () => {
     })
   })
 
-  test('renders search keyboard shortcut hint', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText(/to search across projects, chapters, and more/)).toBeInTheDocument()
-    })
-  })
-
   test('renders SecondaryCard components', async () => {
     render(<Home />)
 
@@ -403,7 +395,6 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByText(/to search across projects, chapters, and more/)).toBeInTheDocument()
       expect(screen.queryByText('Top Contributors')).not.toBeInTheDocument()
 
       const zeroStats = screen.getAllByText('Active Projects')

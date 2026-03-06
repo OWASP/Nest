@@ -137,23 +137,12 @@ export default function Home() {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="pt-5 text-center sm:mb-10">
-          <div className="flex flex-col items-center py-10">
+          <div className="flex flex-col items-center py-5">
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
             </h1>
             <p className="text-muted-foreground max-w-[700px] pt-6 md:text-xl">
               Your gateway to OWASP. Discover, engage, and help shape the future!
-            </p>
-            <p className="mt-4 text-sm text-gray-400 dark:text-gray-500">
-              Press{' '}
-              <kbd className="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs dark:border-gray-600 dark:bg-gray-700">
-                ⌘K
-              </kbd>{' '}
-              /{' '}
-              <kbd className="rounded border border-gray-300 bg-gray-100 px-1.5 py-0.5 text-xs dark:border-gray-600 dark:bg-gray-700">
-                Ctrl+K
-              </kbd>{' '}
-              to search across projects, chapters, and more.
             </p>
           </div>
         </div>
