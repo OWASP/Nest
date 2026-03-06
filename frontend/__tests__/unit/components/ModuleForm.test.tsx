@@ -516,7 +516,7 @@ describe('ModuleForm', () => {
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
-    it('calls onSubmit when all fields are valid', () => {
+    it('calls onSubmit when all fields are valid', async () => {
       const validFormData = {
         ...defaultFormData,
         name: 'Valid Module Name',
@@ -531,11 +531,15 @@ describe('ModuleForm', () => {
       renderModuleForm({ formData: validFormData })
 
       const form = document.querySelector('form')
-      if (form) {
-        fireEvent.submit(form)
-      }
+      await act(async () => {
+        if (form) {
+          fireEvent.submit(form)
+        }
+      })
 
-      expect(mockOnSubmit).toHaveBeenCalled()
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
     })
 
     it('sets all fields as touched on submit', () => {
@@ -571,6 +575,128 @@ describe('ModuleForm', () => {
     it('enables submit button when not loading', () => {
       renderModuleForm({ loading: false })
       expect(screen.getByTestId('submit-button')).not.toBeDisabled()
+    })
+  })
+
+  describe('Mutation Error Display (validationErrors prop)', () => {
+    const validFormData = {
+      ...defaultFormData,
+      name: 'Test Module',
+      description: 'A valid description that is long enough',
+      startedAt: '2024-01-01',
+      endedAt: '2024-12-31',
+      projectId: 'project-123',
+      projectName: 'My Project',
+      experienceLevel: 'BEGINNER',
+    }
+
+    it('displays mutation error for name field after submission', () => {
+      const { rerender } = render(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+        />
+      )
+
+      // Submit first to mark fields as touched
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      // Rerender with mutation errors (simulates page catching backend error)
+      rerender(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+          validationErrors={{
+            name: 'This module name already exists in this program.',
+          }}
+        />
+      )
+
+      expect(screen.getByTestId('module-name-error')).toHaveTextContent(
+        'This module name already exists in this program.'
+      )
+    })
+
+    it('does not display mutation error when validationErrors is empty', () => {
+      renderModuleForm({
+        formData: validFormData,
+        validationErrors: {},
+      })
+
+      expect(screen.queryByTestId('module-name-error')).not.toBeInTheDocument()
+    })
+
+    it('allows resubmission even when validationErrors.name is set', async () => {
+      const { rerender } = render(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+        />
+      )
+
+      // First submit to mark fields as touched
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      mockOnSubmit.mockClear()
+
+      // Rerender with mutation errors
+      rerender(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+          validationErrors={{
+            name: 'This module name already exists in this program.',
+          }}
+        />
+      )
+
+      // Second submit should still call onSubmit so parent can clear errors and retry
+      fireEvent.submit(form!)
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('allows submission when validationErrors has no name error', async () => {
+      renderModuleForm({
+        formData: validFormData,
+        validationErrors: {},
+      })
+
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
+
+    it('allows submission when validationErrors is undefined', async () => {
+      renderModuleForm({
+        formData: validFormData,
+      })
+
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
     })
   })
 })
