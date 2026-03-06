@@ -46,9 +46,8 @@ class RepositoryNode(strawberry.relay.Node):
     organization: OrganizationNode | None = strawberry_django.field()
 
     @strawberry_django.field(prefetch_related=["issues"])
-    def issues(self, root: Repository) -> list[IssueNode]:
+    def recent_issues(self, root: Repository) -> list[IssueNode]:
         """Resolve recent issues."""
-        # TODO(arkid15r): rename this to recent_issues.
         return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
     @strawberry_django.field
@@ -77,9 +76,8 @@ class RepositoryNode(strawberry.relay.Node):
         return root.recent_milestones.order_by("-created_at")[:normalized_limit]
 
     @strawberry_django.field(prefetch_related=["releases"])
-    def releases(self, root: Repository) -> list[ReleaseNode]:
+    def recent_releases(self, root: Repository) -> list[ReleaseNode]:
         """Resolve recent releases."""
-        # TODO(arkid15r): rename this to recent_releases.
         return root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
 
     @strawberry_django.field

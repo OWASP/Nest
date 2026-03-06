@@ -25,7 +25,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
             "description",
             "forks_count",
             "is_archived",
-            "issues",
+            "recent_issues",
             "key",
             "languages",
             "latest_release",
@@ -35,7 +35,7 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
             "organization",
             "project",
             "recent_milestones",
-            "releases",
+            "recent_releases",
             "size",
             "stars_count",
             "subscribers_count",
@@ -46,8 +46,8 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         }
         assert expected_field_names.issubset(field_names)
 
-    def test_resolve_issues(self):
-        field = self._get_field_by_name("issues", RepositoryNode)
+    def test_resolve_recent_issues(self):
+        field = self._get_field_by_name("recent_issues", RepositoryNode)
         assert field is not None
         assert field.type.of_type is IssueNode
 
@@ -71,8 +71,8 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         assert field is not None
         assert field.type.of_type is MilestoneNode
 
-    def test_resolve_releases(self):
-        field = self._get_field_by_name("releases", RepositoryNode)
+    def test_resolve_recent_releases(self):
+        field = self._get_field_by_name("recent_releases", RepositoryNode)
         assert field is not None
         assert field.type.of_type is ReleaseNode
 
@@ -91,16 +91,16 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         assert field is not None
         assert field.type is str
 
-    def test_issues_method(self):
-        """Test issues method resolution."""
+    def test_recent_issues_method(self):
+        """Test recent_issues method resolution."""
         mock_repository = Mock()
-        mock_issues = Mock()
-        mock_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
-        mock_repository.issues = mock_issues
+        mock_recent_issues = Mock()
+        mock_recent_issues.order_by.return_value.__getitem__ = Mock(return_value=[])
+        mock_repository.issues = mock_recent_issues
 
-        field = self._get_field_by_name("issues", RepositoryNode)
+        field = self._get_field_by_name("recent_issues", RepositoryNode)
         field.base_resolver.wrapped_func(None, mock_repository)
-        mock_issues.order_by.assert_called_with("-created_at")
+        mock_recent_issues.order_by.assert_called_with("-created_at")
 
     def test_recent_milestones_with_invalid_limit(self):
         """Test recent_milestones returns empty list for invalid limit."""
@@ -150,17 +150,17 @@ class TestRepositoryNode(GraphQLNodeBaseTest):
         resolver(None, mock_repository, limit=3)
         mock_milestones.order_by.assert_called_with("-created_at")
 
-    def test_releases_method(self):
-        """Test releases method resolution."""
+    def test_recent_releases_method(self):
+        """Test recent_releases method resolution."""
         mock_repository = Mock()
-        mock_releases = Mock()
-        mock_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
-        mock_repository.published_releases = mock_releases
+        mock_recent_releases = Mock()
+        mock_recent_releases.order_by.return_value.__getitem__ = Mock(return_value=[])
+        mock_repository.published_releases = mock_recent_releases
 
-        field = self._get_field_by_name("releases", RepositoryNode)
+        field = self._get_field_by_name("recent_releases", RepositoryNode)
         resolver = field.base_resolver.wrapped_func
         resolver(None, mock_repository)
-        mock_releases.order_by.assert_called_with("-published_at")
+        mock_recent_releases.order_by.assert_called_with("-published_at")
 
     def test_top_contributors_method(self):
         """Test top_contributors method resolution."""
