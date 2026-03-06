@@ -35,25 +35,26 @@ module "alb" {
 module "backend" {
   source = "../modules/service"
 
-  aws_region          = var.aws_region
-  command             = ["./entrypoint.sh"]
-  common_tags         = local.common_tags
-  container_cpu       = 1024
-  container_memory    = 2048
-  container_port      = 8000
-  desired_count       = var.backend_desired_count
-  enable_auto_scaling = var.backend_enable_auto_scaling
-  environment         = var.environment
-  kms_key_arn         = module.kms.key_arn
-  max_count           = var.backend_max_count
-  min_count           = var.backend_min_count
-  parameters_arns     = module.parameters.django_ssm_parameter_arns
-  private_subnet_ids  = module.networking.private_subnet_ids
-  project_name        = var.project_name
-  security_group_id   = module.security.backend_sg_id
-  service_name        = "backend"
-  target_group_arn    = module.alb.backend_target_group_arn
-  use_fargate_spot    = var.backend_use_fargate_spot
+  aws_region            = var.aws_region
+  command               = ["./entrypoint.sh"]
+  common_tags           = local.common_tags
+  container_cpu         = 1024
+  container_memory      = 2048
+  container_port        = 8000
+  desired_count         = var.backend_desired_count
+  enable_auto_scaling   = var.backend_enable_auto_scaling
+  environment           = var.environment
+  kms_key_arn           = module.kms.key_arn
+  max_count             = var.backend_max_count
+  min_count             = var.backend_min_count
+  parameters_arns       = module.parameters.django_ssm_parameter_arns
+  private_subnet_ids    = module.networking.private_subnet_ids
+  project_name          = var.project_name
+  security_group_id     = module.security.backend_sg_id
+  service_name          = "backend"
+  target_group_arn      = module.alb.backend_target_group_arn
+  task_role_policy_arns = [module.storage.static_read_write_policy_arn]
+  use_fargate_spot      = var.backend_use_fargate_spot
 }
 
 module "cache" {
@@ -162,6 +163,7 @@ module "parameters" {
   redis_password_arn = module.cache.redis_password_arn
   server_csrf_url    = "https://${var.domain_name}/csrf/"
   server_graphql_url = "https://${var.domain_name}/graphql/"
+  static_bucket_name = module.storage.static_s3_bucket_name
 }
 
 module "security" {

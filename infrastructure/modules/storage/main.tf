@@ -38,3 +38,34 @@ resource "aws_iam_policy" "fixtures_read_only" {
   })
   tags = var.common_tags
 }
+
+module "static_bucket" {
+  source = "./modules/s3-bucket"
+
+  bucket_name = "${var.project_name}-${var.environment}-static-${random_id.suffix.hex}"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-static"
+  })
+}
+
+resource "aws_iam_policy" "static_read_write" {
+  name        = "${var.project_name}-${var.environment}-static-read-write"
+  description = "Allows read/write access to the static files S3 bucket"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:ListBucket"
+      ]
+      Resource = [
+        module.static_bucket.arn,
+        "${module.static_bucket.arn}/*"
+      ]
+    }]
+  })
+  tags = var.common_tags
+}

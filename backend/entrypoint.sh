@@ -7,8 +7,7 @@ CONTAINER_IP=$(hostname -i)
 export DJANGO_ALLOWED_HOSTS="${DJANGO_ALLOWED_HOSTS},${CONTAINER_IP}"
 
 python manage.py migrate
-# TODO(rudransh-shrivastava): Fix collectstatic — manage bucket within Terraform.
-# python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput
 python manage.py clear_cache
 
 gunicorn wsgi:application --bind 0.0.0.0:8000

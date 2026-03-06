@@ -125,6 +125,12 @@ variable "target_group_arn" {
   type        = string
 }
 
+variable "task_role_policy_arns" {
+  description = "A list of additional IAM policy ARNs to attach to the ECS task role."
+  type        = list(string)
+  default     = []
+}
+
 variable "use_fargate_spot" {
   description = "Whether to use Fargate Spot capacity provider."
   type        = bool
