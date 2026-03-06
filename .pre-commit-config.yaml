@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.2.0
+    rev: v26.3.0
     hooks:
       - id: ansible-lint
         additional_dependencies:
@@ -72,7 +72,7 @@ repos:
           - html
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: v0.48.0
     hooks:
       - id: markdownlint
         args:
