@@ -1,10 +1,15 @@
+import { useQuery } from '@apollo/client/react'
 import { mockChapterData } from '@mockData/mockChapterData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-
 import { useRouter, useSearchParams } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ChaptersPage from 'app/chapters/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
+  useQuery: jest.fn(),
+}))
 
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
@@ -46,6 +51,12 @@ describe('ChaptersPage Component', () => {
     })
     mockRouter = { push: jest.fn() }
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        countries: ['Country One', 'Country Two', 'Country Three'],
+      },
+      loading: false,
+    })
   })
 
   afterEach(() => {

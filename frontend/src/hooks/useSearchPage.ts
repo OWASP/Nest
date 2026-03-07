@@ -20,10 +20,12 @@ interface UseSearchPageReturn<T> {
   searchQuery: string
   sortBy: string
   order: string
+  facetFilters: string[]
   handleSearch: (query: string) => void
   handlePageChange: (page: number) => void
   handleSortChange: (sort: string) => void
   handleOrderChange: (order: string) => void
+  handleFilterChange: (option: string) => void
 }
 
 export function useSearchPage<T>({
@@ -45,6 +47,7 @@ export function useSearchPage<T>({
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+  const [facetFilters, setFacetFilters] = useState<string[]>([])
 
   // Sync state with URL changes
   useEffect(() => {
@@ -57,7 +60,10 @@ export function useSearchPage<T>({
       const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
 
       // Reset page if search query changes (all indices) or if sort/order changes (projects only)
-      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
+      if (
+        searchQueryChanged ||
+        ((indexName === 'projects' || indexName === 'chapters') && sortOrOrderChanged)
+      ) {
         setCurrentPage(1)
       }
     }
@@ -99,7 +105,8 @@ export function useSearchPage<T>({
           computedIndexName,
           searchQuery,
           currentPage,
-          hitsPerPage
+          hitsPerPage,
+          facetFilters
         )
 
         if ('hits' in response) {
@@ -115,7 +122,7 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle, facetFilters])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -134,6 +141,11 @@ export function useSearchPage<T>({
     setOrder(order)
   }
 
+  const handleFilterChange = (option: string) => {
+    setCurrentPage(1)
+    setFacetFilters(option.trim() ? [option] : [])
+  }
+
   return {
     items,
     isLoaded,
@@ -142,9 +154,11 @@ export function useSearchPage<T>({
     searchQuery,
     sortBy,
     order,
+    facetFilters,
     handleSearch,
     handlePageChange,
     handleSortChange,
     handleOrderChange,
+    handleFilterChange,
   }
 }

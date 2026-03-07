@@ -29,3 +29,13 @@ class ChapterQuery:
             return []
 
         return Chapter.active_chapters.order_by("-created_at")[:normalized_limit]
+
+    @strawberry_django.field
+    def countries(self) -> list[str]:
+        """Resolve chapter countries."""
+        return (
+            Chapter.active_chapters.exclude(country="")
+            .values_list("country", flat=True)
+            .distinct()
+            .order_by("country")
+        )

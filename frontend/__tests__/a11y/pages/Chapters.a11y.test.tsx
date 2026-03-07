@@ -1,3 +1,4 @@
+import { useQuery } from '@apollo/client/react'
 import { mockChapterData } from '@mockData/mockChapterData'
 import { screen, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
@@ -21,6 +22,11 @@ jest.mock('components/SearchPageLayout', () => {
   }
 })
 
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
+  useQuery: jest.fn(),
+}))
+
 describe.each([
   { theme: 'light', name: 'light' },
   { theme: 'dark', name: 'dark' },
@@ -28,6 +34,12 @@ describe.each([
   beforeEach(() => {
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
     document.documentElement.classList.toggle('dark', theme === 'dark')
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        countries: ['Country One', 'Country Two', 'Country Three'],
+      },
+      loading: false,
+    })
   })
   it('should have no accessibility violations', async () => {
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
