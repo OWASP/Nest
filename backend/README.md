@@ -56,3 +56,7 @@ Dependencies are managed with [Poetry](https://python-poetry.org/). The main con
 # Update dependencies
 cd backend && poetry update
 ```
+
+## Documentation
+
+- [Nest Deepwiki](https://deepwiki.com/OWASP/Nest) 

@@ -77,3 +77,7 @@ Dependencies are managed with [pnpm](https://pnpm.io/). The configuration is in 
 # Update dependencies
 cd frontend && pnpm update
 ```
+
+## Documentation
+
+- [Nest Deepwiki](https://deepwiki.com/OWASP/Nest) 
