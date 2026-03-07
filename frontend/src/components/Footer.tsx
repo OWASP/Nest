@@ -20,7 +20,7 @@ export default function Footer() {
   return (
     <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
       <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
-        <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
+        <div className="grid w-full sm:grid-cols-2 sm:gap-x-10 sm:gap-y-6 md:grid-cols-4 md:gap-x-20">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="flex flex-col gap-4">
               {/*link*/}
