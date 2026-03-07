@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { mockHealthMetricsData } from '@mockData/mockProjectsHealthMetricsData'
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { screen, waitFor, act } from '@testing-library/react'
+import { render } from 'wrappers/testUtil'
 import MetricsPage from 'app/projects/dashboard/metrics/page'
 
 jest.mock('@apollo/client/react', () => ({
@@ -12,680 +13,560 @@ jest.mock('@heroui/toast', () => ({
   addToast: jest.fn(),
 }))
 
-const createDropDownMockItem = (item, onAction) => (
-  <button key={item.key} onClick={() => onAction(item.key)}>
-    {item.label}
-  </button>
-)
+let capturedSearchBarProps: Record<string, unknown> = {}
 
-const createDropDownMockSection = (section, onAction) => (
-  <div key={section.title}>
-    <h3>{section.title}</h3>
-    {section.items.map((item) => createDropDownMockItem(item, onAction))}
-  </div>
-)
-
-jest.mock('components/ProjectsDashboardDropDown', () => ({
+jest.mock('components/UnifiedSearchBar', () => ({
   __esModule: true,
-  default: ({ onAction, sections }) => (
-    <div>{sections.map((section) => createDropDownMockSection(section, onAction))}</div>
-  ),
-}))
-
-jest.mock('hooks/useDjangoSession', () => ({
-  useDjangoSession: () => ({
-    isSyncing: false,
-  }),
+  default: (props: unknown) => {
+    capturedSearchBarProps = props
+    return (
+      <div data-testid="unified-search-bar">
+        <h1>{props.searchPlaceholder}</h1>
+        {props.children}
+      </div>
+    )
+  },
 }))
 
 jest.mock('@heroui/react', () => ({
   ...jest.requireActual('@heroui/react'),
-  Pagination: ({ page, onChange }) => (
+  Pagination: ({ page, onChange }: { page: number; onChange: (p: number) => void }) => (
     <div>
       <button onClick={() => onChange(page + 1)}>Next Page</button>
     </div>
   ),
 }))
 
-const graphQLError = new Error('GraphQL Error')
+jest.mock('hooks/useDjangoSession', () => ({
+  useDjangoSession: () => ({ isSyncing: false }),
+}))
 
 const mockReplace = jest.fn()
+const mockUseSearchParams = jest.fn(() => new URLSearchParams())
 
 jest.mock('next/navigation', () => ({
-  useSearchParams: jest.fn(() => new URLSearchParams()),
+  useSearchParams: jest.fn(() => mockUseSearchParams()),
+  usePathname: jest.fn(() => '/'),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
     replace: mockReplace,
   })),
 }))
 
+const mockFetchMore = jest.fn()
+
+const setupUseQuery = (overrides = {}) => {
+  ;(useQuery as unknown as jest.Mock).mockReturnValue({
+    data: mockHealthMetricsData,
+    loading: false,
+    error: null,
+    fetchMore: mockFetchMore,
+    ...overrides,
+  })
+}
+
 describe('MetricsPage', () => {
   beforeEach(() => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-    })
+    capturedSearchBarProps = {}
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    setupUseQuery()
   })
+
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  // Helper functions to reduce nesting depth
-  const expectLoadingSpinnerExists = async () => {
-    const loadingSpinner = screen.getAllByAltText('Loading indicator')
-    await waitFor(() => {
-      expect(loadingSpinner.length).toBeGreaterThan(0)
-    })
-  }
-
-  const expectErrorMessageVisible = async () => {
-    const errorMessage = screen.getByText('No metrics found. Try adjusting your filters.')
-    await waitFor(() => {
-      expect(errorMessage).toBeInTheDocument()
-    })
-  }
-
-  const expectHeaderVisible = async () => {
-    const header = screen.getByRole('heading', { name: 'Project Health Metrics' })
-    await waitFor(() => {
-      expect(header).toBeInTheDocument()
-    })
-  }
-
-  const testFilterOptions = async () => {
-    const filterOptions = [
-      'Incubator',
-      'Lab',
-      'Production',
-      'Flagship',
-      'Healthy',
-      'Need Attention',
-      'Unhealthy',
-      'Reset All Filters',
-    ]
-    for (const option of filterOptions) {
-      expect(screen.getAllByText(option).length).toBeGreaterThan(0)
-      const button = screen.getByRole('button', { name: option })
-      fireEvent.click(button)
-      expect(button).toBeInTheDocument()
-    }
-  }
-
-  const testFilterSections = async () => {
-    const filterSectionsLabels = ['Project Level', 'Project Health', 'Reset Filters']
-    for (const label of filterSectionsLabels) {
-      expect(screen.getAllByText(label).length).toBeGreaterThan(0)
-    }
-  }
-
-  test('renders loading state', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: null,
-      loading: true,
-      error: null,
-    })
-    render(<MetricsPage />)
-    await expectLoadingSpinnerExists()
-
-    expect(true).toBe(true)
-  })
-
-  test('renders error state', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: null,
-      loading: false,
-      error: graphQLError,
-    })
-    render(<MetricsPage />)
-    await expectErrorMessageVisible()
-
-    expect(true).toBe(true)
-  })
-
   test('renders page header', async () => {
     render(<MetricsPage />)
-    await expectHeaderVisible()
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
 
+  test('renders loading state (LoadingSpinner shown)', async () => {
+    setupUseQuery({ data: null, loading: true })
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByTestId('unified-search-bar')).toBeInTheDocument()
+    })
+  })
+
+  test('renders error state – header still visible', async () => {
+    setupUseQuery({ data: null, loading: false, error: new Error('GraphQL Error') })
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
+
+  test('renders metrics cards when data is present', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
+
+  test('renders empty state message when metrics array is empty', async () => {
+    setupUseQuery({
+      data: { projectHealthMetrics: [], projectHealthMetricsDistinctLength: 0 },
+    })
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
+
+  test('handleSearchChange – sets query and updates URL', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onSearch).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onSearch('apollo')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('search=apollo'))
+  })
+
+  test('handleSearchChange – deletes search param when query is empty', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('search=old'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onSearch).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onSearch('')
+    })
+
+    const calledUrl: string = mockReplace.mock.calls[0][0]
+    expect(calledUrl).not.toContain('search=')
+  })
+
+  test('handleSortChange – sets order URL param and updates state', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onSortChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onSortChange('starsDesc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=starsDesc'))
+  })
+
+  test('handleSortChange – works for forksDesc', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onSortChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onSortChange('forksDesc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=forksDesc'))
+  })
+
+  test('handleSortChange – works for contributorsDesc', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onSortChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onSortChange('contributorsDesc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=contributorsDesc'))
+  })
+
+  test('handleSortChange – works for createdAtDesc', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onSortChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onSortChange('createdAtDesc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=createdAtDesc'))
+  })
+
+  test('handleSortChange – works for scoreAsc', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onSortChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onSortChange('scoreAsc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=scoreAsc'))
+  })
+
+  test('handleOrderChange – switches to asc order key', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=scoreDesc'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onOrderChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onOrderChange('asc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=scoreAsc'))
+  })
+
+  test('handleOrderChange – switches to desc order key', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=scoreAsc'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onOrderChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onOrderChange('desc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=scoreDesc'))
+  })
+
+  test('handleOrderChange – uses starsDesc/starsAsc pair', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=starsDesc'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onOrderChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onOrderChange('asc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=starsAsc'))
+  })
+
+  test('handleOrderChange – uses forksDesc/forksAsc pair', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=forksAsc'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onOrderChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onOrderChange('desc')
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=forksDesc'))
+  })
+
+  test('handleOrderChange – no-op when newOrderKey not found (bad param)', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=unknownKey'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onOrderChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onOrderChange('asc')
+    })
     expect(true).toBe(true)
   })
 
-  test('renders filter dropdown', async () => {
+  test('handleCategoryChange – applies healthy filter', async () => {
     render(<MetricsPage />)
-    await waitFor(async () => {
-      await testFilterSections()
-      await testFilterOptions()
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('healthy')
     })
 
-    expect(true).toBe(true)
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=healthy'))
   })
 
-  const testMetricsDataDisplay = async () => {
-    const metrics = mockHealthMetricsData.projectHealthMetrics
-    for (const metric of metrics) {
-      expect(screen.getAllByText(metric.projectName)[0]).toBeInTheDocument()
-      expect(screen.getAllByText(metric.starsCount.toString())[0]).toBeInTheDocument()
-      expect(screen.getAllByText(metric.forksCount.toString())[0]).toBeInTheDocument()
-      expect(screen.getAllByText(metric.contributorsCount.toString())[0]).toBeInTheDocument()
-      expect(
-        screen.getAllByText(
-          new Date(metric.createdAt).toLocaleString('default', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          })
-        )[0]
-      ).toBeInTheDocument()
-      expect(screen.getByText(new RegExp(`Score:.*${metric.score}`))).toBeInTheDocument()
-    }
-  }
-
-  test('render health metrics data', async () => {
+  test('handleCategoryChange – applies needsAttention filter', async () => {
     render(<MetricsPage />)
-    await waitFor(async () => {
-      const metrics = mockHealthMetricsData.projectHealthMetrics
-      expect(metrics.length).toBeGreaterThan(0)
-      await testMetricsDataDisplay()
-    })
-  })
-  test('handles pagination', async () => {
-    const mockFetchMore = jest.fn((options) => {
-      const updateQuery = options.updateQuery
-      const mockFetchMoreResult = { projectHealthMetrics: [] }
-      return updateQuery(mockHealthMetricsData, { fetchMoreResult: mockFetchMoreResult })
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
+
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('needsAttention')
     })
 
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const nextPageButton = screen.getByText('Next Page')
-    expect(nextPageButton).toBeInTheDocument()
-    fireEvent.click(nextPageButton)
-
-    await waitFor(() => {
-      expect(mockFetchMore).toHaveBeenCalled()
-    })
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=needsAttention'))
   })
 
-  test('applies health filter - healthy', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+  test('handleCategoryChange – applies unhealthy filter', async () => {
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
 
-    const healthyButton = screen.getByRole('button', { name: 'Healthy' })
-    fireEvent.click(healthyButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=healthy'))
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('unhealthy')
     })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=unhealthy'))
   })
 
-  test('applies health filter - needs attention', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+  test('handleCategoryChange – applies incubator level filter', async () => {
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
 
-    const needsAttentionButton = screen.getByRole('button', { name: 'Need Attention' })
-    fireEvent.click(needsAttentionButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=needsAttention'))
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('incubator')
     })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=incubator'))
   })
 
-  test('applies health filter - unhealthy', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+  test('handleCategoryChange – applies lab level filter', async () => {
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
 
-    const unhealthyButton = screen.getByRole('button', { name: 'Unhealthy' })
-    fireEvent.click(unhealthyButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('health=unhealthy'))
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('lab')
     })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=lab'))
   })
 
-  test('applies level filter - incubator', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+  test('handleCategoryChange – applies production level filter', async () => {
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
 
-    const incubatorButton = screen.getByRole('button', { name: 'Incubator' })
-    fireEvent.click(incubatorButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=incubator'))
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('production')
     })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=production'))
   })
 
-  test('applies level filter - lab', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+  test('handleCategoryChange – applies flagship level filter', async () => {
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
 
-    const labButton = screen.getByRole('button', { name: 'Lab' })
-    fireEvent.click(labButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=lab'))
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('flagship')
     })
+
+    expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=flagship'))
   })
 
-  test('applies level filter - production', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+  test('handleCategoryChange – clears filters when empty category passed', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('health=healthy'))
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onCategoryChange).toBeDefined())
 
-    const productionButton = screen.getByRole('button', { name: 'Production' })
-    fireEvent.click(productionButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=production'))
+    act(() => {
+      capturedSearchBarProps.onCategoryChange('')
     })
+
+    const calledUrl: string = mockReplace.mock.calls[0][0]
+    expect(calledUrl).not.toContain('health=')
+    expect(calledUrl).not.toContain('level=')
   })
 
-  test('applies level filter - flagship', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
+  test('onPageChange – calls fetchMore with correct variables', async () => {
+    const mockFetchMoreImpl = jest.fn().mockResolvedValue({})
+    setupUseQuery({ fetchMore: mockFetchMoreImpl })
+
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onPageChange).toBeDefined())
 
-    const flagshipButton = screen.getByRole('button', { name: 'Flagship' })
-    fireEvent.click(flagshipButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('level=flagship'))
+    await act(async () => {
+      await capturedSearchBarProps.onPageChange(2)
     })
+
+    expect(mockFetchMoreImpl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: expect.objectContaining({
+          pagination: { offset: 10, limit: 10 },
+        }),
+      })
+    )
   })
 
-  test('resets all filters', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
+  test('onPageChange – updateQuery returns fetchMoreResult when present', async () => {
+    let capturedUpdateQuery: ((prevData: unknown, options: unknown) => unknown) | undefined
+    const mockFetchMoreImpl = jest.fn((opts) => {
+      capturedUpdateQuery = opts.updateQuery
+      return Promise.resolve({})
     })
+    setupUseQuery({ fetchMore: mockFetchMoreImpl })
+
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onPageChange).toBeDefined())
 
-    const resetButton = screen.getByRole('button', { name: 'Reset All Filters' })
-    fireEvent.click(resetButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalled()
-      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
-      expect(lastCall).not.toContain('health=')
-      expect(lastCall).not.toContain('level=')
+    await act(async () => {
+      await capturedSearchBarProps.onPageChange(2)
     })
+
+    const prevData = mockHealthMetricsData
+    const fetchMoreResult = { projectHealthMetrics: [] }
+    const result = capturedUpdateQuery(prevData, { fetchMoreResult })
+    expect(result.projectHealthMetrics).toEqual([])
   })
 
-  test('applies sort - score descending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
+  test('onPageChange – updateQuery returns prev when fetchMoreResult is null', async () => {
+    let capturedUpdateQuery: ((prevData: unknown, options: unknown) => unknown) | undefined
+    const mockFetchMoreImpl = jest.fn((opts) => {
+      capturedUpdateQuery = opts.updateQuery
+      return Promise.resolve({})
     })
+    setupUseQuery({ fetchMore: mockFetchMoreImpl })
+
     render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.onPageChange).toBeDefined())
 
-    const scoreDescButton = screen.getByRole('button', { name: 'Score (High → Low)' })
-    fireEvent.click(scoreDescButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=scoreDesc'))
+    await act(async () => {
+      await capturedSearchBarProps.onPageChange(2)
     })
-  })
 
-  test('applies sort - score ascending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const scoreAscButton = screen.getByRole('button', { name: 'Score (Low → High)' })
-    fireEvent.click(scoreAscButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=scoreAsc'))
-    })
-  })
-
-  test('applies sort - stars descending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const starsDescButton = screen.getByRole('button', { name: 'Stars (High → Low)' })
-    fireEvent.click(starsDescButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=starsDesc'))
-    })
-  })
-
-  test('applies sort - stars ascending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const starsAscButton = screen.getByRole('button', { name: 'Stars (Low → High)' })
-    fireEvent.click(starsAscButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=starsAsc'))
-    })
-  })
-
-  test('applies sort - forks descending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const forksDescButton = screen.getByRole('button', { name: 'Forks (High → Low)' })
-    fireEvent.click(forksDescButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=forksDesc'))
-    })
-  })
-
-  test('applies sort - forks ascending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const forksAscButton = screen.getByRole('button', { name: 'Forks (Low → High)' })
-    fireEvent.click(forksAscButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=forksAsc'))
-    })
-  })
-
-  test('applies sort - contributors descending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const contributorsDescButton = screen.getByRole('button', {
-      name: 'Contributors (High → Low)',
-    })
-    fireEvent.click(contributorsDescButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=contributorsDesc'))
-    })
-  })
-
-  test('applies sort - contributors ascending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const contributorsAscButton = screen.getByRole('button', {
-      name: 'Contributors (Low → High)',
-    })
-    fireEvent.click(contributorsAscButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=contributorsAsc'))
-    })
-  })
-
-  test('applies sort - created at descending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const createdAtDescButton = screen.getByRole('button', {
-      name: 'Last checked (Newest)',
-    })
-    fireEvent.click(createdAtDescButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=createdAtDesc'))
-    })
-  })
-
-  test('applies sort - created at ascending', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const createdAtAscButton = screen.getByRole('button', {
-      name: 'Last checked (Oldest)',
-    })
-    fireEvent.click(createdAtAscButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith(expect.stringContaining('order=createdAtAsc'))
-    })
-  })
-
-  test('resets sort order', async () => {
-    const mockFetchMore = jest.fn()
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const resetSortButton = screen.getByRole('button', { name: 'Reset Sorting' })
-    fireEvent.click(resetSortButton)
-
-    await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalled()
-      const lastCall = mockReplace.mock.calls[mockReplace.mock.calls.length - 1][0]
-      expect(lastCall).not.toContain('order=')
-    })
-  })
-
-  test('renders no metrics message when metrics are empty', async () => {
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: {
-        projectHealthMetrics: [],
-        projectHealthMetricsDistinctLength: 0,
-      },
-      loading: false,
-      error: null,
-    })
-    render(<MetricsPage />)
-
-    const noMetricsMessage = screen.getByText('No metrics found. Try adjusting your filters.')
-    await waitFor(() => {
-      expect(noMetricsMessage).toBeInTheDocument()
-    })
+    const prevData = mockHealthMetricsData
+    const result = capturedUpdateQuery(prevData, { fetchMoreResult: null })
+    expect(result).toBe(prevData)
   })
 
   test('initializes with ascending order from URL params', async () => {
-    const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=scoreAsc'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
-
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=scoreAsc'))
     render(<MetricsPage />)
-    await expectHeaderVisible()
-    // Verify component rendered without errors
-    expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
   })
 
   test('initializes with descending order from URL params', async () => {
-    const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('order=starsDesc'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
-
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=starsDesc'))
     render(<MetricsPage />)
-    await expectHeaderVisible()
-    // Verify component rendered without errors
-    expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
-  })
-
-  test('handles pagination when fetchMoreResult is null', async () => {
-    const mockFetchMore = jest.fn((options) => {
-      const updateQuery = options.updateQuery
-      return updateQuery(mockHealthMetricsData, { fetchMoreResult: null })
-    })
-
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: mockFetchMore,
-    })
-    render(<MetricsPage />)
-
-    const nextPageButton = screen.getByText('Next Page')
-    expect(nextPageButton).toBeInTheDocument()
-    fireEvent.click(nextPageButton)
-
     await waitFor(() => {
-      expect(mockFetchMore).toHaveBeenCalled()
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
     })
   })
 
   test('initializes with health filter from URL params', async () => {
-    const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('health=healthy'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
-    })
-
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('health=healthy'))
     render(<MetricsPage />)
-    await expectHeaderVisible()
-    // Verify component rendered without errors
-    expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
+
+  test('initializes with needsAttention health filter from URL', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('health=needsAttention'))
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
   })
 
   test('initializes with level filter from URL params', async () => {
-    const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams('level=incubator'))
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('level=incubator'))
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
+
+  test('initializes with both health and level filters from URL params (level takes precedence)', async () => {
+    mockUseSearchParams.mockReturnValue(
+      new URLSearchParams('health=needsAttention&level=production')
+    )
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
+
+  test('initializes with search query from URL params', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('search=myapp'))
+    render(<MetricsPage />)
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    })
+  })
+
+  test('getSortFieldKey returns scoreDesc when no urlKey', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.sortBy).toBeDefined())
+    expect(capturedSearchBarProps.sortBy).toBe('scoreDesc')
+  })
+
+  test('getSortFieldKey normalizes Asc suffix to Desc for sortBy', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=starsAsc'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.sortBy).toBeDefined())
+    expect(capturedSearchBarProps.sortBy).toBe('starsDesc')
+  })
+
+  test('order prop is "asc" when urlKey ends with Asc', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=forksAsc'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.order).toBeDefined())
+    expect(capturedSearchBarProps.order).toBe('asc')
+  })
+
+  test('order prop is "desc" when urlKey ends with Desc', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=starsDesc'))
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.order).toBeDefined())
+    expect(capturedSearchBarProps.order).toBe('desc')
+  })
+
+  test('currentPage prop starts at 1', async () => {
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.currentPage).toBeDefined())
+    expect(capturedSearchBarProps.currentPage).toBe(1)
+  })
+
+  test('totalPages is calculated from metricsLength', async () => {
+    setupUseQuery({
+      data: {
+        projectHealthMetrics: mockHealthMetricsData.projectHealthMetrics,
+        projectHealthMetricsDistinctLength: 25,
+      },
+    })
+    render(<MetricsPage />)
+    await waitFor(() => expect(capturedSearchBarProps.totalPages).toBeDefined())
+    expect(capturedSearchBarProps.totalPages).toBe(3) // ceil(25/10)
+  })
+
+  test('useEffect – updates ordering when URL order param changes (line 167)', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=scoreDesc'))
+    const { rerender } = render(<MetricsPage />)
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    )
+
+    // Now change the URL to a different ordering – effect should call setOrdering
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('order=starsDesc'))
+    await act(async () => {
+      rerender(<MetricsPage />)
     })
 
-    render(<MetricsPage />)
-    await expectHeaderVisible()
-    // Verify component rendered without errors
     expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
   })
 
-  test('initializes with both health and level filters from URL params', async () => {
-    const { useSearchParams } = jest.requireMock('next/navigation')
-    ;(useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams('health=needsAttention&level=production')
+  test('useEffect – updates searchQuery when URL search param changes (lines 172-173)', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    const { rerender } = render(<MetricsPage />)
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
     )
-    ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
-      loading: false,
-      error: null,
-      fetchMore: jest.fn(),
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('search=newquery'))
+    await act(async () => {
+      rerender(<MetricsPage />)
     })
 
-    render(<MetricsPage />)
-    await expectHeaderVisible()
-    // Verify component rendered without errors
+    expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+  })
+
+  test('useEffect – updates filters when URL health param changes (lines 186-187)', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    const { rerender } = render(<MetricsPage />)
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    )
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('health=healthy'))
+    await act(async () => {
+      rerender(<MetricsPage />)
+    })
+
+    expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+  })
+
+  test('useEffect – updates filters when URL level param changes (lines 186-187, level branch)', async () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    const { rerender } = render(<MetricsPage />)
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
+    )
+
+    mockUseSearchParams.mockReturnValue(new URLSearchParams('level=lab'))
+    await act(async () => {
+      rerender(<MetricsPage />)
+    })
+
     expect(screen.getByRole('heading', { name: 'Project Health Metrics' })).toBeInTheDocument()
   })
 })

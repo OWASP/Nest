@@ -14,6 +14,7 @@ def get_projects(
     limit: int = 25,
     page: int = 1,
     searchable_attributes: list | None = None,
+    filters: str | None = None,
 ) -> dict:
     """Return projects relevant to a search query.
 
@@ -23,6 +24,7 @@ def get_projects(
         limit (int, optional): Number of results per page.
         page (int, optional): Page number for pagination.
         searchable_attributes (list, optional): Attributes to restrict the search to.
+        filters (str, optional): Filter expression for faceted search (e.g., "idx_type:code").
 
     Returns:
         dict: Search results containing projects matching the query.
@@ -53,5 +55,8 @@ def get_projects(
 
     if searchable_attributes:
         params["restrictSearchableAttributes"] = searchable_attributes
+
+    if filters:
+        params["filters"] = filters
 
     return raw_search(Project, query, params)

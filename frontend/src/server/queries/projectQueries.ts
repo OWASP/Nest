@@ -181,3 +181,29 @@ export const SEARCH_PROJECTS = gql`
     }
   }
 `
+export const GET_PROJECTS_LIST = gql`
+  query GetProjectsList(
+    $query: String!
+    $filters: ProjectFilter
+    $ordering: [ProjectOrder!]
+    $pagination: OffsetPaginationInput!
+  ) {
+    searchProjects(query: $query, filters: $filters, ordering: $ordering, pagination: $pagination) {
+      id
+      key
+      name
+      type
+      level
+      summary
+      starsCount
+      forksCount
+      contributorsCount
+      updatedAt
+      createdAt
+      isActive
+      url
+      topics
+    }
+    projectsTotal: searchProjectsCount(query: $query, filters: $filters)
+  }
+`

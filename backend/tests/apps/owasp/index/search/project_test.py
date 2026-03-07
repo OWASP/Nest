@@ -42,3 +42,28 @@ class TestGetProjects:
             params = call_args[2]
             assert params["restrictSearchableAttributes"] == ["idx_name"]
             assert result == MOCKED_HITS
+
+    def test_get_projects_with_filters(self):
+        with patch(
+            "apps.owasp.index.search.project.raw_search", return_value=MOCKED_HITS
+        ) as mock_raw_search:
+            result = get_projects(query="test", filters="idx_type:code")
+
+            mock_raw_search.assert_called_once()
+            call_args = mock_raw_search.call_args[0]
+            params = call_args[2]
+            assert params["filters"] == "idx_type:code"
+            assert result == MOCKED_HITS
+
+    def test_get_projects_with_custom_attributes(self):
+        with patch(
+            "apps.owasp.index.search.project.raw_search", return_value=MOCKED_HITS
+        ) as mock_raw_search:
+            custom_attrs = ["idx_name", "idx_url"]
+            result = get_projects(query="test", attributes=custom_attrs)
+
+            mock_raw_search.assert_called_once()
+            call_args = mock_raw_search.call_args[0]
+            params = call_args[2]
+            assert params["attributesToRetrieve"] == custom_attrs
+            assert result == MOCKED_HITS
