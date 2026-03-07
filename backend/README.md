@@ -48,6 +48,15 @@ See the root `Makefile` and the local `Makefile` for more targets.
 - **REST API (v0)**: Served at `/api/v0/`. See [API v0 README](https://github.com/OWASP/Nest/blob/main/backend/apps/api/rest/v0/README.md) for SDK-related constraints.
 - **GraphQL API**: Served at `/graphql/`.
 
+## Dependencies
+
+Dependencies are managed with [Poetry](https://python-poetry.org/). The main configuration is in `pyproject.toml`.
+
+```bash
+# Update dependencies
+cd backend && poetry update
+```
+
 ## Environment Variables
 
 The backend uses the following environment variables (configured in `backend/.env`):
@@ -119,6 +128,11 @@ The backend uses the following environment variables (configured in `backend/.en
 - **Example Value**: `postgres`
 - **Usage**: Authenticates with the database.
 
+### `DJANGO_ELEVENLABS_API_KEY`
+
+- **Description**: The API key for ElevenLabs text-to-speech service.
+- **Usage**: Used for audio generation features.
+
 ### `DJANGO_OPEN_AI_SECRET_KEY`
 
 - **Description**: The secret key for OpenAI API.
@@ -134,6 +148,23 @@ The backend uses the following environment variables (configured in `backend/.en
 - **Description**: The release version of the application.
 - **Example Value**: `1.0.5`
 - **Usage**: Identifies the current backend deployment version.
+
+### `DJANGO_REDIS_AUTH_ENABLED`
+
+- **Description**: Whether Redis requires authentication.
+- **Example Value**: `True`
+- **Usage**: Enables password authentication for Redis when set to `True`.
+
+### `DJANGO_REDIS_HOST`
+
+- **Description**: The hostname of the Redis server.
+- **Example Value**: `cache`
+- **Usage**: Used to connect Django to Redis for caching and task queues.
+
+### `DJANGO_REDIS_PASSWORD`
+
+- **Description**: The password for Redis authentication.
+- **Usage**: Authenticates with Redis when `DJANGO_REDIS_AUTH_ENABLED` is `True`.
 
 ### `DJANGO_SECRET_KEY`
 
@@ -160,12 +191,3 @@ The backend uses the following environment variables (configured in `backend/.en
 
 - **Description**: The token for accessing GitHub APIs.
 - **Usage**: Used for making authenticated requests to GitHub (e.g., issues, releases).
-
-## Dependencies
-
-Dependencies are managed with [Poetry](https://python-poetry.org/). The main configuration is in `pyproject.toml`.
-
-```bash
-# Update dependencies
-cd backend && poetry update
-```
