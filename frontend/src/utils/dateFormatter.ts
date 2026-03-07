@@ -1,23 +1,27 @@
+function normalizeDate(input: string | number): Date {
+  if (typeof input === 'number') {
+    return new Date(input * 1000)
+  }
+
+  if (typeof input === 'string' && input.includes('/')) {
+    const mmddyyyy = input.match(/^(\d{1,2})[/](\d{1,2})[/](\d{4})$/)
+    if (mmddyyyy) {
+      return new Date(
+        `${mmddyyyy[3]}-${mmddyyyy[1].padStart(2, '0')}-${mmddyyyy[2].padStart(2, '0')}`
+      )
+    }
+    return new Date(input.replace(/\//g, '-'))
+  }
+
+  return new Date(input)
+}
+
 export const formatDate = (input: number | string) => {
   if (!input) {
     return ''
   }
 
-  let parsedInput = input
-  if (typeof parsedInput === 'string') {
-    // Normalize slash-delimited dates to ISO 8601 (YYYY-MM-DD) for consistent UTC parsing
-    const mmddyyyy = parsedInput.match(/^(\d{1,2})[/](\d{1,2})[/](\d{4})$/)
-    if (mmddyyyy) {
-      parsedInput = `${mmddyyyy[3]}-${mmddyyyy[1].padStart(2, '0')}-${mmddyyyy[2].padStart(2, '0')}`
-    } else {
-      parsedInput = parsedInput.replace(/\//g, '-')
-    }
-  }
-
-  const date =
-    typeof parsedInput === 'number'
-      ? new Date(parsedInput * 1000) // Unix timestamp in seconds
-      : new Date(parsedInput) // ISO date string
+  const date = normalizeDate(input)
 
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
@@ -32,8 +36,8 @@ export const formatDate = (input: number | string) => {
 }
 
 export const formatDateRange = (startDate: number | string, endDate: number | string) => {
-  const start = typeof startDate === 'number' ? new Date(startDate * 1000) : new Date(startDate)
-  const end = typeof endDate === 'number' ? new Date(endDate * 1000) : new Date(endDate)
+  const start = normalizeDate(startDate)
+  const end = normalizeDate(endDate)
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
     throw new Error('Invalid date')
@@ -75,7 +79,7 @@ export const formatDateRange = (startDate: number | string, endDate: number | st
 
 export const formatDateForInput = (dateStr: string | number) => {
   if (!dateStr) return ''
-  const date = typeof dateStr === 'number' ? new Date(dateStr * 1000) : new Date(dateStr)
+  const date = normalizeDate(dateStr)
   if (Number.isNaN(date.getTime())) {
     throw new Error('Invalid date')
   }

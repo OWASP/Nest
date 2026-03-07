@@ -101,6 +101,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
     }
   }, [triggerSearch])
 
+  useEffect(() => {
+    setHighlightedIndex(null)
+  }, [suggestions])
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchQuery(value)
@@ -155,6 +159,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
     if (e.key === 'Escape') {
       setShowSuggestions(false)
+      setHighlightedIndex(null)
     }
   }
 

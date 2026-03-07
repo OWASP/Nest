@@ -11,6 +11,7 @@ const originalDescriptor = Object.getOwnPropertyDescriptor(
   window.TreeWalker.prototype,
   'currentNode'
 )
+
 if (originalDescriptor) {
   Object.defineProperty(window.TreeWalker.prototype, 'currentNode', {
     ...originalDescriptor,
@@ -45,6 +46,7 @@ describe('ApiKeysPage Accessibility', () => {
 
   it('should have no violations in loading state', async () => {
     mockUseQuery.mockReturnValue({ data: null, loading: true })
+
     const { container } = render(<ApiKeysPage />)
 
     const results = await axe(container)
@@ -52,7 +54,11 @@ describe('ApiKeysPage Accessibility', () => {
   })
 
   it('should have no violations in empty state', async () => {
-    mockUseQuery.mockReturnValue({ data: { apiKeys: [], activeApiKeyCount: 0 }, loading: false })
+    mockUseQuery.mockReturnValue({
+      data: { apiKeys: [], activeApiKeyCount: 0 },
+      loading: false,
+    })
+
     const { container } = render(<ApiKeysPage />)
 
     const results = await axe(container)
@@ -79,7 +85,7 @@ describe('ApiKeysPage Accessibility', () => {
     const { container } = render(<ApiKeysPage />)
 
     const row = (await screen.findByText('mock key 1')).closest('tr')!
-    const revokeButton = within(row).getByRole('button')
+    const revokeButton = within(row).getByRole('button', { name: /revoke/i })
 
     await act(async () => {
       fireEvent.click(revokeButton)

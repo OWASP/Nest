@@ -137,6 +137,10 @@ describe('HealthMetrics', () => {
       render(<HealthMetrics data={mockData} />)
 
       expect(screen.getByText('Issues Trend')).toBeInTheDocument()
+      const barChart = screen.getByTestId('BarChart')
+      const props = JSON.parse(barChart.dataset.props || '{}')
+      expect(props.days).toEqual([0, 0])
+      expect(props.requirements).toEqual([0, 0])
     })
   })
 })

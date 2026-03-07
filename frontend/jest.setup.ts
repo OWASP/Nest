@@ -131,8 +131,23 @@ beforeAll(() => {
   }
 })
 
+// eslint-disable-next-line no-console
+const originalConsoleError = console.error.bind(console)
+
 beforeEach(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => {})
+  jest.spyOn(console, 'error').mockImplementation((...args) => {
+    const message = typeof args[0] === 'string' ? args[0] : ''
+    if (
+      message.includes('Warning: An update to') ||
+      message.includes('Warning: ReactDOM.render') ||
+      message.includes('not wrapped in act') ||
+      message.includes('inside a test was not wrapped')
+    ) {
+      return
+    }
+
+    originalConsoleError(...args)
+  })
 
   jest.spyOn(globalThis.console, 'warn').mockImplementation((message) => {
     if (
