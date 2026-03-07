@@ -42,28 +42,33 @@ export default function Footer() {
               </Button>
               <div
                 id={`footer-section-${section.title}`}
-                className={`flex flex-col gap-2 text-sm transition-all duration-300 ease-in-out ${
-                  openSection === section.title
+                className={`flex flex-col gap-2 text-sm transition-all duration-300 ease-in-out ${openSection === section.title
                     ? 'max-h-96'
                     : 'max-h-0 overflow-hidden lg:max-h-full lg:overflow-visible'
-                }`}
+                  }`}
               >
-                {section.links.map((link) => (
-                  <div key={link.href || `span-${link.text}`} className="py-1">
-                    {link.isSpan ? (
-                      <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
-                    ) : (
-                      <Link
-                        className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
-                        href={link.href || '/'}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        {link.text}
-                      </Link>
-                    )}
-                  </div>
-                ))}
+                {section.links.map((link) => {
+                  const isExternal = link.href?.startsWith('http')
+
+                  return (
+                    <div key={link.href || `span-${link.text}`} className="py-1">
+                      {link.isSpan ? (
+                        <span className="text-slate-600 dark:text-slate-400">
+                          {link.text}
+                        </span>
+                      ) : (
+                        <Link
+                          className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                          href={link.href || '/'}
+                          target={isExternal ? '_blank' : undefined}
+                          rel={isExternal ? 'noopener noreferrer' : undefined}
+                        >
+                          {link.text}
+                        </Link>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           ))}
