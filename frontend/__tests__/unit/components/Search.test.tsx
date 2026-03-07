@@ -1,6 +1,7 @@
 import { sendGTMEvent } from '@next/third-parties/google'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SearchBar from 'components/Search'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 
 jest.mock('@next/third-parties/google', () => ({
   sendGTMEvent: jest.fn(),
@@ -18,6 +19,10 @@ jest.mock('lodash/debounce', () => {
   }
 })
 
+jest.mock('hooks/useShouldAutoFocusSearch', () => ({
+  useShouldAutoFocusSearch: jest.fn(() => true),
+}))
+
 describe('SearchBar Component', () => {
   const mockOnSearch = jest.fn()
   const defaultProps = {
@@ -28,6 +33,7 @@ describe('SearchBar Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
     jest.useFakeTimers()
   })
 
@@ -110,13 +116,22 @@ describe('SearchBar Component', () => {
   })
 
   describe('Auto-focus functionality', () => {
-    it('should auto-focus on initial render', () => {
+    it('should auto-focus on initial render when shouldAutoFocus is true', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
     })
 
-    it('should not lose focus on re-renders', () => {
+    it('should NOT auto-focus on mobile/touch devices',()=>{
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).not.toHaveFocus()
+    })
+
+    it('should not lose focus on re-renders when shouldAutoFocus is true', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
       const { rerender } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
@@ -141,13 +156,30 @@ describe('SearchBar Component', () => {
     })
 
     it('clears input when clear button is clicked', async () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
-      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
+      input.blur()
+      // NOSONAR: Verifies input lost focus before testing refocus behavior
+      expect(input).not.toHaveFocus()
       fireEvent.click(clearButton)
       expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is refocused after clear when shouldAutoFocus is true
+      expect(input).toHaveFocus()
+    })
+
+    it('does not refocus input after clear when on mobile', async () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      fireEvent.change(input, { target: { value: 'test' } })
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
+      fireEvent.click(clearButton)
+      expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is not refocused on mobile when shouldAutoFocus is false
+      expect(input).not.toHaveFocus()
     })
 
     it('calls onSearch when input value changes', async () => {
