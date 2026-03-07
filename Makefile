@@ -16,10 +16,12 @@ MAKEFLAGS += --no-print-directory
 ##@ Getting Started
 
 help: ## Display this help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} \
-		/^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } \
-		/^[a-zA-Z_-]+:.*?## / { printf "  \033[36m%-30s\033[0m %s\n", $$1, $$2 }' \
-		$(MAKEFILE_LIST)
+	@[ -t 1 ] && c='\033[36m' r='\033[0m' b='\033[1m' || c='' r='' b=''; \
+	awk -v c="$$c" -v r="$$r" -v b="$$b" ' \
+	BEGIN { FS = ":.*##"; printf "\nUsage:\n  make " c "<target>" r "\n" } \
+	/^##@/ { printf "\n" b "%s" r "\n", substr($$0, 5) } \
+	/^[a-zA-Z_-]+:.*?## / { printf "  " c "%-30s" r " %s\n", $$1, $$2 }' \
+	$(MAKEFILE_LIST)
 
 build: ## Build Docker images
 	@docker compose build
@@ -167,7 +169,7 @@ clean-docker: \
 clean-trivy-cache:
 	@rm -rf $(CURDIR)/.trivy-cache
 
-prune: ## Prune Docker resources older than 72h
+prune: ## Prune Docker resources
 	@docker builder prune --filter 'until=72h' -a -f
 	@docker image prune --filter 'until=72h' -a -f
 	@docker volume prune -f

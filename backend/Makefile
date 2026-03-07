@@ -145,7 +145,7 @@ migrations: ## Generate new migrations
 migrations-empty:
 	@CMD="python manage.py makemigrations --empty $(APP_NAME)" $(MAKE) exec-backend-command
 
-purge-data:
+purge-data: ## Purge database data
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 
 purge-data-e2e:
@@ -215,13 +215,12 @@ sbom-backend-image:
 		--output /work/backend-sbom-$(SBOM_VERSION).cdx.json \
 		$(BACKEND_IMAGE_NAME)
 
-shell-backend:
+shell-backend: ## Open backend container shell
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
-shell-db:
+shell-db: ## Open database container shell
 	@CMD="/bin/sh" $(MAKE) exec-db-command-it
 
-sync-data: ## Sync, enrich, and index all data
 sync-data: \
 	update-data \
 	enrich-data \
@@ -238,7 +237,7 @@ test-backend:
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
 
-test-fuzz:
+test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-fuzz_fuzz-db-data >/dev/null 2>&1 || true
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
@@ -253,7 +252,6 @@ test-fuzz:
 update-backend-dependencies:
 	@cd backend && poetry update
 
-update-data: ## Update data from GitHub and OWASP
 update-data: \
 	github-update-owasp-organization \
 	owasp-scrape-chapters \
