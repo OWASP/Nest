@@ -36,9 +36,10 @@ Optional steps for Windows:
 
 [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
-## Documentation
+## External Documentation
 
-- [Nest Deepwiki](https://deepwiki.com/OWASP/Nest)
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest)
+- [OWASP Nest ReadTheDocs](https://owasp-nest.readthedocs.io/latest/)
 
 ## Environment Variables
 

@@ -58,9 +58,10 @@ OWASP Nest thrives on community contributions. Whether you are a developer, desi
 
 To get started, visit the [OWASP Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).
 
-## Documentation
+## External Documentation
 
-- [Nest Deepwiki](https://deepwiki.com/OWASP/Nest) - Auto-generated documentation for the Nest codebase.
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest)
+- [OWASP Nest ReadTheDocs](https://owasp-nest.readthedocs.io/latest/)
 
 ## About
 
