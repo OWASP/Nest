@@ -77,6 +77,7 @@ const ContributePage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
+      scopeLabel="Search within issues"
       searchPlaceholder="Search for issues..."
       searchQuery={searchQuery}
       totalPages={totalPages}

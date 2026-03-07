@@ -59,6 +59,7 @@ const OrganizationPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
+      scopeLabel="Search within organizations"
       searchPlaceholder="Search for organizations..."
       searchQuery={searchQuery}
       totalPages={totalPages}

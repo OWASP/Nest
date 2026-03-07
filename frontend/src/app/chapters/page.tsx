@@ -84,6 +84,7 @@ const ChaptersPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
+      scopeLabel="Search within chapters"
       searchPlaceholder="Search for chapters..."
       searchQuery={searchQuery}
       totalPages={totalPages}

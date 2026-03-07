@@ -59,6 +59,7 @@ const CommitteesPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
+      scopeLabel="Search within committees"
       searchPlaceholder="Search for committees..."
       searchQuery={searchQuery}
       totalPages={totalPages}

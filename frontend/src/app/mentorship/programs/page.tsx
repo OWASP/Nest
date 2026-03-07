@@ -41,6 +41,7 @@ const ProgramsPage = () => {
       isLoaded={isLoaded}
       onPageChange={handlePageChange}
       onSearch={handleSearch}
+      scopeLabel="Search within programs"
       searchPlaceholder="Search for programs..."
       searchQuery={searchQuery}
       totalPages={totalPages}

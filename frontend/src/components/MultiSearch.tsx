@@ -13,6 +13,7 @@ import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { MultiSearchBarProps, Suggestion } from 'types/search'
 import type { User } from 'types/user'
+import { cn } from 'utils/utility'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 
@@ -22,6 +23,9 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   indexes,
   initialValue = '',
   eventData,
+  autoFocus = false,
+  containerClassName,
+  inputClassName,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
@@ -115,6 +119,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const isInputFocused = document.activeElement === inputRef.current
+      if (!isInputFocused && !showSuggestions) {
+        return
+      }
       if (event.key === 'Escape') {
         setShowSuggestions(false)
         inputRef.current?.blur()
@@ -158,8 +166,6 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }, [searchQuery, suggestions, highlightedIndex, handleSuggestionClick])
 
   useEffect(() => {
-    inputRef.current?.focus()
-
     const handleClickOutside = (event: MouseEvent) => {
       if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
         setShowSuggestions(false)
@@ -172,6 +178,12 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus()
+    }
+  }, [autoFocus])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
@@ -221,7 +233,7 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
   }
 
   return (
-    <div className="w-full max-w-md p-4" ref={searchBarRef}>
+    <div className={cn('w-full max-w-md p-4', containerClassName)} ref={searchBarRef}>
       <div className="relative">
         {isLoaded ? (
           <>
@@ -236,7 +248,10 @@ const MultiSearchBar: React.FC<MultiSearchBarProps> = ({
               onChange={handleSearchChange}
               onFocus={handleFocusSearch}
               placeholder={placeholder}
-              className="h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300"
+              className={cn(
+                'h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300',
+                inputClassName
+              )}
             />
             {searchQuery && (
               <button
