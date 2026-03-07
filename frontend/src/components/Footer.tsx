@@ -82,7 +82,7 @@ export default function Footer() {
           </div>
 
           {/* Vertical Separator */}
-          <div className="h-8 w-px bg-white"></div>
+          <div className="h-8 w-px bg-slate-400 dark:bg-white"></div>
 
           {/* OWASP Logo */}
           <img
