@@ -31,6 +31,12 @@ export const mockChapterDetailsData = {
         },
       },
     ],
+    entityChannels: [
+      {
+        name: 'chapter-test',
+        slackChannelId: 'C123ABC',
+      },
+    ],
     establishedYear: 2020,
     key: 'test-chapter',
   },

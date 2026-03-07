@@ -301,4 +301,15 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Project Leader')).toBeInTheDocument()
     })
   })
+
+  test('renders Slack channel link with expected Slack URL', async () => {
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      const slackLink = screen.getByRole('link', { name: '#project-security' })
+      expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C456DEF')
+      expect(slackLink).toHaveAttribute('target', '_blank')
+      expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
+    })
+  })
 })

@@ -72,6 +72,7 @@ export type ChapterNode = Node & {
   contributionStats?: Maybe<Scalars['JSON']['output']>;
   country: Scalars['String']['output'];
   createdAt: Scalars['Float']['output'];
+  entityChannels: Array<EntityChannelNode>;
   entityLeaders: Array<EntityMemberNode>;
   geoLocation?: Maybe<GeoLocationType>;
   /** The Globally Unique ID of this object */
@@ -96,6 +97,7 @@ export type CommitteeNode = Node & {
   __typename?: 'CommitteeNode';
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['Float']['output']>;
+  entityChannels: Array<EntityChannelNode>;
   entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   /** The Globally Unique ID of this object */
@@ -144,6 +146,18 @@ export type CreateProgramInput = {
   name: Scalars['String']['input'];
   startedAt: Scalars['DateTime']['input'];
   tags?: Array<Scalars['String']['input']>;
+};
+
+export type EntityChannelNode = Node & {
+  __typename?: 'EntityChannelNode';
+  /** The Globally Unique ID of this object */
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  isDefault: Scalars['Boolean']['output'];
+  isReviewed: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  platform: Scalars['String']['output'];
+  slackChannelId: Scalars['String']['output'];
 };
 
 export type EntityMemberNode = Node & {
@@ -644,6 +658,7 @@ export type ProjectNode = Node & {
   contributionStats?: Maybe<Scalars['JSON']['output']>;
   contributorsCount: Scalars['Int']['output'];
   createdAt?: Maybe<Scalars['DateTime']['output']>;
+  entityChannels: Array<EntityChannelNode>;
   entityLeaders: Array<EntityMemberNode>;
   forksCount: Scalars['Int']['output'];
   healthMetricsLatest?: Maybe<ProjectHealthMetricsNode>;

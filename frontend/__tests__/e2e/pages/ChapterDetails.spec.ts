@@ -31,6 +31,13 @@ test.describe('Chapter Details Page', () => {
     await expect(page.getByRole('link', { name: 'https://owasp.org/test-chapter' })).toBeVisible()
   })
 
+  test('should have Slack channel link', async ({ page }) => {
+    const slackLink = page.getByRole('link', { name: 'chapter-test' })
+    await expect(slackLink).toBeVisible()
+    await expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/C123ABC')
+    await expect(slackLink).toHaveAttribute('target', '_blank')
+  })
+
   test('should have map with geolocation', async ({ page }) => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
     await expect(unlockButton).toBeVisible()
