@@ -38,7 +38,7 @@ Optional steps for Windows:
 
 ## Environment Variables
 
-### Frontend
+For detailed descriptions of all environment variables, see:
 
 #### `NEXT_PUBLIC_API_URL`
 
@@ -234,6 +234,8 @@ Optional steps for Windows:
 
 - **Description**: The token for accessing GitHub APIs.
 - **Usage**: Used for making authenticated requests to GitHub (e.g., issues, releases).
+- **Backend**: [backend/README.md](backend/README.md#environment-variables)
+- **Frontend**: [frontend/README.md](frontend/README.md#environment-variables)
 
 ## Setting up the Project
 
