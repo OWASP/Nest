@@ -619,6 +619,7 @@ export type ProjectHealthStatsNode = {
   averageScore?: Maybe<Scalars['Float']['output']>;
   monthlyOverallScores: Array<Scalars['Float']['output']>;
   monthlyOverallScoresMonths: Array<Scalars['Int']['output']>;
+  monthlyOverallScoresYears: Array<Scalars['Int']['output']>;
   projectsCountHealthy: Scalars['Int']['output'];
   projectsCountNeedAttention: Scalars['Int']['output'];
   projectsCountUnhealthy: Scalars['Int']['output'];
