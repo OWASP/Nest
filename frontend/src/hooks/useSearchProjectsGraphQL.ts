@@ -50,7 +50,13 @@ function buildGraphQLOrdering(
   const graphQLField = fieldMap.get(sortBy)
   if (!graphQLField) return undefined
 
-  return [{ [graphQLField]: order === 'asc' ? 'ASC' : 'DESC' }]
+  const direction = order === 'asc' ? 'ASC' : 'DESC'
+  const primaryOrdering = { [graphQLField]: direction } as Record<string, 'ASC' | 'DESC'>
+
+  if (graphQLField !== 'name') {
+    return [primaryOrdering, { name: 'ASC' as const }]
+  }
+  return [primaryOrdering]
 }
 
 export function useSearchProjectsGraphQL(

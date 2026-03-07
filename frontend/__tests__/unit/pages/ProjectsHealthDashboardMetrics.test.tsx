@@ -138,6 +138,7 @@ describe('MetricsPage', () => {
     })
   })
   afterEach(() => {
+    jest.clearAllMocks()
     jest.restoreAllMocks()
   })
 

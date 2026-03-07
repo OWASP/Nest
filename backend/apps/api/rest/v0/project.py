@@ -112,8 +112,8 @@ def list_projects(
         "-stars_count",
         "name",
         "-name",
-        "level_raw",
-        "-level_raw",
+        "level",
+        "-level",
     ]
     | None = Query(
         None,
@@ -133,7 +133,10 @@ def list_projects(
     if filters.type:
         queryset = queryset.filter(type__in=filters.type)
 
-    return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
+    ordering_field = (
+        ordering.replace("level", "level_raw") if ordering and "level" in ordering else ordering
+    )
+    return queryset.order_by(ordering_field or "-level_raw", "-stars_count", "-forks_count", "pk")
 
 
 @router.get(

@@ -56,26 +56,49 @@ export function useSearchPage<T>({
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
   useEffect(() => {
-    if (searchParams) {
-      const searchQueryParam = searchParams.get('q') || ''
-      const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'desc'
-      const categoryParam = searchParams.get('category') || defaultCategory
+    if (!searchParams) return
+    const searchQueryParam = searchParams.get('q') || ''
+    const sortByParam = searchParams.get('sortBy') || defaultSortBy
+    const orderParam = searchParams.get('order') || defaultOrder
+    const categoryParam = searchParams.get('category') || defaultCategory
 
-      const searchQueryChanged = searchQuery !== searchQueryParam
-      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
+    let shouldResetPage = false
 
-      if (categoryParam !== category) {
-        setCategory(categoryParam)
+    setSearchQuery((prev) => {
+      if (prev !== searchQueryParam) {
+        shouldResetPage = true
+        return searchQueryParam
       }
+      return prev
+    })
 
-      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
-      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
-        setCurrentPage(1)
+    setCategory((prev) => {
+      if (prev !== categoryParam) {
+        shouldResetPage = true
+        return categoryParam
       }
+      return prev
+    })
+
+    setSortBy((prev) => {
+      if (prev !== sortByParam && indexName === 'projects') {
+        shouldResetPage = true
+      }
+      return prev !== sortByParam ? sortByParam : prev
+    })
+
+    setOrder((prev) => {
+      if (prev !== orderParam && indexName === 'projects') {
+        shouldResetPage = true
+      }
+      return prev !== orderParam ? orderParam : prev
+    })
+
+    if (shouldResetPage) {
+      setCurrentPage(1)
     }
-  }, [searchParams, order, searchQuery, sortBy, category, indexName, defaultCategory])
-  // Sync URL with state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)

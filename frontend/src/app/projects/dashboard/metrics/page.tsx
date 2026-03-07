@@ -135,12 +135,12 @@ const MetricsPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState(searchQueryParam)
   const [sortBy, setSortBy] = useState(sortByParam)
   const [order, setOrder] = useState(orderParam)
-  const initialCategory = healthFilter
-    ? `health:${healthFilter}`
-    : levelFilter
-      ? `level:${levelFilter}`
-      : ''
-  const [category, setCategory] = useState(initialCategory)
+  const computeInitialCategory = () => {
+    if (healthFilter) return `health:${healthFilter}`
+    if (levelFilter) return `level:${levelFilter}`
+    return ''
+  }
+  const [category, setCategory] = useState(computeInitialCategory())
 
   const {
     data,
