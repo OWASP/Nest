@@ -20,6 +20,7 @@ import {
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
+import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generated'
 import type { AlgoliaResponse } from 'types/algolia'
@@ -75,19 +76,23 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const searchParams = {
-        indexName: 'chapters',
-        query: '',
-        currentPage: 1,
-        hitsPerPage: 1000,
+      try {
+        const searchParams = {
+          indexName: 'chapters',
+          query: '',
+          currentPage: 1,
+          hitsPerPage: 1000,
+        }
+        const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
+          searchParams.indexName,
+          searchParams.query,
+          searchParams.currentPage,
+          searchParams.hitsPerPage
+        )
+        setGeoLocData(data.hits)
+      } catch (error) {
+        handleAppError(error)
       }
-      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
-        searchParams.indexName,
-        searchParams.query,
-        searchParams.currentPage,
-        searchParams.hitsPerPage
-      )
-      setGeoLocData(data.hits)
     }
     fetchData()
   }, [])

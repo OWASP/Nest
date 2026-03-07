@@ -36,7 +36,14 @@ export const fetchAlgoliaData = async <T>(
     })
 
     if (!response.ok) {
-      throw new AppError(response.status, 'Search service error')
+      let errorMessage = 'Search service error'
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData?.error || errorMessage
+      } catch {
+        // Fallback to default error message if parsing fails
+      }
+      throw new AppError(response.status, errorMessage)
     }
 
     const results = await response.json()

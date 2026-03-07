@@ -27,6 +27,16 @@ def mock_redis_cache():
         yield mock_cache
 
 
+@pytest.fixture(autouse=True)
+def mock_algolia_settings():
+    """Mock Algolia settings."""
+    with patch("apps.core.api.internal.algolia.settings") as mock_settings:
+        mock_settings.ALGOLIA_APPLICATION_ID = "test-app-id"
+        mock_settings.ALGOLIA_WRITE_API_KEY = "test-api-key"
+        mock_settings.ENVIRONMENT = "test"
+        yield mock_settings
+
+
 class TestAlgoliaSearch:
     def _build_request(self, *, facet_filters, hits_per_page, index_name, page, query):
         """Build mock requests with consistent structure."""
@@ -282,6 +292,29 @@ class TestAlgoliaSearch:
 
         assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
         assert response_data["error"] == "An internal error occurred. Please try again later."
+
+    @patch("apps.core.api.internal.algolia.settings")
+    def test_algolia_search_not_configured(self, mock_settings):
+        """Test that a 503 error is returned when Algolia is not configured."""
+        mock_settings.ALGOLIA_APPLICATION_ID = "None"
+        mock_settings.ALGOLIA_WRITE_API_KEY = "None"
+
+        mock_request = self._build_request(
+            index_name="projects",
+            query="test",
+            page=1,
+            hits_per_page=10,
+            facet_filters=[],
+        )
+
+        response = algolia_search(mock_request)
+        response_data = json.loads(response.content)
+
+        assert response.status_code == HTTPStatus.SERVICE_UNAVAILABLE
+        assert (
+            response_data["error"]
+            == "Algolia is not configured. Please check your environment variables."
+        )
 
     @patch("apps.core.api.internal.algolia.IndexBase.get_client")
     @patch("apps.core.api.internal.algolia.deep_camelize")
