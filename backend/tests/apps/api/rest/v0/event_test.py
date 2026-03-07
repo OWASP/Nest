@@ -4,8 +4,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.utils import timezone
+from pydantic import ValidationError
 
-from apps.api.rest.v0.event import EventDetail, get_event, list_events
+from apps.api.rest.v0.event import EventDetail, EventFilter, get_event, list_events
 from apps.owasp.models.event import Event as EventModel
 
 current_timezone = timezone.get_current_timezone()
@@ -59,6 +60,7 @@ class TestListEvents:
         """Test listing events with default ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.category = None
         mock_queryset = MagicMock()
         mock_event_model.objects.order_by.return_value = mock_queryset
         mock_filters.filter.return_value = mock_queryset
@@ -66,6 +68,7 @@ class TestListEvents:
         result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=None)
 
         mock_event_model.objects.order_by.assert_called_with("-start_date", "-end_date")
+        mock_queryset.filter.assert_not_called()
         assert result == mock_queryset
 
     @patch("apps.api.rest.v0.event.EventModel")
@@ -73,6 +76,7 @@ class TestListEvents:
         """Test listing events with custom ordering."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.category = None
         mock_queryset = MagicMock()
         mock_event_model.objects.order_by.return_value = mock_queryset
         mock_filters.filter.return_value = mock_queryset
@@ -87,6 +91,7 @@ class TestListEvents:
         """Test listing upcoming events."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
+        mock_filters.category = None
         mock_upcoming_qs = MagicMock()
         mock_event_model.upcoming_events.return_value.order_by.return_value = mock_upcoming_qs
         mock_filters.filter.return_value = mock_upcoming_qs
@@ -95,6 +100,41 @@ class TestListEvents:
 
         mock_event_model.upcoming_events.assert_called_once()
         assert result == mock_upcoming_qs
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_with_single_category(self, mock_event_model):
+        """Test listing events with a single category filter."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.category = [EventModel.Category.GLOBAL]
+        mock_queryset = MagicMock()
+        mock_event_model.objects.order_by.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=None)
+
+        mock_filters.filter.assert_called_once_with(mock_queryset)
+        assert result == mock_queryset
+
+    @patch("apps.api.rest.v0.event.EventModel")
+    def test_list_events_with_multiple_categories(self, mock_event_model):
+        """Test listing events with multiple category filters."""
+        mock_request = MagicMock()
+        mock_filters = MagicMock()
+        mock_filters.category = [EventModel.Category.GLOBAL, EventModel.Category.APPSEC_DAYS]
+        mock_queryset = MagicMock()
+        mock_event_model.objects.order_by.return_value = mock_queryset
+        mock_filters.filter.return_value = mock_queryset
+
+        result = list_events(mock_request, mock_filters, ordering=None, is_upcoming=None)
+
+        mock_filters.filter.assert_called_once_with(mock_queryset)
+        assert result == mock_queryset
+
+    def test_list_events_with_invalid_category(self):
+        """Test that invalid category raises a validation error."""
+        with pytest.raises(ValidationError):
+            EventFilter(category=["banana"])
 
 
 class TestGetEvent:
