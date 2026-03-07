@@ -71,7 +71,7 @@ pnpm run graphql-codegen
 
 ## Dependencies
 
-Dependencies are managed with [pnpm](https://pnpm.io/). The configuration is in `package.json`.
+Dependencies are managed with [pnpm](https://pnpm.io/). The main configuration is in `package.json`.
 
 ```bash
 # Update dependencies
