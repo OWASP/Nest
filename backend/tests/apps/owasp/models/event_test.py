@@ -1,5 +1,5 @@
 import math
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from unittest.mock import Mock, patch
 
 import pytest
@@ -180,8 +180,8 @@ class TestEventUpcomingEvents:
     """Test cases for upcoming_events static method."""
 
     def test_upcoming_events(self):
-        """Test upcoming_events returns future events with start_date__gte filter (regression for #4041)."""
-        fixed_now = datetime(2026, 1, 15, 12, 0)
+        """Test upcoming_events returns future events."""
+        fixed_now = datetime(2026, 1, 15, 12, 0, tzinfo=UTC)
         with patch.object(Event, "objects") as mock_objects:
             mock_qs = Mock()
             mock_objects.filter.return_value.exclude.return_value.order_by.return_value = mock_qs
