@@ -33,6 +33,7 @@ export const mockChapterData = {
         lat: 35.1815,
         lng: 136.9066,
       },
+      country: 'Japan',
       region: 'Japan',
     },
   ],

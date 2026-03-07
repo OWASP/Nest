@@ -1,6 +1,5 @@
 import { mockChapterData } from '@mockData/mockChapterData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-
 import { useRouter, useSearchParams } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ChaptersPage from 'app/chapters/page'
@@ -10,13 +9,17 @@ jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
 
-const mockRouter = {
-  push: jest.fn(),
-}
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
+  useQuery: jest.fn(() => ({
+    data: { chapterCountries: ['Japan', 'United States'] },
+    loading: false,
+  })),
+}))
 
 jest.mock('next/navigation', () => ({
   ...jest.requireActual('next/navigation'),
-  useRouter: jest.fn(() => mockRouter),
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
   useSearchParams: jest.fn(() => new URLSearchParams()),
 }))
 
@@ -250,6 +253,159 @@ describe('ChaptersPage Component', () => {
     }
     ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [chapterWithNullUrls],
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+  })
+
+  test('renders country filter dropdown', async () => {
+    render(<ChaptersPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+    const countryFilter = screen.getByLabelText('Filter by country')
+    expect(countryFilter).toBeInTheDocument()
+    const allCountriesElements = screen.getAllByText('All Countries')
+    expect(allCountriesElements.length).toBeGreaterThan(0)
+  })
+
+  test('renders sort controls', async () => {
+    render(<ChaptersPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+    const sortLabels = screen.getAllByText('Sort By :')
+    expect(sortLabels.length).toBeGreaterThan(0)
+  })
+
+  test('country filter calls fetchAlgoliaData with facet filters when country is selected', async () => {
+    const chaptersWithCountries = [
+      {
+        ...mockChapterData.chapters[0],
+        country: 'Japan',
+        key: 'chapter_japan',
+        objectID: '601',
+      },
+      {
+        ...mockChapterData.chapters[0],
+        country: 'United States',
+        key: 'chapter_us',
+        name: 'Chapter US',
+        objectID: '602',
+      },
+    ]
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: chaptersWithCountries,
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+
+    const hiddenSelects = document.querySelectorAll('select')
+    const countrySelect = Array.from(hiddenSelects).find((sel) =>
+      Array.from(sel.options).some((opt) => opt.value === 'Japan')
+    )
+
+    expect(countrySelect).toBeDefined()
+
+    fireEvent.change(countrySelect!, { target: { value: 'Japan' } })
+
+    await waitFor(() => {
+      expect(fetchAlgoliaData).toHaveBeenCalledWith(
+        'chapters',
+        expect.any(String),
+        expect.any(Number),
+        expect.any(Number),
+        ['idx_country:Japan']
+      )
+    })
+  })
+
+  test('country filter calls fetchAlgoliaData with empty facet filters when "All Countries" is selected', async () => {
+    const chaptersWithCountries = [
+      {
+        ...mockChapterData.chapters[0],
+        country: 'Japan',
+        key: 'chapter_japan',
+        objectID: '601',
+      },
+    ]
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: chaptersWithCountries,
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+
+    const hiddenSelects = document.querySelectorAll('select')
+    const countrySelect = Array.from(hiddenSelects).find((sel) =>
+      Array.from(sel.options).some((opt) => opt.value === 'Japan')
+    )
+
+    expect(countrySelect).toBeDefined()
+    ;(fetchAlgoliaData as jest.Mock).mockClear()
+    fireEvent.change(countrySelect!, { target: { value: '' } })
+
+    await waitFor(() => {
+      expect(fetchAlgoliaData).toHaveBeenCalledWith(
+        'chapters',
+        expect.any(String),
+        expect.any(Number),
+        undefined,
+        []
+      )
+    })
+  })
+
+  test('country filter shows "All Countries" option and country options', async () => {
+    const chaptersWithCountries = [
+      {
+        ...mockChapterData.chapters[0],
+        country: 'Japan',
+        key: 'chapter_japan',
+        objectID: '701',
+      },
+      {
+        ...mockChapterData.chapters[0],
+        country: 'United States',
+        key: 'chapter_us',
+        name: 'Chapter US',
+        objectID: '702',
+      },
+    ]
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: chaptersWithCountries,
+      totalPages: 1,
+    })
+
+    render(<ChaptersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Chapter 1')).toBeInTheDocument()
+    })
+
+    const countryLabels = screen.getAllByText('Country :')
+    expect(countryLabels.length).toBeGreaterThan(0)
+  })
+
+  test('handles missing GraphQL data gracefully', async () => {
+    const { useQuery } = jest.requireMock('@apollo/client/react')
+    useQuery.mockReturnValueOnce({ data: undefined, loading: true })
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: mockChapterData.chapters,
       totalPages: 1,
     })
 

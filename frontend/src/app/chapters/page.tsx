@@ -1,51 +1,74 @@
 'use client'
+import { useQuery } from '@apollo/client/react'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import { GetChapterCountriesDocument } from 'types/__generated__/chapterQueries.generated'
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
+import { sortOptionsChapter } from 'utils/sortingOptions'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import CountryFilter from 'components/CountryFilter'
 import SearchPageLayout from 'components/SearchPageLayout'
+import SortBy from 'components/SortBy'
 
 const ChaptersPage = () => {
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
+
+  const router = useRouter()
+  const [selectedCountry, setSelectedCountry] = useState<string>('')
+
+  const { data: countriesData } = useQuery(GetChapterCountriesDocument)
+  const countries = countriesData?.chapterCountries ?? []
+
   const {
     items: chapters,
     isLoaded,
     currentPage,
     totalPages,
     searchQuery,
+    sortBy,
+    order,
     handleSearch,
     handlePageChange,
+    handleSortChange,
+    handleOrderChange,
+    handleFacetFilterChange,
   } = useSearchPage<Chapter>({
     indexName: 'chapters',
     pageTitle: 'OWASP Chapters',
+    defaultSortBy: 'default',
+    defaultOrder: 'desc',
+    facetFilters: [],
   })
 
+  const handleCountryChange = (country: string) => {
+    setSelectedCountry(country)
+    if (country) {
+      handleFacetFilterChange([`idx_country:${country}`])
+    } else {
+      handleFacetFilterChange([])
+    }
+  }
+
   useEffect(() => {
-    const fetchData = async () => {
-      const searchParams = {
-        indexName: 'chapters',
-        query: '',
-        currentPage,
-        hitsPerPage: currentPage === 1 ? 1000 : 25,
-      }
+    const fetchGeoData = async () => {
       const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
-        searchParams.indexName,
-        searchParams.query,
-        searchParams.currentPage,
-        searchParams.hitsPerPage
+        'chapters',
+        '',
+        1,
+        1000,
+        selectedCountry ? [`idx_country:${selectedCountry}`] : []
       )
       setGeoLocData(data.hits)
     }
-    fetchData()
-  }, [currentPage])
+    fetchGeoData()
+  }, [selectedCountry])
 
-  const router = useRouter()
   const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
@@ -87,6 +110,22 @@ const ChaptersPage = () => {
       searchPlaceholder="Search for chapters..."
       searchQuery={searchQuery}
       totalPages={totalPages}
+      filterChildren={
+        <CountryFilter
+          countries={countries}
+          selectedCountry={selectedCountry}
+          onCountryChange={handleCountryChange}
+        />
+      }
+      sortChildren={
+        <SortBy
+          onOrderChange={handleOrderChange}
+          onSortChange={handleSortChange}
+          selectedOrder={order}
+          selectedSortOption={sortBy}
+          sortOptions={sortOptionsChapter}
+        />
+      }
     >
       {chapters.length > 0 && (
         <ChapterMapWrapper

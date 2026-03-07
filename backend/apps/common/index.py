@@ -18,6 +18,10 @@ from apps.common.constants import NL
 logger: logging.Logger = logging.getLogger(__name__)
 
 EXCLUDED_LOCAL_INDEX_NAMES = (
+    "chapters_created_at_asc",
+    "chapters_created_at_desc",
+    "chapters_updated_at_asc",
+    "chapters_updated_at_desc",
     "projects_contributors_count_asc",
     "projects_contributors_count_desc",
     "projects_forks_count_asc",

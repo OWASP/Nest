@@ -16,6 +16,7 @@ interface SearchPageLayoutProps {
   indexName: string
   loadingImageUrl?: string
   children?: React.ReactNode
+  filterChildren?: React.ReactNode
   sortChildren?: React.ReactNode
 }
 
@@ -30,6 +31,7 @@ const SearchPageLayout = ({
   empty,
   indexName,
   loadingImageUrl = '/img/spinner_light.png',
+  filterChildren,
   sortChildren,
   children,
 }: SearchPageLayoutProps) => {
@@ -41,7 +43,8 @@ const SearchPageLayout = ({
   }, [isLoaded, isFirstLoad])
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-      <div className="flex w-full items-center justify-center">
+      <div className="flex w-full items-center justify-center gap-3">
+        {!isFirstLoad && filterChildren}
         <SearchBar
           isLoaded={!isFirstLoad}
           onSearch={onSearch}
@@ -52,7 +55,7 @@ const SearchPageLayout = ({
       {isLoaded ? (
         <>
           <div>
-            {totalPages !== 0 && <div className="flex justify-end">{sortChildren}</div>}
+            {totalPages !== 0 && <div className="mb-3 flex justify-end">{sortChildren}</div>}
             {totalPages === 0 && <div className="text m-4 text-xl dark:text-white">{empty}</div>}
             {children}
           </div>
