@@ -51,6 +51,8 @@ FROM base AS runner
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+RUN apk update && apk upgrade --no-cache
+
 WORKDIR /tmp
 
 # Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786: Update npm's bundled tar to 7.5.10 in runner stage
