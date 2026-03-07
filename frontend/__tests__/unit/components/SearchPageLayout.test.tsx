@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 describe('<SearchPageLayout />', () => {
@@ -365,6 +365,99 @@ describe('<SearchPageLayout />', () => {
     // Pagination should not appear for NaN pages
     expect(screen.queryByText('Prev')).not.toBeInTheDocument()
     expect(screen.queryByText('Next')).not.toBeInTheDocument()
+  })
+
+  it('renders filterChildren when provided and loaded', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        filterChildren={<div>Country Filter</div>}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    expect(screen.getByText('Country Filter')).toBeInTheDocument()
+  })
+
+  it('renders sortChildren inline when inlineSort is true', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        sortChildren={<div>Inline Sort</div>}
+        inlineSort={true}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    const inlineContainer = screen.getByTestId('sort-inline')
+    expect(inlineContainer).toBeInTheDocument()
+    expect(within(inlineContainer).getByText('Inline Sort')).toBeInTheDocument()
+  })
+
+  it('renders sortChildren below search when inlineSort is false (default)', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        sortChildren={<div>Below Sort</div>}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    const belowContainer = screen.getByTestId('sort-below')
+    expect(belowContainer).toBeInTheDocument()
+    expect(within(belowContainer).getByText('Below Sort')).toBeInTheDocument()
+  })
+
+  it('renders both filterChildren and inlineSort together', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    expect(screen.getByText('Filter')).toBeInTheDocument()
+    expect(screen.getByText('Sort')).toBeInTheDocument()
+    expect(screen.getByText('Content')).toBeInTheDocument()
   })
 
   it('renders root layout with expected structure and classNames', () => {
