@@ -78,6 +78,10 @@ Dependencies are managed with [pnpm](https://pnpm.io/). The main configuration i
 cd frontend && pnpm update
 ```
 
+## External Documentation
+
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest/3-frontend-system)
+
 ## Environment Variables
 
 The frontend uses the following environment variables (configured in `frontend/.env`):
