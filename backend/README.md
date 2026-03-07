@@ -57,6 +57,9 @@ Dependencies are managed with [Poetry](https://python-poetry.org/). The main con
 cd backend && poetry update
 ```
 
+## Documentation
+
+- [Nest Deepwiki](https://deepwiki.com/OWASP/Nest)
 ## Environment Variables
 
 The backend uses the following environment variables (configured in `backend/.env`):
