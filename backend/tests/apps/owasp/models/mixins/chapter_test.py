@@ -80,13 +80,13 @@ class TestChapterIndexMixin:
         assert result == "Germany"
 
     def test_idx_created_at_with_chapter_created_at(self):
-        """Test idx_created_at returns chapter created_at timestamp."""
+        """Test idx_created_at returns chapter created_at ISO string."""
         test_datetime = datetime(2024, 3, 15, 10, 30, 0, tzinfo=UTC)
         mock_chapter = self.create_mock_chapter(created_at=test_datetime)
 
         result = ChapterIndexMixin.idx_created_at.fget(mock_chapter)
 
-        assert result == test_datetime.timestamp()
+        assert result == test_datetime.isoformat()
 
     def test_idx_created_at_fallback_to_repository(self):
         """Test idx_created_at falls back to repository created_at."""
@@ -94,7 +94,7 @@ class TestChapterIndexMixin:
 
         result = ChapterIndexMixin.idx_created_at.fget(mock_chapter)
 
-        assert result == mock_chapter.owasp_repository.created_at.timestamp()
+        assert result == mock_chapter.owasp_repository.created_at.isoformat()
 
     def test_idx_geo_location(self):
         """Test idx_geo_location returns latitude, longitude tuple."""
@@ -184,13 +184,13 @@ class TestChapterIndexMixin:
             assert len(result) == 2
 
     def test_idx_updated_at_with_chapter_updated_at(self):
-        """Test idx_updated_at returns chapter updated_at timestamp."""
+        """Test idx_updated_at returns chapter updated_at ISO string."""
         test_datetime = datetime(2024, 8, 20, 14, 0, 0, tzinfo=UTC)
         mock_chapter = self.create_mock_chapter(updated_at=test_datetime)
 
         result = ChapterIndexMixin.idx_updated_at.fget(mock_chapter)
 
-        assert result == test_datetime.timestamp()
+        assert result == test_datetime.isoformat()
 
     def test_idx_updated_at_fallback_to_repository(self):
         """Test idx_updated_at falls back to repository updated_at."""
@@ -198,4 +198,4 @@ class TestChapterIndexMixin:
 
         result = ChapterIndexMixin.idx_updated_at.fget(mock_chapter)
 
-        assert result == mock_chapter.owasp_repository.updated_at.timestamp()
+        assert result == mock_chapter.owasp_repository.updated_at.isoformat()
