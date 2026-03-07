@@ -69,9 +69,30 @@ Run the codegen with:
 pnpm run graphql-codegen
 ```
 
+## Dependencies
+
+Dependencies are managed with [pnpm](https://pnpm.io/). The main configuration is in `package.json`.
+
+```bash
+# Update dependencies
+cd frontend && pnpm update
+```
+
 ## Environment Variables
 
 The frontend uses the following environment variables (configured in `frontend/.env`):
+
+### `NEXTAUTH_SECRET`
+
+- **Description**: A random secret used by NextAuth.js to sign and encrypt session tokens and cookies.
+- **Example Value**: A 32+ character random string (e.g., generated via `openssl rand -base64 32`).
+- **Usage**: **Required** for NextAuth.js to function. Without this, authentication will fail.
+
+### `NEXTAUTH_URL`
+
+- **Description**: The canonical URL of the NextAuth.js application.
+- **Example Value**: `http://localhost:3000/`
+- **Usage**: Used by NextAuth.js to construct callback URLs during the OAuth flow.
 
 ### `NEXT_PUBLIC_API_URL`
 
@@ -120,6 +141,23 @@ The frontend uses the following environment variables (configured in `frontend/.
 - **Example Value**: `https://nest.owasp.org/idx/`
 - **Usage**: Used for services interacting with indexing/search features.
 
+### `NEXT_PUBLIC_IS_PROJECT_HEALTH_ENABLED`
+
+- **Description**: Toggles the project health feature in the UI.
+- **Example Value**: `true`
+- **Usage**: Set to `true` to enable, `false` to disable.
+
+### `NEXT_PUBLIC_POSTHOG_HOST`
+
+- **Description**: The PostHog analytics host URL.
+- **Example Value**: `https://us.i.posthog.com`
+- **Usage**: Used for product analytics and feature flags.
+
+### `NEXT_PUBLIC_POSTHOG_KEY`
+
+- **Description**: The PostHog project API key for analytics.
+- **Usage**: Authenticates frontend with PostHog.
+
 ### `NEXT_PUBLIC_RELEASE_VERSION`
 
 - **Description**: The current release version of the application.
@@ -132,11 +170,31 @@ The frontend uses the following environment variables (configured in `frontend/.
 - **Example Value**: `https://xyz@sentry.io/123456`
 - **Usage**: Enables real-time error tracking and reporting in the frontend.
 
-## Dependencies
+### `NEXT_SERVER_CSRF_URL`
 
-Dependencies are managed with [pnpm](https://pnpm.io/). The configuration is in `package.json`.
+- **Description**: The CSRF endpoint used by the Next.js server for server-side requests.
+- **Example Value**: `http://backend:8000/csrf/`
+- **Usage**: Used when the server communicates with the backend (e.g., in Docker, use internal hostname).
 
-```bash
-# Update dependencies
-cd frontend && pnpm update
-```
+### `NEXT_SERVER_DISABLE_SSR`
+
+- **Description**: Disables server-side rendering when set to `true`.
+- **Example Value**: `false`
+- **Usage**: Used for debugging or specific deployment scenarios.
+
+### `NEXT_SERVER_GITHUB_CLIENT_ID`
+
+- **Description**: The Client ID of your GitHub OAuth App.
+- **Example Value**: `Ov23liABCDEF1234567`
+- **Usage**: **Required** for "Sign in with GitHub" to work locally. Must be a real Client ID from a registered GitHub OAuth App.
+
+### `NEXT_SERVER_GITHUB_CLIENT_SECRET`
+
+- **Description**: The Client Secret of your GitHub OAuth App.
+- **Usage**: **Required** for completing the GitHub OAuth flow. Pairs with `NEXT_SERVER_GITHUB_CLIENT_ID`.
+
+### `NEXT_SERVER_GRAPHQL_URL`
+
+- **Description**: The GraphQL endpoint used by the Next.js server for server-side requests.
+- **Example Value**: `http://backend:8000/graphql/`
+- **Usage**: Used when the server fetches GraphQL data (e.g., in Docker, use internal hostname).
