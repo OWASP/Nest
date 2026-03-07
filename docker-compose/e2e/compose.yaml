@@ -89,19 +89,48 @@ services:
     volumes:
       - e2e-cache-data:/data
 
+  frontend:
+    container_name: e2e-nest-frontend
+    build:
+      context: ../../frontend
+      dockerfile: ../docker/frontend/Dockerfile
+      args:
+        ENV_FILE: .env.e2e.example
+        NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://backend:9000
+        NEXT_SERVER_CSRF_URL: http://backend:9000/csrf/
+        NEXT_SERVER_GRAPHQL_URL: http://backend:9000/graphql/
+
+    env_file: ../../frontend/.env.e2e.example
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - 3500:3000
+    networks:
+      - e2e-nest-network
+    healthcheck:
+      interval: 5s
+      start_period: 20s
+      retries: 10
+      test: >
+        sh -c '
+          wget --spider http://0.0.0.0:3000/
+        '
+      timeout: 5s
+
   e2e-tests:
     container_name: e2e-nest-tests
     build:
       context: ../../frontend
       dockerfile: ../docker/frontend/Dockerfile.e2e.test
-    command: >
-      sh -c '
-        pnpm run test:e2e
-      '
     depends_on:
-      backend:
+      frontend:
         condition: service_healthy
-    env_file: ../../frontend/.env.e2e.example
+    command: ${E2E_TEST_COMMAND:-sh -c "pnpm run test:e2e"}
+    environment:
+      - FRONTEND_URL=http://frontend:3000
+    ports:
+      - 3800:3800
     networks:
       - e2e-nest-network
 

@@ -173,9 +173,6 @@ importers:
       '@next/eslint-plugin-next':
         specifier: ^16.1.6
         version: 16.1.6
-      '@playwright/test':
-        specifier: ^1.58.2
-        version: 1.58.2
       '@swc/core':
         specifier: ^1.15.18
         version: 1.15.18(@swc/helpers@0.5.19)
@@ -10815,6 +10812,7 @@ snapshots:
   '@playwright/test@1.58.2':
     dependencies:
       playwright: 1.58.2
+    optional: true
 
   '@posthog/core@1.23.2':
     dependencies:
@@ -16137,13 +16135,15 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  playwright-core@1.58.2: {}
+  playwright-core@1.58.2:
+    optional: true
 
   playwright@1.58.2:
     dependencies:
       playwright-core: 1.58.2
     optionalDependencies:
       fsevents: 2.3.2
+    optional: true
 
   possible-typed-array-names@1.1.0: {}
 

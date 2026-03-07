@@ -2,6 +2,9 @@ import os from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
+  expect: {
+    timeout: 30000,
+  },
   fullyParallel: true,
   projects: [
     {
@@ -15,9 +18,6 @@ export default defineConfig({
       use: {
         ...devices['iPhone 13'],
       },
-      expect: {
-        timeout: 10000, // Mobile Safari needs more time to render
-      },
     },
   ],
   reporter: [['list', { printSteps: true }]],
@@ -25,14 +25,9 @@ export default defineConfig({
   testDir: './__tests__/e2e',
   timeout: 120_000,
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
     headless: true,
     trace: 'off',
-  },
-  webServer: {
-    command: 'pnpm run build && NEXT_SERVER_DISABLE_SSR=true pnpm run start',
-    timeout: 120_000,
-    url: 'http://localhost:3000',
   },
   workers: os.cpus().length,
 })
