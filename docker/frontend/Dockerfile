@@ -55,20 +55,22 @@ FROM base AS runner
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
+RUN apk update && apk upgrade --no-cache
+
 WORKDIR /tmp
 
-# Fix CVE-2026-23745, CVE-2026-26960: Update npm's bundled tar to 7.5.8 in runner stage
+# Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786: Update npm's bundled tar to 7.5.10 in runner stage
 # Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Fix CVE-2026-27903, CVE-2026-27904: Update npm's bundled minimatch to 10.2.3
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
-RUN npm pack tar@7.5.8 && \
-    tar -xzf tar-7.5.8.tgz && \
+RUN npm pack tar@7.5.10 && \
+    tar -xzf tar-7.5.10.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.8.tgz && \
-    grep -q 'version.*7.5.8' "${TAR_DIR}/package.json" && \
+    rm -rf package tar-7.5.10.tgz && \
+    grep -q 'version.*7.5.10' "${TAR_DIR}/package.json" && \
     npm pack @isaacs/brace-expansion@5.0.1 && \
     tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
     BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \

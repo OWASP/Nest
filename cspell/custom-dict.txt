@@ -38,6 +38,7 @@ Keshav
 Kriti
 Manyi
 Mifos
+Mondal
 NETTACKER
 NOASSERTION
 NOSEMGREP
@@ -45,6 +46,7 @@ NOSONAR
 Nadu
 Nagori
 Nominatim
+Obmondo
 Oleksiuk
 PGPASSWORD
 PLR
@@ -53,6 +55,7 @@ PYTHONUNBUFFERED
 RUF
 SEO
 SLF
+SRE
 Sivagangai
 Sonarqube
 Stegen
