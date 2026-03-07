@@ -69,6 +69,29 @@ export default function Footer() {
           ))}
         </div>
 
+        {/* Logos Section */}
+        <div className="flex items-center justify-center gap-6">
+          {/* Nest Logo and Text */}
+          <div className="flex items-center gap-2">
+            <img
+              src="/img/logo_dark.png"
+              alt="Nest Logo"
+              className="h-8 w-8"
+            />
+            <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
+          </div>
+
+          {/* Vertical Separator */}
+          <div className="h-8 w-px bg-white"></div>
+
+          {/* OWASP Logo */}
+          <img
+            src="/img/OWASP_black_logo.svg"
+            alt="OWASP Logo"
+            className="h-8 w-auto dark:invert"
+          />
+        </div>
+
         {/* Social Media Icons Section */}
         <div className="mb-0 flex flex-row justify-center gap-6">
           {footerIcons.map((social) => {

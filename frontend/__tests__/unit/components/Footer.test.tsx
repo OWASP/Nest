@@ -418,6 +418,63 @@ describe('Footer', () => {
     })
   })
 
+  describe('Logos Section', () => {
+    test('renders both Nest and OWASP logos', () => {
+      renderFooter()
+
+      const nestLogo = screen.getByAltText('Nest Logo')
+      const owaspLogo = screen.getByAltText('OWASP Logo')
+
+      expect(nestLogo).toBeInTheDocument()
+      expect(owaspLogo).toBeInTheDocument()
+    })
+
+    test('renders logos with correct image sources', () => {
+      renderFooter()
+
+      const nestLogo = screen.getByAltText('Nest Logo') as HTMLImageElement
+      const owaspLogo = screen.getByAltText('OWASP Logo') as HTMLImageElement
+
+      expect(nestLogo.src).toContain('/img/logo_dark.png')
+      expect(owaspLogo.src).toContain('/img/OWASP_black_logo.svg')
+    })
+
+    test('renders Nest text next to Nest logo', () => {
+      renderFooter()
+
+      expect(screen.getByText('Nest')).toBeInTheDocument()
+
+      const nestText = screen.getByText('Nest')
+      expect(nestText).toHaveClass('text-lg', 'font-semibold')
+    })
+
+    test('renders vertical separator between logos', () => {
+      renderFooter()
+
+      const footer = screen.getByRole('contentinfo')
+      const separator = footer.querySelector('.h-8.w-px.bg-white')
+
+      expect(separator).toBeInTheDocument()
+    })
+
+    test('OWASP logo has dark mode invert class', () => {
+      renderFooter()
+
+      const owaspLogo = screen.getByAltText('OWASP Logo')
+      expect(owaspLogo).toHaveClass('dark:invert')
+    })
+
+    test('logos section has proper accessibility attributes', () => {
+      renderFooter()
+
+      const nestLogo = screen.getByAltText('Nest Logo')
+      const owaspLogo = screen.getByAltText('OWASP Logo')
+
+      expect(nestLogo).toHaveAttribute('alt', 'Nest Logo')
+      expect(owaspLogo).toHaveAttribute('alt', 'OWASP Logo')
+    })
+  })
+
   describe('Component Integration', () => {
     test('integrates properly with mocked dependencies', () => {
       renderFooter()
