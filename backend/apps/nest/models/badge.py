@@ -14,7 +14,7 @@ class Badge(BulkSaveModel, TimestampedModel):
         """Badge icon CSS class choices."""
 
         AWARD = "award", "Award"
-        BUG_SLASH = "bug_slash", "Bug Slash"
+        BUG_SLASH = "bugSlash", "Bug Slash"
         CERTIFICATE = "certificate", "Certificate"
         MEDAL = "medal", "Medal"
         RIBBON = "ribbon", "Ribbon"
