@@ -538,4 +538,103 @@ describe('Rendering', () => {
       expect(screen.queryByText('Test Chapter')).not.toBeInTheDocument()
     })
   })
+
+  describe('Keyboard Navigation', () => {
+    it('navigates up through suggestions using ArrowUp', async () => {
+      mockFetchAlgoliaData.mockResolvedValue({
+        hits: [mockChapter, { ...mockChapter, name: 'Another Chapter', objectID: 'chap2' }],
+        totalPages: 1,
+      })
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} indexes={['chapters']} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Chapter')).toBeInTheDocument()
+      })
+
+      // ArrowDown twice to highlight the second item
+      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{ArrowDown}')
+
+      // ArrowUp once to move highlight back to the first item
+      await user.keyboard('{ArrowUp}')
+
+      const firstItem = screen.getByText('Test Chapter').closest('button')
+      expect(firstItem).toHaveClass('bg-gray-100')
+    })
+
+    it('navigates to previous group using ArrowUp when subIndex is 0', async () => {
+      mockFetchAlgoliaData.mockImplementation((index) => {
+        if (index === 'chapters') return Promise.resolve({ hits: [mockChapter], totalPages: 1 })
+        if (index === 'users') return Promise.resolve({ hits: [mockUser], totalPages: 1 })
+        return Promise.resolve({ hits: [], totalPages: 0 })
+      })
+
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} indexes={['chapters', 'users']} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Chapter')).toBeInTheDocument()
+        expect(screen.getByText('Test User')).toBeInTheDocument()
+      })
+
+      // Move into second group (users)
+      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{ArrowDown}')
+
+      // Move back up into first group (chapters)
+      await user.keyboard('{ArrowUp}')
+
+      const firstItem = screen.getByText('Test Chapter').closest('button')
+      expect(firstItem).toHaveClass('bg-gray-100')
+    })
+
+    it('selects highlighted item with Enter key', async () => {
+      mockFetchAlgoliaData.mockResolvedValue({
+        hits: [mockChapter],
+        totalPages: 1,
+      })
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} indexes={['chapters']} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Chapter')).toBeInTheDocument()
+      })
+
+      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{Enter}')
+
+      expect(mockPush).toHaveBeenCalledWith(`/chapters/${mockChapter.key}`)
+    })
+
+    it('closes suggestions and clears highlight with Escape key', async () => {
+      mockFetchAlgoliaData.mockResolvedValue({
+        hits: [mockChapter],
+        totalPages: 1,
+      })
+      const user = userEvent.setup()
+      render(<MultiSearchBar {...defaultProps} indexes={['chapters']} />)
+
+      const input = screen.getByPlaceholderText('Search...')
+      await user.type(input, 'test')
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Chapter')).toBeInTheDocument()
+      })
+
+      await user.keyboard('{ArrowDown}')
+      await user.keyboard('{Escape}')
+
+      expect(screen.queryByText('Test Chapter')).not.toBeInTheDocument()
+    })
+  })
 })
