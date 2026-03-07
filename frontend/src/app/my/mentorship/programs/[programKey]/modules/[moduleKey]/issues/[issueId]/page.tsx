@@ -154,7 +154,7 @@ const ModuleIssueDetailsPage = () => {
                 </span>
               </div>
             </div>
-            <ActionButton url={issue.url} tooltipLabel="View on GitHub">
+            <ActionButton url={issue.url}>
               <FaLink className="mr-2 inline-block" /> View on GitHub
             </ActionButton>
           </div>
