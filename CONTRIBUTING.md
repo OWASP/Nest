@@ -334,7 +334,7 @@ If you want to use the "Sign in with GitHub" feature locally, you need to regist
 1. Fill in the form with the following values:
 
    | Field | Value |
-   |---|---|
+   | --- | --- |
    | Application name | `OWASP Nest Local` (or any name you prefer) |
    | Homepage URL | `http://localhost:3000` |
    | Authorization callback URL | `http://localhost:3000/api/auth/callback/github` |
