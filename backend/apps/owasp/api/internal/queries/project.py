@@ -14,7 +14,6 @@ from apps.owasp.models.project import Project
 
 MAX_RECENT_PROJECTS_LIMIT = 1000
 MAX_SEARCH_QUERY_LENGTH = 100
-MIN_SEARCH_QUERY_LENGTH = 1
 MAX_PROJECTS_LIMIT = 1000
 MAX_OFFSET = 10000
 
@@ -98,9 +97,6 @@ class ProjectQuery:
     ) -> list[ProjectNode]:
         """Search active projects by name with optional filters and sorting."""
         cleaned_query = query.strip()
-
-        if cleaned_query and len(cleaned_query) < MIN_SEARCH_QUERY_LENGTH:
-            return []
 
         if len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH:
             return []
