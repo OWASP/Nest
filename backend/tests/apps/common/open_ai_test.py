@@ -66,7 +66,7 @@ class TestOpenAi:
         assert response is None
 
         mock_logger.exception.assert_called_once_with(
-            "Unexpected error during OpenAI API request: %s",
+            "Unexpected OpenAI API error: %s",
             "Exception",
         )
 
@@ -86,7 +86,7 @@ class TestOpenAi:
         assert response is None
 
         mock_logger.exception.assert_called_once_with(
-            "A connection error occurred during OpenAI API request."
+            "OpenAI connection failed. Check network connectivity and firewall/proxy settings."
         )
 
     @patch("openai.OpenAI")
@@ -126,7 +126,8 @@ class TestOpenAi:
 
         assert response is None
         mock_logger.exception.assert_called_once_with(
-            "OpenAI authentication error - check DJANGO_OPEN_AI_SECRET_KEY"
+            "OpenAI authentication failed: invalid or missing API key. "
+            "Verify DJANGO_OPEN_AI_SECRET_KEY is set and valid."
         )
 
     @patch("apps.common.open_ai.logger")
@@ -148,7 +149,8 @@ class TestOpenAi:
 
         assert response is None
         mock_logger.warning.assert_called_once_with(
-            "OpenAI rate limit exceeded - request may be retried"
+            "OpenAI rate limit exceeded: %s. Request may be retried with backoff.",
+            rate_limit_error,
         )
         mock_logger.exception.assert_not_called()
 
@@ -171,7 +173,7 @@ class TestOpenAi:
 
         assert response is None
         mock_logger.exception.assert_called_once_with(
-            "Invalid OpenAI request - check model/message format"
+            "OpenAI invalid request. Check model name, message format, and input size."
         )
 
     @patch("apps.common.open_ai.logger")
@@ -187,6 +189,6 @@ class TestOpenAi:
 
         assert response is None
         mock_logger.exception.assert_called_once_with(
-            "Unexpected error during OpenAI API request: %s",
+            "Unexpected OpenAI API error: %s",
             "ValueError",
         )

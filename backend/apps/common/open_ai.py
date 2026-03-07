@@ -95,18 +95,26 @@ class OpenAi:
 
             return response.choices[0].message.content
         except openai.AuthenticationError:
-            # In this project the deployed environment variable is typically
-            # DJANGO_OPEN_AI_SECRET_KEY (mapped to settings.OPEN_AI_SECRET_KEY).
-            logger.exception("OpenAI authentication error - check DJANGO_OPEN_AI_SECRET_KEY")
-        except openai.RateLimitError:
-            logger.warning("OpenAI rate limit exceeded - request may be retried")
+            logger.exception(
+                "OpenAI authentication failed: invalid or missing API key. "
+                "Verify DJANGO_OPEN_AI_SECRET_KEY is set and valid."
+            )
+        except openai.RateLimitError as e:
+            logger.warning(
+                "OpenAI rate limit exceeded: %s. Request may be retried with backoff.",
+                e,
+            )
         except openai.BadRequestError:
-            logger.exception("Invalid OpenAI request - check model/message format")
+            logger.exception(
+                "OpenAI invalid request. Check model name, message format, and input size."
+            )
         except openai.APIConnectionError:
-            logger.exception("A connection error occurred during OpenAI API request.")
+            logger.exception(
+                "OpenAI connection failed. Check network connectivity and firewall/proxy settings."
+            )
         except Exception as e:
             logger.exception(
-                "Unexpected error during OpenAI API request: %s",
+                "Unexpected OpenAI API error: %s",
                 type(e).__name__,
             )
         return None
