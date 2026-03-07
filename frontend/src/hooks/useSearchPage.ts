@@ -55,22 +55,26 @@ export function useSearchPage<T>({
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
-  // Sync state with URL changes
   useEffect(() => {
     if (searchParams) {
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
       const orderParam = searchParams.get('order') || 'desc'
+      const categoryParam = searchParams.get('category') || defaultCategory
 
       const searchQueryChanged = searchQuery !== searchQueryParam
       const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
+
+      if (categoryParam !== category) {
+        setCategory(categoryParam)
+      }
 
       // Reset page if search query changes (all indices) or if sort/order changes (projects only)
       if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
         setCurrentPage(1)
       }
     }
-  }, [searchParams, order, searchQuery, sortBy, indexName])
+  }, [searchParams, order, searchQuery, sortBy, category, indexName, defaultCategory])
   // Sync URL with state changes
   useEffect(() => {
     const params = new URLSearchParams()
@@ -100,7 +104,6 @@ export function useSearchPage<T>({
     totalCount: graphqlTotalCount,
     error: graphqlError,
   } = useSearchProjectsGraphQL(searchQuery, category, sortBy, order, currentPage, hitsPerPage, {
-    pageSize: hitsPerPage,
     enabled: isGraphQLBackend,
   })
 

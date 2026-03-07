@@ -114,8 +114,6 @@ def list_projects(
         "-name",
         "level_raw",
         "-level_raw",
-        "level",
-        "-level",
     ]
     | None = Query(
         None,

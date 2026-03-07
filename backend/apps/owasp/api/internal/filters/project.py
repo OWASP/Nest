@@ -14,4 +14,7 @@ class ProjectFilter:
     @strawberry_django.filter_field
     def type(self, value: ProjectType, prefix: str):
         """Narrow results to a specific project category (code, tool, etc.)."""
-        return Q(type=ProjectType(value)) if value else Q()
+        if not value:
+            return Q()
+        lookup = f"{prefix}type" if prefix else "type"
+        return Q(**{lookup: value})

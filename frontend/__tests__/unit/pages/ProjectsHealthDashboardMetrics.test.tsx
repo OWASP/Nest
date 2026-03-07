@@ -26,22 +26,20 @@ jest.mock('components/SearchWithFilters', () => ({
       <h3>Project Level</h3>
       <h3>Project Health</h3>
       <h3>Reset Filters</h3>
-      {categoryOptions &&
-        categoryOptions
-          .filter((opt) => opt.key.startsWith('level:'))
-          .map((opt) => (
-            <button key={opt.key} onClick={() => onCategoryChange(opt.key)}>
-              {opt.label}
-            </button>
-          ))}
-      {categoryOptions &&
-        categoryOptions
-          .filter((opt) => opt.key.startsWith('health:'))
-          .map((opt) => (
-            <button key={opt.key} onClick={() => onCategoryChange(opt.key)}>
-              {opt.label === 'Needs Attention' ? 'Need Attention' : opt.label}
-            </button>
-          ))}
+      {categoryOptions
+        ?.filter((opt) => opt.key.startsWith('level:'))
+        .map((opt) => (
+          <button key={opt.key} onClick={() => onCategoryChange(opt.key)}>
+            {opt.label}
+          </button>
+        ))}
+      {categoryOptions
+        ?.filter((opt) => opt.key.startsWith('health:'))
+        .map((opt) => (
+          <button key={opt.key} onClick={() => onCategoryChange(opt.key)}>
+            {opt.label}
+          </button>
+        ))}
       <button onClick={() => onCategoryChange('')}>Reset All Filters</button>
       <input data-testid="mock-search-input" onChange={(e) => onSearch(e.target.value)} />
       <button onClick={() => onCategoryChange('health:invalidKey')}>Invalid Health</button>
@@ -55,27 +53,26 @@ jest.mock('components/SearchWithFilters', () => ({
         Unknown Sort
       </button>
       <button onClick={() => onOrderChange('asc')}>Order Only Asc</button>
-      {sortOptions &&
-        sortOptions.map((opt) => (
-          <span key={opt.key}>
-            <button
-              onClick={() => {
-                onSortChange(opt.key)
-                onOrderChange('desc')
-              }}
-            >
-              {`${opt.label} (High → Low)`}
-            </button>
-            <button
-              onClick={() => {
-                onSortChange(opt.key)
-                onOrderChange('asc')
-              }}
-            >
-              {`${opt.label} (Low → High)`}
-            </button>
-          </span>
-        ))}
+      {sortOptions?.map((opt) => (
+        <span key={opt.key}>
+          <button
+            onClick={() => {
+              onSortChange(opt.key)
+              onOrderChange('desc')
+            }}
+          >
+            {`${opt.label} (High → Low)`}
+          </button>
+          <button
+            onClick={() => {
+              onSortChange(opt.key)
+              onOrderChange('asc')
+            }}
+          >
+            {`${opt.label} (Low → High)`}
+          </button>
+        </span>
+      ))}
       <button
         onClick={() => {
           onSortChange('default')
@@ -141,7 +138,7 @@ describe('MetricsPage', () => {
     })
   })
   afterEach(() => {
-    jest.clearAllMocks()
+    jest.restoreAllMocks()
   })
 
   // Helper functions to reduce nesting depth
@@ -173,7 +170,7 @@ describe('MetricsPage', () => {
       'Production',
       'Flagship',
       'Healthy',
-      'Need Attention',
+      'Needs Attention',
       'Unhealthy',
       'Reset All Filters',
     ]
@@ -313,7 +310,7 @@ describe('MetricsPage', () => {
     })
     render(<MetricsPage />)
 
-    const needsAttentionButton = screen.getByRole('button', { name: 'Need Attention' })
+    const needsAttentionButton = screen.getByRole('button', { name: 'Needs Attention' })
     fireEvent.click(needsAttentionButton)
 
     await waitFor(() => {

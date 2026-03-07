@@ -25,6 +25,13 @@ class TestProjectFilter:
         assert isinstance(result, Q)
         assert result == Q(type=ProjectType.CODE)
 
+    def test_type_filter_with_prefix(self):
+        """Test type filter uses prefix for nested lookups."""
+        type_filter_method = ProjectFilter.__dict__["type"]
+        result = type_filter_method(None, value=ProjectType.CODE, prefix="project__")
+        assert isinstance(result, Q)
+        assert result == Q(project__type=ProjectType.CODE)
+
     def test_type_filter_with_none_value(self):
         """Test type filter returns empty Q() when value is None."""
         type_filter_method = ProjectFilter.__dict__["type"]

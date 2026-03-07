@@ -207,71 +207,47 @@ class TestProjectHealthMetricsQueryFiltering:
         "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
     )
     def test_project_health_metrics_with_query(self, mock_get_latest_metrics):
-        """Test project_health_metrics filters by query string (line 62)."""
-        mock_qs = MagicMock()
-        mock_get_latest_metrics.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
+        """Test project_health_metrics filters by query string."""
+        base_qs = MagicMock()
+        filtered_qs = MagicMock()
+        mock_get_latest_metrics.return_value = base_qs
+        base_qs.filter.return_value = filtered_qs
 
         query = ProjectHealthMetricsQuery()
         result = query.project_health_metrics(query="security", pagination=None, ordering=None)
 
-        mock_qs.filter.assert_called_once_with(project__name__icontains="security")
-        assert result == mock_qs
+        base_qs.filter.assert_called_once_with(project__name__icontains="security")
+        assert result == filtered_qs
 
     @patch(
         "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
     )
-    @patch("strawberry_django.filters.apply")
-    def test_project_health_metrics_with_filters(self, mock_apply, mock_get_latest_metrics):
-        """Test project_health_metrics applies filters (line 65)."""
-        mock_qs = MagicMock()
-        mock_get_latest_metrics.return_value = mock_qs
-        mock_apply.return_value = mock_qs
+    def test_project_health_metrics_without_query(self, mock_get_latest_metrics):
+        """Test project_health_metrics returns unfiltered queryset when query is empty."""
+        base_qs = MagicMock()
+        mock_get_latest_metrics.return_value = base_qs
 
-        mock_filters = MagicMock()
         query = ProjectHealthMetricsQuery()
-        result = query.project_health_metrics(filters=mock_filters, pagination=None, ordering=None)
+        result = query.project_health_metrics(query="", pagination=None, ordering=None)
 
-        mock_apply.assert_called_once_with(mock_filters, mock_qs)
-        assert result == mock_qs
-
-    @patch(
-        "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
-    )
-    @patch("strawberry_django.filters.apply")
-    def test_project_health_metrics_with_query_and_filters(
-        self, mock_apply, mock_get_latest_metrics
-    ):
-        """Test project_health_metrics with both query and filters."""
-        mock_qs = MagicMock()
-        mock_get_latest_metrics.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
-        mock_apply.return_value = mock_qs
-
-        mock_filters = MagicMock()
-        query = ProjectHealthMetricsQuery()
-        result = query.project_health_metrics(
-            query="test", filters=mock_filters, pagination=None, ordering=None
-        )
-
-        mock_qs.filter.assert_called_once_with(project__name__icontains="test")
-        mock_apply.assert_called_once_with(mock_filters, mock_qs)
-        assert result == mock_qs
+        base_qs.filter.assert_not_called()
+        assert result == base_qs
 
     @patch(
         "apps.owasp.models.project_health_metrics.ProjectHealthMetrics.get_latest_health_metrics"
     )
     def test_project_health_metrics_distinct_length_with_query(self, mock_get_latest_metrics):
-        """Test distinct_length filters by query string (line 103)."""
-        mock_qs = MagicMock()
-        mock_get_latest_metrics.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
-        mock_qs.count.return_value = 7
+        """Test distinct_length filters by query string."""
+        base_qs = MagicMock()
+        filtered_qs = MagicMock()
+        mock_get_latest_metrics.return_value = base_qs
+        base_qs.filter.return_value = filtered_qs
+        filtered_qs.count.return_value = 7
 
         query = ProjectHealthMetricsQuery()
         result = query.project_health_metrics_distinct_length(query="owasp")
 
-        mock_qs.filter.assert_called_once_with(project__name__icontains="owasp")
+        base_qs.filter.assert_called_once_with(project__name__icontains="owasp")
         assert result == 7
 
     @patch(
@@ -281,17 +257,20 @@ class TestProjectHealthMetricsQueryFiltering:
     def test_project_health_metrics_distinct_length_with_query_and_filters(
         self, mock_apply, mock_get_latest_metrics
     ):
-        """Test distinct_length with both query and filters."""
-        mock_qs = MagicMock()
-        mock_get_latest_metrics.return_value = mock_qs
-        mock_qs.filter.return_value = mock_qs
-        mock_apply.return_value = mock_qs
-        mock_qs.count.return_value = 3
+        """Test distinct_length with both query and filters using separate querysets."""
+        base_qs = MagicMock()
+        filtered_by_query_qs = MagicMock()
+        filtered_by_both_qs = MagicMock()
+
+        mock_get_latest_metrics.return_value = base_qs
+        base_qs.filter.return_value = filtered_by_query_qs
+        mock_apply.return_value = filtered_by_both_qs
+        filtered_by_both_qs.count.return_value = 3
 
         mock_filters = MagicMock()
         query = ProjectHealthMetricsQuery()
         result = query.project_health_metrics_distinct_length(query="test", filters=mock_filters)
 
-        mock_qs.filter.assert_called_once_with(project__name__icontains="test")
-        mock_apply.assert_called_once_with(mock_filters, mock_qs)
+        base_qs.filter.assert_called_once_with(project__name__icontains="test")
+        mock_apply.assert_called_once_with(mock_filters, filtered_by_query_qs)
         assert result == 3

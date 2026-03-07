@@ -61,9 +61,6 @@ class ProjectHealthMetricsQuery:
         if cleaned_query:
             queryset = queryset.filter(project__name__icontains=cleaned_query)
 
-        if filters:
-            queryset = strawberry_django.filters.apply(filters, queryset)
-
         return queryset
 
     @strawberry_django.field(

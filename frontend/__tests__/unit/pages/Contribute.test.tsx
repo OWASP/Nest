@@ -143,11 +143,23 @@ describe('Contribute Component', () => {
     render(<ContributePage />)
 
     await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Search for issues...')
-      fireEvent.change(searchInput, { target: { value: '' } })
+      expect(screen.getByPlaceholderText('Search for issues...')).toBeInTheDocument()
     })
+    ;(fetchAlgoliaData as jest.Mock).mockClear()
 
-    expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1, 25, [])
+    const searchInput = screen.getByPlaceholderText('Search for issues...')
+    fireEvent.change(searchInput, { target: { value: 'test query' } })
+
+    await waitFor(() => {
+      expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', 'test query', 1, 25, [])
+    })
+    ;(fetchAlgoliaData as jest.Mock).mockClear()
+
+    fireEvent.change(searchInput, { target: { value: '' } })
+
+    await waitFor(() => {
+      expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1, 25, [])
+    })
   })
 
   test('handles error states in card rendering', async () => {

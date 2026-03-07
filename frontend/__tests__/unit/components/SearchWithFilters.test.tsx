@@ -48,19 +48,21 @@ describe('<SearchWithFilters />', () => {
   })
 
   describe('Rendering', () => {
-    it('renders search input, sort control, and category dropdown', async () => {
+    it('renders search input, sort control, and category dropdown with correct initial values', async () => {
       await act(async () => {
         render(<SearchWithFilters {...defaultProps} />)
       })
 
       const searchInput = screen.getByPlaceholderText('Search for projects...')
       expect(searchInput).toBeInTheDocument()
+      expect(searchInput).toHaveValue('')
 
       const categorySelect = screen.getByLabelText('Filter by category')
       expect(categorySelect).toBeInTheDocument()
 
       const sortButton = screen.getByRole('button', { name: /Sort By/ })
       expect(sortButton).toBeInTheDocument()
+      expect(sortButton).toHaveTextContent('Relevancy')
     })
 
     it('renders without category dropdown when categoryOptions is not provided', async () => {

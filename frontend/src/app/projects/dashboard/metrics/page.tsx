@@ -114,7 +114,7 @@ const MetricsPage: FC = () => {
   const currentOrdering = buildGraphQLOrdering(field, direction)
 
   const healthFilter = searchParams.get('health') || ''
-  const levelFilter = searchParams.get('level')
+  const levelFilter = searchParams.get('level') || ''
   const searchQueryParam = searchParams.get('q') || ''
   const sortByParam = searchParams.get('sortBy') || 'score'
   const orderParam = searchParams.get('orderDir') || 'desc'
@@ -135,7 +135,12 @@ const MetricsPage: FC = () => {
   const [searchQuery, setSearchQuery] = useState(searchQueryParam)
   const [sortBy, setSortBy] = useState(sortByParam)
   const [order, setOrder] = useState(orderParam)
-  const [category, setCategory] = useState(healthFilter)
+  const initialCategory = healthFilter
+    ? `health:${healthFilter}`
+    : levelFilter
+      ? `level:${levelFilter}`
+      : ''
+  const [category, setCategory] = useState(initialCategory)
 
   const {
     data,

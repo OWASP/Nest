@@ -7,7 +7,6 @@ import { GetProjectsListDocument } from 'types/__generated__/projectQueries.gene
 import type { Project } from 'types/project'
 
 interface UseSearchProjectsGraphQLOptions {
-  pageSize?: number
   enabled?: boolean
 }
 
