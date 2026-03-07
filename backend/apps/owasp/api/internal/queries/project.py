@@ -80,6 +80,8 @@ class ProjectQuery:
                 if pagination.limit <= 0:
                     return []
                 pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)
+            else:
+                pagination.limit = MAX_PROJECTS_LIMIT
 
         return queryset
 
@@ -119,6 +121,8 @@ class ProjectQuery:
                 if pagination.limit <= 0:
                     return []
                 pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)
+            else:
+                pagination.limit = MAX_PROJECTS_LIMIT
 
         return base_queryset
 

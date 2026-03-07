@@ -75,7 +75,6 @@ repos:
     rev: v0.48.0
     hooks:
       - id: markdownlint
-        language_version: 22.20.0
         args:
           - --fix
         files: \.md$
