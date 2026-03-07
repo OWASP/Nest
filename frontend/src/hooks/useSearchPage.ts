@@ -1,15 +1,19 @@
 'use client'
 
+import { useSearchProjectsGraphQL } from 'hooks/useSearchProjectsGraphQL'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+import type { SearchBackend } from 'utils/backendConfig'
 interface UseSearchPageOptions {
   indexName: string
   pageTitle: string
   defaultSortBy?: string
   defaultOrder?: string
+  defaultCategory?: string
   hitsPerPage?: number
+  useBackend?: SearchBackend
 }
 
 interface UseSearchPageReturn<T> {
@@ -20,10 +24,12 @@ interface UseSearchPageReturn<T> {
   searchQuery: string
   sortBy: string
   order: string
+  category: string
   handleSearch: (query: string) => void
   handlePageChange: (page: number) => void
   handleSortChange: (sort: string) => void
   handleOrderChange: (order: string) => void
+  handleCategoryChange: (category: string) => void
 }
 
 export function useSearchPage<T>({
@@ -31,7 +37,9 @@ export function useSearchPage<T>({
   pageTitle,
   defaultSortBy = '',
   defaultOrder = '',
-  hitsPerPage,
+  defaultCategory = '',
+  hitsPerPage = 25,
+  useBackend = 'algolia',
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -43,26 +51,54 @@ export function useSearchPage<T>({
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
+  const [category, setCategory] = useState<string>(searchParams.get('category') || defaultCategory)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
 
-  // Sync state with URL changes
   useEffect(() => {
-    if (searchParams) {
-      const searchQueryParam = searchParams.get('q') || ''
-      const sortByParam = searchParams.get('sortBy') || 'default'
-      const orderParam = searchParams.get('order') || 'desc'
+    if (!searchParams) return
+    const searchQueryParam = searchParams.get('q') || ''
+    const sortByParam = searchParams.get('sortBy') || defaultSortBy
+    const orderParam = searchParams.get('order') || defaultOrder
+    const categoryParam = searchParams.get('category') || defaultCategory
 
-      const searchQueryChanged = searchQuery !== searchQueryParam
-      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
+    let shouldResetPage = false
 
-      // Reset page if search query changes (all indices) or if sort/order changes (projects only)
-      if (searchQueryChanged || (indexName === 'projects' && sortOrOrderChanged)) {
-        setCurrentPage(1)
+    setSearchQuery((prev) => {
+      if (prev !== searchQueryParam) {
+        shouldResetPage = true
+        return searchQueryParam
       }
+      return prev
+    })
+
+    setCategory((prev) => {
+      if (prev !== categoryParam) {
+        shouldResetPage = true
+        return categoryParam
+      }
+      return prev
+    })
+
+    setSortBy((prev) => {
+      if (prev !== sortByParam && indexName === 'projects') {
+        shouldResetPage = true
+      }
+      return prev === sortByParam ? prev : sortByParam
+    })
+
+    setOrder((prev) => {
+      if (prev !== orderParam && indexName === 'projects') {
+        shouldResetPage = true
+      }
+      return prev === orderParam ? prev : orderParam
+    })
+
+    if (shouldResetPage) {
+      setCurrentPage(1)
     }
-  }, [searchParams, order, searchQuery, sortBy, indexName])
-  // Sync URL with state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
   useEffect(() => {
     const params = new URLSearchParams()
     if (searchQuery) params.set('q', searchQuery)
@@ -72,14 +108,31 @@ export function useSearchPage<T>({
       params.set('sortBy', sortBy)
     }
 
-    if (sortBy !== 'default' && order && order !== '') {
+    if (sortBy && sortBy !== 'default' && order && order !== '') {
       params.set('order', order)
     }
 
+    if (category && category !== '') {
+      params.set('category', category)
+    }
+
     router.push(`?${params.toString()}`)
-  }, [searchQuery, order, currentPage, sortBy, router])
-  // Update URL when state changes
+  }, [searchQuery, order, currentPage, sortBy, category, router])
+
+  // GraphQL backend support
+  const isGraphQLBackend = useBackend === 'graphql'
+  const {
+    items: graphqlItems,
+    isLoaded: graphqlIsLoaded,
+    totalCount: graphqlTotalCount,
+    error: graphqlError,
+  } = useSearchProjectsGraphQL(searchQuery, category, sortBy, order, currentPage, hitsPerPage, {
+    enabled: isGraphQLBackend,
+  })
+
+  // Fetch data via Algolia
   useEffect(() => {
+    if (useBackend !== 'algolia') return
     setIsLoaded(false)
 
     const fetchData = async () => {
@@ -99,7 +152,8 @@ export function useSearchPage<T>({
           computedIndexName,
           searchQuery,
           currentPage,
-          hitsPerPage
+          hitsPerPage,
+          category ? [category] : []
         )
 
         if ('hits' in response) {
@@ -115,10 +169,37 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [
+    currentPage,
+    searchQuery,
+    order,
+    sortBy,
+    category,
+    hitsPerPage,
+    indexName,
+    pageTitle,
+    useBackend,
+  ])
+
+  // Use GraphQL data when backend is graphql
+  useEffect(() => {
+    if (useBackend !== 'graphql') return
+    if (graphqlError) {
+      handleAppError(graphqlError)
+    }
+    setItems((prev) => {
+      const newItems = graphqlItems as T[]
+      if (JSON.stringify(prev) === JSON.stringify(newItems)) return prev
+      return newItems
+    })
+    const calculatedTotalPages = Math.ceil(graphqlTotalCount / hitsPerPage)
+    setTotalPages((prev) => (prev === calculatedTotalPages ? prev : calculatedTotalPages))
+    setIsLoaded((prev) => (prev === graphqlIsLoaded ? prev : graphqlIsLoaded))
+  }, [graphqlItems, graphqlIsLoaded, graphqlError, graphqlTotalCount, hitsPerPage, useBackend])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
+    setCurrentPage(1)
   }
 
   const handlePageChange = (page: number) => {
@@ -128,10 +209,17 @@ export function useSearchPage<T>({
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort)
+    setCurrentPage(1)
   }
 
-  const handleOrderChange = (order: string) => {
-    setOrder(order)
+  const handleOrderChange = (newOrder: string) => {
+    setOrder(newOrder)
+    setCurrentPage(1)
+  }
+
+  const handleCategoryChange = (cat: string) => {
+    setCategory(cat)
+    setCurrentPage(1)
   }
 
   return {
@@ -142,9 +230,11 @@ export function useSearchPage<T>({
     searchQuery,
     sortBy,
     order,
+    category,
     handleSearch,
     handlePageChange,
     handleSortChange,
     handleOrderChange,
+    handleCategoryChange,
   }
 }

@@ -3,17 +3,14 @@
 import { useQuery } from '@apollo/client/react'
 import { Pagination } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { FC, useState, useEffect, Key } from 'react'
-import { FaFilter, FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
+import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { Ordering, ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
-import { DropDownSectionProps } from 'types/DropDownSectionProps'
 import { HealthMetricsProps } from 'types/healthMetrics'
-import { getKeysLabels } from 'utils/getKeysLabels'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
-import ProjectsDashboardDropDown from 'components/ProjectsDashboardDropDown'
+import SearchWithFilters from 'components/SearchWithFilters'
 
 const PAGINATION_LIMIT = 10
 
@@ -32,18 +29,24 @@ const ORDERING_MAP = {
 
 type OrderingKey = keyof typeof ORDERING_MAP
 
-const SORT_FIELDS = [
-  { label: 'Score (High → Low)', key: 'scoreDesc' },
-  { label: 'Score (Low → High)', key: 'scoreAsc' },
-  { label: 'Stars (High → Low)', key: 'starsDesc' },
-  { label: 'Stars (Low → High)', key: 'starsAsc' },
-  { label: 'Forks (High → Low)', key: 'forksDesc' },
-  { label: 'Forks (Low → High)', key: 'forksAsc' },
-  { label: 'Contributors (High → Low)', key: 'contributorsDesc' },
-  { label: 'Contributors (Low → High)', key: 'contributorsAsc' },
-  { label: 'Last checked (Newest)', key: 'createdAtDesc' },
-  { label: 'Last checked (Oldest)', key: 'createdAtAsc' },
-] as const
+const SORT_OPTIONS = [
+  { label: 'Score', key: 'score' },
+  { label: 'Stars', key: 'stars' },
+  { label: 'Forks', key: 'forks' },
+  { label: 'Contributors', key: 'contributors' },
+  { label: 'Last Checked', key: 'createdAt' },
+]
+
+const FILTER_CATEGORY_OPTIONS = [
+  { label: 'All Projects', key: '' },
+  { label: 'Incubator', key: 'level:incubator' },
+  { label: 'Lab', key: 'level:lab' },
+  { label: 'Production', key: 'level:production' },
+  { label: 'Flagship', key: 'level:flagship' },
+  { label: 'Healthy', key: 'health:healthy' },
+  { label: 'Needs Attention', key: 'health:needsAttention' },
+  { label: 'Unhealthy', key: 'health:unhealthy' },
+]
 
 const parseOrderParam = (orderParam: string | null) => {
   if (!orderParam || !Object.hasOwn(ORDERING_MAP, orderParam)) {
@@ -69,62 +72,59 @@ const buildOrderingWithTieBreaker = (primaryOrdering: Record<string, Ordering>) 
   },
 ]
 
+const sortFieldToOrderingKey = (sortField: string, order: string): string => {
+  const dirSuffix = order === 'asc' ? 'Asc' : 'Desc'
+
+  const fieldMap: Record<string, string> = {
+    score: 'score',
+    stars: 'stars',
+    forks: 'forks',
+    contributors: 'contributors',
+    createdAt: 'createdAt',
+  }
+
+  const mappedField = fieldMap[sortField] || 'score'
+  return `${mappedField}${dirSuffix}`
+}
+
 const MetricsPage: FC = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const healthFiltersMapping = {
+
+  const healthFiltersMapping: Record<string, Record<string, unknown>> = {
     healthy: {
-      score: {
-        gte: 75,
-      },
+      score: { gte: 75 },
     },
     needsAttention: {
-      score: {
-        gte: 50,
-        lt: 75,
-      },
+      score: { gte: 50, lt: 75 },
     },
     unhealthy: {
-      score: {
-        lt: 50,
-      },
+      score: { lt: 50 },
     },
   }
-  const levelFiltersMapping = {
-    incubator: {
-      level: ProjectLevel.Incubator,
-    },
-    lab: {
-      level: ProjectLevel.Lab,
-    },
-    production: {
-      level: ProjectLevel.Production,
-    },
-    flagship: {
-      level: ProjectLevel.Flagship,
-    },
+  const levelFiltersMapping: Record<string, Record<string, unknown>> = {
+    incubator: { level: ProjectLevel.Incubator },
+    lab: { level: ProjectLevel.Lab },
+    production: { level: ProjectLevel.Production },
+    flagship: { level: ProjectLevel.Flagship },
   }
 
-  let currentFilters = {}
   const orderingParam = searchParams.get('order')
-  const { field, direction, urlKey } = parseOrderParam(orderingParam)
+  const { field, direction } = parseOrderParam(orderingParam)
   const currentOrdering = buildGraphQLOrdering(field, direction)
 
-  const healthFilter = searchParams.get('health')
-  const levelFilter = searchParams.get('level')
-  const currentFilterKeys = []
-  if (healthFilter) {
-    currentFilters = {
-      ...healthFiltersMapping[healthFilter as keyof typeof healthFiltersMapping],
-    }
-    currentFilterKeys.push(healthFilter)
+  const healthFilter = searchParams.get('health') || ''
+  const levelFilter = searchParams.get('level') || ''
+  const searchQueryParam = searchParams.get('q') || ''
+  const sortByParam = searchParams.get('sortBy') || 'score'
+  const orderParam = searchParams.get('orderDir') || 'desc'
+
+  let currentFilters: Record<string, unknown> = {}
+  if (healthFilter && healthFiltersMapping[healthFilter]) {
+    currentFilters = { ...currentFilters, ...healthFiltersMapping[healthFilter] }
   }
-  if (levelFilter) {
-    currentFilters = {
-      ...currentFilters,
-      ...levelFiltersMapping[levelFilter as keyof typeof levelFiltersMapping],
-    }
-    currentFilterKeys.push(levelFilter)
+  if (levelFilter && levelFiltersMapping[levelFilter]) {
+    currentFilters = { ...currentFilters, ...levelFiltersMapping[levelFilter] }
   }
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
@@ -132,7 +132,16 @@ const MetricsPage: FC = () => {
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
   const [ordering, setOrdering] = useState(currentOrdering)
-  const [activeFilters, setActiveFilters] = useState(currentFilterKeys)
+  const [searchQuery, setSearchQuery] = useState(searchQueryParam)
+  const [sortBy, setSortBy] = useState(sortByParam)
+  const [order, setOrder] = useState(orderParam)
+  const computeInitialCategory = () => {
+    if (healthFilter) return `health:${healthFilter}`
+    if (levelFilter) return `level:${levelFilter}`
+    return ''
+  }
+  const [category, setCategory] = useState(computeInitialCategory())
+
   const {
     data,
     error: graphQLRequestError,
@@ -140,6 +149,7 @@ const MetricsPage: FC = () => {
     fetchMore,
   } = useQuery(GetProjectHealthMetricsDocument, {
     variables: {
+      query: searchQuery,
       filters,
       pagination: { offset: 0, limit: PAGINATION_LIMIT },
       ordering: buildOrderingWithTieBreaker(ordering),
@@ -165,129 +175,92 @@ const MetricsPage: FC = () => {
     }
   }, [data, graphQLRequestError])
 
-  const filteringSections: DropDownSectionProps[] = [
-    {
-      title: 'Project Level',
-      items: [
-        { label: 'Incubator', key: 'incubator' },
-        { label: 'Lab', key: 'lab' },
-        { label: 'Production', key: 'production' },
-        { label: 'Flagship', key: 'flagship' },
-      ],
-    },
-    {
-      title: 'Project Health',
-      items: [
-        { label: 'Healthy', key: 'healthy' },
-        { label: 'Need Attention', key: 'needsAttention' },
-        { label: 'Unhealthy', key: 'unhealthy' },
-      ],
-    },
-    {
-      title: 'Reset Filters',
-      items: [{ label: 'Reset All Filters', key: 'reset' }],
-    },
-  ]
+  const updateUrlParams = (params: Record<string, string | null>) => {
+    const newParams = new URLSearchParams(searchParams.toString())
+    for (const [key, value] of Object.entries(params)) {
+      if (value === null || value === '') {
+        newParams.delete(key)
+      } else {
+        newParams.set(key, value)
+      }
+    }
+    router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
+  }
 
   const getCurrentPage = () => {
     return Math.floor(pagination.offset / PAGINATION_LIMIT) + 1
   }
 
-  const handleSort = (orderKey: string | null) => {
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
     setPagination({ offset: 0, limit: PAGINATION_LIMIT })
-    const newParams = new URLSearchParams(searchParams.toString())
+    updateUrlParams({ q: query || null })
+  }
 
-    if (orderKey === null) {
-      newParams.delete('order')
-      const defaultOrdering = buildGraphQLOrdering('score', Ordering.Desc)
-      setOrdering(defaultOrdering)
-    } else {
-      newParams.set('order', orderKey)
-      const { field: newField, direction: newDirection } = parseOrderParam(orderKey)
-      const newOrdering = buildGraphQLOrdering(newField, newDirection)
-      setOrdering(newOrdering)
+  const handleSortChange = (newSort: string) => {
+    setSortBy(newSort)
+    const orderingKey = sortFieldToOrderingKey(newSort === 'default' ? 'score' : newSort, order)
+    const parsed = parseOrderParam(orderingKey)
+    const newOrdering = buildGraphQLOrdering(parsed.field, parsed.direction)
+    setOrdering(newOrdering)
+    setPagination({ offset: 0, limit: PAGINATION_LIMIT })
+    updateUrlParams({ sortBy: newSort, order: orderingKey })
+  }
+
+  const handleOrderChange = (newOrder: string) => {
+    setOrder(newOrder)
+    const orderingKey = sortFieldToOrderingKey(sortBy === 'default' ? 'score' : sortBy, newOrder)
+    const parsed = parseOrderParam(orderingKey)
+    const newOrdering = buildGraphQLOrdering(parsed.field, parsed.direction)
+    setOrdering(newOrdering)
+    setPagination({ offset: 0, limit: PAGINATION_LIMIT })
+    updateUrlParams({ orderDir: newOrder, order: orderingKey })
+  }
+
+  const handleCategoryChange = (newCategory: string) => {
+    setCategory(newCategory)
+    let newFilters: Record<string, unknown> = {}
+    const urlUpdates: Record<string, string | null> = { health: null, level: null }
+
+    if (newCategory.startsWith('health:')) {
+      const healthKey = newCategory.replace('health:', '')
+      if (healthFiltersMapping[healthKey]) {
+        newFilters = { ...healthFiltersMapping[healthKey] }
+        urlUpdates.health = healthKey
+      }
+    } else if (newCategory.startsWith('level:')) {
+      const levelKey = newCategory.replace('level:', '')
+      if (levelFiltersMapping[levelKey]) {
+        newFilters = { ...levelFiltersMapping[levelKey] }
+        urlUpdates.level = levelKey
+      }
     }
 
-    router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
+    setFilters(newFilters)
+    setPagination({ offset: 0, limit: PAGINATION_LIMIT })
+    updateUrlParams(urlUpdates)
   }
 
   return (
     <>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="mb-2 text-2xl font-bold">Project Health Metrics</h1>
-        <div className="flex flex-row items-center gap-2 self-end">
-          <div>
-            <ProjectsDashboardDropDown
-              buttonDisplayName="Sort By"
-              icon={urlKey?.endsWith('Desc') ? FaArrowDownWideShort : FaArrowUpWideShort}
-              sections={[
-                {
-                  title: 'Sort by',
-                  items: SORT_FIELDS.map((field) => ({
-                    label: field.label,
-                    key: field.key,
-                  })),
-                },
-                {
-                  title: 'Reset',
-                  items: [{ label: 'Reset Sorting', key: 'reset-sort' }],
-                },
-              ]}
-              selectionMode="single"
-              selectedKeys={[urlKey]}
-              selectedLabels={[SORT_FIELDS.find((f) => f.key === urlKey)!.label]}
-              onAction={(key: Key) => {
-                if (key === 'reset-sort') {
-                  handleSort(null)
-                  return
-                }
-
-                handleSort(key as string)
-              }}
-            />
-          </div>
-          <ProjectsDashboardDropDown
-            buttonDisplayName="Filter By"
-            icon={FaFilter}
-            sections={filteringSections}
-            selectionMode="multiple"
-            selectedKeys={activeFilters}
-            selectedLabels={getKeysLabels(filteringSections, activeFilters)}
-            onAction={(key: Key) => {
-              // Because how apollo caches pagination, we need to reset the pagination.
-              setPagination({ offset: 0, limit: PAGINATION_LIMIT })
-              let newFilters = { ...currentFilters }
-              const newParams = new URLSearchParams(searchParams.toString())
-              if ((key as string) in healthFiltersMapping) {
-                newParams.set('health', key as string)
-                newFilters = {
-                  ...newFilters,
-                  ...healthFiltersMapping[key as string as keyof typeof healthFiltersMapping],
-                }
-              } else if ((key as string) in levelFiltersMapping) {
-                newParams.set('level', key as string)
-                newFilters = {
-                  ...newFilters,
-                  ...levelFiltersMapping[key as string as keyof typeof levelFiltersMapping],
-                }
-              } else {
-                newParams.delete('health')
-                newParams.delete('level')
-                newFilters = {}
-              }
-              setFilters(newFilters)
-              setActiveFilters(
-                Array.from(
-                  newParams
-                    .entries()
-                    .filter(([key]) => key != 'order')
-                    .map(([, value]) => value)
-                )
-              )
-              router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
-            }}
-          />
-        </div>
+      </div>
+      <div className="mb-4 flex w-full justify-center">
+        <SearchWithFilters
+          isLoaded={!loading}
+          searchQuery={searchQuery}
+          sortBy={sortBy}
+          order={order}
+          category={category}
+          sortOptions={SORT_OPTIONS}
+          categoryOptions={FILTER_CATEGORY_OPTIONS}
+          searchPlaceholder="Search health metrics..."
+          onSearch={handleSearch}
+          onSortChange={handleSortChange}
+          onOrderChange={handleOrderChange}
+          onCategoryChange={handleCategoryChange}
+        />
       </div>
       {loading ? (
         <LoadingSpinner />
@@ -313,6 +286,7 @@ const MetricsPage: FC = () => {
                 setPagination(newPagination)
                 await fetchMore({
                   variables: {
+                    query: searchQuery,
                     filters,
                     pagination: newPagination,
                     ordering: buildOrderingWithTieBreaker(ordering),

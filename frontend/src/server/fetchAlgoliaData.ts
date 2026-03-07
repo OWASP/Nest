@@ -11,9 +11,11 @@ export const fetchAlgoliaData = async <T>(
   facetFilters: string[] = []
 ): Promise<AlgoliaResponse<T>> => {
   try {
-    if (['projects', 'chapters'].includes(indexName)) {
-      facetFilters.push('idx_is_active:true')
-    }
+    const shouldForceActiveFilter = indexName.startsWith('projects') || indexName === 'chapters'
+    const computedFacetFilters =
+      shouldForceActiveFilter && !facetFilters.includes('idx_is_active:true')
+        ? [...facetFilters, 'idx_is_active:true']
+        : [...facetFilters]
 
     if (!IDX_URL) {
       throw new Error('IDX_URL is not defined')
@@ -27,7 +29,7 @@ export const fetchAlgoliaData = async <T>(
       },
       credentials: 'include',
       body: JSON.stringify({
-        facetFilters,
+        facetFilters: computedFacetFilters,
         hitsPerPage,
         indexName,
         page: currentPage,

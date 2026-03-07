@@ -99,7 +99,23 @@ class ProjectFilter(FilterSchema):
 def list_projects(
     request: HttpRequest,
     filters: ProjectFilter = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+    ordering: Literal[
+        "created_at",
+        "-created_at",
+        "updated_at",
+        "-updated_at",
+        "contributors_count",
+        "-contributors_count",
+        "forks_count",
+        "-forks_count",
+        "stars_count",
+        "-stars_count",
+        "name",
+        "-name",
+        "level",
+        "-level",
+    ]
+    | None = Query(
         None,
         description="Ordering field",
     ),
@@ -114,10 +130,13 @@ def list_projects(
     if filters.level is not None:
         queryset = queryset.filter(level=filters.level)
 
-    if filters.type is not None:
+    if filters.type:
         queryset = queryset.filter(type__in=filters.type)
 
-    return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
+    ordering_field = (
+        ordering.replace("level", "level_raw") if ordering and "level" in ordering else ordering
+    )
+    return queryset.order_by(ordering_field or "-level_raw", "-stars_count", "-forks_count", "pk")
 
 
 @router.get(
