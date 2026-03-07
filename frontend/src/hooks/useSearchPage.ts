@@ -84,14 +84,14 @@ export function useSearchPage<T>({
       if (prev !== sortByParam && indexName === 'projects') {
         shouldResetPage = true
       }
-      return prev !== sortByParam ? sortByParam : prev
+      return prev === sortByParam ? prev : sortByParam
     })
 
     setOrder((prev) => {
       if (prev !== orderParam && indexName === 'projects') {
         shouldResetPage = true
       }
-      return prev !== orderParam ? orderParam : prev
+      return prev === orderParam ? prev : orderParam
     })
 
     if (shouldResetPage) {
