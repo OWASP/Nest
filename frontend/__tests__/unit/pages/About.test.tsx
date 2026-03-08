@@ -297,11 +297,13 @@ describe('About Component', () => {
 
     // Verify items are rendered under their correct phase group
     const phaseDSection = screen.getByText('Phase D').closest('div')
-    expect(within(phaseDSection!).getByText('Timeline Event 7')).toBeInTheDocument()
+    expect(phaseDSection).not.toBeNull()
+    expect(within(phaseDSection as HTMLElement).getByText('Timeline Event 7')).toBeInTheDocument()
 
     const phaseCSection = screen.getByText('Phase C').closest('div')
-    expect(within(phaseCSection!).getByText('Timeline Event 6')).toBeInTheDocument()
-    expect(within(phaseCSection!).getByText('Timeline Event 5')).toBeInTheDocument()
+    expect(phaseCSection).not.toBeNull()
+    expect(within(phaseCSection as HTMLElement).getByText('Timeline Event 6')).toBeInTheDocument()
+    expect(within(phaseCSection as HTMLElement).getByText('Timeline Event 5')).toBeInTheDocument()
 
     // Verify show-more truncation: 6 items visible, Event 1 hidden
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
@@ -320,8 +322,9 @@ describe('About Component', () => {
       expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
       // After expanding, Phase A group should contain both its items
       const phaseASection = screen.getByText('Phase A').closest('div')
-      expect(within(phaseASection!).getByText('Timeline Event 1')).toBeInTheDocument()
-      expect(within(phaseASection!).getByText('Timeline Event 2')).toBeInTheDocument()
+      expect(phaseASection).not.toBeNull()
+      expect(within(phaseASection as HTMLElement).getByText('Timeline Event 1')).toBeInTheDocument()
+      expect(within(phaseASection as HTMLElement).getByText('Timeline Event 2')).toBeInTheDocument()
     })
 
     const showLessButton = within(timelineSection).getByRole('button', { name: /Show less/i })
