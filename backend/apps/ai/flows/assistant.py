@@ -301,8 +301,8 @@ def process_query(  # noqa: PLR0911
                     "intent": intent,
                 },
             )
-                # Pre-check for contribution keywords to help guide the agent
-                contribution_keywords = [
+            # Pre-check for contribution keywords to help guide the agent
+            contribution_keywords = [
                     "contribute",
                     "contributing",
                     "contributor",
@@ -337,13 +337,13 @@ def process_query(  # noqa: PLR0911
                     "love some guidance",
                     "repositories are good",
                     "projects or repositories",
-                ]
-                query_lower = query.lower()
-                has_contribution_keywords = any(
-                    keyword in query_lower for keyword in contribution_keywords
-                )
+            ]
+            query_lower = query.lower()
+            has_contribution_keywords = any(
+                keyword in query_lower for keyword in contribution_keywords
+            )
 
-                logger.info(
+            logger.info(
                     "Query from owasp-community channel detected (intent: %s, "
                     "has_contribution_keywords: %s), routing to community agent for "
                     "channel suggestions",
@@ -356,119 +356,119 @@ def process_query(  # noqa: PLR0911
                         "has_contribution_keywords": has_contribution_keywords,
                         "community_channel_id": community_channel_id,
                     },
-                )
+            )
 
-                # Check for GSoC keywords first (more specific)
-                gsoc_keywords = [
-                    "gsoc",
-                    "google summer of code",
-                    "google summer",
-                    "summer of code",
-                ]
-                has_gsoc_keywords = any(keyword in query_lower for keyword in gsoc_keywords)
+            # Check for GSoC keywords first (more specific)
+            gsoc_keywords = [
+                "gsoc",
+                "google summer of code",
+                "google summer",
+                "summer of code",
+            ]
+            has_gsoc_keywords = any(keyword in query_lower for keyword in gsoc_keywords)
 
-                # If GSoC keywords detected, directly call the GSoC suggestion tool
-                if has_gsoc_keywords:
-                    logger.info(
-                        "GSoC keywords detected in owasp-community channel, "
-                        "directly calling GSoC channel suggestion tool",
-                        extra={"query": query[:200]},
-                    )
-                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
-                        suggest_gsoc_channel,
-                    )
-
-                    # Try to get the underlying function from the Tool object
-                    func = None
-                    result = None
-                    if hasattr(suggest_gsoc_channel, "__wrapped__"):
-                        func = suggest_gsoc_channel.__wrapped__
-                    elif hasattr(suggest_gsoc_channel, "func"):
-                        func = suggest_gsoc_channel.func
-                    elif hasattr(suggest_gsoc_channel, "run"):
-                        # If it has a run method, call that
-                        result = suggest_gsoc_channel.run({})
-                    else:
-                        # Try to unwrap using inspect
-                        func = inspect.unwrap(suggest_gsoc_channel)
-
-                    if func and callable(func):
-                        result = func()
-                    elif result is None:
-                        # Fallback: call render_template directly
-                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
-                        from apps.slack.constants import OWASP_GSOC_CHANNEL_ID  # noqa: PLC0415
-
-                        channel_id = OWASP_GSOC_CHANNEL_ID.lstrip("#")
-                        result = render_template(
-                            "agents/channel/tools/gsoc.jinja",
-                            gsoc_channel_id=channel_id,
-                        )
-                    logger.info(
-                        "Direct GSoC channel suggestion tool call completed",
-                        extra={"result_preview": result[:100]},
-                    )
-                    return result
-
-                # If contribution keywords detected, directly call the suggestion tool
-                if has_contribution_keywords:
-                    matched_keywords = [kw for kw in contribution_keywords if kw in query_lower]
-                    logger.info(
-                        "Contribution keywords detected in owasp-community channel, "
-                        "directly calling channel suggestion tool",
-                        extra={
-                            "query": query[:200],
-                            "matched_keywords": matched_keywords,
-                            "has_contribution_keywords": has_contribution_keywords,
-                        },
-                    )
-                    from apps.ai.agents.channel.tools import (  # noqa: PLC0415
-                        suggest_contribute_channel,
-                    )
-
-                    # Try to get the underlying function from the Tool object
-                    func = None
-                    result = None
-                    if hasattr(suggest_contribute_channel, "__wrapped__"):
-                        func = suggest_contribute_channel.__wrapped__
-                    elif hasattr(suggest_contribute_channel, "func"):
-                        func = suggest_contribute_channel.func
-                    elif hasattr(suggest_contribute_channel, "run"):
-                        # If it has a run method, call that
-                        result = suggest_contribute_channel.run({})
-                    else:
-                        # Try to unwrap using inspect
-                        func = inspect.unwrap(suggest_contribute_channel)
-
-                    if func and callable(func):
-                        result = func()
-                    elif not result:
-                        # Fallback: call render_template directly
-                        from apps.ai.common.decorators import render_template  # noqa: PLC0415
-                        from apps.slack.constants import (  # noqa: PLC0415
-                            OWASP_CONTRIBUTE_CHANNEL_ID,
-                        )
-
-                        channel_id = OWASP_CONTRIBUTE_CHANNEL_ID.lstrip("#")
-                        result = render_template(
-                            "agents/channel/tools/contribute.jinja",
-                            contribute_channel_id=channel_id,
-                        )
-                    logger.info(
-                        "Direct channel suggestion tool call completed",
-                        extra={"result_preview": result[:100]},
-                    )
-                    return result
-
-                # For all other queries in owasp-community channel, use channel agent
+            # If GSoC keywords detected, directly call the GSoC suggestion tool
+            if has_gsoc_keywords:
                 logger.info(
-                    "Query from owasp-community channel, routing to channel agent",
+                    "GSoC keywords detected in owasp-community channel, "
+                    "directly calling GSoC channel suggestion tool",
                     extra={"query": query[:200]},
                 )
-                channel_agent = create_channel_agent()
-                return execute_task(
-                    channel_agent,
-                    query,
+                from apps.ai.agents.channel.tools import (  # noqa: PLC0415
+                    suggest_gsoc_channel,
+                )
+
+                # Try to get the underlying function from the Tool object
+                func = None
+                result = None
+                if hasattr(suggest_gsoc_channel, "__wrapped__"):
+                    func = suggest_gsoc_channel.__wrapped__
+                elif hasattr(suggest_gsoc_channel, "func"):
+                    func = suggest_gsoc_channel.func
+                elif hasattr(suggest_gsoc_channel, "run"):
+                    # If it has a run method, call that
+                    result = suggest_gsoc_channel.run({})
+                else:
+                    # Try to unwrap using inspect
+                    func = inspect.unwrap(suggest_gsoc_channel)
+
+                if func and callable(func):
+                    result = func()
+                elif result is None:
+                    # Fallback: call render_template directly
+                    from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                    from apps.slack.constants import OWASP_GSOC_CHANNEL_ID  # noqa: PLC0415
+
+                    channel_id = OWASP_GSOC_CHANNEL_ID.lstrip("#")
+                    result = render_template(
+                        "agents/channel/tools/gsoc.jinja",
+                        gsoc_channel_id=channel_id,
+                    )
+                logger.info(
+                    "Direct GSoC channel suggestion tool call completed",
+                    extra={"result_preview": result[:100]},
+                )
+                return result
+
+            # If contribution keywords detected, directly call the suggestion tool
+            if has_contribution_keywords:
+                matched_keywords = [kw for kw in contribution_keywords if kw in query_lower]
+                logger.info(
+                    "Contribution keywords detected in owasp-community channel, "
+                    "directly calling channel suggestion tool",
+                    extra={
+                        "query": query[:200],
+                        "matched_keywords": matched_keywords,
+                        "has_contribution_keywords": has_contribution_keywords,
+                    },
+                )
+                from apps.ai.agents.channel.tools import (  # noqa: PLC0415
+                    suggest_contribute_channel,
+                )
+
+                # Try to get the underlying function from the Tool object
+                func = None
+                result = None
+                if hasattr(suggest_contribute_channel, "__wrapped__"):
+                    func = suggest_contribute_channel.__wrapped__
+                elif hasattr(suggest_contribute_channel, "func"):
+                    func = suggest_contribute_channel.func
+                elif hasattr(suggest_contribute_channel, "run"):
+                    # If it has a run method, call that
+                    result = suggest_contribute_channel.run({})
+                else:
+                    # Try to unwrap using inspect
+                    func = inspect.unwrap(suggest_contribute_channel)
+
+                if func and callable(func):
+                    result = func()
+                elif not result:
+                    # Fallback: call render_template directly
+                    from apps.ai.common.decorators import render_template  # noqa: PLC0415
+                    from apps.slack.constants import (  # noqa: PLC0415
+                        OWASP_CONTRIBUTE_CHANNEL_ID,
+                    )
+
+                    channel_id = OWASP_CONTRIBUTE_CHANNEL_ID.lstrip("#")
+                    result = render_template(
+                        "agents/channel/tools/contribute.jinja",
+                        contribute_channel_id=channel_id,
+                    )
+                logger.info(
+                    "Direct channel suggestion tool call completed",
+                    extra={"result_preview": result[:100]},
+                )
+                return result
+
+            # For all other queries in owasp-community channel, use channel agent
+            logger.info(
+                "Query from owasp-community channel, routing to channel agent",
+                extra={"query": query[:200]},
+            )
+            channel_agent = create_channel_agent()
+            return execute_task(
+                channel_agent,
+                query,
                     channel_id=channel_id,
                     is_channel_suggestion=True,
                 )
