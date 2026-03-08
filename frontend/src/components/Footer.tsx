@@ -76,24 +76,36 @@ export default function Footer() {
         {/* Logos Section */}
         <div className="flex items-center justify-center gap-6">
           {/* Nest Logo and Text */}
-          <div className="flex items-center gap-2">
+          <a
+            href="/"
+            className="rounded-md flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            aria-label="OWASP Nest Home"
+          >
             <img
               src="/img/logo_dark.png"
               alt="Nest Logo"
               className="h-8 w-8"
             />
             <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
-          </div>
+          </a>
 
           {/* Vertical Separator */}
           <div className="h-8 w-px bg-slate-400 dark:bg-white"></div>
 
           {/* OWASP Logo */}
-          <img
-            src="/img/OWASP_black_logo.svg"
-            alt="OWASP Logo"
-            className="h-8 w-auto dark:invert"
-          />
+          <Link
+            href="https://owasp.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            aria-label="OWASP Official Website"
+          >
+            <img
+              src="/img/OWASP_black_logo.svg"
+              alt="OWASP Logo"
+              className="h-8 w-auto dark:invert"
+            />
+          </Link>
         </div>
 
         {/* Social Media Icons Section */}

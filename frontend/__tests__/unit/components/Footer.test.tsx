@@ -465,7 +465,7 @@ describe('Footer', () => {
       renderFooter()
 
       const footer = screen.getByRole('contentinfo')
-      const separator = footer.querySelector('.h-8.w-px.bg-white')
+      const separator = footer.querySelector('.h-8.w-px')
 
       expect(separator).toBeInTheDocument()
     })
@@ -485,6 +485,26 @@ describe('Footer', () => {
 
       expect(nestLogo).toHaveAttribute('alt', 'Nest Logo')
       expect(owaspLogo).toHaveAttribute('alt', 'OWASP Logo')
+    })
+
+    test('Nest logo links to home page', () => {
+      renderFooter()
+
+      const nestLink = screen.getByLabelText('OWASP Nest Home')
+      expect(nestLink).toBeInTheDocument()
+      expect(nestLink).toHaveAttribute('href', '/')
+      expect(nestLink).not.toHaveAttribute('target')
+      expect(nestLink).not.toHaveAttribute('rel')
+    })
+
+    test('OWASP logo links to owasp.org', () => {
+      renderFooter()
+
+      const owaspLink = screen.getByLabelText('OWASP Official Website')
+      expect(owaspLink).toBeInTheDocument()
+      expect(owaspLink).toHaveAttribute('href', 'https://owasp.org/')
+      expect(owaspLink).toHaveAttribute('target', '_blank')
+      expect(owaspLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
   })
 
