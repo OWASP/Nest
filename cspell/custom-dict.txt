@@ -164,6 +164,7 @@ nosniff
 notab
 nspname
 numfmt
+opblock
 openblas
 openstreetmap
 owasppcitoolkit

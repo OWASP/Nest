@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
+    <style>
+        :root {
+            /* Light theme colors matching OWASP Nest */
+            --background-light: #f4f6fc;
+            --text-light: #000;
+            --border-light: rgba(0, 0, 0, 0.18);
+            --card-light: #ffffff;
+            --primary-light: #2b6cb0;
+            --owasp-blue: #98AFC7;
+            
+            /* Dark theme colors matching OWASP Nest */
+            --background-dark: #212529;
+            --text-dark: #fff;
+            --border-dark: rgba(255, 255, 255, 0.15);
+            --card-dark: #1f2937;
+            --primary-dark: #3b82f6;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Theme toggle button styling */
+        .theme-toggle-container {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle-btn {
+            background: var(--owasp-blue);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-toggle-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        /* Light theme styles */
+        body.light-theme {
+            background-color: var(--background-light);
+            color: var(--text-light);
+        }
+
+        body.light-theme .swagger-ui {
+            color: var(--text-light);
+        }
+
+        body.light-theme .swagger-ui .topbar {
+            background-color: var(--card-light);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body.light-theme .swagger-ui .info .title {
+            color: var(--text-light);
+        }
+
+        body.light-theme .swagger-ui .info .description {
+            color: #4a5568;
+        }
+
+        body.light-theme .swagger-ui .opblock .opblock-summary {
+            border-color: var(--border-light);
+        }
+
+        body.light-theme .swagger-ui .opblock {
+            background-color: var(--card-light);
+            border: 1px solid var(--border-light);
+        }
+
+        body.light-theme .swagger-ui .opblock.opblock-get {
+            background: rgba(98, 175, 199, 0.1);
+            border-color: #62afc7;
+        }
+
+        body.light-theme .swagger-ui .opblock.opblock-post {
+            background: rgba(73, 204, 144, 0.1);
+            border-color: #49cc90;
+        }
+
+        body.light-theme .swagger-ui .opblock.opblock-put {
+            background: rgba(252, 161, 48, 0.1);
+            border-color: #fca130;
+        }
+
+        body.light-theme .swagger-ui .opblock.opblock-delete {
+            background: rgba(249, 62, 62, 0.1);
+            border-color: #f93e3e;
+        }
+
+        body.light-theme .swagger-ui .opblock.opblock-patch {
+            background: rgba(80, 227, 194, 0.1);
+            border-color: #50e3c2;
+        }
+
+        body.light-theme .swagger-ui .btn {
+            background-color: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+
+        body.light-theme .swagger-ui .model-box {
+            background-color: var(--card-light);
+            border: 1px solid var(--border-light);
+        }
+
+        body.light-theme .swagger-ui table thead tr td,
+        body.light-theme .swagger-ui table thead tr th {
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-light);
+        }
+
+        body.light-theme .swagger-ui .parameter__name {
+            color: var(--text-light);
+        }
+
+        body.light-theme .swagger-ui .response-col_status {
+            color: var(--text-light);
+        }
+
+        body.light-theme .swagger-ui .response-col_description {
+            color: #4a5568;
+        }
+
+        /* Dark theme styles */
+        body.dark-theme {
+            background-color: var(--background-dark);
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui {
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui .topbar {
+            background-color: var(--card-dark);
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui .info .title {
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui .info .description {
+            color: #cbd5e0;
+        }
+
+        body.dark-theme .swagger-ui .scheme-container {
+            background-color: var(--card-dark);
+            border: 1px solid var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui .opblock .opblock-summary {
+            border-color: var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui .opblock {
+            background-color: var(--card-dark);
+            border: 1px solid var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-get {
+            background: rgba(98, 175, 199, 0.15);
+            border-color: #62afc7;
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-get .opblock-summary {
+            background: rgba(98, 175, 199, 0.1);
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-post {
+            background: rgba(73, 204, 144, 0.15);
+            border-color: #49cc90;
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-post .opblock-summary {
+            background: rgba(73, 204, 144, 0.1);
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-put {
+            background: rgba(252, 161, 48, 0.15);
+            border-color: #fca130;
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-put .opblock-summary {
+            background: rgba(252, 161, 48, 0.1);
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-delete {
+            background: rgba(249, 62, 62, 0.15);
+            border-color: #f93e3e;
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-delete .opblock-summary {
+            background: rgba(249, 62, 62, 0.1);
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-patch {
+            background: rgba(80, 227, 194, 0.15);
+            border-color: #50e3c2;
+        }
+
+        body.dark-theme .swagger-ui .opblock.opblock-patch .opblock-summary {
+            background: rgba(80, 227, 194, 0.1);
+        }
+
+        body.dark-theme .swagger-ui .btn {
+            background-color: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        body.dark-theme .swagger-ui .model-box {
+            background-color: var(--card-dark);
+            border: 1px solid var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui table thead tr td,
+        body.dark-theme .swagger-ui table thead tr th {
+            border-bottom: 1px solid var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui .parameter__name {
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui .response-col_status {
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui .response-col_description {
+            color: #cbd5e0;
+        }
+
+        body.dark-theme .swagger-ui .model {
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui .model-title {
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui section.models {
+            border: 1px solid var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui section.models .model-container {
+            background-color: var(--card-dark);
+        }
+
+        body.dark-theme .swagger-ui .opblock-body pre {
+            background-color: #1a1d21;
+            color: #cbd5e0;
+            border: 1px solid var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui .opblock .opblock-section-header {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui .opblock .opblock-section-header h4 {
+            color: var(--text-dark);
+        }
+
+        body.dark-theme .swagger-ui textarea {
+            background-color: #1a1d21;
+            color: var(--text-dark);
+            border-color: var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui input[type="text"],
+        body.dark-theme .swagger-ui input[type="email"],
+        body.dark-theme .swagger-ui input[type="password"] {
+            background-color: #1a1d21;
+            color: var(--text-dark);
+            border-color: var(--border-dark);
+        }
+
+        body.dark-theme .swagger-ui select {
+            background-color: #1a1d21;
+            color: var(--text-dark);
+            border-color: var(--border-dark);
+        }
+
+        /* Override Swagger UI defaults for both themes */
+        .swagger-ui .info {
+            margin: 50px 0;
+        }
+
+        .swagger-ui .topbar {
+            display: none;
+        }
+
+        .swagger-ui .info .title small {
+            background-color: var(--owasp-blue);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Custom header */
+        .custom-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid;
+            margin-bottom: 20px;
+        }
+
+        body.light-theme .custom-header {
+            background-color: var(--card-light);
+            border-color: var(--border-light);
+        }
+
+        body.dark-theme .custom-header {
+            background-color: var(--card-dark);
+            border-color: var(--border-dark);
+        }
+
+        .custom-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--owasp-blue);
+        }
+
+        .custom-header p {
+            margin: 10px 0 0;
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .theme-toggle-container {
+                top: 10px;
+                right: 10px;
+            }
+
+            .custom-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle-container">
+        <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+            <svg id="sunIcon" style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z"></path>
+            </svg>
+            <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Custom Header -->
+    <div class="custom-header">
+        <h1>{{ title }}</h1>
+        <p>{{ description }}</p>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        // Theme management
+        const THEME_KEY = 'nest-swagger-theme';
+        const body = document.body;
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        // Check for saved theme preference or default to dark
+        function getInitialTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            if (savedTheme) {
+                return savedTheme;
+            }
+            // Try to match with main OWASP Nest theme
+            const mainTheme = localStorage.getItem('theme');
+            return mainTheme || 'dark';
+        }
+
+        function applyTheme(theme) {
+            body.classList.remove('light-theme', 'dark-theme');
+            body.classList.add(`${theme}-theme`);
+            
+            if (theme === 'dark') {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+            
+            localStorage.setItem(THEME_KEY, theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = body.classList.contains('dark-theme') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        }
+
+        // Initialize theme
+        applyTheme(getInitialTheme());
+
+        // Theme toggle event listener
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Listen for theme changes from main OWASP Nest application
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme') {
+                applyTheme(e.newValue || 'dark');
+            }
+        });
+
+        // Initialize Swagger UI
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: "{{ swagger_url }}",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                persistAuthorization: {{ persist_authorization|lower }},
+                displayRequestDuration: true,
+                filter: true,
+                tryItOutEnabled: true
+            });
+
+            window.ui = ui;
+        };
+    </script>
+</body>
+</html>
