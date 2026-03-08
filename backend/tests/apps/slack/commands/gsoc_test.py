@@ -91,3 +91,28 @@ class TestGsocCommand:
             assert (
                 "<https://owasp.org/www-project-bug-logging-tool/|Test Project>" in project_block
             )
+    
+    def test_handler_with_2026_projects(self, mock_slack_client):
+        mock_projects = [
+            {
+                "idx_name": "Test Project 2026",
+                "idx_url": "https://owasp.org/www-project-test/",
+            }
+        ]
+        command = {"text": "2026", "user_id": "U123456"}
+        settings.SLACK_COMMANDS_ENABLED = True
+        with patch(
+            "apps.slack.commands.gsoc.get_gsoc_projects",
+            return_value=mock_projects,
+        ):
+            ack = MagicMock()
+            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+            ack.assert_called_once()
+
+            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+            project_block = str(blocks[0])
+
+            assert (
+                "<https://owasp.org/www-project-test/|Test Project 2026>" in project_block
+            )
