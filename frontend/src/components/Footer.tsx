@@ -82,6 +82,25 @@ export default function Footer() {
           ))}
         </div>
 
+        {/* Social Media Icons Section */}
+        <div className="mb-0 flex flex-row justify-center gap-6">
+          {footerIcons.map((social) => {
+            const SocialIcon = social.icon
+            return (
+              <Link
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`OWASP Nest ${social.label}`}
+                className="rounded-full p-2 text-slate-600 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+              >
+                <SocialIcon className="h-4 w-4" />
+              </Link>
+            )
+          })}
+        </div>
+
         {/* Logos Section */}
         <div className="flex items-center justify-center gap-6">
           <Link
@@ -113,24 +132,6 @@ export default function Footer() {
           </Link>
         </div>
 
-        {/* Social Media Icons Section */}
-        <div className="mb-0 flex flex-row justify-center gap-6">
-          {footerIcons.map((social) => {
-            const SocialIcon = social.icon
-            return (
-              <Link
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`OWASP Nest ${social.label}`}
-                className="rounded-full p-2 text-slate-600 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
-              >
-                <SocialIcon className="h-4 w-4" />
-              </Link>
-            )
-          })}
-        </div>
         {/* Footer bottom section with copyright and version */}
         <div className="grid w-full place-content-center">
           <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">
