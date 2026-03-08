@@ -34,9 +34,7 @@ class TestThemedSwagger:
         """Test that ThemedSwagger initializes with correct settings."""
         assert themed_swagger.settings.get("persistAuthorization") is True
 
-    def test_render_page_default_template(
-        self, themed_swagger, mock_api, request_factory
-    ):
+    def test_render_page_default_template(self, themed_swagger, mock_api, request_factory):
         """Test render_page with default template."""
         request = request_factory.get("/api/v0/docs")
 
@@ -59,31 +57,22 @@ class TestThemedSwagger:
             assert "swagger_url" in context
             assert "persist_authorization" in context
             assert context["title"] == "OWASP Nest"
-            assert (
-                context["description"]
-                == "Open Worldwide Application Security Project API"
-            )
+            assert context["description"] == "Open Worldwide Application Security Project API"
             assert context["persist_authorization"] is True
 
-    def test_render_page_custom_template(
-        self, themed_swagger, mock_api, request_factory
-    ):
+    def test_render_page_custom_template(self, themed_swagger, mock_api, request_factory):
         """Test render_page with custom template."""
         request = request_factory.get("/api/v0/docs")
 
         with patch("apps.api.rest.swagger.render") as mock_render:
             mock_render.return_value = MagicMock()
-            themed_swagger.render_page(
-                request, mock_api, template_name="custom/swagger.html"
-            )
+            themed_swagger.render_page(request, mock_api, template_name="custom/swagger.html")
 
             # Verify custom template was used
             call_args = mock_render.call_args
             assert call_args[0][1] == "custom/swagger.html"
 
-    def test_render_page_missing_description(
-        self, themed_swagger, mock_api, request_factory
-    ):
+    def test_render_page_missing_description(self, themed_swagger, mock_api, request_factory):
         """Test render_page when API description is None."""
         request = request_factory.get("/api/v0/docs")
         mock_api.description = None
@@ -96,9 +85,7 @@ class TestThemedSwagger:
             context = mock_render.call_args[0][2]
             assert context["description"] == "API Documentation"
 
-    def test_render_page_builds_correct_url(
-        self, themed_swagger, mock_api, request_factory
-    ):
+    def test_render_page_builds_correct_url(self, themed_swagger, mock_api, request_factory):
         """Test that render_page builds correct OpenAPI URL."""
         request = request_factory.get("/api/v0/docs")
 
@@ -106,8 +93,10 @@ class TestThemedSwagger:
             mock_render.return_value = MagicMock()
             themed_swagger.render_page(request, mock_api)
 
-            # Verify swagger_url is constructed correctly
+            # Verify swagger_url is constructed correctly from request path
             context = mock_render.call_args[0][2]
+            # Should replace /docs with /openapi.json
+            assert "openapi.json" in context["swagger_url"]
             assert "/api/v0/openapi.json" in context["swagger_url"]
 
     def test_render_page_persist_authorization_false(self, mock_api, request_factory):
@@ -123,9 +112,7 @@ class TestThemedSwagger:
             context = mock_render.call_args[0][2]
             assert context["persist_authorization"] is False
 
-    def test_render_page_no_persist_authorization_setting(
-        self, mock_api, request_factory
-    ):
+    def test_render_page_no_persist_authorization_setting(self, mock_api, request_factory):
         """Test render_page when persistAuthorization setting is not provided."""
         themed_swagger = ThemedSwagger(settings={})
         request = request_factory.get("/api/v0/docs")
@@ -137,3 +124,17 @@ class TestThemedSwagger:
             # Verify persistAuthorization defaults to True
             context = mock_render.call_args[0][2]
             assert context["persist_authorization"] is True
+
+    def test_render_page_url_construction_without_docs_suffix(
+        self, themed_swagger, mock_api, request_factory
+    ):
+        """Test URL construction when path doesn't end with /docs."""
+        request = request_factory.get("/api/v0/documentation")
+
+        with patch("apps.api.rest.swagger.render") as mock_render:
+            mock_render.return_value = MagicMock()
+            themed_swagger.render_page(request, mock_api)
+
+            # Verify URL construction fallback works
+            context = mock_render.call_args[0][2]
+            assert "openapi.json" in context["swagger_url"]
