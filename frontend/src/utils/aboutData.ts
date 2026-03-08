@@ -63,82 +63,96 @@ export const projectTimeline: ProjectTimeline[] = [
     title: 'Project Inception',
     description:
       'Initial brainstorming and vision by Arkadii Yakovets & Starr Brown to solve OWASP project navigation challenges.',
+    phase: 'Foundation',
     year: 'August 2024',
   },
   {
     title: 'Backend Minimum Viable Product',
     description:
       'Backend foundations built by Arkadii Yakovets using Django and Docker. GitHub sync implemented for automated data updates.',
+    phase: 'Foundation',
     year: 'August 2024',
   },
   {
     title: 'NestBot for Slack Community Integration',
     description:
       'A key feature allowing users to browse and search all OWASP projects effectively.',
+    phase: 'Foundation',
     year: 'September 2024',
   },
   {
     title: 'Initial Frontend Development',
     description: 'Frontend initially developed by Kate Golovanova using Vue.js and Bootstrap.',
+    phase: 'Foundation',
     year: 'September 2024',
   },
   {
     title: 'New React-based Frontend',
     description:
       'Started transitioning the frontend from Vue.js to React for better performance and scalability.',
+    phase: 'Foundation',
     year: 'November 2024',
   },
   {
     title: 'NestBot Commands and Event Handlers Expansion',
     description:
       'Enhanced NestBot with advanced command processing and intelligent event handlers to improve user interaction efficiency.',
+    phase: 'Launch',
     year: 'January 2025',
   },
   {
     title: 'First Official Release and Public Launch',
     description:
       'We officially launched OWASP Nest to the public, inviting the community to explore and contribute.',
+    phase: 'Launch',
     year: 'February 2025',
   },
   {
     title: 'GSoC 2025 Participation',
     description: 'OWASP Nest accepted for Google Summer of Code 2025 as part of OWASP.',
+    phase: 'Community & Growth',
     year: 'May 2025',
   },
   {
     title: 'OWASP Nest Sponsorship Program Launch',
     description:
       'We started sponsoring some interesting projects that have not made it to the GSoC 2025.',
+    phase: 'Community & Growth',
     year: 'June 2025',
   },
   {
     title: 'OWASP Nest Sponsorship Program Expansion',
     description:
       'OWASP Nest expanded its Sponsorship Program to support ongoing project maintenance and new initiatives.',
+    phase: 'Maturity & Recognition',
     year: 'October 2025',
   },
   {
     title: 'Lab Level Promotion',
     description:
       "OWASP Nest promoted to Lab level, marking a significant milestone in the project's growth and maturity within the OWASP ecosystem.",
+    phase: 'Maturity & Recognition',
     year: 'October 2025',
   },
   {
     title: 'OWASP Nest API Hackathon',
     description:
       'We hosted a successful hackathon to encourage adoption and hands-on use of the OWASP Nest REST API.',
+    phase: 'Maturity & Recognition',
     year: 'November 2025',
   },
   {
     title: 'OWASP Nest Logo Introduction',
     description:
       "Introduced the official OWASP Nest logo as part of the project's branding and visual identity.",
+    phase: 'Maturity & Recognition',
     year: 'December 2025',
   },
   {
     title: 'Production Level Promotion',
     description:
       'OWASP Nest promoted to Production level, marking its recognition as a mature and fully supported platform within the OWASP ecosystem.',
+    phase: 'Maturity & Recognition',
     year: 'February 2026',
   },
 ]

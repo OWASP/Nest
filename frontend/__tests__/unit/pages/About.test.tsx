@@ -64,13 +64,13 @@ jest.mock('utils/aboutData', () => ({
   },
   projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
   projectTimeline: [
-    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
-    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
-    { title: 'Timeline Event 3', description: 'Timeline description 3', year: '2025' },
-    { title: 'Timeline Event 4', description: 'Timeline description 4', year: '2026' },
-    { title: 'Timeline Event 5', description: 'Timeline description 5', year: '2027' },
-    { title: 'Timeline Event 6', description: 'Timeline description 6', year: '2028' },
-    { title: 'Timeline Event 7', description: 'Timeline description 7', year: '2029' },
+    { title: 'Timeline Event 1', description: 'Timeline description 1', phase: 'Phase A', year: '2023' },
+    { title: 'Timeline Event 2', description: 'Timeline description 2', phase: 'Phase A', year: '2024' },
+    { title: 'Timeline Event 3', description: 'Timeline description 3', phase: 'Phase B', year: '2025' },
+    { title: 'Timeline Event 4', description: 'Timeline description 4', phase: 'Phase B', year: '2026' },
+    { title: 'Timeline Event 5', description: 'Timeline description 5', phase: 'Phase C', year: '2027' },
+    { title: 'Timeline Event 6', description: 'Timeline description 6', phase: 'Phase C', year: '2028' },
+    { title: 'Timeline Event 7', description: 'Timeline description 7', phase: 'Phase D', year: '2029' },
   ],
   technologies: [
     {

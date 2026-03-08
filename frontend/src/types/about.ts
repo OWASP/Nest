@@ -16,6 +16,7 @@ export type MissionContent = {
 
 export type ProjectTimeline = {
   description: string
+  phase: string
   title: string
   year: string
 }
