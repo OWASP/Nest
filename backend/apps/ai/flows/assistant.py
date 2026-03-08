@@ -192,11 +192,11 @@ def process_query(  # noqa: PLR0911
         is_community_channel = normalized_channel_id == community_channel_id
 
         # Collaborative flow: if low confidence or multiple intents, invoke all expert agents
-        # Skip collaborative flow for owasp-community channel to preserve channel suggestion routing
+        # Skip collaborative flow for owasp-community channel to preserve
+        # channel suggestion routing
         if (
-            (confidence < CONFIDENCE_THRESHOLD or router_result.get("alternative_intents"))
-            and not is_community_channel
-        ):
+            confidence < CONFIDENCE_THRESHOLD or router_result.get("alternative_intents")
+        ) and not is_community_channel:
             logger.info(
                 "Low confidence or multiple intents detected, invoking collaborative flow",
                 extra={
@@ -244,7 +244,8 @@ def process_query(  # noqa: PLR0911
                     agents.append(rag_agent)
 
                 # Use RAG agent for synthesis if available (best suited for synthesis)
-                # RAG has access to all knowledge and is ideal for synthesizing multiple perspectives
+                # RAG has access to all knowledge and is ideal for synthesizing
+                # multiple perspectives
                 synthesis_agent = rag_agent if rag_agent is not None else agents[-1]
 
                 synthesis_task = Task(
@@ -274,7 +275,8 @@ def process_query(  # noqa: PLR0911
                 # This prevents leaking Question Detector output to users
                 if result_str and result_str.upper() in ("YES", "NO"):
                     logger.error(
-                        "Collaborative flow returned Question Detector output instead of proper response",
+                        "Collaborative flow returned Question Detector output "
+                        "instead of proper response",
                         extra={
                             "intent": intent,
                             "all_intents": all_intents,
@@ -303,40 +305,40 @@ def process_query(  # noqa: PLR0911
             )
             # Pre-check for contribution keywords to help guide the agent
             contribution_keywords = [
-                    "contribute",
-                    "contributing",
-                    "contributor",
-                    "contributors",
-                    "get involved",
-                    "getting involved",
-                    "how to get involved",
-                    "beginner-friendly",
-                    "starter issues",
-                    "new contributors",
-                    "contribution guidelines",
-                    "contribution opportunities",
-                    "how to start",
-                    "getting started",
-                    "how contributors get involved",
-                    "good projects for",
-                    "projects for beginners",
-                    "interested in",
-                    "excited to join",
-                    "looking forward to contributing",
-                    "keen on learning",
-                    "would love some guidance",
-                    "I'd love some guidance",
-                    "how teams collaborate",
-                    "how projects are structured",
-                    "how to find issues",
-                    "contributing along",
-                    "contributing along the way",
-                    "contributing to",
-                    "guidance on",
-                    "some guidance",
-                    "love some guidance",
-                    "repositories are good",
-                    "projects or repositories",
+                "contribute",
+                "contributing",
+                "contributor",
+                "contributors",
+                "get involved",
+                "getting involved",
+                "how to get involved",
+                "beginner-friendly",
+                "starter issues",
+                "new contributors",
+                "contribution guidelines",
+                "contribution opportunities",
+                "how to start",
+                "getting started",
+                "how contributors get involved",
+                "good projects for",
+                "projects for beginners",
+                "interested in",
+                "excited to join",
+                "looking forward to contributing",
+                "keen on learning",
+                "would love some guidance",
+                "I'd love some guidance",
+                "how teams collaborate",
+                "how projects are structured",
+                "how to find issues",
+                "contributing along",
+                "contributing along the way",
+                "contributing to",
+                "guidance on",
+                "some guidance",
+                "love some guidance",
+                "repositories are good",
+                "projects or repositories",
             ]
             query_lower = query.lower()
             has_contribution_keywords = any(
@@ -344,18 +346,18 @@ def process_query(  # noqa: PLR0911
             )
 
             logger.info(
-                    "Query from owasp-community channel detected (intent: %s, "
-                    "has_contribution_keywords: %s), routing to community agent for "
-                    "channel suggestions",
-                    intent,
-                    has_contribution_keywords,
-                    extra={
-                        "channel_id": channel_id,
-                        "intent": intent,
-                        "confidence": confidence,
-                        "has_contribution_keywords": has_contribution_keywords,
-                        "community_channel_id": community_channel_id,
-                    },
+                "Query from owasp-community channel detected (intent: %s, "
+                "has_contribution_keywords: %s), routing to community agent for "
+                "channel suggestions",
+                intent,
+                has_contribution_keywords,
+                extra={
+                    "channel_id": channel_id,
+                    "intent": intent,
+                    "confidence": confidence,
+                    "has_contribution_keywords": has_contribution_keywords,
+                    "community_channel_id": community_channel_id,
+                },
             )
 
             # Check for GSoC keywords first (more specific)
@@ -469,9 +471,9 @@ def process_query(  # noqa: PLR0911
             return execute_task(
                 channel_agent,
                 query,
-                    channel_id=channel_id,
-                    is_channel_suggestion=True,
-                )
+                channel_id=channel_id,
+                is_channel_suggestion=True,
+            )
 
         # Step 3: Check for contribution intent even if misclassified
         # This is a fallback to catch contribution queries that might be misclassified
@@ -708,7 +710,7 @@ def get_fallback_response() -> str:
         Fallback error message (detailed in development, generic in production)
 
     """
-    from django.conf import settings
+    from django.conf import settings  # noqa: PLC0415
 
     # Only show detailed error message in local/development environment
     if getattr(settings, "IS_LOCAL_ENVIRONMENT", False) or getattr(settings, "DEBUG", False):
