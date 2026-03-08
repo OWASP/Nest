@@ -46,27 +46,33 @@ const SearchPageLayout = ({
   }, [isLoaded, isFirstLoad])
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-      <div className="flex w-full items-center justify-center gap-2">
+      <div className={`flex w-full items-center justify-center ${inlineSort ? 'gap-0' : 'gap-2'}`}>
         {filterChildren &&
           (isFirstLoad ? (
-            <Skeleton className="h-12 w-52 rounded-lg" aria-hidden="true" />
+            <Skeleton
+              className={`h-12 w-60 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
+              aria-hidden="true"
+            />
           ) : (
-            filterChildren
+            <div className={inlineSort ? '[&>div]:rounded-r-none' : ''}>{filterChildren}</div>
           ))}
         <SearchBar
           isLoaded={!isFirstLoad}
           onSearch={onSearch}
           placeholder={searchPlaceholder}
           initialValue={searchQuery}
+          className={
+            inlineSort && filterChildren ? 'rounded-none' : inlineSort ? 'rounded-r-none' : ''
+          }
         />
         {inlineSort &&
           sortChildren &&
           (isFirstLoad ? (
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-12 w-52 rounded-lg" aria-hidden="true" />
+            <div className="flex items-center">
+              <Skeleton className="h-12 w-48 rounded-none" aria-hidden="true" />
             </div>
           ) : (
-            <div className="flex items-center" data-testid="sort-inline">
+            <div className="[&>div>div:first-child]:rounded-l-none" data-testid="sort-inline">
               {sortChildren}
             </div>
           ))}

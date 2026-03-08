@@ -20,6 +20,7 @@
   "dependencies": {
     "@apollo/client": "^4.1.6",
     "@graphql-typed-document-node/core": "^3.2.0",
+    "@heroui/autocomplete": "^2.3.33",
     "@heroui/button": "^2.2.32",
     "@heroui/modal": "^2.2.29",
     "@heroui/react": "^2.8.10",
