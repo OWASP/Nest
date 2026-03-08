@@ -486,6 +486,26 @@ describe('Footer', () => {
       expect(nestLogo).toHaveAttribute('alt', 'Nest Logo')
       expect(owaspLogo).toHaveAttribute('alt', 'OWASP Logo')
     })
+
+    test('Nest logo links to home', () => {
+      renderFooter()
+
+      const nestLink = screen.getByLabelText('Nest home')
+      expect(nestLink).toBeInTheDocument()
+      expect(nestLink).toHaveAttribute('href', '/')
+      expect(nestLink).not.toHaveAttribute('target')
+      expect(nestLink).not.toHaveAttribute('rel')
+    })
+
+    test('OWASP logo links to owasp.org', () => {
+      renderFooter()
+
+      const owaspLink = screen.getByLabelText('OWASP Foundation')
+      expect(owaspLink).toBeInTheDocument()
+      expect(owaspLink).toHaveAttribute('href', 'https://owasp.org/')
+      expect(owaspLink).toHaveAttribute('target', '_blank')
+      expect(owaspLink).toHaveAttribute('rel', 'noopener noreferrer')
+    })
   })
 
   describe('Component Integration', () => {
