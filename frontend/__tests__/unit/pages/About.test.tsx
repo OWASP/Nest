@@ -288,15 +288,27 @@ describe('About Component', () => {
     })
 
     expect(screen.getByText('Project Timeline')).toBeInTheDocument()
-    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
+
+    // Verify phase headers are rendered for all groups with visible items
+    expect(screen.getByText('Phase D')).toBeInTheDocument()
+    expect(screen.getByText('Phase C')).toBeInTheDocument()
+    expect(screen.getByText('Phase B')).toBeInTheDocument()
+    expect(screen.getByText('Phase A')).toBeInTheDocument()
+
+    // Verify items are rendered under their correct phase group
+    const phaseDSection = screen.getByText('Phase D').closest('div')
+    expect(within(phaseDSection!).getByText('Timeline Event 7')).toBeInTheDocument()
+
+    const phaseCSection = screen.getByText('Phase C').closest('div')
+    expect(within(phaseCSection!).getByText('Timeline Event 6')).toBeInTheDocument()
+    expect(within(phaseCSection!).getByText('Timeline Event 5')).toBeInTheDocument()
+
+    // Verify show-more truncation: 6 items visible, Event 1 hidden
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
     expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
     expect(screen.getByText('2029')).toBeInTheDocument()
     expect(screen.queryByText('2023')).not.toBeInTheDocument()
     expect(screen.getByText('2024')).toBeInTheDocument()
-
-    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
-    expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
 
     const timelineSection = screen.getByText('Project Timeline').closest('h2')?.parentElement
     if (!timelineSection) throw new Error('Could not find Timeline section')
@@ -306,6 +318,10 @@ describe('About Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+      // After expanding, Phase A group should contain both its items
+      const phaseASection = screen.getByText('Phase A').closest('div')
+      expect(within(phaseASection!).getByText('Timeline Event 1')).toBeInTheDocument()
+      expect(within(phaseASection!).getByText('Timeline Event 2')).toBeInTheDocument()
     })
 
     const showLessButton = within(timelineSection).getByRole('button', { name: /Show less/i })
