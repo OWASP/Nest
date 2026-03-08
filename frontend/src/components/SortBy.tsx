@@ -19,10 +19,13 @@ const SortBy = ({
       onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')
     }
   }
+  const showOrderButton = selectedSortOption !== 'default'
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center">
       {/* Sort Attribute Dropdown */}
-      <div className="inline-flex h-12 items-center rounded-lg border border-gray-300 bg-gray-100 pl-3 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-600 dark:bg-[#323232]">
+      <div
+        className={`inline-flex h-12 items-center border border-gray-300 bg-white pl-3 shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800 ${showOrderButton ? 'rounded-l-lg rounded-r-none border-r-0' : 'rounded-lg'}`}
+      >
         <Select
           className=""
           labelPlacement="outside-left"
@@ -58,8 +61,8 @@ const SortBy = ({
         </Select>
       </div>
 
-      {/* Sort Order Dropdown */}
-      {selectedSortOption !== 'default' && (
+      {/* Sort Order Button */}
+      {showOrderButton && (
         <Tooltip
           content={selectedOrder === 'asc' ? 'Ascending Order' : 'Descending Order'}
           showArrow
@@ -71,7 +74,7 @@ const SortBy = ({
             type="button"
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
             onKeyDown={handleKeyDown}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-gray-100 p-0 shadow-sm transition-all duration-200 hover:bg-gray-200 hover:shadow-md focus:ring-2 focus:ring-gray-300 focus:ring-offset-1 focus:outline-none dark:border-gray-600 dark:bg-[#323232] dark:hover:bg-[#404040] dark:focus:ring-gray-500"
+            className="inline-flex h-12 w-10 items-center justify-center rounded-l-none rounded-r-lg border border-l-0 border-gray-300 bg-white p-0 shadow-none transition-all duration-200 hover:bg-gray-100 focus:ring-0 focus:ring-offset-0 focus:outline-none active:ring-0 active:outline-none dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
             aria-label={
               selectedOrder === 'asc' ? 'Sort in ascending order' : 'Sort in descending order'
             }

@@ -1,5 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { act } from 'react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import CountryFilter from 'components/CountryFilter'
 
 describe('<CountryFilter />', () => {
@@ -14,52 +13,60 @@ describe('<CountryFilter />', () => {
     jest.clearAllMocks()
   })
 
-  it('renders with "All Countries" selected by default', () => {
+  it('renders with "All Countries" as default input value', () => {
     render(<CountryFilter {...defaultProps} />)
-    const value = screen.getByText('All Countries', { selector: '[data-slot="value"]' })
-    expect(value).toBeInTheDocument()
+    const input = screen.getByRole('combobox')
+    expect(input).toHaveValue('All Countries')
   })
 
   it('renders country label', () => {
     render(<CountryFilter {...defaultProps} />)
-    const label = screen.getByText('Country :', { selector: '[data-slot="label"]' })
-    expect(label).toBeInTheDocument()
+    expect(screen.getByText('Country :')).toBeInTheDocument()
   })
 
   it('calls onCountryChange when a country is selected', async () => {
     render(<CountryFilter {...defaultProps} />)
 
-    await act(async () => {
-      const hiddenSelect = document.querySelector('[data-testid="hidden-select-container"] select')
-      if (hiddenSelect) {
-        fireEvent.change(hiddenSelect, { target: { value: 'Germany' } })
-      }
+    const input = screen.getByRole('combobox')
+    fireEvent.click(input)
+    fireEvent.change(input, { target: { value: 'Ger' } })
+
+    await waitFor(() => {
+      const option = screen.getByRole('option', { name: 'Germany' })
+      fireEvent.click(option)
     })
 
     expect(defaultProps.onCountryChange).toHaveBeenCalledWith('Germany')
   })
 
-  it('renders with a selected country', () => {
+  it('renders with a selected country as input value', () => {
     render(<CountryFilter {...defaultProps} selectedCountry="Japan" />)
-    const value = screen.getByText('Japan', { selector: '[data-slot="value"]' })
-    expect(value).toBeInTheDocument()
+    const input = screen.getByRole('combobox')
+    expect(input).toHaveValue('Japan')
   })
 
   it('renders with empty countries list', () => {
     render(<CountryFilter {...defaultProps} countries={[]} />)
-    const value = screen.getByText('All Countries', { selector: '[data-slot="value"]' })
-    expect(value).toBeInTheDocument()
+    const input = screen.getByRole('combobox')
+    expect(input).toHaveValue('All Countries')
   })
 
   it('renders with isLoading state', () => {
     render(<CountryFilter {...defaultProps} isLoading={true} />)
-    const label = screen.getByText('Country :', { selector: '[data-slot="label"]' })
-    expect(label).toBeInTheDocument()
+    expect(screen.getByText('Country :')).toBeInTheDocument()
   })
 
-  it('renders the trigger button', () => {
+  it('filters options when typing', async () => {
     render(<CountryFilter {...defaultProps} />)
-    const trigger = screen.getByRole('button', { name: /Country/ })
-    expect(trigger).toBeInTheDocument()
+
+    const input = screen.getByRole('combobox')
+    fireEvent.click(input)
+    fireEvent.change(input, { target: { value: 'Ind' } })
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'India' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'Indonesia' })).toBeInTheDocument()
+      expect(screen.queryByRole('option', { name: 'Germany' })).not.toBeInTheDocument()
+    })
   })
 })
