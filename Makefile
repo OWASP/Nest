@@ -4,33 +4,36 @@ include docs/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
-.PHONY: build clean check pre-commit prune run scan-images security-scan security-scan-code \
+.DEFAULT_GOAL := help
+
+.PHONY: build clean check help pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
 	security-scan-backend-image security-scan-frontend-image security-scan-zap \
 	test update clean-trivy-cache
 
 MAKEFLAGS += --no-print-directory
 
-build:
+##@ Getting Started
+
+help: ## Display this help
+	@[ -t 1 ] && c='\033[36m' r='\033[0m' b='\033[1m' || c='' r='' b=''; \
+	awk -v c="$$c" -v r="$$r" -v b="$$b" ' \
+	BEGIN { FS = ":.*##"; printf "\nUsage:\n  make " c "<target>" r "\n" } \
+	/^##@/ { printf "\n" b "%s" r "\n", substr($$0, 5) } \
+	/^[a-zA-Z_-]+:.*?## / { printf "  " c "%-30s" r " %s\n", $$1, $$2 }' \
+	$(MAKEFILE_LIST)
+
+build: ## Build Docker images
 	@docker compose build
 
-clean: \
-	clean-dependencies \
-	clean-docker \
-	clean-trivy-cache
+run: ## Run Nest application locally
+	@DOCKER_BUILDKIT=1 \
+	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
+	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
 
-clean-dependencies: \
-	clean-backend-dependencies \
-	clean-frontend-dependencies
+##@ Testing
 
-clean-docker: \
-	clean-backend-docker \
-	clean-docs-docker \
-	clean-frontend-docker
-
-clean-trivy-cache:
-	@rm -rf $(CURDIR)/.trivy-cache
-
+check: ## Run all code quality checks
 check: \
 	check-spelling \
 	check-backend \
@@ -39,6 +42,7 @@ check: \
 check-backend: \
 	pre-commit
 
+check-test: ## Run all checks and tests
 check-test: \
 	check \
 	test
@@ -51,27 +55,30 @@ check-test-frontend: \
 	check-frontend \
 	test-frontend
 
-pre-commit:
+pre-commit: ## Run pre-commit hooks
 	@pre-commit run -a
 
-prune:
-	@docker builder prune --filter 'until=72h' -a -f
-	@docker image prune --filter 'until=72h' -a -f
-	@docker volume prune -f
+test: ## Run all tests
+test: \
+	test-nest-app
 
-run:
-	@DOCKER_BUILDKIT=1 \
-	docker compose -f docker-compose/local/compose.yaml --project-name nest-local build && \
-	docker compose -f docker-compose/local/compose.yaml --project-name nest-local up --remove-orphans
+test-nest-app: \
+	test-backend \
+	test-frontend
 
+##@ Security
+
+security-scan: ## Run all security scans
 security-scan: \
 	security-scan-code \
 	security-scan-images
 
+security-scan-code: ## Run code security scans only
 security-scan-code: \
 	security-scan-code-semgrep \
 	security-scan-code-trivy
 
+security-scan-images: ## Run image security scans only
 security-scan-images: \
 	security-scan-backend-image \
 	security-scan-frontend-image
@@ -142,13 +149,34 @@ security-scan-zap:
 		-c .zapconfig \
 		-t $(ZAP_TARGET)
 
-test: \
-	test-nest-app
+##@ Cleanup
 
-test-nest-app: \
-	test-backend \
-	test-frontend
+clean: ## Remove all generated files and containers
+clean: \
+	clean-dependencies \
+	clean-docker \
+	clean-trivy-cache
 
+clean-dependencies: \
+	clean-backend-dependencies \
+	clean-frontend-dependencies
+
+clean-docker: \
+	clean-backend-docker \
+	clean-docs-docker \
+	clean-frontend-docker
+
+clean-trivy-cache:
+	@rm -rf $(CURDIR)/.trivy-cache
+
+prune: ## Prune Docker resources
+	@docker builder prune --filter 'until=72h' -a -f
+	@docker image prune --filter 'until=72h' -a -f
+	@docker volume prune -f
+
+##@ Maintenance
+
+update: ## Update all dependencies
 update: \
 	clean-dependencies \
 	update-docs-dependencies \

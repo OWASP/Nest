@@ -2,7 +2,7 @@ export const mockChapterData = {
   activeChaptersCount: 0,
   chapters: [
     {
-      createdAt: 1568320077,
+      createdAt: '2019-09-12T20:27:57.000Z',
       leaders: ['Isanori Sakanashi', 'Takeshi Murai', 'Yukiharu Niwa'],
       name: 'Chapter 1',
       relatedUrls: [
@@ -19,7 +19,7 @@ export const mockChapterData = {
         },
       ],
       summary: 'This is a summary of Chapter 1.',
-      updatedAt: 1723121926,
+      updatedAt: '2024-08-08T12:58:46.000Z',
       key: 'chapter_1',
       url: 'https://owasp.org/www-chapter-nagoya',
       objectID: '539',

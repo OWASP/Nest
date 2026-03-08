@@ -12,9 +12,16 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('utils/dateFormatter', () => {
-  const mockFormatDate = jest.fn((date) => {
-    const dateStr = date instanceof Date ? date.toISOString() : String(date)
-    return `Formatted: ${dateStr}`
+  const mockFormatDate = jest.fn((input: string | null) => {
+    if (input === null || input === '') return ''
+    const date = new Date(input)
+    if (Number.isNaN(date.getTime())) return ''
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    })
   })
 
   return {
@@ -117,15 +124,15 @@ describe('Milestones', () => {
     followingCount: 5,
     publicRepositoriesCount: 20,
     contributionsCount: 50,
-    createdAt: 1640995200000,
-    updatedAt: 1640995200000,
+    createdAt: '2022-01-01T00:00:00.000Z',
+    updatedAt: '2022-01-01T00:00:00.000Z',
   })
 
   const createMockMilestone = (overrides: Partial<Milestone> = {}): Milestone => ({
     author: createMockUser(),
     body: 'Test milestone description',
     closedIssuesCount: 5,
-    createdAt: '2023-01-01T00:00:00Z',
+    createdAt: '2023-01-01T00:00:00.000Z', // 2023-01-01T00:00:00Z
     openIssuesCount: 3,
     organizationName: 'test-org',
     progress: 75,
@@ -177,7 +184,7 @@ describe('Milestones', () => {
 
   it('renders milestone details correctly', () => {
     const milestone = createMockMilestone({
-      createdAt: '2023-01-01T00:00:00Z',
+      createdAt: '2023-01-01T00:00:00.000Z', // 2023-01-01T00:00:00Z
       closedIssuesCount: 10,
       openIssuesCount: 5,
       repositoryName: 'awesome-repo',
@@ -185,7 +192,7 @@ describe('Milestones', () => {
 
     render(<Milestones data={[milestone]} />)
 
-    expect(screen.getByText(/Formatted: 2023-01-01T00:00:00Z/)).toBeInTheDocument()
+    expect(screen.getByText('Jan 1, 2023')).toBeInTheDocument()
     expect(screen.getByText('10 closed')).toBeInTheDocument()
     expect(screen.getByText('5 open')).toBeInTheDocument()
     expect(screen.getByTestId('truncated-text')).toHaveTextContent('awesome-repo')

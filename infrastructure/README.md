@@ -12,6 +12,10 @@ Ensure you have the following setup/installed:
 - An AWS account.
 Note: Refer to the respective `README.md` files for more information.
 
+## External Documentation
+
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest/4.3-aws-infrastructure)
+
 ## Setting up the infrastructure
 
 Follow these steps to set up the infrastructure:
