@@ -423,6 +423,7 @@ export default function GlobalSearch() {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search the OWASP community..."
+                aria-label="Search the OWASP community"
                 className="h-14 w-full bg-transparent pr-10 pl-11 text-base text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white dark:placeholder-gray-500"
               />
               {searchQuery ? (
