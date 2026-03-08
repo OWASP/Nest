@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+from typing import cast
 
 from crewai import Agent, Crew, Process, Task
 from django.conf import settings
@@ -177,8 +178,8 @@ def process_query(  # noqa: PLR0911
             }
         else:
             router_result = route(query)
-            intent = router_result.get("intent")
-            confidence = router_result.get("confidence", 0.5)
+            intent = cast("str", router_result.get("intent"))
+            confidence = cast("float", router_result.get("confidence", 0.5))
 
             # Validate router result - ensure we got a proper intent
             if not intent or intent not in Intent.values():
@@ -218,7 +219,8 @@ def process_query(  # noqa: PLR0911
             )
             # Collect all intents while preserving order: primary intent first, then alternatives
             # Use dict.fromkeys() for deterministic deduplication (preserves insertion order)
-            all_intents = [intent, *router_result.get("alternative_intents", [])]
+            alternatives = cast("list[str]", router_result.get("alternative_intents", []))
+            all_intents = [intent, *alternatives]
             all_intents = list(dict.fromkeys(all_intents))
 
             agents = []
