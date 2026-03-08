@@ -42,9 +42,8 @@ export default function Footer() {
                     <h3>{section.title}</h3>
                     <div className="transition-transform duration-200">
                       <FaChevronDown
-                        className={`h-4 w-4 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180' : ''
-                        }`}
+                        className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+                          }`}
                       />
                     </div>
                   </Button>
@@ -55,9 +54,8 @@ export default function Footer() {
                 )}
                 <div
                   id={sectionId}
-                  className={`grid transition-[grid-template-rows] duration-300 ease-in-out lg:grid-rows-[1fr] ${
-                    isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                  }`}
+                  className={`grid transition-[grid-template-rows] duration-300 ease-in-out md:grid-rows-[1fr] ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                    }`}
                 >
                   <div className="overflow-hidden" inert={isMobile && !isOpen ? true : undefined}>
                     <div className="flex flex-col gap-2 text-sm">
