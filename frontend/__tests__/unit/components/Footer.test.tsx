@@ -448,8 +448,8 @@ describe('Footer', () => {
       const nestLogo = screen.getByAltText('Nest Logo') as HTMLImageElement
       const owaspLogo = screen.getByAltText('OWASP Logo') as HTMLImageElement
 
-      expect(nestLogo.src).toContain('/img/logo_dark.png')
-      expect(owaspLogo.src).toContain('/img/OWASP_black_logo.svg')
+      expect(nestLogo.src).toMatch(/\/img\/logo_(light|dark)\.png/)
+      expect(owaspLogo.src).toContain('/img/OWASP_logo.svg')
     })
 
     test('renders Nest text next to Nest logo', () => {
@@ -465,7 +465,7 @@ describe('Footer', () => {
       renderFooter()
 
       const footer = screen.getByRole('contentinfo')
-      const separator = footer.querySelector('.h-8.w-px.bg-white')
+      const separator = footer.querySelector('.h-8.w-px')
 
       expect(separator).toBeInTheDocument()
     })

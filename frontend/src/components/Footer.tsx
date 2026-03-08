@@ -1,13 +1,22 @@
 'use client'
 import { Button } from '@heroui/button'
+import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useCallback } from 'react'
+import { useTheme } from 'next-themes'
+import { useState, useCallback, useEffect } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons, footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
+  const { theme } = useTheme()
+
+  const [nestLogoSrc, setNestLogoSrc] = useState('/img/logo_light.png')
+  useEffect(() => {
+    setNestLogoSrc(theme === 'dark' ? '/img/logo_dark.png' : '/img/logo_light.png')
+  }, [theme])
+
   // State to keep track of the open section in the footer
   const [openSection, setOpenSection] = useState<string | null>(null)
 
@@ -75,25 +84,33 @@ export default function Footer() {
 
         {/* Logos Section */}
         <div className="flex items-center justify-center gap-6">
-          {/* Nest Logo and Text */}
-          <div className="flex items-center gap-2">
-            <img
-              src="/img/logo_dark.png"
-              alt="Nest Logo"
-              className="h-8 w-8"
+          <Link
+            href="https://owasp.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            aria-label="OWASP Foundation"
+          >
+            <Image
+              src="/img/OWASP_logo.svg"
+              alt="OWASP Logo"
+              width={100}
+              height={32}
+              className="h-8 w-auto dark:invert"
             />
-            <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
-          </div>
+          </Link>
 
           {/* Vertical Separator */}
           <div className="h-8 w-px bg-slate-400 dark:bg-white"></div>
 
-          {/* OWASP Logo */}
-          <img
-            src="/img/OWASP_black_logo.svg"
-            alt="OWASP Logo"
-            className="h-8 w-auto dark:invert"
-          />
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            aria-label="Nest home"
+          >
+            <Image src={nestLogoSrc} alt="Nest Logo" width={32} height={32} className="h-8 w-8" />
+            <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
+          </Link>
         </div>
 
         {/* Social Media Icons Section */}
