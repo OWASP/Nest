@@ -3,7 +3,6 @@ import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
-import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
@@ -29,23 +28,19 @@ const ChaptersPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const searchParams = {
-          indexName: 'chapters',
-          query: '',
-          currentPage,
-          hitsPerPage: currentPage === 1 ? 1000 : 25,
-        }
-        const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
-          searchParams.indexName,
-          searchParams.query,
-          searchParams.currentPage,
-          searchParams.hitsPerPage
-        )
-        setGeoLocData(data.hits)
-      } catch (error) {
-        handleAppError(error)
+      const searchParams = {
+        indexName: 'chapters',
+        query: '',
+        currentPage,
+        hitsPerPage: currentPage === 1 ? 1000 : 25,
       }
+      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
+        searchParams.indexName,
+        searchParams.query,
+        searchParams.currentPage,
+        searchParams.hitsPerPage
+      )
+      setGeoLocData(data.hits)
     }
     fetchData()
   }, [currentPage])
