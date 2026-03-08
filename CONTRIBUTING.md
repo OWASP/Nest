@@ -36,6 +36,11 @@ Optional steps for Windows:
 
 [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
+## External Documentation
+
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest)
+- [OWASP Nest ReadTheDocs](https://owasp-nest.readthedocs.io/latest/)
+
 ## Environment Variables
 
 For detailed descriptions of all environment variables, see:
@@ -95,6 +100,16 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
    - Note: The default write API key should have index write permissions (addObject permission). If you do not use the default write API key, ensure that your API key has this permission.
    - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
+
+1. **Getting Started**:
+
+   - To see all available commands and their descriptions, run:
+
+     ```bash
+     make help
+     ```
+
+   - This will print a list of all make targets you can use during development.
 
 1. **Run the Application**:
 

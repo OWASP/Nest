@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fa'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
+import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
@@ -108,7 +109,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="flex items-center justify-normal gap-4">
+        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+          <GlobalSearch />
           <div className="hidden md:flex">
             <NavButton
               href="https://github.com/OWASP/Nest"

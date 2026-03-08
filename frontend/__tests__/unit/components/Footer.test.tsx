@@ -147,12 +147,25 @@ describe('Footer', () => {
         }
       }
 
+      const externalLinks = regularLinks.filter((link) => (link.href || '/').startsWith('http'))
+      const internalLinks = regularLinks.filter((link) => !(link.href || '/').startsWith('http'))
+
       for (const link of regularLinks) {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
         const expectedHref = link.href || '/'
         expect(linkElement).toHaveAttribute('href', expectedHref)
+      }
+
+      for (const link of externalLinks) {
+        const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toHaveAttribute('target', '_blank')
+        expect(linkElement).toHaveAttribute('rel', 'noopener noreferrer')
+      }
+
+      for (const link of internalLinks) {
+        const linkElement = screen.getByRole('link', { name: link.text })
+        expect(linkElement).not.toHaveAttribute('target')
       }
 
       for (const link of spanElements) {
