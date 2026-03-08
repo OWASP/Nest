@@ -94,6 +94,12 @@ jest.mock('components/UserMenu', () => {
   }
 })
 
+jest.mock('components/GlobalSearch', () => {
+  return function MockGlobalSearch() {
+    return <div data-testid="global-search">Global Search</div>
+  }
+})
+
 // Mock constants
 jest.mock('utils/constants', () => {
   const actual = jest.requireActual('utils/constants')
