@@ -888,7 +888,11 @@
                         SwaggerUIBundle.plugins.DownloadUrl
                     ],
                     layout: "StandaloneLayout",
-                    persistAuthorization: {{ persist_authorization|lower }},
+                    persistAuthorization: {
+                        {
+                            persist_authorization | lower
+                        }
+                    },
                     displayRequestDuration: true,
                     filter: true,
                     tryItOutEnabled: true
