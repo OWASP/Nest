@@ -6,6 +6,7 @@ import inspect
 import logging
 
 from crewai import Agent, Crew, Process, Task
+from django.conf import settings
 
 from apps.ai.agents.channel import create_channel_agent
 from apps.ai.agents.chapter import create_chapter_agent
@@ -80,17 +81,25 @@ def process_query(  # noqa: PLR0911
     try:
         # Process images if provided - enrich query with image context
         if images:
-            image_context = (
-                OpenAi(model=DEFAULT_VISION_MODEL)
-                .set_prompt(IMAGE_DESCRIPTION_PROMPT)
-                .set_input(query)
-                .set_images(images)
-                .complete()
-            )
-            if image_context:
-                query = f"{query}{DELIMITER}Image context: {image_context}"
+            try:
+                image_context = (
+                    OpenAi(model=DEFAULT_VISION_MODEL)
+                    .set_prompt(IMAGE_DESCRIPTION_PROMPT)
+                    .set_input(query)
+                    .set_images(images)
+                    .complete()
+                )
+                if image_context:
+                    query = f"{query}{DELIMITER}Image context: {image_context}"
+            except Exception:  # noqa: BLE001 - intentionally broad so image failure never fails the request
+                logger.warning(
+                    "Image enrichment failed; continuing without image context",
+                    extra={"query": query[:200]},
+                )
         # Step 0: Handle simple greetings and non-question messages
-        query_lower = query.strip().lower()
+        # Normalize for comparison: strip, lower, remove trailing punctuation
+        query_normalized = query.strip().lower().rstrip(".!?,;:")
+        query_lower = query_normalized
         # Common greetings and simple acknowledgments (standalone only)
         simple_greetings = [
             "hello",
@@ -139,12 +148,7 @@ def process_query(  # noqa: PLR0911
         # Only treat as simple greeting if it's exactly a greeting
         # AND has no question/OWASP content
         is_simple_greeting = (
-            (
-                query_lower in simple_greetings
-                or any(query_lower == greeting for greeting in simple_greetings)
-            )
-            and not has_question_content
-            and not has_owasp_content
+            query_lower in simple_greetings and not has_question_content and not has_owasp_content
         )
 
         if is_simple_greeting:
@@ -157,24 +161,38 @@ def process_query(  # noqa: PLR0911
                 )
             return None
 
-        # Step 1: Route to appropriate expert agent
-        router_result = route(query)
-        intent = router_result.get("intent")
-        confidence = router_result.get("confidence", 0.5)
+        # Step 1: Check owasp-community channel first (before router) so channel
+        # suggestion flow always runs and we avoid unnecessary route() calls
+        normalized_channel_id = normalize_channel_id(channel_id) if channel_id else ""
+        community_channel_id = normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
+        is_community_channel = normalized_channel_id == community_channel_id
 
-        # Validate router result - ensure we got a proper intent
-        if not intent or intent not in Intent.values():
-            logger.error(
-                "Router returned invalid intent",
-                extra={
-                    "intent": intent,
-                    "router_result": router_result,
-                    "query": query[:200],
-                },
-            )
-            # Fallback to RAG
-            intent = Intent.RAG.value
-            confidence = 0.3
+        if is_community_channel:
+            intent = Intent.COMMUNITY.value
+            confidence = 0.99
+            router_result = {
+                "intent": intent,
+                "confidence": confidence,
+                "alternative_intents": [],
+            }
+        else:
+            router_result = route(query)
+            intent = router_result.get("intent")
+            confidence = router_result.get("confidence", 0.5)
+
+            # Validate router result - ensure we got a proper intent
+            if not intent or intent not in Intent.values():
+                logger.error(
+                    "Router returned invalid intent",
+                    extra={
+                        "intent": intent,
+                        "router_result": router_result,
+                        "query": query[:200],
+                    },
+                )
+                # Fallback to RAG
+                intent = Intent.RAG.value
+                confidence = 0.3
 
         logger.info(
             "Query routed",
@@ -184,12 +202,6 @@ def process_query(  # noqa: PLR0911
                 "query": query[:200],
             },
         )
-
-        # Step 2: Check if query is from owasp-community channel (must be handled first)
-        # Normalize channel IDs for comparison
-        normalized_channel_id = normalize_channel_id(channel_id) if channel_id else ""
-        community_channel_id = normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
-        is_community_channel = normalized_channel_id == community_channel_id
 
         # Collaborative flow: if low confidence or multiple intents, invoke all expert agents
         # Skip collaborative flow for owasp-community channel to preserve
@@ -288,7 +300,7 @@ def process_query(  # noqa: PLR0911
                     # Return a fallback response instead
                     return get_fallback_response()
 
-                return result_str or str(result)
+                return result_str or get_fallback_response()
 
         # Step 2: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
@@ -563,7 +575,7 @@ def process_query(  # noqa: PLR0911
             )
             # Return a fallback response instead
             return get_fallback_response()
-        return result_str or result  # noqa: TRY300
+        return result_str or get_fallback_response()
 
     except Exception as e:
         logger.exception(
@@ -710,8 +722,6 @@ def get_fallback_response() -> str:
         Fallback error message (detailed in development, generic in production)
 
     """
-    from django.conf import settings  # noqa: PLC0415
-
     # Only show detailed error message in local/development environment
     if getattr(settings, "IS_LOCAL_ENVIRONMENT", False) or getattr(settings, "DEBUG", False):
         return (
