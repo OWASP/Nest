@@ -11,7 +11,7 @@ export type Chapter = {
     releases: number
     total: number
   }
-  createdAt?: number
+  createdAt?: string
   entityLeaders?: Leader[]
   geoLocation?: GeoLocation | null
   isActive?: boolean
@@ -24,7 +24,7 @@ export type Chapter = {
   suggestedLocation: string
   summary?: string
   topContributors?: Contributor[]
-  updatedAt?: number
+  updatedAt?: string
   url?: string
 }
 

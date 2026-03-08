@@ -2,7 +2,7 @@ import type { User } from 'types/user'
 
 export type PullRequest = {
   author?: User | null
-  createdAt: string | number
+  createdAt: string
   id?: string
   mergedAt?: string
   organizationName?: string | null
