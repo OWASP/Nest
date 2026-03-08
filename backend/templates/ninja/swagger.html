@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -6,8 +7,13 @@
         <title>{{ title }} - API Documentation</title>
         <link rel="stylesheet"
               type="text/css"
-              href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
-        <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico">
+              href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.0/swagger-ui.css"
+              integrity="sha384-3nuX7df3EaAoiqLBeyS1Ola0Gpg9ryJKVtarubwfnA1cOH8AWHUdbPSIvEqPZ9VH"
+              crossorigin="anonymous">
+        <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
         <style>
             /* OWASP Nest exact color variables */
             :root {
@@ -32,20 +38,60 @@
             body {
                 margin: 0;
                 padding: 0;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
                 transition: background-color 0.3s ease, color 0.3s ease;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
             }
 
-            /* Theme toggle button */
-            .theme-toggle-container {
+            /* Hide default Swagger topbar */
+            .swagger-ui .topbar {
+                display: none !important;
+            }
+
+            /* Custom header — exact OWASP Nest fixed navbar */
+            .custom-header {
                 position: fixed;
-                top: 16px;
-                right: 20px;
+                top: 0;
+                left: 0;
+                right: 0;
                 z-index: 10000;
+                height: 64px;
+                display: flex;
+                align-items: center;
+                padding: 0 1rem;
+                justify-content: space-between;
+                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             }
 
+            /* Header brand: logo + "Nest" text */
+            .header-brand {
+                display: flex;
+                align-items: center;
+                gap: 0;
+                text-decoration: none;
+            }
+
+            /* Logo — always logo_dark.png, visible on both header bg colours */
+            .header-logo {
+                width: 48px;
+                height: 48px;
+                object-fit: contain;
+                padding: 4px;
+                flex-shrink: 0;
+            }
+
+            /* "Nest" text beside logo */
+            .header-title {
+                font-size: 1.5rem;
+                font-weight: 500;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                line-height: 1;
+            }
+
+            /* Theme toggle button — inside header, right side */
             .theme-toggle-btn {
-                background: var(--owasp-blue);
+                background: #87a1bc;
                 border: none;
                 border-radius: 50%;
                 width: 40px;
@@ -54,12 +100,12 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s ease;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                flex-shrink: 0;
             }
 
             .theme-toggle-btn:hover {
-                transform: scale(1.1);
+                transform: scale(1.05);
             }
 
             .theme-toggle-btn svg {
@@ -68,16 +114,9 @@
                 fill: white;
             }
 
-            /* Hide default Swagger topbar */
-            .swagger-ui .topbar {
-                display: none !important;
-            }
-
-            /* Custom header */
-            .custom-header {
-                padding: 20px;
-                text-align: center;
-                border-bottom: 1px solid;
+            /* Offset content below fixed header */
+            #swagger-ui {
+                padding-top: 64px;
             }
 
             /* LIGHT THEME STYLES */
@@ -87,22 +126,17 @@
             }
 
             body.light-theme .custom-header {
-                background-color: var(--card-light);
-                border-color: var(--border-light);
+                background-color: #98AFC7;
             }
 
-            body.light-theme .custom-header h1 {
-                color: var(--owasp-blue);
-            }
-
-            body.light-theme .custom-header p {
-                color: var(--text-light);
-                opacity: 0.8;
+            body.light-theme .header-title {
+                color: #1e293b;
             }
 
             body.light-theme .swagger-ui {
                 background-color: var(--background-light) !important;
                 color: var(--text-light) !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
             }
 
             body.light-theme .swagger-ui .wrapper {
@@ -119,9 +153,17 @@
                 color: var(--text-light) !important;
             }
 
+            /* Swagger info title — match Nest h1 */
+            body.light-theme .swagger-ui .info .title,
+            body.light-theme .swagger-ui .info h1.title {
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: clamp(1.5rem, 5vw, 2rem) !important;
+                font-weight: 700 !important;
+            }
+
             body.light-theme .swagger-ui .info .description,
             body.light-theme .swagger-ui .info p {
-                color: #4a5568 !important;
+                color: #4b5563 !important;
             }
 
             /* Opblocks - API endpoints */
@@ -141,7 +183,7 @@
             }
 
             body.light-theme .swagger-ui .opblock .opblock-summary-description {
-                color: #4a5568 !important;
+                color: #4b5563 !important;
             }
 
             /* Opblock tags */
@@ -151,7 +193,7 @@
             }
 
             body.light-theme .swagger-ui .opblock-tag small {
-                color: #718096 !important;
+                color: #6b7280 !important;
             }
 
             /* Parameters & Forms */
@@ -204,26 +246,28 @@
                 opacity: 0.9 !important;
             }
 
-            /* Code blocks */
+            /* Code blocks — match Nest's .md-wrapper code */
             body.light-theme .swagger-ui .opblock-body pre,
-            body.light-theme .swagger-ui pre {
-                background-color: #f7fafc !important;
-                color: #2d3748 !important;
+            body.light-theme .swagger-ui pre:not(.version) {
+                background-color: #e5e5e5 !important;
+                color: #1d4ed8 !important;
                 border: 1px solid var(--border-light) !important;
+                font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
+                border-radius: 5px !important;
             }
 
             body.light-theme .swagger-ui .highlight-code {
-                background-color: #f7fafc !important;
+                background-color: #e5e5e5 !important;
             }
 
             body.light-theme .swagger-ui .highlight-code pre {
-                background-color: #f7fafc !important;
+                background-color: #e5e5e5 !important;
             }
 
             body.light-theme .swagger-ui .opblock-description-wrapper p,
             body.light-theme .swagger-ui .opblock-external-docs-wrapper p,
             body.light-theme .swagger-ui .opblock-title_normal p {
-                color: var(--text-light) !important;
+                color: #4b5563 !important;
             }
 
             /* Models/Schemas */
@@ -264,12 +308,12 @@
             }
 
             body.light-theme .swagger-ui .response-col_description {
-                color: #4a5568 !important;
+                color: #4b5563 !important;
             }
 
             /* Tabs */
             body.light-theme .swagger-ui .tab li {
-                color: #4a5568 !important;
+                color: #6b7280 !important;
             }
 
             body.light-theme .swagger-ui .tab li.active {
@@ -325,18 +369,61 @@
                 color: var(--text-light) !important;
             }
 
-            /* Version & Info */
+            /* Version & Info — colorful pill badges
+               Swagger wraps version in <small> (superscript by default) with padding/bg.
+               We reset the <small> wrapper and let the <pre> be the actual styled pill. */
+
+            /* Reset the <small> wrapper: remove superscript, gray bg, and padding */
             body.light-theme .swagger-ui .info .title small,
-            body.light-theme .swagger-ui .version-stamp {
-                background-color: var(--owasp-blue) !important;
-                color: white !important;
+            body.light-theme .swagger-ui .info h1.title small {
+                background: transparent !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 4px !important;
+                top: 0 !important;
+                vertical-align: text-top !important;
+                position: static !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
+
+            /* API version <pre> — OWASP steel-blue pill */
+            body.light-theme .swagger-ui .info .title small:not(.version-stamp) pre,
+            body.light-theme .swagger-ui .info h1.title small:not(.version-stamp) pre {
+                background: linear-gradient(135deg, var(--owasp-blue) 0%, #7a95b0 100%) !important;
+                border: none !important;
+                border-radius: 9999px !important;
+                color: #fff !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.03em !important;
+                margin: 0 !important;
+                padding: 3px 10px !important;
+                white-space: nowrap !important;
+            }
+
+            /* OAS version <pre> (inside small.version-stamp) — primary-blue pill */
+            body.light-theme .swagger-ui .info .title small.version-stamp pre,
+            body.light-theme .swagger-ui .info h1.title small.version-stamp pre {
+                background: linear-gradient(135deg, var(--primary-blue) 0%, #2563eb 100%) !important;
+                border: none !important;
+                border-radius: 9999px !important;
+                color: #fff !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.03em !important;
+                margin: 0 !important;
+                padding: 3px 10px !important;
+                white-space: nowrap !important;
             }
 
             body.light-theme .swagger-ui .info hgroup.main a {
                 color: var(--text-light) !important;
             }
 
-            /* Schema section */
+            /* Schema / Models section */
             body.light-theme .swagger-ui section.models h4,
             body.light-theme .swagger-ui section.models h5,
             body.light-theme .swagger-ui section.models .model-title {
@@ -351,13 +438,41 @@
                 color: var(--text-light) !important;
             }
 
-            /* Links */
+            /* Expand/collapse arrows — must be dark on the light bg */
+            body.light-theme .swagger-ui .arrow,
+            body.light-theme .swagger-ui svg.arrow,
+            body.light-theme .swagger-ui section.models h4 svg,
+            body.light-theme .swagger-ui .expand-operation svg,
+            body.light-theme .swagger-ui .opblock-control-arrow {
+                fill: var(--text-light) !important;
+            }
+
+            /* Filter by tag bar */
+            body.light-theme .swagger-ui .filter {
+                background-color: var(--muted-light) !important;
+            }
+            body.light-theme .swagger-ui .filter .operation-filter-input::placeholder {
+                color: #9ca3af !important;
+                opacity: 1 !important;
+            }
+
+            /* Scheme container (server selector + Authorize) */
+            body.light-theme .swagger-ui .scheme-container {
+                box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+            }
+
+            /* Tag section expand arrow */
+            body.light-theme .swagger-ui .opblock-tag svg {
+                fill: var(--text-light) !important;
+            }
+
+            /* Links — exact Nest globals.css: a { color: #1d7bd7 } */
             body.light-theme .swagger-ui a {
-                color: var(--primary-blue) !important;
+                color: #1d7bd7 !important;
             }
 
             body.light-theme .swagger-ui a:hover {
-                color: #2563eb !important;
+                color: #1565b8 !important;
             }
 
             /* Property names and types */
@@ -375,7 +490,17 @@
             body.light-theme .swagger-ui .renderedMarkdown li,
             body.light-theme .swagger-ui .markdown p,
             body.light-theme .swagger-ui .markdown li {
-                color: var(--text-light) !important;
+                color: #4b5563 !important;
+            }
+
+            body.light-theme .swagger-ui .renderedMarkdown code,
+            body.light-theme .swagger-ui .markdown code {
+                background-color: #e5e5e5 !important;
+                color: #1d4ed8 !important;
+                padding: 0.2em 0.4em !important;
+                margin: 0 0.2em !important;
+                border-radius: 5px !important;
+                font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
             }
 
             /* Dropdown/Select styling */
@@ -402,7 +527,7 @@
             /* Error messages */
             body.light-theme .swagger-ui .errors-wrapper {
                 background-color: #fee2e2 !important;
-                color: #dc2626 !important;
+                color: #7f1d1d !important;
                 border: 1px solid #fca5a5 !important;
             }
 
@@ -414,7 +539,8 @@
 
             /* Microlight syntax highlighting */
             body.light-theme .swagger-ui .microlight {
-                color: #2d3748 !important;
+                font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
+                color: #1d4ed8 !important;
             }
 
             /* Additional text elements */
@@ -432,22 +558,21 @@
             }
 
             body.dark-theme .custom-header {
-                background-color: var(--card-dark);
-                border-color: var(--border-dark);
+                background-color: #1e293b;
             }
 
-            body.dark-theme .custom-header h1 {
-                color: var(--owasp-blue);
+            body.dark-theme .header-title {
+                color: #cbd5e1;
             }
 
-            body.dark-theme .custom-header p {
-                color: var(--text-dark);
-                opacity: 0.8;
+            body.dark-theme .theme-toggle-btn {
+                background: #0f172a;
             }
 
             body.dark-theme .swagger-ui {
                 background-color: var(--background-dark) !important;
                 color: var(--text-dark) !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
             }
 
             body.dark-theme .swagger-ui .wrapper {
@@ -464,9 +589,17 @@
                 color: var(--text-dark) !important;
             }
 
+            /* Swagger info title — match Nest h1 */
+            body.dark-theme .swagger-ui .info .title,
+            body.dark-theme .swagger-ui .info h1.title {
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: clamp(1.5rem, 5vw, 2rem) !important;
+                font-weight: 700 !important;
+            }
+
             body.dark-theme .swagger-ui .info .description,
             body.dark-theme .swagger-ui .info p {
-                color: #cbd5e0 !important;
+                color: #d1d5db !important;
             }
 
             /* Opblocks - API endpoints */
@@ -486,7 +619,7 @@
             }
 
             body.dark-theme .swagger-ui .opblock .opblock-summary-description {
-                color: #cbd5e0 !important;
+                color: #d1d5db !important;
             }
 
             /* Opblock tags */
@@ -496,7 +629,7 @@
             }
 
             body.dark-theme .swagger-ui .opblock-tag small {
-                color: #9ca3af !important;
+                color: #9ca3af !important; /* gray-400 — exact Nest muted text */
             }
 
             /* Parameters & Forms */
@@ -549,26 +682,28 @@
                 opacity: 0.9 !important;
             }
 
-            /* Code blocks */
+            /* Code blocks — match Nest's .dark .md-wrapper code */
             body.dark-theme .swagger-ui .opblock-body pre,
-            body.dark-theme .swagger-ui pre {
-                background-color: #1a1d21 !important;
-                color: #cbd5e0 !important;
+            body.dark-theme .swagger-ui pre:not(.version) {
+                background-color: #333539 !important;
+                color: #93c5fd !important;
                 border: 1px solid var(--border-dark) !important;
+                font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
+                border-radius: 5px !important;
             }
 
             body.dark-theme .swagger-ui .highlight-code {
-                background-color: #1a1d21 !important;
+                background-color: #333539 !important;
             }
 
             body.dark-theme .swagger-ui .highlight-code pre {
-                background-color: #1a1d21 !important;
+                background-color: #333539 !important;
             }
 
             body.dark-theme .swagger-ui .opblock-description-wrapper p,
             body.dark-theme .swagger-ui .opblock-external-docs-wrapper p,
             body.dark-theme .swagger-ui .opblock-title_normal p {
-                color: var(--text-dark) !important;
+                color: #d1d5db !important;
             }
 
             /* Models/Schemas */
@@ -609,12 +744,12 @@
             }
 
             body.dark-theme .swagger-ui .response-col_description {
-                color: #cbd5e0 !important;
+                color: #d1d5db !important;
             }
 
             /* Tabs */
             body.dark-theme .swagger-ui .tab li {
-                color: #cbd5e0 !important;
+                color: #9ca3af !important;
             }
 
             body.dark-theme .swagger-ui .tab li.active {
@@ -670,18 +805,56 @@
                 color: var(--text-dark) !important;
             }
 
-            /* Version & Info */
+            /* Version & Info — colorful pill badges (dark theme) */
+
             body.dark-theme .swagger-ui .info .title small,
-            body.dark-theme .swagger-ui .version-stamp {
-                background-color: var(--owasp-blue) !important;
-                color: white !important;
+            body.dark-theme .swagger-ui .info h1.title small {
+                background: transparent !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 4px !important;
+                top: 0 !important;
+                vertical-align: text-top !important;
+                position: static !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
+
+            body.dark-theme .swagger-ui .info .title small:not(.version-stamp) pre,
+            body.dark-theme .swagger-ui .info h1.title small:not(.version-stamp) pre {
+                background: linear-gradient(135deg, var(--owasp-blue) 0%, #7a95b0 100%) !important;
+                border: none !important;
+                border-radius: 9999px !important;
+                color: #fff !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.03em !important;
+                margin: 0 !important;
+                padding: 3px 10px !important;
+                white-space: nowrap !important;
+            }
+
+            body.dark-theme .swagger-ui .info .title small.version-stamp pre,
+            body.dark-theme .swagger-ui .info h1.title small.version-stamp pre {
+                background: linear-gradient(135deg, var(--primary-blue) 0%, #2563eb 100%) !important;
+                border: none !important;
+                border-radius: 9999px !important;
+                color: #fff !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.03em !important;
+                margin: 0 !important;
+                padding: 3px 10px !important;
+                white-space: nowrap !important;
             }
 
             body.dark-theme .swagger-ui .info hgroup.main a {
                 color: var(--text-dark) !important;
             }
 
-            /* Schema section */
+            /* Schema / Models section */
             body.dark-theme .swagger-ui section.models h4,
             body.dark-theme .swagger-ui section.models h5,
             body.dark-theme .swagger-ui section.models .model-title {
@@ -696,9 +869,23 @@
                 color: var(--text-dark) !important;
             }
 
-            /* Links */
+            /* Expand/collapse arrows */
+            body.dark-theme .swagger-ui .arrow,
+            body.dark-theme .swagger-ui svg.arrow,
+            body.dark-theme .swagger-ui section.models h4 svg,
+            body.dark-theme .swagger-ui .expand-operation svg,
+            body.dark-theme .swagger-ui .opblock-control-arrow {
+                fill: var(--text-dark) !important;
+            }
+
+            /* Tag section expand arrow */
+            body.dark-theme .swagger-ui .opblock-tag svg {
+                fill: var(--text-dark) !important;
+            }
+
+            /* Links — exact Nest globals.css: a { color: #1d7bd7 } */
             body.dark-theme .swagger-ui a {
-                color: var(--primary-blue) !important;
+                color: #1d7bd7 !important;
             }
 
             body.dark-theme .swagger-ui a:hover {
@@ -720,7 +907,17 @@
             body.dark-theme .swagger-ui .renderedMarkdown li,
             body.dark-theme .swagger-ui .markdown p,
             body.dark-theme .swagger-ui .markdown li {
-                color: var(--text-dark) !important;
+                color: #d1d5db !important;
+            }
+
+            body.dark-theme .swagger-ui .renderedMarkdown code,
+            body.dark-theme .swagger-ui .markdown code {
+                background-color: #333539 !important;
+                color: #93c5fd !important;
+                padding: 0.2em 0.4em !important;
+                margin: 0 0.2em !important;
+                border-radius: 5px !important;
+                font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
             }
 
             /* Dropdown/Select styling */
@@ -759,7 +956,8 @@
 
             /* Microlight syntax highlighting */
             body.dark-theme .swagger-ui .microlight {
-                color: #cbd5e0 !important;
+                font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
+                color: #93c5fd !important;
             }
 
             /* Additional text elements */
@@ -781,13 +979,12 @@
 
             /* Responsive */
             @media (max-width: 768px) {
-                .theme-toggle-container {
-                    top: 10px;
-                    right: 10px;
+                .custom-header {
+                    padding: 0 0.75rem;
                 }
 
-                .custom-header h1 {
-                    font-size: 1.5rem;
+                .header-title {
+                    font-size: 1.25rem;
                 }
 
                 .swagger-ui .wrapper {
@@ -797,8 +994,12 @@
         </style>
     </head>
     <body class="dark-theme">
-        <!-- Theme Toggle Button -->
-        <div class="theme-toggle-container">
+        <!-- Custom Header — exact OWASP Nest navbar -->
+        <header class="custom-header">
+            <div class="header-brand">
+                <img src="{% static 'img/logo_dark.png' %}" alt="OWASP Logo" class="header-logo">
+                <span class="header-title">Nest</span>
+            </div>
             <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
                 <svg id="sunIcon"
                      style="display: none"
@@ -812,15 +1013,14 @@
                     </path>
                 </svg>
             </button>
-        </div>
-        <!-- Custom Header -->
-        <div class="custom-header">
-            <h1>{{ title }}</h1>
-            <p>{{ description }}</p>
-        </div>
+        </header>
         <div id="swagger-ui"></div>
-        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.0/swagger-ui-bundle.js"
+                integrity="sha384-7xcoc6ZKDFF7Ek627QTC3Bg/K+5Y36NJ8MWAE43D2m6+3Sh9XO3tdsfHhrS8gNIQ"
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.0/swagger-ui-standalone-preset.js"
+                integrity="sha384-FjFI+0PRyd5aAEoduVmUYk65iDC5+onNzam4WJtbAKKBim/kWvGUMk/2+9qRaYZb"
+                crossorigin="anonymous"></script>
         <script>
             // Theme management
             const THEME_KEY = 'nest-swagger-theme';
@@ -829,14 +1029,32 @@
             const sunIcon = document.getElementById('sunIcon');
             const moonIcon = document.getElementById('moonIcon');
 
+            // Safe localStorage helpers — fall back to in-memory store when
+            // storage is unavailable (e.g. SecurityError in restricted contexts).
+            const _memStore = {};
+            function safeGet(key) {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) {
+                    return Object.prototype.hasOwnProperty.call(_memStore, key) ? _memStore[key] : null;
+                }
+            }
+            function safeSet(key, value) {
+                try {
+                    localStorage.setItem(key, value);
+                } catch (e) {
+                    _memStore[key] = value;
+                }
+            }
+
             // Check for saved theme preference or default to dark
             function getInitialTheme() {
-                const savedTheme = localStorage.getItem(THEME_KEY);
+                const savedTheme = safeGet(THEME_KEY);
                 if (savedTheme) {
                     return savedTheme;
                 }
                 // Try to match with main OWASP Nest theme
-                const mainTheme = localStorage.getItem('theme');
+                const mainTheme = safeGet('theme');
                 return mainTheme || 'dark';
             }
 
@@ -844,15 +1062,17 @@
                 body.classList.remove('light-theme', 'dark-theme');
                 body.classList.add(`${theme}-theme`);
 
-                if (theme === 'dark') {
-                    sunIcon.style.display = 'none';
-                    moonIcon.style.display = 'block';
-                } else {
-                    sunIcon.style.display = 'block';
-                    moonIcon.style.display = 'none';
+                if (sunIcon && moonIcon) {
+                    if (theme === 'dark') {
+                        sunIcon.style.display = 'none';
+                        moonIcon.style.display = 'block';
+                    } else {
+                        sunIcon.style.display = 'block';
+                        moonIcon.style.display = 'none';
+                    }
                 }
 
-                localStorage.setItem(THEME_KEY, theme);
+                safeSet(THEME_KEY, theme);
             }
 
             function toggleTheme() {
@@ -888,11 +1108,7 @@
                         SwaggerUIBundle.plugins.DownloadUrl
                     ],
                     layout: "StandaloneLayout",
-                    persistAuthorization: {
-                        {
-                            persist_authorization | lower
-                        }
-                    },
+                    persistAuthorization: {{ persist_authorization | lower }},
                     displayRequestDuration: true,
                     filter: true,
                     tryItOutEnabled: true
