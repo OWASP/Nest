@@ -73,11 +73,15 @@ jest.mock('utils/constants', () => ({
 }))
 
 let mockEnv = {
+  APP_URL: 'http://localhost:3000/',
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
 }
 
 jest.mock('utils/env.client', () => ({
+  get APP_URL() {
+    return mockEnv.APP_URL
+  },
   get ENVIRONMENT() {
     return mockEnv.ENVIRONMENT
   },
@@ -104,6 +108,7 @@ describe('Footer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockEnv = {
+      APP_URL: 'http://localhost:3000/',
       ENVIRONMENT: 'production',
       RELEASE_VERSION: '1.2.3',
     }
@@ -487,12 +492,12 @@ describe('Footer', () => {
       expect(owaspLogo).toHaveAttribute('alt', 'OWASP Logo')
     })
 
-    test('Nest logo links to home page', () => {
+    test('Nest logo links to APP_URL', () => {
       renderFooter()
 
       const nestLink = screen.getByLabelText('OWASP Nest Home')
       expect(nestLink).toBeInTheDocument()
-      expect(nestLink).toHaveAttribute('href', '/')
+      expect(nestLink).toHaveAttribute('href', 'http://localhost:3000/')
       expect(nestLink).not.toHaveAttribute('target')
       expect(nestLink).not.toHaveAttribute('rel')
     })

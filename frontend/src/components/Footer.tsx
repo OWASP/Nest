@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons, footerSections } from 'utils/constants'
-import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
+import { APP_URL, ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
   // State to keep track of the open section in the footer
@@ -77,7 +77,7 @@ export default function Footer() {
         <div className="flex items-center justify-center gap-6">
           {/* Nest Logo and Text */}
           <a
-            href="/"
+            href={APP_URL || '/'}
             className="rounded-md flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             aria-label="OWASP Nest Home"
           >

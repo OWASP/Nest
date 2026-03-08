@@ -1,3 +1,4 @@
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 export const API_URL = process.env.NEXT_PUBLIC_API_URL
 export const CSRF_URL = process.env.NEXT_PUBLIC_CSRF_URL
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
