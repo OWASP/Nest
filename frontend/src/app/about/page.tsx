@@ -249,6 +249,7 @@ const About = () => {
             })()}
           </SecondaryCard>
         )}
+
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
           {projectStory.map((text) => (
             <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
@@ -258,25 +259,62 @@ const About = () => {
             </div>
           ))}
         </SecondaryCard>
+
+        {/* ---- CHANGED: Project Timeline now grouped by year for clearer visual distinction ---- */}
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
-          <div className="space-y-6">
+          <div className="space-y-0">
             {(() => {
               const visibleTimeline = [...projectTimeline]
                 .reverse()
                 .slice(0, showAllTimeline ? projectTimeline.length : PROJECT_LIMIT)
-              return visibleTimeline.map((milestone, index) => (
-                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                  {index !== visibleTimeline.length - 1 && (
-                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                  )}
-                  <div
-                    aria-hidden="true"
-                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                  ></div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+
+              // Group milestones by year extracted from month-year strings e.g. "August 2024" → "2024"
+              const grouped = visibleTimeline.reduce(
+                (acc, milestone) => {
+                  const year = milestone.year.split(' ').pop() || milestone.year
+                  if (!acc[year]) acc[year] = []
+                  acc[year].push(milestone)
+                  return acc
+                },
+                {} as Record<string, typeof visibleTimeline>
+              )
+
+              return Object.entries(grouped).map(([year, milestones]) => (
+                <div key={year} className="mb-8">
+                  <div className="mb-4 flex items-center gap-3">
+                    <span className="rounded-full bg-blue-400 px-3 py-1 text-sm font-bold text-white">
+                      {year}
+                    </span>
+                    <div className="h-px flex-1 bg-gray-300 dark:bg-gray-600" />
+                  </div>
+
+                  <div className="space-y-6">
+                    {milestones.map((milestone, index) => (
+                      <div
+                        key={`${milestone.year}-${milestone.title}`}
+                        className="relative pl-10"
+                      >
+                        {/* Vertical connector line between milestones within the same year */}
+                        {index !== milestones.length - 1 && (
+                          <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-300 dark:bg-gray-600" />
+                        )}
+                        <div
+                          aria-hidden="true"
+                          className="absolute top-2.5 left-0 h-3 w-3 rounded-full border-2 border-blue-400 bg-white dark:bg-gray-800"
+                        />
+                        <div className="rounded-lg bg-gray-100 p-4 dark:bg-gray-700">
+                          <h3 className="text-lg font-semibold text-blue-400">
+                            {milestone.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            {milestone.year}
+                          </p>
+                          <p className="mt-2 text-gray-600 dark:text-gray-300">
+                            {milestone.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))
