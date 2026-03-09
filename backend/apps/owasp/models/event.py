@@ -106,9 +106,13 @@ class Event(BulkSaveModel, TimestampedModel):
         """
         BulkSaveModel.bulk_save(Event, events, fields=fields)
 
-    # TODO(arkid15r): refactor this when there is a chance.
     @staticmethod
-    def parse_dates(dates: str, start_date: date) -> date | None:  # noqa: PLR0911
+    def _normalize_date_dashes(dates: str) -> str:
+        """Normalize supported date-range dash variants."""
+        return re.sub(r"[-\u2013\u2014\u00e2\u20ac\u201c\u201d]", "-", dates)  # noqa: RUF001
+
+    @staticmethod
+    def parse_dates(dates: str, start_date: date) -> date | None:
         """Parse event dates.
 
         Args:
@@ -122,42 +126,34 @@ class Event(BulkSaveModel, TimestampedModel):
         if not dates:
             return None
 
-        max_day_length = 2
-
-        # Normalize dashes (hyphen, en-dash, em-dash).
-        clean_dates = re.sub(r"[\-\–\—]", "-", dates)  # noqa: RUF001
-
-        # Guard against ISO-like single dates (e.g. "2025-05-26").
-        if re.match(r"^\d{4}-\d{2}-\d{2}$", clean_dates.strip()):
-            try:
-                return parser.parse(clean_dates.strip()).date()
-            except (TypeError, ValueError):
-                return None
-
-        try:
-            if "-" in clean_dates:
-                parts = clean_dates.split("-")
-                end_str = parts[-1].strip()
-
-                day_match = re.match(r"^(\d{1,2})", end_str)
-                if day_match:
-                    day_value = day_match.group(1)
-                    if len(end_str) <= max_day_length or "," in end_str:
-                        return start_date.replace(day=int(day_value))
-
-                end_date = parser.parse(
-                    end_str, default=datetime.combine(start_date, datetime.min.time())
-                ).date()
-                # Handle year crossover: if end_date is before start_date, assume next year.
-                if end_date < start_date:
-                    end_date = end_date.replace(year=end_date.year + 1)
-                return end_date
-
-            return parser.parse(clean_dates.strip()).date()
-
-        except (IndexError, OverflowError, TypeError, ValueError):
+        clean_dates = Event._normalize_date_dashes(dates).strip()
+        if not clean_dates:
             return None
 
+        try:
+            # Single ISO date (e.g. "2025-05-26").
+            if re.match(r"^\d{4}-\d{2}-\d{2}$", clean_dates):
+                return parser.parse(clean_dates).date()
+
+            end_str = clean_dates.rpartition("-")[2].strip() if "-" in clean_dates else ""
+            if not end_str:
+                return parser.parse(clean_dates).date()
+
+            # Fast path for ranges like "May 26-30, 2025" or "26-30".
+            day_match = re.match(r"^(\d{1,2})", end_str)
+            if day_match and (len(end_str) <= 2 or "," in end_str):
+                return start_date.replace(day=int(day_match.group(1)))
+
+            end_date = parser.parse(
+                end_str,
+                default=datetime.combine(start_date, datetime.min.time()),
+            ).date()
+            if end_date < start_date:
+                end_date = end_date.replace(year=end_date.year + 1)
+
+            return end_date
+        except (IndexError, OverflowError, TypeError, ValueError):
+            return None
     @staticmethod
     def update_data(category, data, *, save: bool = True) -> Event | None:
         """Update event data.

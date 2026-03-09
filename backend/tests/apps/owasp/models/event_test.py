@@ -34,65 +34,26 @@ class TestEventModel:
         [
             (None, date(2025, 5, 26), None),
             ("", date(2025, 5, 26), None),
-            ("May 26-30, 2025", date(2025, 5, 26), date(2025, 5, 30)),
             ("Invalid date range", date(2025, 5, 26), None),
-        ],
-    )
-    def test_parse_dates_unit(self, dates, start_date, expected_result):
-        """Unit test for parse_dates structure using mocks."""
-        if not dates:
-            assert Event.parse_dates(dates, start_date) is None
-            return
-
-        with patch("apps.owasp.models.event.parser.parse") as mock_parse:
-            if expected_result:
-                mock_date = Mock()
-                mock_date.date.return_value = expected_result
-                mock_parse.return_value = mock_date
-                result = Event.parse_dates(dates, start_date)
-                assert result == expected_result
-            else:
-                mock_parse.side_effect = ValueError("Invalid")
-                result = Event.parse_dates(dates, start_date)
-                assert result is None
-
-    @pytest.mark.parametrize(
-        ("dates", "start_date", "expected_result"),
-        [
+            ("0000-00-00", date(2025, 5, 26), None),
             ("2025-05-26", date(2025, 5, 26), date(2025, 5, 26)),
-            ("Dec 30, 2025 - Jan 2, 2026", date(2025, 12, 30), date(2026, 1, 2)),
             ("June 5, 2025", date(2025, 6, 5), date(2025, 6, 5)),
             ("May 26-30, 2025", date(2025, 5, 26), date(2025, 5, 30)),
             ("May 26-30", date(2025, 5, 26), date(2025, 5, 30)),
-            ("May 26–30, 2025", date(2025, 5, 26), date(2025, 5, 30)),  # noqa: RUF001
+            ("May 26â€“30, 2025", date(2025, 5, 26), date(2025, 5, 30)),  # noqa: RUF001
+            ("May 26â€”30, 2025", date(2025, 5, 26), date(2025, 5, 30)),
+            ("May 26–30, 2025", date(2025, 5, 26), date(2025, 5, 30)),
             ("May 26—30, 2025", date(2025, 5, 26), date(2025, 5, 30)),
             ("May 30 - June 2, 2025", date(2025, 5, 30), date(2025, 6, 2)),
+            ("Dec 30, 2025 - Jan 2, 2026", date(2025, 12, 30), date(2026, 1, 2)),
+            ("December 25 - January 5", date(2025, 12, 25), date(2026, 1, 5)),
+            ("May 1 - May 5", date(2025, 5, 1), date(2025, 5, 5)),
+            ("26-30th", date(2025, 5, 26), date(2025, 5, 30)),
         ],
     )
-    def test_parse_dates_integration(self, dates, start_date, expected_result):
-        """Test parse_dates with real parser to verify crossover and dash logic."""
-        result = Event.parse_dates(dates, start_date)
-        assert result == expected_result
-
-    def test_parse_dates_iso_format_invalid(self):
-        """Test parse_dates with invalid ISO-like single date returns None."""
-        result = Event.parse_dates("0000-00-00", date(2025, 5, 26))
-        assert result is None
-
-    def test_parse_dates_year_crossover(self):
-        """Test parse_dates with year crossover when end month is before start month."""
-        result = Event.parse_dates("December 25 - January 5", date(2025, 12, 25))
-        assert result == date(2026, 1, 5)
-
-    def test_parse_dates_no_year_crossover(self):
-        """Test parse_dates without year crossover when end is after start."""
-        result = Event.parse_dates("May 1 - May 5", date(2025, 5, 1))
-        assert result == date(2025, 5, 5)
-
-    def test_parse_dates_day_with_year_suffix_no_comma(self):
-        """Test parse_dates where end_str has day match, >2 chars, and no comma."""
-        result = Event.parse_dates("26-30th", date(2025, 5, 26))
-        assert result == date(2025, 5, 30)
+    def test_parse_dates(self, dates, start_date, expected_result):
+        """Test parse_dates across valid and invalid date formats."""
+        assert Event.parse_dates(dates, start_date) == expected_result
 
     def test_update_data_existing_event(self):
         """Test update_data when the event already exists."""
