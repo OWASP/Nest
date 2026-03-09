@@ -64,13 +64,13 @@ jest.mock('utils/aboutData', () => ({
   },
   projectStory: ['Test story paragraph 1', 'Test story paragraph 2'],
   projectTimeline: [
-    { title: 'Timeline Event 1', description: 'Timeline description 1', year: '2023' },
-    { title: 'Timeline Event 2', description: 'Timeline description 2', year: '2024' },
-    { title: 'Timeline Event 3', description: 'Timeline description 3', year: '2025' },
-    { title: 'Timeline Event 4', description: 'Timeline description 4', year: '2026' },
-    { title: 'Timeline Event 5', description: 'Timeline description 5', year: '2027' },
-    { title: 'Timeline Event 6', description: 'Timeline description 6', year: '2028' },
-    { title: 'Timeline Event 7', description: 'Timeline description 7', year: '2029' },
+    { title: 'Timeline Event 1', description: 'Timeline description 1', year: 'January 2023' },
+    { title: 'Timeline Event 2', description: 'Timeline description 2', year: 'March 2024' },
+    { title: 'Timeline Event 3', description: 'Timeline description 3', year: 'June 2024' },
+    { title: 'Timeline Event 4', description: 'Timeline description 4', year: 'February 2025' },
+    { title: 'Timeline Event 5', description: 'Timeline description 5', year: 'May 2025' },
+    { title: 'Timeline Event 6', description: 'Timeline description 6', year: 'August 2025' },
+    { title: 'Timeline Event 7', description: 'Timeline description 7', year: 'January 2026' },
   ],
   technologies: [
     {
@@ -291,21 +291,22 @@ describe('About Component', () => {
     expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
     expect(screen.getByText('Timeline Event 2')).toBeInTheDocument()
     expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
-    expect(screen.getByText('2029')).toBeInTheDocument()
-    expect(screen.queryByText('2023')).not.toBeInTheDocument()
-    expect(screen.getByText('2024')).toBeInTheDocument()
-
-    expect(screen.getByText('Timeline Event 7')).toBeInTheDocument()
-    expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
 
     const timelineSection = screen.getByText('Project Timeline').closest('h2')?.parentElement
     if (!timelineSection) throw new Error('Could not find Timeline section')
+
+    // Verify year group headers are rendered
+    expect(within(timelineSection).getByText('2026')).toBeInTheDocument()
+    expect(within(timelineSection).getByText('2025')).toBeInTheDocument()
+    expect(within(timelineSection).getByText('2024')).toBeInTheDocument()
+    expect(within(timelineSection).queryByText('2023')).not.toBeInTheDocument()
 
     const showMoreButton = within(timelineSection).getByRole('button', { name: /Show more/i })
     fireEvent.click(showMoreButton)
 
     await waitFor(() => {
       expect(screen.getByText('Timeline Event 1')).toBeInTheDocument()
+      expect(within(timelineSection).getByText('2023')).toBeInTheDocument()
     })
 
     const showLessButton = within(timelineSection).getByRole('button', { name: /Show less/i })
@@ -313,6 +314,36 @@ describe('About Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('Timeline Event 1')).not.toBeInTheDocument()
+    })
+  })
+
+  test('groups timeline items by year with year headers', async () => {
+    await act(async () => {
+      render(<About />)
+    })
+
+    const timelineSection = screen.getByText('Project Timeline').closest('h2')?.parentElement
+    if (!timelineSection) throw new Error('Could not find Timeline section')
+
+    // Initially 6 items visible: Events 7(2026), 6(2025), 5(2025), 4(2025), 3(2024), 2(2024)
+    // Should have 3 year group headers: 2026, 2025, 2024
+    const yearHeaders = within(timelineSection).getAllByRole('heading', { level: 3 })
+    const yearGroupHeaders = yearHeaders.filter((h) => /^\d{4}$/.test(h.textContent || ''))
+    expect(yearGroupHeaders).toHaveLength(3)
+    expect(yearGroupHeaders[0]).toHaveTextContent('2026')
+    expect(yearGroupHeaders[1]).toHaveTextContent('2025')
+    expect(yearGroupHeaders[2]).toHaveTextContent('2024')
+
+    // Expand to show all items and verify 2023 group appears
+    const showMoreButton = within(timelineSection).getByRole('button', { name: /Show more/i })
+    fireEvent.click(showMoreButton)
+
+    await waitFor(() => {
+      const allYearHeaders = within(timelineSection)
+        .getAllByRole('heading', { level: 3 })
+        .filter((h) => /^\d{4}$/.test(h.textContent || ''))
+      expect(allYearHeaders).toHaveLength(4)
+      expect(allYearHeaders[3]).toHaveTextContent('2023')
     })
   })
 

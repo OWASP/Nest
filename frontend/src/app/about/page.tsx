@@ -259,24 +259,47 @@ const About = () => {
           ))}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
-          <div className="space-y-6">
+          <div className="space-y-8">
             {(() => {
               const visibleTimeline = [...projectTimeline]
                 .reverse()
                 .slice(0, showAllTimeline ? projectTimeline.length : PROJECT_LIMIT)
-              return visibleTimeline.map((milestone, index) => (
-                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                  {index !== visibleTimeline.length - 1 && (
-                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                  )}
-                  <div
-                    aria-hidden="true"
-                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                  ></div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+
+              const groupedByYear: { year: string; items: typeof visibleTimeline }[] = []
+              for (const item of visibleTimeline) {
+                const yearKey = item.year.match(/\d{4}/)?.[0] || item.year
+                const lastGroup = groupedByYear[groupedByYear.length - 1]
+                if (lastGroup && lastGroup.year === yearKey) {
+                  lastGroup.items.push(item)
+                } else {
+                  groupedByYear.push({ year: yearKey, items: [item] })
+                }
+              }
+
+              return groupedByYear.map((group) => (
+                <div key={group.year}>
+                  <h3 className="mb-4 text-lg font-bold text-gray-700 dark:text-gray-200">
+                    {group.year}
+                  </h3>
+                  <div className="space-y-6">
+                    {group.items.map((milestone, index) => (
+                      <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
+                        {index !== group.items.length - 1 && (
+                          <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
+                        )}
+                        <div
+                          aria-hidden="true"
+                          className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-blue-400"
+                        ></div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-blue-400">{milestone.title}</h4>
+                          <p className="mb-1 font-medium text-gray-400">{milestone.year}</p>
+                          <p className="text-gray-600 dark:text-gray-300">
+                            {milestone.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))

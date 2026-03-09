@@ -126,14 +126,21 @@ const AboutSkeleton = () => {
         {/* Project Timeline Section */}
         <div className="mb-6 rounded-lg bg-gray-100 p-6 dark:bg-gray-800">
           <Skeleton className="mb-4 h-6 w-48" />
-          <div className="space-y-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={`project-timeline-${i}`} className="relative pl-10">
-                <Skeleton className="absolute top-[10px] left-0 h-3 w-3 rounded-full" />
-                <Skeleton className="mb-1 h-5 w-48" />
-                <Skeleton className="mb-2 h-4 w-24" />
-                <Skeleton className="mb-1 h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
+          <div className="space-y-8">
+            {[1, 2].map((group) => (
+              <div key={`timeline-group-${group}`}>
+                <Skeleton className="mb-4 h-6 w-16" />
+                <div className="space-y-6">
+                  {[1, 2].map((i) => (
+                    <div key={`project-timeline-${group}-${i}`} className="relative pl-10">
+                      <Skeleton className="absolute top-[10px] left-0 h-3 w-3 rounded-full" />
+                      <Skeleton className="mb-1 h-5 w-48" />
+                      <Skeleton className="mb-2 h-4 w-24" />
+                      <Skeleton className="mb-1 h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
