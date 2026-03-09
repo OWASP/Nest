@@ -376,44 +376,109 @@ const About = () => {
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-0">
-            {timelineGroups.map((group) => {
-              const isExpanded = expandedYears.has(group.calYear)
-              return (
-                <div key={group.calYear}>
-                  <button
-                    type="button"
-                    onClick={() => toggleYear(group.calYear)}
-                    aria-expanded={isExpanded}
-                    aria-controls={`timeline-group-${group.calYear}`}
-                    className="group flex w-full items-center gap-4 py-6 transition-opacity hover:opacity-75"
-                  >
-                    <span className="hidden h-px flex-1 bg-gray-200 dark:bg-gray-700 md:block" />
-                    <span className="flex items-center gap-1.5 rounded-full bg-blue-400 pl-4 pr-3 py-1.5 text-sm font-bold text-white shadow-md">
-                      {group.calYear}
-                      <span className={`text-xs transition-transform duration-200 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}>›</span>
-                    </span>
-                    <span className="hidden h-px flex-1 bg-gray-200 dark:bg-gray-700 md:block" />
-                  </button>
-                  {isExpanded && (
-                    <div id={`timeline-group-${group.calYear}`} className="space-y-6 pb-4">
-                      {group.milestones.map((milestone) => (
-                        <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                          <div
-                            aria-hidden="true"
-                            className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                          />
-                          <div>
-                            <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                            <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                            <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+            {(() => {
+              const visibleGroupMap = new Map(visibleGroups.map((g) => [g.calYear, g]))
+              return timelineGroups.map((group) => {
+                const isExpanded = expandedYears.has(group.calYear)
+                const visibleGroup = visibleGroupMap.get(group.calYear)
+                return (
+                  <div key={group.calYear}>
+                    <button
+                      type="button"
+                      onClick={() => toggleYear(group.calYear)}
+                      aria-expanded={isExpanded}
+                      aria-controls={`timeline-group-${group.calYear}`}
+                      className="group flex w-full items-center gap-4 py-6 transition-opacity hover:opacity-75"
+                    >
+                      <span className="hidden h-px flex-1 bg-gray-200 dark:bg-gray-700 md:block" />
+                      <span className="flex items-center gap-1.5 rounded-full bg-blue-400 pl-4 pr-3 py-1.5 text-sm font-bold text-white shadow-md">
+                        {group.calYear}
+                        <span className={`text-xs transition-transform duration-200 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}>›</span>
+                      </span>
+                      <span className="hidden h-px flex-1 bg-gray-200 dark:bg-gray-700 md:block" />
+                    </button>
+
+                    {isExpanded && visibleGroup && (
+                      <div className="mx-auto hidden h-6 w-0.5 bg-gray-200 dark:bg-gray-700 md:block" />
+                    )}
+
+                    {isExpanded && visibleGroup && (
+                      <div id={`timeline-group-${group.calYear}`} className="space-y-0">
+                        {visibleGroup.items.map((milestone) => {
+                          const isLeft = milestone.globalIndex % 2 === 0
+                          const isLast = milestone.isLast
+                          return (
+                            <div key={milestone.globalIndex} className="relative flex flex-col md:flex-row md:items-center">
+                              <div className="absolute top-0 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 bg-gray-200 dark:bg-gray-700 md:block" />
+                              {!isLast && (
+                                <div className="absolute top-1/2 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 bg-gray-200 dark:bg-gray-700 md:block" />
+                              )}
+
+                              <div className={`w-full py-3 md:w-1/2 ${isLeft ? 'md:pr-10' : 'md:invisible md:py-3'}`}>
+                                {isLeft && (
+                                  <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/80">
+                                    <span className="mb-2 inline-block rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-500 dark:bg-blue-400/10 dark:text-blue-400">
+                                      {milestone.year}
+                                    </span>
+                                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{milestone.title}</h3>
+                                    <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{milestone.description}</p>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="absolute left-1/2 hidden -translate-x-1/2 md:flex md:items-center md:justify-center">
+                                <div className="z-10 h-3 w-3 rounded-full bg-white ring-2 ring-blue-400 dark:ring-blue-400" />
+                              </div>
+
+                              <div className="mb-2 flex items-center gap-3 md:hidden">
+                                <div className="h-3 w-3 shrink-0 rounded-full bg-white ring-2 ring-blue-400" />
+                                <span className="text-xs font-medium text-gray-400">{milestone.year}</span>
+                              </div>
+
+                              <div className={`w-full md:w-1/2 ${isLeft ? 'md:invisible md:py-3' : 'md:pl-10'}`}>
+                                {!isLeft && (
+                                  <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/80">
+                                    <span className="mb-2 inline-block rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-500 dark:bg-blue-400/10 dark:text-blue-400">
+                                      {milestone.year}
+                                    </span>
+                                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{milestone.title}</h3>
+                                    <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{milestone.description}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+
+                        {visibleGroup.hasMore && (
+                          <div className="relative flex flex-col md:flex-row md:items-center">
+                            <div className="absolute top-0 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 bg-gray-200 dark:bg-gray-700 md:block" />
+                            <div className="absolute left-1/2 hidden -translate-x-1/2 md:flex md:items-center md:justify-center">
+                              <button
+                                type="button"
+                                onClick={() => toggleYearMilestones(group.calYear)}
+                                className="z-10 rounded-full border border-gray-300 bg-white px-4 py-1 text-xs font-semibold text-gray-500 shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-blue-400 dark:hover:bg-blue-500 dark:hover:text-white"
+                              >
+                                + more
+                              </button>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleYearMilestones(group.calYear)}
+                              className="my-3 flex items-center gap-2 text-xs font-medium text-blue-400 hover:underline md:hidden"
+                            >
+                              <span className="flex h-3 w-3 shrink-0 items-center justify-center rounded-full ring-2 ring-blue-400" />
+                              Show more in {group.calYear}
+                            </button>
+                            <div className="hidden w-full py-3 md:block" />
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            })()}
           </div>
         </SecondaryCard>
 
