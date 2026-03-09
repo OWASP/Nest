@@ -26,8 +26,8 @@ module "kms" {
 
   alias_name   = "alias/${var.project_name}-${each.key}-state"
   for_each     = local.state_environments
-  common_tags  = local.common_tags
-  environment  = each.key
+  common_tags  = merge(local.common_tags, { Environment = each.key })
+  environment  = "${each.key}-state"
   project_name = var.project_name
 }
 

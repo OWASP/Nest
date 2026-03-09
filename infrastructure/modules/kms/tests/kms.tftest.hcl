@@ -14,12 +14,12 @@ variables {
   project_name = "nest"
 }
 
-run "test_alias_name_format" {
+run "test_alias_name" {
   command = plan
 
   assert {
-    condition     = aws_kms_alias.main.name == "alias/${var.project_name}-${var.environment}"
-    error_message = "KMS alias must follow format: alias/{project}-{environment}."
+    condition     = aws_kms_alias.main.name == var.alias_name
+    error_message = "KMS alias must match the provided alias_name variable."
   }
 }
 
