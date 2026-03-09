@@ -235,7 +235,7 @@ resource "aws_s3_bucket_object_lock_configuration" "state" {
 
   bucket = aws_s3_bucket.state[each.key].id
 
-  depends_on = [aws_s3_bucket_versioning.state[each.key]]
+  depends_on = [aws_s3_bucket_versioning.state]
 
   rule {
     default_retention {
