@@ -1,6 +1,6 @@
 import { Autocomplete, AutocompleteItem } from '@heroui/autocomplete'
 import type React from 'react'
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 interface CountryFilterProps {
   countries: string[]
@@ -15,10 +15,24 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   onCountryChange,
   isLoading = false,
 }) => {
+  const [filterText, setFilterText] = useState('')
+
   const options = useMemo(
     () => [{ key: '', label: 'All Countries' }, ...countries.map((c) => ({ key: c, label: c }))],
     [countries]
   )
+
+  const filteredOptions = useMemo(
+    () =>
+      filterText
+        ? options.filter((o) => o.label.toLowerCase().includes(filterText.toLowerCase()))
+        : options,
+    [options, filterText]
+  )
+
+  const handleInputChange = useCallback((value: string) => {
+    setFilterText(value)
+  }, [])
 
   return (
     <div className="inline-flex h-12 items-center rounded-lg border border-gray-300 bg-white pl-1 shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
@@ -27,12 +41,16 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         size="md"
         label="Country :"
         isLoading={isLoading}
-        items={options}
+        items={filteredOptions}
         selectedKey={selectedCountry}
+        onInputChange={handleInputChange}
         onSelectionChange={(key) => {
           onCountryChange((key as string) ?? '')
         }}
         allowsCustomValue={false}
+        clearButtonProps={{
+          'aria-label': 'Clear country selection',
+        }}
         scrollShadowProps={{
           isEnabled: false,
         }}
@@ -45,6 +63,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
           selectorButton: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
         }}
         inputProps={{
+          'aria-label': 'Country',
           classNames: {
             label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
             inputWrapper:
