@@ -166,9 +166,16 @@ const About = () => {
     totalCount: number
   }
 
-  const visibleGroups: VisibleGroup[] = (() => {
-    let globalIndex = 0
+  // Stable index assigned once from the fully ordered timeline, independent of visibility.
+  const stableIndexMap = new Map<ProjectTimelineItem, number>()
+  let stableCounter = 0
+  for (const group of timelineGroups) {
+    for (const m of group.milestones) {
+      stableIndexMap.set(m, stableCounter++)
+    }
+  }
 
+  const visibleGroups: VisibleGroup[] = (() => {
     // For the default two-year view, apply a global budget of TIMELINE_DEFAULT_LIMIT.
     // Once the user has interacted (single year open), show that year's milestones
     // up to TIMELINE_DEFAULT_LIMIT unless they clicked "+ more".
@@ -206,12 +213,11 @@ const About = () => {
       if (!s) continue
       const { shown, hasMore } = s
       const items: VisibleMilestone[] = shown.map((m, localIdx) => {
-        const gi = globalIndex++
         const isAbsoluteLast = i + localIdx === totalVisible - 1
         return {
           ...m,
           calYear: group.calYear,
-          globalIndex: gi,
+          globalIndex: stableIndexMap.get(m) ?? 0,
           isFirst: i + localIdx === 0,
           isLast: isAbsoluteLast && !hasMore,
         }
@@ -453,8 +459,8 @@ const About = () => {
                                 <div className="absolute top-1/2 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 bg-gray-200 dark:bg-gray-700 md:block" />
                               )}
 
-                              {/* Left card */}
-                              <div className={`w-full py-3 md:w-1/2 ${isLeft ? 'md:pr-10' : 'md:invisible md:py-3'}`}>
+                              {/* Left card — desktop only */}
+                              <div className={`hidden py-3 md:block md:w-1/2 ${isLeft ? 'md:pr-10' : 'md:invisible md:py-3'}`}>
                                 {isLeft && (
                                   <div className="group/card rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/80 dark:hover:border-blue-500/40 dark:hover:shadow-blue-950/30">
                                     {cardContent(milestone)}
@@ -467,14 +473,19 @@ const About = () => {
                                 <div className="z-10 h-3 w-3 rounded-full bg-white ring-2 ring-blue-400 dark:ring-blue-400" />
                               </div>
 
-                              {/* Mobile: dot + month label */}
-                              <div className="mb-2 flex items-center gap-3 md:hidden">
-                                <div className="h-3 w-3 shrink-0 rounded-full bg-white ring-2 ring-blue-400" />
-                                <span className="text-xs font-medium text-gray-400">{milestone.year}</span>
+                              {/* Mobile: dot + month label + card */}
+                              <div className="md:hidden">
+                                <div className="mb-2 flex items-center gap-3">
+                                  <div className="h-3 w-3 shrink-0 rounded-full bg-white ring-2 ring-blue-400" />
+                                  <span className="text-xs font-medium text-gray-400">{milestone.year}</span>
+                                </div>
+                                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/80">
+                                  {cardContent(milestone)}
+                                </div>
                               </div>
 
-                              {/* Right card */}
-                              <div className={`w-full md:w-1/2 ${isLeft ? 'md:invisible md:py-3' : 'md:pl-10'}`}>
+                              {/* Right card — desktop only */}
+                              <div className={`hidden py-3 md:block md:w-1/2 ${isLeft ? 'md:invisible md:py-3' : 'md:pl-10'}`}>
                                 {!isLeft && (
                                   <div className="group/card rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/80 dark:hover:border-blue-500/40 dark:hover:shadow-blue-950/30">
                                     {cardContent(milestone)}
@@ -493,6 +504,7 @@ const About = () => {
                               <button
                                 type="button"
                                 onClick={() => toggleYearMilestones(group.calYear)}
+                                aria-label={`Show more milestones for ${group.calYear}`}
                                 className="z-10 rounded-full border border-gray-300 bg-white px-4 py-1 text-xs font-semibold text-gray-500 shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-blue-400 dark:hover:bg-blue-500 dark:hover:text-white"
                               >
                                 + more
