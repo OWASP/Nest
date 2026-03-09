@@ -377,6 +377,15 @@ const About = () => {
           <div className="space-y-0">
             {(() => {
               const visibleGroupMap = new Map(visibleGroups.map((g) => [g.calYear, g]))
+              const cardContent = (milestone: VisibleMilestone) => (
+                <>
+                  <span className="mb-2 inline-block rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-500 dark:bg-blue-400/10 dark:text-blue-400">
+                    {milestone.year}
+                  </span>
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{milestone.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{milestone.description}</p>
+                </>
+              )
               return timelineGroups.map((group) => {
                 const isExpanded = expandedYears.has(group.calYear)
                 const visibleGroup = visibleGroupMap.get(group.calYear)
@@ -415,12 +424,8 @@ const About = () => {
 
                               <div className={`w-full py-3 md:w-1/2 ${isLeft ? 'md:pr-10' : 'md:invisible md:py-3'}`}>
                                 {isLeft && (
-                                  <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/80">
-                                    <span className="mb-2 inline-block rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-500 dark:bg-blue-400/10 dark:text-blue-400">
-                                      {milestone.year}
-                                    </span>
-                                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{milestone.title}</h3>
-                                    <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{milestone.description}</p>
+                                  <div className="group/card rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/80 dark:hover:border-blue-500/40 dark:hover:shadow-blue-950/30">
+                                    {cardContent(milestone)}
                                   </div>
                                 )}
                               </div>
@@ -436,12 +441,8 @@ const About = () => {
 
                               <div className={`w-full md:w-1/2 ${isLeft ? 'md:invisible md:py-3' : 'md:pl-10'}`}>
                                 {!isLeft && (
-                                  <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/80">
-                                    <span className="mb-2 inline-block rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-500 dark:bg-blue-400/10 dark:text-blue-400">
-                                      {milestone.year}
-                                    </span>
-                                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{milestone.title}</h3>
-                                    <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{milestone.description}</p>
+                                  <div className="group/card rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/80 dark:hover:border-blue-500/40 dark:hover:shadow-blue-950/30">
+                                    {cardContent(milestone)}
                                   </div>
                                 )}
                               </div>
