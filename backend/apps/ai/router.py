@@ -31,7 +31,9 @@ def create_router_agent() -> Agent:
             "Classify user queries into one of these expert agents: "
             f"{', '.join(Intent.values())}. Provide confidence score and reasoning."
         ),
-        backstory=backstory_template.render(**context).strip(),  # NOSEMGREP: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
+        backstory=backstory_template.render(  # nosemgrep: direct-use-of-jinja2
+            **context
+        ).strip(),
         llm=get_llm(),
         verbose=True,
         allow_delegation=False,
@@ -51,7 +53,7 @@ def route(query: str) -> dict:
     router_agent = create_router_agent()
 
     task_template = env.get_template("router/tasks/route.jinja")
-    task_description = task_template.render(  # NOSEMGREP: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
+    task_description = task_template.render(  # nosemgrep: direct-use-of-jinja2
         query=query,
         intent_values=", ".join(Intent.values()),
     ).strip()
