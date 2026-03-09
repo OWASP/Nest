@@ -458,3 +458,14 @@ class TestGetMenteeModuleIssues:
         )
 
         assert result == []
+
+    def test_get_mentee_module_issues_invalid_limit(self, api_mentorship_queries) -> None:
+        """Test that invalid limit (0) returns empty list."""
+        get_mentee_module_issues = api_mentorship_queries.get_mentee_module_issues
+        result = get_mentee_module_issues(
+            program_key="program",
+            module_key="module",
+            mentee_key="test_mentee",
+            limit=0,
+        )
+        assert result == []

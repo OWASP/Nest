@@ -158,5 +158,18 @@ describe('MentorshipPullRequest Component', () => {
       expect(links[0]).toHaveAttribute('target', '_blank')
       expect(links[0]).toHaveAttribute('rel', 'noopener noreferrer')
     })
+    test('renders Unknown alt text when author login is empty but avatar exists', () => {
+      const mockPrWithAvatarButNoLogin = {
+        ...mockPullRequestOpen,
+        author: {
+          ...mockPullRequestOpen.author,
+          login: '',
+        },
+      } as unknown as PullRequest
+
+      render(<MentorshipPullRequest pr={mockPrWithAvatarButNoLogin} />)
+      const avatar = screen.getByAltText('Unknown')
+      expect(avatar).toBeInTheDocument()
+    })
   })
 })

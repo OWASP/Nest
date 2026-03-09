@@ -260,4 +260,29 @@ describe('ProjectHealthMetricsDetails', () => {
       expect(screen.getByText('Stars')).toBeInTheDocument()
     })
   })
+  test('renders metrics with valid createdAt', async () => {
+    const dataWithCreatedAt = {
+      ...mockProjectsDashboardMetricsDetailsData,
+      project: {
+        ...mockProjectsDashboardMetricsDetailsData.project,
+        healthMetricsList: [
+          {
+            ...mockProjectsDashboardMetricsDetailsData.project.healthMetricsList[0],
+            createdAt: '2023-01-01T00:00:00Z',
+          },
+        ],
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithCreatedAt,
+      loading: false,
+      error: null,
+    })
+
+    render(<ProjectHealthMetricsDetails />)
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('mock-apexcharts').length).toBeGreaterThan(0)
+    })
+  })
 })

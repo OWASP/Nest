@@ -47,6 +47,7 @@ dependencies.strawberry-graphql = { extras = [ "django" ], version = "^0.291.0" 
 dependencies.strawberry-graphql-django = "^0.75.0"
 dependencies.thefuzz = "^0.22.1"
 dependencies.pyparsing = "^3.2.3"
+group.fuzz.dependencies.schemathesis = "^4.10.2"
 group.test.dependencies.pytest = "^9.0.1"
 group.test.dependencies.pytest-cov = "^7.0"
 group.test.dependencies.pytest-django = "^4.5"
@@ -123,7 +124,7 @@ ini_options.DJANGO_CONFIGURATION = "Test"
 ini_options.DJANGO_SETTINGS_MODULE = "settings.test"
 ini_options.addopts = [
   "--cov-config=pyproject.toml",
-  "--cov-fail-under=90",
+  "--cov-fail-under=95",
   "--cov-precision=2",
   "--cov-report=term-missing",
   "--cov-report=xml",

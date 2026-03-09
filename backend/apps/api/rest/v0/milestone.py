@@ -23,7 +23,7 @@ class MilestoneBase(Schema):
 
     created_at: datetime
     number: int
-    state: GenericIssueModel.State
+    state: GenericIssueModel.IssueState
     title: str
     updated_at: datetime
     url: str
@@ -61,7 +61,7 @@ class MilestoneFilter(FilterSchema):
         description="Repository that milestones belong to",
         example="Nest",
     )
-    state: GenericIssueModel.State | None = Field(
+    state: GenericIssueModel.IssueState | None = Field(
         None,
         description="Milestone state",
     )

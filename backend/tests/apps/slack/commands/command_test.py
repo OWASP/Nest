@@ -38,6 +38,16 @@ class TestCommandBase:
             result = CommandBase.configure_commands()
             assert result is None
 
+    @patch("apps.slack.commands.command.SlackConfig")
+    def test_configure_commands_registers_commands(self, mock_slack_config):
+        """Tests that configure_commands iterates and registers all subclasses."""
+        mock_slack_config.app = MagicMock()
+        mock_command_class = MagicMock()
+
+        with patch.object(CommandBase, "get_commands", return_value=[mock_command_class]):
+            CommandBase.configure_commands()
+            mock_command_class.return_value.register.assert_called_once()
+
     def test_command_name_property(self, command_instance):
         """Tests that the command_name is derived correctly from the class name."""
         assert command_instance.command_name == "/command"

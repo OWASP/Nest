@@ -234,3 +234,27 @@ class TestProjectHandler:
 
         assert len(blocks) == 1
         assert "No projects found" in blocks[0]["text"]["text"]
+
+    def test_get_blocks_pagination_single_page(self, setup_mocks):
+        """Test that no pagination buttons are added when there is only one page."""
+        mock_data = {
+            "hits": [
+                {
+                    "idx_name": "Project",
+                    "idx_summary": "Summary",
+                    "idx_url": "https://example.com",
+                    "idx_updated_at": "1704067200",
+                    "idx_contributors_count": 0,
+                    "idx_forks_count": 0,
+                    "idx_stars_count": 0,
+                    "idx_leaders": [],
+                }
+            ],
+            "nbPages": 1,
+        }
+        setup_mocks["get_projects"].return_value = mock_data
+        presentation = EntityPresentation(include_feedback=False, include_pagination=True)
+
+        blocks = get_blocks(page=1, presentation=presentation)
+
+        assert not any(block.get("type") == "actions" for block in blocks)

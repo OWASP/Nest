@@ -118,7 +118,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
         assert not result
 
     def test_interested_users(self):
-        """Test interested_users field returns list of users."""
+        """Test interested_users field returns list of users from prefetched interests_users."""
         mock_issue = Mock()
         mock_user1 = Mock()
         mock_user1.login = "user1"
@@ -130,12 +130,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_interest2 = Mock()
         mock_interest2.user = mock_user2
 
-        mock_queryset = Mock()
-        mock_queryset.select_related.return_value.order_by.return_value = [
-            mock_interest1,
-            mock_interest2,
-        ]
-        mock_issue.participant_interests = mock_queryset
+        mock_issue.interests_users = [mock_interest1, mock_interest2]
 
         field = self._get_field_by_name("interested_users", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)

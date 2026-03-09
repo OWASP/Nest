@@ -274,3 +274,47 @@ class TestOwaspScrapeProjects:
         assert mock_project.related_urls == []
         assert mock_project.invalid_urls == []
         assert mock_project.get_related_url.call_count == 2
+
+    @mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    @mock.patch("apps.owasp.management.commands.owasp_scrape_projects.get_github_client")
+    def test_handle_github_user_org_repos_success(self, mock_github, mock_bulk_save, command):
+        """Test handle when GITHUB_USER_RE matches and get_organization succeeds."""
+        mock_project = mock.Mock(spec=Project)
+        mock_project.owasp_url = "https://owasp.org/www-project-test"
+        mock_project.github_url = "https://github.com/owasp/test-project"
+        mock_project.get_audience.return_value = []
+        mock_project.get_urls.return_value = ["https://github.com/some-org"]
+        mock_project.get_leaders_emails.return_value = {}
+        mock_project.get_related_url.side_effect = lambda url, **_: url
+
+        mock_scraper = mock.Mock(spec=OwaspScraper)
+        mock_scraper.page_tree = True
+        mock_scraper.verify_url.return_value = "https://github.com/some-org"
+
+        mock_gh = mock.Mock()
+        mock_repo = mock.Mock()
+        mock_repo.full_name = "some-org/repo1"
+        mock_gh.get_organization.return_value.get_repos.return_value = [mock_repo]
+        mock_github.return_value = mock_gh
+
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.return_value = mock_projects_list
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        command.stdout = mock.MagicMock()
+        with (
+            mock.patch.object(Project, "active_projects", mock_active_projects),
+            mock.patch("time.sleep"),
+            mock.patch(
+                "apps.owasp.management.commands.owasp_scrape_projects.OwaspScraper",
+                return_value=mock_scraper,
+            ),
+        ):
+            command.handle(offset=0)
+
+        mock_gh.get_organization.assert_called_once_with("some-org")
+        assert mock_project.related_urls == ["https://github.com/some-org/repo1"]

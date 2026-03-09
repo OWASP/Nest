@@ -79,7 +79,7 @@ jest.mock('@heroui/react', () => ({
       <button
         type="button"
         data-testid="autocomplete-clear"
-        onClick={() => onSelectionChange?.(new Set())}
+        onClick={() => onSelectionChange?.(null)}
       >
         Clear Selection
       </button>
@@ -278,9 +278,14 @@ describe('ModuleForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers()
     mockQuery.mockResolvedValue({
       data: { searchProjects: [{ id: 'project-1', name: 'Test Project' }] },
     })
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   const renderModuleForm = (props = {}) => {
@@ -396,6 +401,51 @@ describe('ModuleForm', () => {
       }
       expect(mockSetFormData).toHaveBeenCalled()
     })
+
+    it('updates project field when ProjectSelector changes', async () => {
+      renderModuleForm()
+      const input = screen.getByTestId('autocomplete-input')
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'Test' } })
+        jest.advanceTimersByTime(350)
+      })
+      await waitFor(() => expect(mockQuery).toHaveBeenCalled())
+      const selectButton = screen.getByTestId('autocomplete-select-single')
+      await act(async () => {
+        fireEvent.click(selectButton)
+      })
+      expect(mockSetFormData).toHaveBeenCalled()
+      const setterFn = mockSetFormData.mock.calls[mockSetFormData.mock.calls.length - 1][0]
+      const result = setterFn(defaultFormData)
+      expect(result).toEqual(
+        expect.objectContaining({
+          projectId: 'project-1',
+          projectName: 'Test Project',
+        })
+      )
+    })
+
+    it('updates project field when ProjectSelector is cleared', async () => {
+      const initialFormData = {
+        ...defaultFormData,
+        projectId: 'proj-1',
+        projectName: 'Existing Project',
+      }
+      renderModuleForm({ formData: initialFormData })
+      const clearButton = screen.getByTestId('autocomplete-clear')
+      await act(async () => {
+        fireEvent.click(clearButton)
+      })
+      expect(mockSetFormData).toHaveBeenCalled()
+      const setterFn = mockSetFormData.mock.calls[mockSetFormData.mock.calls.length - 1][0]
+      const result = setterFn(initialFormData)
+      expect(result).toEqual(
+        expect.objectContaining({
+          projectId: '',
+          projectName: '',
+        })
+      )
+    })
   })
 
   describe('Experience Level Select - handleSelectChange (lines 74-84)', () => {
@@ -466,7 +516,7 @@ describe('ModuleForm', () => {
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
-    it('calls onSubmit when all fields are valid', () => {
+    it('calls onSubmit when all fields are valid', async () => {
       const validFormData = {
         ...defaultFormData,
         name: 'Valid Module Name',
@@ -481,11 +531,15 @@ describe('ModuleForm', () => {
       renderModuleForm({ formData: validFormData })
 
       const form = document.querySelector('form')
-      if (form) {
-        fireEvent.submit(form)
-      }
+      await act(async () => {
+        if (form) {
+          fireEvent.submit(form)
+        }
+      })
 
-      expect(mockOnSubmit).toHaveBeenCalled()
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
     })
 
     it('sets all fields as touched on submit', () => {
@@ -521,6 +575,128 @@ describe('ModuleForm', () => {
     it('enables submit button when not loading', () => {
       renderModuleForm({ loading: false })
       expect(screen.getByTestId('submit-button')).not.toBeDisabled()
+    })
+  })
+
+  describe('Mutation Error Display (validationErrors prop)', () => {
+    const validFormData = {
+      ...defaultFormData,
+      name: 'Test Module',
+      description: 'A valid description that is long enough',
+      startedAt: '2024-01-01',
+      endedAt: '2024-12-31',
+      projectId: 'project-123',
+      projectName: 'My Project',
+      experienceLevel: 'BEGINNER',
+    }
+
+    it('displays mutation error for name field after submission', () => {
+      const { rerender } = render(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+        />
+      )
+
+      // Submit first to mark fields as touched
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      // Rerender with mutation errors (simulates page catching backend error)
+      rerender(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+          validationErrors={{
+            name: 'This module name already exists in this program.',
+          }}
+        />
+      )
+
+      expect(screen.getByTestId('module-name-error')).toHaveTextContent(
+        'This module name already exists in this program.'
+      )
+    })
+
+    it('does not display mutation error when validationErrors is empty', () => {
+      renderModuleForm({
+        formData: validFormData,
+        validationErrors: {},
+      })
+
+      expect(screen.queryByTestId('module-name-error')).not.toBeInTheDocument()
+    })
+
+    it('allows resubmission even when validationErrors.name is set', async () => {
+      const { rerender } = render(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+        />
+      )
+
+      // First submit to mark fields as touched
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      mockOnSubmit.mockClear()
+
+      // Rerender with mutation errors
+      rerender(
+        <ModuleForm
+          formData={validFormData}
+          setFormData={mockSetFormData}
+          onSubmit={mockOnSubmit}
+          loading={false}
+          title="Create Module"
+          validationErrors={{
+            name: 'This module name already exists in this program.',
+          }}
+        />
+      )
+
+      // Second submit should still call onSubmit so parent can clear errors and retry
+      fireEvent.submit(form!)
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it('allows submission when validationErrors has no name error', async () => {
+      renderModuleForm({
+        formData: validFormData,
+        validationErrors: {},
+      })
+
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
+    })
+
+    it('allows submission when validationErrors is undefined', async () => {
+      renderModuleForm({
+        formData: validFormData,
+      })
+
+      const form = document.querySelector('form')
+      fireEvent.submit(form!)
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled()
+      })
     })
   })
 })
@@ -690,7 +866,7 @@ describe('ProjectSelector', () => {
       expect(mockOnProjectChange).toHaveBeenCalledWith('project-1', 'Test Project 1')
     })
 
-    it('clears selection when empty set is passed (lines 419-420)', async () => {
+    it('clears selection when clear button is clicked (lines 411-413)', async () => {
       renderProjectSelector({ value: 'project-1', defaultName: 'Existing Project' })
       const clearButton = screen.getByTestId('autocomplete-clear')
 
@@ -698,9 +874,8 @@ describe('ProjectSelector', () => {
         fireEvent.click(clearButton)
       })
 
-      // The component's handleSelectionChange doesn't handle empty Set directly
-      // This test verifies the current behavior where it's not called
-      expect(mockOnProjectChange).not.toHaveBeenCalled()
+      // Now expected to call onProjectChange with null
+      expect(mockOnProjectChange).toHaveBeenCalledWith(null, '')
     })
   })
 
@@ -777,6 +952,24 @@ describe('ProjectSelector', () => {
       })
 
       consoleErrorSpy.mockRestore()
+    })
+
+    it('handles missing searchProjects in response', async () => {
+      mockQuery.mockResolvedValue({ data: {} })
+
+      renderProjectSelector()
+      const input = screen.getByTestId('autocomplete-input')
+
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'Test' } })
+        jest.advanceTimersByTime(350)
+      })
+
+      await waitFor(() => {
+        expect(mockQuery).toHaveBeenCalled()
+      })
+      const items = screen.queryAllByTestId('autocomplete-item')
+      expect(items).toHaveLength(0)
     })
   })
 

@@ -3,10 +3,25 @@
 from django.contrib import admin
 
 from apps.mentorship.models import Program
+from apps.mentorship.models.program_admin import ProgramAdmin as ProgramAdminThroughModel
+
+
+class ProgramAdminInline(admin.TabularInline):
+    """Inline admin for ProgramAdmin through model."""
+
+    autocomplete_fields = ("admin",)
+
+    extra = 1
+
+    fields = ("admin", "role")
+
+    model = ProgramAdminThroughModel
 
 
 class ProgramAdmin(admin.ModelAdmin):
     """Admin view for Program model."""
+
+    inlines = (ProgramAdminInline,)
 
     list_display = (
         "name",
@@ -15,14 +30,12 @@ class ProgramAdmin(admin.ModelAdmin):
         "ended_at",
     )
 
+    list_filter = ("status",)
+
     search_fields = (
         "name",
         "description",
     )
-
-    list_filter = ("status",)
-
-    filter_horizontal = ("admins",)
 
 
 admin.site.register(Program, ProgramAdmin)

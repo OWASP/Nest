@@ -8,7 +8,7 @@ from django.db.models import Q
 from apps.common.utils import normalize_limit
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
-from apps.mentorship.models.mentor import Mentor
+from apps.mentorship.models.program_admin import ProgramAdmin
 from apps.nest.api.internal.permissions import IsAuthenticated
 
 PAGE_SIZE = 25
@@ -21,13 +21,20 @@ class ProgramQuery:
     """Program queries."""
 
     @strawberry.field
-    def get_program(self, program_key: str) -> ProgramNode | None:
+    def get_program(self, info: strawberry.Info, program_key: str) -> ProgramNode | None:
         """Get a program by Key."""
         try:
-            program = Program.objects.prefetch_related("admins__github_user").get(key=program_key)
+            program = Program.objects.prefetch_related(
+                "admins__github_user", "admins__nest_user"
+            ).get(key=program_key)
         except Program.DoesNotExist:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)
+            return None
+
+        if program.status != Program.ProgramStatus.PUBLISHED and not program.user_has_access(
+            info.context.request.user
+        ):
             return None
 
         return program
@@ -43,20 +50,24 @@ class ProgramQuery:
         """Get paginated programs where the current user is admin or mentor."""
         user = info.context.request.user
 
-        try:
-            mentor = Mentor.objects.select_related("github_user").get(github_user=user.github_user)
-        except Mentor.DoesNotExist:
-            logger.warning("Mentor for user '%s' not found.", user.username)
-            return PaginatedPrograms(programs=[], total_pages=0, current_page=page)
+        admin_program_ids = ProgramAdmin.objects.filter(admin__nest_user=user).values_list(
+            "program_id", flat=True
+        )
+
+        query = Q(id__in=admin_program_ids)
+        if user.github_user:
+            query |= Q(modules__mentors__github_user=user.github_user)
 
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             normalized_limit = PAGE_SIZE
 
         queryset = (
             Program.objects.prefetch_related(
-                "admins__github_user", "modules__mentors__github_user"
+                "admins__github_user",
+                "admins__nest_user",
+                "modules__mentors__github_user",
             )
-            .filter(Q(admins=mentor) | Q(modules__mentors=mentor))
+            .filter(query)
             .distinct()
         )
 
@@ -73,14 +84,13 @@ class ProgramQuery:
         ]
 
         results = []
-        mentor_id = mentor.id
         for program in paginated_programs:
-            is_admin = any(admin.id == mentor_id for admin in program.admins.all())
+            is_admin = any(admin.nest_user_id == user.id for admin in program.admins.all())
             program.user_role = "admin" if is_admin else "mentor"
             results.append(program)
 
         return PaginatedPrograms(
+            current_page=page,
             programs=results,
             total_pages=total_pages,
-            current_page=page,
         )

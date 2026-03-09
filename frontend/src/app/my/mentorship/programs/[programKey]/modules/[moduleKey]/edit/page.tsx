@@ -14,6 +14,7 @@ import { GetProgramAndModulesDocument } from 'types/__generated__/programsQuerie
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -21,10 +22,14 @@ import ModuleForm from 'components/ModuleForm'
 const EditModulePage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
-  const { data: sessionData, status: sessionStatus } = useSession()
+  const { data: sessionData, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
@@ -53,18 +58,22 @@ const EditModulePage = () => {
       return
     }
 
-    const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
+    const currentUserLogin = sessionData?.user?.login
     const isAdmin = data.getProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
-    if (isAdmin) {
+    const isMentor = data.getModule.mentors?.some(
+      (mentor: { login: string }) => mentor.login === currentUserLogin
+    )
+
+    if (isAdmin || isMentor) {
       setAccessStatus('allowed')
     } else {
       setAccessStatus('denied')
       addToast({
         title: 'Access Denied',
-        description: 'Only program admins can edit modules.',
+        description: 'Only program admins and module mentors can edit this module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,
@@ -95,22 +104,31 @@ const EditModulePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData) return
+    setValidationErrors({})
 
     try {
+      const currentUserLogin = sessionData?.user?.login
+      const isAdmin = data?.getProgram?.admins?.some(
+        (admin: { login: string }) => admin.login === currentUserLogin
+      )
+
       const input: UpdateModuleInput = {
-        description: formData.description,
-        domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || '',
-        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
+        description: formData!.description,
+        domains: parseCommaSeparated(formData!.domains),
+        endedAt: formData!.endedAt || '',
+        experienceLevel: formData!.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
-        labels: parseCommaSeparated(formData.labels),
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
-        name: formData.name,
+        labels: parseCommaSeparated(formData!.labels),
+        name: formData!.name,
         programKey: programKey,
-        projectId: formData.projectId,
-        projectName: formData.projectName,
-        startedAt: formData.startedAt || '',
-        tags: parseCommaSeparated(formData.tags),
+        projectId: formData!.projectId,
+        projectName: formData!.projectName,
+        startedAt: formData!.startedAt || '',
+        tags: parseCommaSeparated(formData!.tags),
+      }
+
+      if (isAdmin) {
+        input.mentorLogins = parseCommaSeparated(formData!.mentorLogins)
       }
 
       const result = await updateModule({
@@ -129,12 +147,19 @@ const EditModulePage = () => {
       })
       router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
-      handleAppError(err)
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(err)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
+      } else if (unmappedErrors.length > 0) {
+        setValidationErrors({ name: unmappedErrors[0] })
+      } else {
+        handleAppError(err)
+      }
     }
-  }
-
-  if (accessStatus === 'checking' || !formData) {
-    return <LoadingSpinner />
   }
 
   if (accessStatus === 'denied') {
@@ -147,6 +172,10 @@ const EditModulePage = () => {
     )
   }
 
+  if (accessStatus === 'checking' || !formData) {
+    return <LoadingSpinner />
+  }
+
   return (
     <ModuleForm
       title="Edit Module"
@@ -156,6 +185,7 @@ const EditModulePage = () => {
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      validationErrors={validationErrors}
       minDate={
         data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
       }

@@ -96,3 +96,8 @@ class TestEntityMetadataBase:
         error_output = stderr.getvalue()
         assert "Validation FAILED" in error_output
         assert "Validation error: missing required field" in error_output
+
+    def test_get_metadata_abstract_returns_empty_dict(self):
+        """Test that the abstract get_metadata base implementation returns empty dict."""
+        result = EntityMetadataBase.get_metadata(None, entity=MagicMock())
+        assert result == {}

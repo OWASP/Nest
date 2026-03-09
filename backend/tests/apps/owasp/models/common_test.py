@@ -276,8 +276,13 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
                 ["https://example.com", "https://test.org"],
             ),
             (
-                """* [Broken](https://)
+                """* [Broken](https://.-invalid)
 * [Valid](https://example.com)""",
+                None,
+                ["https://example.com"],
+            ),
+            (
+                """Visit https://example.com and also see https://.-invalid""",
                 None,
                 ["https://example.com"],
             ),
@@ -660,7 +665,7 @@ Release Notes: https://github.com/OWASP/www-project-machine-learning-security-to
         assert "Leader With Email" in leaders
         assert leaders["Leader With Email"] == "email@example.com"
         assert "Another Leader" in leaders
-        assert leaders["Another Leader"] == "https://example.com"
+        assert leaders["Another Leader"] is None
 
     def test_get_urls_no_content(self):
         """Test get_urls returns empty list when content is None."""

@@ -7,6 +7,7 @@ import type React from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
+import type { ValidationErrors } from 'utils/helpers/handleGraphQLError'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
@@ -43,6 +44,7 @@ interface ModuleFormProps {
   submitText?: string
   minDate?: string
   maxDate?: string
+  validationErrors?: ValidationErrors
 }
 
 const EXPERIENCE_LEVELS = [
@@ -62,6 +64,7 @@ const ModuleForm = ({
   submitText = 'Save',
   minDate,
   maxDate,
+  validationErrors,
 }: ModuleFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
@@ -86,6 +89,9 @@ const ModuleForm = ({
   }
 
   const validateNameLocal = (value: string): string | undefined => {
+    if (validationErrors?.name) {
+      return validationErrors.name
+    }
     return validateName(value)
   }
 
@@ -118,7 +124,7 @@ const ModuleForm = ({
         validator: () => validateExperienceLevel(formData.experienceLevel),
       },
     ],
-    [formData, touched]
+    [formData, touched, validationErrors]
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -138,8 +144,7 @@ const ModuleForm = ({
     })
     setTouched(newTouched)
 
-    // Validate all required fields
-    const nameError = validateNameLocal(formData.name)
+    const nameError = validateName(formData.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDateLocal(formData.endedAt)
@@ -181,7 +186,7 @@ const ModuleForm = ({
                     handleInputChange('name', value)
                     setTouched((prev) => ({ ...prev, name: true }))
                   }}
-                  error={errors.name}
+                  error={errors.name || validationErrors?.name}
                   touched={touched.name}
                   required
                   className="w-full min-w-0 lg:col-span-2"
@@ -399,7 +404,6 @@ export const ProjectSelector = ({
   }, [inputValue, fetchSuggestions])
 
   const handleSelectionChange = (keys: React.Key | null) => {
-    if (keys === null) return
     const selectedKey = keys as string
     if (selectedKey) {
       const selectedProject = items.find((item) => item.id === selectedKey)

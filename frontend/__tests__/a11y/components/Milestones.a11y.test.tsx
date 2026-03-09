@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { Milestone } from 'types/milestone'
 import { User } from 'types/user'
 import Milestones from 'components/Milestones'
@@ -19,15 +20,15 @@ const createMockUser = (): User => ({
   followingCount: 5,
   publicRepositoriesCount: 20,
   contributionsCount: 50,
-  createdAt: 1640995200000,
-  updatedAt: 1640995200000,
+  createdAt: '2022-01-01T00:00:00.000Z',
+  updatedAt: '2022-01-01T00:00:00.000Z',
 })
 
 const createMockMilestone = (overrides: Partial<Milestone> = {}): Milestone => ({
   author: createMockUser(),
   body: 'Test milestone description',
   closedIssuesCount: 5,
-  createdAt: '2023-01-01T00:00:00Z',
+  createdAt: '2023-01-01T00:00:00.000Z', // 2023-01-01T00:00:00Z
   openIssuesCount: 3,
   organizationName: 'test-org',
   progress: 75,
@@ -38,7 +39,14 @@ const createMockMilestone = (overrides: Partial<Milestone> = {}): Milestone => (
   ...overrides,
 })
 
-describe('Milestones a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('Milestones a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<Milestones data={[createMockMilestone()]} />)
 

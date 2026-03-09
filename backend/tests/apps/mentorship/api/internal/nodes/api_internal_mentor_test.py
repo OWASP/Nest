@@ -31,36 +31,31 @@ def mock_mentor_node_no_github_user():
     return mentor_node
 
 
-def test_mentor_node_id(mock_mentor_node):
-    """Test that MentorNode id is correctly assigned."""
-    assert str(mock_mentor_node.id) == "1"
+class TestMentorNode:
+    def test_mentor_node_id(self, mock_mentor_node):
+        """Test that MentorNode id is correctly assigned."""
+        assert str(mock_mentor_node.id) == "1"
 
+    def test_mentor_node_avatar_url(self, mock_mentor_node):
+        """Test the avatar_url field resolver."""
+        assert mock_mentor_node.avatar_url() == "https://example.com/mentor_avatar.jpg"
 
-def test_mentor_node_avatar_url(mock_mentor_node):
-    """Test the avatar_url field resolver."""
-    assert mock_mentor_node.avatar_url() == "https://example.com/mentor_avatar.jpg"
+    def test_mentor_node_avatar_url_no_github_user(self, mock_mentor_node_no_github_user):
+        """Test avatar_url when no github_user is associated."""
+        assert mock_mentor_node_no_github_user.avatar_url() == ""
 
+    def test_mentor_node_name(self, mock_mentor_node):
+        """Test the name field resolver."""
+        assert mock_mentor_node.name() == "Mentor Name"
 
-def test_mentor_node_avatar_url_no_github_user(mock_mentor_node_no_github_user):
-    """Test avatar_url when no github_user is associated."""
-    assert mock_mentor_node_no_github_user.avatar_url() == ""
+    def test_mentor_node_name_no_github_user(self, mock_mentor_node_no_github_user):
+        """Test name when no github_user is associated."""
+        assert mock_mentor_node_no_github_user.name() == ""
 
+    def test_mentor_node_login(self, mock_mentor_node):
+        """Test the login field resolver."""
+        assert mock_mentor_node.login() == "mentor_login"
 
-def test_mentor_node_name(mock_mentor_node):
-    """Test the name field resolver."""
-    assert mock_mentor_node.name() == "Mentor Name"
-
-
-def test_mentor_node_name_no_github_user(mock_mentor_node_no_github_user):
-    """Test name when no github_user is associated."""
-    assert mock_mentor_node_no_github_user.name() == ""
-
-
-def test_mentor_node_login(mock_mentor_node):
-    """Test the login field resolver."""
-    assert mock_mentor_node.login() == "mentor_login"
-
-
-def test_mentor_node_login_no_github_user(mock_mentor_node_no_github_user):
-    """Test login when no github_user is associated."""
-    assert mock_mentor_node_no_github_user.login() == ""
+    def test_mentor_node_login_no_github_user(self, mock_mentor_node_no_github_user):
+        """Test login when no github_user is associated."""
+        assert mock_mentor_node_no_github_user.login() == ""
