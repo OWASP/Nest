@@ -1,8 +1,8 @@
 import { Skeleton } from '@heroui/skeleton'
 import { sendGTMEvent } from '@next/third-parties/google'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import { debounce } from 'lodash'
 import { usePathname } from 'next/navigation'
-import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 import { FaSearch, FaTimes } from 'react-icons/fa'
 
@@ -65,7 +65,7 @@ const SearchBar: React.FC<SearchProps> = ({
     debouncedSearch.cancel()
     setSearchQuery('')
     onSearch('')
-    if (shouldAutoFocus){
+    if (shouldAutoFocus) {
       inputRef.current?.focus()
     }
   }

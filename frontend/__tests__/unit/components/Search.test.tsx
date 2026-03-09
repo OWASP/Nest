@@ -1,7 +1,7 @@
 import { sendGTMEvent } from '@next/third-parties/google'
 import { render, screen, fireEvent } from '@testing-library/react'
-import SearchBar from 'components/Search'
 import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
+import SearchBar from 'components/Search'
 
 jest.mock('@next/third-parties/google', () => ({
   sendGTMEvent: jest.fn(),
@@ -123,7 +123,7 @@ describe('SearchBar Component', () => {
       expect(input).toHaveFocus()
     })
 
-    it('should NOT auto-focus on mobile/touch devices',()=>{
+    it('should NOT auto-focus on mobile/touch devices', () => {
       ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
