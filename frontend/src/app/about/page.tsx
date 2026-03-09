@@ -296,7 +296,7 @@ const About = () => {
           ))}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
-          <div className="space-y-6">
+          <div className="space-y-0">
             {timelineGroups.map((group) => {
               const isExpanded = expandedYears.has(group.calYear)
               return (
@@ -305,12 +305,18 @@ const About = () => {
                     type="button"
                     onClick={() => toggleYear(group.calYear)}
                     aria-expanded={isExpanded}
-                    className="mb-4 text-sm font-bold text-blue-400 hover:underline"
+                    aria-controls={`timeline-group-${group.calYear}`}
+                    className="group flex w-full items-center gap-4 py-6 transition-opacity hover:opacity-75"
                   >
-                    {group.calYear} {isExpanded ? '▲' : '▼'}
+                    <span className="hidden h-px flex-1 bg-gray-200 dark:bg-gray-700 md:block" />
+                    <span className="flex items-center gap-1.5 rounded-full bg-blue-400 pl-4 pr-3 py-1.5 text-sm font-bold text-white shadow-md">
+                      {group.calYear}
+                      <span className={`text-xs transition-transform duration-200 ${isExpanded ? 'rotate-90' : 'rotate-0'}`}>›</span>
+                    </span>
+                    <span className="hidden h-px flex-1 bg-gray-200 dark:bg-gray-700 md:block" />
                   </button>
                   {isExpanded && (
-                    <div className="space-y-6">
+                    <div id={`timeline-group-${group.calYear}`} className="space-y-6 pb-4">
                       {group.milestones.map((milestone) => (
                         <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
                           <div
