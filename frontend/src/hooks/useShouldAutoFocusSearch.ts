@@ -2,12 +2,20 @@
 
 import { useEffect, useState } from 'react'
 
+const getAutoFocusValue = (): boolean => {
+  if (typeof globalThis.matchMedia !== 'function') {
+    return false
+  }
+  const smallScreen = globalThis.matchMedia('(max-width: 767px)')
+  const coarsePointer = globalThis.matchMedia('(pointer: coarse)')
+  return !(smallScreen.matches || coarsePointer.matches)
+}
+
 export const useShouldAutoFocusSearch = (): boolean => {
-  const [shouldAutoFocus, setShouldAutoFocus] = useState(false)
+  const [shouldAutoFocus, setShouldAutoFocus] = useState(getAutoFocusValue)
 
   useEffect(() => {
     if (typeof globalThis.matchMedia !== 'function') {
-      setShouldAutoFocus(false)
       return
     }
 
@@ -19,7 +27,6 @@ export const useShouldAutoFocusSearch = (): boolean => {
       setShouldAutoFocus(!isMobileOrTouch)
     }
 
-    update()
     smallScreen.addEventListener('change', update)
     coarsePointer.addEventListener('change', update)
 
