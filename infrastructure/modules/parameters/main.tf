@@ -61,6 +61,14 @@ resource "aws_ssm_parameter" "django_allowed_origins" {
   }
 }
 
+resource "aws_ssm_parameter" "django_aws_storage_bucket_name" {
+  description = "The S3 bucket name for Django static files."
+  name        = "/${var.project_name}/${var.environment}/DJANGO_AWS_STORAGE_BUCKET_NAME"
+  tags        = var.common_tags
+  type        = "String"
+  value       = var.static_bucket_name
+}
+
 resource "aws_ssm_parameter" "django_configuration" {
   description = "The name of the Django configuration to use (e.g., Staging, Production)."
   name        = "/${var.project_name}/${var.environment}/DJANGO_CONFIGURATION"

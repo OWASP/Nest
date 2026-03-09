@@ -765,25 +765,25 @@ jobs:
         env:
           AVAILABILITY_ZONES: ${{ vars.AWS_AVAILABILITY_ZONES }}
           AWS_REGION: ${{ vars.AWS_REGION }}
+          BACKEND_USE_FARGATE_SPOT: true
           CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
-          ECS_USE_FARGATE_SPOT: true
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
-          LAMBDA_FUNCTION_NAME: nest-staging
           PROJECT_NAME: nest
+          TASKS_USE_FARGATE_SPOT: true
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfvars <<-EOF
           availability_zones=$AVAILABILITY_ZONES
           aws_region="$AWS_REGION"
+          backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
           create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
-          ecs_use_fargate_spot=$ECS_USE_FARGATE_SPOT
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
-          lambda_function_name="$LAMBDA_FUNCTION_NAME"
           project_name="$PROJECT_NAME"
+          tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
           EOF
 
       - name: Terraform Init
@@ -881,59 +881,27 @@ jobs:
         id: tf-outputs
         working-directory: infrastructure/staging
         run: |
-          echo "ecs_security_group_id=$(terraform output -raw ecs_security_group_id)" >> $GITHUB_OUTPUT
+          echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
+          echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
           echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
           echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "lambda_security_group_id=$(terraform output -raw lambda_security_group_id)" >> $GITHUB_OUTPUT
-          echo "private_subnet_a=$(terraform output -json private_subnet_ids | jq -r '.[0]')" >> $GITHUB_OUTPUT
-          echo "private_subnet_b=$(terraform output -json private_subnet_ids | jq -r '.[1]')" >> $GITHUB_OUTPUT
-          echo "private_subnet_c=$(terraform output -json private_subnet_ids | jq -r '.[2]')" >> $GITHUB_OUTPUT
           echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
           echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
-          echo "zappa_s3_bucket=$(terraform output -raw zappa_s3_bucket_name)" >> $GITHUB_OUTPUT
-
-      - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
-        with:
-          cache: poetry
-          cache-dependency-path: backend/poetry.lock
-          python-version: '3.13'
-
-      - name: Install backend dependencies
-        working-directory: backend
-        run: poetry sync --no-root --without test --without video
-
-      - name: Prepare Zappa settings
-        env:
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_PRIVATE_SUBNET_A: ${{ steps.tf-outputs.outputs.private_subnet_a }}
-          AWS_PRIVATE_SUBNET_B: ${{ steps.tf-outputs.outputs.private_subnet_b }}
-          AWS_PRIVATE_SUBNET_C: ${{ steps.tf-outputs.outputs.private_subnet_c }}
-          AWS_REGION: ${{ vars.AWS_REGION }}
-          ZAPPA_S3_BUCKET: ${{ steps.tf-outputs.outputs.zappa_s3_bucket }}
-          ZAPPA_VPC_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.lambda_security_group_id }}
-        run: envsubst < backend/zappa_settings.template.json > backend/zappa_settings.json
-
-      - name: Update Zappa deployment
-        working-directory: backend
-        run: poetry run zappa update staging
+          echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
 
       - name: Run ECS migrate task
         id: migrate-task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          ECS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.ecs_security_group_id }}
           PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: nest-staging-migrate
         run: |
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
@@ -965,16 +933,26 @@ jobs:
       - name: Run ECS index-data task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          ECS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.ecs_security_group_id }}
           PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: nest-staging-index-data
         run: |
           aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$ECS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
+            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
           echo "Index-data task started (runs async, ~30 min)"
+
+      - name: Force new backend deployment
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs update-service \
+            --cluster "$CLUSTER_NAME" \
+            --service "$SERVICE_NAME" \
+            --force-new-deployment
 
       - name: Force new frontend deployment
         env:
@@ -986,6 +964,15 @@ jobs:
             --service "$SERVICE_NAME" \
             --force-new-deployment
 
+      - name: Wait for backend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+
       - name: Wait for frontend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
@@ -996,7 +983,7 @@ jobs:
             --services "$SERVICE_NAME"
 
   run-staging-lighthouse-ci:
-    name: Run Lighthouse CI
+    name: Run staging Lighthouse CI
     needs:
       - deploy-staging-nest
     permissions:
@@ -1390,6 +1377,38 @@ jobs:
       - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
         working-directory: .github/ansible
+    timeout-minutes: 5
+
+  run-production-lighthouse-ci:
+    name: Run production Lighthouse CI
+    needs:
+      - deploy-production-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        with:
+          run_install: true
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: pnpm
+          node-version: 24
+
+      - name: Run lighthouse-ci
+        env:
+          LHCI_BASE_URL: https://nest.owasp.org
+        run: |
+          pnpm run lighthouse-ci
+        working-directory: frontend
     timeout-minutes: 5
 
   run-production-zap-baseline-scan:
