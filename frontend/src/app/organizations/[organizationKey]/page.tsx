@@ -121,7 +121,7 @@ const OrganizationDetailsPage = () => {
       recentReleases={
         recentReleases?.map((release) => ({
           ...release,
-          publishedAt: release.publishedAt as number,
+          publishedAt: release.publishedAt as string,
         })) as Release[]
       }
       recentMilestones={recentMilestones as Milestone[]}

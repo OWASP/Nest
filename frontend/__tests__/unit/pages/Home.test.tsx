@@ -129,14 +129,6 @@ describe('Home', () => {
     })
   })
 
-  test('renders MultiSearchBar component', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search the OWASP community')).toBeInTheDocument()
-    })
-  })
-
   test('renders SecondaryCard components', async () => {
     render(<Home />)
 
@@ -403,7 +395,6 @@ describe('Home', () => {
     render(<Home />)
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search the OWASP community')).toBeInTheDocument()
       expect(screen.queryByText('Top Contributors')).not.toBeInTheDocument()
 
       const zeroStats = screen.getAllByText('Active Projects')

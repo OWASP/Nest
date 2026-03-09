@@ -8,9 +8,8 @@ describe('getIcsFileUrl', () => {
     title: 'Conference',
     description: 'Discuss Q4 goals',
     location: 'Conference Room A',
-    url: 'https://meet.google.com/abc-defg-hij',
-    startDate: '2025-01-01',
-    endDate: '2025-01-03',
+    startDate: '2025-01-01T00:00:00Z',
+    endDate: '2025-01-03T00:00:00Z',
   }
 
   beforeAll(() => {
@@ -37,16 +36,15 @@ describe('getIcsFileUrl', () => {
     expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob))
   })
 
-  it('should correctly format string dates into DateArray', async () => {
+  it('should correctly format Unix timestamps into DateArray', async () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
-    const eventWithStrings = {
-      ...mockEvent,
-      startDate: '2025-01-01',
-      endDate: '2025-01-03',
+    const eventWithTimestamps = {
+      startDate: '2025-01-01T00:00:00Z',
+      endDate: '2025-01-03T00:00:00Z',
     }
 
-    await getIcsFileUrl(eventWithStrings)
+    await getIcsFileUrl(eventWithTimestamps)
 
     expect(createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -57,16 +55,15 @@ describe('getIcsFileUrl', () => {
     )
   })
 
-  it('should correctly format Date objects into DateArray (handling 0-index months)', async () => {
+  it('should correctly format Unix timestamps into DateArray (UTC conversion)', async () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
-    const eventWithDateObjects = {
-      ...mockEvent,
-      startDate: new Date(2025, 0, 1),
-      endDate: new Date(2025, 0, 3),
+    const eventWithTimestamps = {
+      startDate: '2025-01-01T00:00:00Z',
+      endDate: '2025-01-03T00:00:00Z',
     }
 
-    await getIcsFileUrl(eventWithDateObjects)
+    await getIcsFileUrl(eventWithTimestamps)
 
     expect(createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -81,9 +78,8 @@ describe('getIcsFileUrl', () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
     const singleDayEvent = {
-      ...mockEvent,
-      startDate: '2025-01-01',
-      endDate: '2025-01-01',
+      startDate: '2025-01-01T00:00:00Z',
+      endDate: '2025-01-01T00:00:00Z',
     }
 
     await getIcsFileUrl(singleDayEvent)

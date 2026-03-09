@@ -41,8 +41,6 @@ data "aws_iam_policy_document" "part_one" {
       "elasticloadbalancing:Describe*",
       "events:ListRuleNamesByTarget",
       "kms:DescribeKey",
-      "lambda:ListFunctions",
-      "lambda:ListVersionsByFunction",
       "logs:DescribeLogGroups",
       "rds:DescribeDBInstances",
       "rds:DescribeDBSubnetGroups",
@@ -398,7 +396,6 @@ data "aws_iam_policy_document" "part_two" {
       values = [
         "ecs-tasks.amazonaws.com",
         "events.amazonaws.com",
-        "lambda.amazonaws.com",
         "rds.amazonaws.com",
         "vpc-flow-logs.amazonaws.com"
       ]
@@ -458,41 +455,6 @@ data "aws_iam_policy_document" "part_two" {
     ]
   }
 
-  statement {
-    sid    = "LambdaManagement"
-    effect = "Allow"
-    actions = [
-      "lambda:AddPermission",
-      "lambda:CreateAlias",
-      "lambda:CreateFunction",
-      "lambda:DeleteAlias",
-      "lambda:DeleteFunction",
-      "lambda:DeleteFunctionConcurrency",
-      "lambda:GetAlias",
-      "lambda:GetFunction",
-      "lambda:GetFunctionCodeSigningConfig",
-      "lambda:GetFunctionConcurrency",
-      "lambda:GetFunctionConfiguration",
-      "lambda:GetFunctionUrlConfig",
-      "lambda:GetPolicy",
-      "lambda:InvokeFunction",
-      "lambda:ListFunctionUrlConfigs",
-      "lambda:ListTags",
-      "lambda:ListVersionsByFunction",
-      "lambda:PublishVersion",
-      "lambda:PutFunctionConcurrency",
-      "lambda:RemovePermission",
-      "lambda:TagResource",
-      "lambda:UntagResource",
-      "lambda:UpdateAlias",
-      "lambda:UpdateFunctionCode",
-      "lambda:UpdateFunctionConfiguration",
-    ]
-    resources = [
-      "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${each.key}",
-      "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${each.key}:*",
-    ]
-  }
 
   statement {
     sid    = "RDSManagement"
