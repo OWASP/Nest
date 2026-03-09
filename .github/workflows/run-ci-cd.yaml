@@ -983,7 +983,7 @@ jobs:
             --services "$SERVICE_NAME"
 
   run-staging-lighthouse-ci:
-    name: Run Lighthouse CI
+    name: Run staging Lighthouse CI
     needs:
       - deploy-staging-nest
     permissions:
@@ -1377,6 +1377,38 @@ jobs:
       - name: Run proxy deploy
         run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
         working-directory: .github/ansible
+    timeout-minutes: 5
+
+  run-production-lighthouse-ci:
+    name: Run production Lighthouse CI
+    needs:
+      - deploy-production-nest-proxy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        with:
+          run_install: true
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: pnpm
+          node-version: 24
+
+      - name: Run lighthouse-ci
+        env:
+          LHCI_BASE_URL: https://nest.owasp.org
+        run: |
+          pnpm run lighthouse-ci
+        working-directory: frontend
     timeout-minutes: 5
 
   run-production-zap-baseline-scan:
