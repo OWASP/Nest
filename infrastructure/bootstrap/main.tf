@@ -403,6 +403,24 @@ data "aws_iam_policy_document" "part_two" {
   }
 
   statement {
+    sid    = "LambdaManagement"
+    effect = "Allow"
+    actions = [
+      "lambda:AddPermission",
+      "lambda:GetAlias",
+      "lambda:GetFunction",
+      "lambda:GetPolicy",
+      "lambda:ListAliases",
+      "lambda:ListVersionsByFunction",
+      "lambda:RemovePermission",
+    ]
+    resources = [
+      "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${each.key}",
+      "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${each.key}:*",
+    ]
+  }
+
+  statement {
     sid    = "KMSManagement"
     effect = "Allow"
     actions = [
