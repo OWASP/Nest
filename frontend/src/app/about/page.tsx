@@ -37,7 +37,6 @@ const leaders = {
   mamicidal: 'CISSP',
 }
 
-const PROJECT_LIMIT = 6
 const MILESTONE_LIMIT = 3
 
 const projectKey = 'nest'
@@ -89,7 +88,45 @@ const About = () => {
     .filter((leader) => leader.memberName) as Leader[]
 
   const [showAllRoadmap, setShowAllRoadmap] = useState(false)
-  const [showAllTimeline, setShowAllTimeline] = useState(false)
+
+  type ProjectTimelineItem = (typeof projectTimeline)[number]
+  type TimelineGroup = { calYear: string; milestones: ProjectTimelineItem[] }
+
+  const extractCalYear = (yearStr: string): string => yearStr.split(' ').pop() ?? yearStr
+
+  const timelineGroups: TimelineGroup[] = (() => {
+    const map = new Map<string, ProjectTimelineItem[]>()
+    for (const milestone of projectTimeline) {
+      const cy = extractCalYear(milestone.year)
+      if (!map.has(cy)) map.set(cy, [])
+      map.get(cy)!.push(milestone)
+    }
+    return [...map.entries()]
+      .sort(([a], [b]) => Number(b) - Number(a))
+      .map(([calYear, milestones]) => ({ calYear, milestones: [...milestones].reverse() }))
+  })()
+
+  const defaultExpandedYears = (() => {
+    if (timelineGroups.length === 0) return new Set<string>()
+    const mostRecent = timelineGroups[0]
+    if (mostRecent.milestones.length < 3 && timelineGroups.length > 1) {
+      return new Set([mostRecent.calYear, timelineGroups[1].calYear])
+    }
+    return new Set([mostRecent.calYear])
+  })()
+
+  const [expandedYears, setExpandedYears] = useState<Set<string>>(defaultExpandedYears)
+
+  const toggleYear = (calYear: string): void => {
+    setExpandedYears((prev: Set<string>) => {
+      if (prev.has(calYear)) {
+        const next = new Set(prev)
+        next.delete(calYear)
+        return next
+      }
+      return new Set([calYear])
+    })
+  }
 
   useEffect(() => {
     if (error) {
@@ -260,31 +297,39 @@ const About = () => {
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-6">
-            {(() => {
-              const visibleTimeline = [...projectTimeline]
-                .reverse()
-                .slice(0, showAllTimeline ? projectTimeline.length : PROJECT_LIMIT)
-              return visibleTimeline.map((milestone, index) => (
-                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                  {index !== visibleTimeline.length - 1 && (
-                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
+            {timelineGroups.map((group) => {
+              const isExpanded = expandedYears.has(group.calYear)
+              return (
+                <div key={group.calYear}>
+                  <button
+                    type="button"
+                    onClick={() => toggleYear(group.calYear)}
+                    aria-expanded={isExpanded}
+                    className="mb-4 text-sm font-bold text-blue-400 hover:underline"
+                  >
+                    {group.calYear} {isExpanded ? '▲' : '▼'}
+                  </button>
+                  {isExpanded && (
+                    <div className="space-y-6">
+                      {group.milestones.map((milestone) => (
+                        <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
+                          <div
+                            aria-hidden="true"
+                            className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
+                          />
+                          <div>
+                            <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
+                            <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
+                            <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <div
-                    aria-hidden="true"
-                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                  ></div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
-                  </div>
                 </div>
-              ))
-            })()}
+              )
+            })}
           </div>
-          {projectTimeline.length > PROJECT_LIMIT && (
-            <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
-          )}
         </SecondaryCard>
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
