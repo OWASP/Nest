@@ -127,7 +127,13 @@ export default function Footer() {
             className="flex items-center gap-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             aria-label="Nest home"
           >
-            <Image src={nestLogoSrc} alt="Nest Logo" width={32} height={32} className="h-8 w-8" />
+            <Image
+              src={nestLogoSrc}
+              alt="Nest Logo"
+              width={28}
+              height={32}
+              className="h-8 w-auto"
+            />
             <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
           </Link>
         </div>
