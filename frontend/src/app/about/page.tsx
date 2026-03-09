@@ -89,11 +89,15 @@ const About = () => {
 
   const [showAllRoadmap, setShowAllRoadmap] = useState(false)
 
+  // --- Timeline grouping helpers ---
+  const TIMELINE_DEFAULT_LIMIT = 5
+
   type ProjectTimelineItem = (typeof projectTimeline)[number]
   type TimelineGroup = { calYear: string; milestones: ProjectTimelineItem[] }
 
   const extractCalYear = (yearStr: string): string => yearStr.split(' ').pop() ?? yearStr
 
+  // Groups ordered newest-first; milestones within each group keep original order
   const timelineGroups: TimelineGroup[] = (() => {
     const map = new Map<string, ProjectTimelineItem[]>()
     for (const milestone of projectTimeline) {
@@ -106,6 +110,8 @@ const About = () => {
       .map(([calYear, milestones]) => ({ calYear, milestones: [...milestones].reverse() }))
   })()
 
+  // Default: expand the most recent year. If it has fewer than 3 milestones,
+  // also expand the next year so at least up to 5 milestones are visible initially.
   const defaultExpandedYears = (() => {
     if (timelineGroups.length === 0) return new Set<string>()
     const mostRecent = timelineGroups[0]
@@ -115,11 +121,11 @@ const About = () => {
     return new Set([mostRecent.calYear])
   })()
 
-  const TIMELINE_DEFAULT_LIMIT = 5
-
   const [expandedYears, setExpandedYears] = useState<Set<string>>(defaultExpandedYears)
+  // Tracks which year the user clicked "+ more" on to show all its milestones
   const [expandedYearMilestones, setExpandedYearMilestones] = useState<Set<string>>(new Set())
 
+  // Toggle a year — only one year open at a time after user interaction
   const toggleYear = (calYear: string): void => {
     setExpandedYears((prev: Set<string>) => {
       if (prev.has(calYear)) {
@@ -127,11 +133,14 @@ const About = () => {
         next.delete(calYear)
         return next
       }
+      // Collapse all others, open only this one
       return new Set([calYear])
     })
+    // Clear "show all" state for any year being collapsed
     setExpandedYearMilestones(new Set())
   }
 
+  // Expand all milestones for a year — collapses any other expanded year first
   const toggleYearMilestones = (calYear: string): void => {
     setExpandedYears(new Set([calYear]))
     setExpandedYearMilestones((prev: Set<string>) => {
@@ -141,6 +150,8 @@ const About = () => {
     })
   }
 
+  // Build the flat list of visible milestones across all expanded years,
+  // respecting per-year "show more". Global zigzag index is assigned here.
   type VisibleMilestone = ProjectTimelineItem & {
     calYear: string
     isFirst: boolean
@@ -157,6 +168,10 @@ const About = () => {
 
   const visibleGroups: VisibleGroup[] = (() => {
     let globalIndex = 0
+
+    // For the default two-year view, apply a global budget of TIMELINE_DEFAULT_LIMIT.
+    // Once the user has interacted (single year open), show that year's milestones
+    // up to TIMELINE_DEFAULT_LIMIT unless they clicked "+ more".
     let budget = TIMELINE_DEFAULT_LIMIT
     const slices = new Map<string, { shown: ProjectTimelineItem[]; hasMore: boolean }>()
     for (const group of timelineGroups) {
@@ -172,6 +187,7 @@ const About = () => {
       }
     }
 
+    // Flat list to get total count for isFirst / isLast
     const flatVisible: (ProjectTimelineItem & { calYear: string })[] = []
     for (const group of timelineGroups) {
       if (!expandedYears.has(group.calYear)) continue
@@ -325,7 +341,8 @@ const About = () => {
                       .map((milestone, index) => (
                         <div
                           key={milestone.url || milestone.title || index}
-                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700">
+                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
+                        >
                           <div className="flex-1">
                             <div className="relative">
                               <Link
@@ -376,7 +393,10 @@ const About = () => {
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div className="space-y-0">
             {(() => {
+              // O(1) lookup instead of O(n) find inside map
               const visibleGroupMap = new Map(visibleGroups.map((g) => [g.calYear, g]))
+
+              // Shared card inner content — single source of truth, hoisted outside group loop
               const cardContent = (milestone: VisibleMilestone) => (
                 <>
                   <span className="mb-2 inline-block rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-500 dark:bg-blue-400/10 dark:text-blue-400">
@@ -386,11 +406,14 @@ const About = () => {
                   <p className="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{milestone.description}</p>
                 </>
               )
+
               return timelineGroups.map((group) => {
                 const isExpanded = expandedYears.has(group.calYear)
                 const visibleGroup = visibleGroupMap.get(group.calYear)
+
                 return (
                   <div key={group.calYear}>
+                    {/* ── Year separator row ─────────────────────────────── */}
                     <button
                       type="button"
                       onClick={() => toggleYear(group.calYear)}
@@ -406,22 +429,31 @@ const About = () => {
                       <span className="hidden h-px flex-1 bg-gray-200 dark:bg-gray-700 md:block" />
                     </button>
 
+                    {/* Bridge line from badge down to first dot — only when expanded */}
                     {isExpanded && visibleGroup && (
                       <div className="mx-auto hidden h-6 w-0.5 bg-gray-200 dark:bg-gray-700 md:block" />
                     )}
 
+                    {/* ── Milestone cards ────────────────────────────────── */}
                     {isExpanded && visibleGroup && (
                       <div id={`timeline-group-${group.calYear}`} className="space-y-0">
                         {visibleGroup.items.map((milestone) => {
                           const isLeft = milestone.globalIndex % 2 === 0
                           const isLast = milestone.isLast
+
                           return (
-                            <div key={milestone.globalIndex} className="relative flex flex-col md:flex-row md:items-center">
+                            <div
+                              key={milestone.globalIndex}
+                              className="relative flex flex-col md:flex-row md:items-center"
+                            >
+                              {/* Connector: top half */}
                               <div className="absolute top-0 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 bg-gray-200 dark:bg-gray-700 md:block" />
+                              {/* Connector: bottom half */}
                               {!isLast && (
                                 <div className="absolute top-1/2 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 bg-gray-200 dark:bg-gray-700 md:block" />
                               )}
 
+                              {/* Left card */}
                               <div className={`w-full py-3 md:w-1/2 ${isLeft ? 'md:pr-10' : 'md:invisible md:py-3'}`}>
                                 {isLeft && (
                                   <div className="group/card rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/80 dark:hover:border-blue-500/40 dark:hover:shadow-blue-950/30">
@@ -430,15 +462,18 @@ const About = () => {
                                 )}
                               </div>
 
+                              {/* Center dot — desktop */}
                               <div className="absolute left-1/2 hidden -translate-x-1/2 md:flex md:items-center md:justify-center">
                                 <div className="z-10 h-3 w-3 rounded-full bg-white ring-2 ring-blue-400 dark:ring-blue-400" />
                               </div>
 
+                              {/* Mobile: dot + month label */}
                               <div className="mb-2 flex items-center gap-3 md:hidden">
                                 <div className="h-3 w-3 shrink-0 rounded-full bg-white ring-2 ring-blue-400" />
                                 <span className="text-xs font-medium text-gray-400">{milestone.year}</span>
                               </div>
 
+                              {/* Right card */}
                               <div className={`w-full md:w-1/2 ${isLeft ? 'md:invisible md:py-3' : 'md:pl-10'}`}>
                                 {!isLeft && (
                                   <div className="group/card rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/80 dark:hover:border-blue-500/40 dark:hover:shadow-blue-950/30">
@@ -450,6 +485,7 @@ const About = () => {
                           )
                         })}
 
+                        {/* ── "More in [Year]" node ───────────────────────── */}
                         {visibleGroup.hasMore && (
                           <div className="relative flex flex-col md:flex-row md:items-center">
                             <div className="absolute top-0 left-1/2 hidden h-1/2 w-0.5 -translate-x-1/2 bg-gray-200 dark:bg-gray-700 md:block" />
