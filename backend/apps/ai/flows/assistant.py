@@ -34,14 +34,14 @@ IMAGE_DESCRIPTION_PROMPT = (
 )
 
 
-def normalize_channel_id(channel_id: str) -> str:
+def normalize_channel_id(channel_id: str | None) -> str:
     """Normalize channel ID by removing # prefix if present.
 
     Args:
-        channel_id: Channel ID that may or may not have # prefix
+        channel_id: Channel ID that may or may not have # prefix, or None.
 
     Returns:
-        Normalized channel ID without # prefix
+        Normalized channel ID without # prefix, or empty string if None.
 
     """
     return channel_id.lstrip("#") if channel_id else ""
@@ -714,7 +714,11 @@ def execute_task(
 
     crew = Crew(**crew_kwargs)
     result = crew.kickoff()
-    return str(result)
+    result_str = str(result).strip() if result else ""
+    # Avoid leaking Question Detector output (YES/NO) to users
+    if result_str and result_str.upper() in ("YES", "NO"):
+        return get_fallback_response()
+    return result_str or get_fallback_response()
 
 
 def get_fallback_response() -> str:
@@ -734,5 +738,5 @@ def get_fallback_response() -> str:
     # Generic message for production
     return (
         "I'm sorry, I encountered an issue processing your request. "
-        "Please try again or rephrasing your question."
+        "Please try again or rephrase your question."
     )

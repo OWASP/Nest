@@ -65,7 +65,7 @@ class Chunk(TimestampedModel):
           save (bool): Whether to save the chunk to the database.
 
         Returns:
-          Chunk: The created chunk instance.
+          Chunk | None: The created chunk instance, or None if duplicate.
 
         Raises:
           ValueError: If embedding dimension doesn't match the field dimension.
@@ -93,22 +93,18 @@ class Chunk(TimestampedModel):
             )
             logger.warning(warning_msg, extra={"context_id": context.id if context else None})
 
-            # Enforce validation in production/staging environments only
-            # Skip validation in test/local environments to allow flexibility during development
-            # In other environments (dev, preview, etc.), log warning but don't fail
+            # Raise only in production/staging; skip in test/local/dev/preview
+            is_production = getattr(settings, "IS_PRODUCTION_ENVIRONMENT", False)
+            is_staging = getattr(settings, "IS_STAGING_ENVIRONMENT", False)
             is_test = getattr(settings, "IS_TEST_ENVIRONMENT", False)
             is_local = getattr(settings, "IS_LOCAL_ENVIRONMENT", False)
-
-            # Enforce validation in production/staging (skip only in test/local)
-            if not is_test and not is_local:
-                is_production = getattr(settings, "IS_PRODUCTION_ENVIRONMENT", False)
-                is_staging = getattr(settings, "IS_STAGING_ENVIRONMENT", False)
-                if is_production or is_staging:
-                    error_msg = (
-                        f"{warning_msg} Ensure the embedding provider matches "
-                        "the configured dimension."
-                    )
-                    raise ValueError(error_msg)
+            should_enforce = (is_production or is_staging) and not (is_test or is_local)
+            if should_enforce:
+                error_msg = (
+                    f"{warning_msg} Ensure the embedding provider matches "
+                    "the configured dimension."
+                )
+                raise ValueError(error_msg)
 
         if Chunk.objects.filter(context=context, text=text).exists():
             return None
