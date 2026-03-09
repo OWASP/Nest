@@ -115,7 +115,10 @@ const About = () => {
     return new Set([mostRecent.calYear])
   })()
 
+  const TIMELINE_DEFAULT_LIMIT = 5
+
   const [expandedYears, setExpandedYears] = useState<Set<string>>(defaultExpandedYears)
+  const [expandedYearMilestones, setExpandedYearMilestones] = useState<Set<string>>(new Set())
 
   const toggleYear = (calYear: string): void => {
     setExpandedYears((prev: Set<string>) => {
@@ -126,7 +129,83 @@ const About = () => {
       }
       return new Set([calYear])
     })
+    setExpandedYearMilestones(new Set())
   }
+
+  const toggleYearMilestones = (calYear: string): void => {
+    setExpandedYears(new Set([calYear]))
+    setExpandedYearMilestones((prev: Set<string>) => {
+      const next = new Set<string>()
+      if (!prev.has(calYear)) next.add(calYear)
+      return next
+    })
+  }
+
+  type VisibleMilestone = ProjectTimelineItem & {
+    calYear: string
+    isFirst: boolean
+    isLast: boolean
+    globalIndex: number
+  }
+
+  type VisibleGroup = {
+    calYear: string
+    items: VisibleMilestone[]
+    hasMore: boolean
+    totalCount: number
+  }
+
+  const visibleGroups: VisibleGroup[] = (() => {
+    let globalIndex = 0
+    let budget = TIMELINE_DEFAULT_LIMIT
+    const slices = new Map<string, { shown: ProjectTimelineItem[]; hasMore: boolean }>()
+    for (const group of timelineGroups) {
+      if (!expandedYears.has(group.calYear)) continue
+      if (expandedYearMilestones.has(group.calYear)) {
+        slices.set(group.calYear, { shown: group.milestones, hasMore: false })
+      } else if (budget > 0) {
+        const shown = group.milestones.slice(0, budget)
+        slices.set(group.calYear, { shown, hasMore: group.milestones.length > shown.length })
+        budget -= shown.length
+      } else {
+        slices.set(group.calYear, { shown: [], hasMore: group.milestones.length > 0 })
+      }
+    }
+
+    const flatVisible: (ProjectTimelineItem & { calYear: string })[] = []
+    for (const group of timelineGroups) {
+      if (!expandedYears.has(group.calYear)) continue
+      const s = slices.get(group.calYear)
+      if (!s) continue
+      for (const m of s.shown) flatVisible.push({ ...m, calYear: group.calYear })
+    }
+
+    const totalVisible = flatVisible.length
+    const result: VisibleGroup[] = []
+    let i = 0
+
+    for (const group of timelineGroups) {
+      if (!expandedYears.has(group.calYear)) continue
+      const s = slices.get(group.calYear)
+      if (!s) continue
+      const { shown, hasMore } = s
+      const items: VisibleMilestone[] = shown.map((m, localIdx) => {
+        const gi = globalIndex++
+        const isAbsoluteLast = i + localIdx === totalVisible - 1
+        return {
+          ...m,
+          calYear: group.calYear,
+          globalIndex: gi,
+          isFirst: i + localIdx === 0,
+          isLast: isAbsoluteLast && !hasMore,
+        }
+      })
+      i += shown.length
+      result.push({ calYear: group.calYear, items, hasMore, totalCount: group.milestones.length })
+    }
+
+    return result
+  })()
 
   useEffect(() => {
     if (error) {
