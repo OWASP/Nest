@@ -129,15 +129,16 @@ const About = () => {
   const toggleYear = (calYear: string): void => {
     setExpandedYears((prev: Set<string>) => {
       if (prev.has(calYear)) {
+        // Keep at least one year expanded
+        if (prev.size === 1) return prev
         const next = new Set(prev)
         next.delete(calYear)
+        setExpandedYearMilestones(new Set())
         return next
       }
       // Collapse all others, open only this one
       return new Set([calYear])
     })
-    // Clear "show all" state for any year being collapsed
-    setExpandedYearMilestones(new Set())
   }
 
   // Expand all milestones for a year — collapses any other expanded year first
