@@ -136,8 +136,6 @@ const ProgramForm = ({
       const { validationErrors, hasValidationErrors } = extractGraphQLErrors(error)
       if (hasValidationErrors) {
         setBackendErrors(validationErrors)
-      } else {
-        throw error
       }
     }
   }
