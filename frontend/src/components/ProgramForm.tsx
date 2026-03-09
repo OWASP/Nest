@@ -116,8 +116,7 @@ const ProgramForm = ({
     }
     setTouched(newTouched)
 
-    // Validate all required fields
-    const nameError = validateName(formData.name)
+    const nameError = validateName(formData.name, backendErrors.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDate(formData.endedAt, formData.startedAt)
@@ -137,6 +136,8 @@ const ProgramForm = ({
       const { validationErrors, hasValidationErrors } = extractGraphQLErrors(error)
       if (hasValidationErrors) {
         setBackendErrors(validationErrors)
+      } else {
+        throw error
       }
     }
   }

@@ -8,18 +8,26 @@ interface GraphQLErrorLike {
 function getGraphQLErrors(error: unknown): GraphQLErrorLike[] | null {
   if (typeof error !== 'object' || error === null) return null
 
+  let candidates: unknown[] | null = null
   if ('errors' in error && Array.isArray((error as { errors: unknown }).errors)) {
-    return (error as { errors: GraphQLErrorLike[] }).errors
-  }
-
-  if (
+    candidates = (error as { errors: unknown[] }).errors
+  } else if (
     'graphQLErrors' in error &&
     Array.isArray((error as { graphQLErrors: unknown }).graphQLErrors)
   ) {
-    return (error as { graphQLErrors: GraphQLErrorLike[] }).graphQLErrors
+    candidates = (error as { graphQLErrors: unknown[] }).graphQLErrors
   }
 
-  return null
+  if (!candidates || candidates.length === 0) return null
+
+  const gqlErrors = candidates.filter(
+    (item): item is GraphQLErrorLike =>
+      typeof item === 'object' &&
+      item !== null &&
+      typeof (item as GraphQLErrorLike).message === 'string'
+  )
+
+  return gqlErrors.length > 0 ? gqlErrors : null
 }
 
 export function extractGraphQLErrors(error: unknown): {
