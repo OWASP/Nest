@@ -21,6 +21,7 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
    "Sid": "S3StateAccess",
    "Effect": "Allow",
    "Action": [
+    "s3:DeleteObject",
     "s3:GetObject",
     "s3:ListBucket",
     "s3:PutObject"

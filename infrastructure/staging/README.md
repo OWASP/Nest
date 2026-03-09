@@ -28,6 +28,7 @@ Use the following inline permissions for the `nest-staging` IAM User.
    "Sid": "S3StateManagement",
    "Effect": "Allow",
    "Action": [
+    "s3:DeleteObject",
     "s3:GetObject",
     "s3:PutObject",
     "s3:ListBucket"
