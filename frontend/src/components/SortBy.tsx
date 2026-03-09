@@ -24,7 +24,7 @@ const SortBy = ({
     <div className="flex items-center">
       {/* Sort Attribute Dropdown */}
       <div
-        className={`inline-flex h-12 items-center border border-gray-300 bg-white pl-3 shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800 ${showOrderButton ? 'rounded-l-lg rounded-r-none border-r-0' : 'rounded-lg'}`}
+        className={`inline-flex h-12 items-center border border-l-0 border-gray-300 bg-white pl-3 shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800 ${showOrderButton ? 'rounded-l-lg rounded-r-none border-r-0' : 'rounded-lg'}`}
       >
         <Select
           className=""
