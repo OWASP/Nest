@@ -27,7 +27,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         size="md"
         label="Country :"
         isLoading={isLoading}
-        defaultItems={options}
+        items={options}
         selectedKey={selectedCountry}
         onSelectionChange={(key) => {
           onCountryChange((key as string) ?? '')

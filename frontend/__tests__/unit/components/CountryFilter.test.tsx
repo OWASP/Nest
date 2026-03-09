@@ -32,9 +32,10 @@ describe('<CountryFilter />', () => {
     fireEvent.change(input, { target: { value: 'Ger' } })
 
     await waitFor(() => {
-      const option = screen.getByRole('option', { name: 'Germany' })
-      fireEvent.click(option)
+      expect(screen.getByRole('option', { name: 'Germany' })).toBeInTheDocument()
     })
+
+    fireEvent.click(screen.getByRole('option', { name: 'Germany' }))
 
     expect(defaultProps.onCountryChange).toHaveBeenCalledWith('Germany')
   })

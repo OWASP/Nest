@@ -166,4 +166,60 @@ describe('<SortBy />', () => {
     const sortOrderButton = screen.queryByLabelText(/Sort in/i)
     expect(sortOrderButton).not.toBeInTheDocument()
   })
+
+  it('renders sort dropdown and order button connected with no gap', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const container = screen.getByRole('button', { name: /Sort By/ }).closest('.flex.items-center')
+    expect(container).toBeInTheDocument()
+    expect(container).not.toHaveClass('gap-2')
+  })
+
+  it('renders order button with matching height to dropdown', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+    expect(orderButton).toHaveClass('h-12')
+  })
+
+  it('renders dropdown wrapper with rounded-r-none when order button is visible', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    const outerWrapper = sortButton.closest('.h-12.items-center')
+    expect(outerWrapper).toHaveClass('rounded-r-none')
+    expect(outerWrapper).toHaveClass('border-r-0')
+  })
+
+  it('renders dropdown wrapper with full rounded-lg when order button is hidden', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="default" />)
+    })
+    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    const outerWrapper = sortButton.closest('.h-12.items-center')
+    expect(outerWrapper).toHaveClass('rounded-lg')
+    expect(outerWrapper).not.toHaveClass('rounded-r-none')
+  })
+
+  it('renders order button with rounded-l-none for seamless connection', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+    expect(orderButton).toHaveClass('rounded-l-none')
+    expect(orderButton).toHaveClass('rounded-r-lg')
+    expect(orderButton).toHaveClass('border-l-0')
+  })
+
+  it('renders order button without focus ring', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+    expect(orderButton).toHaveClass('focus:ring-0')
+    expect(orderButton).toHaveClass('focus:ring-offset-0')
+  })
 })

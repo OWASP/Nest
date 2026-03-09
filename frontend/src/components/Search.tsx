@@ -76,9 +76,7 @@ const SearchBar: React.FC<SearchProps> = ({
   }
 
   return (
-    <div
-      className={`w-full max-w-md py-4 ${className.includes('rounded-none') || className.includes('rounded-r-none') ? 'p-0' : 'p-4'}`}
-    >
+    <div className={'w-full max-w-md py-4'}>
       <div className="relative">
         {isLoaded ? (
           <>
