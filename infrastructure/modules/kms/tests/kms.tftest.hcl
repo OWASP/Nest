@@ -8,6 +8,7 @@ override_data {
 }
 
 variables {
+  alias_name   = "alias/nest-test"
   common_tags  = { Environment = "test", Project = "nest" }
   environment  = "test"
   project_name = "nest"

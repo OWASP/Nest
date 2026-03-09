@@ -66,6 +66,6 @@ resource "aws_kms_key" "main" {
 }
 
 resource "aws_kms_alias" "main" {
-  name          = "alias/${var.project_name}-${var.environment}"
+  name          = var.alias_name
   target_key_id = aws_kms_key.main.key_id
 }

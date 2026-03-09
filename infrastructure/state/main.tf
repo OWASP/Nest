@@ -24,8 +24,10 @@ locals {
 module "kms" {
   source = "../modules/kms"
 
+  alias_name   = "alias/${var.project_name}-${each.key}-state"
+  for_each     = local.state_environments
   common_tags  = local.common_tags
-  environment  = "state"
+  environment  = each.key
   project_name = var.project_name
 }
 
@@ -110,7 +112,7 @@ resource "aws_dynamodb_table" "state_lock" {
   }
   server_side_encryption {
     enabled     = true
-    kms_key_arn = module.kms.key_arn
+    kms_key_arn = module.kms[each.key].key_arn
   }
 }
 
