@@ -325,8 +325,7 @@ const About = () => {
                       .map((milestone, index) => (
                         <div
                           key={milestone.url || milestone.title || index}
-                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
-                        >
+                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700">
                           <div className="flex-1">
                             <div className="relative">
                               <Link
