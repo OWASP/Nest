@@ -18,8 +18,3 @@ variable "project_name" {
   description = "The name of the project."
   type        = string
 }
-
-variable "zappa_bucket_name" {
-  description = "The name of the S3 bucket for Zappa deployments."
-  type        = string
-}

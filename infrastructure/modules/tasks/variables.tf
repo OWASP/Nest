@@ -21,6 +21,16 @@ variable "container_parameters_arns" {
   default     = {}
 }
 
+variable "ecr_repository_arn" {
+  description = "The ARN of the ECR repository for the backend image."
+  type        = string
+}
+
+variable "ecr_repository_url" {
+  description = "The URL of the ECR repository for the backend image."
+  type        = string
+}
+
 variable "ecs_sg_id" {
   description = "The ID of the security group for the ECS tasks."
   type        = string

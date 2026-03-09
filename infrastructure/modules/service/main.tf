@@ -9,24 +9,56 @@ terraform {
   }
 }
 
+locals {
+  name_prefix = "${var.project_name}-${var.environment}-${var.service_name}"
+
+  container_definition = merge(
+    {
+      essential = true
+      image     = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.main.name
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+      name = var.service_name
+      portMappings = [
+        {
+          containerPort = var.container_port
+          hostPort      = var.container_port
+          protocol      = "tcp"
+        }
+      ]
+      secrets = [for name, valueFrom in var.parameters_arns : {
+        name      = name
+        valueFrom = valueFrom
+      }]
+    },
+    var.command != null ? { command = var.command } : {}
+  )
+}
+
 data "aws_caller_identity" "current" {}
 
-resource "aws_cloudwatch_log_group" "frontend" {
+resource "aws_cloudwatch_log_group" "main" {
   kms_key_id        = var.kms_key_arn
-  name              = "/aws/ecs/${var.project_name}-${var.environment}-frontend"
+  name              = "/aws/ecs/${local.name_prefix}"
   retention_in_days = var.log_retention_in_days
   tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-logs"
+    Name = "${local.name_prefix}-logs"
   })
 }
 
 # TODO: disallow tag mutability
 # NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
-resource "aws_ecr_repository" "frontend" {
+resource "aws_ecr_repository" "main" {
   image_tag_mutability = "MUTABLE"
-  name                 = "${var.project_name}-${var.environment}-frontend"
+  name                 = local.name_prefix
   tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-ecr"
+    Name = "${local.name_prefix}-ecr"
   })
 
   image_scanning_configuration {
@@ -34,7 +66,7 @@ resource "aws_ecr_repository" "frontend" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "frontend" {
+resource "aws_ecr_lifecycle_policy" "main" {
   policy = jsonencode({
     rules = [
       {
@@ -52,13 +84,13 @@ resource "aws_ecr_lifecycle_policy" "frontend" {
       }
     ]
   })
-  repository = aws_ecr_repository.frontend.name
+  repository = aws_ecr_repository.main.name
 }
 
-resource "aws_ecs_cluster" "frontend" {
-  name = "${var.project_name}-${var.environment}-frontend-cluster"
+resource "aws_ecs_cluster" "main" {
+  name = "${local.name_prefix}-cluster"
   tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-cluster"
+    Name = "${local.name_prefix}-cluster"
   })
 
   setting {
@@ -67,54 +99,41 @@ resource "aws_ecs_cluster" "frontend" {
   }
 }
 
-resource "aws_ecs_task_definition" "frontend" {
-  container_definitions = jsonencode([
-    {
-      essential = true
-      image     = "${aws_ecr_repository.frontend.repository_url}:${var.image_tag}"
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.frontend.name
-          "awslogs-region"        = var.aws_region
-          "awslogs-stream-prefix" = "ecs"
-        }
-      }
-      name = "frontend"
-      portMappings = [
-        {
-          containerPort = 3000
-          hostPort      = 3000
-          protocol      = "tcp"
-        }
-      ]
-      secrets = [for name, valueFrom in var.frontend_parameters_arns : {
-        name      = name
-        valueFrom = valueFrom
-      }]
-    }
-  ])
+resource "aws_ecs_cluster_capacity_providers" "main" {
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+  cluster_name       = aws_ecs_cluster.main.name
+
+  default_capacity_provider_strategy {
+    base              = 0
+    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+    weight            = 1
+  }
+}
+
+resource "aws_ecs_task_definition" "main" {
+  container_definitions    = jsonencode([local.container_definition])
   cpu                      = var.container_cpu
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  family                   = "${var.project_name}-${var.environment}-frontend"
+  family                   = local.name_prefix
   memory                   = var.container_memory
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-task-def"
+    Name = "${local.name_prefix}-task-def"
   })
   task_role_arn = aws_iam_role.ecs_task_role.arn
 }
 
-resource "aws_ecs_service" "frontend" {
-  cluster                           = aws_ecs_cluster.frontend.id
+resource "aws_ecs_service" "main" {
+  cluster                           = aws_ecs_cluster.main.id
   desired_count                     = var.desired_count
+  force_new_deployment              = var.force_new_deployment
   health_check_grace_period_seconds = 60
-  name                              = "${var.project_name}-${var.environment}-frontend-service"
+  name                              = "${local.name_prefix}-service"
   tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-frontend-service"
+    Name = "${local.name_prefix}-service"
   })
-  task_definition = aws_ecs_task_definition.frontend.arn
+  task_definition = aws_ecs_task_definition.main.arn
 
   capacity_provider_strategy {
     base              = 0
@@ -123,34 +142,34 @@ resource "aws_ecs_service" "frontend" {
   }
 
   load_balancer {
-    container_name   = "frontend"
-    container_port   = 3000
+    container_name   = var.service_name
+    container_port   = var.container_port
     target_group_arn = var.target_group_arn
   }
 
   network_configuration {
     assign_public_ip = false
-    security_groups  = [var.frontend_sg_id]
+    security_groups  = [var.security_group_id]
     subnets          = var.private_subnet_ids
   }
 }
 
-resource "aws_appautoscaling_target" "frontend" {
+resource "aws_appautoscaling_target" "main" {
   count              = var.enable_auto_scaling ? 1 : 0
   max_capacity       = var.max_count
   min_capacity       = var.min_count
-  resource_id        = "service/${aws_ecs_cluster.frontend.name}/${aws_ecs_service.frontend.name}"
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
 
-resource "aws_appautoscaling_policy" "frontend_cpu" {
+resource "aws_appautoscaling_policy" "cpu" {
   count              = var.enable_auto_scaling ? 1 : 0
-  name               = "${var.project_name}-${var.environment}-frontend-cpu-scaling"
+  name               = "${local.name_prefix}-cpu-scaling"
   policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.frontend[0].resource_id
-  scalable_dimension = aws_appautoscaling_target.frontend[0].scalable_dimension
-  service_namespace  = aws_appautoscaling_target.frontend[0].service_namespace
+  resource_id        = aws_appautoscaling_target.main[0].resource_id
+  scalable_dimension = aws_appautoscaling_target.main[0].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.main[0].service_namespace
 
   target_tracking_scaling_policy_configuration {
     scale_in_cooldown  = 300
@@ -176,7 +195,7 @@ resource "aws_iam_role" "ecs_task_role" {
       }
     ]
   })
-  name = "${var.project_name}-${var.environment}-frontend-task-role"
+  name = "${local.name_prefix}-task-role"
   tags = var.common_tags
 }
 
@@ -193,13 +212,13 @@ resource "aws_iam_role" "ecs_task_execution_role" {
       }
     ]
   })
-  name = "${var.project_name}-${var.environment}-frontend-execution-role"
+  name = "${local.name_prefix}-execution-role"
   tags = var.common_tags
 }
 
 resource "aws_iam_policy" "ecs_task_execution_policy" {
   description = "Policy for ECS task execution - ECR and CloudWatch Logs access."
-  name        = "${var.project_name}-${var.environment}-frontend-execution-policy"
+  name        = "${local.name_prefix}-execution-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -218,7 +237,7 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
           "ecr:GetDownloadUrlForLayer"
         ]
         Effect   = "Allow"
-        Resource = aws_ecr_repository.frontend.arn
+        Resource = aws_ecr_repository.main.arn
       },
       {
         Action = [
@@ -226,7 +245,7 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
           "logs:PutLogEvents"
         ]
         Effect   = "Allow"
-        Resource = "${aws_cloudwatch_log_group.frontend.arn}:*"
+        Resource = "${aws_cloudwatch_log_group.main.arn}:*"
       }
     ]
   })
@@ -234,7 +253,7 @@ resource "aws_iam_policy" "ecs_task_execution_policy" {
 
 resource "aws_iam_policy" "ecs_task_execution_ssm_policy" {
   description = "Policy to allow ECS tasks to read SSM parameters."
-  name        = "${var.project_name}-${var.environment}-frontend-ssm-policy"
+  name        = "${local.name_prefix}-ssm-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -259,4 +278,10 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy_attachment"
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_ssm_policy_attachment" {
   policy_arn = aws_iam_policy.ecs_task_execution_ssm_policy.arn
   role       = aws_iam_role.ecs_task_execution_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "task_role_policies" {
+  for_each   = toset(var.task_role_policy_arns)
+  policy_arn = each.value
+  role       = aws_iam_role.ecs_task_role.name
 }

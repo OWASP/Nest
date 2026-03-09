@@ -50,11 +50,6 @@ locals {
 
 data "aws_elb_service_account" "main" {}
 
-data "aws_lambda_function" "backend" {
-  count         = var.lambda_function_name != null ? 1 : 0
-  function_name = var.lambda_function_name
-}
-
 resource "random_id" "suffix" {
   byte_length = 4
 }
@@ -77,29 +72,6 @@ resource "aws_acm_certificate_validation" "main" {
   validation_record_fqdns = [
     for dvo in aws_acm_certificate.main.domain_validation_options : dvo.resource_record_name
   ]
-}
-
-resource "aws_lambda_alias" "live" {
-  count            = var.lambda_function_name != null ? 1 : 0
-  description      = "Alias pointing to latest published version for SnapStart"
-  function_name    = var.lambda_function_name
-  function_version = data.aws_lambda_function.backend[0].version
-  name             = "live"
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes        = [function_version]
-  }
-}
-
-resource "aws_lambda_permission" "alb" {
-  action        = "lambda:InvokeFunction"
-  count         = var.lambda_function_name != null ? 1 : 0
-  function_name = var.lambda_function_name
-  principal     = "elasticloadbalancing.amazonaws.com"
-  qualifier     = aws_lambda_alias.live[0].name
-  source_arn    = aws_lb_target_group.lambda[0].arn
-  statement_id  = "AllowALBInvoke"
 }
 
 resource "aws_lb" "main" {
@@ -158,19 +130,42 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_lb_listener_rule" "backend_https" {
-  for_each     = var.lambda_function_name != null ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  for_each     = { for idx, chunk in local.backend_path_chunks : idx => chunk }
   listener_arn = aws_lb_listener.https.arn
   priority     = 100 + tonumber(each.key)
   tags         = var.common_tags
 
   action {
-    target_group_arn = aws_lb_target_group.lambda[0].arn
+    target_group_arn = aws_lb_target_group.backend.arn
     type             = "forward"
   }
   condition {
     path_pattern {
       values = each.value
     }
+  }
+}
+
+resource "aws_lb_target_group" "backend" {
+  deregistration_delay = 30
+  name                 = "${var.project_name}-${var.environment}-backend-tg"
+  port                 = var.backend_port
+  protocol             = "HTTP"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-backend-tg"
+  })
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 30
+    matcher             = "200-299"
+    path                = var.backend_health_check_path
+    protocol            = "HTTP"
+    timeout             = 5
+    unhealthy_threshold = 3
   }
 }
 
@@ -195,22 +190,6 @@ resource "aws_lb_target_group" "frontend" {
     timeout             = 5
     unhealthy_threshold = 3
   }
-}
-
-resource "aws_lb_target_group" "lambda" {
-  count       = var.lambda_function_name != null ? 1 : 0
-  name        = "${var.project_name}-${var.environment}-lambda-tg"
-  target_type = "lambda"
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-lambda-tg"
-  })
-}
-
-resource "aws_lb_target_group_attachment" "lambda" {
-  count            = var.lambda_function_name != null ? 1 : 0
-  depends_on       = [aws_lambda_permission.alb]
-  target_group_arn = aws_lb_target_group.lambda[0].arn
-  target_id        = aws_lambda_alias.live[0].arn
 }
 
 resource "aws_s3_bucket" "alb_logs" { # NOSONAR
