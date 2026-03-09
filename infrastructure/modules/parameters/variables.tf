@@ -93,3 +93,8 @@ variable "settings_module" {
   type        = string
   default     = "settings.staging"
 }
+
+variable "static_bucket_name" {
+  description = "The name of the S3 bucket for Django static files."
+  type        = string
+}

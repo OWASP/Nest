@@ -16,7 +16,6 @@ locals {
     Project     = var.project_name
   }
   fixtures_bucket_name = coalesce(var.fixtures_bucket_name, "${var.project_name}-${var.environment}-fixtures")
-  zappa_bucket_name    = coalesce(var.zappa_bucket_name, "${var.project_name}-${var.environment}-zappa-deployments")
 }
 
 module "alb" {
@@ -28,10 +27,34 @@ module "alb" {
   environment                = var.environment
   frontend_health_check_path = "/"
   frontend_port              = 3000
-  lambda_function_name       = var.lambda_function_name
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
   vpc_id                     = module.networking.vpc_id
+}
+
+module "backend" {
+  source = "../modules/service"
+
+  aws_region            = var.aws_region
+  command               = ["./entrypoint.sh"]
+  common_tags           = local.common_tags
+  container_cpu         = 1024
+  container_memory      = 2048
+  container_port        = 8000
+  desired_count         = var.backend_desired_count
+  enable_auto_scaling   = var.backend_enable_auto_scaling
+  environment           = var.environment
+  kms_key_arn           = module.kms.key_arn
+  max_count             = var.backend_max_count
+  min_count             = var.backend_min_count
+  parameters_arns       = module.parameters.django_ssm_parameter_arns
+  private_subnet_ids    = module.networking.private_subnet_ids
+  project_name          = var.project_name
+  security_group_id     = module.security.backend_sg_id
+  service_name          = "backend"
+  target_group_arn      = module.alb.backend_target_group_arn
+  task_role_policy_arns = [module.storage.static_read_write_policy_arn]
+  use_fargate_spot      = var.backend_use_fargate_spot
 }
 
 module "cache" {
@@ -73,40 +96,25 @@ module "database" {
   security_group_ids             = [module.security.rds_sg_id]
 }
 
-module "ecs" {
-  source = "../modules/ecs"
-
-  assign_public_ip              = var.ecs_assign_public_ip
-  aws_region                    = var.aws_region
-  common_tags                   = local.common_tags
-  container_parameters_arns     = module.parameters.django_ssm_parameter_arns
-  ecs_sg_id                     = module.security.ecs_sg_id
-  environment                   = var.environment
-  fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
-  fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
-  kms_key_arn                   = module.kms.key_arn
-  project_name                  = var.project_name
-  subnet_ids                    = var.ecs_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
-  use_fargate_spot              = var.ecs_use_fargate_spot
-}
-
 module "frontend" {
-  source = "../modules/frontend"
+  source = "../modules/service"
 
-  aws_region               = var.aws_region
-  common_tags              = local.common_tags
-  desired_count            = var.frontend_desired_count
-  enable_auto_scaling      = var.frontend_enable_auto_scaling
-  environment              = var.environment
-  frontend_parameters_arns = module.parameters.frontend_ssm_parameter_arns
-  frontend_sg_id           = module.security.frontend_sg_id
-  kms_key_arn              = module.kms.key_arn
-  max_count                = var.frontend_max_count
-  min_count                = var.frontend_min_count
-  private_subnet_ids       = module.networking.private_subnet_ids
-  project_name             = var.project_name
-  target_group_arn         = module.alb.frontend_target_group_arn
-  use_fargate_spot         = var.frontend_use_fargate_spot
+  aws_region          = var.aws_region
+  common_tags         = local.common_tags
+  container_port      = 3000
+  desired_count       = var.frontend_desired_count
+  enable_auto_scaling = var.frontend_enable_auto_scaling
+  environment         = var.environment
+  kms_key_arn         = module.kms.key_arn
+  max_count           = var.frontend_max_count
+  min_count           = var.frontend_min_count
+  parameters_arns     = module.parameters.frontend_ssm_parameter_arns
+  private_subnet_ids  = module.networking.private_subnet_ids
+  project_name        = var.project_name
+  security_group_id   = module.security.frontend_sg_id
+  service_name        = "frontend"
+  target_group_arn    = module.alb.frontend_target_group_arn
+  use_fargate_spot    = var.frontend_use_fargate_spot
 }
 
 module "kms" {
@@ -140,10 +148,7 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  allowed_hosts = join(",", [
-    var.domain_name,
-    "zappa",
-  ])
+  allowed_hosts      = var.domain_name
   allowed_origins    = "https://${var.domain_name}"
   common_tags        = local.common_tags
   db_host            = module.database.db_proxy_endpoint
@@ -158,6 +163,7 @@ module "parameters" {
   redis_password_arn = module.cache.redis_password_arn
   server_csrf_url    = "https://${var.domain_name}/csrf/"
   server_graphql_url = "https://${var.domain_name}/graphql/"
+  static_bucket_name = module.storage.static_s3_bucket_name
 }
 
 module "security" {
@@ -181,5 +187,23 @@ module "storage" {
   environment          = var.environment
   fixtures_bucket_name = local.fixtures_bucket_name
   project_name         = var.project_name
-  zappa_bucket_name    = local.zappa_bucket_name
+}
+
+module "tasks" {
+  source = "../modules/tasks"
+
+  assign_public_ip              = var.tasks_assign_public_ip
+  aws_region                    = var.aws_region
+  common_tags                   = local.common_tags
+  container_parameters_arns     = module.parameters.django_ssm_parameter_arns
+  ecr_repository_arn            = module.backend.ecr_repository_arn
+  ecr_repository_url            = module.backend.ecr_repository_url
+  ecs_sg_id                     = module.security.tasks_sg_id
+  environment                   = var.environment
+  fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
+  fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
+  kms_key_arn                   = module.kms.key_arn
+  project_name                  = var.project_name
+  subnet_ids                    = var.tasks_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
+  use_fargate_spot              = var.tasks_use_fargate_spot
 }

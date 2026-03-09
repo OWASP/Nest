@@ -1,5 +1,5 @@
 variable "aws_region" {
-  description = "The AWS region for resources."
+  description = "The AWS region."
   type        = string
 }
 
@@ -9,26 +9,37 @@ variable "common_tags" {
   default     = {}
 }
 
+variable "command" {
+  description = "The command to run in the container. If null, the container's default CMD is used."
+  type        = list(string)
+  default     = null
+}
+
 variable "container_cpu" {
-  description = "The CPU units for the frontend container (1024 = 1 vCPU)."
+  description = "The CPU units for the container (1024 = 1 vCPU)."
   type        = number
   default     = 512
 }
 
 variable "container_memory" {
-  description = "The memory for the frontend container in MB."
+  description = "The memory for the container in MiB."
   type        = number
   default     = 1024
 }
 
+variable "container_port" {
+  description = "The port the container listens on."
+  type        = number
+}
+
 variable "desired_count" {
-  description = "The desired number of frontend tasks."
+  description = "The desired number of tasks."
   type        = number
   default     = 2
 }
 
 variable "enable_auto_scaling" {
-  description = "Whether to enable auto scaling for the frontend."
+  description = "Whether to enable auto scaling for the service."
   type        = bool
   default     = false
 }
@@ -38,31 +49,27 @@ variable "environment" {
   type        = string
 }
 
-variable "frontend_parameters_arns" {
-  description = "A map of environment variable names to SSM parameter ARNs."
-  type        = map(string)
-}
-
-variable "frontend_sg_id" {
-  description = "The security group ID for the frontend ECS tasks."
-  type        = string
+variable "force_new_deployment" {
+  description = "Whether to force a new deployment on each apply."
+  type        = bool
+  default     = false
 }
 
 variable "image_tag" {
-  description = "The Docker image tag for the frontend."
+  description = "The Docker image tag."
   type        = string
   default     = "latest"
 }
 
 variable "kms_key_arn" {
-  description = "The ARN of the KMS key."
+  description = "The ARN of the KMS key for log encryption."
   type        = string
 }
 
 variable "log_retention_in_days" {
   description = "The CloudWatch log retention in days."
   type        = number
-  default     = 7
+  default     = 30
 }
 
 variable "max_count" {
@@ -87,8 +94,14 @@ variable "min_count" {
   }
 }
 
+variable "parameters_arns" {
+  description = "Map of environment variable names to the ARNs of SSM parameters."
+  type        = map(string)
+  default     = {}
+}
+
 variable "private_subnet_ids" {
-  description = "A list of private subnet IDs for ECS tasks."
+  description = "A list of private subnet IDs for the service."
   type        = list(string)
 }
 
@@ -97,13 +110,29 @@ variable "project_name" {
   type        = string
 }
 
-variable "target_group_arn" {
-  description = "The ARN of the ALB target group for the frontend."
+variable "security_group_id" {
+  description = "The ID of the security group for the service."
   type        = string
 }
 
+variable "service_name" {
+  description = "The name of the service (e.g., backend, frontend)."
+  type        = string
+}
+
+variable "target_group_arn" {
+  description = "The ARN of the ALB target group."
+  type        = string
+}
+
+variable "task_role_policy_arns" {
+  description = "A list of additional IAM policy ARNs to attach to the ECS task role."
+  type        = list(string)
+  default     = []
+}
+
 variable "use_fargate_spot" {
-  description = "Whether to use Fargate Spot capacity provider for frontend tasks."
+  description = "Whether to use Fargate Spot capacity provider."
   type        = bool
   default     = false
 }
