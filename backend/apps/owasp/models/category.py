@@ -21,8 +21,6 @@ class ProjectCategory(TimestampedModel):
 
         db_table = "owasp_project_categories"
         indexes = [
-            models.Index(fields=["name"], name="category_name_idx"),
-            models.Index(fields=["parent"], name="category_parent_idx"),
             models.Index(fields=["is_active"], name="category_is_active_idx"),
         ]
         verbose_name_plural = "Project categories"

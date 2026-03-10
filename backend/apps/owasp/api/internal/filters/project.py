@@ -26,7 +26,9 @@ class ProjectFilter:
             try:
                 category = ProjectCategory.objects.get(slug=category_slug, is_active=True)
                 category_ids = [category.id]
-                category_ids.extend(category.get_descendants().values_list("id", flat=True))
+                category_ids.extend(
+                    category.get_descendants().filter(is_active=True).values_list("id", flat=True)
+                )
                 category_q |= Q(categories__id__in=category_ids)
             except ProjectCategory.DoesNotExist:
                 continue
