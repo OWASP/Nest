@@ -17,9 +17,6 @@ misconfigurations:
     paths:
       - infrastructure/modules/alb/main.tf
       - infrastructure/modules/storage/modules/s3-bucket/main.tf
-  - id: AVD-AWS-0164  # Public subnet map_public_ip for ALB/NAT; review for production
-    paths:
-      - infrastructure/modules/networking/main.tf
 
 vulnerabilities:
   # TODO(arkid15r): Remove when v5.9.3 is no longer current.
