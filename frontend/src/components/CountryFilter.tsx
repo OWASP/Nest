@@ -21,8 +21,9 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   )
 
   return (
-    <div className="inline-flex h-12 items-center rounded-lg border border-r-0 border-gray-300 bg-white pl-1 shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
+    <div className="relative inline-flex h-12 items-center rounded-lg border border-r-0 border-gray-300 bg-white shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
       <Autocomplete
+        aria-label="Country"
         labelPlacement="outside-left"
         size="md"
         isLoading={isLoading}
@@ -35,15 +36,17 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         scrollShadowProps={{
           isEnabled: false,
         }}
+        clearButtonProps={{ 'aria-label': 'Clear country selection' }}
         classNames={{
           base: 'w-52',
           clearButton: 'p-0',
           listbox: 'p-0 focus:outline-none',
           popoverContent:
-            'bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg min-w-44 max-h-72 p-1 focus:outline-none',
+            'z-[1000] mt-1 !w-52 !min-w-52 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-72 p-1 focus:outline-none',
           selectorButton: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
         }}
         inputProps={{
+          'aria-label': 'Country',
           classNames: {
             label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
             inputWrapper:

@@ -171,7 +171,8 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
     })
-    const container = screen.getByRole('button', { name: /Sort By/ }).closest('.flex.items-center')
+    // Trigger shows selected value "Name" when showLabel is false
+    const container = screen.getByRole('button', { name: 'Name' }).closest('.flex.items-center')
     expect(container).toBeInTheDocument()
     expect(container).not.toHaveClass('gap-2')
   })
@@ -188,7 +189,8 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
     })
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    // Trigger shows selected value "Name" when showLabel is false
+    const sortButton = screen.getByRole('button', { name: 'Name' })
     const outerWrapper = sortButton.closest('.h-12.items-center')
     expect(outerWrapper).toHaveClass('rounded-r-none')
     expect(outerWrapper).toHaveClass('border-r-0')
@@ -198,7 +200,8 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} selectedSortOption="default" />)
     })
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    // When no option is selected the order button is hidden; only the Select trigger is present
+    const sortButton = screen.getByRole('button')
     const outerWrapper = sortButton.closest('.h-12.items-center')
     expect(outerWrapper).toHaveClass('rounded-lg')
     expect(outerWrapper).not.toHaveClass('rounded-r-none')

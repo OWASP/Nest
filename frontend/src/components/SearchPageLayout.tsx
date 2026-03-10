@@ -44,11 +44,6 @@ const SearchPageLayout = ({
       setIsFirstLoad(false)
     }
   }, [isLoaded, isFirstLoad])
-  const getSearchBarClassName = () => {
-    if (inlineSort && filterChildren) return 'rounded-none'
-    if (inlineSort) return 'rounded-r-none'
-    return ''
-  }
 
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
