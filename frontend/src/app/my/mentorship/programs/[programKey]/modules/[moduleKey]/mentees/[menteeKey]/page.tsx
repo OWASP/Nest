@@ -18,6 +18,32 @@ import Pagination from 'components/Pagination'
 import SecondaryCard from 'components/SecondaryCard'
 
 const ITEMS_PER_PAGE = 20
+const DEADLINE_ALL = 'all'
+const DEADLINE_OPTIONS = [
+  { key: 'all', label: 'All' },
+  { key: 'overdue', label: 'Overdue' },
+  { key: 'due-soon', label: 'Due Soon' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'no-deadline', label: 'No Deadline' },
+]
+
+const getDeadlineCategory = (deadline?: string | null): string => {
+  if (!deadline) return 'no-deadline'
+
+  const now = new Date()
+  const deadlineDate = new Date(deadline)
+  const nowStartUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  const deadlineStartUtc = Date.UTC(
+    deadlineDate.getUTCFullYear(),
+    deadlineDate.getUTCMonth(),
+    deadlineDate.getUTCDate()
+  )
+  const diffDays = Math.floor((deadlineStartUtc - nowStartUtc) / 86400000)
+
+  if (diffDays < 0) return 'overdue'
+  if (diffDays <= 7) return 'due-soon'
+  return 'upcoming'
+}
 
 const MenteeProfilePage = () => {
   const { programKey, moduleKey, menteeKey } = useParams<{
@@ -32,6 +58,7 @@ const MenteeProfilePage = () => {
   >([])
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [selectedDeadline, setSelectedDeadline] = useState<string>(DEADLINE_ALL)
   const [currentPage, setCurrentPage] = useState(1)
 
   const {
@@ -67,6 +94,7 @@ const MenteeProfilePage = () => {
       isMerged: issue.isMerged,
       labels: issue.labels || [],
       assignees: issue.assignees || [],
+      deadline: issue.taskDeadline ?? null,
       url: issue.url,
     }))
   }, [menteeIssuesData])
@@ -91,7 +119,13 @@ const MenteeProfilePage = () => {
     open: openIssues,
     closed: closedIssues,
   }
-  const filteredIssues = issueMap[statusFilter] || menteeIssues
+  let filteredIssues = issueMap[statusFilter] || menteeIssues
+
+  if (selectedDeadline !== DEADLINE_ALL) {
+    filteredIssues = filteredIssues.filter(
+      (issue) => getDeadlineCategory(issue.deadline) === selectedDeadline
+    )
+  }
 
   const totalPages = Math.ceil(filteredIssues.length / ITEMS_PER_PAGE)
   const paginatedIssues = filteredIssues.slice(
@@ -182,7 +216,36 @@ const MenteeProfilePage = () => {
           <div className="w-full">
             <div className="flex justify-between">
               <h1 className="text-3xl font-bold">Assigned Issues</h1>
-              <div className="mb-4 flex justify-end">
+              <div className="mb-4 flex justify-end gap-3">
+                <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+                  <Select
+                    size="md"
+                    aria-label="Filter by deadline"
+                    selectedKeys={new Set([selectedDeadline])}
+                    onSelectionChange={(keys) => {
+                      const [key] = Array.from(keys as Set<string>)
+                      if (key) {
+                        setSelectedDeadline(key)
+                        setCurrentPage(1)
+                      }
+                    }}
+                    classNames={{
+                      trigger: 'bg-gray-200 dark:bg-[#323232] pl-4 text-nowrap w-36',
+                      popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
+                    }}
+                  >
+                    {DEADLINE_OPTIONS.map((option) => (
+                      <SelectItem
+                        key={option.key}
+                        classNames={{
+                          base: 'text-sm hover:bg-[#D1DBE6] dark:hover:bg-[#454545] rounded-none px-3 py-0.5',
+                        }}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
                 <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
                   <Select
                     size="md"
@@ -218,6 +281,7 @@ const MenteeProfilePage = () => {
             <IssuesTable
               issues={paginatedIssues}
               showAssignee={false}
+              showDeadline={true}
               onIssueClick={handleIssueClick}
               emptyMessage="No issues found for the selected filter."
             />
