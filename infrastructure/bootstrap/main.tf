@@ -85,7 +85,6 @@ data "aws_iam_policy_document" "part_one" {
     sid    = "CloudWatchLogsManagement"
     effect = "Allow"
     actions = [
-      "logs:AssociateKmsKey",
       "logs:CreateLogGroup",
       "logs:DeleteLogGroup",
       "logs:DescribeLogStreams",
