@@ -15,12 +15,17 @@ output "alb_dns_name" {
 
 output "backend_ecr_repository_url" {
   description = "The URL of the backend ECR repository."
-  value       = module.ecs.ecr_repository_url
+  value       = module.backend.ecr_repository_url
 }
 
-output "ecs_security_group_id" {
-  description = "The ID of the security group for ECS tasks."
-  value       = module.security.ecs_sg_id
+output "backend_cluster_name" {
+  description = "The name of the ECS backend cluster."
+  value       = module.backend.ecs_cluster_name
+}
+
+output "backend_service_name" {
+  description = "The name of the ECS backend service."
+  value       = module.backend.ecs_service_name
 }
 
 output "fixtures_bucket_name" {
@@ -48,11 +53,6 @@ output "frontend_url" {
   value       = "https://${var.domain_name}"
 }
 
-output "lambda_security_group_id" {
-  description = "The ID of the security group for the Lambda function."
-  value       = module.security.lambda_sg_id
-}
-
 output "private_subnet_ids" {
   description = "A list of private subnet IDs."
   value       = module.networking.private_subnet_ids
@@ -60,10 +60,10 @@ output "private_subnet_ids" {
 
 output "tasks_cluster_name" {
   description = "The name of the ECS tasks cluster."
-  value       = module.ecs.ecs_cluster_name
+  value       = module.tasks.ecs_cluster_name
 }
 
-output "zappa_s3_bucket_name" {
-  description = "The name of the S3 bucket for Zappa deployments."
-  value       = module.storage.zappa_s3_bucket_name
+output "tasks_security_group_id" {
+  description = "The ID of the security group for ECS tasks."
+  value       = module.security.tasks_sg_id
 }

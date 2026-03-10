@@ -4,6 +4,8 @@ variables {
   aws_region                    = "us-east-2"
   common_tags                   = { Environment = "test", Project = "nest" }
   container_parameters_arns     = {}
+  ecr_repository_arn            = "arn:aws:ecr:us-east-2:123456789012:repository/nest-test-backend"
+  ecr_repository_url            = "123456789012.dkr.ecr.us-east-2.amazonaws.com/nest-test-backend"
   ecs_sg_id                     = "sg-12345678"
   environment                   = "test"
   fixtures_bucket_name          = "nest-fixtures-abcd1234"
@@ -40,23 +42,6 @@ run "test_ecs_capacity_providers_spot" {
   }
 }
 
-run "test_ecr_repository_name_format" {
-  command = plan
-
-  assert {
-    condition     = aws_ecr_repository.main.name == "${var.project_name}-${var.environment}-backend"
-    error_message = "ECR repository name must follow format: {project}-{environment}-backend."
-  }
-}
-
-run "test_ecr_scan_on_push" {
-  command = plan
-
-  assert {
-    condition     = aws_ecr_repository.main.image_scanning_configuration[0].scan_on_push == true
-    error_message = "ECR repository must have scan on push enabled."
-  }
-}
 
 run "test_ecs_execution_role_name_format" {
   command = plan
