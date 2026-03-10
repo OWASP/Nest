@@ -1,8 +1,3 @@
-output "dynamodb_table_names" {
-  description = "The names of the per-environment DynamoDB tables for Terraform state locking."
-  value       = { for env, table in aws_dynamodb_table.state_lock : env => table.name }
-}
-
 output "kms_key_aliases" {
   description = "The Aliases of the per-environment KMS keys for Terraform state encryption."
   value       = { for env, kms in module.kms : env => kms.key_alias }
