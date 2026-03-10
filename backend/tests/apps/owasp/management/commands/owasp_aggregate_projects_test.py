@@ -185,38 +185,38 @@ class TestOwaspAggregateProjects:
     ):
         """Test that stars, forks, and contributors use max instead of sum."""
         mock_repo1 = mock.Mock(
-            organization=mock.Mock(),
-            owner=mock.Mock(),
-            pushed_at="2024-12-28T00:00:00Z",
-            latest_release=None,
             commits_count=10,
             contributors_count=5,
             forks_count=20,
+            latest_release=None,
+            license="MIT",
             open_issues_count=4,
+            organization=mock.Mock(),
+            owner=mock.Mock(),
+            pushed_at="2024-12-28T00:00:00Z",
             stars_count=100,
             subscribers_count=3,
-            watchers_count=7,
             top_languages=["Python"],
-            license="MIT",
             topics=["security"],
+            watchers_count=7,
         )
         mock_repo1.releases.count.return_value = 0
 
         mock_repo2 = mock.Mock(
-            organization=None,
-            owner=mock.Mock(),
-            pushed_at="2024-12-29T00:00:00Z",
-            latest_release=None,
             commits_count=20,
             contributors_count=8,
             forks_count=15,
+            latest_release=None,
+            license="Apache-2.0",
             open_issues_count=2,
+            organization=None,
+            owner=mock.Mock(),
+            pushed_at="2024-12-29T00:00:00Z",
             stars_count=50,
             subscribers_count=5,
-            watchers_count=10,
             top_languages=["JavaScript"],
-            license="Apache-2.0",
             topics=["owasp"],
+            watchers_count=10,
         )
         mock_repo2.releases.count.return_value = 0
 
@@ -236,7 +236,7 @@ class TestOwaspAggregateProjects:
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
 
-        assert mock_project.stars_count == 100
-        assert mock_project.forks_count == 20
-        assert mock_project.contributors_count == 8
         assert mock_project.commits_count == 30
+        assert mock_project.contributors_count == 8
+        assert mock_project.forks_count == 20
+        assert mock_project.stars_count == 100
