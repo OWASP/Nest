@@ -9,7 +9,7 @@ Before the first CI/CD run you must:
 2. **Create the `nest-staging` IAM user** and attach the inline permissions documented below. This user is used to assume the `nest-staging-terraform` role.
 
 3. **Ensure backend resources exist** and replace the placeholders in the policy and pipeline configuration:
-   - **AWS_ACCOUNT_ID** — Your AWS account ID (used in the role ARN and DynamoDB resource).
+   - **AWS_ACCOUNT_ID** — Your AWS account ID (used in the role ARN).
 
 ## Inline Permissions
 
