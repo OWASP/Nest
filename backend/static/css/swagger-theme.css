@@ -28,8 +28,8 @@ html .swagger-ui section.models .model-container {
 }
 
 html .swagger-ui .btn.execute {
-    background-color: #1d7bd7;
-    border-color: #1d7bd7;
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
     color: #ffffff !important;
 }
 
@@ -113,8 +113,8 @@ html .swagger-ui :is(.json-schema-2020-12-expand-deep-button, .json-schema-2020-
 }
 
 :is(html[data-theme="dark"], html.dark) .swagger-ui .btn.execute {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
     color: #ffffff !important;
 }
 

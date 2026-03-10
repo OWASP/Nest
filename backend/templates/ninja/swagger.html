@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <link type="text/css"
               rel="stylesheet"
@@ -15,7 +15,7 @@
                 function setTheme() {
                     var theme = localStorage.getItem('theme') || 'auto';
                     if (theme === 'auto') {
-                        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                        theme = globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                     }
 
                     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -24,19 +24,19 @@
 
                 setTheme();
 
-                window.addEventListener('storage', function(e) {
+                globalThis.addEventListener('storage', function(e) {
                     if (e.key === 'theme') {
                         setTheme();
                     }
                 });
 
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+                globalThis.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
                     if ((localStorage.getItem('theme') || 'auto') === 'auto') {
                         setTheme();
                     }
                 });
 
-                window.setTheme = setTheme;
+                globalThis.setTheme = setTheme;
             })();
         </script>
     </head>
