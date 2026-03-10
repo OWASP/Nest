@@ -52,10 +52,8 @@ resource "aws_cloudwatch_log_group" "main" {
   })
 }
 
-# TODO: disallow tag mutability
-# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
 resource "aws_ecr_repository" "main" {
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
   name                 = local.name_prefix
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-ecr"
@@ -73,13 +71,12 @@ resource "aws_ecr_lifecycle_policy" "main" {
         action = {
           type = "expire"
         }
-        description  = "Expire untagged images after 7 days."
+        description  = "Keep only the last 7 images."
         rulePriority = 1
         selection = {
           countNumber = 7
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          tagStatus   = "untagged"
+          countType   = "imageCountMoreThan"
+          tagStatus   = "any"
         }
       }
     ]

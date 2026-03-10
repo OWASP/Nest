@@ -58,8 +58,8 @@ run "test_ecr_repository_image_tag_mutability" {
   command = plan
 
   assert {
-    condition     = aws_ecr_repository.main.image_tag_mutability == "MUTABLE"
-    error_message = "ECR repository must have mutable image tags."
+    condition     = aws_ecr_repository.main.image_tag_mutability == "IMMUTABLE"
+    error_message = "ECR repository must have immutable image tags."
   }
 }
 

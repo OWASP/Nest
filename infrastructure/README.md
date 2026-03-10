@@ -141,6 +141,7 @@ To do this locally:
 
   > [!NOTE]
   > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket created in the previous step.
+  > Update `backend_image_tag` and `frontend_image_tag` variables with a unique tag (`latest` is used in the examples below).
   > Update defaults (e.g. `region`) as needed.
 
 - Initialize Terraform with the backend configuration:
@@ -180,6 +181,10 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend + Sche
 
 1. **Upload backend image to ECR**:
 
+> [!NOTE]
+> The `latest` tag is used in these example commands. ECR repository tags are `IMMUTABLE`.
+> Pushing images with an existing tag will fail.
+
 - Build the backend image using the following command:
 
     ```bash
@@ -199,6 +204,10 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend + Sche
     ```
 
 1. **Upload frontend image to ECR**:
+
+> [!NOTE]
+> The `latest` tag is used in these example commands. ECR repository tags are `IMMUTABLE`.
+> Pushing images with an existing tag will fail.
 
 - Build the frontend image using the following command:
 
