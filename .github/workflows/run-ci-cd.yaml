@@ -772,12 +772,13 @@ jobs:
           cat > infrastructure/staging/terraform.tfvars <<-EOF
           availability_zones=$AVAILABILITY_ZONES
           aws_region="$AWS_REGION"
+          backend_image_tag="$RELEASE_VERSION"
           backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
           create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
-          image_tag="$RELEASE_VERSION"
+          frontend_image_tag="$RELEASE_VERSION"
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
 
