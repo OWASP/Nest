@@ -3,16 +3,19 @@
 import strawberry
 import strawberry_django
 from django.db.models import Q
+from strawberry_django.pagination import OffsetPaginationInput
 
 from apps.common.utils import normalize_limit
 from apps.github.models.user import User as GithubUser
+from apps.owasp.api.internal.filters.project import ProjectFilter
 from apps.owasp.api.internal.nodes.project import ProjectNode
+from apps.owasp.api.internal.ordering.project import ProjectOrder
 from apps.owasp.models.project import Project
 
 MAX_RECENT_PROJECTS_LIMIT = 1000
 MAX_SEARCH_QUERY_LENGTH = 100
-MIN_SEARCH_QUERY_LENGTH = 3
-SEARCH_PROJECTS_LIMIT = 3
+MAX_PROJECTS_LIMIT = 1000
+MAX_OFFSET = 10000
 
 
 @strawberry.type
@@ -51,20 +54,99 @@ class ProjectQuery:
 
         return Project.objects.filter(is_active=True).order_by("-created_at")[:normalized_limit]
 
-    @strawberry_django.field
-    def search_projects(self, query: str) -> list[ProjectNode]:
-        """Search active projects by name (case-insensitive, partial match)."""
+    @strawberry_django.field(
+        filters=ProjectFilter,
+        ordering=ProjectOrder,
+        pagination=True,
+    )
+    def projects(
+        self,
+        filters: ProjectFilter | None = None,
+        ordering: list[ProjectOrder] | None = None,
+        pagination: OffsetPaginationInput | None = None,
+    ) -> list[ProjectNode]:
+        """Resolve active projects with optional category filter, ordering, and pagination."""
+        queryset = Project.objects.filter(is_active=True)
+
+        if not ordering:
+            queryset = queryset.order_by("-stars_count", "-created_at")
+
+        if pagination:
+            if pagination.offset < 0:
+                return []
+            pagination.offset = min(pagination.offset, MAX_OFFSET)
+
+            if pagination.limit is not None and pagination.limit is not strawberry.UNSET:
+                if pagination.limit <= 0:
+                    return []
+                pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)
+            else:
+                pagination.limit = MAX_PROJECTS_LIMIT
+
+        return queryset
+
+    @strawberry_django.field(
+        filters=ProjectFilter,
+        ordering=ProjectOrder,
+        pagination=True,
+    )
+    def search_projects(
+        self,
+        query: str = "",
+        filters: ProjectFilter | None = None,
+        ordering: list[ProjectOrder] | None = None,
+        pagination: OffsetPaginationInput | None = None,
+    ) -> list[ProjectNode]:
+        """Search active projects by name with optional filters and sorting."""
         cleaned_query = query.strip()
-        if (
-            len(cleaned_query) < MIN_SEARCH_QUERY_LENGTH
-            or len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH
-        ):
+
+        if len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH:
             return []
 
-        return Project.objects.filter(
-            is_active=True,
-            name__icontains=cleaned_query,
-        ).order_by("name")[:SEARCH_PROJECTS_LIMIT]
+        base_queryset = Project.objects.filter(is_active=True)
+
+        if cleaned_query:
+            bounded_query = cleaned_query[:MAX_SEARCH_QUERY_LENGTH]
+            base_queryset = base_queryset.filter(name__icontains=bounded_query)
+
+        if not ordering:
+            base_queryset = base_queryset.order_by("-stars_count", "-created_at")
+
+        if pagination:
+            if pagination.offset < 0:
+                return []
+            pagination.offset = min(pagination.offset, MAX_OFFSET)
+
+            if pagination.limit is not None and pagination.limit is not strawberry.UNSET:
+                if pagination.limit <= 0:
+                    return []
+                pagination.limit = min(pagination.limit, MAX_PROJECTS_LIMIT)
+            else:
+                pagination.limit = MAX_PROJECTS_LIMIT
+
+        return base_queryset
+
+    @strawberry.field
+    def search_projects_count(
+        self,
+        query: str = "",
+        filters: ProjectFilter | None = None,
+    ) -> int:
+        """Return total count of matching projects for pagination."""
+        cleaned_query = query.strip()
+
+        if len(cleaned_query) > MAX_SEARCH_QUERY_LENGTH:
+            return 0
+
+        base_queryset = Project.objects.filter(is_active=True)
+
+        if cleaned_query:
+            base_queryset = base_queryset.filter(name__icontains=cleaned_query)
+
+        if filters:
+            base_queryset = strawberry_django.filters.apply(filters, base_queryset)
+
+        return base_queryset.count()
 
     @strawberry_django.field
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:

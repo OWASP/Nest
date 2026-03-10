@@ -42,7 +42,8 @@ const SortBy = ({
             .filter((item: { key: string; label: string }) => item.key === selectedSortOption)
             .map((item) => item.key)}
           onChange={(e) => {
-            onSortChange((e.target as HTMLSelectElement).value)
+            const value = (e.target as HTMLSelectElement).value
+            if (value) onSortChange(value)
           }}
         >
           {sortOptions.map((option: { label: string; key: string }) => (

@@ -1,16 +1,19 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
 import type { Project } from 'types/project'
+import { getSearchBackendPreference, type SearchBackend } from 'utils/backendConfig'
 import { level } from 'utils/data'
-import { sortOptionsProject } from 'utils/sortingOptions'
+import { sortOptionsProject, typeOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import Card from 'components/Card'
 import SearchPageLayout from 'components/SearchPageLayout'
-import SortBy from 'components/SortBy'
+import SearchWithFilters from 'components/SearchWithFilters'
 
 const ProjectsPage = () => {
+  const [backend] = useState<SearchBackend>(() => getSearchBackendPreference())
   const {
     items: projects,
     isLoaded,
@@ -19,15 +22,19 @@ const ProjectsPage = () => {
     searchQuery,
     sortBy,
     order,
+    category,
     handleSearch,
     handlePageChange,
     handleSortChange,
     handleOrderChange,
+    handleCategoryChange,
   } = useSearchPage<Project>({
     indexName: 'projects',
     pageTitle: 'OWASP Projects',
     defaultSortBy: 'default',
     defaultOrder: 'desc',
+    defaultCategory: '',
+    useBackend: backend,
   })
 
   const router = useRouter()
@@ -69,13 +76,20 @@ const ProjectsPage = () => {
       onSearch={handleSearch}
       searchPlaceholder="Search for projects..."
       searchQuery={searchQuery}
-      sortChildren={
-        <SortBy
-          onOrderChange={handleOrderChange}
-          onSortChange={handleSortChange}
-          selectedOrder={order}
-          selectedSortOption={sortBy}
+      searchBarChildren={
+        <SearchWithFilters
+          isLoaded={isLoaded}
+          searchQuery={searchQuery}
+          sortBy={sortBy}
+          order={order}
+          category={category}
           sortOptions={sortOptionsProject}
+          categoryOptions={typeOptionsProject}
+          searchPlaceholder="Search for projects..."
+          onSearch={handleSearch}
+          onSortChange={handleSortChange}
+          onOrderChange={handleOrderChange}
+          onCategoryChange={handleCategoryChange}
         />
       }
       totalPages={totalPages}

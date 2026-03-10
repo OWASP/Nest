@@ -132,7 +132,7 @@ class TestListProjects:
             field_schema=PROJECT_SEARCH_FIELDS,
         )
         mock_queryset.order_by.assert_called_once_with(
-            "-level_raw", "-stars_count", "-forks_count"
+            "-level_raw", "-stars_count", "-forks_count", "pk"
         )
         assert result == mock_queryset
 
@@ -165,7 +165,7 @@ class TestListProjects:
         )
         mock_queryset.filter.assert_called_once_with(level="flagship")
         mock_filtered_queryset.order_by.assert_called_once_with(
-            "created_at", "-stars_count", "-forks_count"
+            "created_at", "-stars_count", "-forks_count", "pk"
         )
         assert result == mock_filtered_queryset
 
@@ -218,7 +218,7 @@ class TestListProjects:
 
         mock_queryset.filter.assert_called_once_with(type__in=["code"])
         mock_filtered_queryset.order_by.assert_called_once_with(
-            "-level_raw", "-stars_count", "-forks_count"
+            "-level_raw", "-stars_count", "-forks_count", "pk"
         )
         assert result == mock_filtered_queryset
 
@@ -246,7 +246,7 @@ class TestListProjects:
 
         mock_queryset.filter.assert_called_once_with(type__in=["code", "tool"])
         mock_filtered_queryset.order_by.assert_called_once_with(
-            "-level_raw", "-stars_count", "-forks_count"
+            "-level_raw", "-stars_count", "-forks_count", "pk"
         )
         assert result == mock_filtered_queryset
 
@@ -277,17 +277,19 @@ class TestListProjects:
         mock_queryset.filter.assert_called_once_with(level="flagship")
         mock_level_filtered.filter.assert_called_once_with(type__in=["code"])
         mock_type_filtered.order_by.assert_called_once_with(
-            "-level_raw", "-stars_count", "-forks_count"
+            "-level_raw", "-stars_count", "-forks_count", "pk"
         )
         assert result == mock_type_filtered
 
     @pytest.mark.parametrize(
         ("ordering", "expected_order"),
         [
-            ("created_at", ("created_at", "-stars_count", "-forks_count")),
-            ("-created_at", ("-created_at", "-stars_count", "-forks_count")),
-            ("updated_at", ("updated_at", "-stars_count", "-forks_count")),
-            ("-updated_at", ("-updated_at", "-stars_count", "-forks_count")),
+            ("created_at", ("created_at", "-stars_count", "-forks_count", "pk")),
+            ("-created_at", ("-created_at", "-stars_count", "-forks_count", "pk")),
+            ("updated_at", ("updated_at", "-stars_count", "-forks_count", "pk")),
+            ("-updated_at", ("-updated_at", "-stars_count", "-forks_count", "pk")),
+            ("level", ("level_raw", "-stars_count", "-forks_count", "pk")),
+            ("-level", ("-level_raw", "-stars_count", "-forks_count", "pk")),
         ],
     )
     @patch("apps.api.rest.v0.project.apply_structured_search")
