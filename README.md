@@ -10,6 +10,8 @@
 
 [![OpenSSF](https://img.shields.io/badge/OpenSSF-passing-blue?style=for-the-badge)](https://www.bestpractices.dev/projects/10174) [![Snyk Security](https://img.shields.io/badge/Snyk-Scanning-blue?style=for-the-badge)](https://snyk.io)
 
+[![DeepWiki](https://img.shields.io/badge/READ-DEEPWIKI-blue?style=for-the-badge)](https://deepwiki.com/OWASP/Nest) [![Read Docs](https://img.shields.io/badge/Read-the%20docs-blue?style=for-the-badge)](https://owasp-nest.readthedocs.io/latest/)
+
 [![Forks](https://img.shields.io/github/forks/owasp/nest?style=for-the-badge&label=Forks)](https://github.com/OWASP/Nest/network/members) [![Stars](https://img.shields.io/github/stars/owasp/nest?style=for-the-badge&label=Stars)](https://github.com/OWASP/Nest/stargazers)
 
 [![CREATED](https://img.shields.io/badge/created-aug,%202024-blue?style=for-the-badge)](https://github.com/OWASP/Nest/commit/2a213c2efcfc2f8889c2f1d330da0d2e6f649fc1)
