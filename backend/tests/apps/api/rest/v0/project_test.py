@@ -7,14 +7,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.http import HttpResponse
-from django.test import Client
+from pydantic import ValidationError
 
 from apps.api.rest.v0.project import (
     PROJECT_SEARCH_FIELDS,
     ProjectDetail,
+    ProjectFilter,
     get_project,
     list_projects,
 )
+from apps.owasp.models.enums.project import ProjectType
 
 
 class MockMember:
@@ -312,62 +314,31 @@ class TestListProjects:
         mock_queryset.order_by.assert_called_once_with(*expected_order)
 
 
-class TestProjectEndpointIntegration:
-    """Integration tests that call the projects endpoint via Django test client."""
+class TestProjectFilter:
+    """Unit tests for ProjectFilter schema validation."""
 
-    PROJECTS_URL = "/api/v0/projects/"
+    def test_filter_rejects_invalid_type(self) -> None:
+        """ProjectFilter raises ValidationError for invalid type values."""
+        with pytest.raises(ValidationError) as exc_info:
+            ProjectFilter.model_validate({"type": ["invalid"]})
 
-    @patch("apps.api.rest.auth.api_key.ApiKeyModel.authenticate")
-    @patch("apps.api.rest.v0.project.apply_structured_search")
-    @patch("apps.api.rest.v0.project.ProjectModel")
-    def test_repeated_type_filters_and_ordering(
-        self,
-        mock_project_model: MagicMock,
-        mock_apply_search: MagicMock,
-        mock_authenticate: MagicMock,
-    ) -> None:
-        """Test repeated type query params are parsed as a list and ordering is applied."""
-        mock_authenticate.return_value = MagicMock()
-        mock_queryset = MagicMock()
-        mock_filtered = MagicMock()
-        mock_ordered = MagicMock()
-        mock_ordered.count.return_value = 0
-        mock_apply_search.return_value = mock_queryset
-        mock_queryset.filter.return_value = mock_filtered
-        mock_filtered.order_by.return_value = mock_ordered
+        errors = exc_info.value.errors()
+        assert errors
 
-        client = Client()
-        response = client.get(
-            self.PROJECTS_URL,
-            {"type": ["code", "tool"]},
-            HTTP_X_API_KEY="test-key",
-        )
+    def test_filter_accepts_valid_types(self) -> None:
+        """ProjectFilter accepts valid ProjectType enum values."""
+        filters = ProjectFilter.model_validate({"type": ["code", "tool"]})
+        assert filters.type == [ProjectType.CODE, ProjectType.TOOL]
 
-        assert response.status_code == HTTPStatus.OK
-        mock_queryset.filter.assert_called_with(type__in=["code", "tool"])
-        mock_filtered.order_by.assert_called_with("-level_raw", "-stars_count", "-forks_count")
+    def test_filter_accepts_single_valid_type(self) -> None:
+        """ProjectFilter accepts a single valid type."""
+        filters = ProjectFilter.model_validate({"type": ["documentation"]})
+        assert filters.type == [ProjectType.DOCUMENTATION]
 
-    @patch("apps.api.rest.auth.api_key.ApiKeyModel.authenticate")
-    @patch("apps.api.rest.v0.project.apply_structured_search")
-    @patch("apps.api.rest.v0.project.ProjectModel")
-    def test_invalid_type_returns_validation_error(
-        self,
-        mock_project_model: MagicMock,
-        mock_apply_search: MagicMock,
-        mock_authenticate: MagicMock,
-    ) -> None:
-        """Test invalid type returns validation error."""
-        mock_authenticate.return_value = MagicMock()
-        client = Client()
-        response = client.get(
-            self.PROJECTS_URL,
-            {"type": "invalid"},
-            HTTP_X_API_KEY="test-key",
-        )
-
-        assert response.status_code == HTTPStatus.BAD_REQUEST
-        data = response.json()
-        assert "errors" in data
+    def test_filter_accepts_none_type(self) -> None:
+        """ProjectFilter accepts missing or null type."""
+        filters = ProjectFilter.model_validate({})
+        assert filters.type is None
 
 
 class TestGetProject:
