@@ -121,11 +121,6 @@ const MenteeProfilePage = () => {
     }
   }
 
-  const handleDeadlineChange = (deadline: string) => {
-    setSelectedDeadline(deadline)
-    setCurrentPage(1)
-  }
-
   return (
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -199,20 +194,19 @@ const MenteeProfilePage = () => {
               <div className="mb-4 flex justify-end gap-3">
                 <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
                   <Select
-                    labelPlacement="outside-left"
                     size="md"
                     aria-label="Filter by deadline"
-                    label="Deadline :"
-                    classNames={{
-                      label:
-                        'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                      trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-36',
-                      popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
-                    }}
                     selectedKeys={new Set([selectedDeadline])}
                     onSelectionChange={(keys) => {
                       const [key] = Array.from(keys as Set<string>)
-                      if (key) handleDeadlineChange(key)
+                      if (key) {
+                        setSelectedDeadline(key)
+                        setCurrentPage(1)
+                      }
+                    }}
+                    classNames={{
+                      trigger: 'bg-gray-200 dark:bg-[#323232] pl-4 text-nowrap w-36',
+                      popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
                     }}
                   >
                     {DEADLINE_OPTIONS.map((option) => (
@@ -229,16 +223,8 @@ const MenteeProfilePage = () => {
                 </div>
                 <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
                   <Select
-                    labelPlacement="outside-left"
                     size="md"
                     aria-label="Filter by status"
-                    label="Status :"
-                    classNames={{
-                      label:
-                        'font-small text-sm text-gray-600 hover:cursor-pointer dark:text-gray-300 pl-[1.4rem] w-auto',
-                      trigger: 'bg-gray-200 dark:bg-[#323232] pl-0 text-nowrap w-32',
-                      popoverContent: 'text-md min-w-32 dark:bg-[#323232] rounded-none p-0',
-                    }}
                     selectedKeys={new Set([statusFilter])}
                     onSelectionChange={(keys) => {
                       const [key] = Array.from(keys as Set<string>)
@@ -246,6 +232,10 @@ const MenteeProfilePage = () => {
                         setStatusFilter(key)
                         setCurrentPage(1)
                       }
+                    }}
+                    classNames={{
+                      trigger: 'bg-gray-200 dark:bg-[#323232] pl-4 text-nowrap w-32',
+                      popoverContent: 'text-md min-w-32 dark:bg-[#323232] rounded-none p-0',
                     }}
                   >
                     {statusFilterOptions.map((option) => (
