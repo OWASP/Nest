@@ -19,9 +19,9 @@ describe('<CountryFilter />', () => {
     expect(input).toHaveValue('All Countries')
   })
 
-  it('renders country label', () => {
+  it('renders country filter with combobox', () => {
     render(<CountryFilter {...defaultProps} />)
-    expect(screen.getByText('Country :')).toBeInTheDocument()
+    expect(screen.getByRole('combobox')).toBeInTheDocument()
   })
 
   it('calls onCountryChange when a country is selected', async () => {
@@ -53,7 +53,7 @@ describe('<CountryFilter />', () => {
 
   it('renders with isLoading state', () => {
     render(<CountryFilter {...defaultProps} isLoading={true} />)
-    expect(screen.getByText('Country :')).toBeInTheDocument()
+    expect(screen.getByRole('combobox')).toBeInTheDocument()
   })
 
   it('filters options when typing', async () => {

@@ -49,18 +49,21 @@ const SearchPageLayout = ({
       <div className={`flex w-full items-center justify-center ${inlineSort ? 'gap-0' : 'gap-2'}`}>
         {filterChildren &&
           (isFirstLoad ? (
-            <Skeleton className={`h-12 w-60 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`} aria-hidden="true" />
+            <Skeleton
+              className={`h-12 w-60 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
+              aria-hidden="true"
+            />
           ) : (
-            <div className={inlineSort ? '[&>div]:rounded-r-none' : ''}>
-              {filterChildren}
-            </div>
+            <div className={inlineSort ? '[&>div]:rounded-r-none' : ''}>{filterChildren}</div>
           ))}
         <SearchBar
           isLoaded={!isFirstLoad}
           onSearch={onSearch}
           placeholder={searchPlaceholder}
           initialValue={searchQuery}
-          className={inlineSort && filterChildren ? 'rounded-none' : inlineSort ? 'rounded-r-none' : ''}
+          className={
+            inlineSort && filterChildren ? 'rounded-none' : inlineSort ? 'rounded-r-none' : ''
+          }
         />
         {inlineSort &&
           sortChildren &&

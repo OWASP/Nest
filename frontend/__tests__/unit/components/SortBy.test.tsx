@@ -22,8 +22,9 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
-    expect(sortButton).toBeInTheDocument()
+    // HeroUI Select trigger exposes selected value as accessible name when no label is set
+    const sortTrigger = screen.getByRole('button', { name: 'Name' })
+    expect(sortTrigger).toBeInTheDocument()
     const selectedOption = screen.getByText('Name', { selector: '[data-slot="value"]' })
     expect(selectedOption).toBeInTheDocument()
   })
@@ -32,9 +33,9 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    const sortTrigger = screen.getByRole('button', { name: 'Name' })
     await act(async () => {
-      sortButton.click()
+      sortTrigger.click()
     })
     expect(await screen.findByRole('option', { name: 'Name' })).toBeInTheDocument()
     expect(await screen.findByRole('option', { name: 'Date' })).toBeInTheDocument()
@@ -99,11 +100,10 @@ describe('<SortBy />', () => {
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
     expect(hiddenSelect.tagName).toBe('SELECT')
 
-    // Use getAllByText to handle multiple elements with same text
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
-    const container = sortButton.closest('div')
+    // Trigger exposes selected value as accessible name when no label is set
+    const sortTrigger = screen.getByRole('button', { name: 'Name' })
+    const container = sortTrigger.closest('div')
     expect(container).toBeInTheDocument()
-    expect(hiddenSelect).toHaveAccessibleName(/Sort By/)
   })
 
   it('toggles order when Enter key is pressed on sort order button', async () => {

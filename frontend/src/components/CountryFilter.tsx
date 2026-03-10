@@ -21,11 +21,10 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   )
 
   return (
-    <div className="inline-flex h-12 items-center rounded-lg border border-gray-300 bg-white pl-1 shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
+    <div className="inline-flex h-12 items-center rounded-lg border border-r-0 border-gray-300 bg-white pl-1 shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
       <Autocomplete
         labelPlacement="outside-left"
         size="md"
-        label="Country :"
         isLoading={isLoading}
         defaultItems={options}
         selectedKey={selectedCountry}
@@ -37,7 +36,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
           isEnabled: false,
         }}
         classNames={{
-          base: 'w-60',
+          base: 'w-52',
           clearButton: 'p-0',
           listbox: 'p-0 focus:outline-none',
           popoverContent:
@@ -46,8 +45,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         }}
         inputProps={{
           classNames: {
-            label:
-              'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
+            label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
             inputWrapper:
               'bg-transparent data-[hover=true]:bg-transparent focus-within:!bg-transparent border-none shadow-none outline-none ring-0 min-h-8 h-8',
             input:
