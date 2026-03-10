@@ -47,23 +47,6 @@ Use the following inline permissions for the `nest-state` IAM User
    ]
   },
   {
-   "Sid": "DynamoDBManagement",
-   "Effect": "Allow",
-   "Action": [
-    "dynamodb:CreateTable",
-    "dynamodb:DeleteTable",
-    "dynamodb:DescribeContinuousBackups",
-    "dynamodb:DescribeTable",
-    "dynamodb:DescribeTimeToLive",
-    "dynamodb:ListTagsOfResource",
-    "dynamodb:TagResource",
-    "dynamodb:UntagResource",
-    "dynamodb:UpdateContinuousBackups",
-    "dynamodb:UpdateTable"
-   ],
-   "Resource": "arn:aws:dynamodb:*:AWS_ACCOUNT_ID:table/nest-*-terraform-state-lock"
-  },
-  {
    "Sid": "KMSCreateManagement",
    "Effect": "Allow",
    "Action": [

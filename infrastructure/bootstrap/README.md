@@ -32,17 +32,6 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
    ]
   },
   {
-   "Sid": "DynamoDBStateLocking",
-   "Effect": "Allow",
-   "Action": [
-    "dynamodb:DeleteItem",
-    "dynamodb:DescribeTable",
-    "dynamodb:GetItem",
-    "dynamodb:PutItem"
-   ],
-   "Resource": "arn:aws:dynamodb:*:AWS_ACCOUNT_ID:table/nest-bootstrap-terraform-state-lock"
-  },
-  {
    "Sid": "IAMManagement",
    "Effect": "Allow",
    "Action": [
