@@ -68,6 +68,8 @@ jest.mock('@heroui/select', () => {
       'aria-label': ariaLabel,
       classNames: _classNames,
       size: _size,
+      labelPlacement: _labelPlacement,
+      label: _label,
       ...props
     }: {
       children: React.ReactNode
@@ -76,6 +78,8 @@ jest.mock('@heroui/select', () => {
       'aria-label'?: string
       classNames?: Record<string, string>
       size?: string
+      labelPlacement?: string
+      label?: string
     }) => {
       const [isOpen, setIsOpen] = React.useState(false)
       const selectedKey = Array.from(selectedKeys)[0] || 'all'
