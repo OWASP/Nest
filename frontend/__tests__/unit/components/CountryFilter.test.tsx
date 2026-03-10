@@ -36,6 +36,8 @@ describe('<CountryFilter />', () => {
       fireEvent.click(option)
     })
 
+    fireEvent.click(screen.getByRole('option', { name: 'Germany' }))
+
     expect(defaultProps.onCountryChange).toHaveBeenCalledWith('Germany')
   })
 
