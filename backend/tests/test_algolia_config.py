@@ -1,6 +1,4 @@
 """Tests for Algolia configuration validation."""
-import os
-import pytest
 from django.test import TestCase, override_settings
 from apps.common.validators.algolia_validator import (
     validate_algolia_config,
