@@ -7,6 +7,7 @@ import { handleAppError } from 'app/global-error'
 import { Ordering, ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { HealthMetricsProps } from 'types/healthMetrics'
+import { formatCategoryOptions, useProjectCategories } from 'hooks/useProjectCategories'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
 import UnifiedSearchBar from 'components/UnifiedSearchBar'
@@ -126,6 +127,9 @@ const MetricsPage: FC = () => {
   } else if (currentCategory && currentCategory in levelFiltersMapping) {
     currentFilters = levelFiltersMapping[currentCategory as keyof typeof levelFiltersMapping]
   }
+
+  const { categories } = useProjectCategories()
+  const categoryOptions = formatCategoryOptions(categories)
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
@@ -275,7 +279,9 @@ const MetricsPage: FC = () => {
           category={currentCategory}
           isLoaded={!loading}
           sortOptions={SORT_FIELDS}
+          categories={categories}
           categoryOptions={FILTER_OPTIONS}
+          filterOptions={FILTER_OPTIONS}
           searchPlaceholder="Search metrics..."
           onSearch={handleSearchChange}
           onSortChange={handleSortChange}

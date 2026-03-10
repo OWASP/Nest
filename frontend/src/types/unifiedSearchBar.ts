@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { ProjectCategoryOption } from 'hooks/useProjectCategories'
 
 export type UnifiedSearchBarProps = {
   searchQuery: string
@@ -8,6 +9,8 @@ export type UnifiedSearchBarProps = {
   isLoaded: boolean
   sortOptions: { key: string; label: string }[]
   categoryOptions: { key: string; label: string }[]
+  categories?: ProjectCategoryOption[]
+  filterOptions?: { key: string; label: string }[]
   searchPlaceholder?: string
   onSearch: (query: string) => void
   onSortChange: (value: string) => void

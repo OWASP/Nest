@@ -6,6 +6,7 @@ import type { UnifiedSearchBarProps } from 'types/unifiedSearchBar'
 import SearchBar from 'components/Search'
 import SearchPageLayout from 'components/SearchPageLayout'
 import SortBy from 'components/SortBy'
+import NestedCategorySelect from 'components/NestedCategorySelect'
 
 const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   searchQuery: externalQuery,
@@ -15,6 +16,8 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
   isLoaded,
   sortOptions,
   categoryOptions,
+  categories,
+  filterOptions,
   searchPlaceholder = 'Search...',
   onSearch,
   onSortChange,
@@ -40,7 +43,14 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
       totalPages={totalPages}
       searchBarChildren={
         <div className="flex w-full flex-col items-center gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          {categoryOptions && categoryOptions.length > 1 && (
+          {categories && categories.length > 0 ? (
+            <NestedCategorySelect
+              categories={categories}
+              selected={category}
+              onSelect={onCategoryChange}
+              filterOptions={filterOptions}
+            />
+          ) : categoryOptions && categoryOptions.length > 1 ? (
             <div className="inline-flex h-12 items-center rounded-lg border border-gray-300 bg-gray-100 pl-3 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-600 dark:bg-[#323232]">
               <Select
                 aria-label="Filter by category"
@@ -78,7 +88,7 @@ const UnifiedSearchBar: React.FC<UnifiedSearchBarProps> = ({
                 ))}
               </Select>
             </div>
-          )}
+          ) : null}
 
           <SearchBar
             isLoaded={isLoaded}

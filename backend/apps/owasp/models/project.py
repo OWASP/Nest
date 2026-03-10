@@ -135,6 +135,13 @@ class Project(
     )
 
     # M2Ms.
+    categories = models.ManyToManyField(
+        "owasp.ProjectCategory",
+        verbose_name="Categories",
+        blank=True,
+        related_name="projects",
+        help_text="Project taxonomy categories and subcategories",
+    )
     organizations = models.ManyToManyField(
         "github.Organization",
         verbose_name="Organizations",

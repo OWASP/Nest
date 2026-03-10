@@ -4,6 +4,7 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
+from django.db.models import Q
 from django.http import HttpRequest
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -86,9 +87,9 @@ class ProjectFilter(FilterSchema):
         None,
         description="Level of the project",
     )
-    type: list[ProjectType] | None = Field(
+    categories: list[str] | None = Field(
         None,
-        description="Type (category) of the project",
+        description="Project category slugs to filter by. Includes projects with these categories or any nested subcategories.",
     )
     q: str | None = Field(
         None,
@@ -140,8 +141,24 @@ def list_projects(
     if filters.level is not None:
         queryset = queryset.filter(level=filters.level)
 
-    if filters.type:
-        queryset = queryset.filter(type__in=filters.type)
+    # Filter by categories: when a category is specified, include projects
+    if filters.categories:
+        from apps.owasp.models.category import ProjectCategory
+
+        category_q = Q()
+        for category_slug in filters.categories:
+            try:
+                category = ProjectCategory.objects.get(slug=category_slug, is_active=True)
+                category_ids = [category.id]
+                category_ids.extend(
+                    category.get_descendants().values_list("id", flat=True)
+                )
+                category_q |= Q(categories__id__in=category_ids)
+            except ProjectCategory.DoesNotExist:
+                continue
+
+        if category_q:
+            queryset = queryset.filter(category_q).distinct()
 
     return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 

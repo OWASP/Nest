@@ -58,7 +58,7 @@ const SearchPageLayout = ({
 
       {isLoaded ? (
         <>
-          <div>
+          <div className="w-full">
             {!searchBarChildren && totalPages !== 0 && (
               <div className="flex justify-end">{sortChildren}</div>
             )}

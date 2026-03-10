@@ -564,12 +564,27 @@ export enum ProgramStatusEnum {
   Published = 'PUBLISHED'
 }
 
+export type ProjectCategoryNode = {
+  __typename?: 'ProjectCategoryNode';
+  children: Array<ProjectCategoryNode>;
+  description: Scalars['String']['output'];
+  fullPath: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  level: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  nestCreatedAt: Scalars['DateTime']['output'];
+  nestUpdatedAt: Scalars['DateTime']['output'];
+  parent?: Maybe<ProjectCategoryNode>;
+  slug: Scalars['String']['output'];
+};
+
 export type ProjectFilter = {
   AND?: InputMaybe<ProjectFilter>;
   DISTINCT?: InputMaybe<Scalars['Boolean']['input']>;
   NOT?: InputMaybe<ProjectFilter>;
   OR?: InputMaybe<ProjectFilter>;
-  type?: InputMaybe<ProjectType>;
+  categories?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type ProjectHealthMetricsFilter = {
@@ -648,6 +663,7 @@ export enum ProjectLevel {
 
 export type ProjectNode = Node & {
   __typename?: 'ProjectNode';
+  categories: Array<ProjectCategoryNode>;
   contributionData?: Maybe<Scalars['JSON']['output']>;
   contributionStats?: Maybe<Scalars['JSON']['output']>;
   contributorsCount: Scalars['Int']['output'];
@@ -701,13 +717,6 @@ export type ProjectOrder = {
   updatedAt?: InputMaybe<Ordering>;
 };
 
-export enum ProjectType {
-  Code = 'CODE',
-  Documentation = 'DOCUMENTATION',
-  Other = 'OTHER',
-  Tool = 'TOOL'
-}
-
 export type PullRequestNode = Node & {
   __typename?: 'PullRequestNode';
   author?: Maybe<UserNode>;
@@ -742,6 +751,7 @@ export type Query = {
   myPrograms: PaginatedPrograms;
   organization?: Maybe<OrganizationNode>;
   project?: Maybe<ProjectNode>;
+  projectCategories: Array<ProjectCategoryNode>;
   /** List of project health metrics. */
   projectHealthMetrics: Array<ProjectHealthMetricsNode>;
   projectHealthMetricsDistinctLength: Scalars['Int']['output'];
@@ -857,6 +867,11 @@ export type QueryOrganizationArgs = {
 
 export type QueryProjectArgs = {
   key: Scalars['String']['input'];
+};
+
+
+export type QueryProjectCategoriesArgs = {
+  pagination?: InputMaybe<OffsetPaginationInput>;
 };
 
 

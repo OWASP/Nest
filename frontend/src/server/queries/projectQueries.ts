@@ -3,6 +3,17 @@ import { gql } from '@apollo/client'
 export const GET_PROJECT_DATA = gql`
   query GetProject($key: String!) {
     project(key: $key) {
+      categories {
+        id
+        name
+        slug
+        description
+        level
+        fullPath
+        isActive
+        nestCreatedAt
+        nestUpdatedAt
+      }
       contributionData
       contributionStats
       contributorsCount
@@ -189,6 +200,17 @@ export const GET_PROJECTS_LIST = gql`
     $pagination: OffsetPaginationInput!
   ) {
     searchProjects(query: $query, filters: $filters, ordering: $ordering, pagination: $pagination) {
+      categories {
+        id
+        name
+        slug
+        description
+        level
+        fullPath
+        isActive
+        nestCreatedAt
+        nestUpdatedAt
+      }
       id
       key
       name
@@ -206,4 +228,4 @@ export const GET_PROJECTS_LIST = gql`
     }
     projectsTotal: searchProjectsCount(query: $query, filters: $filters)
   }
-`
+

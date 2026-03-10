@@ -1,4 +1,5 @@
 from .board_of_directors import BoardOfDirectors
+from .category import ProjectCategory
 from .chapter import Chapter
 from .committee import Committee
 from .entity_channel import EntityChannel

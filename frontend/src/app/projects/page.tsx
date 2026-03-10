@@ -1,18 +1,21 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
+import { formatCategoryOptions, useProjectCategories } from 'hooks/useProjectCategories'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'
 import type { Project } from 'types/project'
 import { getSearchBackendPreference, type SearchBackend } from 'utils/backendConfig'
 import { level } from 'utils/data'
-import { sortOptionsProject, typeOptionsProject } from 'utils/sortingOptions'
+import { sortOptionsProject } from 'utils/sortingOptions'
 import { getFilteredIcons } from 'utils/utility'
 import Card from 'components/Card'
 import UnifiedSearchBar from 'components/UnifiedSearchBar'
 
 const ProjectsPage = () => {
   const [backend] = useState<SearchBackend>(() => getSearchBackendPreference())
+  const { categories } = useProjectCategories()
+  const categoryOptions = formatCategoryOptions(categories)
 
   const {
     items: projects,
@@ -80,7 +83,8 @@ const ProjectsPage = () => {
       order={order}
       category={category}
       sortOptions={sortOptionsProject}
-      categoryOptions={typeOptionsProject}
+      categoryOptions={categoryOptions}
+      categories={categories}
       onOrderChange={handleOrderChange}
       onSortChange={handleSortChange}
       onCategoryChange={handleCategoryChange}

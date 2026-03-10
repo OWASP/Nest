@@ -3,7 +3,7 @@
 import type { ErrorLike } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { useMemo } from 'react'
-import { ProjectLevel, ProjectType } from 'types/__generated__/graphql'
+import { ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectsListDocument } from 'types/__generated__/projectQueries.generated'
 import type { Project } from 'types/project'
 
@@ -20,9 +20,9 @@ interface UseSearchProjectsGraphQLReturn {
 }
 
 interface ProjectFilterInput {
-  type?: ProjectType
   level?: ProjectLevel
   isActive?: boolean
+  categories?: string[]
 }
 
 interface ProjectOrderInput {
@@ -44,14 +44,8 @@ export function useSearchProjectsGraphQL(
   const filters = useMemo<ProjectFilterInput | undefined>(() => {
     const newFilters: ProjectFilterInput = {}
 
-    if (category && category !== '' && category !== 'idx_type:') {
-      const typeMatch = /idx_type:(\w+)/i.exec(category)
-      if (typeMatch) {
-        const typeValue = typeMatch[1].toUpperCase()
-        if (['CODE', 'TOOL', 'DOCUMENTATION', 'OTHER'].includes(typeValue)) {
-          newFilters.type = typeValue as ProjectType
-        }
-      }
+    if (category && category !== '') {
+      newFilters.categories = [category]
     }
 
     return Object.keys(newFilters).length > 0 ? newFilters : undefined
