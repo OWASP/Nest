@@ -32,13 +32,11 @@ export default function Footer() {
                 aria-controls={`footer-section-${section.title}`}
               >
                 <h3>{section.title}</h3>
-                <div className="flex items-center transition-transform duration-200 lg:hidden">
-                  {openSection === section.title ? (
-                    <FaChevronUp className="h-4 w-4" />
-                  ) : (
-                    <FaChevronDown className="h-4 w-4" />
-                  )}
-                </div>
+                {openSection === section.title ? (
+                  <FaChevronUp className="h-4 w-4 transition-transform duration-200 lg:hidden" />
+                ) : (
+                  <FaChevronDown className="h-4 w-4 transition-transform duration-200 lg:hidden" />
+                )}
               </Button>
               <div
                 id={`footer-section-${section.title}`}
