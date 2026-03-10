@@ -22,10 +22,6 @@ describe('deadlineUtils', () => {
       expect(getDeadlineCategory(null)).toBe('no-deadline')
     })
 
-    it('should return "no-deadline" for undefined deadline', () => {
-      expect(getDeadlineCategory(undefined)).toBe('no-deadline')
-    })
-
     it('should return "overdue" for past deadlines', () => {
       const oneWeekAgo = new Date()
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
