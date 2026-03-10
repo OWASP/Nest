@@ -58,9 +58,7 @@ class ProjectCategoryAdmin(admin.ModelAdmin):
         ),
         (
             "Status",
-            {
-                "fields": ("is_active",)
-            },
+            {"fields": ("is_active",)},
         ),
         (
             "Timestamps",

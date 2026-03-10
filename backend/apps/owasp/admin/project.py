@@ -14,7 +14,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for Project model."""
 
     autocomplete_fields = (
-         "categories",
+        "categories",
         "organizations",
         "owasp_repository",
         "owners",

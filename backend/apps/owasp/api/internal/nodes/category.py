@@ -1,6 +1,5 @@
 """OWASP project category GraphQL node."""
 
-import strawberry
 import strawberry_django
 
 from apps.owasp.models.category import ProjectCategory

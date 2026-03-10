@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 "children": [
                     {
                         "name": "Infrastructure Testing",
-                        "description": "Tools for testing infrastructure and deployment configurations",
+                        "description": "Infrastructure and deployment testing tools",
                         "children": [
                             {
                                 "name": "Kubernetes",
@@ -137,7 +137,7 @@ class Command(BaseCommand):
                     )
 
                 # Recursively create children
-                if "children" in item and item["children"]:
+                if item.get("children"):
                     create_categories_recursive(item["children"], category)
 
         # Create all categories

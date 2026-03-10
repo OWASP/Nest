@@ -228,4 +228,4 @@ export const GET_PROJECTS_LIST = gql`
     }
     projectsTotal: searchProjectsCount(query: $query, filters: $filters)
   }
-
+`

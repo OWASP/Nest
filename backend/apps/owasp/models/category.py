@@ -2,19 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from django.db import models
 
 from apps.common.models import TimestampedModel
 
-if TYPE_CHECKING:
-    from apps.owasp.models.project import Project
-
 
 class ProjectCategory(TimestampedModel):
     """Project category model for hierarchical taxonomy.
-    
+
     Supports up to 3 levels of nesting:
     - Level 1: Category (e.g., "Testing")
     - Level 2: Subcategory (e.g., "Infrastructure Testing")
@@ -59,7 +54,7 @@ class ProjectCategory(TimestampedModel):
         blank=True,
         related_name="children",
         verbose_name="Parent category",
-        help_text="Leave empty for top-level categories. Set to create subcategories (max 3 levels)",
+        help_text="Empty for top-level. Set to create subcategories (max 3 levels)",
     )
 
     is_active = models.BooleanField(
@@ -75,23 +70,24 @@ class ProjectCategory(TimestampedModel):
     @property
     def level(self) -> int:
         """Get the nesting level of this category.
-        
+
         Returns:
             int: Level 1 for top-level, 2 for subcategory, 3 for sub-subcategory.
+
         """
         if self.parent is None:
             return 1
-        elif self.parent.parent is None:
+        if self.parent.parent is None:
             return 2
-        else:
-            return 3
+        return 3
 
     @property
     def full_path(self) -> str:
         """Get the full hierarchical path of this category.
-        
+
         Returns:
             str: Full path like "Testing -> Infrastructure Testing -> Kubernetes"
+
         """
         parts = [self.name]
         current = self.parent
@@ -102,9 +98,10 @@ class ProjectCategory(TimestampedModel):
 
     def get_descendants(self) -> models.QuerySet:
         """Get all descendants (children and their children).
-        
+
         Returns:
             QuerySet: All descendant categories.
+
         """
         descendants = list(self.children.all())
         for child in self.children.all():
@@ -113,11 +110,12 @@ class ProjectCategory(TimestampedModel):
 
     def get_ancestors(self) -> models.QuerySet:
         """Get all ancestors (parent and grandparent, etc).
-        
+
         Returns:
             QuerySet: All ancestor categories.
+
         """
-        ancestors = []
+        ancestors: list[ProjectCategory] = []
         current = self.parent
         while current is not None:
             ancestors.insert(0, current)

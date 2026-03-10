@@ -1,13 +1,13 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
+import { useProjectCategories } from 'hooks/useProjectCategories'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { Ordering, ProjectLevel } from 'types/__generated__/graphql'
 import { GetProjectHealthMetricsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { HealthMetricsProps } from 'types/healthMetrics'
-import { formatCategoryOptions, useProjectCategories } from 'hooks/useProjectCategories'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MetricsCard from 'components/MetricsCard'
 import UnifiedSearchBar from 'components/UnifiedSearchBar'
@@ -129,7 +129,6 @@ const MetricsPage: FC = () => {
   }
 
   const { categories } = useProjectCategories()
-  const categoryOptions = formatCategoryOptions(categories)
 
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)

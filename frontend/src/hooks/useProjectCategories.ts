@@ -2,7 +2,12 @@
 
 import { useQuery } from '@apollo/client/react'
 import { useMemo } from 'react'
-import { GetProjectCategoriesDocument } from 'types/__generated__/categoryQueries.generated'
+import {
+  GetProjectCategoriesDocument,
+  GetProjectCategoriesQuery,
+} from 'types/__generated__/categoryQueries.generated'
+
+type ProjectCategoryNode = GetProjectCategoriesQuery['projectCategories'][number]
 
 export interface ProjectCategoryOption {
   id: string
@@ -10,8 +15,8 @@ export interface ProjectCategoryOption {
   slug: string
   description: string
   level: number
-  full_path: string
-  is_active: boolean
+  fullPath: string
+  isActive: boolean
 }
 
 export interface UseProjectCategoriesReturn {
@@ -31,15 +36,15 @@ export function useProjectCategories(): UseProjectCategoriesReturn {
 
   const categories = useMemo(() => {
     if (!data?.projectCategories) return []
-    
-    return data.projectCategories.map((cat: any) => ({
+
+    return data.projectCategories.map((cat: ProjectCategoryNode) => ({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
       description: cat.description,
       level: cat.level,
-      full_path: cat.fullPath,
-      is_active: cat.isActive,
+      fullPath: cat.fullPath,
+      isActive: cat.isActive,
     }))
   }, [data])
 
@@ -53,12 +58,10 @@ export function useProjectCategories(): UseProjectCategoriesReturn {
 export function formatCategoryOptions(
   categories: ProjectCategoryOption[]
 ): Array<{ key: string; label: string }> {
-  const options: Array<{ key: string; label: string }> = [
-    { key: '', label: 'All Categories' },
-  ]
+  const options: Array<{ key: string; label: string }> = [{ key: '', label: 'All Categories' }]
 
   const sortedCategories = [...categories]
-    .filter((cat) => cat.is_active)
+    .filter((cat) => cat.isActive)
     .sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level
       return a.name.localeCompare(b.name)

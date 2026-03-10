@@ -14,6 +14,7 @@ from ninja.responses import Response
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Leader, ValidationErrorSchema
 from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
+from apps.owasp.models.category import ProjectCategory
 from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project as ProjectModel
 
@@ -89,7 +90,10 @@ class ProjectFilter(FilterSchema):
     )
     categories: list[str] | None = Field(
         None,
-        description="Project category slugs to filter by. Includes projects with these categories or any nested subcategories.",
+        description=(
+            "Project category slugs to filter by. "
+            "Includes projects with these categories or any nested subcategories."
+        ),
     )
     q: str | None = Field(
         None,
@@ -143,16 +147,12 @@ def list_projects(
 
     # Filter by categories: when a category is specified, include projects
     if filters.categories:
-        from apps.owasp.models.category import ProjectCategory
-
         category_q = Q()
         for category_slug in filters.categories:
             try:
                 category = ProjectCategory.objects.get(slug=category_slug, is_active=True)
                 category_ids = [category.id]
-                category_ids.extend(
-                    category.get_descendants().values_list("id", flat=True)
-                )
+                category_ids.extend(category.get_descendants().values_list("id", flat=True))
                 category_q |= Q(categories__id__in=category_ids)
             except ProjectCategory.DoesNotExist:
                 continue

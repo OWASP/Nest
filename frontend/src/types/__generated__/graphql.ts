@@ -566,6 +566,7 @@ export enum ProgramStatusEnum {
 
 export type ProjectCategoryNode = {
   __typename?: 'ProjectCategoryNode';
+  /** Direct child categories */
   children: Array<ProjectCategoryNode>;
   description: Scalars['String']['output'];
   fullPath: Scalars['String']['output'];
@@ -575,6 +576,7 @@ export type ProjectCategoryNode = {
   name: Scalars['String']['output'];
   nestCreatedAt: Scalars['DateTime']['output'];
   nestUpdatedAt: Scalars['DateTime']['output'];
+  /** Parent category if this is a subcategory */
   parent?: Maybe<ProjectCategoryNode>;
   slug: Scalars['String']['output'];
 };

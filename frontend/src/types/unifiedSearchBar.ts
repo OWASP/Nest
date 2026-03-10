@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import type { ProjectCategoryOption } from 'hooks/useProjectCategories'
+import type { ReactNode } from 'react'
 
 export type UnifiedSearchBarProps = {
   searchQuery: string

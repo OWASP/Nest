@@ -1,6 +1,6 @@
 'use client'
-import { useSearchPage } from 'hooks/useSearchPage'
 import { formatCategoryOptions, useProjectCategories } from 'hooks/useProjectCategories'
+import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { FaRightToBracket } from 'react-icons/fa6'

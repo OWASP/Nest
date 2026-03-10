@@ -1,7 +1,8 @@
 """Management command to assign sample categories to projects for testing."""
 
+import random
+
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 
 from apps.owasp.models.category import ProjectCategory
 from apps.owasp.models.project import Project
@@ -32,9 +33,7 @@ class Command(BaseCommand):
 
         if not categories_list:
             self.stdout.write(
-                self.style.ERROR(
-                    "No categories found. Run 'populate_sample_categories' first."
-                )
+                self.style.ERROR("No categories found. Run 'populate_sample_categories' first.")
             )
             return
 
@@ -42,16 +41,14 @@ class Command(BaseCommand):
         projects = Project.active_projects.all().order_by("?")[:limit]
 
         if not projects.exists():
-            self.stdout.write(
-                self.style.ERROR("No projects found in the database.")
-            )
+            self.stdout.write(self.style.ERROR("No projects found in the database."))
             return
 
         modified_count = 0
-        import random
 
         for project in projects:
             # Assign 1-3 random categories to each project
+            # NOSONAR: Using random for test data generation, not security-sensitive
             random_categories = random.sample(categories_list, min(3, len(categories_list)))
 
             # Add categories to project (avoid duplicates)
