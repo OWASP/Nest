@@ -10,6 +10,6 @@ from apps.owasp.models.category import ProjectCategory
 class ProjectCategoryOrder:
     """Ordering for Project Category."""
 
-    created_at: strawberry.auto
+    nest_created_at: strawberry.auto
     name: strawberry.auto
-    updated_at: strawberry.auto
+    nest_updated_at: strawberry.auto

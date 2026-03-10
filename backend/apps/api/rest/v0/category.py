@@ -40,4 +40,8 @@ def list_categories(
     request: HttpRequest,
 ) -> list[ProjectCategorySchema]:
     """Get all active categories with hierarchy information."""
-    return ProjectCategory.objects.filter(is_active=True).order_by("name")
+    return (
+        ProjectCategory.objects.filter(is_active=True)
+        .select_related("parent", "parent__parent")
+        .order_by("name")
+    )

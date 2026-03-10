@@ -5,37 +5,73 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0072_project_project_name_gin_idx_and_more'),
+        ("owasp", "0072_project_project_name_gin_idx_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProjectCategory',
+            name="ProjectCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nest_created_at', models.DateTimeField(auto_now_add=True)),
-                ('nest_updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=100, unique=True, verbose_name='Name')),
-                ('slug', models.SlugField(max_length=100, unique=True, verbose_name='Slug')),
-                ('description', models.TextField(blank=True, default='', help_text='Optional description for this category', verbose_name='Description')),
-                ('is_active', models.BooleanField(default=True, help_text="Inactive categories won't be used for filtering", verbose_name='Is active')),
-                ('parent', models.ForeignKey(blank=True, help_text='Empty for top-level. Set to create subcategories (max 3 levels)', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='owasp.projectcategory', verbose_name='Parent category')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("nest_created_at", models.DateTimeField(auto_now_add=True)),
+                ("nest_updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=100, unique=True, verbose_name="Name")),
+                ("slug", models.SlugField(max_length=100, unique=True, verbose_name="Slug")),
+                (
+                    "description",
+                    models.TextField(
+                        blank=True,
+                        default="",
+                        help_text="Optional description for this category",
+                        verbose_name="Description",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Inactive categories won't be used for filtering",
+                        verbose_name="Is active",
+                    ),
+                ),
+                (
+                    "parent",
+                    models.ForeignKey(
+                        blank=True,
+                        help_text="Empty for top-level. Set to create subcategories (max 3 levels)",
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="children",
+                        to="owasp.projectcategory",
+                        verbose_name="Parent category",
+                    ),
+                ),
             ],
             options={
-                'verbose_name_plural': 'Project categories',
-                'db_table': 'owasp_project_categories',
-                'ordering': ['name'],
+                "verbose_name_plural": "Project categories",
+                "db_table": "owasp_project_categories",
+                "ordering": ["name"],
             },
         ),
         migrations.AddField(
-            model_name='project',
-            name='categories',
-            field=models.ManyToManyField(blank=True, help_text='Project taxonomy categories and subcategories', related_name='projects', to='owasp.projectcategory', verbose_name='Categories'),
+            model_name="project",
+            name="categories",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Project taxonomy categories and subcategories",
+                related_name="projects",
+                to="owasp.projectcategory",
+                verbose_name="Categories",
+            ),
         ),
         migrations.AddIndex(
-            model_name='projectcategory',
-            index=models.Index(fields=['is_active'], name='category_is_active_idx'),
+            model_name="projectcategory",
+            index=models.Index(fields=["is_active"], name="category_is_active_idx"),
         ),
     ]

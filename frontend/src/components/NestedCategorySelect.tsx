@@ -217,15 +217,17 @@ const NestedCategorySelect: React.FC<NestedCategorySelectProps> = ({
               )}
 
               {/* Filter options (Health, Level, etc.) */}
-              {filterOptions.map((option) => (
-                <CategoryItem
-                  key={option.key}
-                  slug={option.key}
-                  name={option.label}
-                  isSelected={selected === option.key}
-                  onSelect={handleSelect}
-                />
-              ))}
+              {filterOptions
+                .filter((option) => option.key !== '')
+                .map((option) => (
+                  <CategoryItem
+                    key={option.key}
+                    slug={option.key}
+                    name={option.label}
+                    isSelected={selected === option.key}
+                    onSelect={handleSelect}
+                  />
+                ))}
             </div>
           )}
         </div>

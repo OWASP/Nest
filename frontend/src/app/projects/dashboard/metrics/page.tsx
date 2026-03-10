@@ -128,14 +128,14 @@ const MetricsPage: FC = () => {
     currentFilters = levelFiltersMapping[currentCategory as keyof typeof levelFiltersMapping]
   }
 
-  const { categories } = useProjectCategories()
-
   const [metrics, setMetrics] = useState<HealthMetricsProps[]>([])
   const [metricsLength, setMetricsLength] = useState<number>(0)
   const [pagination, setPagination] = useState({ offset: 0, limit: PAGINATION_LIMIT })
   const [filters, setFilters] = useState(currentFilters)
   const [ordering, setOrdering] = useState(currentOrdering)
   const [searchQuery, setSearchQuery] = useState(searchQueryParam)
+
+  const { categories } = useProjectCategories()
 
   const handleSearchChange = (query: string) => {
     const normalizedQuery = query.trim()

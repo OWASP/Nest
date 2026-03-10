@@ -34,11 +34,13 @@ class CategoryQuery:
         if pagination:
             if pagination.offset < 0:
                 return []
-            pagination.offset = min(pagination.offset, MAX_OFFSET)
+            offset = min(pagination.offset, MAX_OFFSET)
 
             if pagination.limit is not None and pagination.limit is not strawberry.UNSET:
                 if pagination.limit <= 0:
                     return []
-                pagination.limit = min(pagination.limit, MAX_CATEGORIES_LIMIT)
+                limit = min(pagination.limit, MAX_CATEGORIES_LIMIT)
+                return queryset[offset : offset + limit]
+            return queryset[offset:]
 
         return queryset
