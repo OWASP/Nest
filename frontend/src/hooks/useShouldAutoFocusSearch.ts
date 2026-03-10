@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+
 const getAutoFocusValue = (): boolean => {
   if (typeof globalThis.matchMedia !== 'function') {
     return false
