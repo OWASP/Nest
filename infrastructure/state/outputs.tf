@@ -1,5 +1,5 @@
 output "kms_key_aliases" {
-  description = "The Aliases of the per-environment KMS keys for Terraform state encryption."
+  description = "The aliases of the per-environment KMS keys for Terraform state encryption."
   value       = { for env, kms in module.kms : env => kms.key_alias }
 }
 
