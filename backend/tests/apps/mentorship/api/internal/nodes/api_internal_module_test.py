@@ -392,13 +392,12 @@ class TestModuleNodeResolvers:
     def test_module_node_issues_bulk_load_with_duplicates(self, mock_module_node):
         """Test issues resolver properly handles duplicate deadlines during bulk load."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
-            # Mock deadline_rows with duplicate issue numbers (should skip after first)
             deadline_data = [
                 {"issue__number": 101, "deadline_at": datetime(2025, 10, 26, tzinfo=UTC)},
                 {
                     "issue__number": 101,
                     "deadline_at": datetime(2025, 10, 27, tzinfo=UTC),
-                },  # Duplicate
+                },
                 {"issue__number": 102, "deadline_at": datetime(2025, 10, 28, tzinfo=UTC)},
             ]
             assigned_data = [
@@ -406,15 +405,13 @@ class TestModuleNodeResolvers:
                 {
                     "issue__number": 101,
                     "assigned_at": datetime(2025, 9, 16, tzinfo=UTC),
-                },  # Duplicate
+                },
                 {"issue__number": 102, "assigned_at": datetime(2025, 9, 17, tzinfo=UTC)},
             ]
 
             mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
                 deadline_data
             )
-            # Second call returns assigned_at data
-            mock_task_objects.filter.return_value = mock_task_objects.filter.return_value
 
             mock_qs = (
                 mock_module_node.issues.select_related.return_value.prefetch_related.return_value
@@ -424,7 +421,6 @@ class TestModuleNodeResolvers:
                 MagicMock(number=102),
             ]
 
-            # First filter call for deadline_rows, second for assigned_rows
             filter_mock = mock_task_objects.filter
             filter_mock.side_effect = [
                 MagicMock(
@@ -439,9 +435,19 @@ class TestModuleNodeResolvers:
                 ),
             ]
 
-            issues_list = mock_module_node.mock_issues()
-            # Should have 2 issues from the sliced query result
+            info = MagicMock()
+            info.context.task_deadlines_by_issue = {}
+            info.context.task_assigned_at_by_issue = {}
+
+            issues_list = _call_module_resolver(
+                mock_module_node, "issues", info, limit=20, offset=0, label=None
+            )
             assert len(issues_list) == 2
+
+            assert info.context.task_deadlines_by_issue[101] == datetime(2025, 10, 26, tzinfo=UTC)
+            assert info.context.task_deadlines_by_issue[102] == datetime(2025, 10, 28, tzinfo=UTC)
+            assert info.context.task_assigned_at_by_issue[101] == datetime(2025, 9, 15, tzinfo=UTC)
+            assert info.context.task_assigned_at_by_issue[102] == datetime(2025, 9, 17, tzinfo=UTC)
 
     def test_module_node_recent_pull_requests(self, mock_module_node):
         """Test the recent_pull_requests resolver."""
