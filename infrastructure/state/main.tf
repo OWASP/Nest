@@ -24,8 +24,10 @@ locals {
 module "kms" {
   source = "../modules/kms"
 
-  common_tags  = local.common_tags
-  environment  = "state"
+  alias_name   = "alias/${var.project_name}-${each.key}-state"
+  for_each     = local.state_environments
+  common_tags  = merge(local.common_tags, { Environment = each.key })
+  environment  = "${each.key}-state"
   project_name = var.project_name
 }
 
@@ -110,7 +112,7 @@ resource "aws_dynamodb_table" "state_lock" {
   }
   server_side_encryption {
     enabled     = true
-    kms_key_arn = module.kms.key_arn
+    kms_key_arn = module.kms[each.key].key_arn
   }
 }
 
@@ -235,7 +237,7 @@ resource "aws_s3_bucket_object_lock_configuration" "state" {
 
   bucket = aws_s3_bucket.state[each.key].id
 
-  depends_on = [aws_s3_bucket_versioning.state[each.key]]
+  depends_on = [aws_s3_bucket_versioning.state]
 
   rule {
     default_retention {

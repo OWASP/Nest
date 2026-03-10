@@ -120,6 +120,7 @@ module "frontend" {
 module "kms" {
   source = "../modules/kms"
 
+  alias_name   = "alias/${var.project_name}-${var.environment}"
   common_tags  = local.common_tags
   environment  = var.environment
   project_name = var.project_name
