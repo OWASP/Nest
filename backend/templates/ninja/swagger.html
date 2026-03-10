@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <link type="text/css"
+              rel="stylesheet"
+              href="{% static 'ninja/swagger-ui.css' %}">
+        <link type="text/css"
+              rel="stylesheet"
+              href="{% static 'css/swagger-theme.css' %}">
+        {% include "ninja/favicons.html" %}
+        <title>{{ api.title }}</title>
+        <script>
+            (function() {
+                function setTheme() {
+                    var theme = localStorage.getItem('theme') || 'auto';
+                    if (theme === 'auto') {
+                        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    }
+
+                    document.documentElement.classList.toggle('dark', theme === 'dark');
+                    document.documentElement.dataset.theme = theme;
+                }
+
+                setTheme();
+
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'theme') {
+                        setTheme();
+                    }
+                });
+
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+                    if ((localStorage.getItem('theme') || 'auto') === 'auto') {
+                        setTheme();
+                    }
+                });
+
+                window.setTheme = setTheme;
+            })();
+        </script>
+    </head>
+    <body data-csrf-token="{% if add_csrf %}{{ csrf_token }}{% endif %}"
+          data-api-csrf="{% if add_csrf %}true{% endif %}">
+        <script type="application/json" id="swagger-settings">
+            {
+                {
+                    swagger_settings | safe
+                }
+            }
+        </script>
+        <div id="swagger-ui"></div>
+        <script src="{% static 'ninja/swagger-ui-bundle.js' %}"></script>
+        <script src="{% static 'ninja/swagger-ui-init.js' %}"></script>
+    </body>
+</html>

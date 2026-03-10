@@ -1,0 +1,175 @@
+html[data-theme="light"] {
+    color-scheme: light;
+}
+
+html body,
+html .swagger-ui {
+    background-color: #f4f6fc;
+    color: #000;
+}
+
+html .swagger-ui .scheme-container,
+html .swagger-ui .opblock .opblock-section-header,
+html .swagger-ui .topbar {
+    background-color: #ffffff;
+}
+
+html .swagger-ui .scheme-container {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+html .swagger-ui section.models {
+    background-color: #ffffff;
+    border: 1px solid #0000002d;
+}
+
+html .swagger-ui section.models .model-container {
+    background-color: #f8fafc;
+}
+
+html .swagger-ui .btn.execute {
+    background-color: #1d7bd7;
+    border-color: #1d7bd7;
+    color: #ffffff !important;
+}
+
+html .swagger-ui .btn.authorize {
+    border-color: #10b981;
+    color: #10b981 !important;
+}
+
+html .swagger-ui .btn.cancel {
+    border-color: #ef4444;
+    color: #ef4444 !important;
+}
+
+html .swagger-ui :is(section.models h4 span, section.models h4, section.models h5,
+    section.models button, section.models h4 button, .model-box button,
+    .model-box-control button, .model-box-control, .models-control,
+    .json-schema-2020-12-expand-deep-button, .json-schema-2020-12-collapse-deep-button,
+    .json-schema-2020-12__attribute--muted) {
+    color: #4b5563 !important;
+}
+
+html .swagger-ui :is(section.models h4 span, section.models h4, section.models h5,
+    section.models button, section.models h4 button, .model-box button,
+    .model-box-control button, .model-box-control, .models-control,
+    .json-schema-2020-12-expand-deep-button, .json-schema-2020-12-collapse-deep-button) {
+    opacity: 1 !important;
+}
+
+html .swagger-ui :is(.json-schema-2020-12-expand-deep-button, .json-schema-2020-12-collapse-deep-button,
+    .json-schema-2020-12__attribute--primary, .json-schema-2020-12__attribute--muted) {
+    font-weight: bold !important;
+}
+
+/* --- Dark Mode --- */
+:is(html[data-theme="dark"], html.dark) {
+    color-scheme: dark;
+}
+
+:is(html[data-theme="dark"], html.dark) body,
+:is(html[data-theme="dark"], html.dark) .swagger-ui {
+    background-color: #212529;
+    color: #d1d5db;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(.scheme-container, .opblock .opblock-section-header, .topbar, section.models, .dialog-ux .modal-ux, .dialog-ux .modal-ux-header) {
+    background-color: #1f2937;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .scheme-container {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui section.models {
+    border: 1px solid #374151;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(select, input[type="text"], input[type="password"], input[type="search"], textarea,
+    section.models .model-container, .markdown code, .model-box, .highlight-code) {
+    background-color: #374151;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(select, input[type="text"], input[type="password"], input[type="search"], textarea,
+    .opblock, table thead tr td, table thead tr th, table tbody tr td, .btn, .dialog-ux .modal-ux-header) {
+    border-color: #374151;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(.info .title, .info p, .info a, h3.opblock-tag, h4.opblock-tag,
+    section.models h4, section.models h4 span, .scheme-container .schemes-title,
+    .opblock .opblock-summary-operation-id,
+    .opblock .opblock-summary-path__deprecated, .opblock .opblock-summary-description,
+    .opblock-description-wrapper p, .responses-wrapper .opblock-title,
+    .opblock .opblock-section-header h4, table thead tr td, table thead tr th,
+    .parameter__name, .parameter__type, .parameter__deprecated, .parameter__in,
+    .tab li, .response-col_status, .response-col_description, .model-title, .model,
+    .prop-type, .prop-format, .btn, select, input[type="text"], input[type="password"],
+    input[type="search"], textarea, .markdown p, .markdown pre, .markdown code,
+    .highlight-code .language-json, .json-schema-2020-12-expand-deep-button,
+    .json-schema-2020-12-collapse-deep-button, .json-schema-2020-12-property__name,
+    .dialog-ux .modal-ux-header h3, .dialog-ux .modal-ux-content h4, .dialog-ux .modal-ux-content p) {
+    color: #d1d5db !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .btn.execute {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .btn.authorize {
+    border-color: #10b981;
+    color: #10b981 !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .btn.cancel {
+    border-color: #ef4444;
+    color: #ef4444 !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(.json-schema-2020-12__attribute--primary, .json-schema-2020-12__attribute--muted) {
+    font-weight: bold !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .json-schema-2020-12__attribute--muted {
+    color: #9ca3af !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(.model-box .json-schema-2020-12-accordion, .json-schema-2020-12-accordion,
+    .json-schema-2020-12-expand-deep-button, .json-schema-2020-12-collapse-deep-button) {
+    background-color: transparent !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(.json-schema-2020-12__title,
+    .opblock .opblock-summary-path,
+    .opblock .opblock-summary-path a) {
+    color: #60a5fa !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui :is(.json-schema-2020-12-body, .json-schema-2020-12-keyword__children,
+    .json-schema-2020-12-json-viewer__children) {
+    border-left-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .responses-inner {
+    background-color: #1f2937;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .microlight {
+    background-color: #374151 !important;
+    color: #d1d5db !important;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui .loading-container .loading::after {
+    color: #d1d5db;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui ::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+
+:is(html[data-theme="dark"], html.dark) .swagger-ui ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
