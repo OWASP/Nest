@@ -436,6 +436,7 @@ data "aws_iam_policy_document" "part_two" {
       variable = "kms:ResourceAliases"
       values = [
         "alias/${var.project_name}-state",
+        "alias/${var.project_name}-${each.key}-state",
         "alias/${var.project_name}-${each.key}"
       ]
     }

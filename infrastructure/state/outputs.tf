@@ -3,6 +3,11 @@ output "dynamodb_table_names" {
   value       = { for env, table in aws_dynamodb_table.state_lock : env => table.name }
 }
 
+output "kms_key_arns" {
+  description = "The ARNs of the per-environment KMS keys for Terraform state encryption."
+  value       = { for env, kms in module.kms : env => kms.key_arn }
+}
+
 output "state_bucket_names" {
   description = "The names of the per-environment S3 buckets for Terraform state."
   value       = { for env, bucket in aws_s3_bucket.state : env => bucket.bucket }
