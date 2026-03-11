@@ -109,6 +109,7 @@ class TestGetParamsForIndex:
 
         assert "attributesToRetrieve" in params
         assert "_geoloc" in params["attributesToRetrieve"]
+        assert "idx_country" in params["attributesToRetrieve"]
         assert "idx_region" in params["attributesToRetrieve"]
         assert params["aroundLatLngViaIP"]
 
