@@ -89,31 +89,13 @@ html, body {
     border-radius: 100%;
     background: #87a1bc;
     border: none
-} 
-
-.material-symbols-outlined {
-    font-family: "Material Symbols Outlined";
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
-    -webkit-font-smoothing: antialiased;
-    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-    color: white;
 }
 
 html.dark body {
     background-color: #212529;
-    /* font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
 }
 
-html.dark 
+html.dark
 .swagger-ui .title {
     color: #d1d5dc
 }
@@ -126,7 +108,7 @@ html.dark .nest-topbar {
     background-color: #2d3748;
 }
 
-html.dark 
+html.dark
 .nest-topbar .logo-text {
     color: #cad5e2;
 }
