@@ -45,6 +45,13 @@ const SearchPageLayout = ({
     }
   }, [isLoaded, isFirstLoad])
 
+  let searchBarClassName = ''
+  if (inlineSort && filterChildren) {
+    searchBarClassName = 'rounded-none'
+  } else if (inlineSort) {
+    searchBarClassName = 'rounded-r-none'
+  }
+
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
       <div className={`flex w-full items-center justify-center ${inlineSort ? 'gap-0' : 'gap-2'}`}>
@@ -62,9 +69,7 @@ const SearchPageLayout = ({
           onSearch={onSearch}
           placeholder={searchPlaceholder}
           initialValue={searchQuery}
-          className={
-            inlineSort && filterChildren ? 'rounded-none' : inlineSort ? 'rounded-r-none' : ''
-          }
+          className={searchBarClassName}
         />
         {inlineSort &&
           sortChildren &&
