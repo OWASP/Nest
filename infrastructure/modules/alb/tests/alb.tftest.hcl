@@ -1,0 +1,394 @@
+mock_provider "aws" {}
+
+variables {
+  alb_sg_id                  = "sg-alb-12345"
+  common_tags                = { Environment = "test", Project = "nest" }
+  domain_name                = "nest.owasp.dev"
+  environment                = "test"
+  frontend_health_check_path = "/"
+  frontend_port              = 3000
+  log_retention_days         = 90
+  project_name               = "nest"
+  public_subnet_ids          = ["subnet-public-1", "subnet-public-2"]
+  vpc_id                     = "vpc-12345678"
+}
+
+run "test_acm_certificate_domain_name" {
+  command = plan
+
+  assert {
+    condition     = aws_acm_certificate.main.domain_name == var.domain_name
+    error_message = "ACM certificate domain name must match the domain_name variable."
+  }
+}
+
+run "test_acm_certificate_validation_method" {
+  command = plan
+
+  assert {
+    condition     = aws_acm_certificate.main.validation_method == "DNS"
+    error_message = "ACM certificate must use DNS validation method."
+  }
+}
+
+run "test_acm_certificate_name_format" {
+  command = plan
+
+  assert {
+    condition     = aws_acm_certificate.main.tags.Name == "${var.project_name}-${var.environment}-alb-cert"
+    error_message = "ACM certificate name must follow format: {project}-{environment}-alb-cert."
+  }
+}
+
+run "test_alb_name_format" {
+  command = plan
+  assert {
+    condition     = aws_lb.main.name == "${var.project_name}-${var.environment}-alb"
+    error_message = "ALB name must follow format: {project}-{environment}-alb."
+  }
+}
+
+run "test_alb_drops_invalid_headers" {
+  command = plan
+  assert {
+    condition     = aws_lb.main.drop_invalid_header_fields == true
+    error_message = "ALB must drop invalid header fields."
+  }
+}
+
+run "test_alb_access_logs_enabled" {
+  command = plan
+  assert {
+    condition     = aws_lb.main.access_logs[0].enabled == true
+    error_message = "ALB access logs must be enabled."
+  }
+}
+
+run "test_alb_access_logs_prefix" {
+  command = plan
+  assert {
+    condition     = aws_lb.main.access_logs[0].prefix == "alb"
+    error_message = "ALB access logs prefix must be 'alb'."
+  }
+}
+
+run "test_http_listener_port" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.http_redirect.port == 80
+    error_message = "HTTP listener port must be 80."
+  }
+}
+
+run "test_http_listener_protocol" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.http_redirect.protocol == "HTTP"
+    error_message = "HTTP listener protocol must be 'HTTP'."
+  }
+}
+
+run "test_http_redirect_port" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.http_redirect.default_action[0].redirect[0].port == "443"
+    error_message = "HTTP listener must redirect to port 443."
+  }
+}
+
+run "test_http_redirect_protocol" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.http_redirect.default_action[0].redirect[0].protocol == "HTTPS"
+    error_message = "HTTP listener must redirect to HTTPS."
+  }
+}
+
+run "test_http_redirect_status_code" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.http_redirect.default_action[0].redirect[0].status_code == "HTTP_301"
+    error_message = "HTTP listener redirect must use HTTP_301 status code."
+  }
+}
+
+run "test_https_listener_port" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.https.port == 443
+    error_message = "HTTPS listener port must be 443."
+  }
+}
+
+run "test_https_listener_protocol" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.https.protocol == "HTTPS"
+    error_message = "HTTPS listener protocol must be 'HTTPS'."
+  }
+}
+
+run "test_https_listener_ssl_policy" {
+  command = plan
+  assert {
+    condition     = aws_lb_listener.https.ssl_policy == "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    error_message = "HTTPS listener must use TLS 1.3 security policy."
+  }
+}
+
+run "test_https_listener_sets_hsts_header" {
+  command = plan
+
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_strict_transport_security_header_value == "max-age=31536000; includeSubDomains; preload"
+    error_message = "HTTPS listener must set HSTS header value."
+  }
+}
+
+run "test_https_listener_sets_x_frame_options_header" {
+  command = plan
+
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_x_frame_options_header_value == "DENY"
+    error_message = "HTTPS listener must set X-Frame-Options header value."
+  }
+}
+
+run "test_https_listener_sets_x_content_type_options_header" {
+  command = plan
+
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_x_content_type_options_header_value == "nosniff"
+    error_message = "HTTPS listener must set X-Content-Type-Options header value."
+  }
+}
+
+run "test_https_listener_sets_csp_header" {
+  command = plan
+
+  assert {
+    condition     = aws_lb_listener.https.routing_http_response_content_security_policy_header_value == local.content_security_policy
+    error_message = "HTTPS listener must set Content-Security-Policy header value."
+  }
+}
+
+run "test_https_listener_sets_all_security_headers" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      aws_lb_listener.https.routing_http_response_content_security_policy_header_value != "",
+      aws_lb_listener.https.routing_http_response_strict_transport_security_header_value != "",
+      aws_lb_listener.https.routing_http_response_x_content_type_options_header_value != "",
+      aws_lb_listener.https.routing_http_response_x_frame_options_header_value != ""
+    ])
+    error_message = "HTTPS listener must set all four security response headers."
+  }
+}
+
+run "test_csp_contains_required_directives" {
+  command = plan
+
+  assert {
+    condition = alltrue([
+      strcontains(local.content_security_policy, "default-src 'self'"),
+      strcontains(local.content_security_policy, "object-src 'none'"),
+      strcontains(local.content_security_policy, "frame-ancestors 'none'"),
+      strcontains(local.content_security_policy, "script-src"),
+      strcontains(local.content_security_policy, "style-src"),
+      strcontains(local.content_security_policy, "base-uri 'self'")
+    ])
+    error_message = "Content-Security-Policy must contain required security directives."
+  }
+}
+
+run "test_csp_directive_count" {
+  command = plan
+
+  assert {
+    condition     = length(regexall("[^;]+", trimspace(local.content_security_policy))) == 11
+    error_message = "Content-Security-Policy must contain 11 directives."
+  }
+}
+
+run "test_backend_listener_rules_created" {
+  command = plan
+
+  assert {
+    condition     = length(aws_lb_listener_rule.backend_https) > 0
+    error_message = "Backend listener rules must be created."
+  }
+}
+
+run "test_backend_target_group_name_format" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.name == "${var.project_name}-${var.environment}-backend-tg"
+    error_message = "Backend target group name must follow format: {project}-{environment}-backend-tg."
+  }
+}
+
+run "test_backend_target_group_port" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.port == var.backend_port
+    error_message = "Backend target group port must match the backend_port variable."
+  }
+}
+
+run "test_backend_target_group_protocol" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.protocol == "HTTP"
+    error_message = "Backend target group protocol must be 'HTTP'."
+  }
+}
+
+run "test_backend_target_group_type" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.target_type == "ip"
+    error_message = "Backend target group target type must be 'ip'."
+  }
+}
+
+run "test_backend_target_group_deregistration_delay" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.deregistration_delay == "30"
+    error_message = "Backend target group deregistration delay must be 30 seconds."
+  }
+}
+
+run "test_backend_health_check_path" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].path == var.backend_health_check_path
+    error_message = "Backend health check path must match the variable."
+  }
+}
+
+run "test_frontend_target_group_name_format" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.name == "${var.project_name}-${var.environment}-frontend-tg"
+    error_message = "Frontend target group name must follow format: {project}-{environment}-frontend-tg."
+  }
+}
+
+run "test_frontend_target_group_port" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.port == var.frontend_port
+    error_message = "Frontend target group port must match the frontend_port variable."
+  }
+}
+
+run "test_frontend_target_group_protocol" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.protocol == "HTTP"
+    error_message = "Frontend target group protocol must be 'HTTP'."
+  }
+}
+
+run "test_frontend_target_group_type" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.target_type == "ip"
+    error_message = "Frontend target group target type must be 'ip'."
+  }
+}
+
+run "test_frontend_target_group_deregistration_delay" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.deregistration_delay == "30"
+    error_message = "Frontend target group deregistration delay must be 30 seconds."
+  }
+}
+
+run "test_frontend_health_check_enabled" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.health_check[0].enabled == true
+    error_message = "Frontend health check must be enabled."
+  }
+}
+
+run "test_frontend_health_check_path" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.health_check[0].path == var.frontend_health_check_path
+    error_message = "Frontend health check path must match the variable."
+  }
+}
+
+run "test_frontend_health_check_healthy_threshold" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.health_check[0].healthy_threshold == 2
+    error_message = "Frontend health check healthy threshold must be 2."
+  }
+}
+
+run "test_frontend_health_check_unhealthy_threshold" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.health_check[0].unhealthy_threshold == 3
+    error_message = "Frontend health check unhealthy threshold must be 3."
+  }
+}
+
+run "test_frontend_health_check_timeout" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.health_check[0].timeout == 5
+    error_message = "Frontend health check timeout must be 5 seconds."
+  }
+}
+
+run "test_frontend_health_check_matcher" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.frontend.health_check[0].matcher == "200-299"
+    error_message = "Frontend health check matcher must be '200-299'."
+  }
+}
+
+run "test_s3_bucket_lifecycle_expiration" {
+  command = plan
+  assert {
+    condition     = aws_s3_bucket_lifecycle_configuration.alb_logs.rule[0].expiration[0].days == var.log_retention_days
+    error_message = "S3 lifecycle must expire logs after log_retention_days."
+  }
+}
+
+run "test_s3_bucket_lifecycle_multipart_abort" {
+  command = plan
+  assert {
+    condition     = aws_s3_bucket_lifecycle_configuration.alb_logs.rule[0].abort_incomplete_multipart_upload[0].days_after_initiation == 7
+    error_message = "S3 lifecycle must abort incomplete multipart uploads after 7 days."
+  }
+}
+
+run "test_s3_public_access_block_all_blocked" {
+  command = plan
+  assert {
+    condition = alltrue([
+      aws_s3_bucket_public_access_block.alb_logs.block_public_acls,
+      aws_s3_bucket_public_access_block.alb_logs.block_public_policy,
+      aws_s3_bucket_public_access_block.alb_logs.ignore_public_acls,
+      aws_s3_bucket_public_access_block.alb_logs.restrict_public_buckets
+    ])
+    error_message = "S3 bucket must block all public access."
+  }
+}
+
+run "test_s3_versioning_enabled" {
+  command = plan
+  assert {
+    condition     = aws_s3_bucket_versioning.alb_logs.versioning_configuration[0].status == "Enabled"
+    error_message = "S3 bucket versioning must be enabled."
+  }
+}

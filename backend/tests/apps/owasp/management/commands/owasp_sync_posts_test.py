@@ -214,3 +214,26 @@ This is the content of the test post."""
         mock_update_data.assert_not_called()
         mock_bulk_save.assert_called_once_with([])
         command.stderr.write.assert_called()
+
+    @mock.patch("apps.owasp.management.commands.owasp_sync_posts.get_repository_file_content")
+    @mock.patch("apps.owasp.models.post.Post.update_data")
+    @mock.patch("apps.owasp.models.post.Post.bulk_save")
+    def test_handle_no_yaml_match(
+        self, mock_bulk_save, mock_update_data, mock_get_content, command
+    ):
+        """Test handle when content starts with --- but yaml_pattern doesn't match."""
+        repository_files = [
+            {
+                "name": "2023-01-01-no-yaml.md",
+                "download_url": "https://raw.githubusercontent.com/OWASP/owasp.github.io/main/_posts/2023-01-01-no-yaml.md",
+            },
+        ]
+        no_yaml_match_content = "---\n---\nContent without valid YAML block"
+
+        mock_get_content.side_effect = [json.dumps(repository_files), no_yaml_match_content]
+
+        command.handle()
+
+        assert mock_get_content.call_count == 2
+        mock_update_data.assert_not_called()
+        mock_bulk_save.assert_called_once_with([])

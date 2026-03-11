@@ -234,10 +234,8 @@ const MetricsPage: FC = () => {
                 },
               ]}
               selectionMode="single"
-              selectedKeys={urlKey ? [urlKey] : []}
-              selectedLabels={
-                urlKey ? [SORT_FIELDS.find((f) => f.key === urlKey)?.label || ''] : []
-              }
+              selectedKeys={[urlKey]}
+              selectedLabels={[SORT_FIELDS.find((f) => f.key === urlKey)!.label]}
               onAction={(key: Key) => {
                 if (key === 'reset-sort') {
                   handleSort(null)

@@ -90,3 +90,96 @@ class TestModulePureMocks:
         assert module.started_at == explicit_start
         assert module.ended_at == explicit_end
         assert module.key == "date-module"
+
+    @patch("apps.common.models.TimestampedModel.save")
+    def test_save_inherits_dates_from_program(self, mock_super_save):
+        """Test save method inherits dates from program when not set."""
+        program_started = django.utils.timezone.datetime(
+            2024, 1, 1, tzinfo=django.utils.timezone.UTC
+        )
+        program_ended = django.utils.timezone.datetime(
+            2024, 12, 31, tzinfo=django.utils.timezone.UTC
+        )
+
+        mock_module = MagicMock(spec=Module)
+        mock_module.name = "Test Module"
+        mock_module.program = MagicMock(started_at=program_started, ended_at=program_ended)
+        mock_module.started_at = None
+        mock_module.ended_at = None
+
+        Module.save(mock_module)
+
+        assert mock_module.started_at == program_started
+        assert mock_module.ended_at == program_ended
+        mock_super_save.assert_called_once()
+
+    @patch("apps.common.models.TimestampedModel.save")
+    def test_save_keeps_explicit_dates(self, mock_super_save):
+        """Test save method keeps explicitly set dates."""
+        explicit_start = django.utils.timezone.datetime(
+            2024, 3, 1, tzinfo=django.utils.timezone.UTC
+        )
+        explicit_end = django.utils.timezone.datetime(
+            2024, 6, 30, tzinfo=django.utils.timezone.UTC
+        )
+
+        mock_module = MagicMock(spec=Module)
+        mock_module.name = "Test Module"
+        mock_module.program = MagicMock(
+            started_at=django.utils.timezone.datetime(
+                2024, 1, 1, tzinfo=django.utils.timezone.UTC
+            ),
+            ended_at=django.utils.timezone.datetime(
+                2024, 12, 31, tzinfo=django.utils.timezone.UTC
+            ),
+        )
+        mock_module.started_at = explicit_start
+        mock_module.ended_at = explicit_end
+
+        Module.save(mock_module)
+
+        assert mock_module.started_at == explicit_start
+        assert mock_module.ended_at == explicit_end
+
+    @patch("apps.common.models.TimestampedModel.save")
+    def test_save_sets_key_from_name(self, mock_super_save):
+        """Test save method sets key from slug name."""
+        mock_module = MagicMock(spec=Module)
+        mock_module.name = "My Test Module"
+        mock_module.program = MagicMock(
+            started_at=django.utils.timezone.datetime(
+                2024, 1, 1, tzinfo=django.utils.timezone.UTC
+            ),
+            ended_at=django.utils.timezone.datetime(
+                2024, 12, 31, tzinfo=django.utils.timezone.UTC
+            ),
+        )
+        mock_module.started_at = django.utils.timezone.datetime(
+            2024, 1, 1, tzinfo=django.utils.timezone.UTC
+        )
+        mock_module.ended_at = django.utils.timezone.datetime(
+            2024, 12, 31, tzinfo=django.utils.timezone.UTC
+        )
+
+        Module.save(mock_module)
+
+        assert mock_module.key == "my-test-module"
+        mock_super_save.assert_called_once()
+
+    @patch("apps.common.models.TimestampedModel.save")
+    def test_save_without_program(self, mock_super_save):
+        """Test save method works when program is None."""
+        mock_module = MagicMock(spec=Module)
+        mock_module.name = "Orphan Module"
+        mock_module.program = None
+        mock_module.started_at = django.utils.timezone.datetime(
+            2024, 1, 1, tzinfo=django.utils.timezone.UTC
+        )
+        mock_module.ended_at = django.utils.timezone.datetime(
+            2024, 12, 31, tzinfo=django.utils.timezone.UTC
+        )
+
+        Module.save(mock_module)
+
+        assert mock_module.key == "orphan-module"
+        mock_super_save.assert_called_once()

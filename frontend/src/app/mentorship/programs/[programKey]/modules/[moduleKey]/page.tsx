@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import capitalize from 'lodash/capitalize'
 import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -85,64 +86,66 @@ const ModuleDetailsPage = () => {
   ]
 
   return (
-    <DetailsCard
-      admins={admins ?? undefined}
-      details={moduleDetails}
-      domains={programModule.domains ?? undefined}
-      mentors={programModule.mentors}
-      isFetchingMore={isFetchingMore}
-      pullRequests={((programModule.recentPullRequests as unknown as PullRequest[]) || []).slice(
-        0,
-        visibleCount
-      )}
-      summary={programModule.description}
-      tags={programModule.tags ?? undefined}
-      title={programModule.name}
-      type="module"
-      onLoadMorePullRequests={
-        hasMorePRs || (programModule.recentPullRequests || []).length > visibleCount
-          ? () => {
-              if (isFetchingMore) return
-              const currentLength = programModule.recentPullRequests?.length || 0
-              if (hasMorePRs && currentLength < visibleCount + limit) {
-                setIsFetchingMore(true)
-                fetchMore({
-                  variables: {
-                    programKey,
-                    moduleKey,
-                    offset: currentLength,
-                    limit,
-                  },
-                  updateQuery: (prevResult, { fetchMoreResult }) => {
-                    if (!fetchMoreResult) return prevResult
-                    const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
-                    if (newPRs.length < limit) setHasMorePRs(false)
-                    if (newPRs.length === 0) return prevResult
-                    return {
-                      ...prevResult,
-                      getModule: {
-                        ...prevResult.getModule!,
-                        recentPullRequests: [
-                          ...(prevResult.getModule?.recentPullRequests || []),
-                          ...newPRs,
-                        ],
-                      },
-                    }
-                  },
-                })
-                  .catch((error) => handleAppError(error))
-                  .finally(() => setIsFetchingMore(false))
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        admins={admins ?? undefined}
+        details={moduleDetails}
+        domains={programModule.domains ?? undefined}
+        mentors={programModule.mentors}
+        isFetchingMore={isFetchingMore}
+        pullRequests={((programModule.recentPullRequests as unknown as PullRequest[]) || []).slice(
+          0,
+          visibleCount
+        )}
+        summary={programModule.description}
+        tags={programModule.tags ?? undefined}
+        title={programModule.name}
+        type="module"
+        onLoadMorePullRequests={
+          hasMorePRs || (programModule.recentPullRequests || []).length > visibleCount
+            ? () => {
+                if (isFetchingMore) return
+                const currentLength = programModule.recentPullRequests?.length || 0
+                if (hasMorePRs && currentLength < visibleCount + limit) {
+                  setIsFetchingMore(true)
+                  fetchMore({
+                    variables: {
+                      programKey,
+                      moduleKey,
+                      offset: currentLength,
+                      limit,
+                    },
+                    updateQuery: (prevResult, { fetchMoreResult }) => {
+                      if (!fetchMoreResult) return prevResult
+                      const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
+                      if (newPRs.length < limit) setHasMorePRs(false)
+                      if (newPRs.length === 0) return prevResult
+                      return {
+                        ...prevResult,
+                        getModule: {
+                          ...prevResult.getModule!,
+                          recentPullRequests: [
+                            ...(prevResult.getModule?.recentPullRequests || []),
+                            ...newPRs,
+                          ],
+                        },
+                      }
+                    },
+                  })
+                    .catch((error) => handleAppError(error))
+                    .finally(() => setIsFetchingMore(false))
+                }
+                setVisibleCount((prev) => prev + limit)
               }
-              setVisibleCount((prev) => prev + limit)
-            }
-          : undefined
-      }
-      onResetPullRequests={
-        visibleCount > limit && (programModule.recentPullRequests || []).length > limit
-          ? () => setVisibleCount(limit)
-          : undefined
-      }
-    />
+            : undefined
+        }
+        onResetPullRequests={
+          visibleCount > limit && (programModule.recentPullRequests || []).length > limit
+            ? () => setVisibleCount(limit)
+            : undefined
+        }
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

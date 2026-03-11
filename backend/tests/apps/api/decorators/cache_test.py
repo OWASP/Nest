@@ -10,23 +10,24 @@ from django.http import HttpRequest, HttpResponse
 from apps.api.decorators.cache import cache_response, generate_key
 
 
-@pytest.mark.parametrize(
-    ("full_path", "prefix", "expected_key"),
-    [
-        ("/api/test", "p1", "p1:/api/test"),
-        ("/api/test?a=1", "p2", "p2:/api/test?a=1"),
-        ("/api/test?a=1&b=2", "p3", "p3:/api/test?a=1&b=2"),
-        ("/api/test?b=2&a=1", "p4", "p4:/api/test?b=2&a=1"),
-    ],
-)
-def test_generate_cache_key(full_path, prefix, expected_key):
-    """Test cases for the generate cache key function."""
-    request = HttpRequest()
-    parsed_url = urlparse(full_path)
-    request.path = parsed_url.path
-    request.META["QUERY_STRING"] = parsed_url.query
+class TestGenerateCacheKey:
+    @pytest.mark.parametrize(
+        ("full_path", "prefix", "expected_key"),
+        [
+            ("/api/test", "p1", "p1:/api/test"),
+            ("/api/test?a=1", "p2", "p2:/api/test?a=1"),
+            ("/api/test?a=1&b=2", "p3", "p3:/api/test?a=1&b=2"),
+            ("/api/test?b=2&a=1", "p4", "p4:/api/test?b=2&a=1"),
+        ],
+    )
+    def test_generate_cache_key(self, full_path, prefix, expected_key):
+        """Test cases for the generate cache key function."""
+        request = HttpRequest()
+        parsed_url = urlparse(full_path)
+        request.path = parsed_url.path
+        request.META["QUERY_STRING"] = parsed_url.query
 
-    assert generate_key(request, prefix) == expected_key
+        assert generate_key(request, prefix) == expected_key
 
 
 class TestCacheResponse:

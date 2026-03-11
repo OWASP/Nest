@@ -6,6 +6,18 @@ import { ApexBarChartDataSeries } from 'types/healthMetrics'
 import AnchorTitle from 'components/AnchorTitle'
 import SecondaryCard from 'components/SecondaryCard'
 
+interface DataLabelsFormatterOpts {
+  w: {
+    config: {
+      series: Array<{
+        data: Array<{ goals?: Array<{ value: number }> }>
+      }>
+    }
+  }
+  seriesIndex: number
+  dataPointIndex: number
+}
+
 // Importing Chart dynamically to avoid SSR issues with ApexCharts
 const Chart = dynamic(() => import('react-apexcharts'), {
   ssr: false,
@@ -70,8 +82,9 @@ const BarChart: React.FC<{
             theme: theme,
           },
           dataLabels: {
-            formatter: (val: number, opts) => {
-              const goal = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex].goals[0]
+            formatter: (val: number, opts: DataLabelsFormatterOpts) => {
+              const goal =
+                opts.w.config.series[opts.seriesIndex]?.data[opts.dataPointIndex]?.goals?.[0]
               if (goal) {
                 return `${val} / ${goal.value}`
               }

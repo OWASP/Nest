@@ -26,4 +26,8 @@ rules:
   quoted-strings: disable
   trailing-spaces: enable
   truthy:
+    allowed-values:
+      - 'false'
+      - 'on'  # GitHub Actions workflow trigger key.
+      - 'true'
     level: warning

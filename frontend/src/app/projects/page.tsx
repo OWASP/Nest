@@ -80,7 +80,7 @@ const ProjectsPage = () => {
       }
       totalPages={totalPages}
     >
-      {projects && projects.filter((project) => project.isActive).map(renderProjectCard)}
+      {projects?.filter((project) => project.isActive).map(renderProjectCard)}
     </SearchPageLayout>
   )
 }

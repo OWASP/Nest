@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { useLogout } from 'hooks/useLogout'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import { ReactNode } from 'react'
 import UserMenu from 'components/UserMenu'
 
@@ -31,7 +32,14 @@ jest.mock(
     )
 )
 
-describe('UserMenu Accessibility', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('UserMenu Accessibility ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   const mockUseSession = useDjangoSession as jest.MockedFunction<typeof useDjangoSession>
   const mockUseLogout = useLogout as jest.MockedFunction<typeof useLogout>
 

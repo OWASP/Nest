@@ -277,13 +277,13 @@ class TestProjectIndexMixin:
         assert result == "documentation"
 
     def test_idx_updated_at_with_datetime(self):
-        """Test idx_updated_at returns timestamp when updated_at exists."""
+        """Test idx_updated_at returns ISO string when updated_at exists."""
         test_datetime = datetime(2024, 6, 15, 10, 30, 0, tzinfo=UTC)
         mock_project = self.create_mock_project(updated_at=test_datetime)
 
         result = ProjectIndexMixin.idx_updated_at.fget(mock_project)
 
-        assert result == test_datetime.timestamp()
+        assert result == test_datetime.isoformat()
 
     def test_idx_updated_at_none(self):
         """Test idx_updated_at returns empty string when updated_at is None."""

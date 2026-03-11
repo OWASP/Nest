@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
+import { useTheme } from 'next-themes'
 import React from 'react'
 import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/graphql'
 import { Module } from 'types/mentorship'
@@ -56,14 +57,21 @@ const mockModule: Module = {
       avatarUrl: 'https://example.com/avatar2.jpg',
     },
   ],
-  startedAt: '2024-01-01T00:00:00Z',
-  endedAt: '2024-12-31T23:59:59Z',
+  startedAt: 1704067200,
+  endedAt: 1735689599,
   domains: ['frontend', 'backend'],
   tags: ['react', 'nodejs'],
   labels: ['good first issue', 'bug'],
 }
 
-describe('SingleModuleCard a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('SingleModuleCard a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations', async () => {
     const { container } = render(<SingleModuleCard module={mockModule} />)
 

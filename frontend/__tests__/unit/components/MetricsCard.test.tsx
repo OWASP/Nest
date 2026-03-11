@@ -62,6 +62,7 @@ describe('MetricsCard component', () => {
       [75, 'bg-green-500'],
       [60, 'bg-orange-500'],
       [50, 'bg-orange-500'],
+      [74, 'bg-orange-500'],
       [30, 'bg-red-500'],
     ]
 
@@ -80,6 +81,7 @@ describe('MetricsCard component', () => {
     expect(screen.getAllByText('Test Project')[0]).toBeInTheDocument()
     expect(screen.getByText(/Score:/).textContent).toContain('80')
 
+    // Use midday UTC so the formatted date is in 2024 in all timezones
     const updated = makeMetric({
       projectKey: 'another',
       projectName: 'Another Project',
@@ -87,7 +89,7 @@ describe('MetricsCard component', () => {
       forksCount: 20,
       contributorsCount: 7,
       score: 55,
-      createdAt: '2024-01-01T00:00:00Z',
+      createdAt: '2024-06-15T12:00:00Z',
     })
     rerender(<MetricsCard metric={updated} />)
 
@@ -95,7 +97,8 @@ describe('MetricsCard component', () => {
     expect(screen.getAllByText('99')[0]).toBeInTheDocument()
     expect(screen.getAllByText('20')[0]).toBeInTheDocument()
     expect(screen.getAllByText('7')[0]).toBeInTheDocument()
-    expect(screen.getAllByText('Jan 1, 2024')[0]).toBeInTheDocument()
+    // Date format is locale-dependent; assert the year is shown
+    expect(screen.getByText('Health Checked').closest('div')).toHaveTextContent(/2024/)
     expect(screen.getByText(/Score:/).textContent).toContain('55')
     expect(screen.getByRole('link')).toHaveAttribute('href', '/projects/dashboard/metrics/another')
   })

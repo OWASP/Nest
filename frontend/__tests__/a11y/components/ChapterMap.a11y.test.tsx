@@ -2,6 +2,7 @@ import { mockChapterData } from '@mockData/mockChapterData'
 import { screen, fireEvent, render, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import * as L from 'leaflet'
+import { useTheme } from 'next-themes'
 import React, { useEffect } from 'react'
 import ChapterMap from 'components/ChapterMap'
 
@@ -152,7 +153,14 @@ const defaultProps = {
   style: { width: '100%', height: '400px' },
 }
 
-describe('ChapterMap a11y', () => {
+describe.each([
+  { theme: 'light', name: 'light' },
+  { theme: 'dark', name: 'dark' },
+])('ChapterMap a11y ($name theme)', ({ theme }) => {
+  beforeEach(() => {
+    ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  })
   it('should not have any accessibility violations in locked state', async () => {
     const { baseElement } = render(<ChapterMap {...defaultProps} />)
 

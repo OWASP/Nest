@@ -39,7 +39,7 @@ class ChapterNode(GenericEntityNode):
         return deep_camelize(root.contribution_stats)
 
     @strawberry_django.field
-    def created_at(self, root: Chapter) -> float:
+    def created_at(self, root: Chapter) -> str:
         """Resolve created at."""
         return root.idx_created_at
 
