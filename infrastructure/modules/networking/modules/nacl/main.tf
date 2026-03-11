@@ -88,15 +88,59 @@ resource "aws_network_acl_rule" "private_inbound_redis" {
   to_port        = 6379
 }
 
-resource "aws_network_acl_rule" "private_outbound_all" {
+resource "aws_network_acl_rule" "private_outbound_https" {
   cidr_block     = "0.0.0.0/0"
   egress         = true
-  from_port      = 0
+  from_port      = 443
   network_acl_id = aws_network_acl.private.id
-  protocol       = "-1"
+  protocol       = "tcp"
   rule_action    = "allow"
   rule_number    = 100
-  to_port        = 0
+  to_port        = 443
+}
+
+resource "aws_network_acl_rule" "private_outbound_postgres" {
+  cidr_block     = var.vpc_cidr
+  egress         = true
+  from_port      = 5432
+  network_acl_id = aws_network_acl.private.id
+  protocol       = "tcp"
+  rule_action    = "allow"
+  rule_number    = 110
+  to_port        = 5432
+}
+
+resource "aws_network_acl_rule" "private_outbound_redis" {
+  cidr_block     = var.vpc_cidr
+  egress         = true
+  from_port      = 6379
+  network_acl_id = aws_network_acl.private.id
+  protocol       = "tcp"
+  rule_action    = "allow"
+  rule_number    = 120
+  to_port        = 6379
+}
+
+resource "aws_network_acl_rule" "private_outbound_dns" {
+  cidr_block     = var.vpc_cidr
+  egress         = true
+  from_port      = 53
+  network_acl_id = aws_network_acl.private.id
+  protocol       = "udp"
+  rule_action    = "allow"
+  rule_number    = 130
+  to_port        = 53
+}
+
+resource "aws_network_acl_rule" "private_outbound_ephemeral" {
+  cidr_block     = "0.0.0.0/0"
+  egress         = true
+  from_port      = 1024
+  network_acl_id = aws_network_acl.private.id
+  protocol       = "tcp"
+  rule_action    = "allow"
+  rule_number    = 140
+  to_port        = 65535
 }
 
 resource "aws_network_acl_rule" "public_inbound_ephemeral" {

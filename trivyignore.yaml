@@ -7,12 +7,9 @@ misconfigurations:
   - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
     paths:
       - infrastructure/modules/alb/main.tf
-  - id: AVD-AWS-0102  # NACL egress allows all ports; restrict for production
+  - id: AVD-AWS-0102  # Public NACL egress allows all ports; required for NAT gateway traffic forwarding
     paths:
       - infrastructure/modules/networking/modules/nacl/main.tf
-  - id: AVD-AWS-0104  # Egress 0.0.0.0/0 for ECS/Lambda; restrict for production
-    paths:
-      - infrastructure/modules/security/main.tf
   - id: AVD-AWS-0132  # ALB logs require SSE-S3
     paths:
       - infrastructure/modules/alb/main.tf
