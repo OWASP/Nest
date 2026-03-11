@@ -93,6 +93,19 @@ clear-cache:
 collect-static:
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
+populate-sample-categories: ## Populate sample hierarchical categories for testing
+	@CMD="python manage.py populate_sample_categories" $(MAKE) exec-backend-command
+
+# Default limit for category assignment (can be overridden: make assign-sample-categories LIMIT=50)
+LIMIT ?= 10
+
+assign-sample-categories: ## Assign sample categories to projects (use LIMIT=25 to override default 10)
+	@CMD="python manage.py assign_sample_categories --limit $(LIMIT)" $(MAKE) exec-backend-command
+
+setup-categories: ## Setup categories: populate and assign to projects
+setup-categories: populate-sample-categories assign-sample-categories
+	@echo "Category setup complete"
+
 django-shell: ## Open Django interactive shell
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 

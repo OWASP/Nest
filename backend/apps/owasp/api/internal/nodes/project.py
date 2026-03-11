@@ -11,6 +11,7 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.repository import RepositoryNode
 from apps.github.models.milestone import Milestone
+from apps.owasp.api.internal.nodes.category import ProjectCategoryNode
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
@@ -43,6 +44,11 @@ MAX_LIMIT = 1000
 )
 class ProjectNode(GenericEntityNode):
     """Project node."""
+
+    @strawberry_django.field(prefetch_related=["categories"])
+    def categories(self, root: Project) -> list[ProjectCategoryNode]:
+        """Resolve project categories."""
+        return list(root.categories.filter(is_active=True))
 
     @strawberry_django.field
     def contribution_stats(self, root: Project) -> strawberry.scalars.JSON | None:

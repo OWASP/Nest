@@ -20,11 +20,17 @@ export const GET_PROJECT_HEALTH_STATS = gql`
 `
 export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
   query GetProjectHealthMetrics(
+    $query: String!
     $filters: ProjectHealthMetricsFilter!
     $pagination: OffsetPaginationInput!
     $ordering: [ProjectHealthMetricsOrder!]
   ) {
-    projectHealthMetrics(filters: $filters, pagination: $pagination, ordering: $ordering) {
+    projectHealthMetrics(
+      query: $query
+      filters: $filters
+      pagination: $pagination
+      ordering: $ordering
+    ) {
       id
       createdAt
       contributorsCount
@@ -34,7 +40,7 @@ export const GET_PROJECT_HEALTH_METRICS_LIST = gql`
       score
       starsCount
     }
-    projectHealthMetricsDistinctLength(filters: $filters)
+    projectHealthMetricsDistinctLength(query: $query, filters: $filters)
   }
 `
 export const GET_PROJECT_HEALTH_METRICS_DETAILS = gql`

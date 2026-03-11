@@ -9,6 +9,7 @@ from ninja.pagination import RouterPaginated
 from ninja.throttling import AuthRateThrottle
 
 from apps.api.rest.auth.api_key import ApiKey
+from apps.api.rest.v0.category import router as category_router
 from apps.api.rest.v0.chapter import router as chapter_router
 from apps.api.rest.v0.committee import router as committee_router
 from apps.api.rest.v0.event import router as event_router
@@ -23,6 +24,7 @@ from apps.api.rest.v0.snapshot import router as snapshot_router
 from apps.api.rest.v0.sponsor import router as sponsor_router
 
 ROUTERS = {
+    "/categories": category_router,
     "/chapters": chapter_router,
     "/committees": committee_router,
     "/events": event_router,

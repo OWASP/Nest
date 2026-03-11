@@ -42,8 +42,10 @@ class ProjectIndex(IndexBase):
         "attributesForFaceting": [
             "filterOnly(idx_is_active)",
             "filterOnly(idx_key)",
+            "idx_level",
             "idx_name",
             "idx_tags",
+            "idx_type",
             "idx_repositories.name",
         ],
         "indexLanguages": ["en"],

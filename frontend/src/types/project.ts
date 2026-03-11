@@ -9,6 +9,18 @@ import type { Release } from 'types/release'
 
 export type ProjectHealthType = 'healthy' | 'needsAttention' | 'unhealthy'
 
+export type ProjectCategory = {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  level?: number
+  fullPath?: string
+  isActive?: boolean
+  nestCreatedAt?: string
+  nestUpdatedAt?: string
+}
+
 export type ProjectStats = {
   contributors: number
   forks: number
@@ -19,6 +31,7 @@ export type ProjectStats = {
 
 export type Project = {
   createdAt?: string
+  categories?: ProjectCategory[]
   contributorsCount?: number
   contributionData?: Record<string, number>
   contributionStats?: {

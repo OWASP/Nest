@@ -14,6 +14,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for Project model."""
 
     autocomplete_fields = (
+        "categories",
         "organizations",
         "owasp_repository",
         "owners",
@@ -41,6 +42,7 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "has_active_repositories",
         "level",
         "type",
+        "categories",
     )
     ordering = ("-created_at",)
     search_fields = (
