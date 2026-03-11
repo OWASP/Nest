@@ -1,0 +1,165 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    background-color: #f4f6fc;
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.swagger-ui .scheme-container {
+    background-color: inherit
+}
+
+.swagger-ui .scheme-container .schemes-server-container .servers-title {
+    color: #d1d5dc;
+}
+
+.swagger-ui .title {
+    color: #4a5565
+}
+
+.swagger-ui .info .description p {
+    color: #737373;
+}
+
+.nest-topbar {
+    position: sticky;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    top: 0;
+    background-color: #98AFC7;
+    height: 4rem;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.nest-topbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.nest-topbar .logo-text {
+    font-size: 1.5rem;
+    color: #1d293d;
+}
+
+.nest-logo {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.logo-img-div {
+    height: 48px;
+    width: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.swagger-ui .opblock.opblock-get {
+    background: #e5e7eb;
+    border-color: #e5e7eb;
+}
+
+.swagger-ui .opblock-summary-path-description-wrapper span{
+    color: #52a3ff !important;
+}
+
+
+.swagger-ui .opblock-summary-path-description-wrapper .opblock-summary-description {
+    color: #4a5565
+}
+
+.nest-topbar .toggle-theme-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 100%;
+    background: #87a1bc;
+    border: none
+} 
+
+.material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    color: white;
+}
+
+html.dark body {
+    background-color: #212529;
+    /* font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
+}
+
+html.dark 
+.swagger-ui .title {
+    color: #d1d5dc
+}
+
+html.dark .swagger-ui .info .description p {
+    color: #a3a3a3;
+}
+
+html.dark .nest-topbar {
+    background-color: #2d3748;
+}
+
+html.dark 
+.nest-topbar .logo-text {
+    color: #cad5e2;
+}
+
+html.dark .swagger-ui .opblock.opblock-get {
+    background: #364153;
+    border-color: #364153;
+}
+
+html.dark .nest-topbar .toggle-theme-btn {
+    background-color: #0f172a;
+}
+
+html.dark .swagger-ui .opblock-summary-path-description-wrapper .opblock-summary-description {
+    color: #99a1af
+}
+
+html.dark .opblock-tag-section .opblock-tag {
+    color:#d1d5dc;
+}
+
+html.dark .swagger-ui .opblock-summary .opblock-summary-get .opblock-control-arrow {
+    color: white !important;
+}
+
+html.dark .json-schema-2020-12 {
+    background-color: #364153;
+}
+
+html.dark .json-schema-2020-12-head button{
+    background-color: inherit;
+}
+
+html.dark .json-schema-2020-12-head .json-schema-2020-12-accordion .json-schema-2020-12__title{
+    color: #52a3ff !important;
+}

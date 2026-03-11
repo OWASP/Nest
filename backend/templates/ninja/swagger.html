@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" rel="stylesheet" href="{% static 'ninja/swagger-ui.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'css/swagger-custom-ui.css' %}">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    {% include "ninja/favicons.html" %}
+    <title>{{ api.title }}</title>
+</head>
+
+<body data-csrf-token="{% if add_csrf %}{{ csrf_token }}{% endif %}" data-api-csrf="{% if add_csrf %}true{% endif %}">
+
+    <script type="application/json" id="swagger-settings">
+        {{ swagger_settings | safe }}
+    </script>
+
+    <div class="nest-topbar">
+        <div class="logo">
+            <div class="logo-img-div">
+                <img src="{% static 'img/logo_dark.png' %}" class="nest-logo" alt="Nest logo" />
+            </div>
+            <div class="logo-text">Nest</div>
+        </div>
+        <button type="button" class="toggle-theme-btn" aria-label="Toggle theme">
+            <span class="material-symbols-outlined theme-icon" aria-hidden="true">
+                light_mode
+            </span>
+        </button>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="{% static 'ninja/swagger-ui-bundle.js' %}"></script>
+    <script src="{% static 'ninja/swagger-ui-init.js' %}"></script>
+    <script>
+        (() => {
+            const storageKey = "swagger-theme";
+            const root = document.documentElement;
+            const toggleButton = document.querySelector(".toggle-theme-btn");
+            const themeIcon = toggleButton?.querySelector(".theme-icon");
+            const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+            const getPreferredTheme = () => {
+                const savedTheme = localStorage.getItem(storageKey);
+                if (savedTheme === "light" || savedTheme === "dark") {
+                    return savedTheme;
+                }
+
+                return mediaQuery.matches ? "dark" : "light";
+            };
+
+            const applyTheme = (theme) => {
+                const isDark = theme === "dark";
+                root.dataset.theme = theme;
+                root.classList.toggle("dark", isDark);
+
+                if (themeIcon) {
+                    themeIcon.textContent = isDark ? "light_mode" : "dark_mode";
+                }
+
+                if (toggleButton) {
+                    toggleButton.setAttribute(
+                        "aria-label",
+                        isDark ? "Switch to light theme" : "Switch to dark theme"
+                    );
+                }
+            };
+
+            applyTheme(getPreferredTheme());
+
+            toggleButton?.addEventListener("click", () => {
+                const nextTheme = root.dataset.theme === "dark" ? "light" : "dark";
+                localStorage.setItem(storageKey, nextTheme);
+                applyTheme(nextTheme);
+            });
+
+            mediaQuery.addEventListener("change", (event) => {
+                if (localStorage.getItem(storageKey)) {
+                    return;
+                }
+
+                applyTheme(event.matches ? "dark" : "light");
+            });
+        })();
+    </script>
+
+</body>
+
+</html>
