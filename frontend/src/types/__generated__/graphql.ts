@@ -704,6 +704,7 @@ export type Query = {
   boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
   chapter?: Maybe<ChapterNode>;
+  chapterCountries: Array<Scalars['String']['output']>;
   committee?: Maybe<CommitteeNode>;
   getMenteeDetails?: Maybe<MenteeNode>;
   getMenteeModuleIssues: Array<IssueNode>;

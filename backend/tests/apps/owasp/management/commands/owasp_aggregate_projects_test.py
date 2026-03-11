@@ -177,3 +177,66 @@ class TestOwaspAggregateProjects:
             command.stdout = mock.MagicMock()
             command.handle(offset=0)
         mock_bulk_save.assert_called()
+
+    @mock.patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"})
+    @mock.patch.object(Project, "bulk_save", autospec=True)
+    def test_handle_uses_max_for_stars_forks_contributors(
+        self, mock_bulk_save, command, mock_project
+    ):
+        """Test that stars, forks, and contributors use max instead of sum."""
+        mock_repo1 = mock.Mock(
+            commits_count=10,
+            contributors_count=5,
+            forks_count=20,
+            latest_release=None,
+            license="MIT",
+            open_issues_count=4,
+            organization=mock.Mock(),
+            owner=mock.Mock(),
+            pushed_at="2024-12-28T00:00:00Z",
+            stars_count=100,
+            subscribers_count=3,
+            top_languages=["Python"],
+            topics=["security"],
+            watchers_count=7,
+        )
+        mock_repo1.releases.count.return_value = 0
+
+        mock_repo2 = mock.Mock(
+            commits_count=20,
+            contributors_count=8,
+            forks_count=15,
+            latest_release=None,
+            license="Apache-2.0",
+            open_issues_count=2,
+            organization=None,
+            owner=mock.Mock(),
+            pushed_at="2024-12-29T00:00:00Z",
+            stars_count=50,
+            subscribers_count=5,
+            top_languages=["JavaScript"],
+            topics=["owasp"],
+            watchers_count=10,
+        )
+        mock_repo2.releases.count.return_value = 0
+
+        mock_project.repositories.filter.return_value = MockQuerySet([mock_repo1, mock_repo2])
+        mock_projects_list = [mock_project]
+        mock_active_projects = mock.MagicMock()
+        mock_active_projects.__iter__.return_value = iter(mock_projects_list)
+        mock_active_projects.count.return_value = 1
+        mock_active_projects.__getitem__.side_effect = lambda idx: (
+            mock_projects_list[idx.start : idx.stop]
+            if isinstance(idx, slice)
+            else mock_projects_list[idx]
+        )
+        mock_active_projects.order_by.return_value = mock_active_projects
+
+        with mock.patch.object(Project, "active_projects", mock_active_projects):
+            command.stdout = mock.MagicMock()
+            command.handle(offset=0)
+
+        assert mock_project.commits_count == 30
+        assert mock_project.contributors_count == 8
+        assert mock_project.forks_count == 20
+        assert mock_project.stars_count == 100
