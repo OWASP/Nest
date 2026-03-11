@@ -360,7 +360,7 @@ run "test_private_outbound_ephemeral_rule" {
     error_message = "Private NACL outbound ephemeral rule must use TCP protocol."
   }
   assert {
-    condition     = aws_network_acl_rule.private_outbound_ephemeral.cidr_block == "0.0.0.0/0"
+    condition     = aws_network_acl_rule.private_outbound_ephemeral.cidr_block == var.vpc_cidr
     error_message = "Private NACL outbound ephemeral rule must allow to any destination."
   }
   assert {
