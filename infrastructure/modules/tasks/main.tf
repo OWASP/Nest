@@ -27,41 +27,6 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
   }
 }
 
-
-# TODO: disallow tag mutability
-# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
-resource "aws_ecr_repository" "main" {
-  image_tag_mutability = "MUTABLE"
-  name                 = "${var.project_name}-${var.environment}-backend"
-  tags                 = var.common_tags
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
-resource "aws_ecr_lifecycle_policy" "main" {
-  repository = aws_ecr_repository.main.name
-
-  policy = jsonencode({
-    rules = [
-      {
-        action = {
-          type = "expire"
-        }
-        description  = "Remove untagged images"
-        rulePriority = 1
-        selection = {
-          countNumber = 7
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          tagStatus   = "untagged"
-        }
-      }
-    ]
-  })
-}
-
 resource "aws_iam_role" "ecs_tasks_execution_role" {
   name = "${var.project_name}-${var.environment}-ecs-tasks-execution-role"
   tags = var.common_tags
@@ -122,7 +87,7 @@ resource "aws_iam_policy" "ecs_tasks_execution_policy" {
           "ecr:GetDownloadUrlForLayer"
         ]
         Effect   = "Allow"
-        Resource = aws_ecr_repository.main.arn
+        Resource = var.ecr_repository_arn
       },
       {
         Effect = "Allow"
@@ -235,7 +200,7 @@ module "sync_data_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
-  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.sync_data_task_memory
   project_name                 = var.project_name
@@ -267,7 +232,7 @@ module "owasp_update_project_health_metrics_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
-  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_metrics_task_memory
   project_name                 = var.project_name
@@ -291,7 +256,7 @@ module "owasp_update_project_health_scores_task" {
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
   event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
-  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_scores_task_memory
   project_name                 = var.project_name
@@ -314,7 +279,7 @@ module "migrate_task" {
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
-  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.migrate_task_memory
   project_name                 = var.project_name
@@ -357,7 +322,7 @@ module "load_data_task" {
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
-  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.load_data_task_memory
   project_name                 = var.project_name
@@ -380,7 +345,7 @@ module "index_data_task" {
   ecs_cluster_arn              = aws_ecs_cluster.main.arn
   ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
   environment                  = var.environment
-  image_url                    = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.index_data_task_memory
   project_name                 = var.project_name

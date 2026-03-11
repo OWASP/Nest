@@ -8,8 +8,7 @@ misconfigurations:
   # Temporary for staging; will be fixed for production.
   - id: AVD-AWS-0031  # Mutable ECR tags for staging; IMMUTABLE for production
     paths:
-      - infrastructure/modules/ecs/main.tf
-      - infrastructure/modules/frontend/main.tf
+      - infrastructure/modules/service/main.tf
   - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
     paths:
       - infrastructure/modules/alb/main.tf
