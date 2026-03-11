@@ -271,28 +271,52 @@ run "test_private_outbound_dns_rule" {
   command = plan
 
   assert {
-    condition     = aws_network_acl_rule.private_outbound_dns.egress == true
-    error_message = "Private NACL outbound DNS rule must be egress."
+    condition     = aws_network_acl_rule.private_outbound_dns_tcp.egress == true
+    error_message = "Private NACL outbound DNS rule (tcp) must be egress."
   }
   assert {
-    condition     = aws_network_acl_rule.private_outbound_dns.from_port == 53
-    error_message = "Private NACL outbound DNS rule must use port 53."
+    condition     = aws_network_acl_rule.private_outbound_dns_udp.egress == true
+    error_message = "Private NACL outbound DNS rule (udp) must be egress."
   }
   assert {
-    condition     = aws_network_acl_rule.private_outbound_dns.to_port == 53
-    error_message = "Private NACL outbound DNS rule must use port 53."
+    condition     = aws_network_acl_rule.private_outbound_dns_tcp.from_port == 53
+    error_message = "Private NACL outbound DNS rule (tcp) must use port 53."
   }
   assert {
-    condition     = aws_network_acl_rule.private_outbound_dns.protocol == "udp"
-    error_message = "Private NACL outbound DNS rule must use UDP protocol."
+    condition     = aws_network_acl_rule.private_outbound_dns_tcp.to_port == 53
+    error_message = "Private NACL outbound DNS rule (tcp) must use port 53."
   }
   assert {
-    condition     = aws_network_acl_rule.private_outbound_dns.cidr_block == "10.0.0.0/16"
-    error_message = "Private NACL outbound DNS rule must allow to VPC CIDR."
+    condition     = aws_network_acl_rule.private_outbound_dns_udp.from_port == 53
+    error_message = "Private NACL outbound DNS rule (udp) must use port 53."
   }
   assert {
-    condition     = aws_network_acl_rule.private_outbound_dns.rule_number == 130
-    error_message = "Private NACL outbound DNS rule number must be 130."
+    condition     = aws_network_acl_rule.private_outbound_dns_udp.to_port == 53
+    error_message = "Private NACL outbound DNS rule (udp) must use port 53."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_tcp.protocol == "tcp"
+    error_message = "Private NACL outbound DNS rule (tcp) must use TCP protocol."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_udp.protocol == "udp"
+    error_message = "Private NACL outbound DNS rule (udp) must use UDP protocol."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_tcp.cidr_block == "10.0.0.0/16"
+    error_message = "Private NACL outbound DNS rule (tcp) must allow to VPC CIDR."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_udp.cidr_block == "10.0.0.0/16"
+    error_message = "Private NACL outbound DNS rule (udp) must allow to VPC CIDR."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_tcp.rule_number == 130
+    error_message = "Private NACL outbound DNS rule (tcp) number must be 130."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_udp.rule_number == 135
+    error_message = "Private NACL outbound DNS rule (udp) number must be 135."
   }
 }
 

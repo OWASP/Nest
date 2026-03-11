@@ -121,14 +121,25 @@ resource "aws_network_acl_rule" "private_outbound_redis" {
   to_port        = 6379
 }
 
-resource "aws_network_acl_rule" "private_outbound_dns" {
+resource "aws_network_acl_rule" "private_outbound_dns_tcp" {
+  cidr_block     = var.vpc_cidr
+  egress         = true
+  from_port      = 53
+  network_acl_id = aws_network_acl.private.id
+  protocol       = "tcp"
+  rule_action    = "allow"
+  rule_number    = 130
+  to_port        = 53
+}
+
+resource "aws_network_acl_rule" "private_outbound_dns_udp" {
   cidr_block     = var.vpc_cidr
   egress         = true
   from_port      = 53
   network_acl_id = aws_network_acl.private.id
   protocol       = "udp"
   rule_action    = "allow"
-  rule_number    = 130
+  rule_number    = 135
   to_port        = 53
 }
 

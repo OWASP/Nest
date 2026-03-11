@@ -60,6 +60,13 @@ data "aws_iam_policy_document" "key_policy" {
       effect    = "Allow"
       resources = ["*"]
       sid       = "AllowAdditionalPrincipals"
+
+      condition {
+        test     = "StringEquals"
+        variable = "kms:ViaService"
+        values   = ["s3.${data.aws_region.current.region}.amazonaws.com"]
+      }
+
       principals {
         identifiers = var.kms_allowed_principal_arns
         type        = "AWS"

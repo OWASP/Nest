@@ -152,6 +152,10 @@ run "test_backend_egress_https_rule_type" {
     condition     = aws_security_group_rule.backend_egress_https.type == "egress"
     error_message = "Backend HTTPS egress rule must be of type egress."
   }
+  assert {
+    condition     = aws_security_group_rule.backend_egress_https.protocol == "tcp"
+    error_message = "Backend HTTPS egress rule must use protocol tcp."
+  }
 }
 
 run "test_backend_to_rds_rule_port" {
@@ -252,6 +256,10 @@ run "test_task_egress_https_rule_type" {
   assert {
     condition     = aws_security_group_rule.task_egress_https.type == "egress"
     error_message = "Task HTTPS egress rule must be of type egress."
+  }
+  assert {
+    condition     = aws_security_group_rule.task_egress_https.protocol == "tcp"
+    error_message = "Task HTTPS egress rule must use protocol tcp."
   }
 }
 
