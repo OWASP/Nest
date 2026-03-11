@@ -253,11 +253,11 @@ const ModuleItem = ({
         )}
       </div>
       <TextInfoItem icon={FaTurnUp} label="Level" value={capitalize(module.experienceLevel)} />
-      <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(module.startedAt)} />
+      <TextInfoItem icon={FaCalendar} label="Start" value={formatDate(String(module.startedAt))} />
       <TextInfoItem
         icon={FaHourglassHalf}
         label="Duration"
-        value={getSimpleDuration(module.startedAt, module.endedAt)}
+        value={getSimpleDuration(String(module.startedAt), String(module.endedAt))}
       />
 
       {(mentorsWithAvatars.length > 0 || menteesWithAvatars.length > 0) && (
