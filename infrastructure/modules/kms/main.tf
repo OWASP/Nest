@@ -49,6 +49,20 @@ data "aws_iam_policy_document" "key_policy" {
       type        = "Service"
     }
   }
+
+  statement {
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+    ]
+    effect    = "Allow"
+    resources = ["*"]
+    sid       = "AllowAdditionalPrincipals"
+    principals {
+      identifiers = var.kms_allowed_principal_arns
+      type        = "AWS"
+    }
+  }
 }
 
 resource "aws_kms_key" "main" {

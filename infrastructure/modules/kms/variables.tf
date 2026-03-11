@@ -30,6 +30,11 @@ variable "environment" {
   type        = string
 }
 
+variable "kms_allowed_principal_arns" {
+  description = "The allowed principal ARNs for KMS key access."
+  type        = list(string)
+}
+
 variable "project_name" {
   description = "The name of the project."
   type        = string

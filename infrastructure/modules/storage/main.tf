@@ -20,6 +20,7 @@ module "fixtures_bucket" {
   source = "./modules/s3-bucket"
 
   bucket_name = "${var.fixtures_bucket_name}-${random_id.suffix.hex}"
+  kms_key_arn = var.kms_key_arn
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-fixtures"
   })
@@ -43,6 +44,7 @@ module "static_bucket" {
   source = "./modules/s3-bucket"
 
   bucket_name = "${var.project_name}-${var.environment}-static-${random_id.suffix.hex}"
+  kms_key_arn = var.kms_key_arn
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-static"
   })

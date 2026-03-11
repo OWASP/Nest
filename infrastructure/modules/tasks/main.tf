@@ -134,6 +134,31 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_fixtures_s3_access" {
   role       = aws_iam_role.ecs_task_role.name
 }
 
+resource "aws_iam_policy" "ecs_task_role_kms" {
+  description = "Allow ECS task role to use KMS key for encryption and decryption"
+  name        = "${var.project_name}-${var.environment}-ecs-task-kms-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey*",
+        ]
+        Effect   = "Allow"
+        Resource = var.kms_key_arn
+      }
+    ]
+  })
+  tags = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_role_kms" {
+  policy_arn = aws_iam_policy.ecs_task_role_kms.arn
+  role       = aws_iam_role.ecs_task_role.name
+}
+
 resource "aws_iam_role" "event_bridge_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

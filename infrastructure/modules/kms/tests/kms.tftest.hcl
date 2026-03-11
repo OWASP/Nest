@@ -8,10 +8,11 @@ override_data {
 }
 
 variables {
-  alias_name   = "alias/nest-test"
-  common_tags  = { Environment = "test", Project = "nest" }
-  environment  = "test"
-  project_name = "nest"
+  alias_name                 = "alias/nest-test"
+  common_tags                = { Environment = "test", Project = "nest" }
+  environment                = "test"
+  kms_allowed_principal_arns = ["arn:aws:iam::652192963764:role/nest-staging-backend-task-role"]
+  project_name               = "nest"
 }
 
 run "test_alias_name" {

@@ -14,6 +14,11 @@ variable "fixtures_bucket_name" {
   type        = string
 }
 
+variable "kms_key_arn" {
+  description = "The ARN of the KMS key."
+  type        = string
+}
+
 variable "project_name" {
   description = "The name of the project."
   type        = string
