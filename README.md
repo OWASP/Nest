@@ -16,12 +16,12 @@
 
 [![CREATED](https://img.shields.io/badge/created-aug,%202024-blue?style=for-the-badge)](https://github.com/OWASP/Nest/commit/2a213c2efcfc2f8889c2f1d330da0d2e6f649fc1)
 
+# [OWASP Nest](https://nest.owasp.org/)
+
 <picture>
   <source srcset="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_dark.png" media="(prefers-color-scheme: dark)">
   <img src="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_light.png" alt="OWASP Nest Logo" width="200">
 </picture>
-
-# [OWASP Nest](https://nest.owasp.org/)
 
 </div>
 <!-- --8<-- [start:docs] -->
