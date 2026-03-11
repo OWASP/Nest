@@ -207,6 +207,10 @@ run "test_private_outbound_https_rule" {
     condition     = aws_network_acl_rule.private_outbound_https.rule_number == 100
     error_message = "Private NACL outbound HTTPS rule number must be 100."
   }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_https.rule_action == "allow"
+    error_message = "Private NACL outbound HTTPS rule action must be allow."
+  }
 }
 
 run "test_private_outbound_postgres_rule" {
@@ -236,6 +240,10 @@ run "test_private_outbound_postgres_rule" {
     condition     = aws_network_acl_rule.private_outbound_postgres.rule_number == 110
     error_message = "Private NACL outbound Postgres rule number must be 110."
   }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_postgres.rule_action == "allow"
+    error_message = "Private NACL outbound Postgres rule action must be allow."
+  }
 }
 
 run "test_private_outbound_redis_rule" {
@@ -264,6 +272,10 @@ run "test_private_outbound_redis_rule" {
   assert {
     condition     = aws_network_acl_rule.private_outbound_redis.rule_number == 120
     error_message = "Private NACL outbound Redis rule number must be 120."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_redis.rule_action == "allow"
+    error_message = "Private NACL outbound Redis rule action must be allow."
   }
 }
 
@@ -318,6 +330,14 @@ run "test_private_outbound_dns_rule" {
     condition     = aws_network_acl_rule.private_outbound_dns_udp.rule_number == 135
     error_message = "Private NACL outbound DNS rule (udp) number must be 135."
   }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_tcp.rule_action == "allow"
+    error_message = "Private NACL outbound DNS rule (tcp) action must be allow."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_dns_udp.rule_action == "allow"
+    error_message = "Private NACL outbound DNS rule (udp) action must be allow."
+  }
 }
 
 run "test_private_outbound_ephemeral_rule" {
@@ -346,6 +366,10 @@ run "test_private_outbound_ephemeral_rule" {
   assert {
     condition     = aws_network_acl_rule.private_outbound_ephemeral.rule_number == 140
     error_message = "Private NACL outbound ephemeral rule number must be 140."
+  }
+  assert {
+    condition     = aws_network_acl_rule.private_outbound_ephemeral.rule_action == "allow"
+    error_message = "Private NACL outbound ephemeral rule action must be allow."
   }
 }
 
