@@ -1,0 +1,177 @@
+/*
+ * Swagger UI theme for OWASP Nest.
+ * Adds dark/light theme support to match the main application styling.
+ * Colors are taken from frontend/src/app/globals.css
+ */
+
+:root {
+    --nest-bg: #f4f6fc;
+    --nest-surface: #ffffff;
+    --nest-border: #0000002d;
+    --nest-text: #000000;
+    --nest-text-muted: #4a5568;
+    --nest-primary: #1d7bd7;
+    --nest-owasp-blue: #98AFC7;
+    --nest-header-bg: #1b2a3b;
+}
+
+html.dark {
+    --nest-bg: #212529;
+    --nest-surface: #16191d;
+    --nest-border: #ffffff26;
+    --nest-text: #ffffff;
+    --nest-text-muted: #a0aec0;
+    --nest-primary: #1d7bd7;
+    --nest-owasp-blue: #98AFC7;
+    --nest-header-bg: #0f1923;
+}
+
+body {
+    background-color: var(--nest-bg) !important;
+    color: var(--nest-text) !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Header */
+.swagger-ui .topbar {
+    background-color: var(--nest-header-bg) !important;
+    border-bottom: 2px solid var(--nest-owasp-blue) !important;
+}
+
+.swagger-ui .topbar-wrapper img,
+.swagger-ui .topbar-wrapper svg {
+    visibility: hidden;
+}
+
+.swagger-ui .topbar-wrapper::before {
+    content: "OWASP Nest API";
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    visibility: visible;
+}
+
+/* Info section */
+.swagger-ui .info .title {
+    color: var(--nest-text) !important;
+}
+
+.swagger-ui .info a {
+    color: var(--nest-primary) !important;
+}
+
+/* Server selector */
+.swagger-ui .scheme-container {
+    background-color: var(--nest-surface) !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid var(--nest-border) !important;
+}
+
+.swagger-ui select {
+    background-color: var(--nest-surface) !important;
+    color: var(--nest-text) !important;
+    border: 1px solid var(--nest-border) !important;
+}
+
+/* Operation blocks */
+.swagger-ui .opblock {
+    border: 1px solid var(--nest-border) !important;
+    box-shadow: none !important;
+}
+
+.swagger-ui .opblock .opblock-body {
+    background-color: var(--nest-surface) !important;
+}
+
+.swagger-ui .opblock-tag {
+    color: var(--nest-text) !important;
+    border-bottom: 1px solid var(--nest-border) !important;
+}
+
+.swagger-ui .opblock-summary-description {
+    color: var(--nest-text-muted) !important;
+}
+
+/* HTTP method badges */
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+    background-color: var(--nest-primary) !important;
+}
+
+/* Parameters */
+.swagger-ui .parameter__name,
+.swagger-ui table tbody tr td {
+    color: var(--nest-text) !important;
+}
+
+.swagger-ui .parameter__type,
+.swagger-ui .parameter__in {
+    color: var(--nest-text-muted) !important;
+}
+
+.swagger-ui .parameters-col_description input[type=text],
+.swagger-ui .body-param textarea {
+    background-color: var(--nest-surface) !important;
+    color: var(--nest-text) !important;
+    border: 1px solid var(--nest-border) !important;
+}
+
+/* Buttons */
+.swagger-ui .btn.execute {
+    background-color: var(--nest-primary) !important;
+    border-color: var(--nest-primary) !important;
+    color: #ffffff !important;
+}
+
+.swagger-ui .btn.try-out__btn {
+    border-color: var(--nest-owasp-blue) !important;
+    color: var(--nest-owasp-blue) !important;
+}
+
+.swagger-ui .btn.authorize {
+    border-color: #2ea44f !important;
+    color: #2ea44f !important;
+}
+
+.swagger-ui .btn.authorize svg {
+    fill: #2ea44f !important;
+}
+
+/* Models */
+.swagger-ui section.models {
+    border: 1px solid var(--nest-border) !important;
+}
+
+.swagger-ui section.models h4,
+.swagger-ui .model {
+    color: var(--nest-text) !important;
+}
+
+.swagger-ui .model-box {
+    background-color: var(--nest-surface) !important;
+}
+
+/* Response code blocks */
+.swagger-ui .highlight-code,
+.swagger-ui .microlight {
+    background-color: var(--nest-surface) !important;
+    color: var(--nest-text) !important;
+}
+
+/* Auth modal */
+.swagger-ui .dialog-ux .modal-ux {
+    background-color: var(--nest-surface) !important;
+    border: 1px solid var(--nest-border) !important;
+    color: var(--nest-text) !important;
+}
+
+.swagger-ui .dialog-ux .modal-ux-content input[type=text],
+.swagger-ui .dialog-ux .modal-ux-content input[type=password] {
+    background-color: var(--nest-bg) !important;
+    border: 1px solid var(--nest-border) !important;
+    color: var(--nest-text) !important;
+}
+
+/* Labels */
+.swagger-ui label {
+    color: var(--nest-text-muted) !important;
+}

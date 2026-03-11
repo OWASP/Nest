@@ -176,5 +176,5 @@ module = [ "apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*" ]
 [tool.djlint]
 format = true
 format_css = true
-format_js = true
+format_js = false
 indent = 4
