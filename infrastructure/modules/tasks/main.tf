@@ -143,8 +143,7 @@ resource "aws_iam_policy" "ecs_task_role_kms" {
     Statement = [
       {
         Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey*",
+          "kms:Decrypt"
         ]
         Effect   = "Allow"
         Resource = var.kms_key_arn

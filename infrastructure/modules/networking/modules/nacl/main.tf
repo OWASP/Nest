@@ -144,7 +144,7 @@ resource "aws_network_acl_rule" "private_outbound_dns_udp" {
 }
 
 resource "aws_network_acl_rule" "private_outbound_ephemeral" {
-  cidr_block     = "0.0.0.0/0"
+  cidr_block     = var.vpc_cidr
   egress         = true
   from_port      = 1024
   network_acl_id = aws_network_acl.private.id
