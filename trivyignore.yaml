@@ -13,10 +13,9 @@ misconfigurations:
   - id: AVD-AWS-0104  # Egress 0.0.0.0/0 for ECS/Lambda; restrict for production
     paths:
       - infrastructure/modules/security/main.tf
-  - id: AVD-AWS-0132  # SSE-S3 used; SSE-KMS for production (alb logs require SSE-S3)
+  - id: AVD-AWS-0132  # ALB logs require SSE-S3
     paths:
       - infrastructure/modules/alb/main.tf
-      - infrastructure/modules/storage/modules/s3-bucket/main.tf
 
 vulnerabilities:
   # TODO(arkid15r): Remove when v5.9.3 is no longer current.
