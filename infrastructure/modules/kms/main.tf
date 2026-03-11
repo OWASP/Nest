@@ -49,30 +49,6 @@ data "aws_iam_policy_document" "key_policy" {
       type        = "Service"
     }
   }
-
-  dynamic "statement" {
-    for_each = length(var.kms_allowed_principal_arns) > 0 ? [1] : []
-    content {
-      actions = [
-        "kms:Decrypt",
-        "kms:GenerateDataKey*",
-      ]
-      effect    = "Allow"
-      resources = ["*"]
-      sid       = "AllowAdditionalPrincipals"
-
-      condition {
-        test     = "StringEquals"
-        variable = "kms:ViaService"
-        values   = ["s3.${data.aws_region.current.region}.amazonaws.com"]
-      }
-
-      principals {
-        identifiers = var.kms_allowed_principal_arns
-        type        = "AWS"
-      }
-    }
-  }
 }
 
 resource "aws_kms_key" "main" {

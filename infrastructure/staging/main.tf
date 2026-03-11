@@ -122,11 +122,10 @@ module "frontend" {
 module "kms" {
   source = "../modules/kms"
 
-  alias_name                 = "alias/${var.project_name}-${var.environment}"
-  common_tags                = local.common_tags
-  environment                = var.environment
-  kms_allowed_principal_arns = [module.backend.ecs_task_role_arn, module.tasks.ecs_task_role_arn]
-  project_name               = var.project_name
+  alias_name   = "alias/${var.project_name}-${var.environment}"
+  common_tags  = local.common_tags
+  environment  = var.environment
+  project_name = var.project_name
 }
 
 module "networking" {
