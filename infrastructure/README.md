@@ -141,7 +141,7 @@ To do this locally:
 
   > [!NOTE]
   > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket created in the previous step.
-  > Update `backend_image_tag` and `frontend_image_tag` variables with a unique tag (`latest` is used in the examples below).
+  > Update `backend_image_tag` and `frontend_image_tag` variables with a unique tag (for example, a commit SHA or timestamp); do not reuse `latest` when tags are immutable.
   > Update defaults (e.g. `region`) as needed.
 
 - Initialize Terraform with the backend configuration:

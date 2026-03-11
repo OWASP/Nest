@@ -50,17 +50,20 @@ data "aws_iam_policy_document" "key_policy" {
     }
   }
 
-  statement {
-    actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey*",
-    ]
-    effect    = "Allow"
-    resources = ["*"]
-    sid       = "AllowAdditionalPrincipals"
-    principals {
-      identifiers = var.kms_allowed_principal_arns
-      type        = "AWS"
+  dynamic "statement" {
+    for_each = length(var.kms_allowed_principal_arns) > 0 ? [1] : []
+    content {
+      actions = [
+        "kms:Decrypt",
+        "kms:GenerateDataKey*",
+      ]
+      effect    = "Allow"
+      resources = ["*"]
+      sid       = "AllowAdditionalPrincipals"
+      principals {
+        identifiers = var.kms_allowed_principal_arns
+        type        = "AWS"
+      }
     }
   }
 }

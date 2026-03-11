@@ -33,6 +33,7 @@ variable "environment" {
 variable "kms_allowed_principal_arns" {
   description = "The allowed principal ARNs for KMS key access."
   type        = list(string)
+  default     = []
 }
 
 variable "project_name" {
