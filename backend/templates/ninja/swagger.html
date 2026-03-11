@@ -4,8 +4,12 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link type="text/css" rel="stylesheet" href="{% static 'ninja/swagger-ui.css' %}">
-        <link type="text/css" rel="stylesheet" href="{% static 'css/swagger-custom-ui.css' %}">
+        <link type="text/css"
+              rel="stylesheet"
+              href="{% static 'ninja/swagger-ui.css' %}">
+        <link type="text/css"
+              rel="stylesheet"
+              href="{% static 'css/swagger-custom-ui.css' %}">
         <link rel="icon" type="image/png" href="{% static 'img/logo_dark.png' %}">
         {% include "ninja/favicons.html" %}
         <title>{{ api.title }}</title>
@@ -38,14 +42,15 @@
         <script src="{% static 'ninja/swagger-ui-init.js' %}"></script>
         <script>
             (() => {
-                const storageKey = "swagger-theme";
+                const storageKey = "theme";
                 const root = document.documentElement;
                 const toggleButton = document.querySelector(".toggle-theme-btn");
                 const themeIcon = toggleButton?.querySelector(".theme-icon");
                 const mediaQuery = globalThis.matchMedia("(prefers-color-scheme: dark)");
+                const getStoredTheme = () => localStorage.getItem(storageKey);
 
                 const getPreferredTheme = () => {
-                    const savedTheme = localStorage.getItem(storageKey);
+                    const savedTheme = getStoredTheme();
                     if (savedTheme === "light" || savedTheme === "dark") {
                         return savedTheme;
                     }
@@ -79,7 +84,8 @@
                 });
 
                 const handleThemeChange = (event) => {
-                    if (localStorage.getItem(storageKey)) {
+                    const savedTheme = getStoredTheme();
+                    if (savedTheme === "light" || savedTheme === "dark") {
                         return;
                     }
 

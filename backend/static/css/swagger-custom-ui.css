@@ -1,10 +1,5 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 html, body {
+    margin: 0;
     background-color: #f4f6fc;
     font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
@@ -14,7 +9,7 @@ html, body {
 }
 
 .swagger-ui .scheme-container .schemes-server-container .servers-title {
-    color: #d1d5dc;
+    color: #4a5565;
 }
 
 .swagger-ui .title {
@@ -66,9 +61,13 @@ html, body {
     align-items: center;
 }
 
-.swagger-ui .opblock.opblock-get {
+.swagger-ui .opblock {
     background: #e5e7eb;
     border-color: #e5e7eb;
+}
+
+.swagger-ui .opblock-summary {
+    background-color: #e5e7eb
 }
 
 .swagger-ui .opblock-summary-path-description-wrapper span{
@@ -113,7 +112,7 @@ html.dark
     color: #cad5e2;
 }
 
-html.dark .swagger-ui .opblock.opblock-get {
+html.dark .swagger-ui .opblock {
     background: #364153;
     border-color: #364153;
 }
@@ -130,8 +129,12 @@ html.dark .opblock-tag-section .opblock-tag {
     color:#d1d5dc;
 }
 
-html.dark .swagger-ui .opblock-summary .opblock-summary-get .opblock-control-arrow {
-    color: white !important;
+html.dark .opblock-control-arrow .arrow path{
+    fill: #FFFFFF;
+}
+
+html.dark .swagger-ui .opblock-tag .expand-operation .arrow path {
+    fill: #FFFFFF;
 }
 
 html.dark .json-schema-2020-12 {
@@ -144,4 +147,46 @@ html.dark .json-schema-2020-12-head button{
 
 html.dark .json-schema-2020-12-head .json-schema-2020-12-accordion .json-schema-2020-12__title{
     color: #52a3ff !important;
+}
+
+html.dark
+.swagger-ui .scheme-container .schemes-server-container .servers-title {
+    color: #d1d5dc;
+}
+
+html.dark .swagger-ui .opblock .opblock-description-wrapper,
+html.dark .swagger-ui .opblock .responses-wrapper,
+html.dark .swagger-ui .opblock .responses-inner,
+html.dark .swagger-ui .opblock .response-col_description__inner,
+html.dark .swagger-ui .opblock .response-control-media-type__title,
+html.dark .swagger-ui .opblock .response-control-media-type__accept-message,
+html.dark .swagger-ui .opblock .parameter__name,
+html.dark .swagger-ui .opblock .parameter__type,
+html.dark .swagger-ui .opblock .parameter__in,
+html.dark .swagger-ui .opblock .parameter__enum,
+html.dark .swagger-ui .opblock .parameter__default,
+html.dark .swagger-ui .opblock .renderedMarkdown p,
+html.dark .swagger-ui .opblock .renderedMarkdown code,
+html.dark .swagger-ui .opblock .responses-table
+html.dark .swagger-ui .opblock .response-col_status,
+html.dark .swagger-ui .opblock .response-col_links,
+html.dark .swagger-ui .opblock .tab {
+    color: #d1d5dc;
+}
+
+html.dark .swagger-ui .opblock .responses-table thead tr td,
+html.dark .swagger-ui .opblock .parameters thead tr th {
+    color: #e5e7eb;
+}
+
+html.dark .models .models-control svg path {
+    fill: #FFFFFF
+}
+
+html.dark .models .models-control span {
+    color: #d1d5dc;
+}
+
+html.dark .swagger-ui .opblock-summary {
+    background-color: #364153
 }
