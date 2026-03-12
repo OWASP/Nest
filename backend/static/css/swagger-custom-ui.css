@@ -4,6 +4,11 @@ html, body {
     font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+.swagger-ui .loading-container {
+    margin: 0;
+    height: calc(100vh - 4rem);
+}
+
 .swagger-ui .scheme-container {
     background-color: inherit;
 }
@@ -132,7 +137,7 @@ html.dark .swagger-ui .opblock {
 
 html.dark .json-schema-2020-12-head .json-schema-2020-12__title,
 html.dark .json-schema-2020-12-keyword__name,
-.json-schema-2020-12-body .json-schema-2020-12__title {
+html.dark .json-schema-2020-12-body .json-schema-2020-12__title {
     color: #52a3ff;
 }
 

@@ -12,6 +12,57 @@
               href="{% static 'css/swagger-custom-ui.css' %}">
         {% include "ninja/favicons.html" %}
         <title>{{ api.title }}</title>
+        <script>
+            (() => {
+                const storageKey = "theme";
+                const root = document.documentElement;
+                const mediaQuery = globalThis.matchMedia("(prefers-color-scheme: dark)");
+                const getStoredTheme = () => localStorage.getItem(storageKey);
+                const getPreferredTheme = () => {
+                    const savedTheme = getStoredTheme();
+                    if (savedTheme === "light" || savedTheme === "dark") {
+                        return savedTheme;
+                    }
+
+                    return mediaQuery.matches ? "dark" : "light";
+                };
+                const applyInitialTheme = () => {
+                    const theme = getPreferredTheme();
+                    const isDark = theme === "dark";
+                    const toggleButton = document.querySelector(".toggle-theme-btn");
+                    const themeIcon = toggleButton?.querySelector(".theme-icon");
+
+                    root.dataset.theme = theme;
+                    root.classList.toggle("dark", isDark);
+
+                    if (themeIcon) {
+                        themeIcon.src = isDark ? themeIcon.dataset.lightSrc : themeIcon.dataset.darkSrc;
+                    }
+
+                    if (toggleButton) {
+                        toggleButton.setAttribute(
+                            "aria-label",
+                            isDark ? "Switch to light theme" : "Switch to dark theme"
+                        );
+                    }
+
+                    return Boolean(toggleButton && themeIcon);
+                };
+
+                if (!applyInitialTheme()) {
+                    const observer = new MutationObserver(() => {
+                        if (applyInitialTheme()) {
+                            observer.disconnect();
+                        }
+                    });
+
+                    observer.observe(document.documentElement, {
+                        childList: true,
+                        subtree: true,
+                    });
+                }
+            })();
+        </script>
     </head>
     <body data-csrf-token="{% if add_csrf %}{{ csrf_token }}{% endif %}"
           data-api-csrf="{% if add_csrf %}true{% endif %}">
