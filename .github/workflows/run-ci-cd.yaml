@@ -59,7 +59,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@dfcb455ed8d56b55edf6447a37379108181a6707
@@ -438,7 +438,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Run Infrastructure tests
         run: make test-infrastructure
@@ -604,7 +604,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
@@ -687,7 +687,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
@@ -799,7 +799,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
