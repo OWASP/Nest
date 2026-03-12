@@ -1,0 +1,386 @@
+:root {
+    --nest-bg: #f4f6fc;
+    --nest-bg-surface: #ffffff;
+    --nest-text: #000000;
+    --nest-text-muted: #555555;
+    --nest-border: #0000002d;
+    --nest-accent: #98AFC7;
+    --nest-link: #1d7bd7;
+    --nest-input-bg: #ffffff;
+    --nest-input-border: #ccc;
+    --nest-code-bg: #e5e5e5;
+}
+
+[data-theme="dark"] {
+    --nest-bg: #282921;
+    --nest-bg-surface: #2b3035;
+    --nest-text: #ffffff;
+    --nest-text-muted: #a0aec0;
+    --nest-border: #ffffff26;
+    --nest-accent: #98AFC7;
+    --nest-link: #63b3ed;
+    --nest-input-bg: #343a40;
+    --nest-input-border: #4a5568;
+    --nest-code-bg: #333539;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--nest-bg);
+    color: var(--nest-text);
+}
+
+.swagger-ui {
+    background: var(--nest-bg);
+    color: var(--nest-text);
+}
+
+.swagger-ui .info .title,
+.swagger-ui .info h1,
+.swagger-ui .info h2,
+.swagger-ui .info h3 {
+    color: var(--nest-text);
+}
+
+.swagger-ui .info a {
+    color: var(--nest-link);
+}
+
+.swagger-ui .info .base-url {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .topbar {
+    display: none !important;
+}
+
+.swagger-ui .scheme-container {
+    background: var(--nest-bg-surface);
+    box-shadow: none;
+    border-bottom: 1px solid var(--nest-border);
+}
+
+.swagger-ui .scheme-container .schemes>label {
+    color: var(--nest-text);
+}
+
+.swagger-ui .opblock-tag {
+    color: var(--nest-text);
+    border-bottom-color: var(--nest-border);
+}
+
+.swagger-ui .opblock-tag:hover {
+    color: var(--nest-text);
+}
+
+.swagger-ui .opblock-tag small {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .opblock .opblock-summary-operation-id,
+.swagger-ui .opblock .opblock-summary-path,
+.swagger-ui .opblock .opblock-summary-path__deprecated {
+    color: var(--nest-text);
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .opblock-description-wrapper p,
+.swagger-ui .opblock-external-docs-wrapper p,
+.swagger-ui .opblock-title_normal p {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .opblock .opblock-section-header {
+    background: var(--nest-bg-surface);
+    border-bottom: 1px solid var(--nest-border);
+}
+
+.swagger-ui .opblock .opblock-section-header h4 {
+    color: var(--nest-text);
+}
+
+.swagger-ui .opblock .opblock-section-header label {
+    color: var(--nest-text);
+}
+
+.swagger-ui table thead tr td,
+.swagger-ui table thead tr th {
+    color: var(--nest-text-muted);
+    border-bottom-color: var(--nest-border);
+}
+
+.swagger-ui .parameter__name {
+    color: var(--nest-text);
+}
+
+.swagger-ui .parameter__type {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .responses-inner h4,
+.swagger-ui .responses-inner h5 {
+    color: var(--nest-text);
+}
+
+.swagger-ui .response-col_status {
+    color: var(--nest-text);
+}
+
+.swagger-ui .response-col_description__inner p {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .response-col_links {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .tab li {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .tab li.active {
+    color: var(--nest-text);
+}
+
+.swagger-ui .tab li button.tablinks {
+    color: inherit;
+}
+
+.swagger-ui input[type=email],
+.swagger-ui input[type=file],
+.swagger-ui input[type=password],
+.swagger-ui input[type=search],
+.swagger-ui input[type=text],
+.swagger-ui textarea,
+.swagger-ui select {
+    background: var(--nest-input-bg);
+    color: var(--nest-text);
+    border-color: var(--nest-input-border);
+}
+
+.swagger-ui section.models {
+    background: var(--nest-bg-surface);
+    border-color: var(--nest-border);
+}
+
+.swagger-ui section.models h4 {
+    color: var(--nest-text);
+    border-bottom-color: var(--nest-border);
+}
+
+.swagger-ui section.models h4 button {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.swagger-ui section.models h4 button:focus-visible {
+    outline: 2px solid var(--nest-accent) !important;
+    outline-offset: 2px;
+}
+
+.swagger-ui section.models .model-container {
+    background: var(--nest-bg);
+    border-color: var(--nest-border);
+}
+
+.swagger-ui .model {
+    color: var(--nest-text);
+}
+
+.swagger-ui .model-title {
+    color: var(--nest-text);
+}
+
+.swagger-ui .model .property {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .model .property.primitive {
+    color: var(--nest-accent);
+}
+
+.swagger-ui .json-schema-2020-12__title {
+    background: transparent !important;
+    color: var(--nest-text) !important;
+}
+
+.swagger-ui .json-schema-2020-12-head {
+    background: transparent !important;
+}
+
+.swagger-ui .json-schema-2020-12-accordion {
+    background: transparent !important;
+}
+
+.swagger-ui .json-schema-2020-12-accordion__icon svg {
+    fill: var(--nest-text) !important;
+}
+
+.swagger-ui .json-schema-2020-12-expand-deep-button {
+    background: transparent !important;
+    color: var(--nest-text) !important;
+}
+
+.swagger-ui .json-schema-2020-12__attribute {
+    color: var(--nest-text-muted) !important;
+}
+
+.swagger-ui .json-schema-2020-12-body {
+    background: transparent !important;
+}
+
+.swagger-ui .models .json-schema-2020-12 {
+    background: transparent !important;
+}
+
+.swagger-ui .highlight-code,
+.swagger-ui .microlight {
+    background: var(--nest-code-bg) !important;
+    color: var(--nest-text) !important;
+}
+
+.swagger-ui .btn {
+    color: var(--nest-text);
+    border-color: var(--nest-border);
+}
+
+.swagger-ui .btn.authorize {
+    color: #49cc90;
+    border-color: #49cc90;
+}
+
+.swagger-ui .btn.authorize svg {
+    fill: #49cc90;
+}
+
+.swagger-ui .dialog-ux .modal-ux {
+    background: var(--nest-bg-surface);
+    border-color: var(--nest-border);
+    color: var(--nest-text);
+}
+
+.swagger-ui .dialog-ux .modal-ux-header h3 {
+    color: var(--nest-text);
+}
+
+.swagger-ui .dialog-ux .modal-ux-content p {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .dialog-ux .modal-ux-content h4 {
+    color: var(--nest-text);
+}
+
+.swagger-ui .auth-container {
+    color: var(--nest-text);
+}
+
+.swagger-ui .auth-container .wrapper {
+    border-color: var(--nest-border);
+}
+
+.swagger-ui .auth-container input[type=text],
+.swagger-ui .auth-container input[type=password] {
+    background: var(--nest-input-bg);
+    color: var(--nest-text);
+    border-color: var(--nest-input-border);
+}
+
+.swagger-ui .markdown p,
+.swagger-ui .markdown li,
+.swagger-ui .renderedMarkdown p {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui .markdown a {
+    color: var(--nest-link);
+}
+
+.swagger-ui .markdown code,
+.swagger-ui .renderedMarkdown code {
+    background: var(--nest-code-bg);
+    color: var(--nest-accent);
+}
+
+.swagger-ui .filter-container {
+    background: var(--nest-bg-surface);
+}
+
+.swagger-ui .filter-container .operation-filter-input {
+    background: var(--nest-input-bg);
+    color: var(--nest-text);
+    border-color: var(--nest-input-border);
+}
+
+.swagger-ui .loading-container .loading::after {
+    color: var(--nest-text-muted);
+}
+
+.swagger-ui svg.arrow {
+    fill: var(--nest-text);
+}
+
+.swagger-ui button {
+    color: var(--nest-text);
+}
+
+.swagger-ui .live-responses-table .response-col_status {
+    color: var(--nest-text);
+}
+
+.swagger-ui .responses-table .response-col_status {
+    color: var(--nest-text);
+}
+
+.swagger-ui .servers>label {
+    color: var(--nest-text);
+}
+
+.swagger-ui .servers>label select {
+    background: var(--nest-input-bg);
+    color: var(--nest-text);
+    border-color: var(--nest-input-border);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar {
+    width: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #2d3748;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #4a5568;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+}
+
+#theme-toggle {
+    position: fixed;
+    top: 43px;
+    right: 15px;
+    z-index: 9999;
+    background: var(--nest-bg-surface);
+    border: 1px solid var(--nest-border);
+    border-radius: 24px;
+    padding: 8px 9px;
+    cursor: pointer;
+    color: var(--nest-text);
+    transition: background-color 0.2s, border-color 0.2s;
+    line-height: 0.4;
+}
+
+#theme-toggle:hover {
+    border-color: var(--nest-accent);
+}
