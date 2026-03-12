@@ -9,6 +9,11 @@ variable "bucket_name" {
   type        = string
 }
 
+variable "kms_key_arn" {
+  description = "The ARN of the KMS key."
+  type        = string
+}
+
 variable "noncurrent_version_expiration_days" {
   description = "The number of days an object is noncurrent before it is expired."
   type        = number

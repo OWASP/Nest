@@ -214,6 +214,7 @@ data "aws_iam_policy_document" "part_one" {
       "ecr:ListTagsForResource",
       "ecr:PutImage",
       "ecr:PutImageScanningConfiguration",
+      "ecr:PutImageTagMutability",
       "ecr:PutLifecyclePolicy",
       "ecr:SetRepositoryPolicy",
       "ecr:TagResource",

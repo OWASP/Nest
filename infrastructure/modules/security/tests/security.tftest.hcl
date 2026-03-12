@@ -134,31 +134,99 @@ run "test_backend_from_alb_rule_type" {
   }
 }
 
-run "test_backend_egress_all_rule_port" {
+run "test_backend_egress_https_rule_port" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.backend_egress_all.from_port == 0
-    error_message = "Backend egress rule must allow from_port 0."
+    condition     = aws_security_group_rule.backend_egress_https.from_port == 443
+    error_message = "Backend HTTPS egress rule must allow from_port 443."
   }
   assert {
-    condition     = aws_security_group_rule.backend_egress_all.to_port == 0
-    error_message = "Backend egress rule must allow to_port 0."
-  }
-}
-
-run "test_backend_egress_all_rule_protocol" {
-  command = plan
-  assert {
-    condition     = aws_security_group_rule.backend_egress_all.protocol == "-1"
-    error_message = "Backend egress rule must use protocol -1 (all)."
+    condition     = aws_security_group_rule.backend_egress_https.to_port == 443
+    error_message = "Backend HTTPS egress rule must allow to_port 443."
   }
 }
 
-run "test_backend_egress_all_rule_type" {
+run "test_backend_egress_https_rule_type" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.backend_egress_all.type == "egress"
-    error_message = "Backend egress rule must be of type egress."
+    condition     = aws_security_group_rule.backend_egress_https.type == "egress"
+    error_message = "Backend HTTPS egress rule must be of type egress."
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_egress_https.protocol == "tcp"
+    error_message = "Backend HTTPS egress rule must use protocol tcp."
+  }
+}
+
+run "test_backend_to_rds_rule_port" {
+  command = plan
+  variables {
+    create_rds_proxy = false
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_to_rds[0].from_port == var.db_port
+    error_message = "Backend to RDS egress rule must allow database port."
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_to_rds[0].to_port == var.db_port
+    error_message = "Backend to RDS egress rule must allow database port."
+  }
+}
+
+run "test_backend_to_rds_rule_type" {
+  command = plan
+  variables {
+    create_rds_proxy = false
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_to_rds[0].type == "egress"
+    error_message = "Backend to RDS rule must be of type egress."
+  }
+}
+
+run "test_backend_to_rds_proxy_rule_port" {
+  command = plan
+  variables {
+    create_rds_proxy = true
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_to_rds_proxy[0].from_port == var.db_port
+    error_message = "Backend to RDS Proxy egress rule must allow database port."
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_to_rds_proxy[0].to_port == var.db_port
+    error_message = "Backend to RDS Proxy egress rule must allow database port."
+  }
+}
+
+run "test_backend_to_rds_proxy_rule_type" {
+  command = plan
+  variables {
+    create_rds_proxy = true
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_to_rds_proxy[0].type == "egress"
+    error_message = "Backend to RDS Proxy rule must be of type egress."
+  }
+}
+
+run "test_backend_to_redis_rule_port" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.backend_to_redis.from_port == var.redis_port
+    error_message = "Backend to Redis egress rule must allow redis port."
+  }
+  assert {
+    condition     = aws_security_group_rule.backend_to_redis.to_port == var.redis_port
+    error_message = "Backend to Redis egress rule must allow redis port."
+  }
+}
+
+run "test_backend_to_redis_rule_type" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.backend_to_redis.type == "egress"
+    error_message = "Backend to Redis rule must be of type egress."
   }
 }
 
@@ -171,31 +239,99 @@ run "test_tasks_security_group_name_format" {
   }
 }
 
-run "test_task_egress_all_rule_port" {
+run "test_task_egress_https_rule_port" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.task_egress_all.from_port == 0
-    error_message = "Task egress rule must allow from_port 0."
+    condition     = aws_security_group_rule.task_egress_https.from_port == 443
+    error_message = "Task HTTPS egress rule must allow from_port 443."
   }
   assert {
-    condition     = aws_security_group_rule.task_egress_all.to_port == 0
-    error_message = "Task egress rule must allow to_port 0."
-  }
-}
-
-run "test_task_egress_all_rule_protocol" {
-  command = plan
-  assert {
-    condition     = aws_security_group_rule.task_egress_all.protocol == "-1"
-    error_message = "Task egress rule must use protocol -1 (all)."
+    condition     = aws_security_group_rule.task_egress_https.to_port == 443
+    error_message = "Task HTTPS egress rule must allow to_port 443."
   }
 }
 
-run "test_task_egress_all_rule_type" {
+run "test_task_egress_https_rule_type" {
   command = plan
   assert {
-    condition     = aws_security_group_rule.task_egress_all.type == "egress"
-    error_message = "Task egress rule must be of type egress."
+    condition     = aws_security_group_rule.task_egress_https.type == "egress"
+    error_message = "Task HTTPS egress rule must be of type egress."
+  }
+  assert {
+    condition     = aws_security_group_rule.task_egress_https.protocol == "tcp"
+    error_message = "Task HTTPS egress rule must use protocol tcp."
+  }
+}
+
+run "test_task_to_rds_rule_port" {
+  command = plan
+  variables {
+    create_rds_proxy = false
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_rds[0].from_port == var.db_port
+    error_message = "Task to RDS egress rule must allow database port."
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_rds[0].to_port == var.db_port
+    error_message = "Task to RDS egress rule must allow database port."
+  }
+}
+
+run "test_task_to_rds_rule_type" {
+  command = plan
+  variables {
+    create_rds_proxy = false
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_rds[0].type == "egress"
+    error_message = "Task to RDS rule must be of type egress."
+  }
+}
+
+run "test_task_to_rds_proxy_rule_port" {
+  command = plan
+  variables {
+    create_rds_proxy = true
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_rds_proxy[0].from_port == var.db_port
+    error_message = "Task to RDS Proxy egress rule must allow database port."
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_rds_proxy[0].to_port == var.db_port
+    error_message = "Task to RDS Proxy egress rule must allow database port."
+  }
+}
+
+run "test_task_to_rds_proxy_rule_type" {
+  command = plan
+  variables {
+    create_rds_proxy = true
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_rds_proxy[0].type == "egress"
+    error_message = "Task to RDS Proxy rule must be of type egress."
+  }
+}
+
+run "test_task_to_redis_rule_port" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.task_to_redis.from_port == var.redis_port
+    error_message = "Task to Redis egress rule must allow redis port."
+  }
+  assert {
+    condition     = aws_security_group_rule.task_to_redis.to_port == var.redis_port
+    error_message = "Task to Redis egress rule must allow redis port."
+  }
+}
+
+run "test_task_to_redis_rule_type" {
+  command = plan
+  assert {
+    condition     = aws_security_group_rule.task_to_redis.type == "egress"
+    error_message = "Task to Redis rule must be of type egress."
   }
 }
 
