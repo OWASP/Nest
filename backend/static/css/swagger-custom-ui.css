@@ -5,15 +5,13 @@ html, body {
 }
 
 .swagger-ui .scheme-container {
-    background-color: inherit
+    background-color: inherit;
 }
 
-.swagger-ui .scheme-container .schemes-server-container .servers-title {
+.swagger-ui .scheme-container .schemes-server-container .servers-title,
+.swagger-ui .title,
+.swagger-ui .opblock-summary-path-description-wrapper .opblock-summary-description {
     color: #4a5565;
-}
-
-.swagger-ui .title {
-    color: #4a5565
 }
 
 .swagger-ui .info .description p {
@@ -34,9 +32,14 @@ html, body {
     padding-right: 16px;
 }
 
-.nest-topbar .logo {
+.nest-topbar .logo,
+.logo-img-div,
+.nest-topbar .toggle-theme-btn {
     display: flex;
     align-items: center;
+}
+
+.nest-topbar .logo {
     gap: 0.25rem;
 }
 
@@ -56,47 +59,38 @@ html, body {
 .logo-img-div {
     height: 48px;
     width: 48px;
-    display: flex;
     justify-content: center;
-    align-items: center;
+}
+
+.swagger-ui .opblock,
+.swagger-ui .opblock-summary {
+    background-color: #e5e7eb;
 }
 
 .swagger-ui .opblock {
-    background: #e5e7eb;
     border-color: #e5e7eb;
 }
 
-.swagger-ui .opblock-summary {
-    background-color: #e5e7eb
-}
-
-.swagger-ui .opblock-summary-path-description-wrapper span{
+.swagger-ui .opblock-summary-path-description-wrapper span {
     color: #52a3ff !important;
 }
 
-
-.swagger-ui .opblock-summary-path-description-wrapper .opblock-summary-description {
-    color: #4a5565
-}
-
 .nest-topbar .toggle-theme-btn {
-    display: flex;
-    align-items: center;
     justify-content: center;
     height: 2.5rem;
     width: 2.5rem;
     border-radius: 100%;
     background: #87a1bc;
-    border: none
+    border: none;
+}
+
+.models article.json-schema-2020-12 button,
+html.dark .json-schema-2020-12-head button {
+    background-color: inherit;
 }
 
 html.dark body {
     background-color: #212529;
-}
-
-html.dark
-.swagger-ui .title {
-    color: #d1d5dc
 }
 
 html.dark .swagger-ui .info .description p {
@@ -107,14 +101,8 @@ html.dark .nest-topbar {
     background-color: #2d3748;
 }
 
-html.dark
-.nest-topbar .logo-text {
+html.dark .nest-topbar .logo-text {
     color: #cad5e2;
-}
-
-html.dark .swagger-ui .opblock {
-    background: #364153;
-    border-color: #364153;
 }
 
 html.dark .nest-topbar .toggle-theme-btn {
@@ -122,36 +110,36 @@ html.dark .nest-topbar .toggle-theme-btn {
 }
 
 html.dark .swagger-ui .opblock-summary-path-description-wrapper .opblock-summary-description {
-    color: #99a1af
+    color: #99a1af;
 }
 
-html.dark .opblock-tag-section .opblock-tag {
-    color:#d1d5dc;
+html.dark .swagger-ui .title,
+html.dark .opblock-tag-section .opblock-tag,
+html.dark .swagger-ui .scheme-container .schemes-server-container .servers-title,
+html.dark .models .models-control span {
+    color: #d1d5dc;
 }
 
-html.dark .opblock-control-arrow .arrow path{
-    fill: #FFFFFF;
-}
-
-html.dark .swagger-ui .opblock-tag .expand-operation .arrow path {
-    fill: #FFFFFF;
-}
-
+html.dark .swagger-ui .opblock,
+html.dark .swagger-ui .opblock-summary,
 html.dark .json-schema-2020-12 {
     background-color: #364153;
 }
 
-html.dark .json-schema-2020-12-head button{
-    background-color: inherit;
+html.dark .swagger-ui .opblock {
+    border-color: #364153;
 }
 
-html.dark .json-schema-2020-12-head .json-schema-2020-12-accordion .json-schema-2020-12__title{
-    color: #52a3ff !important;
+html.dark .json-schema-2020-12-head .json-schema-2020-12__title,
+html.dark .json-schema-2020-12-keyword__name,
+.json-schema-2020-12-body .json-schema-2020-12__title {
+    color: #52a3ff;
 }
 
-html.dark
-.swagger-ui .scheme-container .schemes-server-container .servers-title {
-    color: #d1d5dc;
+html.dark .opblock-control-arrow .arrow path,
+html.dark .swagger-ui .opblock-tag .expand-operation .arrow path,
+html.dark .models .models-control svg path {
+    fill: #fff;
 }
 
 html.dark .swagger-ui .opblock .opblock-description-wrapper,
@@ -167,7 +155,7 @@ html.dark .swagger-ui .opblock .parameter__enum,
 html.dark .swagger-ui .opblock .parameter__default,
 html.dark .swagger-ui .opblock .renderedMarkdown p,
 html.dark .swagger-ui .opblock .renderedMarkdown code,
-html.dark .swagger-ui .opblock .responses-table
+html.dark .swagger-ui .opblock .responses-table,
 html.dark .swagger-ui .opblock .response-col_status,
 html.dark .swagger-ui .opblock .response-col_links,
 html.dark .swagger-ui .opblock .tab {
@@ -177,16 +165,4 @@ html.dark .swagger-ui .opblock .tab {
 html.dark .swagger-ui .opblock .responses-table thead tr td,
 html.dark .swagger-ui .opblock .parameters thead tr th {
     color: #e5e7eb;
-}
-
-html.dark .models .models-control svg path {
-    fill: #FFFFFF
-}
-
-html.dark .models .models-control span {
-    color: #d1d5dc;
-}
-
-html.dark .swagger-ui .opblock-summary {
-    background-color: #364153
 }
