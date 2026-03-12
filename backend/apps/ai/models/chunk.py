@@ -3,12 +3,14 @@
 import logging
 
 from django.conf import settings
-from django.db import models
+from django.db import IntegrityError, models
 from pgvector.django import VectorField
 
 from apps.ai.models.context import Context
-from apps.common.models import BulkSaveModel, TimestampedModel
+from apps.common.models import TimestampedModel
 from apps.common.utils import truncate
+
+BULK_BATCH_SIZE = 1000
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +36,20 @@ class Chunk(TimestampedModel):
 
     @staticmethod
     def bulk_save(chunks, fields=None):
-        """Bulk save chunks."""
-        BulkSaveModel.bulk_save(Chunk, chunks, fields=fields)
+        """Bulk save chunks; duplicate (context, text) rows are skipped (constraint-aware)."""
+        new_chunks = [c for c in chunks if not c.id]
+        existing = [c for c in chunks if c.id]
+        if new_chunks:
+            Chunk.objects.bulk_create(
+                new_chunks, batch_size=BULK_BATCH_SIZE, ignore_conflicts=True
+            )
+        if existing:
+            Chunk.objects.bulk_update(
+                existing,
+                fields=fields or [f.name for f in Chunk._meta.fields if not f.primary_key],
+                batch_size=BULK_BATCH_SIZE,
+            )
+        chunks.clear()
 
     @staticmethod
     def split_text(text: str) -> list[str]:
@@ -113,6 +127,10 @@ class Chunk(TimestampedModel):
         chunk = Chunk(text=text, embedding=embedding, context=context)
 
         if save:
-            chunk.save()
+            try:
+                chunk.save()
+            except IntegrityError:
+                # Concurrent insert or duplicate; treat as skip (constraint-aware)
+                return None
 
         return chunk

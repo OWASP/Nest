@@ -56,6 +56,75 @@ INTENT_TO_AGENT = {
     Intent.RAG.value: create_rag_agent,
 }
 
+CONTRIBUTION_KEYWORDS = [
+    "contribute",
+    "contributing",
+    "contributor",
+    "contributors",
+    "get involved",
+    "getting involved",
+    "how to get involved",
+    "beginner-friendly",
+    "starter issues",
+    "new contributors",
+    "contribution guidelines",
+    "contribution opportunities",
+    "how to start",
+    "getting started",
+    "how contributors get involved",
+    "good projects for",
+    "projects for beginners",
+    "interested in",
+    "excited to join",
+    "looking forward to contributing",
+    "keen on learning",
+    "would love some guidance",
+    "I'd love some guidance",
+    "how teams collaborate",
+    "how projects are structured",
+    "how to find issues",
+    "contributing along",
+    "contributing along the way",
+    "contributing to",
+    "guidance on",
+    "some guidance",
+    "love some guidance",
+    "repositories are good",
+    "projects or repositories",
+    "would love",
+]
+
+
+def _invoke_tool_or_fallback(tool, template_path: str, template_context: dict) -> str:
+    """Invoke a crewai tool or fall back to direct template rendering.
+
+    Args:
+        tool: The crewai tool to invoke.
+        template_path: Fallback template path.
+        template_context: Template context variables for fallback.
+
+    Returns:
+        Tool output or rendered template string.
+
+    """
+    func = None
+    result = None
+    if hasattr(tool, "__wrapped__"):
+        func = tool.__wrapped__
+    elif hasattr(tool, "func"):
+        func = tool.func
+    elif hasattr(tool, "run"):
+        result = tool.run({})
+    else:
+        func = inspect.unwrap(tool)
+    if func and callable(func):
+        result = func()
+    if result is None:
+        from apps.ai.common.decorators import render_template  # noqa: PLC0415
+
+        result = render_template(template_path, **template_context)
+    return result
+
 
 def process_query(  # noqa: PLR0911
     query: str,
@@ -318,45 +387,9 @@ def process_query(  # noqa: PLR0911
                 },
             )
             # Pre-check for contribution keywords to help guide the agent
-            contribution_keywords = [
-                "contribute",
-                "contributing",
-                "contributor",
-                "contributors",
-                "get involved",
-                "getting involved",
-                "how to get involved",
-                "beginner-friendly",
-                "starter issues",
-                "new contributors",
-                "contribution guidelines",
-                "contribution opportunities",
-                "how to start",
-                "getting started",
-                "how contributors get involved",
-                "good projects for",
-                "projects for beginners",
-                "interested in",
-                "excited to join",
-                "looking forward to contributing",
-                "keen on learning",
-                "would love some guidance",
-                "I'd love some guidance",
-                "how teams collaborate",
-                "how projects are structured",
-                "how to find issues",
-                "contributing along",
-                "contributing along the way",
-                "contributing to",
-                "guidance on",
-                "some guidance",
-                "love some guidance",
-                "repositories are good",
-                "projects or repositories",
-            ]
             query_lower = query.lower()
             has_contribution_keywords = any(
-                keyword in query_lower for keyword in contribution_keywords
+                keyword in query_lower for keyword in CONTRIBUTION_KEYWORDS
             )
 
             logger.info(
@@ -393,33 +426,14 @@ def process_query(  # noqa: PLR0911
                 from apps.ai.agents.channel.tools import (  # noqa: PLC0415
                     suggest_gsoc_channel,
                 )
+                from apps.slack.constants import OWASP_GSOC_CHANNEL_ID  # noqa: PLC0415
 
-                # Try to get the underlying function from the Tool object
-                func = None
-                result = None
-                if hasattr(suggest_gsoc_channel, "__wrapped__"):
-                    func = suggest_gsoc_channel.__wrapped__
-                elif hasattr(suggest_gsoc_channel, "func"):
-                    func = suggest_gsoc_channel.func
-                elif hasattr(suggest_gsoc_channel, "run"):
-                    # If it has a run method, call that
-                    result = suggest_gsoc_channel.run({})
-                else:
-                    # Try to unwrap using inspect
-                    func = inspect.unwrap(suggest_gsoc_channel)
-
-                if func and callable(func):
-                    result = func()
-                elif result is None:
-                    # Fallback: call render_template directly
-                    from apps.ai.common.decorators import render_template  # noqa: PLC0415
-                    from apps.slack.constants import OWASP_GSOC_CHANNEL_ID  # noqa: PLC0415
-
-                    channel_id = OWASP_GSOC_CHANNEL_ID.lstrip("#")
-                    result = render_template(
-                        "agents/channel/tools/gsoc.jinja",
-                        gsoc_channel_id=channel_id,
-                    )
+                gsoc_channel_id = OWASP_GSOC_CHANNEL_ID.lstrip("#")
+                result = _invoke_tool_or_fallback(
+                    suggest_gsoc_channel,
+                    "agents/channel/tools/gsoc.jinja",
+                    {"gsoc_channel_id": gsoc_channel_id},
+                )
                 logger.info(
                     "Direct GSoC channel suggestion tool call completed",
                     extra={"result_preview": result[:100]},
@@ -428,7 +442,9 @@ def process_query(  # noqa: PLR0911
 
             # If contribution keywords detected, directly call the suggestion tool
             if has_contribution_keywords:
-                matched_keywords = [kw for kw in contribution_keywords if kw in query_lower]
+                matched_keywords = [
+                    kw for kw in CONTRIBUTION_KEYWORDS if kw in query_lower
+                ]
                 logger.info(
                     "Contribution keywords detected in owasp-community channel, "
                     "directly calling channel suggestion tool",
@@ -441,35 +457,16 @@ def process_query(  # noqa: PLR0911
                 from apps.ai.agents.channel.tools import (  # noqa: PLC0415
                     suggest_contribute_channel,
                 )
+                from apps.slack.constants import (  # noqa: PLC0415
+                    OWASP_CONTRIBUTE_CHANNEL_ID,
+                )
 
-                # Try to get the underlying function from the Tool object
-                func = None
-                result = None
-                if hasattr(suggest_contribute_channel, "__wrapped__"):
-                    func = suggest_contribute_channel.__wrapped__
-                elif hasattr(suggest_contribute_channel, "func"):
-                    func = suggest_contribute_channel.func
-                elif hasattr(suggest_contribute_channel, "run"):
-                    # If it has a run method, call that
-                    result = suggest_contribute_channel.run({})
-                else:
-                    # Try to unwrap using inspect
-                    func = inspect.unwrap(suggest_contribute_channel)
-
-                if func and callable(func):
-                    result = func()
-                elif result is None:
-                    # Fallback: call render_template directly
-                    from apps.ai.common.decorators import render_template  # noqa: PLC0415
-                    from apps.slack.constants import (  # noqa: PLC0415
-                        OWASP_CONTRIBUTE_CHANNEL_ID,
-                    )
-
-                    channel_id = OWASP_CONTRIBUTE_CHANNEL_ID.lstrip("#")
-                    result = render_template(
-                        "agents/channel/tools/contribute.jinja",
-                        contribute_channel_id=channel_id,
-                    )
+                contribute_channel_id = OWASP_CONTRIBUTE_CHANNEL_ID.lstrip("#")
+                result = _invoke_tool_or_fallback(
+                    suggest_contribute_channel,
+                    "agents/channel/tools/contribute.jinja",
+                    {"contribute_channel_id": contribute_channel_id},
+                )
                 logger.info(
                     "Direct channel suggestion tool call completed",
                     extra={"result_preview": result[:100]},
@@ -491,30 +488,9 @@ def process_query(  # noqa: PLR0911
 
         # Step 3: Check for contribution intent even if misclassified
         # This is a fallback to catch contribution queries that might be misclassified
-        contribution_keywords = [
-            "contribute",
-            "contributing",
-            "contributor",
-            "contributors",
-            "get involved",
-            "getting involved",
-            "beginner-friendly",
-            "starter issues",
-            "contribution guidelines",
-            "contribution opportunities",
-            "how to start",
-            "getting started",
-            "new contributors",
-            "good projects for",
-            "would love",
-            "interested in",
-            "excited to join",
-            "looking forward to contributing",
-            "keen on learning",
-        ]
         query_lower = query.lower()
         has_contribution_keywords = any(
-            keyword in query_lower for keyword in contribution_keywords
+            keyword in query_lower for keyword in CONTRIBUTION_KEYWORDS
         )
 
         # Step 4: Handle low confidence - skip or provide short message
