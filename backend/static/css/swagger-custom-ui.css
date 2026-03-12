@@ -73,16 +73,20 @@ body {
 }
 
 .swagger-ui .opblock,
-.swagger-ui .opblock-summary {
+.swagger-ui .opblock-summary,
+.swagger-ui .opblock-body {
     background-color: #e5e7eb;
 }
 
-.swagger-ui .opblock {
+.swagger-ui .opblock,
+.swagger-ui .opblock[class*="opblock-"],
+.swagger-ui .opblock-summary,
+.swagger-ui .opblock[class*="opblock-"] .opblock-summary {
     border-color: #e5e7eb;
 }
 
 .swagger-ui .opblock-summary-path-description-wrapper span {
-    color: #52a3ff !important;
+    color: #52a3ff;
 }
 
 .nest-topbar .toggle-theme-btn {
@@ -132,11 +136,15 @@ html.dark .models .models-control span {
 
 html.dark .swagger-ui .opblock,
 html.dark .swagger-ui .opblock-summary,
+html.dark .swagger-ui .opblock-body,
 html.dark .json-schema-2020-12 {
     background-color: #364153;
 }
 
-html.dark .swagger-ui .opblock {
+html.dark .swagger-ui .opblock,
+html.dark .swagger-ui .opblock[class*="opblock-"],
+html.dark .swagger-ui .opblock-summary,
+html.dark .swagger-ui .opblock[class*="opblock-"] .opblock-summary {
     border-color: #364153;
 }
 
@@ -175,4 +183,14 @@ html.dark .swagger-ui .opblock .tab {
 html.dark .swagger-ui .opblock .responses-table thead tr td,
 html.dark .swagger-ui .opblock .parameters thead tr th {
     color: #e5e7eb;
+}
+
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12-json-viewer__name,
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12-json-viewer__value,
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12__attribute {
+    color: #52a3ff;
+}
+
+html.dark .json-schema-2020-12-accordion .json-schema-2020-12-accordion__icon svg path {
+    fill: #FFFFFF;
 }
