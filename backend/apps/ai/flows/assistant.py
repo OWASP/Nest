@@ -79,7 +79,7 @@ CONTRIBUTION_KEYWORDS = [
     "looking forward to contributing",
     "keen on learning",
     "would love some guidance",
-    "I'd love some guidance",
+    "i'd love some guidance",
     "how teams collaborate",
     "how projects are structured",
     "how to find issues",
@@ -93,6 +93,13 @@ CONTRIBUTION_KEYWORDS = [
     "projects or repositories",
     "would love",
 ]
+
+
+def _query_log_extra(query: str) -> dict:
+    """Return query-related log extra; redact query text in non-local to avoid leaking user content."""
+    if getattr(settings, "IS_LOCAL_ENVIRONMENT", False) or getattr(settings, "DEBUG", False):
+        return {"query": query[:200]}
+    return {"query_length": len(query)}
 
 
 def _invoke_tool_or_fallback(tool, template_path: str, template_context: dict) -> str:
@@ -164,7 +171,7 @@ def process_query(  # noqa: PLR0911
             except Exception:  # noqa: BLE001 - intentionally broad so image failure never fails the request
                 logger.warning(
                     "Image enrichment failed; continuing without image context",
-                    extra={"query": query[:200]},
+                    extra=_query_log_extra(query),
                 )
         # Step 0: Handle simple greetings and non-question messages
         # Normalize for comparison: strip, lower, remove trailing punctuation
@@ -257,7 +264,7 @@ def process_query(  # noqa: PLR0911
                     extra={
                         "intent": intent,
                         "router_result": router_result,
-                        "query": query[:200],
+                        **_query_log_extra(query),
                     },
                 )
                 # Fallback to RAG
@@ -269,7 +276,7 @@ def process_query(  # noqa: PLR0911
             extra={
                 "intent": intent,
                 "confidence": confidence,
-                "query": query[:200],
+                **_query_log_extra(query),
             },
         )
 
@@ -365,7 +372,7 @@ def process_query(  # noqa: PLR0911
                             "all_intents": all_intents,
                             "result": result_str,
                             "result_length": len(result_str),
-                            "query": query[:200],
+                            **_query_log_extra(query),
                         },
                     )
                     # Return a fallback response instead
@@ -421,7 +428,7 @@ def process_query(  # noqa: PLR0911
                 logger.info(
                     "GSoC keywords detected in owasp-community channel, "
                     "directly calling GSoC channel suggestion tool",
-                    extra={"query": query[:200]},
+                    extra=_query_log_extra(query),
                 )
                 from apps.ai.agents.channel.tools import (  # noqa: PLC0415
                     suggest_gsoc_channel,
@@ -449,7 +456,7 @@ def process_query(  # noqa: PLR0911
                     "Contribution keywords detected in owasp-community channel, "
                     "directly calling channel suggestion tool",
                     extra={
-                        "query": query[:200],
+                        **_query_log_extra(query),
                         "matched_keywords": matched_keywords,
                         "has_contribution_keywords": has_contribution_keywords,
                     },
@@ -476,7 +483,7 @@ def process_query(  # noqa: PLR0911
             # For all other queries in owasp-community channel, use channel agent
             logger.info(
                 "Query from owasp-community channel, routing to channel agent",
-                extra={"query": query[:200]},
+                extra=_query_log_extra(query),
             )
             channel_agent = create_channel_agent()
             return execute_task(
@@ -548,7 +555,7 @@ def process_query(  # noqa: PLR0911
                     "intent": intent,
                     "result": result_str,
                     "result_length": len(result_str),
-                    "query": query[:200],
+                    **_query_log_extra(query),
                 },
             )
             # Return a fallback response instead
@@ -559,7 +566,7 @@ def process_query(  # noqa: PLR0911
         logger.exception(
             "Failed to process query",
             extra={
-                "query": query[:200],
+                **_query_log_extra(query),
                 "error": str(e),
             },
         )
