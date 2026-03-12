@@ -510,7 +510,7 @@ jobs:
           push: true
           tags: |
             owasp/nest:backend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:${{ env.RELEASE_VERSION }}
 
       - name: Prepare frontend public environment
         env:
@@ -567,7 +567,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             owasp/nest:frontend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:${{ env.RELEASE_VERSION }}
 
       - name: Get frontend image size
         id: frontend-size
@@ -767,17 +767,20 @@ jobs:
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
           PROJECT_NAME: nest
+          RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
           TASKS_USE_FARGATE_SPOT: true
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfvars <<-EOF
           availability_zones=$AVAILABILITY_ZONES
           aws_region="$AWS_REGION"
+          backend_image_tag="$RELEASE_VERSION"
           backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
           create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
+          frontend_image_tag="$RELEASE_VERSION"
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
           EOF

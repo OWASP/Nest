@@ -26,19 +26,6 @@ variable "db_port" {
   }
 }
 
-variable "default_egress_cidr_blocks" {
-  description = "A list of CIDR blocks to allow for default egress traffic."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-
-  validation {
-    condition = alltrue([
-      for cidr in var.default_egress_cidr_blocks : can(cidrhost(cidr, 0))
-    ])
-    error_message = "One or more CIDR blocks are invalid."
-  }
-}
-
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string

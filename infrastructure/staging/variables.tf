@@ -146,6 +146,11 @@ variable "backend_enable_auto_scaling" {
   default     = false
 }
 
+variable "backend_image_tag" {
+  description = "The Docker backend image tag."
+  type        = string
+}
+
 variable "backend_max_count" {
   description = "The maximum number of backend tasks for auto scaling."
   type        = number
@@ -190,6 +195,11 @@ variable "frontend_enable_auto_scaling" {
   description = "Whether to enable auto scaling for frontend."
   type        = bool
   default     = false
+}
+
+variable "frontend_image_tag" {
+  description = "The Docker frontend image tag."
+  type        = string
 }
 
 variable "frontend_max_count" {
