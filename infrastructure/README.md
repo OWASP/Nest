@@ -95,7 +95,10 @@ Follow these steps to set up the infrastructure:
 
 1. **Setup Main Infrastructure (staging)**:
 
-Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`.
+> [!NOTE]
+> This document has steps to deploy the `staging` environment.
+
+Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/live/README.md`.
 This user must assume the role `nest-staging-terraform` created in the bootstrap step.
 To do this locally:
 
@@ -124,7 +127,7 @@ To do this locally:
 - Navigate to the main infrastructure directory:
 
     ```bash
-    cd infrastructure/staging/
+    cd infrastructure/live/
     ```
 
 - Copy the contents from the template file into your new local terraform variables file:

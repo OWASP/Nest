@@ -750,10 +750,12 @@ jobs:
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_KEY: staging/terraform.tfstate
         run: |
           umask 377
-          cat > infrastructure/staging/terraform.tfbackend <<-EOF
+          cat > infrastructure/live/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
+          key="${TF_STATE_KEY}"
           region="$AWS_REGION"
           EOF
 
@@ -773,7 +775,7 @@ jobs:
           TASKS_USE_FARGATE_SPOT: true
         run: |
           umask 377
-          cat > infrastructure/staging/terraform.tfvars <<-EOF
+          cat > infrastructure/live/terraform.tfvars <<-EOF
           availability_zones=$AVAILABILITY_ZONES
           aws_region="$AWS_REGION"
           backend_image_tag="$RELEASE_VERSION"
@@ -790,20 +792,20 @@ jobs:
           EOF
 
       - name: Terraform Init
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform init -backend-config=terraform.tfbackend
 
       - name: Terraform Validate
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: |
           terraform plan -out=tfplan
 
       - name: Show plan in summary
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: |
           echo "## Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
@@ -814,7 +816,7 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: tfplan
-          path: infrastructure/staging/tfplan
+          path: infrastructure/live/tfplan
           retention-days: 3
     timeout-minutes: 15
 
@@ -857,30 +859,32 @@ jobs:
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_KEY: staging/terraform.tfstate
         run: |
           umask 377
-          cat > infrastructure/staging/terraform.tfbackend <<-EOF
+          cat > infrastructure/live/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
+          key="${TF_STATE_KEY}"
           region="$AWS_REGION"
           EOF
 
       - name: Terraform Init
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform init -backend-config=terraform.tfbackend
 
       - name: Download plan artifact
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3
         with:
           name: tfplan
-          path: infrastructure/staging
+          path: infrastructure/live
 
       - name: Terraform Apply
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform apply -auto-approve tfplan
 
       - name: Capture terraform outputs
         id: tf-outputs
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: |
           echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
           echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
