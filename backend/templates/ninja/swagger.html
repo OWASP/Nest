@@ -1,11 +1,18 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ api.title }} – API Docs</title>
+    <script>
+        (function () {
+            var theme = localStorage.getItem('nest-swagger-theme') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link type="text/css" rel="stylesheet" href="{% static 'ninja/swagger-ui.css' %}" />
     {% include "ninja/favicons.html" %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/swagger_ui.css' %}" />
