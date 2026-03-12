@@ -20,7 +20,7 @@ def _call_module_resolver(instance: object, name: str, *args: object, **kwargs: 
     field = next((f for f in definition.fields if f.name == name), None)
     assert field is not None
     assert field.base_resolver is not None
-    return field.base_resolver.wrapped_func(instance, *args, **kwargs)
+    return field.base_resolver.wrapped_func(instance, instance, *args, **kwargs)
 
 
 class FakeModuleNode:
