@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django.db import models
 from pgvector.django import VectorField
 
@@ -84,8 +85,6 @@ class Chunk(TimestampedModel):
         if actual_dimension != expected_dimension:
             # Log warning but only raise error in production/staging environments
             # This allows tests to use different dimensions while catching real issues
-            from django.conf import settings  # noqa: PLC0415
-
             warning_msg = (
                 f"Embedding dimension mismatch: expected {expected_dimension}, "
                 f"got {actual_dimension}. This usually indicates a mismatch between "
@@ -105,6 +104,8 @@ class Chunk(TimestampedModel):
                     "the configured dimension."
                 )
                 raise ValueError(error_msg)
+            # Non-prod: do not save mismatched-dimension vector; pgvector would reject it
+            return None
 
         if Chunk.objects.filter(context=context, text=text).exists():
             return None

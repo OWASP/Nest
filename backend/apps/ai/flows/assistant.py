@@ -458,7 +458,7 @@ def process_query(  # noqa: PLR0911
 
                 if func and callable(func):
                     result = func()
-                elif not result:
+                elif result is None:
                     # Fallback: call render_template directly
                     from apps.ai.common.decorators import render_template  # noqa: PLC0415
                     from apps.slack.constants import (  # noqa: PLC0415
