@@ -767,7 +767,7 @@ jobs:
           CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           DJANGO_CONFIGURATION: Staging
-          DJANGO_SETTINGS_MODULE: settings.Staging
+          DJANGO_SETTINGS_MODULE: settings.staging
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
           PROJECT_NAME: nest
