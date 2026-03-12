@@ -504,7 +504,7 @@ class ModuleMutation:
             msg = "Provided module keys do not match the program's modules."
             raise ValidationError(msg)
 
-        modules = list(modules_query.select_for_update())
+        modules = modules_query.select_for_update()
 
         key_to_order = {key: idx for idx, key in enumerate(input_data.module_keys)}
 
