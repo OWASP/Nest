@@ -14,53 +14,30 @@
         <title>{{ api.title }}</title>
         <script>
             (() => {
-                const storageKey = "theme";
                 const root = document.documentElement;
-                const mediaQuery = globalThis.matchMedia("(prefers-color-scheme: dark)");
-                const getStoredTheme = () => localStorage.getItem(storageKey);
-                const getPreferredTheme = () => {
-                    const savedTheme = getStoredTheme();
-                    if (savedTheme === "light" || savedTheme === "dark") {
-                        return savedTheme;
-                    }
 
-                    return mediaQuery.matches ? "dark" : "light";
-                };
-                const applyInitialTheme = () => {
-                    const theme = getPreferredTheme();
-                    const isDark = theme === "dark";
-                    const toggleButton = document.querySelector(".toggle-theme-btn");
-                    const themeIcon = toggleButton?.querySelector(".theme-icon");
+                const getCookie = (name) =>
+                    document.cookie
+                    .split("; ")
+                    .find((row) => row.startsWith(name + "="))
+                    ?.split("=")[1];
 
-                    root.dataset.theme = theme;
-                    root.classList.toggle("dark", isDark);
+                const getTheme = () => localStorage.getItem("theme") || getCookie("theme") ||
+                    (globalThis.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
-                    if (themeIcon) {
-                        themeIcon.src = isDark ? themeIcon.dataset.lightSrc : themeIcon.dataset.darkSrc;
-                    }
-
-                    if (toggleButton) {
-                        toggleButton.setAttribute(
-                            "aria-label",
-                            isDark ? "Switch to light theme" : "Switch to dark theme"
-                        );
-                    }
-
-                    return Boolean(toggleButton && themeIcon);
+                const apply = (theme) => {
+                    root.classList.toggle("dark", theme === "dark");
                 };
 
-                if (!applyInitialTheme()) {
-                    const observer = new MutationObserver(() => {
-                        if (applyInitialTheme()) {
-                            observer.disconnect();
-                        }
-                    });
+                apply(getTheme());
 
-                    observer.observe(document.documentElement, {
-                        childList: true,
-                        subtree: true,
-                    });
-                }
+                document.addEventListener("click", (e) => {
+                    if (!e.target.closest(".toggle-theme-btn")) return;
+
+                    const newTheme = root.classList.contains("dark") ? "light" : "dark";
+                    localStorage.setItem("theme", newTheme)
+                    apply(newTheme);
+                });
             })();
         </script>
     </head>
@@ -72,9 +49,7 @@
         <div class="nest-topbar">
             <div class="logo">
                 <div class="logo-img-div">
-                    <img src="{% static 'img/logo_dark.png' %}"
-                         class="nest-logo"
-                         alt="Nest logo" />
+                    <img src="{% static 'img/logo.png' %}" class="nest-logo" alt="Nest logo" />
                 </div>
                 <div class="logo-text">Nest</div>
             </div>
@@ -90,64 +65,5 @@
         <div id="swagger-ui"></div>
         <script src="{% static 'ninja/swagger-ui-bundle.js' %}"></script>
         <script src="{% static 'ninja/swagger-ui-init.js' %}"></script>
-        <script>
-            (() => {
-                const storageKey = "theme";
-                const root = document.documentElement;
-                const toggleButton = document.querySelector(".toggle-theme-btn");
-                const themeIcon = toggleButton?.querySelector(".theme-icon");
-                const mediaQuery = globalThis.matchMedia("(prefers-color-scheme: dark)");
-                const getStoredTheme = () => localStorage.getItem(storageKey);
-
-                const getPreferredTheme = () => {
-                    const savedTheme = getStoredTheme();
-                    if (savedTheme === "light" || savedTheme === "dark") {
-                        return savedTheme;
-                    }
-
-                    return mediaQuery.matches ? "dark" : "light";
-                };
-
-                const applyTheme = (theme) => {
-                    const isDark = theme === "dark";
-                    root.dataset.theme = theme;
-                    root.classList.toggle("dark", isDark);
-
-                    if (themeIcon) {
-                        themeIcon.src = isDark ? themeIcon.dataset.lightSrc : themeIcon.dataset.darkSrc;
-                    }
-
-                    if (toggleButton) {
-                        toggleButton.setAttribute(
-                            "aria-label",
-                            isDark ? "Switch to light theme" : "Switch to dark theme"
-                        );
-                    }
-                };
-
-                applyTheme(getPreferredTheme());
-
-                toggleButton?.addEventListener("click", () => {
-                    const nextTheme = root.dataset.theme === "dark" ? "light" : "dark";
-                    localStorage.setItem(storageKey, nextTheme);
-                    applyTheme(nextTheme);
-                });
-
-                const handleThemeChange = (event) => {
-                    const savedTheme = getStoredTheme();
-                    if (savedTheme === "light" || savedTheme === "dark") {
-                        return;
-                    }
-
-                    applyTheme(event.matches ? "dark" : "light");
-                };
-
-                if (typeof mediaQuery.addEventListener === "function") {
-                    mediaQuery.addEventListener("change", handleThemeChange);
-                } else if (typeof mediaQuery.addListener === "function") {
-                    mediaQuery.addListener(handleThemeChange);
-                }
-            })();
-        </script>
     </body>
 </html>

@@ -11,6 +11,11 @@ export default function ModeToggle() {
     setMounted(true)
   }, [])
 
+  useEffect(() => {
+    if (!theme) return
+    document.cookie = `theme=${theme}; Path=/; SameSite=Lax`
+  }, [theme])
+
   const darkModeHandler = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
