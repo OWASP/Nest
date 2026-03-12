@@ -147,7 +147,7 @@ variable "domain_name" {
 variable "backend_desired_count" {
   description = "The desired number of backend tasks."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "backend_enable_auto_scaling" {
@@ -197,7 +197,7 @@ variable "fixtures_bucket_name" {
 variable "frontend_desired_count" {
   description = "The desired number of frontend tasks."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "frontend_enable_auto_scaling" {
