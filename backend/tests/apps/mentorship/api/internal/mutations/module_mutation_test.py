@@ -680,6 +680,54 @@ class TestModuleMutationSetTaskDeadline:
         assert result == mock_mod
         mock_task.objects.bulk_update.assert_called_once()
 
+    @patch("apps.mentorship.api.internal.mutations.module.Task")
+    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.timezone")
+    def test_set_task_deadline_success_as_admin(
+        self, mock_tz, mock_module, mock_mentor, mock_task
+    ):
+        """Test successful deadline setting by a program admin (non-mentor)."""
+        user = MagicMock()
+        info = self._make_info(user)
+        mock_task.Status = Task.Status
+
+        mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
+            mock_mod
+        )
+        mock_mentor.objects.filter.return_value.exists.return_value = False
+
+        mock_issue = MagicMock()
+        assignee = MagicMock()
+        assignees_qs = MagicMock()
+        assignees_qs.exists.return_value = True
+        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
+        mock_issue.assignees.all.return_value = assignees_qs
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+
+        deadline = datetime(2025, 12, 1, tzinfo=UTC)
+        mock_tz.is_naive.return_value = False
+        mock_tz.now.return_value = datetime(2025, 6, 1, tzinfo=UTC)
+
+        mock_task_obj = MagicMock()
+        mock_task_obj.assigned_at = None
+        mock_task.objects.get_or_create.return_value = (mock_task_obj, True)
+
+        mutation = ModuleMutation()
+        result = mutation.set_task_deadline(
+            info,
+            module_key="mod-1",
+            program_key="prog-1",
+            issue_number=1,
+            deadline_at=deadline,
+        )
+
+        assert result == mock_mod
+        mock_task.objects.bulk_update.assert_called_once()
+
     @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_set_deadline_module_not_found(self, mock_module):
         """Test ObjectDoesNotExist when module not found."""
@@ -701,18 +749,21 @@ class TestModuleMutationSetTaskDeadline:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_set_deadline_not_mentor(self, mock_module, mock_mentor):
-        """Test PermissionDenied when user is not a mentor."""
+    def test_set_deadline_not_mentor_or_admin(self, mock_module, mock_mentor):
+        """Test PermissionDenied when user is not a mentor or program admin."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = False
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = False
 
         mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied, match="Only mentors of this module can set"):
+        with pytest.raises(
+            PermissionDenied, match="Only mentors of this module or program admins can set"
+        ):
             mutation.set_task_deadline(
                 info,
                 module_key="mod-1",
@@ -904,6 +955,43 @@ class TestModuleMutationClearTaskDeadline:
     @patch("apps.mentorship.api.internal.mutations.module.Task")
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_clear_deadline_success_as_admin(self, mock_module, mock_mentor, mock_task):
+        """Test clearing deadline by a program admin (non-mentor)."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
+            mock_mod
+        )
+        mock_mentor.objects.filter.return_value.exists.return_value = False
+
+        mock_issue = MagicMock()
+        assignee = MagicMock()
+        assignees_qs = MagicMock()
+        assignees_qs.exists.return_value = True
+        assignees_qs.__iter__ = MagicMock(return_value=iter([assignee]))
+        mock_issue.assignees.all.return_value = assignees_qs
+        issue_qs = mock_mod.issues.select_related.return_value
+        issue_qs.prefetch_related.return_value.filter.return_value.first.return_value = mock_issue
+
+        task_obj = MagicMock()
+        task_obj.deadline_at = datetime(2025, 12, 1, tzinfo=UTC)
+        mock_task.objects.filter.return_value.first.return_value = task_obj
+
+        mutation = ModuleMutation()
+        result = mutation.clear_task_deadline(
+            info, module_key="mod-1", program_key="prog-1", issue_number=1
+        )
+
+        assert result == mock_mod
+        assert task_obj.deadline_at is None
+        task_obj.save.assert_called_once_with(update_fields=["deadline_at"])
+
+    @patch("apps.mentorship.api.internal.mutations.module.Task")
+    @patch("apps.mentorship.api.internal.mutations.module.Mentor")
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
     def test_clear_deadline_multiple_tasks(self, mock_module, mock_mentor, mock_task):
         """Test clearing deadline for multiple tasks uses bulk_update."""
         user = MagicMock()
@@ -1024,18 +1112,21 @@ class TestModuleMutationClearTaskDeadline:
 
     @patch("apps.mentorship.api.internal.mutations.module.Mentor")
     @patch("apps.mentorship.api.internal.mutations.module.Module")
-    def test_clear_deadline_not_mentor(self, mock_module, mock_mentor):
-        """Test PermissionDenied when user is not a mentor."""
+    def test_clear_deadline_not_mentor_or_admin(self, mock_module, mock_mentor):
+        """Test PermissionDenied when user is not a mentor or program admin."""
         user = MagicMock()
         info = self._make_info(user)
         mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = False
         mock_module.objects.select_related.return_value.filter.return_value.first.return_value = (
             mock_mod
         )
         mock_mentor.objects.filter.return_value.exists.return_value = False
 
         mutation = ModuleMutation()
-        with pytest.raises(PermissionDenied, match="Only mentors of this module can clear"):
+        with pytest.raises(
+            PermissionDenied, match="Only mentors of this module or program admins can clear"
+        ):
             mutation.clear_task_deadline(
                 info, module_key="mod-1", program_key="prog-1", issue_number=1
             )
