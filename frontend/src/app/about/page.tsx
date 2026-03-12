@@ -6,13 +6,14 @@ import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetAboutPageDataDocument } from 'types/__generated__/aboutQueries.generated'
+import type { ProjectTimeline } from 'types/about'
 import type { Leader } from 'types/leader'
 import {
   technologies,
@@ -37,7 +38,6 @@ const leaders = {
   mamicidal: 'CISSP',
 }
 
-const PROJECT_LIMIT = 6
 const MILESTONE_LIMIT = 3
 
 const projectKey = 'nest'
@@ -60,6 +60,60 @@ const getMilestoneIcon = (progress: number) => {
     return FaUsersGear
   }
   return FaClock
+}
+
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
+const INITIAL_YEAR_COUNT = 2
+
+const getMonthAbbr = (yearStr: string) => {
+  const month = yearStr.split(' ')[0]
+  return month.substring(0, 3)
+}
+
+const getTimelineYear = (yearStr: string) => yearStr.split(' ').pop() || ''
+
+const getMonthIndex = (yearStr: string) => {
+  const month = yearStr.split(' ')[0]
+  const idx = MONTHS.indexOf(month)
+  return idx === -1 ? 0 : idx
+}
+
+type YearGroup = {
+  year: string
+  milestones: ProjectTimeline[]
+}
+
+const groupByYear = (milestones: ProjectTimeline[]): YearGroup[] => {
+  const groups: Record<string, { milestone: ProjectTimeline; idx: number }[]> = {}
+
+  milestones.forEach((m, idx) => {
+    const year = getTimelineYear(m.year)
+    if (!groups[year]) groups[year] = []
+    groups[year].push({ milestone: m, idx })
+  })
+
+  return Object.entries(groups)
+    .sort(([a], [b]) => Number(b) - Number(a))
+    .map(([year, items]) => ({
+      year,
+      milestones: [...items]
+        .sort((a, b) => getMonthIndex(b.milestone.year) - getMonthIndex(a.milestone.year) || b.idx - a.idx)
+        .map(({ milestone }) => milestone),
+    }))
 }
 
 const About = () => {
@@ -90,6 +144,27 @@ const About = () => {
 
   const [showAllRoadmap, setShowAllRoadmap] = useState(false)
   const [showAllTimeline, setShowAllTimeline] = useState(false)
+  const [fillPercent, setFillPercent] = useState(0)
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const yearGroups = useMemo(() => groupByYear(projectTimeline), [])
+  const visibleYearGroups = showAllTimeline ? yearGroups : yearGroups.slice(0, INITIAL_YEAR_COUNT)
+
+  const updateProgress = useCallback(() => {
+    const el = timelineRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const viewportH = window.innerHeight
+    const start = viewportH * 0.8
+    const end = viewportH * 0.5
+    const progress = (start - rect.top) / (start - end + rect.height)
+    setFillPercent(Math.min(1, Math.max(0, progress)))
+  }, [])
+
+  useEffect(() => {
+    updateProgress()
+    window.addEventListener('scroll', updateProgress, { passive: true })
+    return () => window.removeEventListener('scroll', updateProgress)
+  }, [updateProgress, visibleYearGroups.length])
 
   useEffect(() => {
     if (error) {
@@ -259,30 +334,57 @@ const About = () => {
           ))}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
-          <div className="space-y-6">
-            {(() => {
-              const visibleTimeline = [...projectTimeline]
-                .reverse()
-                .slice(0, showAllTimeline ? projectTimeline.length : PROJECT_LIMIT)
-              return visibleTimeline.map((milestone, index) => (
-                <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                  {index !== visibleTimeline.length - 1 && (
-                    <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                  )}
+          <div ref={timelineRef} className="relative ml-3 md:ml-5">
+            <div aria-hidden="true" className="absolute top-0 bottom-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500" />
+            <div
+              aria-hidden="true"
+              className="absolute top-0 left-0 w-0.5 origin-top bg-blue-400"
+              style={{ height: `${fillPercent * 100}%` }}
+            />
+
+            {visibleYearGroups.map((group, groupIdx) => (
+              <div
+                key={group.year}
+                className={groupIdx === visibleYearGroups.length - 1 ? '' : 'mb-8'}
+              >
+                <div className="relative flex items-center">
                   <div
                     aria-hidden="true"
-                    className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                  ></div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                    <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                    <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+                    className="absolute left-0 z-10 h-3.5 w-3.5 -translate-x-[6px] rounded-full border-2 border-blue-400 bg-blue-100 dark:bg-blue-300"
+                  />
+                </div>
+
+                <div className="ml-5 rounded-lg bg-gray-200 p-4 md:p-6 dark:bg-gray-700">
+                  <span className="mb-3 inline-block rounded-full border border-blue-200 bg-blue-50 px-3 py-0.5 text-sm font-semibold text-blue-400 dark:border-blue-400/30 dark:bg-blue-400/10">
+                    {group.year}
+                  </span>
+
+                  <div className="space-y-2">
+                    {group.milestones.map((milestone) => (
+                      <div
+                        key={`${milestone.year}-${milestone.title}`}
+                        className="flex cursor-default items-start gap-4 rounded-md px-3 py-1.5 transition-all hover:bg-gray-300/50 dark:hover:bg-gray-600/50"
+                      >
+                        <span className="w-10 shrink-0 pt-0.5 text-sm font-semibold text-blue-400">
+                          {getMonthAbbr(milestone.year)}
+                        </span>
+                        <div className="min-w-0">
+                          <span className="font-semibold text-gray-700 dark:text-gray-200">
+                            {milestone.title}
+                          </span>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-300">
+                            {milestone.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))
-            })()}
+              </div>
+            ))}
           </div>
-          {projectTimeline.length > PROJECT_LIMIT && (
+
+          {yearGroups.length > INITIAL_YEAR_COUNT && (
             <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
           )}
         </SecondaryCard>
