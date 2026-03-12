@@ -151,22 +151,24 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  allowed_hosts      = var.domain_name
-  allowed_origins    = "https://${var.domain_name}"
-  common_tags        = local.common_tags
-  db_host            = module.database.db_proxy_endpoint
-  db_name            = var.db_name
-  db_password_arn    = module.database.db_password_arn
-  db_port            = var.db_port
-  db_user            = var.db_user
-  environment        = var.environment
-  nextauth_url       = "https://${var.domain_name}"
-  project_name       = var.project_name
-  redis_host         = module.cache.redis_primary_endpoint
-  redis_password_arn = module.cache.redis_password_arn
-  server_csrf_url    = "https://${var.domain_name}/csrf/"
-  server_graphql_url = "https://${var.domain_name}/graphql/"
-  static_bucket_name = module.storage.static_s3_bucket_name
+  common_tags                   = local.common_tags
+  db_password_arn               = module.database.db_password_arn
+  django_configuration          = var.django_configuration
+  django_allowed_hosts          = var.domain_name
+  django_allowed_origins        = "https://${var.domain_name}"
+  django_aws_static_bucket_name = module.storage.static_s3_bucket_name
+  django_db_host                = module.database.db_proxy_endpoint
+  django_db_name                = var.db_name
+  django_db_port                = var.db_port
+  django_db_user                = var.db_user
+  django_redis_host             = module.cache.redis_primary_endpoint
+  django_settings_module        = var.django_settings_module
+  environment                   = var.environment
+  next_server_csrf_url          = "https://${var.domain_name}/csrf/"
+  next_server_graphql_url       = "https://${var.domain_name}/graphql/"
+  nextauth_url                  = "https://${var.domain_name}"
+  project_name                  = var.project_name
+  redis_password_arn            = module.cache.redis_password_arn
 }
 
 module "security" {

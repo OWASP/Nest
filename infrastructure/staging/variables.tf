@@ -129,6 +129,16 @@ variable "db_user" {
   default     = "nest_db_user"
 }
 
+variable "django_configuration" {
+  description = "The name of the Django configuration to use (e.g., Staging, Production)."
+  type        = string
+}
+
+variable "django_settings_module" {
+  description = "The location of the Django settings module to use (e.g., settings.staging, settings.production)."
+  type        = string
+}
+
 variable "domain_name" {
   description = "The domain name for the site."
   type        = string
@@ -172,7 +182,6 @@ variable "backend_use_fargate_spot" {
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
-  default     = "staging"
   validation {
     condition     = contains(["staging", "production"], var.environment)
     error_message = "Environment must be either 'staging' or 'production'."
