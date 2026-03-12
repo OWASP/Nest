@@ -725,8 +725,8 @@ jobs:
           backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
           create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
-          django_configuration=$DJANGO_CONFIGURATION
-          django_settings_module=$DJANGO_SETTINGS_MODULE
+          django_configuration="$DJANGO_CONFIGURATION"
+          django_settings_module="$DJANGO_SETTINGS_MODULE"
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
           frontend_image_tag="$RELEASE_VERSION"
