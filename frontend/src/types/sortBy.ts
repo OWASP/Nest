@@ -4,4 +4,5 @@ export type SortByProps = {
   selectedOrder: string
   onSortChange: (value: string) => void
   onOrderChange: (order: string) => void
+  showLabel?: boolean
 }

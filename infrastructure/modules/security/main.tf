@@ -84,14 +84,47 @@ resource "aws_security_group_rule" "backend_from_alb" {
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "backend_egress_all" {
-  cidr_blocks       = var.default_egress_cidr_blocks
-  description       = "Allow all outbound traffic"
-  from_port         = 0
-  protocol          = "-1"
+#trivy:ignore:AVD-AWS-0104
+resource "aws_security_group_rule" "backend_egress_https" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTPS for external API calls"
+  from_port         = 443
+  protocol          = "tcp"
   security_group_id = aws_security_group.backend.id
-  to_port           = 0
+  to_port           = 443
   type              = "egress"
+}
+
+resource "aws_security_group_rule" "backend_to_rds" {
+  count                    = var.create_rds_proxy ? 0 : 1
+  description              = "Allow traffic to RDS"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = aws_security_group.rds.id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "backend_to_rds_proxy" {
+  count                    = var.create_rds_proxy ? 1 : 0
+  description              = "Allow traffic to RDS Proxy"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = aws_security_group.rds_proxy[0].id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "backend_to_redis" {
+  description              = "Allow traffic to Redis"
+  from_port                = var.redis_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = aws_security_group.redis.id
+  to_port                  = var.redis_port
+  type                     = "egress"
 }
 
 resource "aws_security_group_rule" "backend_to_vpc_endpoints" {
@@ -114,14 +147,47 @@ resource "aws_security_group" "tasks" {
   vpc_id = var.vpc_id
 }
 
-resource "aws_security_group_rule" "task_egress_all" {
-  cidr_blocks       = var.default_egress_cidr_blocks
-  description       = "Allow all outbound traffic"
-  from_port         = 0
-  protocol          = "-1"
+#trivy:ignore:AVD-AWS-0104
+resource "aws_security_group_rule" "task_egress_https" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTPS for external API calls"
+  from_port         = 443
+  protocol          = "tcp"
   security_group_id = aws_security_group.tasks.id
-  to_port           = 0
+  to_port           = 443
   type              = "egress"
+}
+
+resource "aws_security_group_rule" "task_to_rds" {
+  count                    = var.create_rds_proxy ? 0 : 1
+  description              = "Allow traffic to RDS"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = aws_security_group.rds.id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "task_to_rds_proxy" {
+  count                    = var.create_rds_proxy ? 1 : 0
+  description              = "Allow traffic to RDS Proxy"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = aws_security_group.rds_proxy[0].id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "task_to_redis" {
+  description              = "Allow traffic to Redis"
+  from_port                = var.redis_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = aws_security_group.redis.id
+  to_port                  = var.redis_port
+  type                     = "egress"
 }
 
 resource "aws_security_group_rule" "task_to_vpc_endpoints" {
@@ -154,6 +220,7 @@ resource "aws_security_group_rule" "frontend_from_alb" {
   type                     = "ingress"
 }
 
+#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "frontend_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow HTTPS for external API calls"

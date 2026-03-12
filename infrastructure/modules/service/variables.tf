@@ -58,7 +58,6 @@ variable "force_new_deployment" {
 variable "image_tag" {
   description = "The Docker image tag."
   type        = string
-  default     = "latest"
 }
 
 variable "kms_key_arn" {

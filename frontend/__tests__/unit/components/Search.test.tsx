@@ -444,5 +444,25 @@ describe('SearchBar Component', () => {
       expect(input).toBeInTheDocument()
       expect(searchIcon).toBeInTheDocument()
     })
+
+    it('applies className prop to the input element', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} className="rounded-none" />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveClass('rounded-none')
+    })
+
+    it('applies className prop to the skeleton when not loaded', () => {
+      const { container } = render(
+        <SearchBar {...defaultProps} isLoaded={false} className="rounded-none" />
+      )
+      const skeleton = container.querySelector('.h-12')
+      expect(skeleton).toHaveClass('rounded-none')
+    })
+
+    it('renders wrapper with py-4 class', () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const wrapper = container.firstChild as HTMLElement
+      expect(wrapper).toHaveClass('py-4')
+    })
   })
 })

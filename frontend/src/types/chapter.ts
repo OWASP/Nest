@@ -11,6 +11,7 @@ export type Chapter = {
     releases: number
     total: number
   }
+  country?: string
   createdAt?: string
   entityLeaders?: Leader[]
   geoLocation?: GeoLocation | null

@@ -1,9 +1,11 @@
 availability_zones            = ["us-east-2a", "us-east-2b", "us-east-2c"]
 aws_region                    = "us-east-2"
+backend_image_tag             = "REPLACE_WITH_BACKEND_IMAGE_TAG"
 backend_use_fargate_spot      = true
 create_rds_proxy              = false
 domain_name                   = "nest.owasp.dev"
 environment                   = "staging"
+frontend_image_tag            = "REPLACE_WITH_FRONTEND_IMAGE_TAG"
 frontend_use_fargate_spot     = true
 project_name                  = "nest"
-tasks_use_fargate_spot          = true
+tasks_use_fargate_spot        = true

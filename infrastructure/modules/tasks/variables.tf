@@ -54,7 +54,6 @@ variable "fixtures_bucket_name" {
 variable "image_tag" {
   description = "The Docker image tag to use for ECS tasks."
   type        = string
-  default     = "latest"
 }
 
 variable "index_data_task_cpu" {
