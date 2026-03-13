@@ -11,6 +11,11 @@ variable "environment" {
 variable "private_subnet_ids" {
   description = "A list of private subnet IDs."
   type        = list(string)
+
+  validation {
+    condition     = length(var.private_subnet_ids) > 0
+    error_message = "private_subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "project_name" {
@@ -21,6 +26,11 @@ variable "project_name" {
 variable "public_subnet_ids" {
   description = "A list of public subnet IDs."
   type        = list(string)
+
+  validation {
+    condition     = length(var.public_subnet_ids) > 0
+    error_message = "public_subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "vpc_cidr" {

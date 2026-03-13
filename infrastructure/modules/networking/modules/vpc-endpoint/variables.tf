@@ -57,6 +57,11 @@ variable "private_route_table_id" {
 variable "private_subnet_ids" {
   description = "A list of private subnet IDs."
   type        = list(string)
+
+  validation {
+    condition     = length(var.private_subnet_ids) > 0
+    error_message = "private_subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "project_name" {

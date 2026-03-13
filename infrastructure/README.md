@@ -255,6 +255,9 @@ Run the following commands to execute ECS tasks with the correct network configu
 
 1. Set variables from Terraform outputs
 
+> [!NOTE]
+> Ensure you have `jq` installed.
+
 ```bash
 CLUSTER=$(terraform output -raw tasks_cluster_name)
 SECURITY_GROUP=$(terraform output -raw tasks_security_group_id)

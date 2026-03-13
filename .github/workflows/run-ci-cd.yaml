@@ -949,12 +949,28 @@ jobs:
           TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
           ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
-          aws ecs run-task \
+          RESPONSE=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}"
-          echo "Index-data task started (runs async, ~30 min)"
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
+
+          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
+          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
+
+          if [ "$FAILURE_COUNT" -gt 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
+            echo "$RESPONSE" | jq '.failures'
+            exit 1
+          fi
+
+          if [ "$TASK_COUNT" -eq 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Index-data task started successfully (runs async, ~30 min)"
 
       - name: Force new backend deployment
         env:
