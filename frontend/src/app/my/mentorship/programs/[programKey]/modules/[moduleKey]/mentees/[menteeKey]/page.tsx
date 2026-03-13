@@ -78,6 +78,10 @@ const MenteeProfilePage = () => {
     return <LoadingSpinner />
   }
 
+  if (error) {
+    return null
+  }
+
   if (!menteeDetails) {
     return (
       <ErrorDisplay
