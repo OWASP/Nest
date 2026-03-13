@@ -24,7 +24,7 @@ WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    corepack enable && corepack install && \
+    corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
