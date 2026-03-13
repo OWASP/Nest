@@ -256,8 +256,9 @@ Migrate and load data into the new database.
   - Environment: Cluster: `nest-staging-tasks-cluster`
   - Networking:
     - VPC: `nest-staging-vpc`
-    - Subnets: subnets will be auto-selected due to VPC selection.
+    - Subnets: Choose a private subnet if NAT Gateway is enabled, public otherwise.
     - Security group name: select the ECS security group (e.g. `nest-staging-tasks-sg`).
+    - Public IP: Turned on (Turned on if NAT Gateway is enabled, Turned off otherwise).
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.

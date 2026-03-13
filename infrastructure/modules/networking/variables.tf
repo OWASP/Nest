@@ -50,6 +50,12 @@ variable "create_vpc_ssm_endpoint" {
   default     = false
 }
 
+variable "enable_nat_gateway" {
+  description = "Whether to enable a NAT Gateway."
+  type        = bool
+  default     = true
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string

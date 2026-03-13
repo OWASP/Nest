@@ -768,6 +768,7 @@ jobs:
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           DJANGO_CONFIGURATION: Staging
           DJANGO_SETTINGS_MODULE: settings.staging
+          ENABLE_NAT_GATEWAY: false
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
           PROJECT_NAME: nest
@@ -784,6 +785,7 @@ jobs:
           domain_name="$DOMAIN_NAME"
           django_configuration="$DJANGO_CONFIGURATION"
           django_settings_module="$DJANGO_SETTINGS_MODULE"
+          enable_nat_gateway=$ENABLE_NAT_GATEWAY
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
           frontend_image_tag="$RELEASE_VERSION"
@@ -890,23 +892,26 @@ jobs:
           echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
           echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
           echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
           echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
           echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
+          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
 
       - name: Run ECS migrate task
         id: migrate-task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: nest-staging-migrate
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
@@ -938,15 +943,17 @@ jobs:
       - name: Run ECS index-data task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
-          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASK_DEFINITION: nest-staging-index-data
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
           aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}"
           echo "Index-data task started (runs async, ~30 min)"
 
       - name: Force new backend deployment

@@ -53,6 +53,11 @@ output "frontend_url" {
   value       = "https://${var.domain_name}"
 }
 
+output "nat_gateway_enabled" {
+  description = "Whether a NAT Gateway is enabled."
+  value       = var.enable_nat_gateway
+}
+
 output "private_subnet_ids" {
   description = "A list of private subnet IDs."
   value       = module.networking.private_subnet_ids
@@ -66,4 +71,9 @@ output "tasks_cluster_name" {
 output "tasks_security_group_id" {
   description = "The ID of the security group for ECS tasks."
   value       = module.security.tasks_sg_id
+}
+
+output "tasks_subnet_ids" {
+  description = "A list of public or private subnet IDs for ECS tasks."
+  value       = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
 }

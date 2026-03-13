@@ -179,6 +179,12 @@ variable "backend_use_fargate_spot" {
   default     = true
 }
 
+variable "enable_nat_gateway" {
+  description = "Whether to enable a NAT Gateway."
+  type        = bool
+  default     = true
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
@@ -299,12 +305,6 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
-}
-
-variable "tasks_assign_public_ip" {
-  description = "Whether to assign public IP to ECS tasks."
-  type        = bool
-  default     = false
 }
 
 variable "tasks_use_fargate_spot" {
