@@ -79,7 +79,13 @@ const MenteeProfilePage = () => {
   }
 
   if (error) {
-    return null
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading mentee"
+        message="An error occurred while loading the mentee data"
+      />
+    )
   }
 
   if (!menteeDetails) {
