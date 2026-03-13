@@ -24,7 +24,14 @@ export const getFilteredIcons = (project: ProjectType, params: string[]): Icon =
   const filteredIcons = params.reduce((acc: Icon, key) => {
     if (ICONS[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       if (key === 'createdAt') {
-        acc[key] = dayjs(project[key as keyof ProjectType] as unknown as string).fromNow()
+        const rawValue = project[key as keyof ProjectType]
+        if (typeof rawValue === 'number' && Number.isFinite(rawValue) && rawValue > 0) {
+          const parsed = dayjs.unix(rawValue)
+          if (parsed.isValid()) acc[key] = parsed.fromNow()
+        } else if (typeof rawValue === 'string' && rawValue.trim() !== '') {
+          const parsed = dayjs(rawValue)
+          if (parsed.isValid()) acc[key] = parsed.fromNow()
+        }
       } else {
         acc[key] = project[key as keyof typeof project] as unknown as number
       }
