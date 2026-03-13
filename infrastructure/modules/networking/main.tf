@@ -177,17 +177,17 @@ module "nacl" {
 }
 
 module "vpc_endpoint" {
-  count  = (var.create_vpc_cloudwatch_logs_endpoint || var.create_vpc_ecr_api_endpoint || var.create_vpc_ecr_dkr_endpoint || var.create_vpc_s3_endpoint || var.create_vpc_secretsmanager_endpoint || var.create_vpc_ssm_endpoint) ? 1 : 0
+  count  = (var.enable_vpc_cloudwatch_logs_endpoint || var.enable_vpc_ecr_api_endpoint || var.enable_vpc_ecr_dkr_endpoint || var.enable_vpc_s3_endpoint || var.enable_vpc_secretsmanager_endpoint || var.enable_vpc_ssm_endpoint) ? 1 : 0
   source = "./modules/vpc-endpoint"
 
   aws_region             = var.aws_region
   common_tags            = var.common_tags
-  create_cloudwatch_logs = var.create_vpc_cloudwatch_logs_endpoint
-  create_ecr_api         = var.create_vpc_ecr_api_endpoint
-  create_ecr_dkr         = var.create_vpc_ecr_dkr_endpoint
-  create_s3              = var.create_vpc_s3_endpoint
-  create_secretsmanager  = var.create_vpc_secretsmanager_endpoint
-  create_ssm             = var.create_vpc_ssm_endpoint
+  enable_cloudwatch_logs = var.enable_vpc_cloudwatch_logs_endpoint
+  enable_ecr_api         = var.enable_vpc_ecr_api_endpoint
+  enable_ecr_dkr         = var.enable_vpc_ecr_dkr_endpoint
+  enable_s3              = var.enable_vpc_s3_endpoint
+  enable_secretsmanager  = var.enable_vpc_secretsmanager_endpoint
+  enable_ssm             = var.enable_vpc_ssm_endpoint
   environment            = var.environment
   private_route_table_id = aws_route_table.private.id
   private_subnet_ids     = aws_subnet.private[*].id

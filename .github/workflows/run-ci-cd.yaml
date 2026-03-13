@@ -764,11 +764,11 @@ jobs:
           AVAILABILITY_ZONES: ${{ vars.AWS_AVAILABILITY_ZONES }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           BACKEND_USE_FARGATE_SPOT: true
-          CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           DJANGO_CONFIGURATION: Staging
           DJANGO_SETTINGS_MODULE: settings.staging
           ENABLE_NAT_GATEWAY: false
+          ENABLE_RDS_PROXY: false
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
           PROJECT_NAME: nest
@@ -781,11 +781,11 @@ jobs:
           aws_region="$AWS_REGION"
           backend_image_tag="$RELEASE_VERSION"
           backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
-          create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
           django_configuration="$DJANGO_CONFIGURATION"
           django_settings_module="$DJANGO_SETTINGS_MODULE"
           enable_nat_gateway=$ENABLE_NAT_GATEWAY
+          enable_rds_proxy=$ENABLE_RDS_PROXY
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
           frontend_image_tag="$RELEASE_VERSION"

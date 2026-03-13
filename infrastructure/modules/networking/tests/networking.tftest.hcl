@@ -4,12 +4,12 @@ variables {
   availability_zones                  = ["us-east-2a", "us-east-2b", "us-east-2c"]
   aws_region                          = "us-east-2"
   common_tags                         = { Environment = "test", Project = "nest" }
-  create_vpc_cloudwatch_logs_endpoint = false
-  create_vpc_ecr_api_endpoint         = false
-  create_vpc_ecr_dkr_endpoint         = false
-  create_vpc_s3_endpoint              = false
-  create_vpc_secretsmanager_endpoint  = false
-  create_vpc_ssm_endpoint             = false
+  enable_vpc_cloudwatch_logs_endpoint = false
+  enable_vpc_ecr_api_endpoint         = false
+  enable_vpc_ecr_dkr_endpoint         = false
+  enable_vpc_s3_endpoint              = false
+  enable_vpc_secretsmanager_endpoint  = false
+  enable_vpc_ssm_endpoint             = false
   environment                         = "test"
   kms_key_arn                         = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days               = 90
@@ -254,7 +254,7 @@ run "test_vpc_endpoint_module_created_when_enabled" {
   command = plan
 
   variables {
-    create_vpc_s3_endpoint = true
+    enable_vpc_s3_endpoint = true
   }
   assert {
     condition     = length(module.vpc_endpoint) == 1

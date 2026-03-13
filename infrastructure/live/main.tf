@@ -79,7 +79,6 @@ module "database" {
   source = "../modules/database"
 
   common_tags                    = local.common_tags
-  create_rds_proxy               = var.create_rds_proxy
   db_allocated_storage           = var.db_allocated_storage
   db_backup_retention_period     = var.db_backup_retention_period
   db_deletion_protection         = var.db_deletion_protection
@@ -91,6 +90,7 @@ module "database" {
   db_storage_type                = var.db_storage_type
   db_subnet_ids                  = module.networking.private_subnet_ids
   db_user                        = var.db_user
+  enable_rds_proxy               = var.enable_rds_proxy
   environment                    = var.environment
   kms_key_arn                    = module.kms.key_arn
   project_name                   = var.project_name
@@ -134,16 +134,16 @@ module "kms" {
 module "networking" {
   source = "../modules/networking"
 
-  aws_region                          = var.aws_region
   availability_zones                  = var.availability_zones
+  aws_region                          = var.aws_region
   common_tags                         = local.common_tags
-  create_vpc_cloudwatch_logs_endpoint = var.create_vpc_cloudwatch_logs_endpoint
-  create_vpc_ecr_api_endpoint         = var.create_vpc_ecr_api_endpoint
-  create_vpc_ecr_dkr_endpoint         = var.create_vpc_ecr_dkr_endpoint
-  create_vpc_s3_endpoint              = var.create_vpc_s3_endpoint
-  create_vpc_secretsmanager_endpoint  = var.create_vpc_secretsmanager_endpoint
-  create_vpc_ssm_endpoint             = var.create_vpc_ssm_endpoint
   enable_nat_gateway                  = var.enable_nat_gateway
+  enable_vpc_cloudwatch_logs_endpoint = var.enable_vpc_cloudwatch_logs_endpoint
+  enable_vpc_ecr_api_endpoint         = var.enable_vpc_ecr_api_endpoint
+  enable_vpc_ecr_dkr_endpoint         = var.enable_vpc_ecr_dkr_endpoint
+  enable_vpc_s3_endpoint              = var.enable_vpc_s3_endpoint
+  enable_vpc_secretsmanager_endpoint  = var.enable_vpc_secretsmanager_endpoint
+  enable_vpc_ssm_endpoint             = var.enable_vpc_ssm_endpoint
   environment                         = var.environment
   kms_key_arn                         = module.kms.key_arn
   private_subnet_cidrs                = var.private_subnet_cidrs
@@ -179,9 +179,9 @@ module "security" {
   source = "../modules/security"
 
   common_tags               = local.common_tags
-  create_rds_proxy          = var.create_rds_proxy
-  create_vpc_endpoint_rules = var.create_vpc_ssm_endpoint || var.create_vpc_cloudwatch_logs_endpoint || var.create_vpc_ecr_api_endpoint || var.create_vpc_ecr_dkr_endpoint || var.create_vpc_secretsmanager_endpoint
   db_port                   = var.db_port
+  enable_rds_proxy          = var.enable_rds_proxy
+  enable_vpc_endpoint_rules = var.enable_vpc_ssm_endpoint || var.enable_vpc_cloudwatch_logs_endpoint || var.enable_vpc_ecr_api_endpoint || var.enable_vpc_ecr_dkr_endpoint || var.enable_vpc_secretsmanager_endpoint
   environment               = var.environment
   project_name              = var.project_name
   redis_port                = var.redis_port

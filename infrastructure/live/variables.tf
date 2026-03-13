@@ -10,46 +10,39 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
-variable "create_rds_proxy" {
-  description = "Whether to create an RDS proxy."
+variable "backend_desired_count" {
+  description = "The desired number of backend tasks."
+  type        = number
+  default     = 1
+}
+
+variable "backend_enable_auto_scaling" {
+  description = "Whether to enable auto scaling for backend."
   type        = bool
   default     = false
 }
 
-variable "create_vpc_cloudwatch_logs_endpoint" {
-  description = "Whether to create CloudWatch Logs VPC endpoint."
-  type        = bool
-  default     = false
+variable "backend_image_tag" {
+  description = "The Docker backend image tag."
+  type        = string
 }
 
-variable "create_vpc_ecr_api_endpoint" {
-  description = "Whether to create ECR API VPC endpoint."
-  type        = bool
-  default     = false
+variable "backend_max_count" {
+  description = "The maximum number of backend tasks for auto scaling."
+  type        = number
+  default     = 6
 }
 
-variable "create_vpc_ecr_dkr_endpoint" {
-  description = "Whether to create ECR DKR VPC endpoint."
-  type        = bool
-  default     = false
+variable "backend_min_count" {
+  description = "The minimum number of backend tasks for auto scaling."
+  type        = number
+  default     = 2
 }
 
-variable "create_vpc_s3_endpoint" {
-  description = "Whether to create S3 VPC endpoint (Gateway, free)."
+variable "backend_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend tasks."
   type        = bool
   default     = true
-}
-
-variable "create_vpc_secretsmanager_endpoint" {
-  description = "Whether to create Secrets Manager VPC endpoint."
-  type        = bool
-  default     = false
-}
-
-variable "create_vpc_ssm_endpoint" {
-  description = "Whether to create SSM VPC endpoint."
-  type        = bool
-  default     = false
 }
 
 variable "db_allocated_storage" {
@@ -144,45 +137,52 @@ variable "domain_name" {
   type        = string
 }
 
-variable "backend_desired_count" {
-  description = "The desired number of backend tasks."
-  type        = number
-  default     = 1
-}
-
-variable "backend_enable_auto_scaling" {
-  description = "Whether to enable auto scaling for backend."
-  type        = bool
-  default     = false
-}
-
-variable "backend_image_tag" {
-  description = "The Docker backend image tag."
-  type        = string
-}
-
-variable "backend_max_count" {
-  description = "The maximum number of backend tasks for auto scaling."
-  type        = number
-  default     = 6
-}
-
-variable "backend_min_count" {
-  description = "The minimum number of backend tasks for auto scaling."
-  type        = number
-  default     = 2
-}
-
-variable "backend_use_fargate_spot" {
-  description = "Whether to use Fargate Spot for backend tasks."
-  type        = bool
-  default     = true
-}
-
 variable "enable_nat_gateway" {
   description = "Whether to enable a NAT Gateway."
   type        = bool
   default     = true
+}
+
+variable "enable_rds_proxy" {
+  description = "Whether to create an RDS proxy."
+  type        = bool
+  default     = false
+}
+
+variable "enable_vpc_cloudwatch_logs_endpoint" {
+  description = "Whether to create CloudWatch Logs VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "enable_vpc_ecr_api_endpoint" {
+  description = "Whether to create ECR API VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "enable_vpc_ecr_dkr_endpoint" {
+  description = "Whether to create ECR DKR VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "enable_vpc_s3_endpoint" {
+  description = "Whether to create S3 VPC endpoint (Gateway, free)."
+  type        = bool
+  default     = true
+}
+
+variable "enable_vpc_secretsmanager_endpoint" {
+  description = "Whether to create Secrets Manager VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "enable_vpc_ssm_endpoint" {
+  description = "Whether to create SSM VPC endpoint."
+  type        = bool
+  default     = false
 }
 
 variable "environment" {

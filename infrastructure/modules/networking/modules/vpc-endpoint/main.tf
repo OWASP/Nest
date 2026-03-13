@@ -10,7 +10,7 @@ terraform {
 }
 
 locals {
-  any_interface_endpoint = var.create_cloudwatch_logs || var.create_ecr_api || var.create_ecr_dkr || var.create_secretsmanager || var.create_ssm
+  any_interface_endpoint = var.enable_cloudwatch_logs || var.enable_ecr_api || var.enable_ecr_dkr || var.enable_secretsmanager || var.enable_ssm
 }
 
 resource "aws_security_group" "vpc_endpoints" {
@@ -35,7 +35,7 @@ resource "aws_security_group_rule" "vpc_endpoints_ingress_https" {
 }
 
 resource "aws_vpc_endpoint" "cloudwatch_logs" {
-  count               = var.create_cloudwatch_logs ? 1 : 0
+  count               = var.enable_cloudwatch_logs ? 1 : 0
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpc_endpoints[0].id]
   service_name        = "com.amazonaws.${var.aws_region}.logs"
@@ -48,7 +48,7 @@ resource "aws_vpc_endpoint" "cloudwatch_logs" {
 }
 
 resource "aws_vpc_endpoint" "ecr_api" {
-  count               = var.create_ecr_api ? 1 : 0
+  count               = var.enable_ecr_api ? 1 : 0
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpc_endpoints[0].id]
   service_name        = "com.amazonaws.${var.aws_region}.ecr.api"
@@ -61,7 +61,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
 }
 
 resource "aws_vpc_endpoint" "ecr_dkr" {
-  count               = var.create_ecr_dkr ? 1 : 0
+  count               = var.enable_ecr_dkr ? 1 : 0
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpc_endpoints[0].id]
   service_name        = "com.amazonaws.${var.aws_region}.ecr.dkr"
@@ -74,7 +74,7 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
 }
 
 resource "aws_vpc_endpoint" "s3" {
-  count        = var.create_s3 ? 1 : 0
+  count        = var.enable_s3 ? 1 : 0
   service_name = "com.amazonaws.${var.aws_region}.s3"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-s3-endpoint"
@@ -84,19 +84,19 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "s3_private" {
-  count           = var.create_s3 ? 1 : 0
+  count           = var.enable_s3 ? 1 : 0
   route_table_id  = var.private_route_table_id
   vpc_endpoint_id = aws_vpc_endpoint.s3[0].id
 }
 
 resource "aws_vpc_endpoint_route_table_association" "s3_public" {
-  count           = var.create_s3 ? 1 : 0
+  count           = var.enable_s3 ? 1 : 0
   route_table_id  = var.public_route_table_id
   vpc_endpoint_id = aws_vpc_endpoint.s3[0].id
 }
 
 resource "aws_vpc_endpoint" "secretsmanager" {
-  count               = var.create_secretsmanager ? 1 : 0
+  count               = var.enable_secretsmanager ? 1 : 0
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpc_endpoints[0].id]
   service_name        = "com.amazonaws.${var.aws_region}.secretsmanager"
@@ -109,7 +109,7 @@ resource "aws_vpc_endpoint" "secretsmanager" {
 }
 
 resource "aws_vpc_endpoint" "ssm" {
-  count               = var.create_ssm ? 1 : 0
+  count               = var.enable_ssm ? 1 : 0
   private_dns_enabled = true
   security_group_ids  = [aws_security_group.vpc_endpoints[0].id]
   service_name        = "com.amazonaws.${var.aws_region}.ssm"

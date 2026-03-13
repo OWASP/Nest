@@ -88,7 +88,7 @@ resource "aws_ssm_parameter" "django_db_password" {
 }
 
 resource "aws_iam_role" "rds_proxy" {
-  count = var.create_rds_proxy ? 1 : 0
+  count = var.enable_rds_proxy ? 1 : 0
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -109,7 +109,7 @@ resource "aws_iam_role" "rds_proxy" {
 }
 
 resource "aws_iam_role_policy" "rds_proxy" {
-  count = var.create_rds_proxy ? 1 : 0
+  count = var.enable_rds_proxy ? 1 : 0
 
   name = "${var.project_name}-${var.environment}-rds-proxy-policy"
   policy = jsonencode({
@@ -131,7 +131,7 @@ resource "aws_iam_role_policy" "rds_proxy" {
 }
 
 resource "aws_db_proxy" "main" {
-  count = var.create_rds_proxy ? 1 : 0
+  count = var.enable_rds_proxy ? 1 : 0
 
   auth {
     auth_scheme = "SECRETS"
@@ -156,13 +156,13 @@ resource "aws_db_proxy" "main" {
   lifecycle {
     precondition {
       condition     = length(var.proxy_security_group_ids) > 0
-      error_message = "proxy_security_group_ids must be provided when create_rds_proxy is true."
+      error_message = "proxy_security_group_ids must be provided when enable_rds_proxy is true."
     }
   }
 }
 
 resource "aws_db_proxy_default_target_group" "main" {
-  count = var.create_rds_proxy ? 1 : 0
+  count = var.enable_rds_proxy ? 1 : 0
 
   connection_pool_config {
     connection_borrow_timeout    = 120
@@ -174,7 +174,7 @@ resource "aws_db_proxy_default_target_group" "main" {
 }
 
 resource "aws_db_proxy_target" "main" {
-  count                  = var.create_rds_proxy ? 1 : 0
+  count                  = var.enable_rds_proxy ? 1 : 0
   db_instance_identifier = aws_db_instance.main.identifier
   db_proxy_name          = aws_db_proxy.main[0].name
   target_group_name      = aws_db_proxy_default_target_group.main[0].name
