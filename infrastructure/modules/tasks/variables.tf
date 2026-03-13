@@ -36,6 +36,11 @@ variable "ecs_sg_id" {
   type        = string
 }
 
+variable "enable_cron_tasks" {
+  description = "Whether to enable scheduled cron tasks."
+  type        = bool
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string

@@ -209,6 +209,7 @@ module "tasks" {
   ecr_repository_arn            = module.backend.ecr_repository_arn
   ecr_repository_url            = module.backend.ecr_repository_url
   ecs_sg_id                     = module.security.tasks_sg_id
+  enable_cron_tasks             = var.enable_cron_tasks
   environment                   = var.environment
   fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn

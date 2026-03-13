@@ -767,6 +767,7 @@ jobs:
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           DJANGO_CONFIGURATION: Staging
           DJANGO_SETTINGS_MODULE: settings.staging
+          ENABLE_CRON_TASKS: false
           ENABLE_NAT_GATEWAY: false
           ENABLE_RDS_PROXY: false
           ENVIRONMENT: staging
@@ -784,6 +785,7 @@ jobs:
           domain_name="$DOMAIN_NAME"
           django_configuration="$DJANGO_CONFIGURATION"
           django_settings_module="$DJANGO_SETTINGS_MODULE"
+          enable_cron_tasks=$ENABLE_CRON_TASKS
           enable_nat_gateway=$ENABLE_NAT_GATEWAY
           enable_rds_proxy=$ENABLE_RDS_PROXY
           environment="$ENVIRONMENT"
