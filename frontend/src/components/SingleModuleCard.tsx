@@ -45,9 +45,12 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(module.experienceLevel) },
-    { label: 'Start Date', value: formatDate(module.startedAt) },
-    { label: 'End Date', value: formatDate(module.endedAt) },
-    { label: 'Duration', value: getSimpleDuration(module.startedAt, module.endedAt) },
+    { label: 'Start Date', value: formatDate(String(module.startedAt)) },
+    { label: 'End Date', value: formatDate(String(module.endedAt)) },
+    {
+      label: 'Duration',
+      value: getSimpleDuration(String(module.startedAt), String(module.endedAt)),
+    },
   ]
 
   const maxInitialDisplay = 6
