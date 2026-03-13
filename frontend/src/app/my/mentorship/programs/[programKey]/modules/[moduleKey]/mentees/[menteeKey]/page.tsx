@@ -56,6 +56,7 @@ const MenteeProfilePage = () => {
       setHasReceivedData(true)
     }
     if (error) {
+      setHasReceivedData(true)
       handleAppError(error)
     }
   }, [data, error])
