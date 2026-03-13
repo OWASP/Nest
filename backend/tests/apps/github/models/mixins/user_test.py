@@ -60,6 +60,7 @@ def user_index_mixin_instance():
     instance.user_badges.filter.return_value.count.return_value = 2
 
     instance.contributions_count = 150
+    instance.calculated_score = 42
 
     return instance
 
@@ -113,6 +114,7 @@ class TestUserIndexMixin:
             ),
             ("idx_issues_count", 5),
             ("idx_contributions_count", 150),
+            ("idx_calculated_score", 42),
             ("idx_releases_count", 3),
         ],
     )
