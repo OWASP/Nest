@@ -4,18 +4,6 @@ variable "common_tags" {
   default     = {}
 }
 
-variable "create_rds_proxy" {
-  description = "Whether to create an RDS proxy."
-  type        = bool
-  default     = false
-}
-
-variable "create_vpc_endpoint_rules" {
-  description = "Whether to create security group rules for VPC endpoints."
-  type        = bool
-  default     = false
-}
-
 variable "db_port" {
   description = "The port for the RDS database."
   type        = number
@@ -24,6 +12,18 @@ variable "db_port" {
     condition     = var.db_port > 0 && var.db_port < 65536
     error_message = "db_port must be between 1 and 65535."
   }
+}
+
+variable "enable_rds_proxy" {
+  description = "Whether to create an RDS proxy."
+  type        = bool
+  default     = false
+}
+
+variable "enable_vpc_endpoint_rules" {
+  description = "Whether to create security group rules for VPC endpoints."
+  type        = bool
+  default     = false
 }
 
 variable "environment" {

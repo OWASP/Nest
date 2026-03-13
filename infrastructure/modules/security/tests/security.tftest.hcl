@@ -161,7 +161,7 @@ run "test_backend_egress_https_rule_type" {
 run "test_backend_to_rds_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.backend_to_rds[0].from_port == var.db_port
@@ -176,7 +176,7 @@ run "test_backend_to_rds_rule_port" {
 run "test_backend_to_rds_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.backend_to_rds[0].type == "egress"
@@ -187,7 +187,7 @@ run "test_backend_to_rds_rule_type" {
 run "test_backend_to_rds_proxy_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.backend_to_rds_proxy[0].from_port == var.db_port
@@ -202,7 +202,7 @@ run "test_backend_to_rds_proxy_rule_port" {
 run "test_backend_to_rds_proxy_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.backend_to_rds_proxy[0].type == "egress"
@@ -266,7 +266,7 @@ run "test_task_egress_https_rule_type" {
 run "test_task_to_rds_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.task_to_rds[0].from_port == var.db_port
@@ -281,7 +281,7 @@ run "test_task_to_rds_rule_port" {
 run "test_task_to_rds_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.task_to_rds[0].type == "egress"
@@ -292,7 +292,7 @@ run "test_task_to_rds_rule_type" {
 run "test_task_to_rds_proxy_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.task_to_rds_proxy[0].from_port == var.db_port
@@ -307,7 +307,7 @@ run "test_task_to_rds_proxy_rule_port" {
 run "test_task_to_rds_proxy_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.task_to_rds_proxy[0].type == "egress"
@@ -394,7 +394,7 @@ run "test_rds_security_group_name_format" {
 run "test_rds_proxy_security_group_name_format" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group.rds_proxy[0].name == "${var.project_name}-${var.environment}-rds-proxy-sg"
@@ -405,7 +405,7 @@ run "test_rds_proxy_security_group_name_format" {
 run "test_rds_from_backend_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.rds_from_backend[0].from_port == var.db_port
@@ -420,7 +420,7 @@ run "test_rds_from_backend_rule_port" {
 run "test_rds_from_backend_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.rds_from_backend[0].type == "ingress"
@@ -431,7 +431,7 @@ run "test_rds_from_backend_rule_type" {
 run "test_rds_from_task_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.rds_from_task[0].from_port == var.db_port
@@ -446,7 +446,7 @@ run "test_rds_from_task_rule_port" {
 run "test_rds_from_task_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = false
+    enable_rds_proxy = false
   }
   assert {
     condition     = aws_security_group_rule.rds_from_task[0].type == "ingress"
@@ -457,7 +457,7 @@ run "test_rds_from_task_rule_type" {
 run "test_rds_from_proxy_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_from_proxy[0].from_port == var.db_port
@@ -472,7 +472,7 @@ run "test_rds_from_proxy_rule_port" {
 run "test_rds_from_proxy_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_from_proxy[0].type == "ingress"
@@ -483,7 +483,7 @@ run "test_rds_from_proxy_rule_type" {
 run "test_proxy_to_rds_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_proxy_to_rds[0].from_port == var.db_port
@@ -498,7 +498,7 @@ run "test_proxy_to_rds_rule_port" {
 run "test_proxy_to_rds_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_proxy_to_rds[0].type == "egress"
@@ -509,7 +509,7 @@ run "test_proxy_to_rds_rule_type" {
 run "test_rds_proxy_from_backend_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_proxy_from_backend[0].from_port == var.db_port
@@ -524,7 +524,7 @@ run "test_rds_proxy_from_backend_rule_port" {
 run "test_rds_proxy_from_backend_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_proxy_from_backend[0].type == "ingress"
@@ -535,7 +535,7 @@ run "test_rds_proxy_from_backend_rule_type" {
 run "test_rds_proxy_from_task_rule_port" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_proxy_from_task[0].from_port == var.db_port
@@ -550,7 +550,7 @@ run "test_rds_proxy_from_task_rule_port" {
 run "test_rds_proxy_from_task_rule_type" {
   command = plan
   variables {
-    create_rds_proxy = true
+    enable_rds_proxy = true
   }
   assert {
     condition     = aws_security_group_rule.rds_proxy_from_task[0].type == "ingress"
@@ -609,7 +609,7 @@ run "test_redis_from_task_rule_type" {
 run "test_backend_to_vpc_endpoints_rule_port" {
   command = plan
   variables {
-    create_vpc_endpoint_rules = true
+    enable_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
@@ -625,7 +625,7 @@ run "test_backend_to_vpc_endpoints_rule_port" {
 run "test_backend_to_vpc_endpoints_rule_type" {
   command = plan
   variables {
-    create_vpc_endpoint_rules = true
+    enable_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
@@ -637,7 +637,7 @@ run "test_backend_to_vpc_endpoints_rule_type" {
 run "test_task_to_vpc_endpoints_rule_port" {
   command = plan
   variables {
-    create_vpc_endpoint_rules = true
+    enable_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
@@ -653,7 +653,7 @@ run "test_task_to_vpc_endpoints_rule_port" {
 run "test_task_to_vpc_endpoints_rule_type" {
   command = plan
   variables {
-    create_vpc_endpoint_rules = true
+    enable_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
@@ -665,7 +665,7 @@ run "test_task_to_vpc_endpoints_rule_type" {
 run "test_frontend_to_vpc_endpoints_rule_port" {
   command = plan
   variables {
-    create_vpc_endpoint_rules = true
+    enable_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
@@ -681,7 +681,7 @@ run "test_frontend_to_vpc_endpoints_rule_port" {
 run "test_frontend_to_vpc_endpoints_rule_type" {
   command = plan
   variables {
-    create_vpc_endpoint_rules = true
+    enable_vpc_endpoint_rules = true
     vpc_endpoint_sg_id        = "sg-endpoint123"
   }
   assert {
