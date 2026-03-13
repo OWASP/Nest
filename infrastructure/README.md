@@ -248,6 +248,62 @@ Migrate and load data into the new database.
 
 1. **Run ECS Tasks**:
 
+Run the following commands to execute ECS tasks with the correct network configuration:
+
+> [!NOTE]
+> Ensure you are in the `infrastructure/live` directory.
+
+1. Set variables from Terraform outputs
+
+```bash
+CLUSTER=$(terraform output -raw tasks_cluster_name)
+SECURITY_GROUP=$(terraform output -raw tasks_security_group_id)
+SUBNETS=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')
+NAT_ENABLED=$(terraform output -raw nat_gateway_enabled)
+ASSIGN_PUBLIC_IP=$([ "$NAT_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+```
+
+> [!NOTE]
+> Replace `AWS_REGION` in each command with appropriate region.
+> Please wait for a task to be complete before running the next task.
+> To view the status of a task, use the AWS Console.
+
+1. Run migrate task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-migrate \
+  --region AWS_REGION
+```
+
+1. Run load-data task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-load-data \
+  --region AWS_REGION
+```
+
+1. Run index-data task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-index-data \
+  --region AWS_REGION
+```
+
+<details>
+<summary>Manual AWS Console Instructions (Alternative)</summary>
+
 - Head over to Elastic Container Service in the AWS Console.
 - Click on `nest-staging-migrate` in `Task Definitions` section.
 - Select the task definition revision.
@@ -256,12 +312,14 @@ Migrate and load data into the new database.
   - Environment: Cluster: `nest-staging-tasks-cluster`
   - Networking:
     - VPC: `nest-staging-vpc`
-    - Subnets: Choose a private subnet if NAT Gateway is enabled, public otherwise.
+    - Subnets: Choose a private subnet if NAT Gateway is enabled, public otherwise (default).
     - Security group name: select the ECS security group (e.g. `nest-staging-tasks-sg`).
-    - Public IP: Turned on (Turned on if NAT Gateway is enabled, Turned off otherwise).
+    - Public IP: Turned off if NAT Gateway is enabled, Turned on otherwise (default).
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.
+
+</details>
 
 ## Configure Domain
 
