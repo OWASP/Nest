@@ -30,6 +30,7 @@ const MenteeProfilePage = () => {
   const [menteeIssuesData, setMenteeIssuesData] = useState<
     GetModuleMenteeDetailsQuery['getMenteeModuleIssues']
   >([])
+  const [hasReceivedData, setHasReceivedData] = useState(false)
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -52,6 +53,7 @@ const MenteeProfilePage = () => {
     if (data) {
       setMenteeDetails(data.getMenteeDetails ?? null)
       setMenteeIssuesData(data.getMenteeModuleIssues ?? [])
+      setHasReceivedData(true)
     }
     if (error) {
       handleAppError(error)
@@ -71,7 +73,9 @@ const MenteeProfilePage = () => {
     }))
   }, [menteeIssuesData])
 
-  if (isLoading) return <LoadingSpinner />
+  if (isLoading || !hasReceivedData) {
+    return <LoadingSpinner />
+  }
 
   if (!menteeDetails) {
     return (
