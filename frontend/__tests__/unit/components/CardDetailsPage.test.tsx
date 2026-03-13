@@ -526,11 +526,13 @@ jest.mock('components/ModuleCard', () => ({
     modules,
     accessLevel: _accessLevel,
     admins: _admins,
+    programKey: _programKey,
     ...props
   }: {
     modules: unknown[]
     accessLevel: string
     admins?: unknown[]
+    programKey?: string
     [key: string]: unknown
   }) => (
     <div data-testid="module-card" {...props}>
