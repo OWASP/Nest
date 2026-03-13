@@ -85,12 +85,12 @@ run "test_public_subnets_count" {
   }
 }
 
-run "test_public_subnets_map_public_ip" {
+run "test_public_subnets_no_public_ip" {
   command = plan
 
   assert {
-    condition     = alltrue([for subnet in aws_subnet.public : subnet.map_public_ip_on_launch == true])
-    error_message = "Public subnets must auto-assign public IPs."
+    condition     = alltrue([for subnet in aws_subnet.public : subnet.map_public_ip_on_launch == false])
+    error_message = "Public subnets must not auto-assign public IPs."
   }
 }
 

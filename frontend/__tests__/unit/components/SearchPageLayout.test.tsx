@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import SearchPageLayout from 'components/SearchPageLayout'
 
 describe('<SearchPageLayout />', () => {
@@ -367,6 +367,99 @@ describe('<SearchPageLayout />', () => {
     expect(screen.queryByText('Next')).not.toBeInTheDocument()
   })
 
+  it('renders filterChildren when provided and loaded', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        filterChildren={<div>Country Filter</div>}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    expect(screen.getByText('Country Filter')).toBeInTheDocument()
+  })
+
+  it('renders sortChildren inline when inlineSort is true', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        sortChildren={<div>Inline Sort</div>}
+        inlineSort={true}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    const inlineContainer = screen.getByTestId('sort-inline')
+    expect(inlineContainer).toBeInTheDocument()
+    expect(within(inlineContainer).getByText('Inline Sort')).toBeInTheDocument()
+  })
+
+  it('renders sortChildren below search when inlineSort is false (default)', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        sortChildren={<div>Below Sort</div>}
+      >
+        <div>Some content</div>
+      </SearchPageLayout>
+    )
+
+    const belowContainer = screen.getByTestId('sort-below')
+    expect(belowContainer).toBeInTheDocument()
+    expect(within(belowContainer).getByText('Below Sort')).toBeInTheDocument()
+  })
+
+  it('renders both filterChildren and inlineSort together', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="any-index"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    expect(screen.getByText('Filter')).toBeInTheDocument()
+    expect(screen.getByText('Sort')).toBeInTheDocument()
+    expect(screen.getByText('Content')).toBeInTheDocument()
+  })
+
   it('renders root layout with expected structure and classNames', () => {
     const { container } = render(
       <SearchPageLayout
@@ -417,5 +510,169 @@ describe('<SearchPageLayout />', () => {
     // Assert there's at least one div with expected role in layout
     const divs = screen.getAllByRole('generic') // 'div' usually maps to role='generic'
     expect(divs.length).toBeGreaterThan(0)
+  })
+
+  // -------- Unified Bar / Skeleton Tests --------
+  it('renders gap-0 between components when inlineSort is true', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const flexRow = container.querySelector('.flex.w-full.items-center.justify-center.gap-0')
+    expect(flexRow).toBeInTheDocument()
+  })
+
+  it('renders gap-2 between components when inlineSort is false', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        sortChildren={<div>Sort</div>}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const flexRow = container.querySelector('.flex.w-full.items-center.justify-center.gap-2')
+    expect(flexRow).toBeInTheDocument()
+  })
+
+  it('applies rounded-r-none to filter wrapper when inlineSort is true', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div data-testid="filter-content">Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const filterWrapper = screen.getByTestId('filter-content').parentElement
+    expect(filterWrapper).toHaveClass('[&>div]:rounded-r-none')
+  })
+
+  it('applies rounded-l-none to sort wrapper when inlineSort is true', () => {
+    render(
+      <SearchPageLayout
+        isLoaded={true}
+        totalPages={3}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      >
+        <div>Content</div>
+      </SearchPageLayout>
+    )
+
+    const inlineContainer = screen.getByTestId('sort-inline')
+    expect(inlineContainer).toHaveClass('[&>div>div:first-child]:rounded-l-none')
+  })
+
+  it('renders filter skeleton with correct width and rounding when loading with inlineSort', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={false}
+        totalPages={0}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      />
+    )
+
+    const skeletons = container.querySelectorAll('[aria-hidden="true"]')
+    const filterSkeleton = skeletons[0]
+    expect(filterSkeleton).toHaveClass('h-12', 'w-60', 'rounded-l-lg', 'rounded-r-none')
+  })
+
+  it('renders sort skeleton when loading with inlineSort', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={false}
+        totalPages={0}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div>Filter</div>}
+        sortChildren={<div>Sort</div>}
+        inlineSort={true}
+      />
+    )
+
+    const skeletons = container.querySelectorAll('[aria-hidden="true"]')
+    // sort dropdown skeleton
+    const sortDropdownSkeleton = skeletons[1]
+    expect(sortDropdownSkeleton).toHaveClass('h-12', 'w-48', 'rounded-none')
+  })
+
+  it('renders filter skeleton with full rounded-lg when inlineSort is false', () => {
+    const { container } = render(
+      <SearchPageLayout
+        isLoaded={false}
+        totalPages={0}
+        currentPage={1}
+        searchQuery=""
+        onSearch={() => {}}
+        onPageChange={() => {}}
+        searchPlaceholder="Search..."
+        empty="No results"
+        indexName="test"
+        filterChildren={<div>Filter</div>}
+      />
+    )
+
+    const skeletons = container.querySelectorAll('[aria-hidden="true"]')
+    const filterSkeleton = skeletons[0]
+    expect(filterSkeleton).toHaveClass('h-12', 'w-60', 'rounded-lg')
+    expect(filterSkeleton).not.toHaveClass('rounded-r-none')
   })
 })

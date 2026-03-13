@@ -88,7 +88,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           version: 10
           run_install: true
@@ -510,7 +510,7 @@ jobs:
           push: true
           tags: |
             owasp/nest:backend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:${{ env.RELEASE_VERSION }}
 
       - name: Prepare frontend public environment
         env:
@@ -567,7 +567,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             owasp/nest:frontend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:${{ env.RELEASE_VERSION }}
 
       - name: Get frontend image size
         id: frontend-size
@@ -664,12 +664,10 @@ jobs:
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}
-          TF_STATE_DYNAMODB_TABLE_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_DYNAMODB_TABLE_NAME }}
         run: |
           umask 377
           cat > infrastructure/bootstrap/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
-          dynamodb_table="$TF_STATE_DYNAMODB_TABLE_NAME"
           region="$AWS_REGION"
           EOF
 
@@ -752,12 +750,10 @@ jobs:
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
-          TF_STATE_DYNAMODB_TABLE_NAME: ${{ secrets.TF_STATE_DYNAMODB_TABLE_NAME }}
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
-          dynamodb_table="$TF_STATE_DYNAMODB_TABLE_NAME"
           region="$AWS_REGION"
           EOF
 
@@ -771,17 +767,20 @@ jobs:
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
           PROJECT_NAME: nest
+          RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
           TASKS_USE_FARGATE_SPOT: true
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfvars <<-EOF
           availability_zones=$AVAILABILITY_ZONES
           aws_region="$AWS_REGION"
+          backend_image_tag="$RELEASE_VERSION"
           backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
           create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
+          frontend_image_tag="$RELEASE_VERSION"
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
           EOF
@@ -854,12 +853,10 @@ jobs:
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
-          TF_STATE_DYNAMODB_TABLE_NAME: ${{ secrets.TF_STATE_DYNAMODB_TABLE_NAME }}
         run: |
           umask 377
           cat > infrastructure/staging/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
-          dynamodb_table="$TF_STATE_DYNAMODB_TABLE_NAME"
           region="$AWS_REGION"
           EOF
 
@@ -868,7 +865,7 @@ jobs:
         run: terraform init -backend-config=terraform.tfbackend
 
       - name: Download plan artifact
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: tfplan
           path: infrastructure/staging
@@ -994,7 +991,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           run_install: true
           version: 10
@@ -1391,7 +1388,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           run_install: true
           version: 10

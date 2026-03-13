@@ -10,6 +10,7 @@ variables {
   environment                   = "test"
   fixtures_bucket_name          = "nest-fixtures-abcd1234"
   fixtures_read_only_policy_arn = "arn:aws:iam::123456789012:policy/test-fixtures-policy"
+  image_tag                     = "test-tag"
   kms_key_arn                   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name                  = "nest"
   subnet_ids                    = ["subnet-12345678"]

@@ -275,18 +275,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.42.64"
+version = "1.42.66"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.64-py3-none-any.whl", hash = "sha256:2ca6b472937a54ba74af0b4bede582ba98c070408db1061fc26d5c3aa8e6e7e6"},
-    {file = "boto3-1.42.64.tar.gz", hash = "sha256:58d47897a26adbc22f6390d133dab772fb606ba72695291a8c9e20cba1c7fd23"},
+    {file = "boto3-1.42.66-py3-none-any.whl", hash = "sha256:7c6c60dc5500e8a2967a306372a5fdb4c7f9a5b8adc5eb9aa2ebb5081c51ff47"},
+    {file = "boto3-1.42.66.tar.gz", hash = "sha256:3bec5300fb2429c3be8e8961fdb1f11e85195922c8a980022332c20af05616d5"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.64,<1.43.0"
+botocore = ">=1.42.66,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -295,14 +295,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.64"
+version = "1.42.66"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.64-py3-none-any.whl", hash = "sha256:f77c5cb76ed30576ed0bc73b591265d03dddffff02a9208d3ee0c790f43d3cd2"},
-    {file = "botocore-1.42.64.tar.gz", hash = "sha256:4ee2aece227b9171ace8b749af694a77ab984fceab1639f2626bd0d6fb1aa69d"},
+    {file = "botocore-1.42.66-py3-none-any.whl", hash = "sha256:ac48af1ab527dfa08c4617c387413ca56a7f87780d7bfc1da34ef847a59219a5"},
+    {file = "botocore-1.42.66.tar.gz", hash = "sha256:39756a21142b646de552d798dde2105759b0b8fa0d881a34c26d15bd4c9448fa"},
 ]
 
 [package.dependencies]
@@ -1045,14 +1045,14 @@ django = ">=4.2"
 
 [[package]]
 name = "django-ninja"
-version = "1.5.3"
+version = "1.6.0"
 description = "Django Ninja - Fast Django REST framework"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "django_ninja-1.5.3-py3-none-any.whl", hash = "sha256:0a6ead5b4e57ec1050b584eb6f36f105f256b8f4ac70d12e774d8b6dd91e2198"},
-    {file = "django_ninja-1.5.3.tar.gz", hash = "sha256:974803944965ad0566071633ffd4999a956f2ad1ecbed815c0de37c1c969592b"},
+    {file = "django_ninja-1.6.0-py3-none-any.whl", hash = "sha256:44c6e3f5f1b929cf51f645004715b36326ea32fddf1a94026c4917de8d230135"},
+    {file = "django_ninja-1.6.0.tar.gz", hash = "sha256:dd84230931f511503a251ac090200c65fd0be25a16ba2b9140073b814decc201"},
 ]
 
 [package.dependencies]
@@ -2207,14 +2207,14 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.7.15"
+version = "0.7.16"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.7.15-py3-none-any.whl", hash = "sha256:12d5eff6072002051c9dbfa04e7d06d56b9caad4e813d75827afd3cc44e379fa"},
-    {file = "langsmith-0.7.15.tar.gz", hash = "sha256:4d7848f236f1374606e51d7ae1aff240d4e57049d9d58130714059cd70d488c7"},
+    {file = "langsmith-0.7.16-py3-none-any.whl", hash = "sha256:c84a7a06938025fe0aad992acc546dd75ce3f757ba8ee5b00ad914911d4fc02e"},
+    {file = "langsmith-0.7.16.tar.gz", hash = "sha256:87267d32c1220ec34bd0074d3d04b57c7394328a39a02182b62ab4ae09d28144"},
 ]
 
 [package.dependencies]
@@ -4326,14 +4326,14 @@ crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
 name = "schemathesis"
-version = "4.11.2"
+version = "4.12.0"
 description = "Property-based testing framework for Open API and GraphQL based apps"
 optional = false
 python-versions = ">=3.10"
 groups = ["fuzz"]
 files = [
-    {file = "schemathesis-4.11.2-py3-none-any.whl", hash = "sha256:a909b08d05a0324ed7b7e2a426b3dd7322b95100d75887595495393a22f73d3b"},
-    {file = "schemathesis-4.11.2.tar.gz", hash = "sha256:58a349be770d419c332a26edad377b5dd414de580b77e84ebe2ead1a4935bc7b"},
+    {file = "schemathesis-4.12.0-py3-none-any.whl", hash = "sha256:8b488381b9d4fa83af0a5c4f6bc4861562dec53c1d5ded25ab1f473f4d33381c"},
+    {file = "schemathesis-4.12.0.tar.gz", hash = "sha256:91f5f5137292636a4c84f5ba801d9f1ffbf462a541ed517919c387c9a8363323"},
 ]
 
 [package.dependencies]

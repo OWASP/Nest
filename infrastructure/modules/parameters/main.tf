@@ -199,6 +199,18 @@ resource "aws_ssm_parameter" "django_slack_signing_secret" {
   }
 }
 
+resource "aws_ssm_parameter" "github_token" {
+  description = "GitHub Personal Access Token for GitHub API authentication."
+  name        = "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
+  tags        = var.common_tags
+  type        = "SecureString"
+  value       = "to-be-set-in-aws-console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "next_server_csrf_url" {
   description = "The server-side CSRF URL for Next.js SSR."
   name        = "/${var.project_name}/${var.environment}/NEXT_SERVER_CSRF_URL"
