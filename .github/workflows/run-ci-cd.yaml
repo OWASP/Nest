@@ -585,8 +585,6 @@ jobs:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
     environment: staging
-    needs:
-      - scan-staging-images
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -663,7 +661,6 @@ jobs:
     environment: staging
     needs:
       - bootstrap-staging-nest
-      - scan-staging-images
       - set-release-version
     permissions:
       contents: read
