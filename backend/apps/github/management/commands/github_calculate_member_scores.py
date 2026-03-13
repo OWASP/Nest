@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"Member '{user_login}' not found"))
                 return
         else:
-            users = User.objects.filter(contributions_count__gt=0)
+            users = User.objects.all()
 
         total_users = users.count()
         self.stdout.write(f"Calculating scores for {total_users} members...")
@@ -57,9 +57,10 @@ class Command(BaseCommand):
             user.calculated_score = calculator.calculate(user)
             updated_users.append(user)
 
-            if not len(updated_users) % BATCH_SIZE:
+            if len(updated_users) >= BATCH_SIZE:
                 User.bulk_save(updated_users, fields=("calculated_score",))
                 self.stdout.write(f"  Processed {idx + 1} of {total_users}")
+                updated_users = []
 
         User.bulk_save(updated_users, fields=("calculated_score",))
 

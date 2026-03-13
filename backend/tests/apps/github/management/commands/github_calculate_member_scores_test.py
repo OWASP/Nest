@@ -1,5 +1,6 @@
 """Tests for github_calculate_member_scores management command."""
 
+import math
 from unittest.mock import MagicMock, patch
 
 from apps.github.management.commands.github_calculate_member_scores import Command
@@ -22,7 +23,7 @@ class TestCalculateMemberScoresCommand:
         mock_qs = MagicMock()
         mock_qs.count.return_value = 2
         mock_qs.iterator.return_value = [mock_user_1, mock_user_2]
-        mock_user_model.objects.filter.return_value = mock_qs
+        mock_user_model.objects.all.return_value = mock_qs
 
         command = Command()
         command.stdout = MagicMock()
@@ -31,10 +32,10 @@ class TestCalculateMemberScoresCommand:
 
         command.handle(user=None)
 
-        mock_user_model.objects.filter.assert_called_once_with(contributions_count__gt=0)
+        mock_user_model.objects.all.assert_called_once()
         assert mock_calculator.calculate.call_count == 2
-        assert mock_user_1.calculated_score == 42.5
-        assert mock_user_2.calculated_score == 42.5
+        assert math.isclose(mock_user_1.calculated_score, 42.5)
+        assert math.isclose(mock_user_2.calculated_score, 42.5)
         mock_user_model.bulk_save.assert_called()
 
     @patch("apps.github.management.commands.github_calculate_member_scores.User")
@@ -77,3 +78,4 @@ class TestCalculateMemberScoresCommand:
         command.handle(user="nonexistent")
 
         mock_user_model.bulk_save.assert_not_called()
+        command.stdout.write.assert_called_once_with("Member 'nonexistent' not found")

@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
             model_name="user",
             name="calculated_score",
             field=models.FloatField(
+                db_default=0,
                 db_index=True,
                 default=0,
                 help_text="Composite ranking score from multiple factors",

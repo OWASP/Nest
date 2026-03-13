@@ -5,11 +5,13 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 
 from apps.github.services.score import (
     MAX_SCORE,
     POINTS_BOARD_MEMBER,
     POINTS_OWASP_STAFF,
+    POINTS_PROJECT_LEADER,
     WEIGHT_BREADTH,
     WEIGHT_CONSISTENCY,
     WEIGHT_CONTRIBUTIONS,
@@ -41,7 +43,9 @@ def mock_user():
     user.created_releases = MagicMock()
     user.created_releases.exists.return_value = False
 
-    type(user).owasp_profile = PropertyMock(side_effect=Exception("No profile"))
+    type(user).owasp_profile = PropertyMock(
+        side_effect=ObjectDoesNotExist("No profile"),
+    )
 
     return user
 
@@ -81,16 +85,26 @@ class TestLeadershipScore:
 
     @patch("apps.owasp.models.entity_member.EntityMember.objects.filter")
     @patch("django.contrib.contenttypes.models.ContentType.objects.get_for_model")
-    def test_project_leader(self, mock_ct, mock_em_filter, calculator, mock_user):
+    def test_project_leader(self, mock_get_for_model, mock_em_filter, calculator, mock_user):
         """Test score for a single project leader role."""
+        mock_project_ct = MagicMock()
+        mock_chapter_ct = MagicMock()
+        mock_committee_ct = MagicMock()
+
+        def get_for_model_side_effect(model_class):
+            if model_class.__name__ == "Project":
+                return mock_project_ct
+            if model_class.__name__ == "Chapter":
+                return mock_chapter_ct
+            return mock_committee_ct
+
+        mock_get_for_model.side_effect = get_for_model_side_effect
+
         mock_qs = MagicMock()
 
         def filter_side_effect(**kwargs):
             mock_count = MagicMock()
-            if (
-                kwargs.get("role") == "leader"
-                and kwargs.get("entity_type") == mock_ct.return_value
-            ):
+            if kwargs.get("entity_type") == mock_project_ct and kwargs.get("role") == "leader":
                 mock_count.count.return_value = 1
             else:
                 mock_count.count.return_value = 0
@@ -100,7 +114,7 @@ class TestLeadershipScore:
         mock_em_filter.return_value = mock_qs
 
         score = calculator._leadership_score(mock_user)
-        assert score >= 0
+        assert math.isclose(score, POINTS_PROJECT_LEADER)
 
     @patch("apps.owasp.models.entity_member.EntityMember.objects.filter")
     @patch("django.contrib.contenttypes.models.ContentType.objects.get_for_model")

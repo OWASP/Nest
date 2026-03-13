@@ -10,6 +10,7 @@ import math
 from datetime import UTC, datetime, timedelta
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 WEIGHT_CONTRIBUTIONS = 0.30
@@ -130,7 +131,7 @@ class MemberScoreCalculator:
                 score += POINTS_BOARD_MEMBER
             if profile.is_gsoc_mentor:
                 score += POINTS_GSOC_MENTOR
-        except Exception:  # noqa: BLE001, S110
+        except ObjectDoesNotExist:
             pass
 
         if user.is_owasp_staff:

@@ -68,7 +68,7 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=None)
 
-        mock_user_model.objects.order_by.assert_called_with("-calculated_score")
+        mock_user_model.objects.order_by.assert_called_with("-calculated_score", "id")
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
 
@@ -99,7 +99,7 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=ordering)
 
-        mock_user_model.objects.order_by.assert_called_once_with(ordering)
+        mock_user_model.objects.order_by.assert_called_once_with(ordering, "id")
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
 

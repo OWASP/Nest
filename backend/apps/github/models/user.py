@@ -60,6 +60,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     calculated_score = models.FloatField(
         verbose_name="Calculated score",
         default=0,
+        db_default=0,
         db_index=True,
         help_text="Composite ranking score from multiple factors",
     )
