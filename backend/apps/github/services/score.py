@@ -164,22 +164,26 @@ class MemberScoreCalculator:
         window_180 = now - timedelta(days=180)
         window_365 = now - timedelta(days=365)
 
-        recent_90 = 0
-        recent_180 = 0
-        recent_365 = 0
+        recent_90: float = 0.0
+        recent_180: float = 0.0
+        recent_365: float = 0.0
 
         for date_str, count in contribution_data.items():
             try:
                 date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC).date()
+                numeric_count = float(count)
             except (ValueError, TypeError):
                 continue
 
+            if numeric_count <= 0:
+                continue
+
             if date >= window_90:
-                recent_90 += count
+                recent_90 += numeric_count
             elif date >= window_180:
-                recent_180 += count
+                recent_180 += numeric_count
             elif date >= window_365:
-                recent_365 += count
+                recent_365 += numeric_count
 
         weighted_sum = recent_90 * 3 + recent_180 * 2 + recent_365 * 1
 
@@ -279,6 +283,12 @@ class MemberScoreCalculator:
         if total_days == 0:
             return 0
 
-        active_days = sum(1 for count in contribution_data.values() if count > 0)
+        active_days = 0
+        for count in contribution_data.values():
+            try:
+                if float(count) > 0:
+                    active_days += 1
+            except (ValueError, TypeError):
+                continue
 
         return min(MAX_SCORE, (active_days / total_days) * MAX_SCORE)
