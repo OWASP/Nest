@@ -90,7 +90,9 @@ def list_members(
     ),
 ) -> list[Member]:
     """Get all members."""
-    return filters.filter(UserModel.objects.order_by(ordering or "-calculated_score"))
+    return filters.filter(
+        UserModel.objects.order_by(ordering or "-calculated_score", "-created_at")
+    )
 
 
 @router.get(

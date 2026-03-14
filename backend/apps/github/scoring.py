@@ -146,7 +146,9 @@ def _score_consistency(contribution_data: dict | None) -> float:
 
     active_weeks: set[tuple[int, int]] = set()
 
-    for date_str in contribution_data:
+    for date_str, count in contribution_data.items():
+        if count <= 0:
+            continue
         try:
             date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
         except (ValueError, TypeError):

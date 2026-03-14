@@ -82,7 +82,7 @@ class Command(BaseCommand):
 
         users = []
         for idx, user in enumerate(active_users[offset:].iterator()):
-            prefix = f"{idx + offset + 1} of {active_users_count - offset}"
+            prefix = f"{idx + 1} of {active_users_count - offset}"
             self.stdout.write(f"{prefix:<10} {user.title}\n")
 
             repo_item = repo_data_map.get(user.id, {})
@@ -92,7 +92,7 @@ class Command(BaseCommand):
             user.calculated_score = calculate_member_score(
                 contributions_count=user.contributions_count,
                 distinct_repository_count=repo_item.get("repo_count", 0),
-                distinct_project_count=leadership_id.get("project_leader", 0),
+                distinct_project_count=0,
                 release_count=user_release_counts.get(user.id, 0),
                 chapter_leader_count=leadership_id.get("chapter_leader", 0),
                 project_leader_count=leadership_id.get("project_leader", 0),
@@ -131,14 +131,16 @@ class Command(BaseCommand):
                 is_reviewed=True,
                 role__in=(EntityMember.Role.LEADER, EntityMember.Role.MEMBER),
             )
-            .values("member_id", "entity_type_id")
+            .values("member_id", "entity_type_id", "role")
             .annotate(count=models.Count("id"))
         )
 
         result: dict = defaultdict(dict)
         for item in memberships:
             role_key = entity_type_map.get(item["entity_type_id"])
-            if role_key:
+            if not role_key:
+                continue
+            if role_key == "committee_member" or item["role"] == EntityMember.Role.LEADER:
                 result[item["member_id"]][role_key] = item["count"]
 
         return dict(result)

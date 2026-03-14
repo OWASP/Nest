@@ -326,7 +326,8 @@ class TestCalculateMemberScore:
             contribution_data=None,
         )
         # Should be rounded to 4 decimal places
-        assert score == round(score, 4)
+        decimal_str = str(score).split(".")[-1] if "." in str(score) else ""
+        assert len(decimal_str) <= 4
 
     def test_weights_sum_to_one(self):
         total = (

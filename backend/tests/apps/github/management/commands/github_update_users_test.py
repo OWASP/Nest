@@ -123,8 +123,8 @@ class TestGithubUpdateUsersCommand:
         mock_users_queryset.__getitem__.assert_called_once_with(slice(1, None))
 
         assert command.stdout.write.call_count == 2
-        command.stdout.write.assert_any_call("2 of 2     User 2\n")
-        command.stdout.write.assert_any_call("3 of 2     User 3\n")
+        command.stdout.write.assert_any_call("1 of 2     User 2\n")
+        command.stdout.write.assert_any_call("2 of 2     User 3\n")
 
         assert mock_user1.contributions_count == 20
         assert mock_user2.contributions_count == 30
