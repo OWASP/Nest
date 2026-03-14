@@ -28,10 +28,10 @@ from apps.github.scoring import (
 
 class TestScoreContributions:
     def test_zero_contributions(self):
-        assert _score_contributions(0) == 0.0
+        assert _score_contributions(0) == pytest.approx(0.0)
 
     def test_negative_contributions(self):
-        assert _score_contributions(-1) == 0.0
+        assert _score_contributions(-1) == pytest.approx(0.0)
 
     def test_positive_contributions(self):
         score = _score_contributions(100)
@@ -59,7 +59,7 @@ class TestScoreLeadership:
             is_board_member=False,
             is_gsoc_mentor=False,
         )
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_chapter_leader(self):
         score = _score_leadership(
@@ -131,7 +131,7 @@ class TestScoreLeadership:
 
 class TestScoreBreadth:
     def test_zero_breadth(self):
-        assert _score_breadth(0, 0) == 0.0
+        assert _score_breadth(0, 0) == pytest.approx(0.0)
 
     def test_repo_breadth(self):
         score = _score_breadth(5, 0)
@@ -150,10 +150,10 @@ class TestScoreBreadth:
 
 class TestScoreReleases:
     def test_zero_releases(self):
-        assert _score_releases(0) == 0.0
+        assert _score_releases(0) == pytest.approx(0.0)
 
     def test_negative_releases(self):
-        assert _score_releases(-1) == 0.0
+        assert _score_releases(-1) == pytest.approx(0.0)
 
     def test_positive_releases(self):
         score = _score_releases(5)
@@ -168,10 +168,10 @@ class TestScoreReleases:
 
 class TestScoreRecency:
     def test_no_data(self):
-        assert _score_recency(None) == 0.0
+        assert _score_recency(None) == pytest.approx(0.0)
 
     def test_empty_data(self):
-        assert _score_recency({}) == 0.0
+        assert _score_recency({}) == pytest.approx(0.0)
 
     def test_recent_contributions_score_higher(self):
         """Contributions made today should score higher than those a year ago."""
@@ -182,7 +182,7 @@ class TestScoreRecency:
 
     def test_invalid_date_ignored(self):
         score = _score_recency({"not-a-date": 5})
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_mixed_valid_invalid(self):
         now = datetime.now(tz=UTC)
@@ -196,10 +196,10 @@ class TestScoreRecency:
 
 class TestScoreConsistency:
     def test_no_data(self):
-        assert _score_consistency(None) == 0.0
+        assert _score_consistency(None) == pytest.approx(0.0)
 
     def test_empty_data(self):
-        assert _score_consistency({}) == 0.0
+        assert _score_consistency({}) == pytest.approx(0.0)
 
     def test_single_week_activity(self):
         now = datetime.now(tz=UTC)
@@ -222,7 +222,7 @@ class TestScoreConsistency:
         now = datetime.now(tz=UTC)
         old_date = now - timedelta(days=400)
         data = {old_date.strftime("%Y-%m-%d"): 100}
-        assert _score_consistency(data) == 0.0
+        assert _score_consistency(data) == pytest.approx(0.0)
 
 
 class TestCalculateMemberScore:
@@ -239,7 +239,7 @@ class TestCalculateMemberScore:
             is_gsoc_mentor=False,
             contribution_data=None,
         )
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_contributions_only(self):
         score = calculate_member_score(
