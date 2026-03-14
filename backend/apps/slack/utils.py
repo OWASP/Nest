@@ -52,6 +52,40 @@ def format_links_for_slack(text: str) -> str:
     return markdown_link_pattern.sub(r"<\2|\1>", text)
 
 
+def normalize_markdown_for_slack(text: str) -> str:
+    """Convert standard Markdown formatting to Slack mrkdwn formatting.
+
+    Slack uses a different syntax for some Markdown elements. This function
+    normalizes AI-generated Markdown responses so they render correctly in
+    Slack messages.
+
+    Conversions applied:
+        - ``**text**`` -> ``*text*`` (bold)
+        - ``__text__`` -> ``_text_`` (italic)
+        - ``# Heading`` -> ``*Heading*`` (headings become bold)
+
+    Args:
+        text (str): The input text potentially containing standard Markdown.
+
+    Returns:
+        str: Text with Markdown converted to Slack mrkdwn formatting.
+
+    """
+    if not text:
+        return text
+
+    # Convert headings (###, ##, #) to bold
+    text = re.sub(r"^#{1,6}\s+(.+)$", r"*\1*", text, flags=re.MULTILINE)
+
+    # Convert **bold** to *bold* (must run before italic to avoid conflicts)
+    text = re.sub(r"\*\*(.+?)\*\*", r"*\1*", text)
+
+    # Convert __italic__ to _italic_
+    text = re.sub(r"__(.+?)__", r"_\1_", text)
+
+    return text
+
+
 @lru_cache
 def get_gsoc_projects(year: int) -> list:
     """Get GSoC projects.
