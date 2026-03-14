@@ -141,6 +141,8 @@ class Command(BaseCommand):
             if not role_key:
                 continue
             if role_key == "committee_member" or item["role"] == EntityMember.Role.LEADER:
-                result[item["member_id"]][role_key] = item["count"]
+                result[item["member_id"]][role_key] = (
+                    result[item["member_id"]].get(role_key, 0) + item["count"]
+                )
 
         return dict(result)
