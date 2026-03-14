@@ -92,6 +92,14 @@ SRE at Obmondo | Maintainer of CNCF KubeStellar
 
 Rishi Mondal is a Site Reliability Engineer (SRE) at Obmondo and a CNCF KubeStellar Maintainer. He is a Linux Foundation Mentor and active open-source contributor, specializing in Kubernetes, cloud-native infrastructure, Terraform, and AWS. He builds and maintains scalable, production-grade distributed systems.
 
+### Collins Wandji
+
+Software Engineer at Tech Chantier | Open Source Contributor
+
+[GitHub](https://github.com/wandji69/) • [LinkedIn](https://www.linkedin.com/in/wandji-collins/) • [Slack](https://owasp.slack.com/team/U0ALBPLP7U6) • [Cameroon (West African Time)](https://time-time.net/time/douala-cameroon.php)
+
+Collins Wandji is a software engineer at Tech Chantier and a contributor to Mediawiki core/extensions. He is an open-source enthusiast and active contributor, specialized in backend engineering, has experience in building tools, and DevOps. Collins builds and maintains scalable tools and applications powered by Wikidata, production-grade distributed systems.
+
 ---
 
 ## Google Summer of Code 2025
