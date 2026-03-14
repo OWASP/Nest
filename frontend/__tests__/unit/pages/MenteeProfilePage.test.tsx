@@ -583,9 +583,7 @@ describe('MenteeProfilePage', () => {
       const deadlineFilterButton = screen.getByLabelText('Filter by deadline')
       fireEvent.click(deadlineFilterButton)
       const options = screen.getAllByText(labelText)
-      const selectItem = options.find(
-        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
-      )
+      const selectItem = options.find((el) => el.dataset.testid === 'select-item')
       if (selectItem) fireEvent.click(selectItem)
     }
 
@@ -880,9 +878,7 @@ describe('MenteeProfilePage', () => {
       const deadlineFilterButton = screen.getByLabelText('Filter by deadline')
       fireEvent.click(deadlineFilterButton)
       const dueSoonOptions = screen.getAllByText('Due Soon')
-      const dueSoonSelectItem = dueSoonOptions.find(
-        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
-      )
+      const dueSoonSelectItem = dueSoonOptions.find((el) => el.dataset.testid === 'select-item')
       if (dueSoonSelectItem) fireEvent.click(dueSoonSelectItem)
 
       const statusFilterButton = screen.getByLabelText('Filter by status')
@@ -944,9 +940,7 @@ describe('MenteeProfilePage', () => {
       const deadlineFilterButton = screen.getByLabelText('Filter by deadline')
       fireEvent.click(deadlineFilterButton)
       const upcomingOptions = screen.getAllByText('Upcoming')
-      const upcomingSelectItem = upcomingOptions.find(
-        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
-      )
+      const upcomingSelectItem = upcomingOptions.find((el) => el.dataset.testid === 'select-item')
       if (upcomingSelectItem) fireEvent.click(upcomingSelectItem)
 
       expect(screen.getAllByText('Upcoming Issue').length).toBeGreaterThan(0)
@@ -955,9 +949,7 @@ describe('MenteeProfilePage', () => {
 
       fireEvent.click(deadlineFilterButton)
       const allOptions = screen.getAllByText('All')
-      const allSelectItem = allOptions.find(
-        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
-      )
+      const allSelectItem = allOptions.find((el) => el.dataset.testid === 'select-item')
       if (allSelectItem) fireEvent.click(allSelectItem)
 
       expect(screen.getAllByText('Overdue Issue').length).toBeGreaterThan(0)
