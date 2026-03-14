@@ -17,3 +17,11 @@ class TestChapterIndex:
 
             mock_manager.select_related.assert_called_once_with("owasp_repository")
             assert result == ["chapter1", "chapter2"]
+
+    @patch("apps.common.index.IndexBase.configure_replicas")
+    def test_configure_replicas(self, mock_configure_replicas):
+        """Test that configure_replicas calls the parent method with correct args."""
+        ChapterIndex.configure_replicas()
+        assert mock_configure_replicas.call_count == 1
+        assert mock_configure_replicas.call_args[0][0] == "chapters"
+        assert isinstance(mock_configure_replicas.call_args[0][1], dict)

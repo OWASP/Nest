@@ -1,10 +1,10 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
@@ -85,6 +85,7 @@ data "aws_iam_policy_document" "part_one" {
     sid    = "CloudWatchLogsManagement"
     effect = "Allow"
     actions = [
+      "logs:AssociateKmsKey",
       "logs:CreateLogGroup",
       "logs:DeleteLogGroup",
       "logs:DescribeLogStreams",
@@ -214,6 +215,7 @@ data "aws_iam_policy_document" "part_one" {
       "ecr:ListTagsForResource",
       "ecr:PutImage",
       "ecr:PutImageScanningConfiguration",
+      "ecr:PutImageTagMutability",
       "ecr:PutLifecyclePolicy",
       "ecr:SetRepositoryPolicy",
       "ecr:TagResource",

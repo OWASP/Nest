@@ -50,11 +50,14 @@ const ModuleDetailsPage = () => {
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(mentorshipModule.experienceLevel) },
-    { label: 'Start Date', value: formatDate(mentorshipModule.startedAt) },
-    { label: 'End Date', value: formatDate(mentorshipModule.endedAt) },
+    { label: 'Start Date', value: formatDate(String(mentorshipModule.startedAt)) },
+    { label: 'End Date', value: formatDate(String(mentorshipModule.endedAt)) },
     {
       label: 'Duration',
-      value: getSimpleDuration(mentorshipModule.startedAt, mentorshipModule.endedAt),
+      value: getSimpleDuration(
+        String(mentorshipModule.startedAt),
+        String(mentorshipModule.endedAt)
+      ),
     },
   ]
 

@@ -76,6 +76,11 @@ variable "memory" {
 variable "subnet_ids" {
   description = "Subnet IDs for the task (can be public or private)."
   type        = list(string)
+
+  validation {
+    condition     = length(var.subnet_ids) > 0
+    error_message = "subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "project_name" {
