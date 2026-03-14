@@ -4,6 +4,7 @@ variables {
   common_tags          = { Environment = "test", Project = "nest" }
   environment          = "test"
   fixtures_bucket_name = "nest-fixtures"
+  kms_key_arn          = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name         = "nest"
 }
 

@@ -110,7 +110,7 @@ class TestRepositoryIndexMixin:
         [
             ("idx_commits_count", 100),
             ("idx_contributors_count", CONTRIBUTORS_COUNT),
-            ("idx_created_at", datetime(2020, 1, 1, tzinfo=UTC).timestamp()),
+            ("idx_created_at", datetime(2020, 1, 1, tzinfo=UTC).isoformat()),
             ("idx_description", "Description"),
             ("idx_forks_count", FORKS_COUNT),
             ("idx_has_funding_yml", True),
