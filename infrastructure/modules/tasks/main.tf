@@ -1,15 +1,21 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
 
 data "aws_caller_identity" "current" {}
+
+locals {
+  sync_data_schedule_expression                     = var.enable_cron_tasks ? "cron(17 05 * * ? *)" : null
+  update_project_health_metrics_schedule_expression = var.enable_cron_tasks ? "cron(17 17 * * ? *)" : null
+  update_project_health_scores_schedule_expression  = var.enable_cron_tasks ? "cron(22 17 * * ? *)" : null
+}
 
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-${var.environment}-tasks-cluster"
@@ -228,7 +234,7 @@ module "sync_data_task" {
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.sync_data_task_memory
   project_name                 = var.project_name
-  schedule_expression          = "cron(17 05 * * ? *)"
+  schedule_expression          = local.sync_data_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "sync-data"
@@ -260,7 +266,7 @@ module "owasp_update_project_health_metrics_task" {
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_metrics_task_memory
   project_name                 = var.project_name
-  schedule_expression          = "cron(17 17 * * ? *)"
+  schedule_expression          = local.update_project_health_metrics_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-metrics"
@@ -284,7 +290,7 @@ module "owasp_update_project_health_scores_task" {
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_scores_task_memory
   project_name                 = var.project_name
-  schedule_expression          = "cron(22 17 * * ? *)"
+  schedule_expression          = local.update_project_health_scores_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-scores"

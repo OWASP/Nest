@@ -31,7 +31,17 @@ class ModuleQuery:
             Module.objects.filter(program=program)
             .select_related("program", "project")
             .prefetch_related("mentors__github_user")
-            .order_by("started_at")
+            .order_by("order", "started_at")
+        )
+
+    @strawberry.field
+    def get_project_modules(self, project_key: str) -> list[ModuleNode]:
+        """Get all modules by project Key. Returns an empty list if project is not found."""
+        return (
+            Module.objects.filter(project__key=project_key)
+            .select_related("program", "project")
+            .prefetch_related("mentors__github_user")
+            .order_by("order", "started_at")
         )
 
     @strawberry.field

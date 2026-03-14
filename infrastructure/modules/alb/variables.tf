@@ -67,6 +67,11 @@ variable "project_name" {
 variable "public_subnet_ids" {
   description = "A list of public subnet IDs for the ALB."
   type        = list(string)
+
+  validation {
+    condition     = length(var.public_subnet_ids) > 0
+    error_message = "public_subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "vpc_id" {
