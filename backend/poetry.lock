@@ -275,18 +275,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.42.67"
+version = "1.42.68"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.67-py3-none-any.whl", hash = "sha256:aa900216bdc48bbd0115ed7128a4baed5548c6a60673160a38df8a8566df57cd"},
-    {file = "boto3-1.42.67.tar.gz", hash = "sha256:d4123ceb3be36c5cb7ddccc7a7c43701e1fb6af612ef46e3b5d667daf5447d4b"},
+    {file = "boto3-1.42.68-py3-none-any.whl", hash = "sha256:dbff353eb7dc93cbddd7926ed24793e0174c04adbe88860dfa639568442e4962"},
+    {file = "boto3-1.42.68.tar.gz", hash = "sha256:3f349f967ab38c23425626d130962bcb363e75f042734fe856ea8c5a00eef03c"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.67,<1.43.0"
+botocore = ">=1.42.68,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -295,14 +295,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.67"
+version = "1.42.68"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.67-py3-none-any.whl", hash = "sha256:a94317d2ce83deae230964beb2729639455de65595d0154f285b0ccfd29780cd"},
-    {file = "botocore-1.42.67.tar.gz", hash = "sha256:ee307f30fcb798d244fb35a87847b274e1e1f72cd5f7f2e31bd1826df0c45295"},
+    {file = "botocore-1.42.68-py3-none-any.whl", hash = "sha256:9df7da26374601f890e2f115bfa573d65bf15b25fe136bb3aac809f6145f52ab"},
+    {file = "botocore-1.42.68.tar.gz", hash = "sha256:3951c69e12ac871dda245f48dac5c7dd88ea1bfdd74a8879ec356cf2874b806a"},
 ]
 
 [package.dependencies]
@@ -2817,14 +2817,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "2.26.0"
+version = "2.28.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "openai-2.26.0-py3-none-any.whl", hash = "sha256:6151bf8f83802f036117f06cc8a57b3a4da60da9926826cc96747888b57f394f"},
-    {file = "openai-2.26.0.tar.gz", hash = "sha256:b41f37c140ae0034a6e92b0c509376d907f3a66109935fba2c1b471a7c05a8fb"},
+    {file = "openai-2.28.0-py3-none-any.whl", hash = "sha256:79aa5c45dba7fef84085701c235cf13ba88485e1ef4f8dfcedc44fc2a698fc1d"},
+    {file = "openai-2.28.0.tar.gz", hash = "sha256:bb7fdff384d2a787fa82e8822d1dd3c02e8cf901d60f1df523b7da03cbb6d48d"},
 ]
 
 [package.dependencies]
@@ -3597,14 +3597,14 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyjwt"
-version = "2.12.0"
+version = "2.12.1"
 description = "JSON Web Token implementation in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyjwt-2.12.0-py3-none-any.whl", hash = "sha256:9bb459d1bdd0387967d287f5656bf7ec2b9a26645d1961628cda1764e087fd6e"},
-    {file = "pyjwt-2.12.0.tar.gz", hash = "sha256:2f62390b667cd8257de560b850bb5a883102a388829274147f1d724453f8fb02"},
+    {file = "pyjwt-2.12.1-py3-none-any.whl", hash = "sha256:28ca37c070cad8ba8cd9790cd940535d40274d22f80ab87f3ac6a713e6e8454c"},
+    {file = "pyjwt-2.12.1.tar.gz", hash = "sha256:c74a7a2adf861c04d002db713dd85f84beb242228e671280bf709d765b03672b"},
 ]
 
 [package.dependencies]
@@ -4326,14 +4326,14 @@ crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
 name = "schemathesis"
-version = "4.12.0"
+version = "4.12.1"
 description = "Property-based testing framework for Open API and GraphQL based apps"
 optional = false
 python-versions = ">=3.10"
 groups = ["fuzz"]
 files = [
-    {file = "schemathesis-4.12.0-py3-none-any.whl", hash = "sha256:8b488381b9d4fa83af0a5c4f6bc4861562dec53c1d5ded25ab1f473f4d33381c"},
-    {file = "schemathesis-4.12.0.tar.gz", hash = "sha256:91f5f5137292636a4c84f5ba801d9f1ffbf462a541ed517919c387c9a8363323"},
+    {file = "schemathesis-4.12.1-py3-none-any.whl", hash = "sha256:fbca23d71cf34ade35808cdc813a97c670dcfe2fe3f20c07599bc78b6b904207"},
+    {file = "schemathesis-4.12.1.tar.gz", hash = "sha256:c004411b8f358c03cf68f3478d195f54e6d69790d6159fd30918b175b2938bc1"},
 ]
 
 [package.dependencies]
