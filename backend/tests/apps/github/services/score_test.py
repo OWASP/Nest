@@ -2,6 +2,7 @@
 
 import math
 from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -28,6 +29,9 @@ from apps.github.services.score import (
     _score_releases,
     _score_type_diversity,
     calculate_member_score,
+    compute_user_score,
+    get_leadership_data,
+    get_scoring_context,
 )
 
 
@@ -428,5 +432,223 @@ class TestCalculateMemberScore:
             has_contributions=True,
             has_pull_requests=True,
         )
+        expected = round(
+            WEIGHT_CONTRIBUTIONS * _score_contributions(100)
+            + WEIGHT_LEADERSHIP
+            * _score_leadership(
+                chapter_leader_count=0,
+                project_leader_count=1,
+                committee_member_count=0,
+                is_board_member=False,
+                is_gsoc_mentor=False,
+                is_owasp_staff=False,
+            )
+            + WEIGHT_RECENCY * _score_recency(None)
+            + WEIGHT_BREADTH * _score_breadth(5)
+            + WEIGHT_TYPE_DIVERSITY
+            * _score_type_diversity(
+                has_contributions=True,
+                has_pull_requests=True,
+                has_issues=False,
+                has_releases=False,
+            )
+            + WEIGHT_RELEASES * _score_releases(0)
+            + WEIGHT_CONSISTENCY * _score_consistency(None),
+            2,
+        )
+        assert score == expected
+
+
+class TestScoreRecencyOldContributions:
+    """Tests for recency scoring of contributions older than 365 days."""
+
+    def test_contributions_older_than_365_days_ignored(self):
+        """Test that contributions older than 365 days produce zero score."""
+        now = datetime.now(tz=UTC).date()
+        old_date = (now - timedelta(days=400)).strftime("%Y-%m-%d")
+        assert _score_recency({old_date: 10}) == pytest.approx(0.0)
+
+
+class TestComputeUserScore:
+    """Tests for compute_user_score function."""
+
+    def test_compute_user_score_with_data(self):
+        """Test compute_user_score returns a score using context data."""
+        mock_user = MagicMock(id=1, is_owasp_staff=False, contribution_data=None)
+
+        context = {
+            "repo_data_map": {1: {"total_contributions": 50, "repo_count": 3}},
+            "user_release_counts": {1: 2},
+            "user_pr_flags": {1},
+            "user_issue_flags": {1},
+            "leadership_data": {1: {"project_leader": 1, "chapter_leader": 0}},
+            "board_members": set(),
+            "gsoc_mentors": set(),
+        }
+
+        score = compute_user_score(mock_user, context)
         assert score > 0.0
-        assert score == round(score, 2)
+
+    def test_compute_user_score_with_no_data(self):
+        """Test compute_user_score returns zero when user has no data."""
+        mock_user = MagicMock(id=99, is_owasp_staff=False, contribution_data=None)
+
+        context = {
+            "repo_data_map": {},
+            "user_release_counts": {},
+            "user_pr_flags": set(),
+            "user_issue_flags": set(),
+            "leadership_data": {},
+            "board_members": set(),
+            "gsoc_mentors": set(),
+        }
+
+        score = compute_user_score(mock_user, context)
+        assert score == pytest.approx(0.0)
+
+    def test_compute_user_score_board_member(self):
+        """Test compute_user_score includes board member bonus."""
+        mock_user = MagicMock(id=1, is_owasp_staff=False, contribution_data=None)
+
+        context_without = {
+            "repo_data_map": {},
+            "user_release_counts": {},
+            "user_pr_flags": set(),
+            "user_issue_flags": set(),
+            "leadership_data": {},
+            "board_members": set(),
+            "gsoc_mentors": set(),
+        }
+        context_with = {
+            "repo_data_map": {},
+            "user_release_counts": {},
+            "user_pr_flags": set(),
+            "user_issue_flags": set(),
+            "leadership_data": {},
+            "board_members": {1},
+            "gsoc_mentors": set(),
+        }
+
+        assert compute_user_score(mock_user, context_with) > compute_user_score(
+            mock_user, context_without
+        )
+
+
+class TestGetScoringContext:
+    """Tests for get_scoring_context function."""
+
+    @patch("apps.github.services.score.get_leadership_data")
+    @patch("apps.github.services.score.User")
+    @patch("apps.github.services.score.RepositoryContributor")
+    def test_returns_expected_keys(
+        self,
+        mock_repo_contributor,
+        mock_user,
+        mock_get_leadership,
+    ):
+        """Test that get_scoring_context returns all expected keys."""
+        mock_qs = MagicMock()
+        mock_qs.exclude.return_value.values.return_value.annotate.return_value = []
+        mock_repo_contributor.objects = mock_qs
+
+        releases_qs = MagicMock()
+        releases_qs.annotate.return_value.values_list.return_value = []
+        prs_qs = MagicMock()
+        prs_qs.values_list.return_value.distinct.return_value = []
+        issues_qs = MagicMock()
+        issues_qs.values_list.return_value.distinct.return_value = []
+        board_qs = MagicMock()
+        board_qs.values_list.return_value = []
+        gsoc_qs = MagicMock()
+        gsoc_qs.values_list.return_value = []
+
+        mock_user.objects.filter.side_effect = [
+            releases_qs,
+            prs_qs,
+            issues_qs,
+            board_qs,
+            gsoc_qs,
+        ]
+        mock_user.get_non_indexable_logins.return_value = []
+
+        mock_get_leadership.return_value = {}
+
+        context = get_scoring_context()
+
+        assert "repo_data_map" in context
+        assert "user_release_counts" in context
+        assert "user_pr_flags" in context
+        assert "user_issue_flags" in context
+        assert "leadership_data" in context
+        assert "board_members" in context
+        assert "gsoc_mentors" in context
+
+
+class TestGetLeadershipData:
+    """Tests for get_leadership_data function."""
+
+    @patch("apps.github.services.score.EntityMember")
+    @patch("apps.github.services.score.ContentType")
+    @patch("apps.github.services.score.Project")
+    @patch("apps.github.services.score.Chapter")
+    @patch("apps.github.services.score.Committee")
+    def test_aggregates_leadership_roles(
+        self,
+        mock_committee,
+        mock_chapter,
+        mock_project,
+        mock_content_type,
+        mock_entity_member,
+    ):
+        """Test that leadership data is aggregated correctly."""
+        mock_content_type.objects.get_for_model.side_effect = [
+            MagicMock(id=10),
+            MagicMock(id=20),
+            MagicMock(id=30),
+        ]
+
+        mock_entity_member.Role.LEADER = "leader"
+        mock_entity_member.Role.MEMBER = "member"
+
+        mock_qs = mock_entity_member.objects.filter.return_value
+        mock_qs.values.return_value.annotate.return_value = [
+            {"member_id": 1, "entity_type_id": 20, "role": "leader", "count": 2},
+            {"member_id": 1, "entity_type_id": 10, "role": "leader", "count": 1},
+            {"member_id": 2, "entity_type_id": 30, "role": "member", "count": 3},
+        ]
+
+        result = get_leadership_data()
+
+        assert result[1]["project_leader"] == 2
+        assert result[1]["chapter_leader"] == 1
+        assert result[2]["committee_member"] == 3
+
+    @patch("apps.github.services.score.EntityMember")
+    @patch("apps.github.services.score.ContentType")
+    @patch("apps.github.services.score.Project")
+    @patch("apps.github.services.score.Chapter")
+    @patch("apps.github.services.score.Committee")
+    def test_empty_memberships(
+        self,
+        mock_committee,
+        mock_chapter,
+        mock_project,
+        mock_content_type,
+        mock_entity_member,
+    ):
+        """Test that empty memberships return empty dict."""
+        mock_content_type.objects.get_for_model.side_effect = [
+            MagicMock(id=10),
+            MagicMock(id=20),
+            MagicMock(id=30),
+        ]
+
+        mock_entity_member.Role.LEADER = "leader"
+        mock_entity_member.Role.MEMBER = "member"
+
+        mock_qs = mock_entity_member.objects.filter.return_value
+        mock_qs.values.return_value.annotate.return_value = []
+
+        result = get_leadership_data()
+
+        assert result == {}

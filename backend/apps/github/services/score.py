@@ -3,7 +3,19 @@
 from __future__ import annotations
 
 import math
+from collections import defaultdict
 from datetime import UTC, datetime, timedelta
+
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.db.models import Q, Sum
+
+from apps.github.models.repository_contributor import RepositoryContributor
+from apps.github.models.user import User
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.committee import Committee
+from apps.owasp.models.entity_member import EntityMember
+from apps.owasp.models.project import Project
 
 WEIGHT_CONTRIBUTIONS = 0.25
 WEIGHT_LEADERSHIP = 0.25
@@ -255,3 +267,132 @@ def _score_consistency(contribution_data: dict | None) -> float:
             continue
 
     return min(MAX_SCORE, (active_days / total_days) * MAX_SCORE)
+
+
+def get_scoring_context() -> dict:
+    """Fetch all data needed to compute member scores.
+
+    Returns:
+        dict: A context dictionary with keys: repo_data_map,
+            user_release_counts, user_pr_flags, user_issue_flags,
+            leadership_data, board_members, gsoc_mentors.
+
+    """
+    owasp_repo_filter = (
+        Q(repository__is_fork=True)
+        | Q(repository__organization__is_owasp_related_organization=False)
+        | Q(user__login__in=User.get_non_indexable_logins())
+    )
+
+    repo_data = (
+        RepositoryContributor.objects.exclude(owasp_repo_filter)
+        .values("user_id")
+        .annotate(
+            total_contributions=Sum("contributions_count"),
+            repo_count=models.Count("repository", distinct=True),
+        )
+    )
+
+    return {
+        "repo_data_map": {item["user_id"]: item for item in repo_data},
+        "user_release_counts": dict(
+            User.objects.filter(created_releases__isnull=False)
+            .annotate(release_count=models.Count("created_releases"))
+            .values_list("id", "release_count")
+        ),
+        "user_pr_flags": set(
+            User.objects.filter(created_pull_requests__isnull=False)
+            .values_list("id", flat=True)
+            .distinct()
+        ),
+        "user_issue_flags": set(
+            User.objects.filter(created_issues__isnull=False)
+            .values_list("id", flat=True)
+            .distinct()
+        ),
+        "leadership_data": get_leadership_data(),
+        "board_members": set(
+            User.objects.filter(
+                owasp_profile__is_owasp_board_member=True,
+            ).values_list("id", flat=True)
+        ),
+        "gsoc_mentors": set(
+            User.objects.filter(
+                owasp_profile__is_gsoc_mentor=True,
+            ).values_list("id", flat=True)
+        ),
+    }
+
+
+def compute_user_score(user, context: dict) -> float:
+    """Compute the ranking score for a single user.
+
+    Args:
+        user: A User model instance.
+        context: The dict returned by get_scoring_context().
+
+    Returns:
+        float: The calculated ranking score.
+
+    """
+    repo_item = context["repo_data_map"].get(user.id, {})
+    leadership_info = context["leadership_data"].get(user.id, {})
+    user_release_counts = context["user_release_counts"]
+
+    return calculate_member_score(
+        contributions_count=repo_item.get("total_contributions", 0),
+        distinct_repository_count=repo_item.get("repo_count", 0),
+        release_count=user_release_counts.get(user.id, 0),
+        chapter_leader_count=leadership_info.get("chapter_leader", 0),
+        project_leader_count=leadership_info.get("project_leader", 0),
+        committee_member_count=leadership_info.get("committee_member", 0),
+        is_board_member=user.id in context["board_members"],
+        is_gsoc_mentor=user.id in context["gsoc_mentors"],
+        is_owasp_staff=user.is_owasp_staff,
+        has_pull_requests=user.id in context["user_pr_flags"],
+        has_issues=user.id in context["user_issue_flags"],
+        has_releases=user.id in user_release_counts,
+        has_contributions=repo_item.get("total_contributions", 0) > 0,
+        contribution_data=user.contribution_data,
+    )
+
+
+def get_leadership_data() -> dict:
+    """Aggregate leadership role counts per user.
+
+    Returns:
+        dict: Mapping of user_id -> {role_key: count}.
+
+    """
+    chapter_ct_id = ContentType.objects.get_for_model(Chapter).id
+    project_ct_id = ContentType.objects.get_for_model(Project).id
+    committee_ct_id = ContentType.objects.get_for_model(Committee).id
+
+    memberships = (
+        EntityMember.objects.filter(
+            member__isnull=False,
+            is_active=True,
+            is_reviewed=True,
+            role__in=(EntityMember.Role.LEADER, EntityMember.Role.MEMBER),
+        )
+        .values("member_id", "entity_type_id", "role")
+        .annotate(count=models.Count("id"))
+    )
+
+    result: dict = defaultdict(dict)
+    for item in memberships:
+        entity_type_id = item["entity_type_id"]
+        role = item["role"]
+        count = item["count"]
+        user_id = item["member_id"]
+
+        if entity_type_id == project_ct_id and role == EntityMember.Role.LEADER:
+            result[user_id]["project_leader"] = result[user_id].get("project_leader", 0) + count
+        elif entity_type_id == chapter_ct_id and role == EntityMember.Role.LEADER:
+            result[user_id]["chapter_leader"] = result[user_id].get("chapter_leader", 0) + count
+        elif entity_type_id == committee_ct_id:
+            result[user_id]["committee_member"] = (
+                result[user_id].get("committee_member", 0) + count
+            )
+
+    return dict(result)
