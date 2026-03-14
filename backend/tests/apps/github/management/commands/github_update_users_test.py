@@ -283,3 +283,51 @@ class TestGithubUpdateUsersCommand:
 
         assert mock_user.bulk_save.call_count == 1
         assert mock_user.bulk_save.call_args_list[0][0][0] == [mock_user1, mock_user2]
+
+    @patch("apps.github.management.commands.github_update_users.User")
+    @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
+    @patch.object(
+        Command,
+        "_get_leadership_data",
+        return_value={1: {"chapter_leader": 2, "project_leader": 1}},
+    )
+    @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 2)
+    def test_handle_with_leadership_data(
+        self,
+        mock_leadership_data,
+        mock_repository_contributor,
+        mock_user,
+    ):
+        """Test that leadership data flows into calculated_score."""
+        mock_user1 = MagicMock(
+            id=1,
+            title="User 1",
+            contributions_count=0,
+            contribution_data=None,
+        )
+
+        mock_users_queryset = MagicMock()
+        mock_users_queryset.count.return_value = 1
+        mock_sliced_qs = MagicMock()
+        mock_sliced_qs.iterator.return_value = [mock_user1]
+        mock_users_queryset.__getitem__.return_value = mock_sliced_qs
+
+        mock_user.objects.order_by.return_value = mock_users_queryset
+
+        mock_rc_queryset = MagicMock()
+        mock_rc_queryset.exclude.return_value.values.return_value.annotate.return_value = [
+            {"user_id": 1, "total_contributions": 50, "repo_count": 3},
+        ]
+        mock_repository_contributor.objects = mock_rc_queryset
+
+        command = Command()
+        command.stdout = MagicMock()
+        command.handle(offset=0)
+
+        assert mock_user1.contributions_count == 50
+        assert mock_user1.calculated_score > 0
+
+        assert mock_user.bulk_save.call_count == 1
+        saved_fields = mock_user.bulk_save.call_args_list[0][1]["fields"]
+        assert "calculated_score" in saved_fields
+        assert "contributions_count" in saved_fields

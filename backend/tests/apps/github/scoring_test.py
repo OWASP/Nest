@@ -326,8 +326,8 @@ class TestCalculateMemberScore:
             contribution_data=None,
         )
         # Should be rounded to 4 decimal places
-        decimal_str = str(score).split(".")[-1] if "." in str(score) else ""
-        assert len(decimal_str) <= 4
+        scaled = score * 10000
+        assert scaled == pytest.approx(round(scaled))
 
     def test_weights_sum_to_one(self):
         total = (
