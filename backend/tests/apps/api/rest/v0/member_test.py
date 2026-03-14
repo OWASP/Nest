@@ -17,6 +17,7 @@ class TestMemberSchema:
         member_data = {
             "avatar_url": "https://github.com/images/johndoe.png",
             "bio": "Developer advocate",
+            "calculated_score": 45.5,
             "company": "GitHub",
             "created_at": created_at,
             "email": "john@example.com",
@@ -66,7 +67,7 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=None)
 
-        mock_user_model.objects.order_by.assert_called_with("-created_at")
+        mock_user_model.objects.order_by.assert_called_with("-calculated_score")
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
 

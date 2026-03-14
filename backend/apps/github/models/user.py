@@ -37,6 +37,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
             models.Index(fields=["-updated_at"], name="github_user_updated_at_desc"),
             models.Index(fields=["name"], name="github_user_name_asc"),
             models.Index(fields=["-name"], name="github_user_name_desc"),
+            models.Index(fields=["-calculated_score"], name="idx_calc_score_desc"),
         ]
         verbose_name_plural = "Users"
 
@@ -64,6 +65,14 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         blank=True,
         null=True,
         help_text="Aggregated contribution data as date -> count mapping",
+    )
+
+    calculated_score = models.FloatField(
+        verbose_name="Calculated ranking score",
+        default=0.0,
+        null=True,
+        blank=True,
+        help_text="Member ranking score based on contributions and roles",
     )
 
     def __str__(self) -> str:
