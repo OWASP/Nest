@@ -577,4 +577,426 @@ describe('MenteeProfilePage', () => {
       screen.queryByRole('heading', { name: /Skills & Technologies/i })
     ).not.toBeInTheDocument()
   })
+
+  describe('deadline filtering', () => {
+    const selectDeadlineOption = (labelText: string) => {
+      const deadlineFilterButton = screen.getByLabelText('Filter by deadline')
+      fireEvent.click(deadlineFilterButton)
+      const options = screen.getAllByText(labelText)
+      const selectItem = options.find(
+        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
+      )
+      if (selectItem) fireEvent.click(selectItem)
+    }
+
+    it('filters issues by overdue deadline category', () => {
+      const now = new Date()
+      const overdueDate = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString() // 10 days ago
+
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Overdue Issue',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: overdueDate,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'Upcoming Issue',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      selectDeadlineOption('Overdue')
+      expect(screen.getAllByText('Overdue Issue').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Upcoming Issue')).not.toBeInTheDocument()
+    })
+
+    it('filters issues by due-soon deadline category', () => {
+      const now = new Date()
+      const dueSoonDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days from now
+
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Due Soon Issue',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: dueSoonDate,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'Upcoming Issue',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      selectDeadlineOption('Due Soon')
+      expect(screen.getAllByText('Due Soon Issue').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Upcoming Issue')).not.toBeInTheDocument()
+    })
+
+    it('filters issues by upcoming deadline category', () => {
+      const now = new Date()
+      const upcomingDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
+
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Upcoming Issue',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: upcomingDate,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'Due Soon Issue',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      selectDeadlineOption('Upcoming')
+      expect(screen.getAllByText('Upcoming Issue').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Due Soon Issue')).not.toBeInTheDocument()
+    })
+
+    it('filters issues by no-deadline category', () => {
+      const now = new Date()
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'No Deadline Issue',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: null,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'With Deadline Issue',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      selectDeadlineOption('No Deadline')
+      expect(screen.getAllByText('No Deadline Issue').length).toBeGreaterThan(0)
+      expect(screen.queryByText('With Deadline Issue')).not.toBeInTheDocument()
+    })
+
+    it('resets pagination when deadline filter is changed', () => {
+      const now = new Date()
+      const dueSoonDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Due Soon Issue',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: dueSoonDate,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'Another Issue',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      selectDeadlineOption('Due Soon')
+      expect(screen.getAllByText('Due Soon Issue').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Another Issue')).not.toBeInTheDocument()
+    })
+
+    it('shows all issues when deadline filter is set to "All"', () => {
+      const now = new Date()
+      const dueSoonDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+      const upcomingDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Due Soon Issue',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: dueSoonDate,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'Upcoming Issue',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: upcomingDate,
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      selectDeadlineOption('Due Soon')
+      expect(screen.getAllByText('Due Soon Issue').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Upcoming Issue')).not.toBeInTheDocument()
+
+      selectDeadlineOption('All')
+      expect(screen.getAllByText('Due Soon Issue').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Upcoming Issue').length).toBeGreaterThan(0)
+    })
+
+    it('handles issues with undefined deadline', () => {
+      const now = new Date()
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Issue with undefined deadline',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: undefined,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'With Deadline',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      selectDeadlineOption('No Deadline')
+      expect(screen.getAllByText('Issue with undefined deadline').length).toBeGreaterThan(0)
+      expect(screen.queryByText('With Deadline')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('combined deadline and status filtering', () => {
+    it('applies both deadline and status filters together', () => {
+      const now = new Date()
+      const dueSoonDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+      const upcomingDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Open Due Soon',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: dueSoonDate,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'Closed Due Soon',
+            state: 'closed',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: dueSoonDate,
+          },
+          {
+            id: 'issue3',
+            number: 103,
+            title: 'Open Upcoming',
+            state: 'open',
+            url: 'http://example.com/issue3',
+            labels: ['docs'],
+            taskDeadline: upcomingDate,
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      const deadlineFilterButton = screen.getByLabelText('Filter by deadline')
+      fireEvent.click(deadlineFilterButton)
+      const dueSoonOptions = screen.getAllByText('Due Soon')
+      const dueSoonSelectItem = dueSoonOptions.find(
+        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
+      )
+      if (dueSoonSelectItem) fireEvent.click(dueSoonSelectItem)
+
+      const statusFilterButton = screen.getByLabelText('Filter by status')
+      fireEvent.click(statusFilterButton)
+      const openSelectItems = screen.getAllByTestId('select-item')
+      const openStatusOption = openSelectItems.find((el) => el.textContent?.includes('Open'))
+      if (openStatusOption) fireEvent.click(openStatusOption)
+
+      expect(screen.getAllByText('Open Due Soon').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Closed Due Soon')).not.toBeInTheDocument()
+      expect(screen.queryByText('Open Upcoming')).not.toBeInTheDocument()
+    })
+
+    it('does not filter by deadline when DEADLINE_ALL is selected', () => {
+      const now = new Date()
+      const overdueDate = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
+      const dueSoonDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+      const upcomingDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+
+      const dataWithDeadlines = {
+        ...mockMenteeData,
+        getMenteeModuleIssues: [
+          {
+            id: 'issue1',
+            number: 101,
+            title: 'Overdue Issue',
+            state: 'open',
+            url: 'http://example.com/issue1',
+            labels: ['bug'],
+            taskDeadline: overdueDate,
+          },
+          {
+            id: 'issue2',
+            number: 102,
+            title: 'Due Soon Issue',
+            state: 'open',
+            url: 'http://example.com/issue2',
+            labels: ['feature'],
+            taskDeadline: dueSoonDate,
+          },
+          {
+            id: 'issue3',
+            number: 103,
+            title: 'Upcoming Issue',
+            state: 'open',
+            url: 'http://example.com/issue3',
+            labels: ['docs'],
+            taskDeadline: upcomingDate,
+          },
+        ],
+      }
+      mockUseQuery.mockReturnValue({ data: dataWithDeadlines, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      expect(screen.getAllByText('Overdue Issue').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Due Soon Issue').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Upcoming Issue').length).toBeGreaterThan(0)
+
+      const deadlineFilterButton = screen.getByLabelText('Filter by deadline')
+      fireEvent.click(deadlineFilterButton)
+      const upcomingOptions = screen.getAllByText('Upcoming')
+      const upcomingSelectItem = upcomingOptions.find(
+        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
+      )
+      if (upcomingSelectItem) fireEvent.click(upcomingSelectItem)
+
+      expect(screen.getAllByText('Upcoming Issue').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Overdue Issue')).not.toBeInTheDocument()
+      expect(screen.queryByText('Due Soon Issue')).not.toBeInTheDocument()
+
+      fireEvent.click(deadlineFilterButton)
+      const allOptions = screen.getAllByText('All')
+      const allSelectItem = allOptions.find(
+        (el) => el.hasAttribute('data-testid') && el.getAttribute('data-testid') === 'select-item'
+      )
+      if (allSelectItem) fireEvent.click(allSelectItem)
+
+      expect(screen.getAllByText('Overdue Issue').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Due Soon Issue').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Upcoming Issue').length).toBeGreaterThan(0)
+    })
+
+    it('does not change status filter when selection is empty', () => {
+      mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+
+      const emptyTriggers = screen.getAllByTestId('select-trigger-empty')
+      if (emptyTriggers[1]) {
+        fireEvent.click(emptyTriggers[1])
+      }
+
+      expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Open Issue 2').length).toBeGreaterThan(0)
+    })
+
+    it('resets pagination when status filter is changed', () => {
+      mockUseQuery.mockReturnValue({ data: mockMenteeData, loading: false, error: undefined })
+      render(<MenteeProfilePage />)
+
+      expect(screen.getAllByText('Open Issue 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+
+      const statusFilterButton = screen.getByLabelText('Filter by status')
+      fireEvent.click(statusFilterButton)
+      const closedOption = screen.getByText('Closed (1)')
+      fireEvent.click(closedOption)
+
+      expect(screen.getAllByText('Closed Issue 1').length).toBeGreaterThan(0)
+      expect(screen.queryByText('Open Issue 1')).not.toBeInTheDocument()
+      expect(screen.queryByText('Open Issue 2')).not.toBeInTheDocument()
+    })
+  })
 })
