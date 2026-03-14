@@ -1,23 +1,16 @@
-"""Member score calculation service.
-
-Computes a composite ranking score for OWASP community members
-based on multiple weighted factors.
-"""
+"""Member score calculation service."""
 
 from __future__ import annotations
 
 import math
 from datetime import UTC, datetime, timedelta
 
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
-
-WEIGHT_CONTRIBUTIONS = 0.30
+WEIGHT_CONTRIBUTIONS = 0.25
 WEIGHT_LEADERSHIP = 0.25
 WEIGHT_RECENCY = 0.20
 WEIGHT_BREADTH = 0.10
 WEIGHT_TYPE_DIVERSITY = 0.10
+WEIGHT_RELEASES = 0.05
 WEIGHT_CONSISTENCY = 0.05
 
 POINTS_PROJECT_LEADER = 20
@@ -34,261 +27,231 @@ MAX_COMMITTEE_MEMBER_POINTS = 30
 MAX_SCORE = 100
 
 
-class MemberScoreCalculator:
-    """Calculate composite ranking scores for OWASP community members."""
+def calculate_member_score(
+    *,
+    contributions_count: int,
+    distinct_repository_count: int,
+    release_count: int,
+    chapter_leader_count: int,
+    project_leader_count: int,
+    committee_member_count: int,
+    is_board_member: bool,
+    is_gsoc_mentor: bool,
+    is_owasp_staff: bool,
+    has_pull_requests: bool,
+    has_issues: bool,
+    has_releases: bool,
+    has_contributions: bool,
+    contribution_data: dict | None,
+) -> float:
+    """Calculate the composite member ranking score.
 
-    def calculate(self, user) -> float:
-        """Calculate the composite score for a user.
+    All inputs are simple values so this function is easy to test
+    without database dependencies.
 
-        Args:
-            user: User instance with related data.
+    Returns:
+        float: The calculated ranking score (≥ 0).
 
-        Returns:
-            float: Weighted composite score.
+    """
+    contributions_score = _score_contributions(contributions_count)
+    leadership_score = _score_leadership(
+        chapter_leader_count=chapter_leader_count,
+        project_leader_count=project_leader_count,
+        committee_member_count=committee_member_count,
+        is_board_member=is_board_member,
+        is_gsoc_mentor=is_gsoc_mentor,
+        is_owasp_staff=is_owasp_staff,
+    )
+    recency_score = _score_recency(contribution_data)
+    breadth_score = _score_breadth(distinct_repository_count)
+    type_diversity_score = _score_type_diversity(
+        has_contributions=has_contributions,
+        has_pull_requests=has_pull_requests,
+        has_issues=has_issues,
+        has_releases=has_releases,
+    )
+    releases_score = _score_releases(release_count)
+    consistency_score = _score_consistency(contribution_data)
 
-        """
-        contribution = self._contribution_score(user)
-        leadership = self._leadership_score(user)
-        recency = self._recency_score(user)
-        breadth = self._breadth_score(user)
-        type_diversity = self._type_diversity_score(user)
-        consistency = self._consistency_score(user)
+    total = (
+        WEIGHT_CONTRIBUTIONS * contributions_score
+        + WEIGHT_LEADERSHIP * leadership_score
+        + WEIGHT_RECENCY * recency_score
+        + WEIGHT_BREADTH * breadth_score
+        + WEIGHT_TYPE_DIVERSITY * type_diversity_score
+        + WEIGHT_RELEASES * releases_score
+        + WEIGHT_CONSISTENCY * consistency_score
+    )
 
-        return round(
-            WEIGHT_CONTRIBUTIONS * contribution
-            + WEIGHT_LEADERSHIP * leadership
-            + WEIGHT_RECENCY * recency
-            + WEIGHT_BREADTH * breadth
-            + WEIGHT_TYPE_DIVERSITY * type_diversity
-            + WEIGHT_CONSISTENCY * consistency,
-            2,
-        )
+    return round(total, 2)
 
-    @staticmethod
-    def _contribution_score(user) -> float:
-        """Score based on total contribution count using logarithmic scaling.
 
-        Args:
-            user: User instance.
+def _score_contributions(contributions_count: int) -> float:
+    """Score based on total contribution count using logarithmic scaling.
 
-        Returns:
-            float: Score from 0 to 100.
+    Returns:
+        float: Score from 0 to 100.
 
-        """
-        if user.contributions_count <= 0:
-            return 0
-        return min(MAX_SCORE, math.log2(1 + user.contributions_count) * 10)
+    """
+    if contributions_count <= 0:
+        return 0.0
+    return min(MAX_SCORE, math.log2(1 + contributions_count) * 10)
 
-    @staticmethod
-    def _leadership_score(user) -> float:
-        """Score based on community leadership roles.
 
-        Args:
-            user: User instance.
+def _score_leadership(
+    *,
+    chapter_leader_count: int,
+    project_leader_count: int,
+    committee_member_count: int,
+    is_board_member: bool,
+    is_gsoc_mentor: bool,
+    is_owasp_staff: bool,
+) -> float:
+    """Score based on community leadership roles.
 
-        Returns:
-            float: Score from 0 to 100.
+    Returns:
+        float: Score from 0 to 100.
 
-        """
-        from apps.owasp.models.chapter import Chapter  # noqa: PLC0415
-        from apps.owasp.models.committee import Committee  # noqa: PLC0415
-        from apps.owasp.models.entity_member import EntityMember  # noqa: PLC0415
-        from apps.owasp.models.project import Project  # noqa: PLC0415
+    """
+    score = 0.0
+    score += min(project_leader_count * POINTS_PROJECT_LEADER, MAX_PROJECT_LEADER_POINTS)
+    score += min(chapter_leader_count * POINTS_CHAPTER_LEADER, MAX_CHAPTER_LEADER_POINTS)
+    score += min(committee_member_count * POINTS_COMMITTEE_MEMBER, MAX_COMMITTEE_MEMBER_POINTS)
 
-        score = 0
+    if is_board_member:
+        score += POINTS_BOARD_MEMBER
+    if is_gsoc_mentor:
+        score += POINTS_GSOC_MENTOR
+    if is_owasp_staff:
+        score += POINTS_OWASP_STAFF
 
-        leader_memberships = EntityMember.objects.filter(
-            member=user,
-            is_active=True,
-            is_reviewed=True,
-        )
+    return min(score, MAX_SCORE)
 
-        project_ct = ContentType.objects.get_for_model(Project)
-        chapter_ct = ContentType.objects.get_for_model(Chapter)
-        committee_ct = ContentType.objects.get_for_model(Committee)
 
-        project_leader_count = leader_memberships.filter(
-            entity_type=project_ct,
-            role=EntityMember.Role.LEADER,
-        ).count()
-        score += min(project_leader_count * POINTS_PROJECT_LEADER, MAX_PROJECT_LEADER_POINTS)
+def _score_recency(contribution_data: dict | None) -> float:
+    """Score based on recent contribution activity.
 
-        chapter_leader_count = leader_memberships.filter(
-            entity_type=chapter_ct,
-            role=EntityMember.Role.LEADER,
-        ).count()
-        score += min(chapter_leader_count * POINTS_CHAPTER_LEADER, MAX_CHAPTER_LEADER_POINTS)
+    Contributions are weighted by recency:
+    - Last 90 days: weight 3x
+    - 91-180 days: weight 2x
+    - 181-365 days: weight 1x
 
-        committee_member_count = leader_memberships.filter(
-            entity_type=committee_ct,
-            role__in=[EntityMember.Role.LEADER, EntityMember.Role.MEMBER],
-        ).count()
-        score += min(committee_member_count * POINTS_COMMITTEE_MEMBER, MAX_COMMITTEE_MEMBER_POINTS)
+    Returns:
+        float: Score from 0 to 100.
 
+    """
+    if not contribution_data:
+        return 0.0
+
+    now = datetime.now(tz=UTC).date()
+    window_90 = now - timedelta(days=90)
+    window_180 = now - timedelta(days=180)
+    window_365 = now - timedelta(days=365)
+
+    recent_90: float = 0.0
+    recent_180: float = 0.0
+    recent_365: float = 0.0
+
+    for date_str, count in contribution_data.items():
         try:
-            profile = user.owasp_profile
-            if profile.is_owasp_board_member:
-                score += POINTS_BOARD_MEMBER
-            if profile.is_gsoc_mentor:
-                score += POINTS_GSOC_MENTOR
-        except ObjectDoesNotExist:
-            pass
+            date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC).date()
+            numeric_count = float(count)
+        except (ValueError, TypeError):
+            continue
 
-        if user.is_owasp_staff:
-            score += POINTS_OWASP_STAFF
+        if numeric_count <= 0:
+            continue
 
-        return min(score, MAX_SCORE)
+        if date >= window_90:
+            recent_90 += numeric_count
+        elif date >= window_180:
+            recent_180 += numeric_count
+        elif date >= window_365:
+            recent_365 += numeric_count
 
-    @staticmethod
-    def _recency_score(user) -> float:
-        """Score based on recent contribution activity.
+    weighted_sum = recent_90 * 3 + recent_180 * 2 + recent_365 * 1
 
-        Contributions are weighted by recency:
-        - Last 90 days: weight 3x
-        - 91-180 days: weight 2x
-        - 181-365 days: weight 1x
+    if weighted_sum <= 0:
+        return 0.0
 
-        Args:
-            user: User instance.
+    return min(MAX_SCORE, math.log2(1 + weighted_sum) * 8)
 
-        Returns:
-            float: Score from 0 to 100.
 
-        """
-        contribution_data = user.contribution_data
-        if not contribution_data:
-            return 0
+def _score_breadth(distinct_repository_count: int) -> float:
+    """Score based on the number of distinct repositories contributed to.
 
-        now = datetime.now(tz=UTC).date()
-        window_90 = now - timedelta(days=90)
-        window_180 = now - timedelta(days=180)
-        window_365 = now - timedelta(days=365)
+    Returns:
+        float: Score from 0 to 100.
 
-        recent_90: float = 0.0
-        recent_180: float = 0.0
-        recent_365: float = 0.0
+    """
+    return min(MAX_SCORE, distinct_repository_count * 10)
 
-        for date_str, count in contribution_data.items():
-            try:
-                date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC).date()
-                numeric_count = float(count)
-            except (ValueError, TypeError):
-                continue
 
-            if numeric_count <= 0:
-                continue
+def _score_releases(release_count: int) -> float:
+    """Score based on how many releases a user has authored.
 
-            if date >= window_90:
-                recent_90 += numeric_count
-            elif date >= window_180:
-                recent_180 += numeric_count
-            elif date >= window_365:
-                recent_365 += numeric_count
+    Uses logarithmic scaling with a higher multiplier since
+    releases are high-impact but infrequent events.
 
-        weighted_sum = recent_90 * 3 + recent_180 * 2 + recent_365 * 1
+    Returns:
+        float: Score from 0 to 100.
 
-        if weighted_sum <= 0:
-            return 0
+    """
+    if release_count <= 0:
+        return 0.0
+    return min(MAX_SCORE, math.log2(1 + release_count) * 20)
 
-        return min(MAX_SCORE, math.log2(1 + weighted_sum) * 8)
 
-    @staticmethod
-    def _breadth_score(user) -> float:
-        """Score based on the number of distinct repositories contributed to.
+def _score_type_diversity(
+    *,
+    has_contributions: bool,
+    has_pull_requests: bool,
+    has_issues: bool,
+    has_releases: bool,
+) -> float:
+    """Score based on diversity of contribution types.
 
-        Args:
-            user: User instance.
+    Awards 25 points each for having: commits, PRs, issues, releases.
 
-        Returns:
-            float: Score from 0 to 100.
+    Returns:
+        float: Score from 0 to 100.
 
-        """
-        from apps.github.models.repository_contributor import (  # noqa: PLC0415
-            RepositoryContributor,
-        )
+    """
+    score = 0.0
+    if has_contributions:
+        score += 25
+    if has_pull_requests:
+        score += 25
+    if has_issues:
+        score += 25
+    if has_releases:
+        score += 25
+    return score
 
-        distinct_repos = (
-            RepositoryContributor.objects.filter(user=user)
-            .exclude(
-                Q(repository__is_fork=True)
-                | Q(repository__organization__is_owasp_related_organization=False)
-            )
-            .values("repository")
-            .distinct()
-            .count()
-        )
 
-        return min(MAX_SCORE, distinct_repos * 10)
+def _score_consistency(contribution_data: dict | None) -> float:
+    """Score based on regularity of activity.
 
-    @staticmethod
-    def _type_diversity_score(user) -> float:
-        """Score based on diversity of contribution types.
+    Calculates the ratio of active days to total days in the
+    contribution data period.
 
-        Awards 25 points each for having: commits, PRs, issues, releases.
+    Returns:
+        float: Score from 0 to 100.
 
-        Args:
-            user: User instance.
+    """
+    if not contribution_data:
+        return 0.0
 
-        Returns:
-            float: Score from 0 to 100.
+    total_days = len(contribution_data)
+    if total_days == 0:
+        return 0.0
 
-        """
-        from apps.github.models.repository_contributor import (  # noqa: PLC0415
-            RepositoryContributor,
-        )
+    active_days = 0
+    for count in contribution_data.values():
+        try:
+            if float(count) > 0:
+                active_days += 1
+        except (ValueError, TypeError):
+            continue
 
-        score = 0
-
-        has_contributions = (
-            RepositoryContributor.objects.filter(user=user, contributions_count__gt=0)
-            .exclude(
-                Q(repository__is_fork=True)
-                | Q(repository__organization__is_owasp_related_organization=False)
-            )
-            .exists()
-        )
-        if has_contributions:
-            score += 25
-
-        if user.created_pull_requests.exists():
-            score += 25
-
-        if user.created_issues.exists():
-            score += 25
-
-        if user.created_releases.exists():
-            score += 25
-
-        return score
-
-    @staticmethod
-    def _consistency_score(user) -> float:
-        """Score based on regularity of activity.
-
-        Calculates the ratio of active days to total days in the
-        contribution data period.
-
-        Args:
-            user: User instance.
-
-        Returns:
-            float: Score from 0 to 100.
-
-        """
-        contribution_data = user.contribution_data
-        if not contribution_data:
-            return 0
-
-        total_days = len(contribution_data)
-        if total_days == 0:
-            return 0
-
-        active_days = 0
-        for count in contribution_data.values():
-            try:
-                if float(count) > 0:
-                    active_days += 1
-            except (ValueError, TypeError):
-                continue
-
-        return min(MAX_SCORE, (active_days / total_days) * MAX_SCORE)
+    return min(MAX_SCORE, (active_days / total_days) * MAX_SCORE)
