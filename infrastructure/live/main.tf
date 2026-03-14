@@ -1,15 +1,16 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
 
 locals {
+  assign_public_ip = var.enable_nat_gateway ? false : true
   common_tags = {
     Environment = var.environment
     ManagedBy   = "Terraform"
@@ -35,6 +36,7 @@ module "alb" {
 module "backend" {
   source = "../modules/service"
 
+  assign_public_ip      = local.assign_public_ip
   aws_region            = var.aws_region
   command               = ["./entrypoint.sh"]
   common_tags           = local.common_tags
@@ -49,10 +51,10 @@ module "backend" {
   max_count             = var.backend_max_count
   min_count             = var.backend_min_count
   parameters_arns       = module.parameters.django_ssm_parameter_arns
-  private_subnet_ids    = module.networking.private_subnet_ids
   project_name          = var.project_name
   security_group_id     = module.security.backend_sg_id
   service_name          = "backend"
+  subnet_ids            = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn      = module.alb.backend_target_group_arn
   task_role_policy_arns = [module.storage.static_read_write_policy_arn]
   use_fargate_spot      = var.backend_use_fargate_spot
@@ -77,7 +79,6 @@ module "database" {
   source = "../modules/database"
 
   common_tags                    = local.common_tags
-  create_rds_proxy               = var.create_rds_proxy
   db_allocated_storage           = var.db_allocated_storage
   db_backup_retention_period     = var.db_backup_retention_period
   db_deletion_protection         = var.db_deletion_protection
@@ -89,6 +90,7 @@ module "database" {
   db_storage_type                = var.db_storage_type
   db_subnet_ids                  = module.networking.private_subnet_ids
   db_user                        = var.db_user
+  enable_rds_proxy               = var.enable_rds_proxy
   environment                    = var.environment
   kms_key_arn                    = module.kms.key_arn
   project_name                   = var.project_name
@@ -100,6 +102,7 @@ module "database" {
 module "frontend" {
   source = "../modules/service"
 
+  assign_public_ip    = local.assign_public_ip
   aws_region          = var.aws_region
   common_tags         = local.common_tags
   container_port      = 3000
@@ -111,10 +114,10 @@ module "frontend" {
   max_count           = var.frontend_max_count
   min_count           = var.frontend_min_count
   parameters_arns     = module.parameters.frontend_ssm_parameter_arns
-  private_subnet_ids  = module.networking.private_subnet_ids
   project_name        = var.project_name
   security_group_id   = module.security.frontend_sg_id
   service_name        = "frontend"
+  subnet_ids          = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn    = module.alb.frontend_target_group_arn
   use_fargate_spot    = var.frontend_use_fargate_spot
 }
@@ -131,15 +134,16 @@ module "kms" {
 module "networking" {
   source = "../modules/networking"
 
-  aws_region                          = var.aws_region
   availability_zones                  = var.availability_zones
+  aws_region                          = var.aws_region
   common_tags                         = local.common_tags
-  create_vpc_cloudwatch_logs_endpoint = var.create_vpc_cloudwatch_logs_endpoint
-  create_vpc_ecr_api_endpoint         = var.create_vpc_ecr_api_endpoint
-  create_vpc_ecr_dkr_endpoint         = var.create_vpc_ecr_dkr_endpoint
-  create_vpc_s3_endpoint              = var.create_vpc_s3_endpoint
-  create_vpc_secretsmanager_endpoint  = var.create_vpc_secretsmanager_endpoint
-  create_vpc_ssm_endpoint             = var.create_vpc_ssm_endpoint
+  enable_nat_gateway                  = var.enable_nat_gateway
+  enable_vpc_cloudwatch_logs_endpoint = var.enable_vpc_cloudwatch_logs_endpoint
+  enable_vpc_ecr_api_endpoint         = var.enable_vpc_ecr_api_endpoint
+  enable_vpc_ecr_dkr_endpoint         = var.enable_vpc_ecr_dkr_endpoint
+  enable_vpc_s3_endpoint              = var.enable_vpc_s3_endpoint
+  enable_vpc_secretsmanager_endpoint  = var.enable_vpc_secretsmanager_endpoint
+  enable_vpc_ssm_endpoint             = var.enable_vpc_ssm_endpoint
   environment                         = var.environment
   kms_key_arn                         = module.kms.key_arn
   private_subnet_cidrs                = var.private_subnet_cidrs
@@ -151,31 +155,33 @@ module "networking" {
 module "parameters" {
   source = "../modules/parameters"
 
-  allowed_hosts      = var.domain_name
-  allowed_origins    = "https://${var.domain_name}"
-  common_tags        = local.common_tags
-  db_host            = module.database.db_proxy_endpoint
-  db_name            = var.db_name
-  db_password_arn    = module.database.db_password_arn
-  db_port            = var.db_port
-  db_user            = var.db_user
-  environment        = var.environment
-  nextauth_url       = "https://${var.domain_name}"
-  project_name       = var.project_name
-  redis_host         = module.cache.redis_primary_endpoint
-  redis_password_arn = module.cache.redis_password_arn
-  server_csrf_url    = "https://${var.domain_name}/csrf/"
-  server_graphql_url = "https://${var.domain_name}/graphql/"
-  static_bucket_name = module.storage.static_s3_bucket_name
+  common_tags                   = local.common_tags
+  db_password_arn               = module.database.db_password_arn
+  django_configuration          = var.django_configuration
+  django_allowed_hosts          = var.domain_name
+  django_allowed_origins        = "https://${var.domain_name}"
+  django_aws_static_bucket_name = module.storage.static_s3_bucket_name
+  django_db_host                = module.database.db_proxy_endpoint
+  django_db_name                = var.db_name
+  django_db_port                = var.db_port
+  django_db_user                = var.db_user
+  django_redis_host             = module.cache.redis_primary_endpoint
+  django_settings_module        = var.django_settings_module
+  environment                   = var.environment
+  next_server_csrf_url          = "https://${var.domain_name}/csrf/"
+  next_server_graphql_url       = "https://${var.domain_name}/graphql/"
+  nextauth_url                  = "https://${var.domain_name}"
+  project_name                  = var.project_name
+  redis_password_arn            = module.cache.redis_password_arn
 }
 
 module "security" {
   source = "../modules/security"
 
   common_tags               = local.common_tags
-  create_rds_proxy          = var.create_rds_proxy
-  create_vpc_endpoint_rules = var.create_vpc_ssm_endpoint || var.create_vpc_cloudwatch_logs_endpoint || var.create_vpc_ecr_api_endpoint || var.create_vpc_ecr_dkr_endpoint || var.create_vpc_secretsmanager_endpoint
   db_port                   = var.db_port
+  enable_rds_proxy          = var.enable_rds_proxy
+  enable_vpc_endpoint_rules = var.enable_vpc_ssm_endpoint || var.enable_vpc_cloudwatch_logs_endpoint || var.enable_vpc_ecr_api_endpoint || var.enable_vpc_ecr_dkr_endpoint || var.enable_vpc_secretsmanager_endpoint
   environment               = var.environment
   project_name              = var.project_name
   redis_port                = var.redis_port
@@ -196,19 +202,20 @@ module "storage" {
 module "tasks" {
   source = "../modules/tasks"
 
-  assign_public_ip              = var.tasks_assign_public_ip
+  assign_public_ip              = local.assign_public_ip
   aws_region                    = var.aws_region
   common_tags                   = local.common_tags
   container_parameters_arns     = module.parameters.django_ssm_parameter_arns
   ecr_repository_arn            = module.backend.ecr_repository_arn
   ecr_repository_url            = module.backend.ecr_repository_url
   ecs_sg_id                     = module.security.tasks_sg_id
+  enable_cron_tasks             = var.enable_cron_tasks
   environment                   = var.environment
   fixtures_bucket_name          = module.storage.fixtures_s3_bucket_name
   fixtures_read_only_policy_arn = module.storage.fixtures_read_only_policy_arn
   image_tag                     = var.backend_image_tag
   kms_key_arn                   = module.kms.key_arn
   project_name                  = var.project_name
-  subnet_ids                    = var.tasks_assign_public_ip ? module.networking.public_subnet_ids : module.networking.private_subnet_ids
+  subnet_ids                    = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   use_fargate_spot              = var.tasks_use_fargate_spot
 }

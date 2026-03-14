@@ -1,3 +1,9 @@
+variable "assign_public_ip" {
+  description = "Whether to assign public IPs to ECS tasks (required for public subnets)."
+  type        = bool
+  default     = false
+}
+
 variable "aws_region" {
   description = "The AWS region."
   type        = string
@@ -99,11 +105,6 @@ variable "parameters_arns" {
   default     = {}
 }
 
-variable "private_subnet_ids" {
-  description = "A list of private subnet IDs for the service."
-  type        = list(string)
-}
-
 variable "project_name" {
   description = "The name of the project."
   type        = string
@@ -117,6 +118,16 @@ variable "security_group_id" {
 variable "service_name" {
   description = "The name of the service (e.g., backend, frontend)."
   type        = string
+}
+
+variable "subnet_ids" {
+  description = "Subnet IDs for ECS tasks (can be public or private)."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.subnet_ids) > 0
+    error_message = "subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "target_group_arn" {

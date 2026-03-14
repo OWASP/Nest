@@ -41,7 +41,7 @@ class TestReleaseIndex:
                     }
                 ],
             ),
-            ("idx_created_at", datetime(2023, 1, 1, tzinfo=UTC).timestamp()),
+            ("idx_created_at", datetime(2023, 1, 1, tzinfo=UTC).isoformat()),
             (
                 "idx_description",
                 "This is a long description",

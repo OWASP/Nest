@@ -74,11 +74,11 @@ security-scan-frontend-image:
 		--rm \
 		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
-		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		image --config /trivy.yaml $(FRONTEND_IMAGE_NAME)
+		image --config /.trivy.yaml $(FRONTEND_IMAGE_NAME)
 
 SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
 
