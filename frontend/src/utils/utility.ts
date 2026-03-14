@@ -23,7 +23,7 @@ type ProjectType = Project | Issue | Committee | Chapter
 export const getFilteredIcons = (project: ProjectType, params: string[]): Icon => {
   const filteredIcons = params.reduce((acc: Icon, key) => {
     if (ICONS[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
-      if (key === 'createdAt') {
+      if (key === 'createdAt' || key === 'updatedAt') {
         const timestamp = project[key as keyof ProjectType]
         const dayjsDate = typeof timestamp === 'number' ? dayjs.unix(timestamp) : dayjs(timestamp)
         acc[key] = dayjsDate.fromNow()

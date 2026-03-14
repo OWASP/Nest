@@ -119,7 +119,7 @@ class TestRepositoryIndexMixin:
             ("idx_license", "MIT"),
             ("idx_name", "Name"),
             ("idx_open_issues_count", OPEN_ISSUES_COUNT),
-            ("idx_pushed_at", datetime(2021, 1, 1, tzinfo=UTC).timestamp()),
+            ("idx_pushed_at", datetime(2021, 1, 1, tzinfo=UTC).isoformat()),
             ("idx_size", 1024),
             ("idx_stars_count", STARS_COUNT),
             ("idx_subscribers_count", SUBSCRIBERS_COUNT),

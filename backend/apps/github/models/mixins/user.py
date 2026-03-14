@@ -224,7 +224,7 @@ class UserIndexMixin:
         """
         return [
             {
-                "created_at": i.created_at.timestamp(),
+                "created_at": i.created_at.isoformat(),
                 "comments_count": i.comments_count,
                 "number": i.number,
                 "repository": {
@@ -264,7 +264,7 @@ class UserIndexMixin:
             {
                 "is_pre_release": r.is_pre_release,
                 "name": r.name,
-                "published_at": r.published_at.timestamp(),
+                "published_at": r.published_at.isoformat(),
                 "repository": {
                     "key": r.repository.key,
                     "owner_key": r.repository.owner.login,
