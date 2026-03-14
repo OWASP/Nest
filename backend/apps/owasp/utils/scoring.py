@@ -6,19 +6,19 @@ import math
 from datetime import UTC, datetime, timedelta
 
 WEIGHT_CONTRIBUTIONS = 0.35
-WEIGHT_LEADERSHIP    = 0.25
-WEIGHT_RECENCY       = 0.20
-WEIGHT_BREADTH       = 0.10
-WEIGHT_CONSISTENCY   = 0.10
+WEIGHT_LEADERSHIP = 0.25
+WEIGHT_RECENCY = 0.20
+WEIGHT_BREADTH = 0.10
+WEIGHT_CONSISTENCY = 0.10
 
-POINTS_BOARD_MEMBER     = 50
-POINTS_PROJECT_LEADER   = 20
-POINTS_CHAPTER_LEADER   = 15
+POINTS_BOARD_MEMBER = 50
+POINTS_PROJECT_LEADER = 20
+POINTS_CHAPTER_LEADER = 15
 POINTS_COMMITTEE_MEMBER = 10
-POINTS_GSOC_MENTOR      = 10
+POINTS_GSOC_MENTOR = 10
 
-RECENCY_WINDOW_DAYS  = 90
-CONSISTENCY_WEEKS    = 52
+RECENCY_WINDOW_DAYS = 90
+CONSISTENCY_WEEKS = 52
 
 
 def calculate_member_score(
@@ -35,15 +35,16 @@ def calculate_member_score(
     """Calculate a member's ranking score (0-100) based on contributions and roles."""
     score = (
         WEIGHT_CONTRIBUTIONS * _contributions_score(contributions_count)
-        + WEIGHT_LEADERSHIP  * _leadership_score(
+        + WEIGHT_LEADERSHIP
+        * _leadership_score(
             chapter_leader_count=chapter_leader_count,
             project_leader_count=project_leader_count,
             committee_member_count=committee_member_count,
             is_board_member=is_board_member,
             is_gsoc_mentor=is_gsoc_mentor,
         )
-        + WEIGHT_RECENCY     * _recency_score(contribution_data)
-        + WEIGHT_BREADTH     * _breadth_score(distinct_repository_count)
+        + WEIGHT_RECENCY * _recency_score(contribution_data)
+        + WEIGHT_BREADTH * _breadth_score(distinct_repository_count)
         + WEIGHT_CONSISTENCY * _consistency_score(contribution_data)
     )
 
@@ -67,11 +68,11 @@ def _leadership_score(
 ) -> float:
     """Calculate leadership score from community roles (0-80)."""
     score = (
-        int(is_board_member)     * POINTS_BOARD_MEMBER
-        + project_leader_count   * POINTS_PROJECT_LEADER
-        + chapter_leader_count   * POINTS_CHAPTER_LEADER
+        int(is_board_member) * POINTS_BOARD_MEMBER
+        + project_leader_count * POINTS_PROJECT_LEADER
+        + chapter_leader_count * POINTS_CHAPTER_LEADER
         + committee_member_count * POINTS_COMMITTEE_MEMBER
-        + int(is_gsoc_mentor)    * POINTS_GSOC_MENTOR
+        + int(is_gsoc_mentor) * POINTS_GSOC_MENTOR
     )
     return min(80.0, score)
 
@@ -81,8 +82,8 @@ def _recency_score(contribution_data: dict | None) -> float:
     if not contribution_data:
         return 0.0
 
-    now                  = datetime.now(tz=UTC)
-    window_start         = now - timedelta(days=RECENCY_WINDOW_DAYS)
+    now = datetime.now(tz=UTC)
+    window_start = now - timedelta(days=RECENCY_WINDOW_DAYS)
     recent_contributions = 0.0
 
     for date_str, count in contribution_data.items():
@@ -112,7 +113,7 @@ def _consistency_score(contribution_data: dict | None) -> float:
     if not contribution_data:
         return 0.0
 
-    now          = datetime.now(tz=UTC)
+    now = datetime.now(tz=UTC)
     one_year_ago = now - timedelta(weeks=CONSISTENCY_WEEKS)
     active_weeks: set[tuple[int, int]] = set()
 
@@ -127,4 +128,4 @@ def _consistency_score(contribution_data: dict | None) -> float:
         if date >= one_year_ago:
             active_weeks.add((date.isocalendar().year, date.isocalendar().week))
 
-    return round(len(active_weeks) / CONSISTENCY_WEEKS * 100.0, 2)
+    return min(100.0, round(len(active_weeks) / CONSISTENCY_WEEKS * 100.0, 2))

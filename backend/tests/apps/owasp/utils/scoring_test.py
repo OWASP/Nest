@@ -7,12 +7,12 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 from apps.owasp.utils.scoring import (
-    calculate_member_score,
     _breadth_score,
     _consistency_score,
     _contributions_score,
     _leadership_score,
     _recency_score,
+    calculate_member_score,
 )
 
 
@@ -21,11 +21,11 @@ class TestContributionsScore:
 
     def test_no_contributions_returns_zero(self):
         """Test that zero contributions returns zero score."""
-        assert _contributions_score(0) == 0.0
+        assert _contributions_score(0) == pytest.approx(0.0)
 
     def test_negative_contributions_returns_zero(self):
         """Test that negative contributions returns zero score."""
-        assert _contributions_score(-5) == 0.0
+        assert _contributions_score(-5) == pytest.approx(0.0)
 
     def test_single_contribution(self):
         """Test score for single contribution."""
@@ -36,7 +36,7 @@ class TestContributionsScore:
         """Test that contributions score is capped at 100."""
         high_contributions = 100000
         score = _contributions_score(high_contributions)
-        assert score == 100.0
+        assert score == pytest.approx(100.0)
 
     def test_contributions_score_log_scaling(self):
         """Test that contributions use logarithmic scaling."""
@@ -59,7 +59,7 @@ class TestLeadershipScore:
             is_board_member=False,
             is_gsoc_mentor=False,
         )
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_board_member_score(self):
         """Test board member score."""
@@ -70,7 +70,7 @@ class TestLeadershipScore:
             is_board_member=True,
             is_gsoc_mentor=False,
         )
-        assert score == 50.0
+        assert score == pytest.approx(50.0)
 
     def test_project_leader_score(self):
         """Test project leader score."""
@@ -81,7 +81,7 @@ class TestLeadershipScore:
             is_board_member=False,
             is_gsoc_mentor=False,
         )
-        assert score == 20.0
+        assert score == pytest.approx(20.0)
 
     def test_chapter_leader_score(self):
         """Test chapter leader score."""
@@ -92,7 +92,7 @@ class TestLeadershipScore:
             is_board_member=False,
             is_gsoc_mentor=False,
         )
-        assert score == 15.0
+        assert score == pytest.approx(15.0)
 
     def test_committee_member_score(self):
         """Test committee member score."""
@@ -103,7 +103,7 @@ class TestLeadershipScore:
             is_board_member=False,
             is_gsoc_mentor=False,
         )
-        assert score == 10.0
+        assert score == pytest.approx(10.0)
 
     def test_gsoc_mentor_score(self):
         """Test GSOC mentor score."""
@@ -114,7 +114,7 @@ class TestLeadershipScore:
             is_board_member=False,
             is_gsoc_mentor=True,
         )
-        assert score == 10.0
+        assert score == pytest.approx(10.0)
 
     def test_leadership_score_capped_at_80(self):
         """Test that leadership score is capped at 80."""
@@ -125,7 +125,7 @@ class TestLeadershipScore:
             is_board_member=True,
             is_gsoc_mentor=True,
         )
-        assert score == 80.0
+        assert score == pytest.approx(80.0)
 
     def test_multiple_roles_accumulate(self):
         """Test that multiple roles accumulate."""
@@ -136,7 +136,7 @@ class TestLeadershipScore:
             is_board_member=False,
             is_gsoc_mentor=False,
         )
-        assert score == 50.0
+        assert score == pytest.approx(50.0)
 
 
 class TestRecencyScore:
@@ -145,12 +145,12 @@ class TestRecencyScore:
     def test_no_contribution_data_returns_zero(self):
         """Test that empty contribution data returns zero."""
         score = _recency_score(None)
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_empty_contribution_data_returns_zero(self):
         """Test that empty dict returns zero."""
         score = _recency_score({})
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_recent_contributions(self):
         """Test score for recent contributions."""
@@ -159,7 +159,8 @@ class TestRecencyScore:
         contribution_data = {recent_date: 5}
 
         score = _recency_score(contribution_data)
-        assert score > 0 and score <= 100
+        assert score > 0
+        assert score <= 100
 
     def test_old_contributions_not_counted(self):
         """Test that contributions older than 90 days are ignored."""
@@ -168,10 +169,10 @@ class TestRecencyScore:
         contribution_data = {old_date: 100}
 
         score = _recency_score(contribution_data)
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_boundary_contributions_at_90_days(self):
-        """Test contributions exactly at 90-day boundary."""
+        """Test contributions within 90-day window (89 days old)."""
         now = datetime.now(tz=UTC)
         boundary_date = (now - timedelta(days=89)).strftime("%Y-%m-%d")
         contribution_data = {boundary_date: 1}
@@ -188,7 +189,8 @@ class TestRecencyScore:
             data[date] = 1
 
         score = _recency_score(data)
-        assert score > 0 and score <= 100
+        assert score > 0
+        assert score <= 100
 
     def test_invalid_date_format_ignored(self):
         """Test that invalid date formats are handled gracefully."""
@@ -207,11 +209,11 @@ class TestBreadthScore:
 
     def test_no_repositories_returns_zero(self):
         """Test that zero repositories returns zero."""
-        assert _breadth_score(0) == 0.0
+        assert _breadth_score(0) == pytest.approx(0.0)
 
     def test_negative_repositories_returns_zero(self):
         """Test that negative repositories returns zero."""
-        assert _breadth_score(-5) == 0.0
+        assert _breadth_score(-5) == pytest.approx(0.0)
 
     def test_single_repository(self):
         """Test score for single repository."""
@@ -222,7 +224,7 @@ class TestBreadthScore:
         """Test that breadth score is capped at 100."""
         many_repos = 10000
         score = _breadth_score(many_repos)
-        assert score == 100.0
+        assert score == pytest.approx(100.0)
 
     def test_breadth_uses_log_scaling(self):
         """Test that breadth uses logarithmic scaling."""
@@ -239,19 +241,19 @@ class TestConsistencyScore:
     def test_no_contribution_data_returns_zero(self):
         """Test that empty contribution data returns zero."""
         score = _consistency_score(None)
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_empty_contribution_data_returns_zero(self):
         """Test that empty dict returns zero."""
         score = _consistency_score({})
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_contributions_in_one_week(self):
         """Test contributions spread across one week."""
         now = datetime.now(tz=UTC)
         data = {}
         # Use different weeks to ensure different ISO weeks
-        for weeks_ago in range(0, 5):
+        for weeks_ago in range(5):
             date = (now - timedelta(weeks=weeks_ago)).strftime("%Y-%m-%d")
             data[date] = 1
 
@@ -263,7 +265,7 @@ class TestConsistencyScore:
         """Test contributions spread across full year."""
         now = datetime.now(tz=UTC)
         data = {}
-        for weeks_ago in range(0, 52):
+        for weeks_ago in range(52):
             date = (now - timedelta(weeks=weeks_ago)).strftime("%Y-%m-%d")
             data[date] = 1
 
@@ -277,7 +279,7 @@ class TestConsistencyScore:
         data = {old_date: 100}
 
         score = _consistency_score(data)
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_invalid_date_format_ignored(self):
         """Test that invalid dates are handled gracefully."""
@@ -305,14 +307,13 @@ class TestComprehensiveMemberScore:
             is_gsoc_mentor=False,
             contribution_data=None,
         )
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     def test_maximum_score_not_exceeded(self):
         """Test that score is capped at 100."""
         now = datetime.now(tz=UTC)
         contribution_data = {
-            (now - timedelta(days=i)).strftime("%Y-%m-%d"): 100
-            for i in range(90)
+            (now - timedelta(days=i)).strftime("%Y-%m-%d"): 100 for i in range(90)
         }
 
         score = calculate_member_score(
@@ -330,10 +331,7 @@ class TestComprehensiveMemberScore:
     def test_score_is_weighted_correctly(self):
         """Test that score weights are applied correctly."""
         now = datetime.now(tz=UTC)
-        contribution_data = {
-            (now - timedelta(days=i)).strftime("%Y-%m-%d"): 1
-            for i in range(7)
-        }
+        contribution_data = {(now - timedelta(days=i)).strftime("%Y-%m-%d"): 1 for i in range(7)}
 
         score = calculate_member_score(
             contributions_count=10,
@@ -366,10 +364,7 @@ class TestComprehensiveMemberScore:
     def test_contributions_are_primary_factor(self):
         """Test that contributions have the largest weight (35%)."""
         now = datetime.now(tz=UTC)
-        contribution_data = {
-            (now - timedelta(days=i)).strftime("%Y-%m-%d"): 1
-            for i in range(30)
-        }
+        contribution_data = {(now - timedelta(days=i)).strftime("%Y-%m-%d"): 1 for i in range(30)}
 
         score_with_contributions = calculate_member_score(
             contributions_count=100,

@@ -553,7 +553,7 @@ class Command(BaseCommand):
                 is_active=True,
             )
             .exclude(entity_type__in=[chapter_ct, project_ct])
-            .values_list("entity_id", flat=True)
+            .values_list("entity_type", "entity_id")
             .distinct()
             .count()
         )

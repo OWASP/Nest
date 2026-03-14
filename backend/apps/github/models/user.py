@@ -70,7 +70,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     calculated_score = models.FloatField(
         verbose_name="Calculated ranking score",
         default=0.0,
-        null=True,
         blank=True,
         help_text="Member ranking score based on contributions and roles",
     )

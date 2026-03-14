@@ -977,7 +977,7 @@ class TestGithubSyncUserCommand:
 
         score = command.calculate_member_score(mock_user)
 
-        assert score == 0.0
+        assert score == pytest.approx(0.0)
 
     @patch("apps.github.management.commands.github_sync_user.EntityMember.objects")
     @patch("apps.github.management.commands.github_sync_user.RepositoryContributor.objects")
