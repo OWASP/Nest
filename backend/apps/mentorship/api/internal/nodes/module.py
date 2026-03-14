@@ -8,7 +8,10 @@ import strawberry
 import strawberry_django
 
 from apps.common.utils import normalize_limit
-from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH, IssueNode  # noqa: TC001
+from apps.github.api.internal.nodes.issue import (
+    MERGED_PULL_REQUESTS_PREFETCH,
+    IssueNode,
+)
 from apps.github.api.internal.nodes.pull_request import PullRequestNode  # noqa: TC001
 from apps.github.api.internal.nodes.user import UserNode  # noqa: TC001
 from apps.github.models import Label
@@ -31,14 +34,14 @@ MAX_LIMIT = 1000
 @strawberry_django.type(
     Module,
     fields=[
-        "id",
-        "key",
-        "name",
         "description",
         "domains",
         "ended_at",
         "experience_level",
+        "id",
+        "key",
         "labels",
+        "name",
         "started_at",
         "tags",
     ],
@@ -74,14 +77,15 @@ class ModuleNode:
             .filter(mentee__github_user__isnull=False)
             .values_list("mentee__github_user", flat=True)
         )
+
         return list(User.objects.filter(id__in=mentee_users).order_by("login"))
 
     @strawberry_django.field
     def issue_mentees(self, root: Module, issue_number: int) -> list[UserNode]:
         """Return mentees assigned to this module's issue identified by its number."""
-        issue_ids = list(root.issues.filter(number=issue_number).values_list("id", flat=True))
-        if not issue_ids:
+        if not (issue_ids := root.issues.filter(number=issue_number).values_list("id", flat=True)):
             return []
+
         mentee_users = (
             Task.objects.filter(module=root, issue_id__in=issue_ids, assignee__isnull=False)
             .select_related("assignee")
@@ -97,13 +101,16 @@ class ModuleNode:
         """Return paginated issues linked to this module, optionally filtered by label."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
+
         queryset = root.issues.select_related("repository", "author").prefetch_related(
             "assignees",
             "labels",
             MERGED_PULL_REQUESTS_PREFETCH,
         )
+
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
+
         return list(queryset.order_by("-updated_at")[offset : offset + normalized_limit])
 
     @strawberry_django.field
@@ -122,6 +129,7 @@ class ModuleNode:
             .values_list("name", flat=True)
             .distinct()
         )
+
         return sorted(label_names)
 
     @strawberry_django.field
@@ -141,9 +149,9 @@ class ModuleNode:
     @strawberry_django.field
     def interested_users(self, root: Module, issue_number: int) -> list[UserNode]:
         """Return users interested in this module's issue identified by its number."""
-        issue_ids = list(root.issues.filter(number=issue_number).values_list("id", flat=True))
-        if not issue_ids:
+        if not (issue_ids := root.issues.filter(number=issue_number).values_list("id", flat=True)):
             return []
+
         interests = (
             IssueUserInterest.objects.select_related("user")
             .filter(module=root, issue_id__in=issue_ids)
@@ -184,9 +192,11 @@ class ModuleNode:
         """Return recent pull requests linked to issues in this module."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
-        issue_ids = root.issues.values_list("id", flat=True)
+
         return list(
-            PullRequest.objects.filter(related_issues__id__in=issue_ids)
+            PullRequest.objects.filter(
+                related_issues__id__in=root.issues.values_list("id", flat=True)
+            )
             .select_related("author")
             .distinct()
             .order_by("-created_at")[:normalized_limit]
