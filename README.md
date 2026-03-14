@@ -2,11 +2,13 @@
 
 [![OWASP](https://img.shields.io/badge/production-blue?&label=level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/archives/project-nest)
 
-[![License](https://img.shields.io/badge/license-%20MIT-blue?style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors)
-
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=blue&label=Build&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml?query=branch%3Amain) [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-code-ql.yaml?branch=main&color=blue&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-code-ql.yaml?query=branch%3Amain) [![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?color=blue&server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/summary/new_code?id=OWASP_Nest&branch=main)
 
+[![License](https://img.shields.io/badge/license-%20MIT-blue?style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors)
+
 [![Issues](https://img.shields.io/github/issues/owasp/nest?color=blue&style=for-the-badge&label=Issues)](https://github.com/OWASP/Nest/issues) [![Pull Requests](https://img.shields.io/github/issues-pr/owasp/nest?color=blue&style=for-the-badge&label=Pull%20Requests)](https://github.com/OWASP/Nest/pulls)
+
+[![DeepWiki](https://img.shields.io/badge/docs-deep%20wiki-blue?style=for-the-badge)](https://deepwiki.com/OWASP/Nest) [![ReadTheDocs](https://img.shields.io/badge/docs-read%20the%20docs-blue?style=for-the-badge)](https://owasp-nest.readthedocs.io/latest/)
 
 [![OpenSSF](https://img.shields.io/badge/OpenSSF-passing-blue?style=for-the-badge)](https://www.bestpractices.dev/projects/10174) [![Snyk Security](https://img.shields.io/badge/Snyk-Scanning-blue?style=for-the-badge)](https://snyk.io)
 
@@ -14,14 +16,15 @@
 
 [![CREATED](https://img.shields.io/badge/created-aug,%202024-blue?style=for-the-badge)](https://github.com/OWASP/Nest/commit/2a213c2efcfc2f8889c2f1d330da0d2e6f649fc1)
 
+# [OWASP Nest](https://nest.owasp.org/)
+
 <picture>
   <source srcset="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_dark.png" media="(prefers-color-scheme: dark)">
   <img src="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_light.png" alt="OWASP Nest Logo" width="200">
 </picture>
 
-# [OWASP Nest](https://nest.owasp.org/)
-
 </div>
+
 <!-- --8<-- [start:docs] -->
 **OWASP Nest** is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 

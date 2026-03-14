@@ -8,13 +8,14 @@ variables {
   container_port        = 3000
   desired_count         = 2
   environment           = "test"
+  image_tag             = "test-tag"
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
   parameters_arns       = { "NEXT_PUBLIC_API_URL" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/NEXT_PUBLIC_API_URL" }
-  private_subnet_ids    = ["subnet-private-1", "subnet-private-2"]
   project_name          = "nest"
   security_group_id     = "sg-service-12345"
   service_name          = "service"
+  subnet_ids            = ["subnet-1", "subnet-2"]
   target_group_arn      = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
 }
 
@@ -58,8 +59,8 @@ run "test_ecr_repository_image_tag_mutability" {
   command = plan
 
   assert {
-    condition     = aws_ecr_repository.main.image_tag_mutability == "MUTABLE"
-    error_message = "ECR repository must have mutable image tags."
+    condition     = aws_ecr_repository.main.image_tag_mutability == "IMMUTABLE"
+    error_message = "ECR repository must have immutable image tags."
   }
 }
 

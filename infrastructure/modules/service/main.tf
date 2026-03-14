@@ -1,10 +1,10 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
@@ -52,10 +52,8 @@ resource "aws_cloudwatch_log_group" "main" {
   })
 }
 
-# TODO: disallow tag mutability
-# NOSEMGREP: terraform.aws.security.aws-ecr-mutable-image-tags.aws-ecr-mutable-image-tags
 resource "aws_ecr_repository" "main" {
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
   name                 = local.name_prefix
   tags = merge(var.common_tags, {
     Name = "${local.name_prefix}-ecr"
@@ -73,13 +71,12 @@ resource "aws_ecr_lifecycle_policy" "main" {
         action = {
           type = "expire"
         }
-        description  = "Expire untagged images after 7 days."
+        description  = "Keep only the last 7 images."
         rulePriority = 1
         selection = {
           countNumber = 7
-          countType   = "sinceImagePushed"
-          countUnit   = "days"
-          tagStatus   = "untagged"
+          countType   = "imageCountMoreThan"
+          tagStatus   = "any"
         }
       }
     ]
@@ -148,9 +145,9 @@ resource "aws_ecs_service" "main" {
   }
 
   network_configuration {
-    assign_public_ip = false
+    assign_public_ip = var.assign_public_ip
     security_groups  = [var.security_group_id]
-    subnets          = var.private_subnet_ids
+    subnets          = var.subnet_ids
   }
 }
 
@@ -283,5 +280,30 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_ssm_policy_attachm
 resource "aws_iam_role_policy_attachment" "task_role_policies" {
   for_each   = { for i, arn in var.task_role_policy_arns : "policy-${i}" => arn }
   policy_arn = each.value
+  role       = aws_iam_role.ecs_task_role.name
+}
+
+resource "aws_iam_policy" "ecs_task_role_kms" {
+  description = "Allow ECS task role to use KMS key for encryption and decryption"
+  name        = "${local.name_prefix}-task-kms-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey*",
+        ]
+        Effect   = "Allow"
+        Resource = var.kms_key_arn
+      }
+    ]
+  })
+  tags = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_role_kms" {
+  policy_arn = aws_iam_policy.ecs_task_role_kms.arn
   role       = aws_iam_role.ecs_task_role.name
 }

@@ -24,7 +24,7 @@ WORKDIR /app
 
 COPY --chmod=444 package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    corepack enable && corepack install && \
+    corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts
 
 COPY --chmod=444 .env .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
@@ -55,18 +55,18 @@ RUN apk update && apk upgrade --no-cache
 
 WORKDIR /tmp
 
-# Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786: Update npm's bundled tar to 7.5.10 in runner stage
+# Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786, CVE-2026-31802: Update npm's bundled tar to 7.5.11
 # Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Fix CVE-2026-27903, CVE-2026-27904: Update npm's bundled minimatch to 10.2.3
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
-RUN npm pack tar@7.5.10 && \
-    tar -xzf tar-7.5.10.tgz && \
+RUN npm pack tar@7.5.11 && \
+    tar -xzf tar-7.5.11.tgz && \
     TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
     rm -rf "${TAR_DIR}" && \
     cp -r package "${TAR_DIR}" && \
     chmod -R 755 "${TAR_DIR}" && \
-    rm -rf package tar-7.5.10.tgz && \
-    grep -q 'version.*7.5.10' "${TAR_DIR}/package.json" && \
+    rm -rf package tar-7.5.11.tgz && \
+    grep -q 'version.*7.5.11' "${TAR_DIR}/package.json" && \
     npm pack @isaacs/brace-expansion@5.0.1 && \
     tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
     BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \

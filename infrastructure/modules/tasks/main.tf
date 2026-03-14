@@ -1,15 +1,21 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
 
 data "aws_caller_identity" "current" {}
+
+locals {
+  sync_data_schedule_expression                     = var.enable_cron_tasks ? "cron(17 05 * * ? *)" : null
+  update_project_health_metrics_schedule_expression = var.enable_cron_tasks ? "cron(17 17 * * ? *)" : null
+  update_project_health_scores_schedule_expression  = var.enable_cron_tasks ? "cron(22 17 * * ? *)" : null
+}
 
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-${var.environment}-tasks-cluster"
@@ -134,6 +140,30 @@ resource "aws_iam_role_policy_attachment" "ecs_task_role_fixtures_s3_access" {
   role       = aws_iam_role.ecs_task_role.name
 }
 
+resource "aws_iam_policy" "ecs_task_role_kms" {
+  description = "Allow ECS task role to use KMS key for encryption and decryption"
+  name        = "${var.project_name}-${var.environment}-ecs-task-kms-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "kms:Decrypt"
+        ]
+        Effect   = "Allow"
+        Resource = var.kms_key_arn
+      }
+    ]
+  })
+  tags = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_role_kms" {
+  policy_arn = aws_iam_policy.ecs_task_role_kms.arn
+  role       = aws_iam_role.ecs_task_role.name
+}
+
 resource "aws_iam_role" "event_bridge_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -204,7 +234,7 @@ module "sync_data_task" {
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.sync_data_task_memory
   project_name                 = var.project_name
-  schedule_expression          = "cron(17 05 * * ? *)"
+  schedule_expression          = local.sync_data_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "sync-data"
@@ -236,7 +266,7 @@ module "owasp_update_project_health_metrics_task" {
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_metrics_task_memory
   project_name                 = var.project_name
-  schedule_expression          = "cron(17 17 * * ? *)"
+  schedule_expression          = local.update_project_health_metrics_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-metrics"
@@ -260,7 +290,7 @@ module "owasp_update_project_health_scores_task" {
   kms_key_arn                  = var.kms_key_arn
   memory                       = var.update_project_health_scores_task_memory
   project_name                 = var.project_name
-  schedule_expression          = "cron(22 17 * * ? *)"
+  schedule_expression          = local.update_project_health_scores_schedule_expression
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "owasp-update-project-health-scores"

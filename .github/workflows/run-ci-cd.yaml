@@ -59,7 +59,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@dfcb455ed8d56b55edf6447a37379108181a6707
@@ -88,7 +88,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           version: 10
           run_install: true
@@ -438,7 +438,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Run Infrastructure tests
         run: make test-infrastructure
@@ -510,7 +510,7 @@ jobs:
           push: true
           tags: |
             owasp/nest:backend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:${{ env.RELEASE_VERSION }}
 
       - name: Prepare frontend public environment
         env:
@@ -567,7 +567,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             owasp/nest:frontend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:${{ env.RELEASE_VERSION }}
 
       - name: Get frontend image size
         id: frontend-size
@@ -658,7 +658,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
@@ -744,16 +744,18 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_KEY: staging/terraform.tfstate
         run: |
           umask 377
-          cat > infrastructure/staging/terraform.tfbackend <<-EOF
+          cat > infrastructure/live/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
+          key="${TF_STATE_KEY}"
           region="$AWS_REGION"
           EOF
 
@@ -762,41 +764,52 @@ jobs:
           AVAILABILITY_ZONES: ${{ vars.AWS_AVAILABILITY_ZONES }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           BACKEND_USE_FARGATE_SPOT: true
-          CREATE_RDS_PROXY: false
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+          DJANGO_CONFIGURATION: Staging
+          DJANGO_SETTINGS_MODULE: settings.staging
+          ENABLE_CRON_TASKS: false
+          ENABLE_NAT_GATEWAY: false
+          ENABLE_RDS_PROXY: false
           ENVIRONMENT: staging
           FRONTEND_USE_FARGATE_SPOT: true
           PROJECT_NAME: nest
+          RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
           TASKS_USE_FARGATE_SPOT: true
         run: |
           umask 377
-          cat > infrastructure/staging/terraform.tfvars <<-EOF
+          cat > infrastructure/live/terraform.tfvars <<-EOF
           availability_zones=$AVAILABILITY_ZONES
           aws_region="$AWS_REGION"
+          backend_image_tag="$RELEASE_VERSION"
           backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
-          create_rds_proxy=$CREATE_RDS_PROXY
           domain_name="$DOMAIN_NAME"
+          django_configuration="$DJANGO_CONFIGURATION"
+          django_settings_module="$DJANGO_SETTINGS_MODULE"
+          enable_cron_tasks=$ENABLE_CRON_TASKS
+          enable_nat_gateway=$ENABLE_NAT_GATEWAY
+          enable_rds_proxy=$ENABLE_RDS_PROXY
           environment="$ENVIRONMENT"
           frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
+          frontend_image_tag="$RELEASE_VERSION"
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
           EOF
 
       - name: Terraform Init
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform init -backend-config=terraform.tfbackend
 
       - name: Terraform Validate
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: |
           terraform plan -out=tfplan
 
       - name: Show plan in summary
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: |
           echo "## Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
@@ -807,7 +820,7 @@ jobs:
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: tfplan
-          path: infrastructure/staging/tfplan
+          path: infrastructure/live/tfplan
           retention-days: 3
     timeout-minutes: 15
 
@@ -844,58 +857,63 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_KEY: staging/terraform.tfstate
         run: |
           umask 377
-          cat > infrastructure/staging/terraform.tfbackend <<-EOF
+          cat > infrastructure/live/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
+          key="${TF_STATE_KEY}"
           region="$AWS_REGION"
           EOF
 
       - name: Terraform Init
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform init -backend-config=terraform.tfbackend
 
       - name: Download plan artifact
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: tfplan
-          path: infrastructure/staging
+          path: infrastructure/live
 
       - name: Terraform Apply
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform apply -auto-approve tfplan
 
       - name: Capture terraform outputs
         id: tf-outputs
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: |
           echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
           echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
           echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
           echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
           echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
           echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
+          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
 
       - name: Run ECS migrate task
         id: migrate-task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: nest-staging-migrate
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
@@ -927,16 +945,34 @@ jobs:
       - name: Run ECS index-data task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
-          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASK_DEFINITION: nest-staging-index-data
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
-          aws ecs run-task \
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          RESPONSE=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
-          echo "Index-data task started (runs async, ~30 min)"
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
+
+          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
+          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
+
+          if [ "$FAILURE_COUNT" -gt 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
+            echo "$RESPONSE" | jq '.failures'
+            exit 1
+          fi
+
+          if [ "$TASK_COUNT" -eq 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Index-data task started successfully (runs async, ~30 min)"
 
       - name: Force new backend deployment
         env:
@@ -988,7 +1024,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           run_install: true
           version: 10
@@ -1385,7 +1421,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
         with:
           run_install: true
           version: 10

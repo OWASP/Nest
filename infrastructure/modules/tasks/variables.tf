@@ -36,6 +36,11 @@ variable "ecs_sg_id" {
   type        = string
 }
 
+variable "enable_cron_tasks" {
+  description = "Whether to enable scheduled cron tasks."
+  type        = bool
+}
+
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
@@ -54,7 +59,6 @@ variable "fixtures_bucket_name" {
 variable "image_tag" {
   description = "The Docker image tag to use for ECS tasks."
   type        = string
-  default     = "latest"
 }
 
 variable "index_data_task_cpu" {
@@ -101,6 +105,11 @@ variable "migrate_task_memory" {
 variable "subnet_ids" {
   description = "Subnet IDs for ECS tasks (can be public or private)."
   type        = list(string)
+
+  validation {
+    condition     = length(var.subnet_ids) > 0
+    error_message = "subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "project_name" {
