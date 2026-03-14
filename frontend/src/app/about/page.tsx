@@ -79,9 +79,8 @@ const MONTHS = [
 
 const INITIAL_YEAR_COUNT = 2
 
-const getMonthAbbr = (yearStr: string) => {
-  const month = yearStr.split(' ')[0]
-  return month.substring(0, 3)
+const getMonthShortName = (yearStr: string) => {
+  return yearStr.split(' ')[0].substring(0, 3)
 }
 
 const getTimelineYear = (yearStr: string) => yearStr.split(' ').pop() || ''
@@ -111,7 +110,10 @@ const groupByYear = (milestones: ProjectTimeline[]): YearGroup[] => {
     .map(([year, items]) => ({
       year,
       milestones: [...items]
-        .sort((a, b) => getMonthIndex(b.milestone.year) - getMonthIndex(a.milestone.year) || b.idx - a.idx)
+        .sort(
+          (a, b) =>
+            getMonthIndex(b.milestone.year) - getMonthIndex(a.milestone.year) || b.idx - a.idx
+        )
         .map(({ milestone }) => milestone),
     }))
 }
@@ -152,6 +154,7 @@ const About = () => {
   const updateProgress = useCallback(() => {
     const el = timelineRef.current
     if (!el) return
+
     const rect = el.getBoundingClientRect()
     const viewportH = window.innerHeight
     const start = viewportH * 0.8
@@ -335,7 +338,10 @@ const About = () => {
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
           <div ref={timelineRef} className="relative ml-3 md:ml-5">
-            <div aria-hidden="true" className="absolute top-0 bottom-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500" />
+            <div
+              aria-hidden="true"
+              className="absolute top-0 bottom-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500"
+            />
             <div
               aria-hidden="true"
               className="absolute top-0 left-0 w-0.5 origin-top bg-blue-400"
@@ -366,7 +372,7 @@ const About = () => {
                         className="flex cursor-default items-start gap-4 rounded-md px-3 py-1.5 transition-all hover:bg-gray-300/50 dark:hover:bg-gray-600/50"
                       >
                         <span className="w-10 shrink-0 pt-0.5 text-sm font-semibold text-blue-400">
-                          {getMonthAbbr(milestone.year)}
+                          {getMonthShortName(milestone.year)}
                         </span>
                         <div className="min-w-0">
                           <span className="font-semibold text-gray-700 dark:text-gray-200">
