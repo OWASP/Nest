@@ -32,9 +32,9 @@ class ReleaseIndexMixin:
         )
 
     @property
-    def idx_created_at(self) -> float:
-        """Return created at timestamp for indexing."""
-        return self.created_at.timestamp()
+    def idx_created_at(self) -> str:
+        """Return created at for indexing."""
+        return self.created_at.isoformat()
 
     @property
     def idx_description(self) -> str:

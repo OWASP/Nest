@@ -7,6 +7,7 @@ variables {
   ecr_repository_arn            = "arn:aws:ecr:us-east-2:123456789012:repository/nest-test-backend"
   ecr_repository_url            = "123456789012.dkr.ecr.us-east-2.amazonaws.com/nest-test-backend"
   ecs_sg_id                     = "sg-12345678"
+  enable_cron_tasks             = true
   environment                   = "test"
   fixtures_bucket_name          = "nest-fixtures-abcd1234"
   fixtures_read_only_policy_arn = "arn:aws:iam::123456789012:policy/test-fixtures-policy"
@@ -14,6 +15,52 @@ variables {
   kms_key_arn                   = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   project_name                  = "nest"
   subnet_ids                    = ["subnet-12345678"]
+}
+
+run "test_cron_tasks_disabled_removes_schedules" {
+  command = plan
+
+  variables {
+    enable_cron_tasks = false
+  }
+
+  assert {
+    condition     = local.sync_data_schedule_expression == null
+    error_message = "sync_data_schedule_expression must be null when enable_cron_tasks is false."
+  }
+
+  assert {
+    condition     = local.update_project_health_metrics_schedule_expression == null
+    error_message = "update_project_health_metrics_schedule_expression must be null when enable_cron_tasks is false."
+  }
+
+  assert {
+    condition     = local.update_project_health_scores_schedule_expression == null
+    error_message = "update_project_health_scores_schedule_expression must be null when enable_cron_tasks is false."
+  }
+}
+
+run "test_cron_tasks_enabled_creates_schedules" {
+  command = plan
+
+  variables {
+    enable_cron_tasks = true
+  }
+
+  assert {
+    condition     = local.sync_data_schedule_expression == "cron(17 05 * * ? *)"
+    error_message = "sync_data_schedule_expression must be set when enable_cron_tasks is true."
+  }
+
+  assert {
+    condition     = local.update_project_health_metrics_schedule_expression == "cron(17 17 * * ? *)"
+    error_message = "update_project_health_metrics_schedule_expression must be set when enable_cron_tasks is true."
+  }
+
+  assert {
+    condition     = local.update_project_health_scores_schedule_expression == "cron(22 17 * * ? *)"
+    error_message = "update_project_health_scores_schedule_expression must be set when enable_cron_tasks is true."
+  }
 }
 
 run "test_ecs_cluster_name_format" {

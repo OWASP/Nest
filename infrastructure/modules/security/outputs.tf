@@ -15,7 +15,7 @@ output "backend_sg_id" {
 
 output "rds_proxy_sg_id" {
   description = "The ID of the RDS proxy security group."
-  value       = var.create_rds_proxy ? aws_security_group.rds_proxy[0].id : null
+  value       = var.enable_rds_proxy ? aws_security_group.rds_proxy[0].id : null
 }
 
 output "rds_sg_id" {
