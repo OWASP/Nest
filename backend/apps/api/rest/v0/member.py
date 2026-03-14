@@ -91,7 +91,7 @@ def list_members(
 ) -> list[Member]:
     """Get all members."""
     return filters.filter(
-        UserModel.objects.order_by(ordering or "-calculated_score", "-created_at")
+        UserModel.objects.order_by(ordering or "-calculated_score", "-created_at", "-id")
     )
 
 

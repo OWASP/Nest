@@ -62,8 +62,17 @@ class Command(BaseCommand):
         repo_data_map = {item["user_id"]: item for item in repo_data}
 
         user_release_counts = dict(
-            User.objects.filter(created_releases__isnull=False)
-            .annotate(release_count=models.Count("created_releases"))
+            User.objects.exclude(login__in=non_indexable_logins)
+            .annotate(
+                release_count=models.Count(
+                    "created_releases",
+                    filter=Q(created_releases__repository__is_fork=False)
+                    & Q(
+                        created_releases__repository__organization__is_owasp_related_organization=True
+                    ),
+                    distinct=True,
+                )
+            )
             .values_list("id", "release_count")
         )
 
@@ -92,7 +101,7 @@ class Command(BaseCommand):
             user.calculated_score = calculate_member_score(
                 contributions_count=user.contributions_count,
                 distinct_repository_count=repo_item.get("repo_count", 0),
-                distinct_project_count=0,
+                distinct_project_count=leadership_id.get("project_leader", 0),
                 release_count=user_release_counts.get(user.id, 0),
                 chapter_leader_count=leadership_id.get("chapter_leader", 0),
                 project_leader_count=leadership_id.get("project_leader", 0),

@@ -126,6 +126,9 @@ def _score_recency(contribution_data: dict | None) -> float:
         except (ValueError, TypeError):
             continue
 
+        if not math.isfinite(numeric_count):
+            continue
+
         if numeric_count <= 0:
             continue
 

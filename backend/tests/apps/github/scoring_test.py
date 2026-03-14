@@ -193,6 +193,16 @@ class TestScoreRecency:
         valid_only = {now.strftime("%Y-%m-%d"): 5}
         assert _score_recency(data) == _score_recency(valid_only)
 
+    def test_nan_count_ignored(self):
+        now = datetime.now(tz=UTC)
+        score = _score_recency({now.strftime("%Y-%m-%d"): float("nan")})
+        assert score == pytest.approx(0.0)
+
+    def test_infinity_count_ignored(self):
+        now = datetime.now(tz=UTC)
+        score = _score_recency({now.strftime("%Y-%m-%d"): float("inf")})
+        assert score == pytest.approx(0.0)
+
 
 class TestScoreConsistency:
     def test_no_data(self):
@@ -326,8 +336,7 @@ class TestCalculateMemberScore:
             contribution_data=None,
         )
         # Should be rounded to 4 decimal places
-        scaled = score * 10000
-        assert scaled == pytest.approx(round(scaled))
+        assert score == round(score, 4)
 
     def test_weights_sum_to_one(self):
         total = (

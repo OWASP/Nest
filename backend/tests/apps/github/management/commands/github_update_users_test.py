@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 from django.core.management.base import BaseCommand
 
 from apps.github.management.commands.github_update_users import Command
@@ -291,9 +292,14 @@ class TestGithubUpdateUsersCommand:
         "_get_leadership_data",
         return_value={1: {"chapter_leader": 2, "project_leader": 1}},
     )
+    @patch(
+        "apps.github.management.commands.github_update_users.calculate_member_score",
+        return_value=123.4567,
+    )
     @patch("apps.github.management.commands.github_update_users.BATCH_SIZE", 2)
     def test_handle_with_leadership_data(
         self,
+        mock_calculate_member_score,
         mock_leadership_data,
         mock_repository_contributor,
         mock_user,
@@ -325,7 +331,14 @@ class TestGithubUpdateUsersCommand:
         command.handle(offset=0)
 
         assert mock_user1.contributions_count == 50
-        assert mock_user1.calculated_score > 0
+        assert mock_user1.calculated_score == pytest.approx(123.4567)
+
+        mock_calculate_member_score.assert_called_once()
+        score_kwargs = mock_calculate_member_score.call_args.kwargs
+        assert score_kwargs["contributions_count"] == 50
+        assert score_kwargs["distinct_repository_count"] == 3
+        assert score_kwargs["chapter_leader_count"] == 2
+        assert score_kwargs["project_leader_count"] == 1
 
         assert mock_user.bulk_save.call_count == 1
         saved_fields = mock_user.bulk_save.call_args_list[0][1]["fields"]
