@@ -56,7 +56,7 @@ class TestListMembers:
 
     @patch("apps.api.rest.v0.member.UserModel")
     def test_list_members_no_ordering(self, mock_user_model: MagicMock) -> None:
-        """Test listing members without ordering applies default '-created_at'."""
+        """Test listing members without ordering applies default '-calculated_score'."""
         mock_request = MagicMock()
         mock_filters = MagicMock()
         mock_ordered_queryset = MagicMock()
@@ -66,7 +66,7 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=None)
 
-        mock_user_model.objects.order_by.assert_called_with("-created_at")
+        mock_user_model.objects.order_by.assert_called_with("-calculated_score")
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
 
