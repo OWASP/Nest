@@ -6,10 +6,18 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState } from 'react'
-import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
+import { useState, useEffect } from 'react'
+import {
+  FaCodeBranch,
+  FaLink,
+  FaPlus,
+  FaTags,
+  FaXmark,
+  FaChevronDown,
+  FaChevronUp,
+} from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
@@ -18,11 +26,13 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import Markdown from 'components/MarkdownWrapper'
 import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import SecondaryCard from 'components/SecondaryCard'
-import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
-  const [showAllPRs, setShowAllPRs] = useState(false)
+  const [hasMorePRs, setHasMorePRs] = useState(true)
+  const [visibleCount, setVisibleCount] = useState(4)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const limit = 4
   const { programKey, moduleKey, issueId } = params
 
   const formatDeadline = (deadline: string | null) => {
@@ -66,12 +76,25 @@ const ModuleIssueDetailsPage = () => {
       color,
     }
   }
-  const { data, loading, error } = useQuery(GetModuleIssueViewDocument, {
-    variables: { programKey, moduleKey, number: Number(issueId) },
+  const { data, loading, error, fetchMore } = useQuery(GetModuleIssueViewDocument, {
+    variables: {
+      programKey,
+      moduleKey,
+      number: Number(issueId),
+      limit,
+      offset: 0,
+    },
     skip: !issueId,
-    fetchPolicy: 'cache-first',
     nextFetchPolicy: 'cache-and-network',
   })
+
+  useEffect(() => {
+    const prCount = data?.getModule?.issueByNumber?.pullRequests?.length
+    if (prCount == null) return
+    if (prCount <= limit) {
+      setHasMorePRs(prCount >= limit)
+    }
+  }, [data, limit])
 
   const {
     assignIssue,
@@ -101,7 +124,7 @@ const ModuleIssueDetailsPage = () => {
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
   }
-  if (loading) return <LoadingSpinner />
+  if (loading && !data) return <LoadingSpinner />
   if (!issue)
     return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
 
@@ -205,7 +228,6 @@ const ModuleIssueDetailsPage = () => {
                                 },
                               })
                             } else {
-                              // Clear deadline
                               await clearTaskDeadlineMutation({
                                 variables: {
                                   programKey,
@@ -319,14 +341,79 @@ const ModuleIssueDetailsPage = () => {
 
           <SecondaryCard icon={FaCodeBranch} title="Pull Requests">
             <div className="grid grid-cols-1 gap-3">
-              {(issue.pullRequests || []).slice(0, showAllPRs ? undefined : 4).map((pr) => (
+              {(issue.pullRequests || []).slice(0, visibleCount).map((pr) => (
                 <MentorshipPullRequest key={pr.id} pr={pr} />
               ))}
+
+              {(hasMorePRs ||
+                (issue.pullRequests || []).length > visibleCount ||
+                (visibleCount > limit && (issue.pullRequests || []).length > limit)) && (
+                <div className="mt-4 flex justify-start gap-4">
+                  {(hasMorePRs || (issue.pullRequests || []).length > visibleCount) && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={() => {
+                        if (isFetchingMore) return
+                        const currentLength = issue.pullRequests?.length || 0
+                        if (hasMorePRs && currentLength < visibleCount + limit) {
+                          setIsFetchingMore(true)
+                          fetchMore({
+                            variables: {
+                              programKey,
+                              moduleKey,
+                              number: Number(issueId),
+                              offset: currentLength,
+                              limit,
+                            },
+                            updateQuery: (prevResult, { fetchMoreResult }) => {
+                              if (!fetchMoreResult) return prevResult
+                              const newPRs =
+                                fetchMoreResult.getModule?.issueByNumber?.pullRequests || []
+                              if (newPRs.length < limit) setHasMorePRs(false)
+                              if (newPRs.length === 0) return prevResult
+                              return {
+                                ...prevResult,
+                                getModule: {
+                                  ...prevResult.getModule!,
+                                  issueByNumber: {
+                                    ...prevResult.getModule!.issueByNumber!,
+                                    pullRequests: [
+                                      ...(prevResult.getModule?.issueByNumber?.pullRequests || []),
+                                      ...newPRs,
+                                    ],
+                                  },
+                                },
+                              }
+                            },
+                          })
+                            .catch((err) => handleAppError(err))
+                            .finally(() => setIsFetchingMore(false))
+                        }
+                        setVisibleCount((prev) => prev + limit)
+                      }}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
+                      <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+
+                  {visibleCount > limit && (issue.pullRequests || []).length > limit && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={() => setVisibleCount(limit)}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+                </div>
+              )}
+
               {(!issue.pullRequests || issue.pullRequests.length === 0) && (
                 <span className="text-sm text-gray-400">No linked pull requests.</span>
-              )}
-              {issue.pullRequests && issue.pullRequests.length > 4 && (
-                <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
               )}
             </div>
           </SecondaryCard>
@@ -364,6 +451,7 @@ const ModuleIssueDetailsPage = () => {
                     type="button"
                     disabled={!issueId || assigning}
                     onClick={async () => {
+                      if (!issueId || assigning) return
                       await assignIssue({
                         variables: {
                           programKey,

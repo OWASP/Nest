@@ -1,6 +1,6 @@
 """Test cases for IssueNode."""
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -85,6 +85,37 @@ class TestIssueNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("repository_name", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)
         assert result is None
+
+    def test_pull_requests_resolver(self):
+        """Test pull_requests field resolver with pagination."""
+        mock_issue = Mock()
+        mock_qs = Mock()
+
+        mock_issue.pull_requests.all.return_value = mock_qs
+        mock_qs.order_by.return_value = ["pr1", "pr2", "pr3", "pr4", "pr5"]
+
+        field = self._get_field_by_name("pull_requests", IssueNode)
+        result = field.base_resolver.wrapped_func(mock_issue)
+        assert result == ["pr1", "pr2", "pr3", "pr4"]
+        result = field.base_resolver.wrapped_func(mock_issue, limit=2, offset=2)
+        assert result == ["pr3", "pr4"]
+
+    @patch("apps.github.api.internal.nodes.issue.normalize_limit")
+    def test_pull_requests_resolver_security(self, mock_normalize_limit):
+        """Test pull_requests field security check."""
+        mock_issue = Mock()
+
+        mock_normalize_limit.return_value = 10
+        field = self._get_field_by_name("pull_requests", IssueNode)
+
+        mock_issue.pull_requests.all.return_value.order_by.return_value = []
+
+        field.base_resolver.wrapped_func(mock_issue, limit=10)
+        mock_normalize_limit.assert_called()
+
+        mock_normalize_limit.return_value = None
+        result = field.base_resolver.wrapped_func(mock_issue, limit=999999)
+        assert result == []
 
     def test_labels(self):
         """Test labels field returns list of label names."""
