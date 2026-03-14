@@ -1,5 +1,6 @@
 'use client'
 import { sendGAEvent } from '@next/third-parties/google'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
@@ -14,7 +15,6 @@ import type { Organization } from 'types/organization'
 import type { Project } from 'types/project'
 import type { Suggestion } from 'types/search'
 import type { User } from 'types/user'
-import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 
