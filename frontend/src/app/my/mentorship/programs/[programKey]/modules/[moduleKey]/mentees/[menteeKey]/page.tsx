@@ -79,9 +79,14 @@ const MenteeProfilePage = () => {
   }
 
   if (error) {
+    const isNotFoundError =
+      'graphQLErrors' in error &&
+      Array.isArray(error.graphQLErrors) &&
+      error.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND'
+
     return (
       <ErrorDisplay
-        statusCode={500}
+        statusCode={isNotFoundError ? 404 : 500}
         title="Error loading mentee"
         message="An error occurred while loading the mentee data"
       />
