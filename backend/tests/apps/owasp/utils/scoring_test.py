@@ -171,8 +171,8 @@ class TestRecencyScore:
         score = _recency_score(contribution_data)
         assert score == pytest.approx(0.0)
 
-    def test_boundary_contributions_at_90_days(self):
-        """Test contributions within 90-day window (89 days old)."""
+    def test_contributions_within_90_day_window(self):
+        """Test contributions within 90-day recency window (89 days old)."""
         now = datetime.now(tz=UTC)
         boundary_date = (now - timedelta(days=89)).strftime("%Y-%m-%d")
         contribution_data = {boundary_date: 1}

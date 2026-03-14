@@ -1,9 +1,10 @@
 import io
 from datetime import UTC, datetime
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 from github import GithubException
 
 from apps.github.management.commands.github_sync_user import Command
@@ -850,8 +851,10 @@ class TestGithubSyncUserCommand:
         mock_user.created_pull_requests.count.return_value = 3
         mock_user.created_issues.count.return_value = 2
         mock_user.created_releases.count.return_value = 1
-        mock_user.owasp_profile.is_owasp_board_member = False
-        mock_user.owasp_profile.is_gsoc_mentor = False
+        mock_profile = MagicMock()
+        mock_profile.is_owasp_board_member = False
+        mock_profile.is_gsoc_mentor = False
+        mock_user.owasp_profile = mock_profile
 
         mock_repo_contributor_qs = MagicMock()
         count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
@@ -861,7 +864,9 @@ class TestGithubSyncUserCommand:
         mock_filter_qs = MagicMock()
         count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
         count_val.return_value = 1
-        exclude_qs = mock_filter_qs.exclude.return_value.values_list.return_value
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
         exclude_count = exclude_qs.distinct.return_value.count
         exclude_count.return_value = 0
         mock_entity_member.filter.return_value = mock_filter_qs
@@ -898,8 +903,10 @@ class TestGithubSyncUserCommand:
         mock_user.created_pull_requests.count.return_value = 5
         mock_user.created_issues.count.return_value = 3
         mock_user.created_releases.count.return_value = 2
-        mock_user.owasp_profile.is_owasp_board_member = True
-        mock_user.owasp_profile.is_gsoc_mentor = True
+        mock_profile = MagicMock()
+        mock_profile.is_owasp_board_member = True
+        mock_profile.is_gsoc_mentor = True
+        mock_user.owasp_profile = mock_profile
 
         mock_repo_contributor_qs = MagicMock()
         count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
@@ -909,7 +916,9 @@ class TestGithubSyncUserCommand:
         mock_filter_qs = MagicMock()
         count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
         count_val.return_value = 2
-        exclude_qs = mock_filter_qs.exclude.return_value.values_list.return_value
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
         exclude_count = exclude_qs.distinct.return_value.count
         exclude_count.return_value = 1
         mock_entity_member.filter.return_value = mock_filter_qs
@@ -952,8 +961,10 @@ class TestGithubSyncUserCommand:
         mock_user.created_pull_requests.count.return_value = 0
         mock_user.created_issues.count.return_value = 0
         mock_user.created_releases.count.return_value = 0
-        mock_user.owasp_profile.is_owasp_board_member = False
-        mock_user.owasp_profile.is_gsoc_mentor = False
+        mock_profile = MagicMock()
+        mock_profile.is_owasp_board_member = False
+        mock_profile.is_gsoc_mentor = False
+        mock_user.owasp_profile = mock_profile
 
         mock_repo_contributor_qs = MagicMock()
         count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
@@ -963,7 +974,9 @@ class TestGithubSyncUserCommand:
         mock_filter_qs = MagicMock()
         count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
         count_val.return_value = 0
-        exclude_qs = mock_filter_qs.exclude.return_value.values_list.return_value
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
         exclude_count = exclude_qs.distinct.return_value.count
         exclude_count.return_value = 0
         mock_entity_member.filter.return_value = mock_filter_qs
@@ -997,7 +1010,7 @@ class TestGithubSyncUserCommand:
         mock_user.created_pull_requests.count.return_value = 3
         mock_user.created_issues.count.return_value = 2
         mock_user.created_releases.count.return_value = 1
-        mock_user.owasp_profile = None
+        type(mock_user).owasp_profile = PropertyMock(side_effect=ObjectDoesNotExist)
 
         mock_repo_contributor_qs = MagicMock()
         count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
@@ -1007,7 +1020,9 @@ class TestGithubSyncUserCommand:
         mock_filter_qs = MagicMock()
         count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
         count_val.return_value = 0
-        exclude_qs = mock_filter_qs.exclude.return_value.values_list.return_value
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
         exclude_count = exclude_qs.distinct.return_value.count
         exclude_count.return_value = 0
         mock_entity_member.filter.return_value = mock_filter_qs

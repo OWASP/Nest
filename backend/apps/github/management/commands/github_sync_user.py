@@ -4,6 +4,7 @@ import logging
 from datetime import UTC, datetime
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from github.GithubException import GithubException
 
@@ -516,7 +517,7 @@ class Command(BaseCommand):
             profile = user.owasp_profile
             is_board_member = profile.is_owasp_board_member
             is_gsoc_mentor = profile.is_gsoc_mentor
-        except AttributeError:
+        except ObjectDoesNotExist:
             is_board_member = False
             is_gsoc_mentor = False
 
@@ -553,17 +554,19 @@ class Command(BaseCommand):
                 is_active=True,
             )
             .exclude(entity_type__in=[chapter_ct, project_ct])
+            .exclude(role=EntityMember.Role.CANDIDATE)
             .values_list("entity_type", "entity_id")
             .distinct()
             .count()
         )
 
-        contribution_data = {}
+        contribution_data: dict[str, int] = {}
         snapshots = MemberSnapshot.objects.filter(github_user=user).values(
             "contribution_heatmap_data"
         )
         for snapshot in snapshots:
-            contribution_data.update(snapshot["contribution_heatmap_data"])
+            for date_key, count in snapshot["contribution_heatmap_data"].items():
+                contribution_data[date_key] = contribution_data.get(date_key, 0) + count
 
         return calculate_member_score(
             contributions_count=contributions_count,
