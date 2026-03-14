@@ -69,8 +69,8 @@ class TestGithubUpdateUsersCommand:
         mock_users_queryset.count.assert_called_once()
         mock_users_queryset.__getitem__.assert_called_once_with(slice(0, None))
 
-        assert mock_rc_objects.exclude.return_value.values.call_count == 1
-        assert mock_rc_objects.exclude.return_value.values.return_value.annotate.call_count == 1
+        mock_rc_objects.exclude.return_value.values.assert_called_once_with("user_id")
+        mock_rc_objects.exclude.return_value.values.return_value.annotate.assert_called_once()
 
         assert command.stdout.write.call_count == 3
         command.stdout.write.assert_any_call("1 of 3     User 1\n")

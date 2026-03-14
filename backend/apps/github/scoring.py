@@ -122,15 +122,23 @@ def _score_recency(contribution_data: dict | None) -> float:
 
     for date_str, count in contribution_data.items():
         try:
+            numeric_count = float(count)
+        except (ValueError, TypeError):
+            continue
+
+        if numeric_count <= 0:
+            continue
+
+        try:
             date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
             days_ago = max((now - date).days, 0)
         except (ValueError, TypeError):
             continue
 
         decay = 0.5 ** (days_ago / RECENCY_HALF_LIFE_DAYS)
-        total_score += count * decay
+        total_score += numeric_count * decay
 
-    return math.log1p(total_score) * 10.0
+    return math.log1p(max(total_score, 0.0)) * 10.0
 
 
 def _score_consistency(contribution_data: dict | None) -> float:
