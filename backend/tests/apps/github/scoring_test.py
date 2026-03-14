@@ -44,7 +44,7 @@ class TestScoreContributions:
         score_10000 = _score_contributions(10000)
         assert score_1000 > score_100
         assert score_10000 > score_1000
-        # Ratio between 100->1000 should be similar to 1000->10000 (log scaling)
+
         ratio_1 = score_1000 / score_100
         ratio_2 = score_10000 / score_1000
         assert abs(ratio_1 - ratio_2) < ratio_1 * 0.5
@@ -335,7 +335,6 @@ class TestCalculateMemberScore:
             is_gsoc_mentor=False,
             contribution_data=None,
         )
-        # Should be rounded to 4 decimal places
         assert score == round(score, 4)
 
     def test_weights_sum_to_one(self):

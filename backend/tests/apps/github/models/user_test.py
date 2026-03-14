@@ -221,6 +221,26 @@ class TestUserModel:
         user = User(login="testuser", node_id="U_test123")
         assert user.contribution_data == {}
 
+    def test_calculated_score_default(self):
+        """Test that calculated_score defaults to 0.0."""
+        user = User(login="testuser", node_id="U_test123")
+        assert user.calculated_score == pytest.approx(0.0)
+
+    def test_calculated_score_storage(self):
+        """Test that calculated_score can store float values."""
+        user = User(login="testuser", node_id="U_test123", calculated_score=42.8756)
+        assert user.calculated_score == pytest.approx(42.8756)
+
+    def test_calculated_score_index_exists(self):
+        """Ensure calculated_score descending index is configured on the model."""
+        calculated_score_index = next(
+            (index for index in User._meta.indexes if index.name == "github_user_calc_score_desc"),
+            None,
+        )
+
+        assert calculated_score_index is not None
+        assert calculated_score_index.fields == ["-calculated_score"]
+
     def test_contribution_data_storage(self):
         """Test that contribution_data can store and retrieve JSON data."""
         user = User(
