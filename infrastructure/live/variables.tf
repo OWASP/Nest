@@ -10,46 +10,39 @@ variable "aws_region" {
   default     = "us-east-2"
 }
 
-variable "create_rds_proxy" {
-  description = "Whether to create an RDS proxy."
+variable "backend_desired_count" {
+  description = "The desired number of backend tasks."
+  type        = number
+  default     = 1
+}
+
+variable "backend_enable_auto_scaling" {
+  description = "Whether to enable auto scaling for backend."
   type        = bool
   default     = false
 }
 
-variable "create_vpc_cloudwatch_logs_endpoint" {
-  description = "Whether to create CloudWatch Logs VPC endpoint."
-  type        = bool
-  default     = false
+variable "backend_image_tag" {
+  description = "The Docker backend image tag."
+  type        = string
 }
 
-variable "create_vpc_ecr_api_endpoint" {
-  description = "Whether to create ECR API VPC endpoint."
-  type        = bool
-  default     = false
+variable "backend_max_count" {
+  description = "The maximum number of backend tasks for auto scaling."
+  type        = number
+  default     = 6
 }
 
-variable "create_vpc_ecr_dkr_endpoint" {
-  description = "Whether to create ECR DKR VPC endpoint."
-  type        = bool
-  default     = false
+variable "backend_min_count" {
+  description = "The minimum number of backend tasks for auto scaling."
+  type        = number
+  default     = 2
 }
 
-variable "create_vpc_s3_endpoint" {
-  description = "Whether to create S3 VPC endpoint (Gateway, free)."
+variable "backend_use_fargate_spot" {
+  description = "Whether to use Fargate Spot for backend tasks."
   type        = bool
   default     = true
-}
-
-variable "create_vpc_secretsmanager_endpoint" {
-  description = "Whether to create Secrets Manager VPC endpoint."
-  type        = bool
-  default     = false
-}
-
-variable "create_vpc_ssm_endpoint" {
-  description = "Whether to create SSM VPC endpoint."
-  type        = bool
-  default     = false
 }
 
 variable "db_allocated_storage" {
@@ -129,50 +122,77 @@ variable "db_user" {
   default     = "nest_db_user"
 }
 
+variable "django_configuration" {
+  description = "The name of the Django configuration to use (e.g., Staging, Production)."
+  type        = string
+}
+
+variable "django_settings_module" {
+  description = "The location of the Django settings module to use (e.g., settings.staging, settings.production)."
+  type        = string
+}
+
 variable "domain_name" {
   description = "The domain name for the site."
   type        = string
 }
 
-variable "backend_desired_count" {
-  description = "The desired number of backend tasks."
-  type        = number
-  default     = 2
+variable "enable_cron_tasks" {
+  description = "Whether to enable scheduled cron tasks."
+  type        = bool
 }
 
-variable "backend_enable_auto_scaling" {
-  description = "Whether to enable auto scaling for backend."
+variable "enable_nat_gateway" {
+  description = "Whether to enable a NAT Gateway."
+  type        = bool
+  default     = true
+}
+
+variable "enable_rds_proxy" {
+  description = "Whether to create an RDS proxy."
   type        = bool
   default     = false
 }
 
-variable "backend_image_tag" {
-  description = "The Docker backend image tag."
-  type        = string
+variable "enable_vpc_cloudwatch_logs_endpoint" {
+  description = "Whether to create CloudWatch Logs VPC endpoint."
+  type        = bool
+  default     = false
 }
 
-variable "backend_max_count" {
-  description = "The maximum number of backend tasks for auto scaling."
-  type        = number
-  default     = 6
+variable "enable_vpc_ecr_api_endpoint" {
+  description = "Whether to create ECR API VPC endpoint."
+  type        = bool
+  default     = false
 }
 
-variable "backend_min_count" {
-  description = "The minimum number of backend tasks for auto scaling."
-  type        = number
-  default     = 2
+variable "enable_vpc_ecr_dkr_endpoint" {
+  description = "Whether to create ECR DKR VPC endpoint."
+  type        = bool
+  default     = false
 }
 
-variable "backend_use_fargate_spot" {
-  description = "Whether to use Fargate Spot for backend tasks."
+variable "enable_vpc_s3_endpoint" {
+  description = "Whether to create S3 VPC endpoint (Gateway, free)."
   type        = bool
   default     = true
+}
+
+variable "enable_vpc_secretsmanager_endpoint" {
+  description = "Whether to create Secrets Manager VPC endpoint."
+  type        = bool
+  default     = false
+}
+
+variable "enable_vpc_ssm_endpoint" {
+  description = "Whether to create SSM VPC endpoint."
+  type        = bool
+  default     = false
 }
 
 variable "environment" {
   description = "The environment (e.g., staging, production)."
   type        = string
-  default     = "staging"
   validation {
     condition     = contains(["staging", "production"], var.environment)
     error_message = "Environment must be either 'staging' or 'production'."
@@ -188,7 +208,7 @@ variable "fixtures_bucket_name" {
 variable "frontend_desired_count" {
   description = "The desired number of frontend tasks."
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "frontend_enable_auto_scaling" {
@@ -290,12 +310,6 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
-}
-
-variable "tasks_assign_public_ip" {
-  description = "Whether to assign public IP to ECS tasks."
-  type        = bool
-  default     = false
 }
 
 variable "tasks_use_fargate_spot" {
