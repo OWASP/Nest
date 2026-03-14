@@ -84,9 +84,7 @@ class ModuleNode:
     @strawberry_django.field
     def issue_mentees(self, root: Module, issue_number: int) -> list[UserNode]:
         """Return mentees assigned to this module's issue identified by its number."""
-        if not (issue_ids := root.issues.filter(number=issue_number).values_list("id", flat=True)):
-            return []
-
+        issue_ids = root.issues.filter(number=issue_number).values_list("id", flat=True)
         mentee_users = (
             Task.objects.filter(module=root, issue_id__in=issue_ids, assignee__isnull=False)
             .select_related("assignee")
@@ -150,15 +148,16 @@ class ModuleNode:
     @strawberry_django.field
     def interested_users(self, root: Module, issue_number: int) -> list[UserNode]:
         """Return users interested in this module's issue identified by its number."""
-        if not (issue_ids := root.issues.filter(number=issue_number).values_list("id", flat=True)):
-            return []
-
-        interests = (
-            IssueUserInterest.objects.select_related("user")
-            .filter(module=root, issue_id__in=issue_ids)
-            .order_by("user__login")
-        )
-        return [i.user for i in interests]
+        return [
+            issue_user_interest.user
+            for issue_user_interest in IssueUserInterest.objects.select_related("user")
+            .filter(
+                module=root,
+                issue_id__in=root.issues.filter(number=issue_number).values_list("id", flat=True),
+            )
+            .order_by("user", "user__login")
+            .distinct("user")
+        ]
 
     @strawberry_django.field
     def task_deadline(self, root: Module, issue_number: int) -> datetime | None:
