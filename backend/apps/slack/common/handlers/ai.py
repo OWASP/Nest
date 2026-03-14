@@ -7,6 +7,7 @@ import logging
 from apps.ai.agent.agent import AgenticRAGAgent
 from apps.slack.blocks import markdown
 from apps.slack.common.question_detector import QuestionDetector
+from apps.slack.utils import normalize_markdown_for_slack
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ def get_blocks(query: str) -> list[dict]:
     ai_response = process_ai_query(query.strip())
 
     if ai_response:
-        return [markdown(ai_response)]
+        return [markdown(normalize_markdown_for_slack(ai_response))]
     return get_error_blocks()
 
 
