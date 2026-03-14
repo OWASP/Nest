@@ -63,6 +63,7 @@ Twitterbot
 VCALENDAR
 VEVENT
 WSL
+Wandji
 Whistleblower
 Wörld
 Xmark
