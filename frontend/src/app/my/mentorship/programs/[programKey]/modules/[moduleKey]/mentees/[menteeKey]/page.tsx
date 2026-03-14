@@ -63,6 +63,16 @@ const MenteeProfilePage = () => {
 
   if (isLoading) return <LoadingSpinner />
 
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading mentee"
+        message="An error occurred while loading the mentee data."
+      />
+    )
+  }
+
   if (!menteeDetails) {
     return (
       <ErrorDisplay
