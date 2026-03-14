@@ -264,7 +264,7 @@ class UserIndexMixin:
             {
                 "is_pre_release": r.is_pre_release,
                 "name": r.name,
-                "published_at": r.published_at.isoformat(),
+                "published_at": r.published_at.isoformat() if r.published_at else None,
                 "repository": {
                     "key": r.repository.key,
                     "owner_key": r.repository.owner.login,
