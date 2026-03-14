@@ -42,6 +42,7 @@ MAX_LIMIT = 1000
         "key",
         "labels",
         "name",
+        "order",
         "started_at",
         "tags",
     ],

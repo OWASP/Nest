@@ -6,14 +6,14 @@ export type UpdateModuleMutationVariables = Types.Exact<{
 }>;
 
 
-export type UpdateModuleMutation = { updateModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: Types.ExperienceLevelEnum, startedAt: any, endedAt: any, tags: Array<string> | null, domains: Array<string> | null, labels: Array<string> | null, projectId: string | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
+export type UpdateModuleMutation = { updateModule: { __typename: 'ModuleNode', id: string, key: string, name: string, description: string, experienceLevel: string, startedAt: any, endedAt: any, tags: any, domains: any, labels: any, projectId: string | null, mentors: Array<{ __typename: 'MentorNode', id: string, login: string, name: string, avatarUrl: string }>, mentees: Array<{ __typename: 'UserNode', id: string, login: string, name: string, avatarUrl: string }> } };
 
 export type CreateModuleMutationVariables = Types.Exact<{
   input: Types.CreateModuleInput;
 }>;
 
 
-export type CreateModuleMutation = { createModule: { __typename: 'ModuleNode', description: string, domains: Array<string> | null, endedAt: any, experienceLevel: Types.ExperienceLevelEnum, id: string, key: string, labels: Array<string> | null, name: string, projectId: string | null, startedAt: any, tags: Array<string> | null, mentors: Array<{ __typename: 'MentorNode', avatarUrl: string, id: string, login: string, name: string }>, mentees: Array<{ __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string }> } };
+export type CreateModuleMutation = { createModule: { __typename: 'ModuleNode', description: string, domains: any, endedAt: any, experienceLevel: string, id: string, key: string, labels: any, name: string, projectId: string | null, startedAt: any, tags: any, mentors: Array<{ __typename: 'MentorNode', avatarUrl: string, id: string, login: string, name: string }>, mentees: Array<{ __typename: 'UserNode', avatarUrl: string, id: string, login: string, name: string }> } };
 
 export type ReorderModulesMutationVariables = Types.Exact<{
   input: Types.ReorderModulesInput;
