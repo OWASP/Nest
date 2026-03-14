@@ -179,6 +179,70 @@
                 padding-top: 64px;
             }
 
+            /* Shared Swagger info/title styling */
+            .swagger-ui .info .title,
+            .swagger-ui .info h1.title {
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: clamp(1.5rem, 5vw, 2rem) !important;
+                font-weight: 700 !important;
+            }
+
+            /* Shared version pill styling used by both light and dark themes */
+            .swagger-ui .info .title small,
+            .swagger-ui .info h1.title small {
+                background: transparent !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 4px !important;
+                top: 0 !important;
+                vertical-align: text-top !important;
+                position: static !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
+
+            .swagger-ui .info .title small:not(.version-stamp) pre,
+            .swagger-ui .info h1.title small:not(.version-stamp) pre {
+                background: linear-gradient(135deg, var(--owasp-blue) 0%, #7a95b0 100%) !important;
+                border: none !important;
+                border-radius: 9999px !important;
+                color: #fff !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.03em;
+                margin: 0 !important;
+                padding: 3px 10px !important;
+                white-space: nowrap !important;
+            }
+
+            .swagger-ui .info .title small.version-stamp pre,
+            .swagger-ui .info h1.title small.version-stamp pre {
+                background: linear-gradient(135deg, var(--primary-blue) 0%, #2563eb 100%) !important;
+                border: none !important;
+                border-radius: 9999px !important;
+                color: #fff !important;
+                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                font-size: 0.7rem !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.03em;
+                margin: 0 !important;
+                padding: 3px 10px !important;
+                white-space: nowrap !important;
+            }
+
+            .swagger-ui .copy-to-clipboard button {
+                background-color: var(--primary-blue) !important;
+                color: white !important;
+            }
+
+            .swagger-ui .no-margin,
+            .swagger-ui .info li,
+            .swagger-ui .info p,
+            .swagger-ui .info span {
+                color: inherit !important;
+            }
+
             /* LIGHT THEME STYLES */
             body.light-theme {
                 background-color: var(--background-light) !important;
@@ -211,14 +275,6 @@
             body.light-theme .swagger-ui .info h4,
             body.light-theme .swagger-ui .info h5 {
                 color: var(--text-light) !important;
-            }
-
-            /* Swagger info title — match Nest h1 */
-            body.light-theme .swagger-ui .info .title,
-            body.light-theme .swagger-ui .info h1.title {
-                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-                font-size: clamp(1.5rem, 5vw, 2rem) !important;
-                font-weight: 700 !important;
             }
 
             body.light-theme .swagger-ui .info .description,
@@ -434,52 +490,6 @@
                Swagger wraps version in <small> (superscript by default) with padding/bg.
                We reset the <small> wrapper and let the <pre> be the actual styled pill. */
 
-            /* Reset the <small> wrapper: remove superscript, gray bg, and padding */
-            body.light-theme .swagger-ui .info .title small,
-            body.light-theme .swagger-ui .info h1.title small {
-                background: transparent !important;
-                border-radius: 0 !important;
-                padding: 0 !important;
-                margin: 0 4px !important;
-                top: 0 !important;
-                vertical-align: text-top !important;
-                position: static !important;
-                display: inline-flex !important;
-                align-items: center !important;
-            }
-
-            /* API version <pre> — OWASP steel-blue pill */
-            body.light-theme .swagger-ui .info .title small:not(.version-stamp) pre,
-            body.light-theme .swagger-ui .info h1.title small:not(.version-stamp) pre {
-                background: linear-gradient(135deg, var(--owasp-blue) 0%, #7a95b0 100%) !important;
-                border: none !important;
-                border-radius: 9999px !important;
-                color: #fff !important;
-                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-                font-size: 0.7rem !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.03em;
-                margin: 0 !important;
-                padding: 3px 10px !important;
-                white-space: nowrap !important;
-            }
-
-            /* OAS version <pre> (inside small.version-stamp) — primary-blue pill */
-            body.light-theme .swagger-ui .info .title small.version-stamp pre,
-            body.light-theme .swagger-ui .info h1.title small.version-stamp pre {
-                background: linear-gradient(135deg, var(--primary-blue) 0%, #2563eb 100%) !important;
-                border: none !important;
-                border-radius: 9999px !important;
-                color: #fff !important;
-                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-                font-size: 0.7rem !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.03em;
-                margin: 0 !important;
-                padding: 3px 10px !important;
-                white-space: nowrap !important;
-            }
-
             body.light-theme .swagger-ui .info hgroup.main a {
                 color: var(--text-light) !important;
             }
@@ -587,24 +597,10 @@
                 border: 1px solid #fca5a5 !important;
             }
 
-            /* Copy button */
-            body.light-theme .swagger-ui .copy-to-clipboard button {
-                background-color: var(--primary-blue) !important;
-                color: white !important;
-            }
-
             /* Microlight syntax highlighting */
             body.light-theme .swagger-ui .microlight {
                 font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
                 color: #1d4ed8 !important;
-            }
-
-            /* Additional text elements */
-            body.light-theme .swagger-ui .no-margin,
-            body.light-theme .swagger-ui .info li,
-            body.light-theme .swagger-ui .info p,
-            body.light-theme .swagger-ui .info span {
-                color: inherit !important;
             }
 
             /* DARK THEME STYLES */
@@ -643,14 +639,6 @@
             body.dark-theme .swagger-ui .info h4,
             body.dark-theme .swagger-ui .info h5 {
                 color: var(--text-dark) !important;
-            }
-
-            /* Swagger info title — match Nest h1 */
-            body.dark-theme .swagger-ui .info .title,
-            body.dark-theme .swagger-ui .info h1.title {
-                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-                font-size: clamp(1.5rem, 5vw, 2rem) !important;
-                font-weight: 700 !important;
             }
 
             body.dark-theme .swagger-ui .info .description,
@@ -864,49 +852,6 @@
 
             /* Version & Info — colorful pill badges (dark theme) */
 
-            body.dark-theme .swagger-ui .info .title small,
-            body.dark-theme .swagger-ui .info h1.title small {
-                background: transparent !important;
-                border-radius: 0 !important;
-                padding: 0 !important;
-                margin: 0 4px !important;
-                top: 0 !important;
-                vertical-align: text-top !important;
-                position: static !important;
-                display: inline-flex !important;
-                align-items: center !important;
-            }
-
-            body.dark-theme .swagger-ui .info .title small:not(.version-stamp) pre,
-            body.dark-theme .swagger-ui .info h1.title small:not(.version-stamp) pre {
-                background: linear-gradient(135deg, var(--owasp-blue) 0%, #7a95b0 100%) !important;
-                border: none !important;
-                border-radius: 9999px !important;
-                color: #fff !important;
-                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-                font-size: 0.7rem !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.03em;
-                margin: 0 !important;
-                padding: 3px 10px !important;
-                white-space: nowrap !important;
-            }
-
-            body.dark-theme .swagger-ui .info .title small.version-stamp pre,
-            body.dark-theme .swagger-ui .info h1.title small.version-stamp pre {
-                background: linear-gradient(135deg, var(--primary-blue) 0%, #2563eb 100%) !important;
-                border: none !important;
-                border-radius: 9999px !important;
-                color: #fff !important;
-                font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-                font-size: 0.7rem !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.03em;
-                margin: 0 !important;
-                padding: 3px 10px !important;
-                white-space: nowrap !important;
-            }
-
             body.dark-theme .swagger-ui .info hgroup.main a {
                 color: var(--text-dark) !important;
             }
@@ -1004,24 +949,10 @@
                 border: 1px solid #991b1b !important;
             }
 
-            /* Copy button */
-            body.dark-theme .swagger-ui .copy-to-clipboard button {
-                background-color: var(--primary-blue) !important;
-                color: white !important;
-            }
-
             /* Microlight syntax highlighting */
             body.dark-theme .swagger-ui .microlight {
                 font-family: 'Geist Mono', 'Courier New', Courier, monospace !important;
                 color: #93c5fd !important;
-            }
-
-            /* Additional text elements */
-            body.dark-theme .swagger-ui .no-margin,
-            body.dark-theme .swagger-ui .info li,
-            body.dark-theme .swagger-ui .info p,
-            body.dark-theme .swagger-ui .info span {
-                color: inherit !important;
             }
 
             /* Global Swagger UI adjustments */
@@ -1159,11 +1090,7 @@
                 SwaggerUIBundle.plugins.DownloadUrl
             ],
             layout: "StandaloneLayout",
-            persistAuthorization: {
-                {
-                    persist_authorization | lower
-                }
-            },
+            persistAuthorization: {{ persist_authorization|lower }},
             displayRequestDuration: true,
             filter: true,
             tryItOutEnabled: true
