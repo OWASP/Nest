@@ -25,8 +25,7 @@ export const getFilteredIcons = (project: ProjectType, params: string[]): Icon =
     if (ICONS[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       if (key === 'createdAt') {
         const timestamp = project[key as keyof ProjectType]
-        const dayjsDate = typeof timestamp === 'number' ? dayjs.unix(timestamp) : dayjs(timestamp)
-        acc[key] = dayjsDate.fromNow()
+        acc[key] = dayjs(timestamp).fromNow()
       } else {
         acc[key] = project[key as keyof typeof project] as unknown as number
       }
