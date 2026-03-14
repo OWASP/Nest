@@ -78,16 +78,21 @@ class Command(BaseCommand):
 
         leadership_data = self._get_leadership_data()
 
-        board_members = set(
-            User.objects.filter(
-                owasp_profile__is_owasp_board_member=True,
-            ).values_list("id", flat=True)
+        member_profile_flags = User.objects.filter(
+            Q(owasp_profile__is_owasp_board_member=True) | Q(owasp_profile__is_gsoc_mentor=True)
+        ).values_list(
+            "id",
+            "owasp_profile__is_owasp_board_member",
+            "owasp_profile__is_gsoc_mentor",
         )
-        gsoc_mentors = set(
-            User.objects.filter(
-                owasp_profile__is_gsoc_mentor=True,
-            ).values_list("id", flat=True)
-        )
+
+        board_members = set()
+        gsoc_mentors = set()
+        for user_id, is_board_member, is_gsoc_mentor in member_profile_flags:
+            if is_board_member:
+                board_members.add(user_id)
+            if is_gsoc_mentor:
+                gsoc_mentors.add(user_id)
 
         users = []
         for idx, user in enumerate(active_users[offset:].iterator()):
@@ -113,11 +118,11 @@ class Command(BaseCommand):
             users.append(user)
 
             if not len(users) % BATCH_SIZE:
-                User.bulk_save(list(users), fields=("contributions_count", "calculated_score"))
+                User.bulk_save(users, fields=("contributions_count", "calculated_score"))
                 users.clear()
 
         if users:
-            User.bulk_save(list(users), fields=("contributions_count", "calculated_score"))
+            User.bulk_save(users, fields=("contributions_count", "calculated_score"))
 
     @staticmethod
     def _get_leadership_data() -> dict:

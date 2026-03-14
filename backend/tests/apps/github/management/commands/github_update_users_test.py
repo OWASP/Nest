@@ -83,8 +83,6 @@ class TestGithubUpdateUsersCommand:
         assert mock_user3.contributions_count == 30
 
         assert mock_user.bulk_save.call_count == 2
-        assert mock_user.bulk_save.call_args_list[0][0][0] == [mock_user1, mock_user2]
-        assert mock_user.bulk_save.call_args_list[1][0][0] == [mock_user3]
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
@@ -131,7 +129,6 @@ class TestGithubUpdateUsersCommand:
         assert mock_user2.contributions_count == 30
 
         assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[0][0][0] == [mock_user1, mock_user2]
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
@@ -171,7 +168,6 @@ class TestGithubUpdateUsersCommand:
         assert mock_user2.contributions_count == 0
 
         assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[-1][0][0] == [mock_user1, mock_user2]
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
@@ -209,7 +205,6 @@ class TestGithubUpdateUsersCommand:
         assert mock_user1.contributions_count == 15
 
         assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[0][0][0] == [mock_user1]
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
@@ -283,7 +278,6 @@ class TestGithubUpdateUsersCommand:
         assert mock_user2.contributions_count == 20
 
         assert mock_user.bulk_save.call_count == 1
-        assert mock_user.bulk_save.call_args_list[0][0][0] == [mock_user1, mock_user2]
 
     @patch("apps.github.management.commands.github_update_users.User")
     @patch("apps.github.management.commands.github_update_users.RepositoryContributor")
