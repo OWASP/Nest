@@ -275,14 +275,17 @@ html.dark .swagger-ui .json-schema-2020-12-body .json-schema-2020-12-keyword__na
     border-radius: 4px;
   }
 
-  .dark ::-webkit-scrollbar-track {
+  html.dark::-webkit-scrollbar-track,
+  html.dark ::-webkit-scrollbar-track {
     background: #2d3748;
   }
 
-  .dark ::-webkit-scrollbar-thumb {
+  html.dark::-webkit-scrollbar-thumb,
+  html.dark ::-webkit-scrollbar-thumb {
     background: #4a5568;
   }
 
-  .dark ::-webkit-scrollbar-thumb:hover {
+  html.dark::-webkit-scrollbar-thumb:hover,
+  html.dark ::-webkit-scrollbar-thumb:hover {
     background: #718096;
   }
