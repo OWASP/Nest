@@ -112,7 +112,7 @@ html.dark .swagger-ui .info .description p {
 }
 
 html.dark .nest-topbar {
-    background-color: #2d3748;
+    background-color: #1e2939;
 }
 
 html.dark .nest-topbar .logo-text {
@@ -148,9 +148,9 @@ html.dark .swagger-ui .opblock[class*="opblock-"] .opblock-summary {
     border-color: #364153;
 }
 
-html.dark .json-schema-2020-12-head .json-schema-2020-12__title,
-html.dark .json-schema-2020-12-keyword__name,
-html.dark .json-schema-2020-12-body .json-schema-2020-12__title {
+
+html.dark .json-schema-2020-12__title
+{
     color: #52a3ff;
 }
 
@@ -186,11 +186,103 @@ html.dark .swagger-ui .opblock .parameters thead tr th {
 }
 
 html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12-json-viewer__name,
-html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12-json-viewer__value,
-html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12__attribute {
-    color: #52a3ff;
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12-json-viewer__value {
+    color: white;
 }
 
 html.dark .json-schema-2020-12-accordion .json-schema-2020-12-accordion__icon svg path {
     fill: #FFFFFF;
 }
+
+html.dark .servers select {
+    color: #cad5e2;
+    background-color: #1e2939;
+}
+
+html.dark .swagger-ui .opblock-body input,
+html.dark .swagger-ui .opblock-body select
+{
+    color: rgba(255, 255, 255, 0.5);
+    background-color:#424E63;
+    border-color: #424E63;
+}
+
+html.dark .swagger-ui .responses-wrapper select{
+    color: white
+}
+
+html.dark .swagger-ui .parameter__name.required:after,
+html.dark .swagger-ui .parameter__name.required span {
+    color: #FF8A80;
+}
+
+html.dark .swagger-ui .opblock-section input::placeholder,
+html.dark .swagger-ui .opblock-section select::placeholder
+{
+    color:  rgba(255, 255, 255, 0.5);
+}
+
+html.dark .opblock .opblock-section-header {
+    background-color: #364153;
+    border-bottom:1px solid grey;
+    box-shadow: none;
+}
+
+html.dark .swagger-ui .opblock .opblock-section-header h4,
+html.dark .swagger-ui .btn{
+    color: #CBD5E1;
+}
+
+html.dark .swagger-ui .try-out__btn {
+    border-color: #4D5B71;
+}
+
+html.dark select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+}
+
+html.dark .json-schema-2020-12-keyword--description {
+    color: #9E9E9E;
+}
+
+html.dark .swagger-ui .json-schema-2020-12__attribute--primary,
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12__attribute {
+    color: #CE93D8;
+}
+
+html.dark .swagger-ui .json-schema-2020-12-body .json-schema-2020-12__title,
+html.dark .swagger-ui .json-schema-2020-12-body .json-schema-2020-12-keyword__name{
+    color: #E0E0E0
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #7689ad;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #3d4554;
+    border-radius: 4px;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: #2d3748;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #4a5568;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+  }
