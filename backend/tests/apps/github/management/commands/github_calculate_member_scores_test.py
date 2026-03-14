@@ -89,7 +89,7 @@ class TestCalculateMemberScoresCommand:
 
         command.handle(user="testuser")
 
-        mock_user_model.objects.filter.assert_any_call(login="testuser")
+        mock_user_model.objects.filter.assert_called_once_with(login="testuser")
 
     @patch("apps.github.management.commands.github_calculate_member_scores.User")
     def test_handle_user_not_found(self, mock_user_model):

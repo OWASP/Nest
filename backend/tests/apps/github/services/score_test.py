@@ -4,8 +4,6 @@ import math
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from apps.github.services.score import (
     MAX_SCORE,
     POINTS_BOARD_MEMBER,
@@ -40,11 +38,11 @@ class TestScoreContributions:
 
     def test_zero_contributions(self):
         """Test that zero contributions gives zero score."""
-        assert _score_contributions(0) == pytest.approx(0.0)
+        assert math.isclose(_score_contributions(0), 0.0)
 
     def test_negative_contributions(self):
         """Test that negative contributions gives zero score."""
-        assert _score_contributions(-1) == pytest.approx(0.0)
+        assert math.isclose(_score_contributions(-1), 0.0)
 
     def test_positive_contributions(self):
         """Test that positive contributions give a positive score."""
@@ -74,7 +72,7 @@ class TestScoreLeadership:
             is_gsoc_mentor=False,
             is_owasp_staff=False,
         )
-        assert score == pytest.approx(0.0)
+        assert math.isclose(score, 0.0)
 
     def test_project_leader(self):
         """Test score for a single project leader role."""
@@ -181,17 +179,29 @@ class TestScoreLeadership:
         )
         assert score == expected
 
+    def test_negative_counts_clamped_to_zero(self):
+        """Test that negative leadership counts are treated as zero."""
+        score = _score_leadership(
+            chapter_leader_count=-5,
+            project_leader_count=-3,
+            committee_member_count=-1,
+            is_board_member=False,
+            is_gsoc_mentor=False,
+            is_owasp_staff=False,
+        )
+        assert math.isclose(score, 0.0)
+
 
 class TestScoreRecency:
     """Tests for recency score calculation."""
 
     def test_no_contribution_data(self):
         """Test zero score when no contribution data exists."""
-        assert _score_recency({}) == pytest.approx(0.0)
+        assert math.isclose(_score_recency({}), 0.0)
 
     def test_none_contribution_data(self):
         """Test zero score when contribution_data is None."""
-        assert _score_recency(None) == pytest.approx(0.0)
+        assert math.isclose(_score_recency(None), 0.0)
 
     def test_recent_contributions_weighted_higher(self):
         """Test that recent contributions produce higher scores."""
@@ -204,17 +214,17 @@ class TestScoreRecency:
 
     def test_invalid_date_ignored(self):
         """Test that invalid dates are skipped."""
-        assert _score_recency({"not-a-date": 5}) == pytest.approx(0.0)
+        assert math.isclose(_score_recency({"not-a-date": 5}), 0.0)
 
     def test_non_numeric_count_ignored(self):
         """Test that non-numeric counts are skipped."""
-        assert _score_recency({"2025-01-01": "invalid"}) == pytest.approx(0.0)
+        assert math.isclose(_score_recency({"2025-01-01": "invalid"}), 0.0)
 
     def test_zero_count_skipped(self):
         """Test that days with zero contributions are not counted."""
         now = datetime.now(tz=UTC).date()
         data = {(now - timedelta(days=5)).strftime("%Y-%m-%d"): 0}
-        assert _score_recency(data) == pytest.approx(0.0)
+        assert math.isclose(_score_recency(data), 0.0)
 
     def test_180_day_window_scored(self):
         """Test that contributions in the 91-180 day window are scored."""
@@ -251,22 +261,26 @@ class TestScoreBreadth:
         """Test breadth score is capped at 100."""
         assert _score_breadth(20) == MAX_SCORE
 
+    def test_negative_repos(self):
+        """Test that negative repo count gives zero score."""
+        assert math.isclose(_score_breadth(-5), 0.0)
+
 
 class TestScoreReleases:
     """Tests for release score calculation."""
 
     def test_zero_releases(self):
         """Test that zero releases gives zero score."""
-        assert _score_releases(0) == pytest.approx(0.0)
+        assert math.isclose(_score_releases(0), 0.0)
 
     def test_negative_releases(self):
         """Test that negative values give zero score."""
-        assert _score_releases(-3) == pytest.approx(0.0)
+        assert math.isclose(_score_releases(-3), 0.0)
 
     def test_single_release(self):
         """Test score for a single release."""
         score = _score_releases(1)
-        assert score == pytest.approx(math.log2(2) * 20)
+        assert math.isclose(score, math.log2(2) * 20)
 
     def test_several_releases(self):
         """Test that more releases give higher score."""
@@ -316,11 +330,11 @@ class TestScoreConsistency:
 
     def test_no_data(self):
         """Test zero score with no contribution data."""
-        assert _score_consistency({}) == pytest.approx(0.0)
+        assert math.isclose(_score_consistency({}), 0.0)
 
     def test_none_data(self):
         """Test zero score with None data."""
-        assert _score_consistency(None) == pytest.approx(0.0)
+        assert math.isclose(_score_consistency(None), 0.0)
 
     def test_all_active_days(self):
         """Test full score when all days are active."""
@@ -339,7 +353,7 @@ class TestScoreConsistency:
     def test_zero_count_not_active(self):
         """Test that days with count=0 are not counted as active."""
         data = {f"2025-01-{i:02d}": 0 for i in range(1, 31)}
-        assert _score_consistency(data) == pytest.approx(0.0)
+        assert math.isclose(_score_consistency(data), 0.0)
 
     def test_non_numeric_count_skipped(self):
         """Test that non-numeric counts are skipped gracefully."""
@@ -367,7 +381,6 @@ class TestCalculateMemberScore:
             "has_pull_requests": False,
             "has_issues": False,
             "has_releases": False,
-            "has_contributions": False,
             "contribution_data": None,
         }
         defaults.update(overrides)
@@ -375,7 +388,7 @@ class TestCalculateMemberScore:
 
     def test_all_zeros(self):
         """Test that a user with no data gets zero score."""
-        assert self._make_score() == pytest.approx(0.0)
+        assert math.isclose(self._make_score(), 0.0)
 
     def test_contributions_only(self):
         """Test that contributions alone produce a positive score."""
@@ -421,7 +434,7 @@ class TestCalculateMemberScore:
             + WEIGHT_RELEASES
             + WEIGHT_CONSISTENCY
         )
-        assert total == pytest.approx(1.0)
+        assert math.isclose(total, 1.0)
 
     def test_weighted_calculation(self):
         """Test that the score is correctly weighted."""
@@ -429,7 +442,6 @@ class TestCalculateMemberScore:
             contributions_count=100,
             project_leader_count=1,
             distinct_repository_count=5,
-            has_contributions=True,
             has_pull_requests=True,
         )
         expected = round(
@@ -466,7 +478,7 @@ class TestScoreRecencyOldContributions:
         """Test that contributions older than 365 days produce zero score."""
         now = datetime.now(tz=UTC).date()
         old_date = (now - timedelta(days=400)).strftime("%Y-%m-%d")
-        assert _score_recency({old_date: 10}) == pytest.approx(0.0)
+        assert math.isclose(_score_recency({old_date: 10}), 0.0)
 
 
 class TestComputeUserScore:
@@ -504,7 +516,7 @@ class TestComputeUserScore:
         }
 
         score = compute_user_score(mock_user, context)
-        assert score == pytest.approx(0.0)
+        assert math.isclose(score, 0.0)
 
     def test_compute_user_score_board_member(self):
         """Test compute_user_score includes board member bonus."""

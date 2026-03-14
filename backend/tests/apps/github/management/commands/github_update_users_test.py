@@ -1,5 +1,6 @@
 """Tests for the github_update_users Django management command."""
 
+import math
 from unittest.mock import MagicMock, patch
 
 from django.core.management.base import BaseCommand
@@ -347,7 +348,8 @@ class TestGithubUpdateUsersCommand:
         command.handle(offset=0)
 
         assert mock_user1.contributions_count == 50
-        assert mock_user1.calculated_score == 55.0
+        assert math.isclose(mock_user1.calculated_score, 55.0)
+        mock_compute_score.assert_called_once_with(mock_user1, mock_get_context.return_value)
         assert mock_user.bulk_save.call_count == 1
         saved_fields = mock_user.bulk_save.call_args_list[0][1]["fields"]
         assert "calculated_score" in saved_fields

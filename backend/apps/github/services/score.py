@@ -53,7 +53,6 @@ def calculate_member_score(
     has_pull_requests: bool,
     has_issues: bool,
     has_releases: bool,
-    has_contributions: bool,
     contribution_data: dict | None,
 ) -> float:
     """Calculate the composite member ranking score.
@@ -77,7 +76,7 @@ def calculate_member_score(
     recency_score = _score_recency(contribution_data)
     breadth_score = _score_breadth(distinct_repository_count)
     type_diversity_score = _score_type_diversity(
-        has_contributions=has_contributions,
+        has_contributions=contributions_count > 0,
         has_pull_requests=has_pull_requests,
         has_issues=has_issues,
         has_releases=has_releases,
@@ -126,9 +125,11 @@ def _score_leadership(
 
     """
     score = 0.0
-    score += min(project_leader_count * POINTS_PROJECT_LEADER, MAX_PROJECT_LEADER_POINTS)
-    score += min(chapter_leader_count * POINTS_CHAPTER_LEADER, MAX_CHAPTER_LEADER_POINTS)
-    score += min(committee_member_count * POINTS_COMMITTEE_MEMBER, MAX_COMMITTEE_MEMBER_POINTS)
+    score += min(max(0, project_leader_count) * POINTS_PROJECT_LEADER, MAX_PROJECT_LEADER_POINTS)
+    score += min(max(0, chapter_leader_count) * POINTS_CHAPTER_LEADER, MAX_CHAPTER_LEADER_POINTS)
+    score += min(
+        max(0, committee_member_count) * POINTS_COMMITTEE_MEMBER, MAX_COMMITTEE_MEMBER_POINTS
+    )
 
     if is_board_member:
         score += POINTS_BOARD_MEMBER
@@ -137,7 +138,7 @@ def _score_leadership(
     if is_owasp_staff:
         score += POINTS_OWASP_STAFF
 
-    return min(score, MAX_SCORE)
+    return min(MAX_SCORE, score)
 
 
 def _score_recency(contribution_data: dict | None) -> float:
@@ -196,6 +197,8 @@ def _score_breadth(distinct_repository_count: int) -> float:
         float: Score from 0 to 100.
 
     """
+    if distinct_repository_count <= 0:
+        return 0.0
     return min(MAX_SCORE, distinct_repository_count * 10)
 
 
@@ -352,7 +355,6 @@ def compute_user_score(user, context: dict) -> float:
         has_pull_requests=user.id in context["user_pr_flags"],
         has_issues=user.id in context["user_issue_flags"],
         has_releases=user.id in user_release_counts,
-        has_contributions=repo_item.get("total_contributions", 0) > 0,
         contribution_data=user.contribution_data,
     )
 
