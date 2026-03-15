@@ -103,7 +103,7 @@ class TestUserIndexMixin:
                 "idx_issues",
                 [
                     {
-                        "created_at": datetime(2021, 1, 1, tzinfo=UTC).timestamp(),
+                        "created_at": datetime(2021, 1, 1, tzinfo=UTC).isoformat(),
                         "comments_count": 5,
                         "number": 1,
                         "repository": {"key": "repo_key", "owner_key": "owner_login"},
