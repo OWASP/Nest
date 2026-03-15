@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-
+from apps.github.recognition import calculate_contributor_score, get_contributor_tier
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import get_absolute_url
 from apps.github.constants import (
@@ -63,6 +63,28 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
         null=True,
         help_text="Aggregated contribution data as date -> count mapping",
     )
+
+    recognition_score = models.IntegerField(
+        default=0,
+        help_text="Cached recognition score based on contribution metrics",
+    )
+
+    recognition_tier = models.CharField(
+        max_length=20,
+        default="None",
+        help_text="Recognition tier (Bronze, Silver, Gold)",
+    )
+
+    def get_recognition(self):
+        pr_count = self.contributions_count or 0
+        review_count = 0
+        issue_count = 0
+        score = calculate_contributor_score( pr_count, review_count, issue_count )
+        tier = get_contributor_tier( score )
+        return {
+            "score": score,
+            "tier": tier
+        }
 
     def __str__(self) -> str:
         """Return a human-readable representation of the user.
