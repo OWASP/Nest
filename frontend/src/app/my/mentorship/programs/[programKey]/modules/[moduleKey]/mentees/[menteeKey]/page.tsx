@@ -6,11 +6,7 @@ import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useMemo, useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GetModuleMenteeDetailsDocument,
-  type GetModuleMenteeDetailsQuery,
-} from 'types/__generated__/menteeQueries.generated'
-import { MenteeDetails } from 'types/mentorship'
+import { GetModuleMenteeDetailsDocument } from 'types/__generated__/menteeQueries.generated'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -25,11 +21,6 @@ const MenteeProfilePage = () => {
     moduleKey: string
     menteeKey: string
   }>()
-
-  const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
-  const [menteeIssuesData, setMenteeIssuesData] = useState<
-    GetModuleMenteeDetailsQuery['getMenteeModuleIssues']
-  >([])
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -49,17 +40,16 @@ const MenteeProfilePage = () => {
   })
 
   useEffect(() => {
-    if (data) {
-      setMenteeDetails(data.getMenteeDetails ?? null)
-      setMenteeIssuesData(data.getMenteeModuleIssues ?? [])
-    }
     if (error) {
       handleAppError(error)
     }
-  }, [data, error])
+  }, [error])
+
+  const menteeDetails = data?.getMenteeDetails ?? null
 
   const menteeIssues: IssueRow[] = useMemo(() => {
-    return menteeIssuesData.map((issue) => ({
+    const issues = data?.getMenteeModuleIssues ?? []
+    return issues.map((issue) => ({
       objectID: issue.id,
       number: issue.number,
       title: issue.title,
@@ -69,9 +59,19 @@ const MenteeProfilePage = () => {
       assignees: issue.assignees || [],
       url: issue.url,
     }))
-  }, [menteeIssuesData])
+  }, [data])
 
   if (isLoading) return <LoadingSpinner />
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading mentee"
+        message="An error occurred while loading the mentee data."
+      />
+    )
+  }
 
   if (!menteeDetails) {
     return (
