@@ -51,14 +51,26 @@ def test_validate_domains_empty():
 
 def test_validate_domains_valid():
     """Test valid domains."""
-    domains = ["App Sec", "Web Security", "AI"]
-    assert validate_domains(domains) == domains
+    domains = ["App Sec", "  Web   Security  ", "AI"]
+    normalized = ["App Sec", "Web Security", "AI"]
+    assert validate_domains(domains) == normalized
 
 
 def test_validate_domains_duplicates():
     """Test duplicate domains raise error."""
     domains = ["AppSec", "AppSec"]
     with pytest.raises(ValueError, match="Domains must be unique"):
+        validate_domains(domains)
+
+    domains_spacing = ["App Sec", "App Sec "]
+    with pytest.raises(ValueError, match="Domains must be unique"):
+        validate_domains(domains_spacing)
+
+
+def test_validate_domains_blank():
+    """Test blank domains raise error."""
+    domains = ["   "]
+    with pytest.raises(ValueError, match="Domains cannot be blank"):
         validate_domains(domains)
 
 

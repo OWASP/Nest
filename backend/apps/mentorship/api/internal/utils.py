@@ -48,14 +48,20 @@ def validate_domains(domains: list[str]) -> list[str]:
     if not domains:
         return []
 
-    if len(domains) != len(set(domains)):
+    normalized_domains = [re.sub(r"\s+", " ", domain.strip()) for domain in domains]
+
+    if any(not domain for domain in normalized_domains):
+        msg = "Domains cannot be blank."
+        raise ValueError(msg)
+
+    if len(normalized_domains) != len(set(normalized_domains)):
         msg = "Domains must be unique."
         raise ValueError(msg)
 
     pattern = re.compile(r"^[a-zA-Z0-9 ]+$")
-    for domain in domains:
+    for domain in normalized_domains:
         if not pattern.match(domain):
             msg = f"Domain '{domain}' must contain only alphanumeric characters or spaces."
             raise ValueError(msg)
 
-    return domains
+    return normalized_domains
