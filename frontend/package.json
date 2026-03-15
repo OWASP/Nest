@@ -19,6 +19,9 @@
   },
   "dependencies": {
     "@apollo/client": "^4.1.6",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@heroui/autocomplete": "^2.3.34",
     "@heroui/button": "^2.2.32",
@@ -33,7 +36,7 @@
     "@next/third-parties": "^16.1.6",
     "@react-leaflet/core": "^3.0.0",
     "@sentry/nextjs": "^10.43.0",
-    "apexcharts": "^5.10.3",
+    "apexcharts": "^5.10.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "core-js": "^3.48.0",
@@ -53,7 +56,7 @@
     "next": "^16.1.6",
     "next-auth": "^4.24.13",
     "next-themes": "^0.4.6",
-    "posthog-js": "^1.360.1",
+    "posthog-js": "^1.360.2",
     "react": "^19.2.4",
     "react-apexcharts": "^2.1.0",
     "react-dom": "^19.2.4",
@@ -122,7 +125,7 @@
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@10.32.1",
   "pnpm": {
     "overrides": {
       "glob": "^11.1.0",

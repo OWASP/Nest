@@ -1,10 +1,10 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
@@ -19,8 +19,8 @@ resource "aws_security_group" "alb" {
 
   lifecycle {
     precondition {
-      condition     = var.create_vpc_endpoint_rules ? var.vpc_endpoint_sg_id != null : true
-      error_message = "vpc_endpoint_sg_id must be provided when create_vpc_endpoint_rules is true."
+      condition     = var.enable_vpc_endpoint_rules ? var.vpc_endpoint_sg_id != null : true
+      error_message = "vpc_endpoint_sg_id must be provided when enable_vpc_endpoint_rules is true."
     }
   }
 }
@@ -96,7 +96,7 @@ resource "aws_security_group_rule" "backend_egress_https" {
 }
 
 resource "aws_security_group_rule" "backend_to_rds" {
-  count                    = var.create_rds_proxy ? 0 : 1
+  count                    = var.enable_rds_proxy ? 0 : 1
   description              = "Allow traffic to RDS"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -107,7 +107,7 @@ resource "aws_security_group_rule" "backend_to_rds" {
 }
 
 resource "aws_security_group_rule" "backend_to_rds_proxy" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "Allow traffic to RDS Proxy"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -128,7 +128,7 @@ resource "aws_security_group_rule" "backend_to_redis" {
 }
 
 resource "aws_security_group_rule" "backend_to_vpc_endpoints" {
-  count                    = var.create_vpc_endpoint_rules ? 1 : 0
+  count                    = var.enable_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
@@ -159,7 +159,7 @@ resource "aws_security_group_rule" "task_egress_https" {
 }
 
 resource "aws_security_group_rule" "task_to_rds" {
-  count                    = var.create_rds_proxy ? 0 : 1
+  count                    = var.enable_rds_proxy ? 0 : 1
   description              = "Allow traffic to RDS"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -170,7 +170,7 @@ resource "aws_security_group_rule" "task_to_rds" {
 }
 
 resource "aws_security_group_rule" "task_to_rds_proxy" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "Allow traffic to RDS Proxy"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -191,7 +191,7 @@ resource "aws_security_group_rule" "task_to_redis" {
 }
 
 resource "aws_security_group_rule" "task_to_vpc_endpoints" {
-  count                    = var.create_vpc_endpoint_rules ? 1 : 0
+  count                    = var.enable_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
@@ -232,7 +232,7 @@ resource "aws_security_group_rule" "frontend_https" {
 }
 
 resource "aws_security_group_rule" "frontend_to_vpc_endpoints" {
-  count                    = var.create_vpc_endpoint_rules ? 1 : 0
+  count                    = var.enable_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
@@ -252,7 +252,7 @@ resource "aws_security_group" "rds" {
 }
 
 resource "aws_security_group" "rds_proxy" {
-  count       = var.create_rds_proxy ? 1 : 0
+  count       = var.enable_rds_proxy ? 1 : 0
   description = "Security group for RDS Proxy"
   name        = "${var.project_name}-${var.environment}-rds-proxy-sg"
   tags = merge(var.common_tags, {
@@ -262,7 +262,7 @@ resource "aws_security_group" "rds_proxy" {
 }
 
 resource "aws_security_group_rule" "rds_from_backend" {
-  count                    = var.create_rds_proxy ? 0 : 1
+  count                    = var.enable_rds_proxy ? 0 : 1
   description              = "PostgreSQL from backend"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -273,7 +273,7 @@ resource "aws_security_group_rule" "rds_from_backend" {
 }
 
 resource "aws_security_group_rule" "rds_from_task" {
-  count                    = var.create_rds_proxy ? 0 : 1
+  count                    = var.enable_rds_proxy ? 0 : 1
   description              = "PostgreSQL from ECS Task"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -284,7 +284,7 @@ resource "aws_security_group_rule" "rds_from_task" {
 }
 
 resource "aws_security_group_rule" "rds_from_proxy" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "PostgreSQL from RDS Proxy"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -295,7 +295,7 @@ resource "aws_security_group_rule" "rds_from_proxy" {
 }
 
 resource "aws_security_group_rule" "rds_proxy_to_rds" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "Allow RDS Proxy to reach RDS database"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -306,7 +306,7 @@ resource "aws_security_group_rule" "rds_proxy_to_rds" {
 }
 
 resource "aws_security_group_rule" "rds_proxy_from_backend" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "PostgreSQL from backend"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -317,7 +317,7 @@ resource "aws_security_group_rule" "rds_proxy_from_backend" {
 }
 
 resource "aws_security_group_rule" "rds_proxy_from_task" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "PostgreSQL from ECS Task"
   from_port                = var.db_port
   protocol                 = "tcp"
