@@ -6,6 +6,7 @@ from datetime import datetime  # noqa: TC003
 
 import strawberry
 import strawberry_django
+from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import (
@@ -95,9 +96,37 @@ class ModuleNode:
 
     @strawberry_django.field
     def issues(
-        self, root: Module, limit: int = 20, offset: int = 0, label: str | None = None
+        self, root: Module, info: Info, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
+        info.context.current_module = root
+
+        # BULK load data
+        deadline_rows = (
+            Task.objects.filter(module=root, deadline_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "deadline_at")
+        )
+        assigned_rows = (
+            Task.objects.filter(module=root, assigned_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "assigned_at")
+        )
+
+        deadline_map = {}
+        assigned_map = {}
+
+        for row in deadline_rows:
+            num = row["issue__number"]
+            if num not in deadline_map:
+                deadline_map[num] = row["deadline_at"]
+        for row in assigned_rows:
+            num = row["issue__number"]
+            if num not in assigned_map:
+                assigned_map[num] = row["assigned_at"]
+
+        info.context.task_deadlines_by_issue = deadline_map
+        info.context.task_assigned_at_by_issue = assigned_map
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
 
@@ -132,8 +161,10 @@ class ModuleNode:
         return sorted(label_names)
 
     @strawberry_django.field
-    def issue_by_number(self, root: Module, number: int) -> IssueNode | None:
+    def issue_by_number(self, root: Module, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
+        info.context.current_module = root
+
         return (
             root.issues.select_related("repository", "author")
             .prefetch_related(
@@ -160,8 +191,13 @@ class ModuleNode:
         ]
 
     @strawberry_django.field
-    def task_deadline(self, root: Module, issue_number: int) -> datetime | None:
+    def task_deadline(self, root: Module, info: Info, issue_number: int) -> datetime | None:
         """Return the deadline for the latest assigned task linked to this module and issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping is not None:
+            return mapping.get(issue_number)
+
+        # fallback (single issue query)
         return (
             Task.objects.filter(
                 module=root,
@@ -174,8 +210,12 @@ class ModuleNode:
         )
 
     @strawberry_django.field
-    def task_assigned_at(self, root: Module, issue_number: int) -> datetime | None:
-        """Return the latest assignment time for tasks linked to this module and issue number."""
+    def task_assigned_at(self, root: Module, info: Info, issue_number: int) -> datetime | None:
+        """Return the latest assignment time for tasks linked to this module and issue."""
+        mapping = getattr(info.context, "task_assigned_at_by_issue", None)
+        if mapping is not None:
+            return mapping.get(issue_number)
+
         return (
             Task.objects.filter(
                 module=root,

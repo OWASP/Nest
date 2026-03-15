@@ -61,7 +61,10 @@ class FakeModuleNode:
         return _call_module_resolver(self, "project_name")
 
     def mock_issues(self, limit: int = 20, offset: int = 0, label: str | None = None):
-        return _call_module_resolver(self, "issues", limit=limit, offset=offset, label=label)
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+        return _call_module_resolver(self, "issues", info, limit=limit, offset=offset, label=label)
 
     def mock_issues_count(self, label: str | None = None):
         return _call_module_resolver(self, "issues_count", label=label)
@@ -70,16 +73,23 @@ class FakeModuleNode:
         return _call_module_resolver(self, "available_labels")
 
     def mock_issue_by_number(self, number: int):
-        return _call_module_resolver(self, "issue_by_number", number=number)
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+        return _call_module_resolver(self, "issue_by_number", info, number=number)
 
     def mock_interested_users(self, issue_number: int):
         return _call_module_resolver(self, "interested_users", issue_number=issue_number)
 
     def mock_task_deadline(self, issue_number: int):
-        return _call_module_resolver(self, "task_deadline", issue_number=issue_number)
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        return _call_module_resolver(self, "task_deadline", info, issue_number=issue_number)
 
     def mock_task_assigned_at(self, issue_number: int):
-        return _call_module_resolver(self, "task_assigned_at", issue_number=issue_number)
+        info = MagicMock()
+        info.context.task_assigned_at_by_issue = None
+        return _call_module_resolver(self, "task_assigned_at", info, issue_number=issue_number)
 
 
 @pytest.fixture
@@ -186,7 +196,8 @@ class TestModuleNodeResolvers:
 
     def test_module_node_issues_with_label(self, mock_module_node):
         """Test the issues resolver with a label filter."""
-        issues_list = mock_module_node.mock_issues(label="bug")
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues(label="bug")
         assert len(issues_list) == 1
         mock_module_node_qs_related = mock_module_node.issues.select_related.return_value
         mock_module_node_qs_related.prefetch_related.return_value.filter.assert_called_once_with(
@@ -290,6 +301,24 @@ class TestModuleNodeResolvers:
             deadline = mock_module_node.mock_task_deadline(issue_number=101)
             assert deadline is None
 
+    def test_module_node_task_deadline_with_bulk_load(self, mock_module_node):
+        """Test task_deadline with pre-loaded mapping from bulk load."""
+        expected_deadline = datetime(2025, 10, 26, tzinfo=UTC)
+
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = {101: expected_deadline}
+
+        deadline = _call_module_resolver(mock_module_node, "task_deadline", info, issue_number=101)
+        assert deadline == expected_deadline
+
+    def test_module_node_task_deadline_with_bulk_load_not_found(self, mock_module_node):
+        """Test task_deadline with bulk load but issue not in mapping."""
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = {102: datetime(2025, 10, 26, tzinfo=UTC)}
+
+        deadline = _call_module_resolver(mock_module_node, "task_deadline", info, issue_number=101)
+        assert deadline is None
+
     def test_module_node_task_assigned_at(self, mock_module_node):
         """Test task_assigned_at method."""
         with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
@@ -313,9 +342,32 @@ class TestModuleNodeResolvers:
             assigned_at = mock_module_node.mock_task_assigned_at(issue_number=202)
             assert assigned_at is None
 
+    def test_module_node_task_assigned_at_with_bulk_load(self, mock_module_node):
+        """Test task_assigned_at with pre-loaded mapping from bulk load."""
+        expected_assigned_at = datetime(2025, 9, 15, tzinfo=UTC)
+
+        info = MagicMock()
+        info.context.task_assigned_at_by_issue = {202: expected_assigned_at}
+
+        assigned_at = _call_module_resolver(
+            mock_module_node, "task_assigned_at", info, issue_number=202
+        )
+        assert assigned_at == expected_assigned_at
+
+    def test_module_node_task_assigned_at_with_bulk_load_not_found(self, mock_module_node):
+        """Test task_assigned_at with bulk load but issue not in mapping."""
+        info = MagicMock()
+        info.context.task_assigned_at_by_issue = {203: datetime(2025, 9, 15, tzinfo=UTC)}
+
+        assigned_at = _call_module_resolver(
+            mock_module_node, "task_assigned_at", info, issue_number=202
+        )
+        assert assigned_at is None
+
     def test_module_node_issues_invalid_limit(self, mock_module_node):
         """Test the issues resolver returns [] when limit is invalid."""
-        issues_list = mock_module_node.mock_issues(limit=0)
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues(limit=0)
         assert issues_list == []
 
     def test_module_node_issues_no_label(self, mock_module_node):
@@ -323,7 +375,8 @@ class TestModuleNodeResolvers:
         mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
         mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
 
-        issues_list = mock_module_node.mock_issues()
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues()
         assert len(issues_list) == 1
         mock_qs.filter.assert_not_called()
 
@@ -332,8 +385,69 @@ class TestModuleNodeResolvers:
         mock_qs = mock_module_node.issues.select_related.return_value.prefetch_related.return_value
         mock_qs.order_by.return_value.__getitem__.return_value = [MagicMock()]
 
-        issues_list = mock_module_node.mock_issues(label="all")
+        with patch("apps.mentorship.models.task.Task.objects"):
+            issues_list = mock_module_node.mock_issues(label="all")
         assert len(issues_list) == 1
+
+    def test_module_node_issues_bulk_load_with_duplicates(self, mock_module_node):
+        """Test issues resolver properly handles duplicate deadlines during bulk load."""
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
+            deadline_data = [
+                {"issue__number": 101, "deadline_at": datetime(2025, 10, 26, tzinfo=UTC)},
+                {
+                    "issue__number": 101,
+                    "deadline_at": datetime(2025, 10, 27, tzinfo=UTC),
+                },
+                {"issue__number": 102, "deadline_at": datetime(2025, 10, 28, tzinfo=UTC)},
+            ]
+            assigned_data = [
+                {"issue__number": 101, "assigned_at": datetime(2025, 9, 15, tzinfo=UTC)},
+                {
+                    "issue__number": 101,
+                    "assigned_at": datetime(2025, 9, 16, tzinfo=UTC),
+                },
+                {"issue__number": 102, "assigned_at": datetime(2025, 9, 17, tzinfo=UTC)},
+            ]
+
+            mock_task_objects.filter.return_value.order_by.return_value.values.return_value = (
+                deadline_data
+            )
+
+            mock_qs = (
+                mock_module_node.issues.select_related.return_value.prefetch_related.return_value
+            )
+            mock_qs.order_by.return_value.__getitem__.return_value = [
+                MagicMock(number=101),
+                MagicMock(number=102),
+            ]
+
+            filter_mock = mock_task_objects.filter
+            filter_mock.side_effect = [
+                MagicMock(
+                    order_by=MagicMock(
+                        return_value=MagicMock(values=MagicMock(return_value=deadline_data))
+                    )
+                ),
+                MagicMock(
+                    order_by=MagicMock(
+                        return_value=MagicMock(values=MagicMock(return_value=assigned_data))
+                    )
+                ),
+            ]
+
+            info = MagicMock()
+            info.context.task_deadlines_by_issue = {}
+            info.context.task_assigned_at_by_issue = {}
+
+            issues_list = _call_module_resolver(
+                mock_module_node, "issues", info, limit=20, offset=0, label=None
+            )
+            assert len(issues_list) == 2
+
+            assert info.context.task_deadlines_by_issue[101] == datetime(2025, 10, 26, tzinfo=UTC)
+            assert info.context.task_deadlines_by_issue[102] == datetime(2025, 10, 28, tzinfo=UTC)
+            assert info.context.task_assigned_at_by_issue[101] == datetime(2025, 9, 15, tzinfo=UTC)
+            assert info.context.task_assigned_at_by_issue[102] == datetime(2025, 9, 17, tzinfo=UTC)
 
     def test_module_node_recent_pull_requests(self, mock_module_node):
         """Test the recent_pull_requests resolver."""
