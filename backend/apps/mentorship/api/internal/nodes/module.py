@@ -6,7 +6,7 @@ from datetime import datetime  # noqa: TC003
 
 import strawberry
 import strawberry_django
-from strawberry.types import Info
+from strawberry.types import Info  # noqa: TC002 (Strawberry introspects Info at runtime)
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.issue import (
