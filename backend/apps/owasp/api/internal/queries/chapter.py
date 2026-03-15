@@ -23,6 +23,15 @@ class ChapterQuery:
             return None
 
     @strawberry_django.field
+    def chapter_countries(self) -> list[str]:
+        """Resolve distinct chapter countries."""
+        return sorted(
+            Chapter.active_chapters.exclude(country="")
+            .values_list("country", flat=True)
+            .distinct()
+        )
+
+    @strawberry_django.field
     def recent_chapters(self, limit: int = 8) -> list[ChapterNode]:
         """Resolve recent chapters."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:

@@ -1,6 +1,6 @@
 ## Prerequisites
 
-Before the first CI/CD run you must:
+Before the first **staging** CI/CD run you must:
 
 1. **IAM role `nest-staging-terraform` (lifecycle)**
    The staging pipeline assumes this role (see the "STSStateManagement" resource below). The role is **created automatically** by the bootstrap when you run it (e.g. the bootstrap workflow that applies `infrastructure/bootstrap` with `staging` in the environments list). On first deployment, the bootstrap run creates `aws_iam_role.terraform` (named `${project}-${env}-terraform`, here `nest-staging-terraform`); subsequent bootstrap runs **update** the existing role. No code or workflow changes are required for this.

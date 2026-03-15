@@ -22,6 +22,7 @@ output "django_ssm_parameter_arns" {
     "DJANGO_SETTINGS_MODULE"         = aws_ssm_parameter.django_settings_module.arn
     "DJANGO_SLACK_BOT_TOKEN"         = aws_ssm_parameter.django_slack_bot_token.arn
     "DJANGO_SLACK_SIGNING_SECRET"    = aws_ssm_parameter.django_slack_signing_secret.arn
+    "GITHUB_TOKEN"                   = aws_ssm_parameter.github_token.arn
   }
 }
 
