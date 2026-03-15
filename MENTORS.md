@@ -12,6 +12,14 @@ Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
 Arkadii is an OWASP Nest founder and current leader focusing on project strategic goals as well as day-to-day contribution and maintenance making sure the project aligns with OWASP community needs.
 
+### Collins Wandji
+
+Software Engineer at Tech Chantier | Open Source Contributor
+
+[GitHub](https://github.com/wandji69) • [LinkedIn](https://www.linkedin.com/in/wandji-collins) • [Slack](https://owasp.slack.com/team/U0ALBPLP7U6) • [Cameroon (West African Time)](https://time-time.net/time/douala-cameroon.php)
+
+Collins Wandji is a software engineer at Tech Chantier and a contributor to MediaWiki core/extensions. He is an open-source enthusiast and active contributor, specialized in backend engineering, has experience in building tools, and DevOps. Collins builds and maintains scalable tools and applications powered by Wikidata, production-grade distributed systems.
+
 ### Illia Oleksiuk
 
 Senior DevOps Engineer | OWASP GenAI Data Security Risk and Mitigations Initiative 2026 Contributor

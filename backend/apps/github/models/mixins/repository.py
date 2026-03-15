@@ -149,14 +149,14 @@ class RepositoryIndexMixin:
         return self.project.nest_key if self.project else ""
 
     @property
-    def idx_pushed_at(self) -> float:
-        """Get the timestamp of the last push to this repository for indexing.
+    def idx_pushed_at(self) -> str:
+        """Get the last push date for this repository for indexing.
 
         Returns:
-            float: Unix timestamp of the most recent push.
+            str: ISO format datetime string of the most recent push.
 
         """
-        return self.pushed_at.timestamp()
+        return self.pushed_at.isoformat()
 
     @property
     def idx_size(self) -> int:
