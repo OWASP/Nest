@@ -92,6 +92,12 @@ class FakeModuleNode:
         info.context.task_assigned_at_by_issue = None
         return _call_module_resolver(self, "task_assigned_at", info, issue_number=issue_number)
 
+    def mock_program(self):
+        return _call_module_resolver(self, "program")
+
+    def mock_project_id(self):
+        return _call_module_resolver(self, "project_id")
+
 
 @pytest.fixture
 def mock_module_node():
@@ -197,6 +203,16 @@ class TestModuleNodeResolvers:
         mock = FakeModuleNode()
         mock.project = None
         assert mock.mock_project_name() is None
+
+    def test_module_node_program(self, mock_module_node):
+        """Test the program resolver."""
+        result = mock_module_node.mock_program()
+        assert result == mock_module_node.program
+
+    def test_module_node_project_id(self, mock_module_node):
+        """Test the project_id resolver."""
+        result = mock_module_node.mock_project_id()
+        assert str(result) == "project-1"
 
     def test_module_node_issues_with_label(self, mock_module_node):
         """Test the issues resolver with a label filter."""
