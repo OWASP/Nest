@@ -119,7 +119,7 @@ const ProgramDetailsPage = () => {
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
       <DetailsCard
-        accessLevel="admin"
+        accessLevel={isAdmin ? 'admin' : 'user'}
         admins={program?.admins ?? undefined}
         canUpdateStatus={canUpdateStatus}
         details={programDetails}

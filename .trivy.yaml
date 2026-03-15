@@ -3,7 +3,7 @@ exit-code: 1
 filesystem:
   skip-files:
 
-ignorefile: /trivyignore.yaml
+ignorefile: /.trivyignore.yaml
 
 report: all
 

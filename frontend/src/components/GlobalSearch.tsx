@@ -1,5 +1,6 @@
 'use client'
 import { sendGAEvent } from '@next/third-parties/google'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import { debounce } from 'lodash'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
@@ -36,6 +37,7 @@ export default function GlobalSearch() {
   const panelRef = useRef<HTMLDivElement>(null)
   const searchVersionRef = useRef(0)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const shouldAutoFocus = useShouldAutoFocusSearch()
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -51,10 +53,10 @@ export default function GlobalSearch() {
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement
-      const timer = setTimeout(() => inputRef.current?.focus(), 50)
+      const timer = shouldAutoFocus ? setTimeout(() => inputRef.current?.focus(), 50) : undefined
       document.body.style.overflow = 'hidden'
       return () => {
-        clearTimeout(timer)
+        if (timer !== undefined) clearTimeout(timer)
         document.body.style.overflow = ''
       }
     } else {
@@ -62,7 +64,7 @@ export default function GlobalSearch() {
       previousFocusRef.current?.focus()
       previousFocusRef.current = null
     }
-  }, [isOpen])
+  }, [isOpen, shouldAutoFocus])
 
   useEffect(() => {
     if (!isOpen) {
@@ -249,7 +251,9 @@ export default function GlobalSearch() {
     setSuggestions([])
     setShowSuggestions(false)
     setHighlightedIndex(null)
-    inputRef.current?.focus()
+    if (shouldAutoFocus) {
+      inputRef.current?.focus()
+    }
   }
 
   const handleSuggestionKeyDown = (e: React.KeyboardEvent, hit: SearchHit, indexName: string) => {

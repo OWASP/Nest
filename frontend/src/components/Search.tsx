@@ -1,5 +1,6 @@
 import { Skeleton } from '@heroui/skeleton'
 import { sendGTMEvent } from '@next/third-parties/google'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import { debounce } from 'lodash'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
@@ -23,16 +24,17 @@ const SearchBar: React.FC<SearchProps> = ({
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const inputRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
+  const shouldAutoFocus = useShouldAutoFocusSearch()
 
   useEffect(() => {
     setSearchQuery(initialValue)
   }, [initialValue])
 
   useEffect(() => {
-    if (isLoaded && inputRef.current) {
+    if (isLoaded && shouldAutoFocus && inputRef.current) {
       inputRef.current.focus()
     }
-  }, [pathname, isLoaded])
+  }, [pathname, isLoaded, shouldAutoFocus])
 
   const debouncedSearch = useMemo(
     () =>
@@ -65,7 +67,9 @@ const SearchBar: React.FC<SearchProps> = ({
     debouncedSearch.cancel()
     setSearchQuery('')
     onSearch('')
-    inputRef.current?.focus()
+    if (shouldAutoFocus) {
+      inputRef.current?.focus()
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

@@ -95,7 +95,10 @@ Follow these steps to set up the infrastructure:
 
 1. **Setup Main Infrastructure (staging)**:
 
-Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`.
+> [!NOTE]
+> This document has steps to deploy the `staging` environment.
+
+Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/live/README.md`.
 This user must assume the role `nest-staging-terraform` created in the bootstrap step.
 To do this locally:
 
@@ -124,7 +127,7 @@ To do this locally:
 - Navigate to the main infrastructure directory:
 
     ```bash
-    cd infrastructure/staging/
+    cd infrastructure/live/
     ```
 
 - Copy the contents from the template file into your new local terraform variables file:
@@ -141,6 +144,7 @@ To do this locally:
 
   > [!NOTE]
   > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket created in the previous step.
+  > Update `backend_image_tag` and `frontend_image_tag` variables with a unique tag (for example, a commit SHA or timestamp); do not reuse `latest` when tags are immutable.
   > Update defaults (e.g. `region`) as needed.
 
 - Initialize Terraform with the backend configuration:
@@ -180,6 +184,10 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend + Sche
 
 1. **Upload backend image to ECR**:
 
+> [!NOTE]
+> The `latest` tag is used in these example commands. ECR repository tags are `IMMUTABLE`.
+> Pushing images with an existing tag will fail.
+
 - Build the backend image using the following command:
 
     ```bash
@@ -199,6 +207,10 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend + Sche
     ```
 
 1. **Upload frontend image to ECR**:
+
+> [!NOTE]
+> The `latest` tag is used in these example commands. ECR repository tags are `IMMUTABLE`.
+> Pushing images with an existing tag will fail.
 
 - Build the frontend image using the following command:
 
@@ -236,6 +248,65 @@ Migrate and load data into the new database.
 
 1. **Run ECS Tasks**:
 
+Run the following commands to execute ECS tasks with the correct network configuration:
+
+> [!NOTE]
+> Ensure you are in the `infrastructure/live` directory.
+
+1. Set variables from Terraform outputs
+
+> [!NOTE]
+> Ensure you have `jq` installed.
+
+```bash
+CLUSTER=$(terraform output -raw tasks_cluster_name)
+SECURITY_GROUP=$(terraform output -raw tasks_security_group_id)
+SUBNETS=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')
+NAT_ENABLED=$(terraform output -raw nat_gateway_enabled)
+ASSIGN_PUBLIC_IP=$([ "$NAT_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+```
+
+> [!NOTE]
+> Replace `AWS_REGION` in each command with appropriate region.
+> Please wait for a task to be complete before running the next task.
+> To view the status of a task, use the AWS Console.
+
+1. Run migrate task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-migrate \
+  --region AWS_REGION
+```
+
+1. Run load-data task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-load-data \
+  --region AWS_REGION
+```
+
+1. Run index-data task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-index-data \
+  --region AWS_REGION
+```
+
+<details>
+<summary>Manual AWS Console Instructions (Alternative)</summary>
+
 - Head over to Elastic Container Service in the AWS Console.
 - Click on `nest-staging-migrate` in `Task Definitions` section.
 - Select the task definition revision.
@@ -244,11 +315,14 @@ Migrate and load data into the new database.
   - Environment: Cluster: `nest-staging-tasks-cluster`
   - Networking:
     - VPC: `nest-staging-vpc`
-    - Subnets: subnets will be auto-selected due to VPC selection.
+    - Subnets: Choose a private subnet if NAT Gateway is enabled, public otherwise (default).
     - Security group name: select the ECS security group (e.g. `nest-staging-tasks-sg`).
+    - Public IP: Turned off if NAT Gateway is enabled, Turned on otherwise (default).
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.
+
+</details>
 
 ## Configure Domain
 
