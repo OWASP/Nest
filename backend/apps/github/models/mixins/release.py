@@ -57,9 +57,9 @@ class ReleaseIndexMixin:
         return self.repository.project.nest_key if self.repository.project else ""
 
     @property
-    def idx_published_at(self) -> float | None:
-        """Return published at timestamp for indexing."""
-        return self.published_at.timestamp() if self.published_at else None
+    def idx_published_at(self) -> str | None:
+        """Return published at for indexing."""
+        return self.published_at.isoformat() if self.published_at else None
 
     @property
     def idx_repository(self) -> str:

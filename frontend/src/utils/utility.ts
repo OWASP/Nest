@@ -24,7 +24,7 @@ export const getFilteredIcons = (project: ProjectType, params: string[]): Icon =
   const filteredIcons = params.reduce((acc: Icon, key) => {
     if (ICONS[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
       acc[key] =
-        key === 'createdAt'
+        key === 'createdAt' || key === 'updatedAt'
           ? dayjs(project[key as keyof ProjectType]).fromNow()
           : (project[key as keyof typeof project] as unknown as number)
     }

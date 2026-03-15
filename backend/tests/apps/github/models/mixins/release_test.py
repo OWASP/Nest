@@ -49,7 +49,7 @@ class TestReleaseIndex:
             ("idx_is_pre_release", True),
             ("idx_name", "Release v1.0.0"),
             ("idx_project", "mock/project"),
-            ("idx_published_at", datetime(2023, 6, 1, tzinfo=UTC).timestamp()),
+            ("idx_published_at", datetime(2023, 6, 1, tzinfo=UTC).isoformat()),
             ("idx_repository", "mock/repository"),
             ("idx_tag_name", "v1.0.0"),
             ("idx_author", []),
