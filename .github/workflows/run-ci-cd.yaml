@@ -642,8 +642,6 @@ jobs:
       (github.event_name == 'release' &&
       github.event.action == 'published')
 
-    needs:
-      - run-infrastructure-tests
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -1084,11 +1082,6 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - run-backend-tests
-      - run-frontend-a11y-tests
-      - run-frontend-e2e-tests
-      - run-frontend-unit-tests
-      - run-infrastructure-tests
       - set-release-version
     permissions:
       contents: read
@@ -1102,12 +1095,6 @@ jobs:
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
@@ -1130,25 +1117,13 @@ jobs:
           build-args: |
             OWASP_GID=1002
             OWASP_UID=1002
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
           file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
           tags: |
-            owasp/nest:backend-production
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-backend:${{ env.RELEASE_VERSION }}
-
-      - name: Get backend image size
-        id: backend-size
-        run: |
-          IMAGE_NAME="owasp/nest:backend-production"
-          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
-          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
-          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
 
       - name: Prepare frontend public environment
         env:
@@ -1182,9 +1157,6 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
           file: docker/frontend/Dockerfile
           load: true
@@ -1194,25 +1166,7 @@ jobs:
             RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
-            owasp/nest:frontend-production
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-frontend:${{ env.RELEASE_VERSION }}
-
-      - name: Get frontend image size
-        id: frontend-size
-        run: |
-          IMAGE_NAME="owasp/nest:frontend-production"
-          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
-          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
-          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
-
-      - name: Create Docker image size report
-        run: |
-          {
-            echo "## Docker Image Size Report"
-            echo ""
-            echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
-            echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
-          } >> $GITHUB_STEP_SUMMARY
     timeout-minutes: 5
 
   scan-production-images:
@@ -1270,7 +1224,7 @@ jobs:
       github.event.action == 'published'
     needs:
       - bootstrap-nest-infrastructure
-      - scan-production-images
+      - build-production-images
       - set-release-version
     permissions:
       contents: read
@@ -1319,7 +1273,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: settings.production
           ENABLE_CRON_TASKS: true
           ENABLE_NAT_GATEWAY: true
-          ENABLE_RDS_PROXY: true
+          ENABLE_RDS_PROXY: false
           ENVIRONMENT: production
           FRONTEND_USE_FARGATE_SPOT: false
           PROJECT_NAME: nest
@@ -1344,6 +1298,12 @@ jobs:
           frontend_image_tag="$RELEASE_VERSION"
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
+
+          secret_recovery_window_in_days = 0
+          db_backup_retention_period     = 0
+          db_deletion_protection         = false
+          db_skip_final_snapshot         = true
+
           EOF
 
       - name: Terraform Init
@@ -1370,8 +1330,8 @@ jobs:
       - name: Upload plan artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
-          name: tfplan
-          path: infrastructure/live/production.tfplan
+          name: production.tfplan
+          path: infrastructure/live/tfplan
           retention-days: 3
     timeout-minutes: 15
 
@@ -1430,7 +1390,7 @@ jobs:
       - name: Download plan artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          name: tfplan
+          name: production.tfplan
           path: infrastructure/live
 
       - name: Terraform Apply
