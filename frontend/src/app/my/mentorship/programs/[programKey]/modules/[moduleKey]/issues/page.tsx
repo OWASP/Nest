@@ -22,7 +22,7 @@ const IssuesPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   const userName = hasExtendedUser(session) ? session.user.login : undefined
   const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
@@ -135,7 +135,7 @@ const IssuesPage = () => {
     [router, programKey, moduleKey]
   )
 
-  if (!userName || loading) {
+  if (status === 'loading') {
     return <LoadingSpinner />
   }
 
@@ -147,6 +147,11 @@ const IssuesPage = () => {
       />
     )
   }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   if (!moduleData)
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 

@@ -25,7 +25,7 @@ import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [showAllPRs, setShowAllPRs] = useState(false)
   const { programKey, moduleKey, issueId } = params
 
@@ -108,7 +108,7 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
-  if (!userName || loading) {
+  if (status === 'loading') {
     return <LoadingSpinner />
   }
 
@@ -119,6 +119,10 @@ const ModuleIssueDetailsPage = () => {
         message="Only project leaders and mentors can access this page."
       />
     )
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
   }
 
   if (error) {

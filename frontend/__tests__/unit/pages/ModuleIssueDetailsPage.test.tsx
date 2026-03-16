@@ -106,6 +106,7 @@ describe('ModuleIssueDetailsPage', () => {
           isMentor: false,
         },
       },
+      status: 'authenticated',
     })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: mockAssignIssue,
@@ -730,6 +731,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: false,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
 
@@ -747,6 +749,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: true,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
 
@@ -769,6 +772,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: false,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: undefined, loading: true, error: undefined })
 
@@ -789,6 +793,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: false,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
 
@@ -809,6 +814,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: false,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
 
@@ -819,7 +825,7 @@ describe('ModuleIssueDetailsPage', () => {
       )
     })
 
-    it('renders LoadingSpinner when userName is undefined and loading (line 81, 115)', () => {
+    it('shows AccessDeniedDisplay when userName is undefined (line 115)', () => {
       mockUseSession.mockReturnValue({
         data: {
           user: {
@@ -829,11 +835,15 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: false,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: undefined, loading: true, error: undefined })
 
       render(<ModuleIssueDetailsPage />)
-      expect(screen.getAllByAltText('Loading indicator')[0]).toBeInTheDocument()
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only project leaders and mentors can access this page.')
+      ).toBeInTheDocument()
     })
 
     it('shows AccessDeniedDisplay when user is not authorized (line 115)', () => {
@@ -846,6 +856,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: false,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
 
@@ -856,12 +867,15 @@ describe('ModuleIssueDetailsPage', () => {
       ).toBeInTheDocument()
     })
 
-    it('shows LoadingSpinner when session data is unavailable (line 115)', () => {
-      mockUseSession.mockReturnValue({ data: null })
+    it('shows AccessDeniedDisplay when session data is unavailable (line 115)', () => {
+      mockUseSession.mockReturnValue({ data: null, status: 'unauthenticated' })
       mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
 
       render(<ModuleIssueDetailsPage />)
-      expect(screen.getAllByAltText('Loading indicator')[0]).toBeInTheDocument()
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only project leaders and mentors can access this page.')
+      ).toBeInTheDocument()
     })
 
     it('does not show AccessDeniedDisplay when user is authorized as project leader (line 115)', () => {
@@ -874,6 +888,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: false,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
 
@@ -892,6 +907,7 @@ describe('ModuleIssueDetailsPage', () => {
             isMentor: true,
           },
         },
+        status: 'authenticated',
       })
       mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
 
