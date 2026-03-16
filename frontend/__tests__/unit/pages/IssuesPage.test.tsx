@@ -878,6 +878,14 @@ describe('IssuesPage', () => {
       ).toBeInTheDocument()
     })
 
+    it('shows LoadingSpinner while session is loading (status === loading)', () => {
+      mockUseSession.mockReturnValue({ data: undefined, status: 'loading' })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    })
+
     it('does not show AccessDeniedDisplay when user is authorized as project leader (lines 142-175)', () => {
       mockUseSession.mockReturnValue({
         data: {
