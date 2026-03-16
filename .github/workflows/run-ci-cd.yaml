@@ -1271,6 +1271,7 @@ jobs:
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
           DJANGO_CONFIGURATION: Production
           DJANGO_SETTINGS_MODULE: settings.production
+          ENABLE_ADDITIONAL_PARAMETERS: true
           ENABLE_CRON_TASKS: true
           ENABLE_NAT_GATEWAY: true
           ENABLE_RDS_PROXY: false
@@ -1290,6 +1291,7 @@ jobs:
           django_configuration="$DJANGO_CONFIGURATION"
           django_release_version="$RELEASE_VERSION"
           django_settings_module="$DJANGO_SETTINGS_MODULE"
+          enable_additional_parameters=$ENABLE_ADDITIONAL_PARAMETERS
           enable_cron_tasks=$ENABLE_CRON_TASKS
           enable_nat_gateway=$ENABLE_NAT_GATEWAY
           enable_rds_proxy=$ENABLE_RDS_PROXY
