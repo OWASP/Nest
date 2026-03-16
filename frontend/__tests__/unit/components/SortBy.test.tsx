@@ -22,8 +22,9 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
-    expect(sortButton).toBeInTheDocument()
+    // HeroUI Select trigger exposes selected value as accessible name when no label is set
+    const sortTrigger = screen.getByRole('button', { name: 'Name' })
+    expect(sortTrigger).toBeInTheDocument()
     const selectedOption = screen.getByText('Name', { selector: '[data-slot="value"]' })
     expect(selectedOption).toBeInTheDocument()
   })
@@ -32,9 +33,9 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
+    const sortTrigger = screen.getByRole('button', { name: 'Name' })
     await act(async () => {
-      sortButton.click()
+      sortTrigger.click()
     })
     expect(await screen.findByRole('option', { name: 'Name' })).toBeInTheDocument()
     expect(await screen.findByRole('option', { name: 'Date' })).toBeInTheDocument()
@@ -99,11 +100,10 @@ describe('<SortBy />', () => {
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
     expect(hiddenSelect.tagName).toBe('SELECT')
 
-    // Use getAllByText to handle multiple elements with same text
-    const sortButton = screen.getByRole('button', { name: /Sort By/ })
-    const container = sortButton.closest('div')
+    // Trigger exposes selected value as accessible name when no label is set
+    const sortTrigger = screen.getByRole('button', { name: 'Name' })
+    const container = sortTrigger.closest('div')
     expect(container).toBeInTheDocument()
-    expect(hiddenSelect).toHaveAccessibleName(/Sort By/)
   })
 
   it('toggles order when Enter key is pressed on sort order button', async () => {
@@ -165,5 +165,64 @@ describe('<SortBy />', () => {
     })
     const sortOrderButton = screen.queryByLabelText(/Sort in/i)
     expect(sortOrderButton).not.toBeInTheDocument()
+  })
+
+  it('renders sort dropdown and order button connected with no gap', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    // Trigger shows selected value "Name" when showLabel is false
+    const container = screen.getByRole('button', { name: 'Name' }).closest('.flex.items-center')
+    expect(container).toBeInTheDocument()
+    expect(container).not.toHaveClass('gap-2')
+  })
+
+  it('renders order button with matching height to dropdown', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+    expect(orderButton).toHaveClass('h-12')
+  })
+
+  it('renders dropdown wrapper with rounded-r-none when order button is visible', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    // Trigger shows selected value "Name" when showLabel is false
+    const sortButton = screen.getByRole('button', { name: 'Name' })
+    const outerWrapper = sortButton.closest('.h-12.items-center')
+    expect(outerWrapper).toHaveClass('rounded-r-none')
+    expect(outerWrapper).toHaveClass('border-r-0')
+  })
+
+  it('renders dropdown wrapper with full rounded-lg when order button is hidden', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="default" />)
+    })
+    // When no option is selected the order button is hidden; only the Select trigger is present
+    const sortButton = screen.getByRole('button')
+    const outerWrapper = sortButton.closest('.h-12.items-center')
+    expect(outerWrapper).toHaveClass('rounded-lg')
+    expect(outerWrapper).not.toHaveClass('rounded-r-none')
+  })
+
+  it('renders order button with rounded-l-none for seamless connection', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+    expect(orderButton).toHaveClass('rounded-l-none')
+    expect(orderButton).toHaveClass('rounded-r-lg')
+    expect(orderButton).toHaveClass('border-l-0')
+  })
+
+  it('renders order button without focus ring', async () => {
+    await act(async () => {
+      render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
+    })
+    const orderButton = screen.getByLabelText(/Sort in ascending order/i)
+    expect(orderButton).toHaveClass('focus:ring-0')
+    expect(orderButton).toHaveClass('focus:ring-offset-0')
   })
 })

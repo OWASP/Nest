@@ -6,7 +6,6 @@ export type Milestone = {
   body?: string
   closedIssuesCount?: number
   createdAt?: string
-  id?: string
   openIssuesCount?: number
   organizationName?: string | null
   progress?: number

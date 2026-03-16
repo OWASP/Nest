@@ -5,6 +5,8 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
+##@ Backend
+
 ifeq ($(EXEC_MODE),direct)
 SHELL := /bin/sh
 else
@@ -38,7 +40,7 @@ clean-backend-docker:
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
-create-superuser:
+create-superuser: ## Create Django admin superuser
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
@@ -91,13 +93,14 @@ clear-cache:
 collect-static:
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
-django-shell:
+django-shell: ## Open Django interactive shell
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
-dump-data:
+dump-data: ## Dump database data
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
+enrich-data: ## Enrich data from external sources
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
@@ -108,13 +111,13 @@ enrich-data: \
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 
-index-data:
+index-data: ## Index data for Algolia search
 	@echo "Indexing Nest data"
 	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data:
+load-data: ## Load initial data from fixtures
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
 
@@ -133,16 +136,16 @@ load-data-staging:
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
-migrate:
+migrate: ## Run database migrations
 	@CMD="python manage.py migrate" $(MAKE) exec-backend-command
 
-migrations:
+migrations: ## Generate new migrations
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
 migrations-empty:
 	@CMD="python manage.py makemigrations --empty $(APP_NAME)" $(MAKE) exec-backend-command
 
-purge-data:
+purge-data: ## Purge database data
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
 
 purge-data-e2e:
@@ -187,12 +190,12 @@ security-scan-backend-image:
 	@docker run \
 		--rm \
 		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
-		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		image --config /trivy.yaml $(BACKEND_IMAGE_NAME)
+		image --config /.trivy.yaml $(BACKEND_IMAGE_NAME)
 
 SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
 
@@ -212,10 +215,10 @@ sbom-backend-image:
 		--output /work/backend-sbom-$(SBOM_VERSION).cdx.json \
 		$(BACKEND_IMAGE_NAME)
 
-shell-backend:
+shell-backend: ## Open backend container shell
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
-shell-db:
+shell-db: ## Open database container shell
 	@CMD="/bin/sh" $(MAKE) exec-db-command-it
 
 sync-data: \
@@ -223,6 +226,7 @@ sync-data: \
 	enrich-data \
 	index-data
 
+test-backend: ## Run backend tests
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
@@ -233,7 +237,7 @@ test-backend:
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
 
-test-fuzz:
+test-fuzz: ## Run fuzz tests (REST API and GraphQL)
 	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-fuzz_fuzz-db-data >/dev/null 2>&1 || true
 	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \

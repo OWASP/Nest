@@ -5,6 +5,7 @@ import Header from 'components/Header'
 
 jest.mock('next/navigation', () => ({
   usePathname: () => '/',
+  useRouter: () => ({ push: jest.fn() }),
 }))
 
 jest.mock('next/image', () => ({
@@ -38,6 +39,11 @@ jest.mock('components/NavDropDown', () => ({
 jest.mock('components/UserMenu', () => ({
   __esModule: true,
   default: () => <div data-testid="user-menu">User Menu</div>,
+}))
+
+jest.mock('components/GlobalSearch', () => ({
+  __esModule: true,
+  default: () => <div data-testid="global-search">Global Search</div>,
 }))
 
 describe('Header Navigation', () => {

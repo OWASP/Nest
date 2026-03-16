@@ -10,6 +10,10 @@ test.describe('Home Page', () => {
     await expect(
       page.getByText('Your gateway to OWASP. Discover, engage, and help shape the future!')
     ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Open search' })).toBeVisible()
+    await page.getByRole('button', { name: 'Open search' }).click()
+    await expect(page.getByRole('textbox', { name: 'Search the OWASP community' })).toBeVisible()
+    await page.getByRole('textbox', { name: 'Search the OWASP community' }).fill('owasp')
   })
 
   test('should have new chapters', async ({ page }) => {

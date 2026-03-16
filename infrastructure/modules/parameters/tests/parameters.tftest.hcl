@@ -1,23 +1,24 @@
 mock_provider "aws" {}
 
 variables {
-  allowed_hosts      = "nest.owasp.dev"
-  allowed_origins    = "https://nest.owasp.dev"
-  common_tags        = { Environment = "test", Project = "nest" }
-  configuration      = "Staging"
-  db_host            = "db.example.com"
-  db_name            = "nest_db"
-  db_password_arn    = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_DB_PASSWORD"
-  db_port            = "5432"
-  db_user            = "nest_user"
-  environment        = "test"
-  nextauth_url       = "https://nest.owasp.dev"
-  project_name       = "nest"
-  redis_host         = "redis.example.com"
-  redis_password_arn = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_REDIS_PASSWORD"
-  server_csrf_url    = "https://nest.owasp.dev/csrf"
-  server_graphql_url = "https://nest.owasp.dev/graphql"
-  settings_module    = "settings.staging"
+  common_tags                   = { Environment = "test", Project = "nest" }
+  db_password_arn               = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_DB_PASSWORD"
+  django_allowed_hosts          = "nest.owasp.dev"
+  django_allowed_origins        = "https://nest.owasp.dev"
+  django_aws_static_bucket_name = "nest-test-static-abcd1234"
+  django_configuration          = "Staging"
+  django_db_host                = "db.example.com"
+  django_db_name                = "nest_db"
+  django_db_port                = "5432"
+  django_db_user                = "nest_user"
+  django_redis_host             = "redis.example.com"
+  django_settings_module        = "settings.staging"
+  environment                   = "test"
+  next_server_csrf_url          = "https://nest.owasp.dev/csrf"
+  next_server_graphql_url       = "https://nest.owasp.dev/graphql"
+  nextauth_url                  = "https://nest.owasp.dev"
+  project_name                  = "nest"
+  redis_password_arn            = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_REDIS_PASSWORD"
 }
 
 run "test_django_algolia_application_id_path_format" {
@@ -81,6 +82,22 @@ run "test_django_allowed_origins_is_string" {
   assert {
     condition     = aws_ssm_parameter.django_allowed_origins.type == "String"
     error_message = "DJANGO_ALLOWED_ORIGINS must be stored as String."
+  }
+}
+
+run "test_django_aws_storage_bucket_name_path_format" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_aws_storage_bucket_name.name == "/${var.project_name}/${var.environment}/DJANGO_AWS_STORAGE_BUCKET_NAME"
+    error_message = "DJANGO_AWS_STORAGE_BUCKET_NAME must follow path: /{project}/{environment}/DJANGO_AWS_STORAGE_BUCKET_NAME."
+  }
+}
+
+run "test_django_aws_storage_bucket_name_is_string" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.django_aws_storage_bucket_name.type == "String"
+    error_message = "DJANGO_AWS_STORAGE_BUCKET_NAME must be stored as String."
   }
 }
 
