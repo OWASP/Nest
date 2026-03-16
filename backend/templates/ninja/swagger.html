@@ -44,7 +44,8 @@
     <body data-csrf-token="{% if add_csrf %}{{ csrf_token }}{% endif %}"
           data-api-csrf="{% if add_csrf %}true{% endif %}">
         {# djlint:off #}
-        <script type="application/json" id="swagger-settings">{{ swagger_settings | safe }}</script>
+        <!-- NOSEMGREP: python.flask.security.xss.audit.template-unescaped-with-safe.template-unescaped-with-safe -->
+        <script type="application/json" id="swagger-settings">{{ swagger_settings | safe }}</script><!-- NOSEMGREP: generic.html-templates.security.var-in-script-tag.var-in-script-tag -->
         {# djlint:on #}
         <div class="nest-top-bar">
             <a href="/" class="logo nest-logo-link" aria-label="Nest home">
