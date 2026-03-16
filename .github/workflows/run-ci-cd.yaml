@@ -637,8 +637,11 @@ jobs:
       TF_IN_AUTOMATION: true
     environment: staging
     if: |
-      github.repository == 'OWASP/Nest' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+      (github.repository == 'OWASP/Nest' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')) ||
+      (github.event_name == 'release' &&
+      github.event.action == 'published')
+
     needs:
       - run-infrastructure-tests
     permissions:
