@@ -41,10 +41,10 @@ locals {
     "form-action 'self'",
     "frame-ancestors 'none'",
     "frame-src 'self'",
-    "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://owasp.org https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://raw.githubusercontent.com",
+    "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://owasp-nest.s3.amazonaws.com https://owasp.org https://raw.githubusercontent.com",
     "object-src 'none'",
-    "script-src 'self' 'unsafe-inline' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org",
-    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com",
+    "script-src 'self' 'unsafe-inline' https://*.i.posthog.com https://*.tile.openstreetmap.org https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://owasp-nest.s3.amazonaws.com https://www.googletagmanager.com",
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://owasp-nest.s3.amazonaws.com",
   ])
 }
 
