@@ -391,7 +391,7 @@ export default function GlobalSearch() {
         type="button"
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 rounded-lg border border-slate-600/30 bg-transparent px-2.5 py-2 text-sm text-slate-600 transition-colors hover:border-slate-500/50 hover:bg-slate-200/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 sm:w-60 sm:px-4 dark:border-slate-600/50 dark:bg-transparent dark:text-slate-300 dark:hover:border-slate-500/50 dark:hover:bg-slate-600/30 dark:hover:text-slate-100 dark:focus-visible:outline-slate-400"
-        aria-label="Open search(⌘K)"
+        aria-label="Open search"
       >
         <FaSearch className="h-4 w-4 shrink-0" />
         <span className="hidden flex-1 text-left sm:inline">Press <kbd className="rounded border border-slate-500/30 bg-transparent px-1.5 py-0.5 text-xs dark:border-slate-500/50 dark:bg-transparent">
