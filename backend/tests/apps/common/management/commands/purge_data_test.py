@@ -54,3 +54,9 @@ class TestPurgeDataCommand:
                 )
                 cursor_instance.execute.assert_any_call(expected_query)
                 command.stdout.write.assert_any_call(f"Purged {app_name}.{model_name}")
+
+        django_content_type_query = sql.SQL("TRUNCATE TABLE {} CASCADE").format(
+            sql.Identifier("django_content_type")
+        )
+        cursor_instance.execute.assert_any_call(django_content_type_query)
+        command.stdout.write.assert_any_call("Purged django_content_type")

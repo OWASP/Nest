@@ -5,6 +5,8 @@ from django.core.management.base import BaseCommand
 from django.db import connection
 from psycopg2 import sql
 
+DJANGO_CONTENT_TYPE_TABLE = "django_content_type"
+
 
 class Command(BaseCommand):
     help = "Purge OWASP Nest data."
@@ -30,3 +32,9 @@ class Command(BaseCommand):
                         )
                     )
                     self.stdout.write(f"Purged {nest_app}.{model.__name__}")
+            cursor.execute(
+                sql.SQL("TRUNCATE TABLE {} CASCADE").format(
+                    sql.Identifier(DJANGO_CONTENT_TYPE_TABLE)
+                )
+            )
+            self.stdout.write(f"Purged {DJANGO_CONTENT_TYPE_TABLE}")
