@@ -43,7 +43,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
     "dompurify": "^3.3.3",
-    "framer-motion": "^12.36.0",
+    "framer-motion": "^12.37.0",
     "graphql": "^16.13.1",
     "ics": "^3.8.1",
     "isomorphic-dompurify": "^3.3.0",
