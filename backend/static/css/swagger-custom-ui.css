@@ -28,7 +28,7 @@ body {
     color: #737373;
 }
 
-.nest-topbar {
+.nest-top-bar {
     position: sticky;
     z-index: 20;
     display: flex;
@@ -42,20 +42,34 @@ body {
     padding-right: 16px;
 }
 
-.nest-topbar .logo,
+.nest-top-bar .logo,
 .logo-img-div,
-.nest-topbar .toggle-theme-btn {
+.nest-top-bar .toggle-theme-btn {
     display: flex;
     align-items: center;
 }
 
-.nest-topbar .logo {
-    gap: 0.25rem;
+/* Logo layout matches main site Header: flex, items-center, same proportions. */
+.nest-top-bar .logo {
+    gap: 0;
+    height: 100%;
 }
 
-.nest-topbar .logo-text {
+.nest-top-bar .nest-logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.nest-top-bar .logo-text {
     font-size: 1.5rem;
-    color: #1d293d;
+    font-weight: 400;
+    line-height: 2rem;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .nest-logo {
@@ -66,9 +80,12 @@ body {
     display: block;
 }
 
+/* Match main site: 64×64 box with py-2 (8px) so image shows at 48px. */
 .logo-img-div {
-    height: 48px;
-    width: 48px;
+    height: 4rem;
+    width: 4rem;
+    padding: 8px 0;
+    box-sizing: border-box;
     justify-content: center;
 }
 
@@ -89,13 +106,49 @@ body {
     color: #52a3ff;
 }
 
-.nest-topbar .toggle-theme-btn {
+/* Match main platform ModeToggle: bg-[#87a1bc] (light), dark:bg-slate-900 (#0f172a). */
+.nest-top-bar .toggle-theme-btn {
     justify-content: center;
+    align-items: center;
     height: 2.5rem;
     width: 2.5rem;
     border-radius: 100%;
     background: #87a1bc;
     border: none;
+    color: #fff;
+    position: relative;
+}
+
+/* Theme icon: show opposite theme (moon in light = switch to dark, sun in dark = switch to light), consistent with main platform. */
+.nest-top-bar .toggle-theme-btn .theme-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    pointer-events: none;
+}
+
+/* Force icon visible in both themes (Swagger may set fill on svg path in dark). */
+.nest-top-bar .toggle-theme-btn .theme-icon path {
+    fill: #fff;
+}
+
+.nest-top-bar .toggle-theme-btn .theme-icon-sun {
+    visibility: hidden;
+}
+
+.nest-top-bar .toggle-theme-btn .theme-icon-moon {
+    visibility: visible;
+}
+
+html.dark .nest-top-bar .toggle-theme-btn .theme-icon-sun {
+    visibility: visible;
+}
+
+html.dark .nest-top-bar .toggle-theme-btn .theme-icon-moon {
+    visibility: hidden;
 }
 
 html.dark {
@@ -111,15 +164,15 @@ html.dark .swagger-ui .info .description p {
     color: #a3a3a3;
 }
 
-html.dark .nest-topbar {
+html.dark .nest-top-bar {
     background-color: #1e2939;
 }
 
-html.dark .nest-topbar .logo-text {
-    color: #cad5e2;
+html.dark .nest-top-bar .logo-text {
+    color: #cbd5e1;
 }
 
-html.dark .nest-topbar .toggle-theme-btn {
+html.dark .nest-top-bar .toggle-theme-btn {
     background-color: #0f172a;
 }
 
