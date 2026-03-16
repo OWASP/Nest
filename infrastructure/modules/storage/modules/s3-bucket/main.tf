@@ -20,6 +20,11 @@ resource "aws_s3_bucket" "this" { # NOSONAR
 
 resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.id
+
+  # Apply public access block before policy so that when allow_public_read is true,
+  # block_public_policy is turned off before attaching a public bucket policy.
+  depends_on = [aws_s3_bucket_public_access_block.this]
+
   policy = jsonencode({
     Version = "2012-10-17"
     Id      = "BucketPolicy"
