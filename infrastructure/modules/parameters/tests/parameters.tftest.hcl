@@ -12,6 +12,7 @@ variables {
   django_db_port                = "5432"
   django_db_user                = "nest_user"
   django_redis_host             = "redis.example.com"
+  django_release_version        = "1.0.0"
   django_settings_module        = "settings.staging"
   environment                   = "test"
   next_server_csrf_url          = "https://nest.owasp.dev/csrf"
@@ -19,6 +20,7 @@ variables {
   nextauth_url                  = "https://nest.owasp.dev"
   project_name                  = "nest"
   redis_password_arn            = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_REDIS_PASSWORD"
+  slack_bot_token_suffix        = "T04T40NHX"
 }
 
 run "test_django_algolia_application_id_path_format" {
@@ -181,6 +183,66 @@ run "test_django_db_user_is_string" {
   }
 }
 
+run "test_django_github_app_id_disabled_by_default" {
+  command = plan
+  assert {
+    condition     = length(aws_ssm_parameter.django_github_app_id) == 0
+    error_message = "DJANGO_GITHUB_APP_ID must not be created when enable_additional_parameters is false."
+  }
+}
+
+run "test_django_github_app_id_is_string" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.django_github_app_id[0].type == "String"
+    error_message = "DJANGO_GITHUB_APP_ID must be stored as String."
+  }
+}
+
+run "test_django_github_app_id_path_format" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.django_github_app_id[0].name == "/${var.project_name}/${var.environment}/DJANGO_GITHUB_APP_ID"
+    error_message = "DJANGO_GITHUB_APP_ID must follow path: /{project}/{environment}/DJANGO_GITHUB_APP_ID."
+  }
+}
+
+run "test_django_github_app_installation_id_disabled_by_default" {
+  command = plan
+  assert {
+    condition     = length(aws_ssm_parameter.django_github_app_installation_id) == 0
+    error_message = "DJANGO_GITHUB_APP_INSTALLATION_ID must not be created when enable_additional_parameters is false."
+  }
+}
+
+run "test_django_github_app_installation_id_is_string" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.django_github_app_installation_id[0].type == "String"
+    error_message = "DJANGO_GITHUB_APP_INSTALLATION_ID must be stored as String."
+  }
+}
+
+run "test_django_github_app_installation_id_path_format" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.django_github_app_installation_id[0].name == "/${var.project_name}/${var.environment}/DJANGO_GITHUB_APP_INSTALLATION_ID"
+    error_message = "DJANGO_GITHUB_APP_INSTALLATION_ID must follow path: /{project}/{environment}/DJANGO_GITHUB_APP_INSTALLATION_ID."
+  }
+}
+
 run "test_django_open_ai_secret_key_path_format" {
   command = plan
   assert {
@@ -226,6 +288,36 @@ run "test_django_redis_use_tls_is_string" {
   assert {
     condition     = aws_ssm_parameter.django_redis_use_tls.type == "String"
     error_message = "DJANGO_REDIS_USE_TLS must be stored as String."
+  }
+}
+
+run "test_django_release_version_disabled_by_default" {
+  command = plan
+  assert {
+    condition     = length(aws_ssm_parameter.django_release_version) == 0
+    error_message = "DJANGO_RELEASE_VERSION must not be created when enable_additional_parameters is false."
+  }
+}
+
+run "test_django_release_version_is_string" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.django_release_version[0].type == "String"
+    error_message = "DJANGO_RELEASE_VERSION must be stored as String."
+  }
+}
+
+run "test_django_release_version_path_format" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.django_release_version[0].name == "/${var.project_name}/${var.environment}/DJANGO_RELEASE_VERSION"
+    error_message = "DJANGO_RELEASE_VERSION must follow path: /{project}/{environment}/DJANGO_RELEASE_VERSION."
   }
 }
 
@@ -306,6 +398,52 @@ run "test_django_slack_signing_secret_is_secure_string" {
   assert {
     condition     = aws_ssm_parameter.django_slack_signing_secret.type == "SecureString"
     error_message = "DJANGO_SLACK_SIGNING_SECRET must be stored as SecureString."
+  }
+}
+
+run "test_github_token_is_secure_string" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.github_token.type == "SecureString"
+    error_message = "GITHUB_TOKEN must be stored as SecureString."
+  }
+}
+
+run "test_github_token_path_format" {
+  command = plan
+  assert {
+    condition     = aws_ssm_parameter.github_token.name == "/${var.project_name}/${var.environment}/GITHUB_TOKEN"
+    error_message = "GITHUB_TOKEN must follow path: /{project}/{environment}/GITHUB_TOKEN."
+  }
+}
+
+run "test_nest_github_app_private_key_disabled_by_default" {
+  command = plan
+  assert {
+    condition     = length(aws_ssm_parameter.nest_github_app_private_key) == 0
+    error_message = "NEST_GITHUB_APP_PRIVATE_KEY must not be created when enable_additional_parameters is false."
+  }
+}
+
+run "test_nest_github_app_private_key_is_secure_string" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.nest_github_app_private_key[0].type == "SecureString"
+    error_message = "NEST_GITHUB_APP_PRIVATE_KEY must be stored as SecureString."
+  }
+}
+
+run "test_nest_github_app_private_key_path_format" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.nest_github_app_private_key[0].name == "/${var.project_name}/${var.environment}/NEST_GITHUB_APP_PRIVATE_KEY"
+    error_message = "NEST_GITHUB_APP_PRIVATE_KEY must follow path: /{project}/{environment}/NEST_GITHUB_APP_PRIVATE_KEY."
   }
 }
 
@@ -418,6 +556,36 @@ run "test_nextauth_url_is_string" {
   assert {
     condition     = aws_ssm_parameter.nextauth_url.type == "String"
     error_message = "NEXTAUTH_URL must be stored as String."
+  }
+}
+
+run "test_slack_bot_token_disabled_by_default" {
+  command = plan
+  assert {
+    condition     = length(aws_ssm_parameter.slack_bot_token) == 0
+    error_message = "SLACK_BOT_TOKEN must not be created when enable_additional_parameters is false."
+  }
+}
+
+run "test_slack_bot_token_is_secure_string" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.slack_bot_token[0].type == "SecureString"
+    error_message = "SLACK_BOT_TOKEN must be stored as SecureString."
+  }
+}
+
+run "test_slack_bot_token_path_format" {
+  command = plan
+  variables {
+    enable_additional_parameters = true
+  }
+  assert {
+    condition     = aws_ssm_parameter.slack_bot_token[0].name == "/${var.project_name}/${var.environment}/SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}"
+    error_message = "SLACK_BOT_TOKEN must follow path: /{project}/{environment}/SLACK_BOT_TOKEN_{suffix}."
   }
 }
 

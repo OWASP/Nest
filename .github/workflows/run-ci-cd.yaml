@@ -630,8 +630,8 @@ jobs:
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
-  bootstrap-staging-nest:
-    name: Bootstrap Nest Staging
+  bootstrap-nest-infrastructure:
+    name: Bootstrap Nest Infrastructure
     env:
       TF_INPUT: false
       TF_IN_AUTOMATION: true
@@ -640,7 +640,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
-      - scan-staging-images
+      - run-infrastructure-tests
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -719,7 +719,7 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
-      - bootstrap-staging-nest
+      - bootstrap-nest-infrastructure
       - scan-staging-images
       - set-release-version
     permissions:
@@ -1266,7 +1266,7 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - bootstrap-staging-nest
+      - bootstrap-nest-infrastructure
       - scan-production-images
       - set-release-version
     permissions:
