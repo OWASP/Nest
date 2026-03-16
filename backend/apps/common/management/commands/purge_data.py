@@ -32,7 +32,7 @@ class Command(BaseCommand):
                         )
                     )
                     self.stdout.write(f"Purged {nest_app}.{model.__name__}")
-            cursor.execute(
+            cursor.execute(  # NOSEMGREP: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query  # noqa: E501
                 sql.SQL("TRUNCATE TABLE {} CASCADE").format(
                     sql.Identifier(DJANGO_CONTENT_TYPE_TABLE)
                 )
