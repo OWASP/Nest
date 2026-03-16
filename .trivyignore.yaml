@@ -7,6 +7,12 @@ misconfigurations:
   - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
     paths:
       - infrastructure/modules/alb/main.tf
+  - id: AVD-AWS-0087  # Public policy allowed for static bucket via allow_public_read
+    paths:
+      - infrastructure/modules/storage/modules/s3-bucket/main.tf
+  - id: AVD-AWS-0093  # Public buckets allowed for static bucket via allow_public_read
+    paths:
+      - infrastructure/modules/storage/modules/s3-bucket/main.tf
   - id: AVD-AWS-0102  # Public NACL egress allows all ports; required for NAT gateway traffic forwarding
     paths:
       - infrastructure/modules/networking/modules/nacl/main.tf
