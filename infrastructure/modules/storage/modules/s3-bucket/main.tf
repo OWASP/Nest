@@ -22,31 +22,41 @@ resource "aws_s3_bucket_policy" "this" {
   bucket = aws_s3_bucket.this.id
   policy = jsonencode({
     Version = "2012-10-17"
-    Id      = "ForceHTTPS"
-    Statement = [{
-      Sid       = "HTTPSOnly"
-      Effect    = "Deny"
-      Principal = { AWS = "*" }
-      Action    = "s3:*"
-      Resource = [
-        aws_s3_bucket.this.arn,
-        "${aws_s3_bucket.this.arn}/*"
-      ]
-      Condition = {
-        Bool = {
-          "aws:SecureTransport" = "false"
+    Id      = "BucketPolicy"
+    Statement = concat([
+      {
+        Sid       = "HTTPSOnly"
+        Effect    = "Deny"
+        Principal = { AWS = "*" }
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.this.arn,
+          "${aws_s3_bucket.this.arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
         }
       }
-    }]
+      ], var.allow_public_read ? [
+      {
+        Sid       = "AllowPublicReadObjects"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = ["s3:GetObject"]
+        Resource  = ["${aws_s3_bucket.this.arn}/*"]
+      }
+    ] : [])
   })
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {
   block_public_acls       = true
-  block_public_policy     = true
+  block_public_policy     = !var.allow_public_read
   bucket                  = aws_s3_bucket.this.id
   ignore_public_acls      = true
-  restrict_public_buckets = true
+  restrict_public_buckets = !var.allow_public_read
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "this" {

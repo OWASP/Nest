@@ -14,6 +14,12 @@ variable "kms_key_arn" {
   type        = string
 }
 
+variable "allow_public_read" {
+  description = "Whether to allow public read access to objects in the bucket."
+  type        = bool
+  default     = false
+}
+
 variable "noncurrent_version_expiration_days" {
   description = "The number of days an object is noncurrent before it is expired."
   type        = number
