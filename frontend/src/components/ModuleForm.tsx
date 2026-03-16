@@ -411,7 +411,7 @@ export const ProjectSelector = ({
         setInputValue(selectedProject.name)
         onProjectChange(selectedProject.id, selectedProject.name)
       }
-    } else {
+    } else if (!value) {
       // Selection cleared
       setInputValue('')
       onProjectChange(null, '')
