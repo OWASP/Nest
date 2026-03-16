@@ -2,7 +2,7 @@ export type Organization = {
   avatarUrl?: string
   collaboratorsCount?: number
   company?: string
-  createdAt?: number
+  createdAt?: string
   description?: string
   email?: string
   followersCount?: number
@@ -12,6 +12,6 @@ export type Organization = {
   name?: string
   objectID?: string
   publicRepositoriesCount?: number
-  updatedAt?: number
+  updatedAt?: string
   url?: string
 }
