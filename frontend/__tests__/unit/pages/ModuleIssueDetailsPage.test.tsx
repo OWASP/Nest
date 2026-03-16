@@ -846,6 +846,27 @@ describe('ModuleIssueDetailsPage', () => {
       ).toBeInTheDocument()
     })
 
+    it('skips query when userName is missing even if user has required role', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'LeaderWithoutLogin',
+            login: undefined,
+            isLeader: true,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<ModuleIssueDetailsPage />)
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ skip: true })
+      )
+    })
+
     it('shows AccessDeniedDisplay when user is not authorized (line 115)', () => {
       mockUseSession.mockReturnValue({
         data: {
