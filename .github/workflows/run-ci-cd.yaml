@@ -1332,7 +1332,7 @@ jobs:
       - name: Upload plan artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
-          name: production.tfplan
+          name: tfplan
           path: infrastructure/live/tfplan
           retention-days: 3
     timeout-minutes: 15
@@ -1392,7 +1392,7 @@ jobs:
       - name: Download plan artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          name: production.tfplan
+          name: tfplan
           path: infrastructure/live
 
       - name: Terraform Apply
