@@ -1,6 +1,7 @@
 """Test cases for IssueNode."""
 
-from unittest.mock import Mock
+from datetime import UTC, datetime
+from unittest.mock import Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -28,6 +29,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
             "pull_requests",
             "repository_name",
             "state",
+            "task_deadline",
             "title",
             "url",
         }
@@ -135,3 +137,51 @@ class TestIssueNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("interested_users", IssueNode)
         result = field.base_resolver.wrapped_func(None, mock_issue)
         assert result == [mock_user1, mock_user2]
+
+    def test_task_deadline_with_bulk_load_mapping(self):
+        """Test task_deadline field when mapping exists with issue deadline."""
+        expected_date = datetime(2025, 10, 26, tzinfo=UTC)
+        mock_issue = Mock()
+        mock_issue.number = 123
+
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.task_deadlines_by_issue = {123: expected_date}
+
+        field = self._get_field_by_name("task_deadline", IssueNode)
+        result = field.base_resolver.wrapped_func(None, mock_issue, mock_info)
+        assert result == expected_date
+
+    def test_task_deadline_with_bulk_load_mapping_no_deadline(self):
+        """Test task_deadline field when mapping exists but issue not in mapping."""
+        mock_issue = Mock()
+        mock_issue.number = 123
+
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.task_deadlines_by_issue = {456: datetime(2025, 10, 26, tzinfo=UTC)}
+
+        field = self._get_field_by_name("task_deadline", IssueNode)
+        result = field.base_resolver.wrapped_func(None, mock_issue, mock_info)
+        assert result is None
+
+    def test_task_deadline_without_bulk_load_mapping(self):
+        """Test task_deadline field when no mapping exists (fallback to query)."""
+        expected_date = datetime(2025, 10, 26, tzinfo=UTC)
+        mock_issue = Mock()
+        mock_issue.number = 123
+
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.task_deadlines_by_issue = None
+
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
+            mock_query = mock_task_objects.filter.return_value.order_by.return_value
+            mock_query.values_list.return_value.first.return_value = expected_date
+
+            field = self._get_field_by_name("task_deadline", IssueNode)
+            result = field.base_resolver.wrapped_func(None, mock_issue, mock_info)
+            assert result == expected_date
+            mock_task_objects.filter.assert_called_once_with(
+                issue=mock_issue, deadline_at__isnull=False
+            )
