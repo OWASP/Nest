@@ -78,7 +78,10 @@ class TestGitHubAppAuth:
     def test_load_private_key_from_env(self):
         """Test successful private key loading from environment variable."""
         with (
-            mock.patch.dict(os.environ, {"NEST_GITHUB_APP_PRIVATE_KEY": "test-private-key"}),
+            mock.patch.dict(
+                os.environ,
+                {"NEST_GITHUB_APP_PRIVATE_KEY": "test-private-key", "GITHUB_TOKEN": "test-pat"},
+            ),
             mock.patch("apps.github.auth.settings") as mock_settings,
         ):
             mock_settings.GITHUB_APP_ID = None
@@ -102,7 +105,10 @@ class TestGitHubAppAuth:
     def test_load_private_key_strips_whitespace(self):
         """Test that private key is stripped of whitespace."""
         with (
-            mock.patch.dict(os.environ, {"NEST_GITHUB_APP_PRIVATE_KEY": "  test-key  \n"}),
+            mock.patch.dict(
+                os.environ,
+                {"NEST_GITHUB_APP_PRIVATE_KEY": "  test-key  \n", "GITHUB_TOKEN": "test-pat"},
+            ),
             mock.patch("apps.github.auth.settings") as mock_settings,
         ):
             mock_settings.GITHUB_APP_ID = None
