@@ -12,6 +12,8 @@ class TestSwaggerDocsUI:
         assert 'class="toggle-theme-btn"' in template_content
         assert 'aria-label="Switch to dark mode"' in template_content
         assert 'title="Switch to dark mode"' in template_content
+        assert 'theme === "dark" ? "Switch to light mode" : "Switch to dark mode"' in template_content
+        assert 'toggleButton.setAttribute("aria-label", label);' in template_content
         assert 'toggleButton.setAttribute("title", label);' in template_content
 
     def test_theme_toggle_uses_pointer_cursor(self):
