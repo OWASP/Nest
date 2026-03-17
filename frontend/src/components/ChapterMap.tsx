@@ -19,6 +19,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
   useEffect(() => {
     if (!map) return
+    try {
     if (isMapActive) {
       map.scrollWheelZoom.enable()
       map.dragging.enable()
@@ -41,8 +42,10 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
         zoomControlRef.current = null
       }
     }
-  }, [isMapActive, map])
-
+  } catch (error) {
+    console.warn('Map zoom control error:', error)
+  }
+  },[isMapActive, map])
   useEffect(() => {
     return () => {
       if (!map) return
@@ -58,7 +61,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
     }
   }, [map])
   return null
-}
+}M
 
 const MapViewUpdater = ({
   validGeoLocData,
