@@ -65,7 +65,7 @@ Follow these steps to set up the infrastructure:
 - Copy the contents from the template file into your new local terraform variables file:
 
     ```bash
-    cp terraform.tfvars.staging.example terraform.tfvars
+    cp terraform.tfvars.example terraform.tfvars
     ```
 
   > [!NOTE]
@@ -75,7 +75,7 @@ Follow these steps to set up the infrastructure:
 - Copy the contents from the template file into your new terraform backend file:
 
     ```bash
-    cp terraform.tfbackend.staging.example terraform.tfbackend
+    cp terraform.tfbackend.example terraform.tfbackend
     ```
 
   > [!NOTE]
