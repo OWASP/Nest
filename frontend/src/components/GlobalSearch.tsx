@@ -41,7 +41,7 @@ export default function GlobalSearch() {
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if (e.key === '/') {
         e.preventDefault()
         setIsOpen((prev) => !prev)
       }
@@ -394,9 +394,13 @@ export default function GlobalSearch() {
         aria-label="Open search"
       >
         <FaSearch className="h-4 w-4 shrink-0" />
-        <span className="hidden flex-1 text-left sm:inline">Press <kbd className="rounded border border-slate-500/30 bg-transparent px-1.5 py-0.5 text-xs dark:border-slate-500/50 dark:bg-transparent">
-    ⌘K
-  </kbd> to search</span>
+        <span className="hidden flex-1 text-left sm:inline">
+          Type{' '}
+          <kbd className="mx-1 rounded border border-slate-500/30 bg-transparent px-1.5 py-0.5 text-xs dark:border-slate-500/50 dark:bg-transparent">
+            /
+          </kbd>{' '}
+          to search
+        </span>
       </button>
 
       {isOpen && (
