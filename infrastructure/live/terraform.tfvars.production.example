@@ -4,6 +4,7 @@ backend_image_tag             = "REPLACE_WITH_BACKEND_IMAGE_TAG"
 backend_use_fargate_spot      = false
 domain_name                   = "nest.owasp.org"
 django_configuration          = "Production"
+django_release_version        = "0.0.0"
 django_settings_module        = "settings.production"
 enable_additional_parameters  = true
 enable_cron_tasks             = true
