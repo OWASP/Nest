@@ -10,8 +10,15 @@ variable "bucket_name" {
 }
 
 variable "kms_key_arn" {
-  description = "The ARN of the KMS key."
+  description = "ARN of the KMS key for SSE-KMS encryption. If null, uses SSE-S3 (AES256) instead."
   type        = string
+  default     = null
+}
+
+variable "allow_public_read" {
+  description = "Whether to allow public read access to objects in the bucket."
+  type        = bool
+  default     = false
 }
 
 variable "noncurrent_version_expiration_days" {
