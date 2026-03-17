@@ -44,9 +44,8 @@ resource "aws_iam_policy" "fixtures_read_only" {
 module "static_bucket" {
   source = "./modules/s3-bucket"
 
-  bucket_name       = "${var.project_name}-${var.environment}-static-${random_id.suffix.hex}"
-  kms_key_arn       = var.kms_key_arn
   allow_public_read = true
+  bucket_name       = "${var.project_name}-${var.environment}-static-${random_id.suffix.hex}"
   tags = merge(var.common_tags, {
     Name = "${var.project_name}-${var.environment}-static"
   })

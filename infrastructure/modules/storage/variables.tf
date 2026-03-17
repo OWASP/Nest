@@ -15,7 +15,7 @@ variable "fixtures_bucket_name" {
 }
 
 variable "kms_key_arn" {
-  description = "The ARN of the KMS key."
+  description = "The ARN of the KMS key (used for fixtures bucket encryption)."
   type        = string
 }
 
