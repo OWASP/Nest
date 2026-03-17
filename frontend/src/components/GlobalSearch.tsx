@@ -41,10 +41,11 @@ export default function GlobalSearch() {
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/') {
-        e.preventDefault()
-        setIsOpen((prev) => !prev)
-      }
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement | null
+      if (target?.closest('input, textarea, [contenteditable]')) return
+      e.preventDefault()
+      setIsOpen(true)
     }
     document.addEventListener('keydown', handleGlobalKeyDown)
     return () => document.removeEventListener('keydown', handleGlobalKeyDown)
