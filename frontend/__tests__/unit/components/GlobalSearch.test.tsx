@@ -80,9 +80,9 @@ describe('GlobalSearch', () => {
     })
   })
 
-  test('opens search overlay with Cmd+K keyboard shortcut', async () => {
+  test('opens search overlay with / keyboard shortcut', async () => {
     render(<GlobalSearch />)
-    fireEvent.keyDown(document, { key: 'k', metaKey: true })
+    fireEvent.keyDown(document.body, { key: '/' })
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
