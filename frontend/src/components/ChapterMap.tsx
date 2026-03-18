@@ -46,6 +46,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   useEffect(() => {
     return () => {
       if (!map) return
+      if (!map.getContainer()) return
       map.scrollWheelZoom.disable()
       map.dragging.disable()
       map.touchZoom.disable()
@@ -74,6 +75,7 @@ const MapViewUpdater = ({
   useEffect(() => {
     if (!map) return
     const container = map.getContainer()
+    if (!container) return
     const width = container.clientWidth
     const height = container.clientHeight
     const aspectRatio = height > 0 ? width / height : 1
