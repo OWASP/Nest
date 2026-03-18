@@ -24,9 +24,9 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
         return self.country
 
     @property
-    def idx_created_at(self) -> float:
+    def idx_created_at(self) -> str:
         """Return created at for indexing."""
-        return (self.created_at or self.owasp_repository.created_at).timestamp()
+        return (self.created_at or self.owasp_repository.created_at).isoformat()
 
     @property
     def idx_geo_location(self) -> tuple[float, float]:
@@ -74,6 +74,6 @@ class ChapterIndexMixin(RepositoryBasedEntityModelMixin):
         return RepositoryContributor.get_top_contributors(chapter=self.key)
 
     @property
-    def idx_updated_at(self) -> float:
+    def idx_updated_at(self) -> str:
         """Return updated at for indexing."""
-        return (self.updated_at or self.owasp_repository.updated_at).timestamp()
+        return (self.updated_at or self.owasp_repository.updated_at).isoformat()

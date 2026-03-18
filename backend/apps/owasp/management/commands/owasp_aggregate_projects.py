@@ -71,11 +71,11 @@ class Command(BaseCommand):
 
                 # Counters.
                 commits_count += repository.commits_count
-                contributors_count += repository.contributors_count
-                forks_count += repository.forks_count
+                contributors_count = max(contributors_count, repository.contributors_count)
+                forks_count = max(forks_count, repository.forks_count)
                 open_issues_count += repository.open_issues_count
                 releases_count += repository.releases.count()
-                stars_count += repository.stars_count
+                stars_count = max(stars_count, repository.stars_count)
                 subscribers_count += repository.subscribers_count
                 watchers_count += repository.watchers_count
 
