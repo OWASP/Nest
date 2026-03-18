@@ -95,7 +95,7 @@ export const projectTimeline: ProjectTimeline[] = [
     year: 'January 2025',
   },
   {
-    title: 'First Official Release and Production Launch',
+    title: 'First Official Release and Public Launch',
     description:
       'We officially launched OWASP Nest to the public, inviting the community to explore and contribute.',
     year: 'February 2025',
@@ -134,6 +134,12 @@ export const projectTimeline: ProjectTimeline[] = [
     description:
       "Introduced the official OWASP Nest logo as part of the project's branding and visual identity.",
     year: 'December 2025',
+  },
+  {
+    title: 'Production Level Promotion',
+    description:
+      'OWASP Nest promoted to Production level, marking its recognition as a mature and fully supported platform within the OWASP ecosystem.',
+    year: 'February 2026',
   },
 ]
 

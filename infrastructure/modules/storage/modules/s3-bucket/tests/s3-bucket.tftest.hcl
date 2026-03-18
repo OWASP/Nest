@@ -42,7 +42,7 @@ run "test_encryption_algorithm" {
 
   assert {
     condition     = one(aws_s3_bucket_server_side_encryption_configuration.this.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "AES256"
-    error_message = "S3 bucket must use AES256 encryption."
+    error_message = "S3 bucket must use SSE-S3 (AES256) encryption."
   }
 }
 

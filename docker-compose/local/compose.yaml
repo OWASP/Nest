@@ -76,7 +76,7 @@ services:
     container_name: nest-docs
     command: >
       sh -c '
-        mkdocs serve -a 0.0.0.0:8002
+        mkdocs serve -a 0.0.0.0:8001 -f .mkdocs.yaml
       '
     build:
       context: ../../
@@ -87,6 +87,11 @@ services:
       - 8002:8002
     volumes:
       - ../../docs:/home/owasp/docs
+      - ../../backend:/home/owasp/backend:ro
+      - ../../frontend:/home/owasp/frontend:ro
+      - ../../README.md:/home/owasp/README.md:ro
+      - ../../CODE_OF_CONDUCT.md:/home/owasp/CODE_OF_CONDUCT.md:ro
+      - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
       - docs-venv:/home/owasp/.venv
 
   frontend:

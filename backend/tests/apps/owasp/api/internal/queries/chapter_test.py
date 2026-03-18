@@ -15,6 +15,7 @@ class TestChapterQuery:
 
         field_names = [field.name for field in ChapterQuery.__strawberry_definition__.fields]
         assert "chapter" in field_names
+        assert "chapter_countries" in field_names
         assert "recent_chapters" in field_names
 
 
@@ -83,3 +84,34 @@ class TestChapterResolution:
             mock_active.order_by.assert_called_once_with("-created_at")
             mock_qs.__getitem__.assert_called_once_with(slice(None, 5, None))
             assert result == mock_chapters
+
+    def test_chapter_countries_returns_sorted_distinct_countries(self, mock_info):
+        """Test chapter_countries returns sorted distinct country names."""
+        query = ChapterQuery()
+        with patch.object(Chapter, "active_chapters") as mock_active:
+            mock_qs = Mock()
+            mock_active.exclude.return_value = mock_qs
+            mock_values_qs = Mock()
+            mock_qs.values_list.return_value = mock_values_qs
+            mock_values_qs.distinct.return_value = ["Japan", "Germany", "United States"]
+
+            result = query.chapter_countries()
+
+            mock_active.exclude.assert_called_once_with(country="")
+            mock_qs.values_list.assert_called_once_with("country", flat=True)
+            mock_values_qs.distinct.assert_called_once()
+            assert result == ["Germany", "Japan", "United States"]
+
+    def test_chapter_countries_returns_empty_list_when_no_chapters(self, mock_info):
+        """Test chapter_countries returns empty list when no active chapters."""
+        query = ChapterQuery()
+        with patch.object(Chapter, "active_chapters") as mock_active:
+            mock_qs = Mock()
+            mock_active.exclude.return_value = mock_qs
+            mock_values_qs = Mock()
+            mock_qs.values_list.return_value = mock_values_qs
+            mock_values_qs.distinct.return_value = []
+
+            result = query.chapter_countries()
+
+            assert result == []

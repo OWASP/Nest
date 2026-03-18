@@ -1278,3 +1278,211 @@ class TestModuleMutationUpdateModule:
 
         assert "advanced" in mock_mod.program.experience_levels
         mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
+
+
+class TestModuleMutationDeleteModule:
+    """Tests for ModuleMutation.delete_module."""
+
+    def _make_info(self, user):
+        info = MagicMock()
+        info.context.request.user = user
+        return info
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_success_removes_unique_experience_level(self, mock_module):
+        """Test successful deletion removes experience level when no other module uses it."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_mod = MagicMock()
+        mock_mod.name = "Test Module"
+        mock_mod.experience_level = "intermediate"
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.experience_levels = ["beginner", "intermediate"]
+
+        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_module.DoesNotExist = ObjectDoesNotExist
+        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = False
+
+        mutation = ModuleMutation()
+        result = mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+        assert result == "Module 'Test Module' has been deleted successfully."
+        mock_mod.delete.assert_called_once()
+        mock_mod.program.save.assert_called_once_with(update_fields=["experience_levels"])
+        assert "intermediate" not in mock_mod.program.experience_levels
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_success_keeps_shared_experience_level(self, mock_module):
+        """Test successful deletion keeps experience level when other modules use it."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_mod = MagicMock()
+        mock_mod.name = "Test Module"
+        mock_mod.experience_level = "beginner"
+        mock_mod.program.admins.filter.return_value.exists.return_value = True
+        mock_mod.program.experience_levels = ["beginner", "advanced"]
+
+        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_module.DoesNotExist = ObjectDoesNotExist
+        mock_module.objects.filter.return_value.exclude.return_value.exists.return_value = True
+
+        mutation = ModuleMutation()
+        result = mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+        assert result == "Module 'Test Module' has been deleted successfully."
+        mock_mod.delete.assert_called_once()
+        assert "beginner" in mock_mod.program.experience_levels
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_not_found(self, mock_module):
+        """Test ObjectDoesNotExist when module is not found."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_module.DoesNotExist = ObjectDoesNotExist
+        mock_module.objects.select_related.return_value.get.side_effect = ObjectDoesNotExist(
+            "not found"
+        )
+
+        mutation = ModuleMutation()
+        with pytest.raises(ObjectDoesNotExist):
+            mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    def test_delete_module_not_admin(self, mock_module):
+        """Test PermissionDenied when user is not a program admin."""
+        user = MagicMock()
+        info = self._make_info(user)
+
+        mock_mod = MagicMock()
+        mock_mod.program.admins.filter.return_value.exists.return_value = False
+
+        mock_module.objects.select_related.return_value.get.return_value = mock_mod
+        mock_module.DoesNotExist = ObjectDoesNotExist
+
+        mutation = ModuleMutation()
+        with pytest.raises(PermissionDenied):
+            mutation.delete_module(info, program_key="prog-1", module_key="mod-1")
+
+
+class TestModuleMutationReorderModules:
+    """Tests for ModuleMutation.reorder_modules."""
+
+    def _make_info(self, user):
+        info = MagicMock()
+        info.context.request.user = user
+        return info
+
+    def _make_input_data(self, **overrides):
+        defaults = {
+            "program_key": "test-program",
+            "module_keys": ["mod-b", "mod-a", "mod-c"],
+        }
+        defaults.update(overrides)
+        return MagicMock(**defaults)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_success(self, mock_program, mock_module):
+        """Test successful module reordering by admin."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data()
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = True
+
+        mod_a = MagicMock()
+        mod_a.key = "mod-a"
+        mod_b = MagicMock()
+        mod_b.key = "mod-b"
+        mod_c = MagicMock()
+        mod_c.key = "mod-c"
+
+        mock_module.objects.filter.return_value.count.return_value = 3
+        mock_module.objects.filter.return_value.select_for_update.return_value = [
+            mod_a,
+            mod_b,
+            mod_c,
+        ]
+
+        mock_result_qs = MagicMock()
+        mock_qs = mock_module.objects.filter.return_value.select_related.return_value
+        mock_qs.prefetch_related.return_value.order_by.return_value = mock_result_qs
+
+        mutation = ModuleMutation()
+        mutation.reorder_modules(info, input_data)
+
+        assert mod_b.order == 0
+        assert mod_a.order == 1
+        assert mod_c.order == 2
+        mock_module.objects.bulk_update.assert_called_once()
+
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_not_admin(self, mock_program):
+        """Test PermissionDenied when user is not a program admin."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data()
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = False
+
+        mutation = ModuleMutation()
+        with pytest.raises(PermissionDenied):
+            mutation.reorder_modules(info, input_data)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_program_not_found(self, mock_program):
+        """Test ObjectDoesNotExist when program not found."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data()
+
+        mock_program.DoesNotExist = ObjectDoesNotExist
+        mock_program.objects.get.side_effect = ObjectDoesNotExist("not found")
+
+        mutation = ModuleMutation()
+        with pytest.raises(ObjectDoesNotExist):
+            mutation.reorder_modules(info, input_data)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_duplicate_keys(self, mock_program):
+        """Test ValidationError when duplicate module keys are provided."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(module_keys=["key-a", "key-a", "key-c"])
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = True
+
+        mutation = ModuleMutation()
+        with pytest.raises(ValidationError, match=r"Duplicate module keys are not allowed."):
+            mutation.reorder_modules(info, input_data)
+
+    @patch("apps.mentorship.api.internal.mutations.module.Module")
+    @patch("apps.mentorship.api.internal.mutations.module.Program")
+    def test_reorder_modules_mismatched_keys(self, mock_program, mock_module):
+        """Test ValidationError when provided keys do not match the program's modules."""
+        user = MagicMock()
+        info = self._make_info(user)
+        input_data = self._make_input_data(module_keys=["key-a", "key-b"])
+
+        mock_prog = MagicMock()
+        mock_program.objects.get.return_value = mock_prog
+        mock_prog.admins.filter.return_value.exists.return_value = True
+
+        mod_a = MagicMock(key="key-a")
+        mock_module.objects.filter.return_value.count.return_value = 1
+        mock_module.objects.filter.return_value.select_for_update.return_value = [mod_a]
+
+        mutation = ModuleMutation()
+        with pytest.raises(
+            ValidationError, match=r"Provided module keys do not match the program's modules."
+        ):
+            mutation.reorder_modules(info, input_data)

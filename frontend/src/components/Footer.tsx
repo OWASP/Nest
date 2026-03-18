@@ -1,13 +1,22 @@
 'use client'
 import { Button } from '@heroui/button'
+import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useCallback } from 'react'
+import { useTheme } from 'next-themes'
+import { useState, useCallback, useEffect } from 'react'
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import type { Section } from 'types/section'
 import { footerIcons, footerSections } from 'utils/constants'
 import { ENVIRONMENT, RELEASE_VERSION } from 'utils/env.client'
 
 export default function Footer() {
+  const { theme } = useTheme()
+
+  const [nestLogoSrc, setNestLogoSrc] = useState('/img/logo_light.png')
+  useEffect(() => {
+    setNestLogoSrc(theme === 'dark' ? '/img/logo_dark.png' : '/img/logo_light.png')
+  }, [theme])
+
   // State to keep track of the open section in the footer
   const [openSection, setOpenSection] = useState<string | null>(null)
 
@@ -20,25 +29,23 @@ export default function Footer() {
   return (
     <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
       <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
-        <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
+        <div className="grid w-full sm:grid-cols-2 sm:gap-x-10 sm:gap-y-6 md:grid-cols-4 md:gap-x-14 lg:gap-x-20">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="flex flex-col gap-4">
               {/*link*/}
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
+                className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 md:justify-start md:gap-2 lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
                 <h3>{section.title}</h3>
-                <div className="transition-transform duration-200 lg:hidden">
-                  {openSection === section.title ? (
-                    <FaChevronUp className="h-4 w-4" />
-                  ) : (
-                    <FaChevronDown className="h-4 w-4" />
-                  )}
-                </div>
+                {openSection === section.title ? (
+                  <FaChevronUp className="h-4 w-4 transition-transform duration-200 lg:hidden" />
+                ) : (
+                  <FaChevronDown className="h-4 w-4 transition-transform duration-200 lg:hidden" />
+                )}
               </Button>
               <div
                 id={`footer-section-${section.title}`}
@@ -48,22 +55,26 @@ export default function Footer() {
                     : 'max-h-0 overflow-hidden lg:max-h-full lg:overflow-visible'
                 }`}
               >
-                {section.links.map((link) => (
-                  <div key={link.href || `span-${link.text}`} className="py-1">
-                    {link.isSpan ? (
-                      <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
-                    ) : (
-                      <Link
-                        className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
-                        href={link.href || '/'}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        {link.text}
-                      </Link>
-                    )}
-                  </div>
-                ))}
+                {section.links.map((link) => {
+                  const isExternal = link.href?.startsWith('http')
+
+                  return (
+                    <div key={link.href || `span-${link.text}`} className="py-1">
+                      {link.isSpan ? (
+                        <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
+                      ) : (
+                        <Link
+                          className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                          href={link.href || '/'}
+                          target={isExternal ? '_blank' : undefined}
+                          rel={isExternal ? 'noopener noreferrer' : undefined}
+                        >
+                          {link.text}
+                        </Link>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           ))}
@@ -87,6 +98,44 @@ export default function Footer() {
             )
           })}
         </div>
+
+        {/* Logos Section */}
+        <div className="flex items-center justify-center gap-6">
+          <Link
+            href="https://owasp.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            aria-label="OWASP Foundation"
+          >
+            <Image
+              src="/img/OWASP_logo.svg"
+              alt="OWASP Logo"
+              width={100}
+              height={32}
+              className="h-8 w-auto dark:invert"
+            />
+          </Link>
+
+          {/* Vertical Separator */}
+          <div className="h-8 w-px bg-slate-400 dark:bg-white"></div>
+
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+            aria-label="Nest home"
+          >
+            <Image
+              src={nestLogoSrc}
+              alt="Nest Logo"
+              width={28}
+              height={32}
+              className="h-8 w-auto"
+            />
+            <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
+          </Link>
+        </div>
+
         {/* Footer bottom section with copyright and version */}
         <div className="grid w-full place-content-center">
           <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">

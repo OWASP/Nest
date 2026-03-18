@@ -49,3 +49,9 @@ export const GET_CHAPTER_METADATA = gql`
     }
   }
 `
+
+export const GET_CHAPTER_COUNTRIES = gql`
+  query GetChapterCountries {
+    chapterCountries
+  }
+`

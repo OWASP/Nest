@@ -63,7 +63,7 @@ class TestOpenAi:
     @patch("apps.common.open_ai.logger")
     @patch("openai.OpenAI")
     def test_complete_general_exception(self, mock_openai, mock_logger):
-        """Test that general exceptions are caught and logged."""
+        """Test that general exceptions are caught and logged with type."""
         mock_client = MagicMock()
         mock_client.chat.completions.create.side_effect = Exception("API error")
         mock_openai.return_value = mock_client
@@ -74,7 +74,8 @@ class TestOpenAi:
         assert response is None
 
         mock_logger.exception.assert_called_once_with(
-            "An error occurred during OpenAI API request."
+            "Unexpected OpenAI API error: %s",
+            "Exception",
         )
 
     def test_user_content_text_only(self, openai_instance):
@@ -142,7 +143,7 @@ class TestOpenAi:
         assert response is None
 
         mock_logger.exception.assert_called_once_with(
-            "A connection error occurred during OpenAI API request."
+            "OpenAI connection failed. Check network connectivity and firewall/proxy settings."
         )
 
     @patch("openai.OpenAI")
@@ -161,3 +162,90 @@ class TestOpenAi:
 
         assert response == "Generated response content"
         mock_client.chat.completions.create.assert_called_once()
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_complete_authentication_error(self, mock_openai, mock_logger):
+        """Test that AuthenticationError is caught and logged with specific message."""
+        mock_client = MagicMock()
+        # constructors for OpenAI SDK errors require response/body kwargs
+        mock_response = MagicMock()
+        auth_error = openai_module.AuthenticationError(
+            "Invalid API key",
+            response=mock_response,
+            body={},
+        )
+        mock_client.chat.completions.create.side_effect = auth_error
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "OpenAI authentication failed: invalid or missing API key. "
+            "Verify DJANGO_OPEN_AI_SECRET_KEY is set and valid."
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_complete_rate_limit_error(self, mock_openai, mock_logger):
+        """Test that RateLimitError is caught and logged with specific message."""
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        rate_limit_error = openai_module.RateLimitError(
+            "Rate limit exceeded",
+            response=mock_response,
+            body={},
+        )
+        mock_client.chat.completions.create.side_effect = rate_limit_error
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response is None
+        mock_logger.warning.assert_called_once_with(
+            "OpenAI rate limit exceeded: %s. Request may be retried with backoff.",
+            rate_limit_error,
+        )
+        mock_logger.exception.assert_not_called()
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_complete_bad_request_error(self, mock_openai, mock_logger):
+        """Test that BadRequestError is caught and logged with specific message."""
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        bad_request_error = openai_module.BadRequestError(
+            "Invalid request",
+            response=mock_response,
+            body={},
+        )
+        mock_client.chat.completions.create.side_effect = bad_request_error
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "OpenAI invalid request. Check model name, message format, and input size."
+        )
+
+    @patch("apps.common.open_ai.logger")
+    @patch("openai.OpenAI")
+    def test_complete_generic_exception_includes_type(self, mock_openai, mock_logger):
+        """Test that generic exceptions are caught with error type in log message."""
+        mock_client = MagicMock()
+        mock_client.chat.completions.create.side_effect = ValueError("Custom error")
+        mock_openai.return_value = mock_client
+        openai_instance = OpenAi()
+        openai_instance.set_prompt("Test prompt").set_input("Test input")
+        response = openai_instance.complete()
+
+        assert response is None
+        mock_logger.exception.assert_called_once_with(
+            "Unexpected OpenAI API error: %s",
+            "ValueError",
+        )

@@ -1,14 +1,14 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.7.2"
+      version = "~> 3.8.0"
     }
   }
 }
@@ -33,14 +33,22 @@ locals {
     "/status/*",
   ]
   backend_path_chunks = chunklist(local.backend_paths, 5)
+  content_security_policy = join("; ", [
+    "base-uri 'self'",
+    "connect-src 'self' https://*.google-analytics.com https://*.i.posthog.com https://*.sentry.io https://*.tile.openstreetmap.org",
+    "default-src 'self'",
+    "font-src 'self' https://cdn.jsdelivr.net",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "frame-src 'self'",
+    "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://owasp.org https://raw.githubusercontent.com",
+    "object-src 'none'",
+    "script-src 'self' 'unsafe-inline' https://*.i.posthog.com https://*.tile.openstreetmap.org https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com",
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com",
+  ])
 }
 
 data "aws_elb_service_account" "main" {}
-
-data "aws_lambda_function" "backend" {
-  count         = var.lambda_function_name != null ? 1 : 0
-  function_name = var.lambda_function_name
-}
 
 resource "random_id" "suffix" {
   byte_length = 4
@@ -64,29 +72,6 @@ resource "aws_acm_certificate_validation" "main" {
   validation_record_fqdns = [
     for dvo in aws_acm_certificate.main.domain_validation_options : dvo.resource_record_name
   ]
-}
-
-resource "aws_lambda_alias" "live" {
-  count            = var.lambda_function_name != null ? 1 : 0
-  description      = "Alias pointing to latest published version for SnapStart"
-  function_name    = var.lambda_function_name
-  function_version = data.aws_lambda_function.backend[0].version
-  name             = "live"
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes        = [function_version]
-  }
-}
-
-resource "aws_lambda_permission" "alb" {
-  action        = "lambda:InvokeFunction"
-  count         = var.lambda_function_name != null ? 1 : 0
-  function_name = var.lambda_function_name
-  principal     = "elasticloadbalancing.amazonaws.com"
-  qualifier     = aws_lambda_alias.live[0].name
-  source_arn    = aws_lb_target_group.lambda[0].arn
-  statement_id  = "AllowALBInvoke"
 }
 
 resource "aws_lb" "main" {
@@ -127,12 +112,16 @@ resource "aws_lb_listener" "http_redirect" {
 }
 
 resource "aws_lb_listener" "https" {
-  certificate_arn   = aws_acm_certificate_validation.main.certificate_arn
-  load_balancer_arn = aws_lb.main.arn
-  port              = 443
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  tags              = var.common_tags
+  certificate_arn                                              = aws_acm_certificate_validation.main.certificate_arn
+  load_balancer_arn                                            = aws_lb.main.arn
+  port                                                         = 443
+  protocol                                                     = "HTTPS"
+  routing_http_response_content_security_policy_header_value   = local.content_security_policy
+  routing_http_response_strict_transport_security_header_value = "max-age=31536000; includeSubDomains; preload"
+  routing_http_response_x_content_type_options_header_value    = "nosniff"
+  routing_http_response_x_frame_options_header_value           = "DENY"
+  ssl_policy                                                   = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  tags                                                         = var.common_tags
 
   default_action {
     target_group_arn = aws_lb_target_group.frontend.arn
@@ -141,19 +130,42 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_lb_listener_rule" "backend_https" {
-  for_each     = var.lambda_function_name != null ? { for idx, chunk in local.backend_path_chunks : idx => chunk } : {}
+  for_each     = { for idx, chunk in local.backend_path_chunks : idx => chunk }
   listener_arn = aws_lb_listener.https.arn
   priority     = 100 + tonumber(each.key)
   tags         = var.common_tags
 
   action {
-    target_group_arn = aws_lb_target_group.lambda[0].arn
+    target_group_arn = aws_lb_target_group.backend.arn
     type             = "forward"
   }
   condition {
     path_pattern {
       values = each.value
     }
+  }
+}
+
+resource "aws_lb_target_group" "backend" {
+  deregistration_delay = 30
+  name                 = "${var.project_name}-${var.environment}-backend-tg"
+  port                 = var.backend_port
+  protocol             = "HTTP"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-backend-tg"
+  })
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 30
+    matcher             = "200-299"
+    path                = var.backend_health_check_path
+    protocol            = "HTTP"
+    timeout             = 5
+    unhealthy_threshold = 3
   }
 }
 
@@ -178,22 +190,6 @@ resource "aws_lb_target_group" "frontend" {
     timeout             = 5
     unhealthy_threshold = 3
   }
-}
-
-resource "aws_lb_target_group" "lambda" {
-  count       = var.lambda_function_name != null ? 1 : 0
-  name        = "${var.project_name}-${var.environment}-lambda-tg"
-  target_type = "lambda"
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-lambda-tg"
-  })
-}
-
-resource "aws_lb_target_group_attachment" "lambda" {
-  count            = var.lambda_function_name != null ? 1 : 0
-  depends_on       = [aws_lambda_permission.alb]
-  target_group_arn = aws_lb_target_group.lambda[0].arn
-  target_id        = aws_lambda_alias.live[0].arn
 }
 
 resource "aws_s3_bucket" "alb_logs" { # NOSONAR

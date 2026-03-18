@@ -12,6 +12,10 @@ Ensure you have the following setup/installed:
 - An AWS account.
 Note: Refer to the respective `README.md` files for more information.
 
+## External Documentation
+
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest/4.3-aws-infrastructure)
+
 ## Setting up the infrastructure
 
 Follow these steps to set up the infrastructure:
@@ -91,7 +95,10 @@ Follow these steps to set up the infrastructure:
 
 1. **Setup Main Infrastructure (staging)**:
 
-Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/staging/README.md`.
+> [!NOTE]
+> This document has steps to deploy the `staging` environment.
+
+Prerequisite: Create a `nest-staging` IAM user with the policies defined in `infrastructure/live/README.md`.
 This user must assume the role `nest-staging-terraform` created in the bootstrap step.
 To do this locally:
 
@@ -120,7 +127,7 @@ To do this locally:
 - Navigate to the main infrastructure directory:
 
     ```bash
-    cd infrastructure/staging/
+    cd infrastructure/live/
     ```
 
 - Copy the contents from the template file into your new local terraform variables file:
@@ -137,6 +144,7 @@ To do this locally:
 
   > [!NOTE]
   > Update the state bucket name in `terraform.tfbackend` with the name of the state bucket created in the previous step.
+  > Update `backend_image_tag` and `frontend_image_tag` variables with a unique tag (for example, a commit SHA or timestamp); do not reuse `latest` when tags are immutable.
   > Update defaults (e.g. `region`) as needed.
 
 - Initialize Terraform with the backend configuration:
@@ -156,77 +164,9 @@ To do this locally:
 - Visit the AWS Console > Systems Manager > Parameter Store.
 - Populate all `DJANGO_*` secrets that have `to-be-set-in-aws-console` value.
 
-## Setting up Zappa
-
-The Django backend deployment is managed by Zappa. This includes the IAM roles, and Lambda Function provision.
-
-1. **Change Directory**:
-
-- Navigate to the `backend/` directory:
-
-    ```bash
-    cd backend/
-    ```
-
-1. **Setup Dependencies**:
-
-- This step may differ for different operating systems.
-- The goal is to install dependencies listed in `pyproject.toml`.
-- Steps for Linux:
-
-    ```bash
-    poetry sync --without test --without video && eval $(poetry env activate)
-    ```
-
-1. **Create Zappa Settings File**:
-
-- Copy the contents from the template file into your new local Zappa settings file:
-
-    ```bash
-    cp zappa_settings.template.json zappa_settings.json
-    ```
-
-1. **Populate Settings File**:
-
-- Replace all `${...}` variables in `zappa_settings.json` with appropriate output variables.
-
-1. **Deploy**:
-
-  > [!NOTE]
-  > Make sure to populate all `DJANGO_*` secrets that are set as `to-be-set-in-aws-console` in the Parameter Store. The deployment might fail with no logs if secrets such as `DJANGO_SLACK_BOT_TOKEN` are invalid.
-
-  ```bash
-  zappa deploy staging
-  ```
-
-  > [!NOTE]
-  > If the deployment is successful but returns a `5xx` error, resolve the issues and use `zappa undeploy staging` & `zappa deploy staging`. The command `zappa update staging` may not work.
-
-1. **Configure ALB Routing**:
-
-- Run `zappa status staging` to get Zappa details.
-
-- Navigate to the main infrastructure directory:
-
-    ```bash
-    cd infrastructure/staging/
-    ```
-
-- Update `terraform.tfvars` with the Lambda details:
-
-    ```hcl
-    lambda_function_name = "nest-staging"
-    ```
-
-- Apply the changes to create ALB routing:
-
-    ```bash
-    terraform apply
-    ```
-
 ## Populate ECR Repositories
 
-ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
+ECR Repositories are used to store images used by ECS (Frontend + Backend + Scheduled Tasks)
 
 > [!NOTE]
 > Ensure you are in the project root.
@@ -243,6 +183,10 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     ```
 
 1. **Upload backend image to ECR**:
+
+> [!NOTE]
+> The `latest` tag is used in these example commands. ECR repository tags are `IMMUTABLE`.
+> Pushing images with an existing tag will fail.
 
 - Build the backend image using the following command:
 
@@ -263,6 +207,10 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend Tasks)
     ```
 
 1. **Upload frontend image to ECR**:
+
+> [!NOTE]
+> The `latest` tag is used in these example commands. ECR repository tags are `IMMUTABLE`.
+> Pushing images with an existing tag will fail.
 
 - Build the frontend image using the following command:
 
@@ -300,6 +248,65 @@ Migrate and load data into the new database.
 
 1. **Run ECS Tasks**:
 
+Run the following commands to execute ECS tasks with the correct network configuration:
+
+> [!NOTE]
+> Ensure you are in the `infrastructure/live` directory.
+
+1. Set variables from Terraform outputs
+
+> [!NOTE]
+> Ensure you have `jq` installed.
+
+```bash
+CLUSTER=$(terraform output -raw tasks_cluster_name)
+SECURITY_GROUP=$(terraform output -raw tasks_security_group_id)
+SUBNETS=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')
+NAT_ENABLED=$(terraform output -raw nat_gateway_enabled)
+ASSIGN_PUBLIC_IP=$([ "$NAT_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+```
+
+> [!NOTE]
+> Replace `AWS_REGION` in each command with appropriate region.
+> Please wait for a task to be complete before running the next task.
+> To view the status of a task, use the AWS Console.
+
+1. Run migrate task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-migrate \
+  --region AWS_REGION
+```
+
+1. Run load-data task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-load-data \
+  --region AWS_REGION
+```
+
+1. Run index-data task and wait for it to be complete:
+
+```bash
+aws ecs run-task \
+  --cluster "$CLUSTER" \
+  --launch-type FARGATE \
+  --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SECURITY_GROUP],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+  --task-definition nest-staging-index-data \
+  --region AWS_REGION
+```
+
+<details>
+<summary>Manual AWS Console Instructions (Alternative)</summary>
+
 - Head over to Elastic Container Service in the AWS Console.
 - Click on `nest-staging-migrate` in `Task Definitions` section.
 - Select the task definition revision.
@@ -308,13 +315,16 @@ Migrate and load data into the new database.
   - Environment: Cluster: `nest-staging-tasks-cluster`
   - Networking:
     - VPC: `nest-staging-vpc`
-    - Subnets: subnets will be auto-selected due to VPC selection.
-    - Security group name: select the ECS security group (e.g. `nest-staging-ecs-sg`).
+    - Subnets: Choose a private subnet if NAT Gateway is enabled, public otherwise (default).
+    - Security group name: select the ECS security group (e.g. `nest-staging-tasks-sg`).
+    - Public IP: Turned off if NAT Gateway is enabled, Turned on otherwise (default).
 - Click "Create"
 - The task is now running... Click on the task ID to view Logs, Status, etc.
 - Follow the same steps for `nest-staging-load-data` and `nest-staging-index-data`.
 
-## Configure Domain and Frontend
+</details>
+
+## Configure Domain
 
 1. **Validate ACM Certificate**:
 
@@ -334,9 +344,24 @@ Migrate and load data into the new database.
 
 - Add a CNAME record and point the domain to the frontend ALB.
 
+## Redeploy Frontend and Backend
+
 1. **Configure Frontend Parameters**:
 
-- Update the frontend server (`NEXT_SERVER_*`) parameters using the Lambda URL from Terraform outputs.
+- Update the frontend server (`NEXT_SERVER_*`) parameters using the backend ALB URL from Terraform outputs.
+- Populate all `DJANGO_*` parameters that have `to-be-set-in-aws-console` value.
+
+1. **Restart Backend ECS Tasks**:
+
+- Force a new deployment to pick up the updated configuration:
+
+    ```bash
+    aws ecs update-service \
+        --cluster nest-staging-backend-cluster \
+        --service nest-staging-backend-service \
+        --force-new-deployment \
+        --region AWS_REGION
+    ```
 
 1. **Restart Frontend ECS Tasks**:
 
@@ -352,12 +377,6 @@ Migrate and load data into the new database.
 
 ## Cleaning Up
 
-- To delete the deployment use the following command:
-
-  ```bash
-  zappa undeploy staging
-  ```
-
 - Ensure all buckets and ECR repositories are empty.
 
 > [!NOTE]
@@ -367,18 +386,4 @@ Migrate and load data into the new database.
 
   ```bash
   terraform destroy
-  ```
-
-## Helpful Commands
-
-- To view logs for a `staging` deployment run:
-
-  ```bash
-  zappa tail staging
-  ```
-
-- To update a Zappa `staging` deployment run:
-
-  ```bash
-  zappa update staging
   ```
