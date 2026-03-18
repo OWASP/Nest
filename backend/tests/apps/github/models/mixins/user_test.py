@@ -200,6 +200,7 @@ class TestUserIndexMixin:
         assert contributions[1]["repository_key"] == "other-repo"
 
     def test_idx_is_owasp_staff(self, user_index_mixin_instance):
+        user_index_mixin_instance.owasp_profile = MagicMock(is_owasp_staff=True)
         assert user_index_mixin_instance.idx_is_owasp_staff
 
     def test_idx_is_owasp_staff_without_profile(self):

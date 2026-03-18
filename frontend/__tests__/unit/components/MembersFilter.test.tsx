@@ -4,8 +4,8 @@ import MembersFilter, { AFFINITY_FILTERS, ROLE_FILTERS } from 'components/Member
 const defaultProps = {
   selectedAffinity: 'all',
   onAffinityChange: jest.fn(),
-  selectedMemberType: 'all',
-  onMemberTypeChange: jest.fn(),
+  selectedMemberTypes: ['all'],
+  onMemberTypesChange: jest.fn(),
 }
 
 describe('<MembersFilter />', () => {
@@ -25,7 +25,7 @@ describe('<MembersFilter />', () => {
   })
 
   it('shows selected member type when provided', () => {
-    render(<MembersFilter {...defaultProps} selectedMemberType="staff" />)
+    render(<MembersFilter {...defaultProps} selectedMemberTypes={['staff']} />)
     expect(screen.getByRole('button')).toHaveTextContent('OWASP Staff')
   })
 
@@ -36,18 +36,18 @@ describe('<MembersFilter />', () => {
     expect(defaultProps.onAffinityChange).toHaveBeenCalledWith('projects')
   })
 
-  it('calls onMemberTypeChange when a new member type is chosen', () => {
+  it('calls onMemberTypesChange when a new member type is chosen', () => {
     render(<MembersFilter {...defaultProps} />)
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
     fireEvent.change(hiddenSelect, { target: { value: 'staff' } })
-    expect(defaultProps.onMemberTypeChange).toHaveBeenCalledWith('staff')
+    expect(defaultProps.onMemberTypesChange).toHaveBeenCalledWith(['staff'])
   })
 
   it('does not call member type callback when only affinity changes', () => {
     render(<MembersFilter {...defaultProps} />)
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
     fireEvent.change(hiddenSelect, { target: { value: 'chapters' } })
-    expect(defaultProps.onMemberTypeChange).not.toHaveBeenCalled()
+    expect(defaultProps.onMemberTypesChange).not.toHaveBeenCalled()
   })
 
   it('does not call affinity callback when only member type changes', () => {

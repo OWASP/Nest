@@ -104,7 +104,10 @@ const MembersFilter: React.FC<MembersFilterProps> = ({
   ]
 
   const getCurrentKey = () => {
-    if (selectedAffinity === 'all' && selectedMemberTypes.includes('all')) {
+    if (
+      selectedAffinity === 'all' &&
+      (selectedMemberTypes.length === 0 || selectedMemberTypes.includes('all'))
+    ) {
       return 'all'
     }
     if (selectedAffinity === 'all') {

@@ -47,7 +47,10 @@ class TestUserIndex:
         bots and non-indexable users.
         """
         mock_user_manager = MagicMock()
-        mock_user_manager.exclude.return_value = "final_queryset"
+        mock_queryset = MagicMock()
+        mock_user_manager.exclude.return_value = mock_queryset
+        mock_queryset.select_related.return_value = mock_queryset
+        mock_queryset.prefetch_related.return_value = "final_queryset"
 
         with patch.object(User, "objects", mock_user_manager):
             queryset = user_index.get_entities()
@@ -55,4 +58,6 @@ class TestUserIndex:
             mock_user_manager.exclude.assert_called_once_with(
                 Q(is_bot=True) | Q(login__in=["user2"])
             )
+            mock_queryset.select_related.assert_called_once_with("owasp_profile")
+            mock_queryset.prefetch_related.assert_called_once_with("chapters", "projects")
             assert queryset == "final_queryset"

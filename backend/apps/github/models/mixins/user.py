@@ -316,7 +316,9 @@ class UserIndexMixin:
             bool: True if the user is OWASP Foundation staff.
 
         """
-        return self.is_owasp_staff
+        if hasattr(self, "owasp_profile"):
+            return self.owasp_profile.is_owasp_staff
+        return False
 
     @property
     def idx_owasp_board_member(self) -> bool:
