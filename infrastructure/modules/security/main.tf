@@ -1,10 +1,10 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
@@ -19,8 +19,8 @@ resource "aws_security_group" "alb" {
 
   lifecycle {
     precondition {
-      condition     = var.create_vpc_endpoint_rules ? var.vpc_endpoint_sg_id != null : true
-      error_message = "vpc_endpoint_sg_id must be provided when create_vpc_endpoint_rules is true."
+      condition     = var.enable_vpc_endpoint_rules ? var.vpc_endpoint_sg_id != null : true
+      error_message = "vpc_endpoint_sg_id must be provided when enable_vpc_endpoint_rules is true."
     }
   }
 }
@@ -45,6 +45,16 @@ resource "aws_security_group_rule" "alb_https" {
   type              = "ingress"
 }
 
+resource "aws_security_group_rule" "alb_to_backend" {
+  description              = "Allow traffic to backend ECS tasks"
+  from_port                = 8000
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.alb.id
+  source_security_group_id = aws_security_group.backend.id
+  to_port                  = 8000
+  type                     = "egress"
+}
+
 resource "aws_security_group_rule" "alb_to_frontend" {
   description              = "Allow traffic to frontend ECS tasks"
   from_port                = 3000
@@ -55,31 +65,137 @@ resource "aws_security_group_rule" "alb_to_frontend" {
   type                     = "egress"
 }
 
-resource "aws_security_group" "ecs" {
-  description = "Security group for ECS tasks"
-  name        = "${var.project_name}-${var.environment}-ecs-sg"
+resource "aws_security_group" "backend" {
+  description = "Security group for backend ECS tasks"
+  name        = "${var.project_name}-${var.environment}-backend-sg"
   tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-ecs-sg"
+    Name = "${var.project_name}-${var.environment}-backend-sg"
   })
   vpc_id = var.vpc_id
 }
 
-resource "aws_security_group_rule" "ecs_egress_all" {
-  cidr_blocks       = var.default_egress_cidr_blocks
-  description       = "Allow all outbound traffic"
-  from_port         = 0
-  protocol          = "-1"
-  security_group_id = aws_security_group.ecs.id
-  to_port           = 0
+resource "aws_security_group_rule" "backend_from_alb" {
+  description              = "Allow traffic from ALB"
+  from_port                = 8000
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = aws_security_group.alb.id
+  to_port                  = 8000
+  type                     = "ingress"
+}
+
+#trivy:ignore:AVD-AWS-0104
+resource "aws_security_group_rule" "backend_egress_https" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTPS for external API calls"
+  from_port         = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.backend.id
+  to_port           = 443
   type              = "egress"
 }
 
-resource "aws_security_group_rule" "ecs_to_vpc_endpoints" {
-  count                    = var.create_vpc_endpoint_rules ? 1 : 0
+resource "aws_security_group_rule" "backend_to_rds" {
+  count                    = var.enable_rds_proxy ? 0 : 1
+  description              = "Allow traffic to RDS"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = aws_security_group.rds.id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "backend_to_rds_proxy" {
+  count                    = var.enable_rds_proxy ? 1 : 0
+  description              = "Allow traffic to RDS Proxy"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = aws_security_group.rds_proxy[0].id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "backend_to_redis" {
+  description              = "Allow traffic to Redis"
+  from_port                = var.redis_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = aws_security_group.redis.id
+  to_port                  = var.redis_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "backend_to_vpc_endpoints" {
+  count                    = var.enable_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.ecs.id
+  security_group_id        = aws_security_group.backend.id
+  source_security_group_id = var.vpc_endpoint_sg_id
+  to_port                  = 443
+  type                     = "egress"
+}
+
+resource "aws_security_group" "tasks" {
+  description = "Security group for ECS tasks"
+  name        = "${var.project_name}-${var.environment}-tasks-sg"
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-${var.environment}-tasks-sg"
+  })
+  vpc_id = var.vpc_id
+}
+
+#trivy:ignore:AVD-AWS-0104
+resource "aws_security_group_rule" "task_egress_https" {
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTPS for external API calls"
+  from_port         = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.tasks.id
+  to_port           = 443
+  type              = "egress"
+}
+
+resource "aws_security_group_rule" "task_to_rds" {
+  count                    = var.enable_rds_proxy ? 0 : 1
+  description              = "Allow traffic to RDS"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = aws_security_group.rds.id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "task_to_rds_proxy" {
+  count                    = var.enable_rds_proxy ? 1 : 0
+  description              = "Allow traffic to RDS Proxy"
+  from_port                = var.db_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = aws_security_group.rds_proxy[0].id
+  to_port                  = var.db_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "task_to_redis" {
+  description              = "Allow traffic to Redis"
+  from_port                = var.redis_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
+  source_security_group_id = aws_security_group.redis.id
+  to_port                  = var.redis_port
+  type                     = "egress"
+}
+
+resource "aws_security_group_rule" "task_to_vpc_endpoints" {
+  count                    = var.enable_vpc_endpoint_rules ? 1 : 0
+  description              = "Allow HTTPS to VPC endpoints"
+  from_port                = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.tasks.id
   source_security_group_id = var.vpc_endpoint_sg_id
   to_port                  = 443
   type                     = "egress"
@@ -104,6 +220,7 @@ resource "aws_security_group_rule" "frontend_from_alb" {
   type                     = "ingress"
 }
 
+#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "frontend_https" {
   cidr_blocks       = ["0.0.0.0/0"]
   description       = "Allow HTTPS for external API calls"
@@ -115,41 +232,11 @@ resource "aws_security_group_rule" "frontend_https" {
 }
 
 resource "aws_security_group_rule" "frontend_to_vpc_endpoints" {
-  count                    = var.create_vpc_endpoint_rules ? 1 : 0
+  count                    = var.enable_vpc_endpoint_rules ? 1 : 0
   description              = "Allow HTTPS to VPC endpoints"
   from_port                = 443
   protocol                 = "tcp"
   security_group_id        = aws_security_group.frontend.id
-  source_security_group_id = var.vpc_endpoint_sg_id
-  to_port                  = 443
-  type                     = "egress"
-}
-
-resource "aws_security_group" "lambda" {
-  description = "Security group for Lambda functions (Zappa)"
-  name        = "${var.project_name}-${var.environment}-lambda-sg"
-  tags = merge(var.common_tags, {
-    Name = "${var.project_name}-${var.environment}-lambda-sg"
-  })
-  vpc_id = var.vpc_id
-}
-
-resource "aws_security_group_rule" "lambda_egress_all" {
-  cidr_blocks       = var.default_egress_cidr_blocks
-  description       = "Allow all outbound traffic"
-  from_port         = 0
-  protocol          = "-1"
-  security_group_id = aws_security_group.lambda.id
-  to_port           = 0
-  type              = "egress"
-}
-
-resource "aws_security_group_rule" "lambda_to_vpc_endpoints" {
-  count                    = var.create_vpc_endpoint_rules ? 1 : 0
-  description              = "Allow HTTPS to VPC endpoints"
-  from_port                = 443
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.lambda.id
   source_security_group_id = var.vpc_endpoint_sg_id
   to_port                  = 443
   type                     = "egress"
@@ -165,7 +252,7 @@ resource "aws_security_group" "rds" {
 }
 
 resource "aws_security_group" "rds_proxy" {
-  count       = var.create_rds_proxy ? 1 : 0
+  count       = var.enable_rds_proxy ? 1 : 0
   description = "Security group for RDS Proxy"
   name        = "${var.project_name}-${var.environment}-rds-proxy-sg"
   tags = merge(var.common_tags, {
@@ -174,30 +261,30 @@ resource "aws_security_group" "rds_proxy" {
   vpc_id = var.vpc_id
 }
 
-resource "aws_security_group_rule" "rds_from_ecs" {
-  count                    = var.create_rds_proxy ? 0 : 1
-  description              = "PostgreSQL from ECS"
+resource "aws_security_group_rule" "rds_from_backend" {
+  count                    = var.enable_rds_proxy ? 0 : 1
+  description              = "PostgreSQL from backend"
   from_port                = var.db_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.rds.id
-  source_security_group_id = aws_security_group.ecs.id
+  source_security_group_id = aws_security_group.backend.id
   to_port                  = var.db_port
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "rds_from_lambda" {
-  count                    = var.create_rds_proxy ? 0 : 1
-  description              = "PostgreSQL from Lambda"
+resource "aws_security_group_rule" "rds_from_task" {
+  count                    = var.enable_rds_proxy ? 0 : 1
+  description              = "PostgreSQL from ECS Task"
   from_port                = var.db_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.rds.id
-  source_security_group_id = aws_security_group.lambda.id
+  source_security_group_id = aws_security_group.tasks.id
   to_port                  = var.db_port
   type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "rds_from_proxy" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "PostgreSQL from RDS Proxy"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -208,7 +295,7 @@ resource "aws_security_group_rule" "rds_from_proxy" {
 }
 
 resource "aws_security_group_rule" "rds_proxy_to_rds" {
-  count                    = var.create_rds_proxy ? 1 : 0
+  count                    = var.enable_rds_proxy ? 1 : 0
   description              = "Allow RDS Proxy to reach RDS database"
   from_port                = var.db_port
   protocol                 = "tcp"
@@ -218,24 +305,24 @@ resource "aws_security_group_rule" "rds_proxy_to_rds" {
   type                     = "egress"
 }
 
-resource "aws_security_group_rule" "rds_proxy_from_ecs" {
-  count                    = var.create_rds_proxy ? 1 : 0
-  description              = "PostgreSQL from ECS"
+resource "aws_security_group_rule" "rds_proxy_from_backend" {
+  count                    = var.enable_rds_proxy ? 1 : 0
+  description              = "PostgreSQL from backend"
   from_port                = var.db_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.rds_proxy[0].id
-  source_security_group_id = aws_security_group.ecs.id
+  source_security_group_id = aws_security_group.backend.id
   to_port                  = var.db_port
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "rds_proxy_from_lambda" {
-  count                    = var.create_rds_proxy ? 1 : 0
-  description              = "PostgreSQL from Lambda"
+resource "aws_security_group_rule" "rds_proxy_from_task" {
+  count                    = var.enable_rds_proxy ? 1 : 0
+  description              = "PostgreSQL from ECS Task"
   from_port                = var.db_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.rds_proxy[0].id
-  source_security_group_id = aws_security_group.lambda.id
+  source_security_group_id = aws_security_group.tasks.id
   to_port                  = var.db_port
   type                     = "ingress"
 }
@@ -249,22 +336,22 @@ resource "aws_security_group" "redis" {
   vpc_id = var.vpc_id
 }
 
-resource "aws_security_group_rule" "redis_from_ecs" {
-  description              = "Redis from ECS"
+resource "aws_security_group_rule" "redis_from_backend" {
+  description              = "Redis from backend"
   from_port                = var.redis_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.redis.id
-  source_security_group_id = aws_security_group.ecs.id
+  source_security_group_id = aws_security_group.backend.id
   to_port                  = var.redis_port
   type                     = "ingress"
 }
 
-resource "aws_security_group_rule" "redis_from_lambda" {
-  description              = "Redis from Lambda"
+resource "aws_security_group_rule" "redis_from_task" {
+  description              = "Redis from ECS Task"
   from_port                = var.redis_port
   protocol                 = "tcp"
   security_group_id        = aws_security_group.redis.id
-  source_security_group_id = aws_security_group.lambda.id
+  source_security_group_id = aws_security_group.tasks.id
   to_port                  = var.redis_port
   type                     = "ingress"
 }

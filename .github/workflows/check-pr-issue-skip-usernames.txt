@@ -365,6 +365,7 @@ matowasp
 matreurai
 matt-perrotti
 mavensecurity
+mavrick-1
 mbrg
 mccabe615
 meetsaad
@@ -636,6 +637,7 @@ vxvera-owasp
 vyshnavvizz
 wadealcorn
 wagrodrigo
+wandji69
 wangjie8578
 warlordsam07
 weltraumschaf

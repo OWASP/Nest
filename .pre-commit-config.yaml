@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.2.0
+    rev: v26.3.0
     hooks:
       - id: ansible-lint
         additional_dependencies:
@@ -55,7 +55,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.3
+    rev: v0.15.6
     hooks:
       - id: ruff-check
         args:
@@ -72,7 +72,7 @@ repos:
           - html
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: v0.48.0
     hooks:
       - id: markdownlint
         args:
@@ -137,6 +137,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.16.2
+    rev: v2.19.0
     hooks:
       - id: pyproject-fmt

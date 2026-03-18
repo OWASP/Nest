@@ -206,7 +206,7 @@ const DetailsCard = ({
                   <strong>{detail.label}:</strong>{' '}
                   <LeadersList
                     entityKey={`${entityKey}-${detail.label}`}
-                    leaders={detail?.value == null ? 'Unknown' : String(detail.value)}
+                    leaders={String(detail?.value ?? 'Unknown')}
                   />
                 </div>
               ) : (
@@ -425,11 +425,21 @@ const DetailsCard = ({
               <>
                 {modulesList.length === 1 ? (
                   <div className="mb-8">
-                    <ModuleCard modules={modulesList} accessLevel={accessLevel} admins={admins} />
+                    <ModuleCard
+                      modules={modulesList}
+                      accessLevel={accessLevel}
+                      admins={admins}
+                      programKey={programKey}
+                    />
                   </div>
                 ) : (
                   <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
-                    <ModuleCard modules={modulesList} accessLevel={accessLevel} admins={admins} />
+                    <ModuleCard
+                      modules={modulesList}
+                      accessLevel={accessLevel}
+                      admins={admins}
+                      programKey={programKey}
+                    />
                   </SecondaryCard>
                 )}
               </>

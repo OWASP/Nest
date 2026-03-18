@@ -8,6 +8,7 @@ export const GET_MODULES_BY_PROGRAM = gql`
       name
       description
       experienceLevel
+      order
       startedAt
       endedAt
       projectId
@@ -132,6 +133,7 @@ export const GET_MODULE_ISSUES = gql`
         state
         isMerged
         labels
+        taskDeadline
         assignees {
           avatarUrl
           login
