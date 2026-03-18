@@ -4,7 +4,7 @@ import { Tooltip } from '@heroui/tooltip'
 import L from 'leaflet'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import { FaUnlock } from 'react-icons/fa'
+import { FaLock, FaUnlock } from 'react-icons/fa'
 import { FaLocationDot } from 'react-icons/fa6'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
@@ -177,12 +177,7 @@ const ChapterMap = ({
   )
 
   return (
-    <section
-      aria-label="Chapter Map"
-      className="relative"
-      style={style}
-      onMouseLeave={() => setIsMapActive(false)}
-    >
+    <section aria-label="Chapter Map" className="relative" style={style}>
       <MapContainer
         center={[20, 0]}
         zoom={2}
@@ -271,7 +266,7 @@ const ChapterMap = ({
         </div>
       )}
       {isMapActive && (
-        <div className="absolute top-20 left-3 z-[999] w-fit">
+        <div className="absolute top-20 left-3 z-[999] flex gap-2">
           {onShareLocation && (
             <Tooltip
               showArrow
@@ -294,6 +289,16 @@ const ChapterMap = ({
               </Button>
             </Tooltip>
           )}
+          <Tooltip showArrow content="Lock map" placement="bottom-start">
+            <Button
+              isIconOnly
+              className="h-[30px] w-[30px] min-w-[30px] rounded-xs bg-white text-gray-700 shadow-lg outline-2 outline-gray-400 hover:bg-gray-100 dark:outline-gray-700"
+              onPress={() => setIsMapActive(false)}
+              aria-label="Lock map"
+            >
+              <FaLock size={14} />
+            </Button>
+          </Tooltip>
         </div>
       )}
     </section>
