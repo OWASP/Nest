@@ -79,7 +79,10 @@ jest.mock('@heroui/react', () => ({
       <button
         type="button"
         data-testid="autocomplete-clear"
-        onClick={() => onSelectionChange?.(null)}
+        onClick={() => {
+          onInputChange?.('')
+          onSelectionChange?.(null)
+        }}
       >
         Clear Selection
       </button>
