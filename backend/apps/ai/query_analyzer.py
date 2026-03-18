@@ -53,36 +53,28 @@ def analyze_query(query: str) -> dict:
         dict: Analysis with 'is_simple', 'sub_queries', and 'required_agents'.
 
     """
-    try:
-        analyzer_agent = create_query_analyzer_agent()
+    analyzer_agent = create_query_analyzer_agent()
 
-        task_template = env.get_template("query_analyzer/tasks/analyze.jinja")
-        agents = [{"name": name, "description": desc} for name, desc in AGENT_DESCRIPTIONS.items()]
-        task_description = task_template.render(  # nosemgrep: direct-use-of-jinja2
-            query=query, agents=agents
-        ).strip()
+    task_template = env.get_template("query_analyzer/tasks/analyze.jinja")
+    agents = [{"name": name, "description": desc} for name, desc in AGENT_DESCRIPTIONS.items()]
+    task_description = task_template.render(  # nosemgrep: direct-use-of-jinja2
+        query=query, agents=agents
+    ).strip()
 
-        analysis_task = Task(
-            description=task_description,
-            agent=analyzer_agent,
-            expected_output="Query analysis with complexity assessment and required agents",
-        )
+    analysis_task = Task(
+        description=task_description,
+        agent=analyzer_agent,
+        expected_output="Query analysis with complexity assessment and required agents",
+    )
 
-        crew = Crew(
-            agents=[analyzer_agent],
-            tasks=[analysis_task],
-            verbose=True,
-            max_iter=5,
-            max_rpm=10,
-        )
-        result = crew.kickoff()
-    except (RuntimeError, ValueError):
-        logger.exception("Query analysis failed for: %s", query)
-        return {
-            "is_simple": True,
-            "sub_queries": [query],
-            "required_agents": [],
-        }
+    crew = Crew(
+        agents=[analyzer_agent],
+        tasks=[analysis_task],
+        verbose=True,
+        max_iter=5,
+        max_rpm=10,
+    )
+    result = crew.kickoff()
 
     result_str = str(result)
     is_simple = True
