@@ -98,9 +98,8 @@ describe('UsersPage Component', () => {
   test('does not render a standalone sidebar — filters are inline', async () => {
     render(<UsersPage />)
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('members-sidebar')).not.toBeInTheDocument()
-    })
+    await screen.findByTestId('members-filter')
+    expect(screen.queryByTestId('members-sidebar')).not.toBeInTheDocument()
   })
 
   test('renders user cards correctly', async () => {

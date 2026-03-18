@@ -349,6 +349,10 @@ class UserIndexMixin:
         Returns:
             bool: True if the user contributed to a chapter repository or leads a chapter.
 
+        Note:
+            Performs database queries. During bulk reindexing, consider using
+            annotations or prefetch_related to avoid N+1 query issues.
+
         """
         from apps.github.models.repository_contributor import RepositoryContributor
 
@@ -364,6 +368,10 @@ class UserIndexMixin:
 
         Returns:
             bool: True if the user contributed to a committee repository or leads a committee.
+
+        Note:
+            Performs database queries. During bulk reindexing, consider using
+            annotations or prefetch_related to avoid N+1 query issues.
 
         """
         from apps.github.models.repository_contributor import RepositoryContributor
@@ -381,6 +389,10 @@ class UserIndexMixin:
 
         Returns:
             bool: True if the user contributed to a project repository or leads a project.
+
+        Note:
+            Performs database queries. During bulk reindexing, consider using
+            annotations or prefetch_related to avoid N+1 query issues.
 
         """
         from apps.github.models.repository_contributor import RepositoryContributor

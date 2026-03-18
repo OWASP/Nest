@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import MembersFilter, { AFFINITY_FILTERS, ROLE_FILTERS } from 'components/MembersFilter'
 
 const defaultProps = {
@@ -57,12 +57,16 @@ describe('<MembersFilter />', () => {
     expect(defaultProps.onAffinityChange).not.toHaveBeenCalled()
   })
 
-  it('renders available options for both groups when the dropdown is opened', () => {
+  it('renders all filter options in the DOM', async () => {
     render(<MembersFilter {...defaultProps} />)
-    expect(screen.getByTestId('affinity-option-projects')).toBeInTheDocument()
-    expect(screen.getByTestId('affinity-option-chapters')).toBeInTheDocument()
-    expect(screen.getByTestId('affinity-option-committees')).toBeInTheDocument()
-    expect(screen.getByTestId('type-option-staff')).toBeInTheDocument()
+    const trigger = screen.getByRole('button', { name: 'All Filters' })
+    fireEvent.click(trigger)
+    await waitFor(() => {
+      expect(screen.getByTestId('affinity-option-projects')).toBeInTheDocument()
+      expect(screen.getByTestId('affinity-option-chapters')).toBeInTheDocument()
+      expect(screen.getByTestId('affinity-option-committees')).toBeInTheDocument()
+      expect(screen.getByTestId('type-option-staff')).toBeInTheDocument()
+    })
   })
 
   it('AFFINITY_FILTERS has keys [projects, chapters, committees]', () => {

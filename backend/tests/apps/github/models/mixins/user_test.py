@@ -202,13 +202,17 @@ class TestUserIndexMixin:
     def test_idx_is_owasp_staff(self, user_index_mixin_instance):
         assert user_index_mixin_instance.idx_is_owasp_staff
 
+    def test_idx_is_owasp_staff_without_profile(self):
+        instance = UserIndexMixin()
+        assert not instance.idx_is_owasp_staff
+
     def test_idx_owasp_board_member_with_profile(self, user_index_mixin_instance):
         user_index_mixin_instance.owasp_profile = MagicMock(is_owasp_board_member=True)
         assert user_index_mixin_instance.idx_owasp_board_member
 
     def test_idx_owasp_board_member_without_profile(self):
         instance = UserIndexMixin()
-        assert instance.idx_owasp_board_member is False
+        assert not instance.idx_owasp_board_member
 
     def test_idx_owasp_gsoc_mentor_with_profile(self, user_index_mixin_instance):
         user_index_mixin_instance.owasp_profile = MagicMock(is_gsoc_mentor=True)

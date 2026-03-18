@@ -103,29 +103,44 @@ const MembersFilter: React.FC<MembersFilterProps> = ({
     { key: 'gsoc', label: 'GSoC Mentor', type: 'role' as const },
   ]
 
-  const currentKey =
-    selectedAffinity !== 'all'
-      ? selectedAffinity
-      : selectedMemberType !== 'all'
-        ? selectedMemberType
-        : 'all'
-  const isActive = currentKey !== 'all'
+  const getCurrentKey = () => {
+    if (selectedAffinity === 'all' && selectedMemberType === 'all') {
+      return 'all'
+    }
+    if (selectedAffinity === 'all') {
+      return selectedMemberType
+    }
+    return selectedAffinity
+  }
+
+  const currentKey = getCurrentKey()
+  const isActive = currentKey === 'all' ? false : true
+
+  const getTestId = (option: (typeof combinedOptions)[number]) => {
+    if (option.type === 'affinity') {
+      return `affinity-option-${option.key}`
+    }
+    if (option.type === 'role') {
+      return `type-option-${option.key}`
+    }
+    return 'filter-reset-all'
+  }
 
   const handleChange = (value: string) => {
     if (value === 'all') {
-      onAffinityChange('all')
-      onMemberTypeChange('all')
+      if (selectedAffinity !== 'all') onAffinityChange('all')
+      if (selectedMemberType !== 'all') onMemberTypeChange('all')
       return
     }
     const option = combinedOptions.find((o) => o.key === value)
     if (!option) return
     if (option.type === 'affinity') {
       onAffinityChange(option.key)
-      onMemberTypeChange('all')
+      if (selectedMemberType !== 'all') onMemberTypeChange('all')
     }
     if (option.type === 'role') {
       onMemberTypeChange(option.key)
-      onAffinityChange('all')
+      if (selectedAffinity !== 'all') onAffinityChange('all')
     }
   }
 
@@ -137,7 +152,6 @@ const MembersFilter: React.FC<MembersFilterProps> = ({
         }
       >
         <Select
-          aria-label="Filters"
           selectedKeys={[currentKey]}
           onChange={(e) => handleChange((e.target as HTMLSelectElement).value)}
           classNames={selectClassNames(isActive)}
@@ -145,13 +159,7 @@ const MembersFilter: React.FC<MembersFilterProps> = ({
           {combinedOptions.map((option) => (
             <SelectItem
               key={option.key}
-              data-testid={
-                option.type === 'affinity'
-                  ? `affinity-option-${option.key}`
-                  : option.type === 'role'
-                    ? `type-option-${option.key}`
-                    : 'filter-reset-all'
-              }
+              data-testid={getTestId(option)}
               classNames={{
                 base: 'text-sm text-gray-700 dark:text-gray-300 hover:bg-transparent dark:hover:bg-transparent focus:bg-gray-100 dark:focus:bg-[#404040] focus:outline-none rounded-sm px-3 py-2 cursor-pointer data-[selected=true]:bg-blue-50 dark:data-[selected=true]:bg-blue-900/20 data-[selected=true]:text-blue-600 dark:data-[selected=true]:text-blue-400 data-[focus=true]:bg-gray-100 dark:data-[focus=true]:bg-[#404040]',
               }}

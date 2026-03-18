@@ -21,6 +21,7 @@ export type User = {
   followersCount?: number
   followingCount?: number
   hasChapterAffinity?: boolean
+  hasCommitteeAffinity?: boolean
   hasProjectAffinity?: boolean
   isOwaspStaff?: boolean
   issues?: Issue[]
