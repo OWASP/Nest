@@ -61,7 +61,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
     }
   }, [map])
   return null
-}M
+}
 
 const MapViewUpdater = ({
   validGeoLocData,
