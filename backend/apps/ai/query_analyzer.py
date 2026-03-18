@@ -90,7 +90,7 @@ def analyze_query(query: str) -> dict:
         elif line_lower.startswith("subqueries:"):
             value = line.split(":", 1)[1].strip()
             if value and value.lower() != "none":
-                sub_queries = [q.strip() for q in value.split("|") if q.strip()]
+                sub_queries = [q.strip() for q in value.split("|") if q.strip()] or [query]
         elif line_lower.startswith("requiredagents:"):
             value = line.split(":", 1)[1].strip().lower()
             if value and value != "none":
