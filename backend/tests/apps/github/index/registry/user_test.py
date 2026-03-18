@@ -32,6 +32,14 @@ class TestUserIndex:
         UserIndex.update_synonyms()
         mock_reindex_synonyms.assert_called_once_with("github", "users")
 
+    @patch("apps.common.index.IndexBase.configure_replicas")
+    def test_configure_replicas(self, mock_configure_replicas):
+        """Test that configure_replicas calls the parent method with correct args."""
+        UserIndex.configure_replicas()
+        assert mock_configure_replicas.call_count == 1
+        assert mock_configure_replicas.call_args[0][0] == "users"
+        assert isinstance(mock_configure_replicas.call_args[0][1], dict)
+
     @patch("apps.github.models.user.User.get_non_indexable_logins", return_value=["user2"])
     def test_get_entities(self, mock_get_non_indexable_logins, user_index):
         """Test that get_entities constructs the correct queryset by excluding.
