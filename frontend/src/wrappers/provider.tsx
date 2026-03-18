@@ -23,12 +23,29 @@ export function Providers({
   children: React.ReactNode
 }>) {
   if (!apolloClient) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-red-500">
-        Configuration Error: GraphQL Client failed to initialize
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-center">
+      <h1 className="text-xl font-semibold text-red-500">
+        ⚠️ Backend connection failed
+      </h1>
+
+      <p className="text-gray-500 max-w-md">
+        Unable to initialize the GraphQL client. This usually means the backend
+        server is not running or environment variables are not configured
+        correctly.
+      </p>
+
+      <div className="text-sm text-gray-400">
+        <p>Try the following:</p>
+        <ul className="mt-2 list-disc list-inside">
+          <li>Start the backend server</li>
+          <li>Check your environment variables (e.g. NEXT_PUBLIC_API_URL)</li>
+          
+        </ul>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
   return (
     <Suspense>
