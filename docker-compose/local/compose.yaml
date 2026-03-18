@@ -34,7 +34,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-nestbot:/home/owasp/.venv
 
   cache:
     command: >
@@ -53,7 +53,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - cache-data-nestbot:/data
 
   db:
     container_name: nest-db
@@ -70,7 +70,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data-nestbot:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -184,9 +184,9 @@ networks:
   nest-network:
 
 volumes:
-  backend-venv:
-  cache-data:
-  db-data:
+  backend-venv-nestbot:
+  cache-data-nestbot:
+  db-data-nestbot:
   docs-venv:
   frontend-next:
   frontend-node-modules:
