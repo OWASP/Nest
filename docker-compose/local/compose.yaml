@@ -76,7 +76,7 @@ services:
     container_name: nest-docs
     command: >
       sh -c '
-        mkdocs serve -a 0.0.0.0:8001 -f .mkdocs.yaml
+        mkdocs serve -a 0.0.0.0:8002 -f .mkdocs.yaml
       '
     build:
       context: ../../
