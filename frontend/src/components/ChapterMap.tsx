@@ -19,7 +19,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
   useEffect(() => {
     if (!map) return
-    try {
+    if (!map.getContainer()) return
     if (isMapActive) {
       map.scrollWheelZoom.enable()
       map.dragging.enable()
@@ -42,10 +42,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
         zoomControlRef.current = null
       }
     }
-  } catch (error) {
-    console.warn('Map zoom control error:', error)
-  }
-  },[isMapActive, map])
+  }, [isMapActive, map])
   useEffect(() => {
     return () => {
       if (!map) return
