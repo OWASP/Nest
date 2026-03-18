@@ -275,18 +275,18 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.42.69"
+version = "1.42.70"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.69-py3-none-any.whl", hash = "sha256:6823a4b59aa578c7d98124280a9b6d83cea04bdb02525cbaa79370e5b6f7f631"},
-    {file = "boto3-1.42.69.tar.gz", hash = "sha256:e59846f4ff467b23bae4751948298db554dbdda0d72b09028d2cacbeff27e1ad"},
+    {file = "boto3-1.42.70-py3-none-any.whl", hash = "sha256:18a108c4d5df89a200b3949de0d39c0879b100c455e3229ea38275dd392db0f4"},
+    {file = "boto3-1.42.70.tar.gz", hash = "sha256:d060b0d83d2832e403671b9a895e73c3b025df8bb5896d89e401b0678705aac4"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.69,<1.43.0"
+botocore = ">=1.42.70,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -295,14 +295,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.69"
+version = "1.42.70"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.69-py3-none-any.whl", hash = "sha256:ef0e3d860a5d7bffc0ccb4911781c4c27d538557ed9a616ba1926c762d72e5f6"},
-    {file = "botocore-1.42.69.tar.gz", hash = "sha256:0934f2d90403c5c8c2cba83e754a39d77edcad5885d04a79363edff3e814f55e"},
+    {file = "botocore-1.42.70-py3-none-any.whl", hash = "sha256:54ed9d25f05f810efd22b0dfda0bb9178df3ad8952b2e4359e05156c9321bd3c"},
+    {file = "botocore-1.42.70.tar.gz", hash = "sha256:9ee17553b7febd1a0c1253b3b62ab5d79607eb6163c8fb943470a8893c31d4fa"},
 ]
 
 [package.dependencies]
@@ -1060,14 +1060,14 @@ django = ">=4.2"
 
 [[package]]
 name = "django-ninja"
-version = "1.6.0"
+version = "1.6.1"
 description = "Django Ninja - Fast Django REST framework"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "django_ninja-1.6.0-py3-none-any.whl", hash = "sha256:44c6e3f5f1b929cf51f645004715b36326ea32fddf1a94026c4917de8d230135"},
-    {file = "django_ninja-1.6.0.tar.gz", hash = "sha256:dd84230931f511503a251ac090200c65fd0be25a16ba2b9140073b814decc201"},
+    {file = "django_ninja-1.6.1-py3-none-any.whl", hash = "sha256:acadf4fd928f6aef24850e61b135a6ca7b4ef78f491889f55f0848ee383d77d8"},
+    {file = "django_ninja-1.6.1.tar.gz", hash = "sha256:b074fe5d112086e63b34f3389ff24752801f19102ac9a78876cbf2ae79e5f5c7"},
 ]
 
 [package.dependencies]
@@ -2222,14 +2222,14 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.7.18"
+version = "0.7.20"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.7.18-py3-none-any.whl", hash = "sha256:3253c171fe2f6506056a42f9077983a34749b7a1629e41d8fb8e2005d8960886"},
-    {file = "langsmith-0.7.18.tar.gz", hash = "sha256:d7e6e1f9c9300ee83b9f201c9254b4a32799218de102a5b1d2b217e00be2dfa2"},
+    {file = "langsmith-0.7.20-py3-none-any.whl", hash = "sha256:0162faf791ea48d69009a12a3da917468556b99cf5d5fcacbb8cda064262e118"},
+    {file = "langsmith-0.7.20.tar.gz", hash = "sha256:fa983a74f75648ee0e80d3f9751162b6f9a438896d5f9bdb6cba9abda451e234"},
 ]
 
 [package.dependencies]
@@ -2832,14 +2832,14 @@ files = [
 
 [[package]]
 name = "openai"
-version = "2.28.0"
+version = "2.29.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "openai-2.28.0-py3-none-any.whl", hash = "sha256:79aa5c45dba7fef84085701c235cf13ba88485e1ef4f8dfcedc44fc2a698fc1d"},
-    {file = "openai-2.28.0.tar.gz", hash = "sha256:bb7fdff384d2a787fa82e8822d1dd3c02e8cf901d60f1df523b7da03cbb6d48d"},
+    {file = "openai-2.29.0-py3-none-any.whl", hash = "sha256:b7c5de513c3286d17c5e29b92c4c98ceaf0d775244ac8159aeb1bddf840eb42a"},
+    {file = "openai-2.29.0.tar.gz", hash = "sha256:32d09eb2f661b38d3edd7d7e1a2943d1633f572596febe64c0cd370c86d52bec"},
 ]
 
 [package.dependencies]
@@ -2850,7 +2850,7 @@ jiter = ">=0.10.0,<1"
 pydantic = ">=1.9.0,<3"
 sniffio = "*"
 tqdm = ">4"
-typing-extensions = ">=4.11,<5"
+typing-extensions = ">=4.14,<5"
 
 [package.extras]
 aiohttp = ["aiohttp", "httpx-aiohttp (>=0.1.9)"]
