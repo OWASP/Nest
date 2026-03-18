@@ -70,15 +70,15 @@ export const MEMBER_TYPE_OPTIONS = [
 interface MembersFilterProps {
   selectedAffinity: string
   onAffinityChange: (value: string) => void
-  selectedMemberType: string
-  onMemberTypeChange: (value: string) => void
+  selectedMemberTypes: string[]
+  onMemberTypesChange: (value: string[]) => void
 }
 
 const MembersFilter: React.FC<MembersFilterProps> = ({
   selectedAffinity,
   onAffinityChange,
-  selectedMemberType,
-  onMemberTypeChange,
+  selectedMemberTypes,
+  onMemberTypesChange,
 }) => {
   const selectClassNames = (isActive: boolean) => ({
     trigger:
@@ -104,17 +104,17 @@ const MembersFilter: React.FC<MembersFilterProps> = ({
   ]
 
   const getCurrentKey = () => {
-    if (selectedAffinity === 'all' && selectedMemberType === 'all') {
+    if (selectedAffinity === 'all' && selectedMemberTypes.includes('all')) {
       return 'all'
     }
     if (selectedAffinity === 'all') {
-      return selectedMemberType
+      return selectedMemberTypes[0]
     }
     return selectedAffinity
   }
 
   const currentKey = getCurrentKey()
-  const isActive = currentKey === 'all' ? false : true
+  const isActive = currentKey !== 'all'
 
   const getTestId = (option: (typeof combinedOptions)[number]) => {
     if (option.type === 'affinity') {
@@ -129,17 +129,17 @@ const MembersFilter: React.FC<MembersFilterProps> = ({
   const handleChange = (value: string) => {
     if (value === 'all') {
       if (selectedAffinity !== 'all') onAffinityChange('all')
-      if (selectedMemberType !== 'all') onMemberTypeChange('all')
+      if (!selectedMemberTypes.includes('all')) onMemberTypesChange(['all'])
       return
     }
     const option = combinedOptions.find((o) => o.key === value)
     if (!option) return
     if (option.type === 'affinity') {
       onAffinityChange(option.key)
-      if (selectedMemberType !== 'all') onMemberTypeChange('all')
+      if (!selectedMemberTypes.includes('all')) onMemberTypesChange(['all'])
     }
     if (option.type === 'role') {
-      onMemberTypeChange(option.key)
+      onMemberTypesChange([option.key])
       if (selectedAffinity !== 'all') onAffinityChange('all')
     }
   }
