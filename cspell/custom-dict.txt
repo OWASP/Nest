@@ -192,6 +192,7 @@ repositorycontributor
 requirepass
 rqworker
 rsc
+rudransh
 saft
 sakanashi
 samm
@@ -199,6 +200,7 @@ sbom
 schemathesis
 semgrep
 seo
+shrivastava
 skillstruck
 slackbot
 slideshare

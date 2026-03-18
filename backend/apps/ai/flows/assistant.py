@@ -15,6 +15,7 @@ from apps.ai.agents.project import create_project_agent
 from apps.ai.agents.rag import create_rag_agent
 from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
 from apps.ai.common.intent import Intent
+from apps.ai.query_analyzer import analyze_query
 from apps.ai.router import route
 from apps.common.open_ai import OpenAi
 from apps.slack.constants import (
@@ -101,6 +102,18 @@ def process_query(  # noqa: PLR0911
                 "confidence": confidence,
                 "query": query,
                 "channel_id": channel_id,
+            },
+        )
+
+        # TODO(rudransh-shrivastava): Use analysis results for multi-agent orchestration
+        query_analysis = analyze_query(query)
+        logger.warning(
+            "Query analyzed",
+            extra={
+                "is_simple": query_analysis["is_simple"],
+                "sub_queries": query_analysis["sub_queries"],
+                "required_agents": query_analysis["required_agents"],
+                "query": query,
             },
         )
 

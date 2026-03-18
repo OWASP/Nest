@@ -1,0 +1,19 @@
+Analyze this query: {{ query }}
+
+Determine the complexity of this query and what resources are needed to answer it.
+
+Available expert agents:
+{% for agent in agents %}
+- {{ agent.name }}: {{ agent.description }}
+{% endfor %}
+
+A query is SIMPLE if it has a single clear intent and can be fully answered by ONE expert agent.
+
+A query is COMPLEX if it combines multiple topics, requires information from multiple agents, or asks compound questions that need different expertise.
+
+For complex queries, break them into independent sub-queries where each sub-query is answerable by a single agent.
+
+Format your response as:
+IsSimple: true or false
+SubQueries: sub-query 1 | sub-query 2 | sub-query 3 (use pipe separator, or just the original query if simple)
+RequiredAgents: agent1, agent2 (comma-separated list of agent names)
