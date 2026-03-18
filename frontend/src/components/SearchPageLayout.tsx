@@ -8,9 +8,7 @@ interface SearchPageLayoutProps {
   totalPages: number
   currentPage: number
   searchQuery: string
-
   onSearch: (query: string) => void
-
   onPageChange: (page: number) => void
   searchPlaceholder: string
   empty?: string
