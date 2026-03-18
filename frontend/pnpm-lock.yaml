@@ -98,8 +98,8 @@ importers:
         specifier: ^3.8.1
         version: 3.8.1
       isomorphic-dompurify:
-        specifier: ^3.4.0
-        version: 3.4.0
+        specifier: ^3.5.1
+        version: 3.5.1
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -5497,8 +5497,8 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
-  isomorphic-dompurify@3.4.0:
-    resolution: {integrity: sha512-7t7uE0FD2o4gtfn6sidW8XOYNLhg9CCQrcqIfvmTvxFjWnrax8G7NWlirZdpKsUBg/vgj7BEuty3mJVtqakSzw==}
+  isomorphic-dompurify@3.5.1:
+    resolution: {integrity: sha512-LlUCZikq/W6CmSq1UWcFLgS4nhkNBwimmVyNQtdByDffT0yVjKYef9lincZ7/ohBlknPkX1C97BBmjeNuFFR4Q==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
 
   isomorphic-fetch@3.0.0:
@@ -14275,7 +14275,7 @@ snapshots:
 
   isexe@2.0.0: {}
 
-  isomorphic-dompurify@3.4.0:
+  isomorphic-dompurify@3.5.1:
     dependencies:
       dompurify: 3.3.3
       jsdom: 29.0.0
