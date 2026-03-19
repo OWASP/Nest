@@ -5,14 +5,14 @@ import { test, expect } from '@playwright/test'
 test.describe('Projects Health Dashboard Metrics', () => {
   test('renders 404 when user is not OWASP staff', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, false)
-    await page.goto('/projects/dashboard/metrics', { timeout: 25000 })
+    await page.goto('/projects/dashboard/metrics')
     await expect(page.getByText('404')).toBeVisible()
     await expect(page.getByText("Sorry, the page you're looking for doesn't exist.")).toBeVisible()
   })
 
   test('renders page headers', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, true)
-    await page.goto('/projects/dashboard/metrics', { timeout: 25000 })
+    await page.goto('/projects/dashboard/metrics')
     await expect(page.getByRole('heading', { name: 'Project Health Metrics' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Filter By' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Score' })).toBeVisible()
@@ -20,7 +20,7 @@ test.describe('Projects Health Dashboard Metrics', () => {
 
   test('renders health metrics data', async ({ page }) => {
     await mockDashboardCookies(page, mockHealthMetricsData, true)
-    await page.goto('/projects/dashboard/metrics', { timeout: 25000 })
+    await page.goto('/projects/dashboard/metrics')
     const firstMetric = mockHealthMetricsData.projectHealthMetrics[0]
     const metricsLink = page
       .getByRole('link')

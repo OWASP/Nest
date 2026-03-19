@@ -33,7 +33,6 @@ test.describe('Organization Details Page', () => {
     await expect(
       page.locator('[data-anchor-title="true"]', { hasText: 'Recent Issues' })
     ).toBeVisible()
-    // Validate that at least one issue is listed
     const firstIssue = page.locator('div').filter({ hasText: 'Recent Issues' }).locator('a').first()
     await expect(firstIssue).toBeVisible()
   })

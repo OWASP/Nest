@@ -5,8 +5,6 @@
 .git
 .gitignore
 .local
-.next
-.pnpm-store
 .pytest_cache
 .ruff_cache
 .venv
@@ -14,13 +12,8 @@
 *.log
 *.pem
 **/__pycache__
-backend/staticfiles
+staticfiles
 build
 coverage
 dist
-docker
-Dockerfile.*
-node_modules
-**/node_modules
-npm-debug.log
 venv

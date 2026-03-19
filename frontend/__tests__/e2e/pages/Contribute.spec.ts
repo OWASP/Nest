@@ -24,8 +24,19 @@ test.describe('Contribute Page', () => {
     await expect(page.getByRole('button', { name: 'Read More' })).toBeVisible()
   })
 
+  test('displays "No Issues found" when there are no issues', async ({ page }) => {
+    await page.route('**/idx/', async (route) => {
+      await route.fulfill({
+        status: 200,
+        body: JSON.stringify({ hits: [], totalPages: 0 }),
+      })
+    })
+    await page.goto('/contribute')
+    await expect(page.getByText('No issues found')).toBeVisible()
+  })
+
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = page.getByRole('button', { name: '2' })
+    const nextPageButton = await page.getByRole('button', { name: '2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
@@ -45,25 +56,14 @@ test.describe('Contribute Page', () => {
   })
 
   test('closes dialog on close button click', async ({ page }) => {
-    const contributeButton = page.getByRole('button', { name: 'Read More' }).first()
+    const contributeButton = await page.getByRole('button', { name: 'Read More' }).first()
     await contributeButton.click()
-    const closeButton = page.getByRole('button', { name: 'close-modal' })
+    const closeButton = await page.getByRole('button', { name: 'close-modal' })
     await expect(closeButton).toBeVisible()
     await closeButton.click()
   })
 
   test('breadcrumb renders correct segments on /contribute', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Contribute'])
-  })
-
-  test('displays "No Issues found" when there are no issues', async ({ page }) => {
-    await page.route('**/idx/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({ hits: [], totalPages: 0 }),
-      })
-    })
-    await page.goto('/contribute')
-    await expect(page.getByText('No issues found')).toBeVisible()
   })
 })

@@ -58,11 +58,11 @@ const nextConfig: NextConfig = {
     ? async () => [
         {
           source: '/csrf',
-          destination: `${process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL}/csrf/`, // NOSONAR
+          destination: `${process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL}/csrf/`,
         },
         {
           source: '/graphql',
-          destination: `${process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL}/graphql/`, // NOSONAR
+          destination: `${process.env.NEXT_PUBLIC_E2E_BACKEND_BASE_URL}/graphql/`,
         },
       ]
     : undefined,

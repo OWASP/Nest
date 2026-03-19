@@ -18,7 +18,6 @@ test.describe('Home Page', () => {
 
   test('should have new chapters', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'New Chapters' })).toBeVisible()
-    // Select the first chapter link in the "New Chapters" section
     const firstChapter = page
       .locator('div')
       .filter({ hasText: 'New Chapters' })
@@ -39,7 +38,6 @@ test.describe('Home Page', () => {
 
   test('should have top contributors', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Top Contributors' })).toBeVisible()
-    // Look for the contributor grid/list
     const contributor = page.locator('img[alt*="avatar"]').first()
     await expect(contributor).toBeVisible()
   })

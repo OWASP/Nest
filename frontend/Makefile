@@ -47,8 +47,12 @@ graphql-codegen:
 init-e2e-db:
 	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
-	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
+	@DOCKER_BUILDKIT=1 docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml up \
+		--abort-on-container-exit backend cache db data-loader \
+		--build \
+		--remove-orphans
 
 lighthouse-ci:
 	@cd frontend && pnpm run lighthouse-ci
@@ -121,15 +125,23 @@ test-frontend-a11y:
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
 test-frontend-e2e-no-db-init:
-	@DOCKER_BUILDKIT=1 \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend frontend e2e-tests
+	@DOCKER_BUILDKIT=1 docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml up \
+		--abort-on-container-exit backend cache db frontend e2e-tests \
+		--build \
+		--remove-orphans
 
 test-frontend-e2e: ## Run frontend e2e tests
 test-frontend-e2e: init-e2e-db test-frontend-e2e-no-db-init
 
 test-frontend-e2e-ui-no-db-init:
-	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" \
-	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend frontend e2e-tests
+	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml up \
+		--abort-on-container-exit backend cache db frontend e2e-tests \
+		--build \
+		--remove-orphans
 
 test-frontend-e2e-ui: init-e2e-db test-frontend-e2e-ui-no-db-init
 

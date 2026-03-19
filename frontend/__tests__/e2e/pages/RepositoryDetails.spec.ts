@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Repository Details Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/organizations/OWASP/repositories/Nest', { timeout: 25000 })
+    await page.goto('/organizations/OWASP/repositories/Nest')
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -12,13 +12,8 @@ test.describe('Repository Details Page', () => {
 
   test('should have repository details block', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Repository Details' })).toBeVisible()
-
     await expect(page.getByText('License: MIT')).toBeVisible()
-
-    // Check that there is a link to the GitHub repo
     await expect(page.getByRole('link', { name: 'https://github.com/OWASP/Nest' })).toBeVisible()
-
-    // Verify "Last Updated" text is present (date will vary)
     await expect(page.getByText(/Last Updated:/i)).toBeVisible()
   })
 
@@ -57,14 +52,6 @@ test.describe('Repository Details Page', () => {
     await expect(contributor).toBeVisible()
   })
 
-  test('toggle top contributors', async ({ page }) => {
-    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
-    await page.getByRole('button', { name: 'Show more' }).last().click()
-    await expect(page.getByRole('button', { name: 'Show less' }).last()).toBeVisible()
-    await page.getByRole('button', { name: 'Show less' }).last().click()
-    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
-  })
-
   test('should have recent activity sections', async ({ page }) => {
     // Grouping activity checks as they are dynamic lists (using data-anchor-title attribute for AnchorTitle components)
     await expect(
@@ -79,5 +66,12 @@ test.describe('Repository Details Page', () => {
     await expect(
       page.locator('[data-anchor-title="true"]', { hasText: 'Recent Milestones' })
     ).toBeVisible()
+  })
+  test('toggle top contributors', async ({ page }) => {
+    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
+    await page.getByRole('button', { name: 'Show more' }).last().click()
+    await expect(page.getByRole('button', { name: 'Show less' }).last()).toBeVisible()
+    await page.getByRole('button', { name: 'Show less' }).last().click()
+    await expect(page.getByRole('button', { name: 'Show more' }).last()).toBeVisible()
   })
 })

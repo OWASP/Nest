@@ -358,13 +358,15 @@ jobs:
 
       - name: Run frontend in the background
         run: |
-          docker run -d --name e2e-nest-frontend \
-          --env-file frontend/.env.e2e.example \
-          --network host \
-          -p 3000:3000 \
-          -e NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
-          -e NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-          owasp/nest:frontend-e2e-latest
+          docker run \
+            --env-file frontend/.env.e2e.example \
+            --name e2e-nest-frontend \
+            --network host \
+            -d \
+            -e NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
+            -e NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
+            -p 3000:3000 \
+            owasp/nest:frontend-e2e-latest
 
       - name: Wait for frontend to be ready
         run: |
@@ -392,7 +394,8 @@ jobs:
 
       - name: Run frontend end-to-end tests
         run: |
-          docker run --network host \
+          docker run \
+            --network host \
             -e FRONTEND_URL=http://localhost:3000 \
             owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
     timeout-minutes: 20
