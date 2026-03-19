@@ -190,6 +190,43 @@ class TestAiHandler:
             query, images=images, channel_id=channel_id, is_app_mention=True
         )
 
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_rejects_bare_yes_no(self, mock_process_query):
+        """Reject bare YES/NO pipeline output."""
+        query = "What is OWASP?"
+        mock_process_query.return_value = "YES"
+        assert process_ai_query(query) is None
+        mock_process_query.return_value = "no"
+        assert process_ai_query(query) is None
+        mock_process_query.return_value = "No, OWASP is a foundation."
+        assert process_ai_query(query) == "No, OWASP is a foundation."
+
+    @patch("apps.ai.flows.process_query")
+    def test_process_ai_query_rejects_whitespace_only(self, mock_process_query):
+        """Whitespace-only output is None."""
+        mock_process_query.return_value = "   \n  "
+        assert process_ai_query("q") is None
+
+    @patch("apps.slack.common.handlers.ai.markdown_blocks")
+    @patch("apps.slack.common.handlers.ai.get_error_blocks")
+    @patch("apps.ai.flows.process_query")
+    def test_get_blocks_empty_after_formatting(
+        self,
+        mock_process_query,
+        mock_get_error_blocks,
+        mock_markdown_blocks,
+    ):
+        """Empty after formatting returns error blocks."""
+        mock_process_query.return_value = "```\n```"
+        err = [{"type": "section", "text": {"type": "mrkdwn", "text": "err"}}]
+        mock_get_error_blocks.return_value = err
+
+        result = get_blocks("question")
+
+        assert result == err
+        mock_get_error_blocks.assert_called_once()
+        mock_markdown_blocks.assert_not_called()
+
     @patch("apps.slack.common.handlers.ai.markdown_blocks")
     def test_get_error_blocks(self, mock_markdown_blocks):
         """Test error blocks generation."""

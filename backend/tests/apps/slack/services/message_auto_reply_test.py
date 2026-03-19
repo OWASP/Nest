@@ -94,7 +94,8 @@ class TestMessageAutoReply:
         ]
         assert len(block_posts) == 1
         assert block_posts[0].kwargs["blocks"] == response_blocks
-        assert block_posts[0].kwargs["text"] == truncate_for_slack_fallback(ai_text)
+        formatted = format_ai_response_for_slack(ai_text)
+        assert block_posts[0].kwargs["text"] == truncate_for_slack_fallback(formatted)
         assert block_posts[0].kwargs["thread_ts"] == mock_message.slack_message_id
 
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
@@ -226,3 +227,55 @@ class TestMessageAutoReply:
 
         post_texts = [c.kwargs.get("text") for c in mock_client.chat_postMessage.call_args_list]
         assert ERROR_UNABLE_TO_GENERATE_RESPONSE in post_texts
+
+    @patch.object(SlackConfig, "app")
+    @patch("apps.slack.services.message_auto_reply.Message.objects.get")
+    @patch("apps.slack.services.message_auto_reply.process_ai_query")
+    def test_generate_ai_reply_empty_after_formatting(
+        self,
+        mock_process_ai_query,
+        mock_message_get,
+        mock_app,
+        mock_message,
+    ):
+        """Whitespace-only after formatting is treated as no answer."""
+        mock_message_get.return_value = mock_message
+        mock_client = Mock()
+        mock_app.client = mock_client
+        mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
+        mock_process_ai_query.return_value = "```\n```"
+
+        generate_ai_reply_if_unanswered(mock_message.id)
+
+        post_texts = [c.kwargs.get("text") for c in mock_client.chat_postMessage.call_args_list]
+        assert ERROR_UNABLE_TO_GENERATE_RESPONSE in post_texts
+        block_posts = [
+            c for c in mock_client.chat_postMessage.call_args_list if c.kwargs.get("blocks")
+        ]
+        assert not block_posts
+
+    @patch("apps.ai.flows.process_query")
+    @patch.object(SlackConfig, "app")
+    @patch("apps.slack.services.message_auto_reply.Message.objects.get")
+    def test_generate_ai_reply_bare_yes_from_pipeline(
+        self,
+        mock_message_get,
+        mock_app,
+        mock_process_query,
+        mock_message,
+    ):
+        """Bare YES from the pipeline yields no block reply."""
+        mock_message_get.return_value = mock_message
+        mock_client = Mock()
+        mock_app.client = mock_client
+        mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
+        mock_process_query.return_value = "YES"
+
+        generate_ai_reply_if_unanswered(mock_message.id)
+
+        post_texts = [c.kwargs.get("text") for c in mock_client.chat_postMessage.call_args_list]
+        assert ERROR_UNABLE_TO_GENERATE_RESPONSE in post_texts
+        block_posts = [
+            c for c in mock_client.chat_postMessage.call_args_list if c.kwargs.get("blocks")
+        ]
+        assert not block_posts

@@ -68,15 +68,22 @@ class AppMention(EventBase):
                 timestamp=message_ts,
                 name="eyes",
             )
-        except Exception as e:
-            logger.exception(
-                "Exception while adding reaction to message",
-                extra={
-                    "channel_id": channel_id,
-                    "message_ts": message_ts,
-                    "error": str(e),
-                },
-            )
+        except SlackApiError as e:
+            err = (e.response or {}).get("error")
+            if err == "already_reacted":
+                logger.debug(
+                    "already_reacted when adding eyes to app mention",
+                    extra={"channel_id": channel_id, "message_ts": message_ts},
+                )
+            else:
+                logger.warning(
+                    "Failed to add eyes reaction to app mention",
+                    extra={
+                        "channel_id": channel_id,
+                        "message_ts": message_ts,
+                        "error": err,
+                    },
+                )
 
         slack_image_files = [
             {"url_private": image.get("url_private"), "mimetype": image.get("mimetype")}

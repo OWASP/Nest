@@ -13,11 +13,13 @@ from apps.owasp.utils.staff import get_staff_data
 from apps.slack.utils import (
     download_file,
     escape,
+    format_ai_response_for_slack,
     format_links_for_slack,
     get_posts_data,
     get_sponsors_data,
     get_text,
     strip_markdown,
+    truncate_for_slack_fallback,
 )
 
 MOCK_GSOC_PROJECTS = {
@@ -100,6 +102,23 @@ class TestFormatLinksForSlack:
     def test_format_links_for_slack(self, input_text, expected_output):
         """Test format_links_for_slack with various inputs including empty text."""
         assert format_links_for_slack(input_text) == expected_output
+
+
+class TestFormatAiResponseForSlack:
+    def test_leaves_markdown_links_to_block_builder(self):
+        raw = "See [OWASP](https://owasp.org/) for details."
+        assert format_ai_response_for_slack(raw) == raw
+
+
+class TestTruncateForSlackFallback:
+    def test_result_never_exceeds_max_len_when_tiny(self):
+        """Tiny max_len hard-truncates without overflowing."""
+        long = "abcdefghijklmnop"
+        assert len(truncate_for_slack_fallback(long, max_len=8)) == 8
+        assert truncate_for_slack_fallback(long, max_len=0) == ""
+
+    def test_default_max_keeps_full_short_string(self):
+        assert truncate_for_slack_fallback("hi") == "hi"
 
 
 class TestGetText:

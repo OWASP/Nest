@@ -112,6 +112,13 @@ class MessagePosted(EventBase):
             logger.debug("Bot mentioned in message; app_mention handler will process it.")
             return
 
+        if bot_user_id is None and "<@" in text:
+            logger.debug(
+                "Skipping deferred question path: bot user id unknown; message has mentions",
+                extra={"channel_id": channel_id},
+            )
+            return
+
         if not self.question_detector.is_owasp_question(text):
             return
 

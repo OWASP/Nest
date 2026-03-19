@@ -9,9 +9,7 @@ from apps.slack.utils import format_links_for_slack
 DIVIDER = "{{ DIVIDER }}"
 SECTION_BREAK = "{{ SECTION_BREAK }}"
 
-# Slack Block Kit: section text (mrkdwn) max length is 3000 characters.
 SLACK_SECTION_MRKDWN_MAX_CHARS = 3000
-# chat.postMessage allows at most 50 blocks per message.
 SLACK_MAX_BLOCKS_PER_MESSAGE = 50
 
 
@@ -69,31 +67,28 @@ def markdown(text: str) -> dict:
 
 
 def markdown_blocks(text: str, *, max_blocks: int = SLACK_MAX_BLOCKS_PER_MESSAGE) -> list[dict]:
-    """Return one or more section blocks, each respecting Slack's mrkdwn length limit.
-
-    Use this for AI and other user-generated content so chat.postMessage does not fail with
-    invalid_blocks (text must be < 3001 characters per section).
-
-    Args:
-        text (str): Markdown text (link conversion applied; then split for Slack).
-        max_blocks: Cap on section blocks (Slack allows at most 50 per message).
-
-    Returns:
-        list[dict]: Section blocks safe to pass to chat.postMessage.
-
-    """
+    """Section blocks with mrkdwn under Slack length limits (link conversion applied)."""
+    effective_cap = max(1, min(max_blocks, SLACK_MAX_BLOCKS_PER_MESSAGE))
     formatted = format_links_for_slack(text)
     parts = _split_mrkdwn_text(formatted)
-    if len(parts) > max_blocks:
-        parts = parts[:max_blocks]
+    if len(parts) > effective_cap:
+        parts = parts[:effective_cap]
         suffix = "\n\n_(Message truncated for Slack limits.)_"
-        room = SLACK_SECTION_MRKDWN_MAX_CHARS - len(suffix)
-        if room < 1:
-            parts[-1] = suffix.strip()
-        elif len(parts[-1]) > room:
-            parts[-1] = parts[-1][:room].rstrip() + "..." + suffix
+        ellipsis = "..."
+        tail_budget = len(ellipsis) + len(suffix)
+        room_for_prefix = SLACK_SECTION_MRKDWN_MAX_CHARS - tail_budget
+        if room_for_prefix < 1:
+            parts[-1] = (suffix.strip())[:SLACK_SECTION_MRKDWN_MAX_CHARS]
+        elif len(parts[-1]) > room_for_prefix:
+            prefix_len = max(0, room_for_prefix)
+            parts[-1] = parts[-1][:prefix_len].rstrip() + ellipsis + suffix
         else:
-            parts[-1] = parts[-1].rstrip() + suffix
+            combined = parts[-1].rstrip() + suffix
+            if len(combined) > SLACK_SECTION_MRKDWN_MAX_CHARS:
+                room = SLACK_SECTION_MRKDWN_MAX_CHARS - len(suffix)
+                parts[-1] = parts[-1][: max(0, room)].rstrip() + suffix
+            else:
+                parts[-1] = combined
 
     return [{"type": "section", "text": {"type": "mrkdwn", "text": p}} for p in parts]
 

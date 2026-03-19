@@ -73,7 +73,6 @@ def format_links_for_slack(text: str) -> str:
     return markdown_link_pattern.sub(r"<\2|\1>", text)
 
 
-# https://api.slack.com/methods/chat.postMessage — ``text`` max 40000 characters.
 SLACK_CHAT_POST_FALLBACK_TEXT_MAX = 40_000
 
 
@@ -84,66 +83,34 @@ def truncate_for_slack_fallback(
     if len(text) <= max_len:
         return text
     tail = "\n… _(truncated)_"
-    cut = max(0, max_len - len(tail))
+    if max_len <= 0:
+        return ""
+    if max_len <= len(tail):
+        return text[:max_len]
+    cut = max_len - len(tail)
     return text[:cut].rstrip() + tail
 
 
 def format_ai_response_for_slack(text: str) -> str:
-    """Format AI response text for Slack by removing code blocks and fixing markdown.
-
-    Args:
-        text (str): The AI response text that may contain markdown code blocks.
-
-    Returns:
-        str: Text formatted for Slack mrkdwn format.
-
-    """
+    """Strip code fences and inline backticks; leave markdown links for block builders."""
     if not text:
         return text
 
-    # Strip leading/trailing whitespace
     text = text.strip()
 
-    # Check if the entire response is wrapped in code blocks
-    # Pattern: starts with ``` and ends with ```
     if text.startswith("```") and text.endswith("```"):
-        # Extract content from code block wrapper
-        # Remove first ``` and optional language identifier
         text = re.sub(r"^```[\w]*\n?", "", text, count=1)
-        # Remove trailing ```
         text = re.sub(r"\n?```$", "", text)
         text = text.strip()
 
-    # Remove markdown code blocks (```language\ncode\n```) and convert to plain text
-    # This regex matches code blocks with optional language identifier
-    # Pattern: ```optional_lang\ncontent\n```
     code_block_pattern = re.compile(r"```[\w]*\n(.*?)```", re.DOTALL)
 
     def replace_code_block(match):
-        # Convert code block content to plain text
-        # This prevents Slack from rendering it as a code block
-        # Preserve Slack channel links that might be inside code blocks
         return match.group(1).strip()
 
     text = code_block_pattern.sub(replace_code_block, text)
-
-    # Remove any remaining triple backticks that might have been missed
-    # (handles edge cases where regex didn't match)
-    # Also handle cases where backticks are on separate lines
     text = re.sub(r"```+", "", text)
-
-    # Remove single backticks that might wrap inline code
-    # But preserve Slack channel/user links (format: <#...|...> or <@...|...>)
-    # Pattern: `text` but not part of Slack link syntax
-    text = re.sub(r"`([^`<]+)`", r"\1", text)
-
-    # Preserve Slack channel links (format: <#channel_id|channel_name>)
-    # These should not be modified by format_links_for_slack
-    # Convert markdown links to Slack format (but preserve existing Slack links)
-    return format_links_for_slack(text)
-
-
-# Import get_news_data and get_staff_data from owasp utils
+    return re.sub(r"`([^`<]+)`", r"\1", text)
 
 
 def get_sponsors_data(limit: int = 10) -> QuerySet | None:

@@ -19,6 +19,9 @@ from apps.slack.utils import (
 
 logger = logging.getLogger(__name__)
 
+MAX_SLACK_IMAGE_FILES = 4
+MAX_SLACK_IMAGE_BYTES = 10 * 1024 * 1024
+
 ERROR_UNABLE_TO_GENERATE_RESPONSE = (
     "⚠️ I was unable to generate a response. Please try again later."
 )
@@ -28,20 +31,86 @@ ERROR_UNEXPECTED_PROCESSING = (
 )
 
 
-def _format_response_blocks(text: str) -> list[dict]:
-    """Format final AI response as Slack blocks."""
-    return markdown_blocks(format_ai_response_for_slack(text))
+def _blocks_and_fallback_text_for_ai_reply(raw_ai_text: str) -> tuple[list[dict], str] | None:
+    """Return blocks and formatted body for chat.postMessage, or None if unusable."""
+    formatted = format_ai_response_for_slack(raw_ai_text)
+    if not formatted.strip():
+        return None
+    return markdown_blocks(formatted), formatted
+
+
+def _post_unable_to_generate_async(
+    client,
+    *,
+    channel_id: str,
+    message_ts: str | None,
+    thread_ts: str | None,
+    is_app_mention: bool,
+    user_id: str | None,
+) -> None:
+    """No-answer UX: reactions and error for mention vs slash paths."""
+    if message_ts:
+        with contextlib.suppress(SlackApiError):
+            client.reactions_remove(
+                channel=channel_id,
+                timestamp=message_ts,
+                name="eyes",
+            )
+        try:
+            client.reactions_add(
+                channel=channel_id,
+                timestamp=message_ts,
+                name="man-shrugging",
+            )
+        except SlackApiError as e:
+            if e.response.get("error") != "already_reacted":
+                logger.warning(
+                    "Failed to add no-answer reaction: %s",
+                    e.response.get("error"),
+                    extra={"channel_id": channel_id, "message_ts": message_ts},
+                )
+
+    if is_app_mention:
+        with contextlib.suppress(SlackApiError):
+            client.chat_postMessage(
+                channel=channel_id,
+                text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
+                thread_ts=thread_ts or message_ts,
+            )
+    elif user_id:
+        with contextlib.suppress(SlackApiError):
+            client.chat_postEphemeral(
+                channel=channel_id,
+                user=user_id,
+                text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
+            )
 
 
 def _slack_files_to_image_uris(client, slack_image_files: list[dict]) -> list[str] | None:
     """Download Slack-hosted files in the worker and build data URIs for vision flow."""
     uris: list[str] = []
-    for file in slack_image_files:
+    for file in slack_image_files[:MAX_SLACK_IMAGE_FILES]:
         url = file.get("url_private")
-        mime = file.get("mimetype") or "application/octet-stream"
-        if not url:
+        mime = (file.get("mimetype") or "").strip()
+        try:
+            size = int(file.get("size") or 0)
+        except (TypeError, ValueError):
+            size = 0
+        if not url or not mime.startswith("image/"):
+            continue
+        if size > MAX_SLACK_IMAGE_BYTES:
+            logger.warning(
+                "Skipping oversized Slack image for AI vision",
+                extra={"size": size, "max": MAX_SLACK_IMAGE_BYTES},
+            )
             continue
         content = download_file(url, client.token)
+        if content and len(content) > MAX_SLACK_IMAGE_BYTES:
+            logger.warning(
+                "Downloaded Slack image exceeds size cap; skipping",
+                extra={"len": len(content), "max": MAX_SLACK_IMAGE_BYTES},
+            )
+            continue
         if content:
             uris.append(f"data:{mime};base64,{base64.b64encode(content).decode()}")
     return uris or None
@@ -53,8 +122,8 @@ def _post_slash_command_dm(
     *,
     blocks: list[dict],
     fallback_text: str,
-) -> None:
-    """Post AI reply to the user's DM (matches legacy /ai private behavior)."""
+) -> bool:
+    """Post /ai reply to the user's DM. Returns False if Slack API fails."""
     try:
         conv = client.conversations_open(users=user_id)
         dm_id = conv["channel"]["id"]
@@ -63,7 +132,7 @@ def _post_slash_command_dm(
             "Failed to open DM for slash command reply",
             extra={"user_id": user_id},
         )
-        return
+        return False
     try:
         client.chat_postMessage(
             channel=dm_id,
@@ -74,6 +143,39 @@ def _post_slash_command_dm(
         logger.exception(
             "Failed to post slash command reply to DM",
             extra={"user_id": user_id},
+        )
+        return False
+    return True
+
+
+def _post_unable_to_generate_deferred(client, channel_id: str, message_ts: str) -> None:
+    """No-answer UX for delayed auto-reply path."""
+    with contextlib.suppress(SlackApiError):
+        client.reactions_remove(
+            channel=channel_id,
+            timestamp=message_ts,
+            name="eyes",
+        )
+
+    try:
+        client.reactions_add(
+            channel=channel_id,
+            timestamp=message_ts,
+            name="man-shrugging",
+        )
+    except SlackApiError as e:
+        if e.response.get("error") != "already_reacted":
+            logger.warning(
+                "Failed to add no-answer reaction: %s",
+                e.response.get("error"),
+                extra={"channel_id": channel_id, "message_ts": message_ts},
+            )
+
+    with contextlib.suppress(SlackApiError):
+        client.chat_postMessage(
+            channel=channel_id,
+            text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
+            thread_ts=message_ts,
         )
 
 
@@ -108,12 +210,19 @@ def generate_ai_reply_if_unanswered(message_id: int):
     channel_id = message.conversation.slack_channel_id
     message_ts = message.slack_message_id
 
-    with contextlib.suppress(SlackApiError):
+    try:
         client.reactions_add(
             channel=channel_id,
             timestamp=message_ts,
             name="eyes",
         )
+    except SlackApiError as e:
+        err = (e.response or {}).get("error")
+        if err != "already_reacted":
+            logger.warning(
+                "Failed to add eyes reaction on deferred reply",
+                extra={"channel_id": channel_id, "message_ts": message_ts, "error": err},
+            )
 
     thinking_ts = None
     try:
@@ -130,40 +239,19 @@ def generate_ai_reply_if_unanswered(message_id: int):
         ai_response_text = process_ai_query(query=message.text, channel_id=channel_id)
 
         if not ai_response_text:
-            with contextlib.suppress(SlackApiError):
-                client.reactions_remove(
-                    channel=channel_id,
-                    timestamp=message_ts,
-                    name="eyes",
-                )
-
-            try:
-                client.reactions_add(
-                    channel=channel_id,
-                    timestamp=message_ts,
-                    name="man-shrugging",
-                )
-            except SlackApiError as e:
-                if e.response.get("error") != "already_reacted":
-                    logger.warning(
-                        "Failed to add no-answer reaction: %s",
-                        e.response.get("error"),
-                        extra={"channel_id": channel_id, "message_ts": message_ts},
-                    )
-
-            with contextlib.suppress(SlackApiError):
-                client.chat_postMessage(
-                    channel=channel_id,
-                    text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
-                    thread_ts=message_ts,
-                )
+            _post_unable_to_generate_deferred(client, channel_id, message_ts)
             return
 
-        blocks = _format_response_blocks(ai_response_text)
+        packed = _blocks_and_fallback_text_for_ai_reply(ai_response_text)
+        if packed is None:
+            _post_unable_to_generate_deferred(client, channel_id, message_ts)
+            return
+
+        blocks, formatted_body = packed
         client.chat_postMessage(
             channel=channel_id,
             blocks=blocks,
-            text=truncate_for_slack_fallback(ai_response_text),
+            text=truncate_for_slack_fallback(formatted_body),
             thread_ts=message_ts,
         )
 
@@ -257,45 +345,43 @@ def process_ai_query_async(
         )
 
         if not ai_response_text:
-            if message_ts:
-                with contextlib.suppress(SlackApiError):
-                    client.reactions_remove(
-                        channel=channel_id,
-                        timestamp=message_ts,
-                        name="eyes",
-                    )
-                with contextlib.suppress(SlackApiError):
-                    client.reactions_add(
-                        channel=channel_id,
-                        timestamp=message_ts,
-                        name="man-shrugging",
-                    )
-
-            if is_app_mention:
-                with contextlib.suppress(SlackApiError):
-                    client.chat_postMessage(
-                        channel=channel_id,
-                        text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
-                        thread_ts=thread_ts or message_ts,
-                    )
-            elif user_id:
-                with contextlib.suppress(SlackApiError):
-                    client.chat_postEphemeral(
-                        channel=channel_id,
-                        user=user_id,
-                        text=ERROR_UNABLE_TO_GENERATE_RESPONSE,
-                    )
+            _post_unable_to_generate_async(
+                client,
+                channel_id=channel_id,
+                message_ts=message_ts,
+                thread_ts=thread_ts,
+                is_app_mention=is_app_mention,
+                user_id=user_id,
+            )
             return
 
-        blocks = _format_response_blocks(ai_response_text)
-        fallback = truncate_for_slack_fallback(ai_response_text)
+        packed = _blocks_and_fallback_text_for_ai_reply(ai_response_text)
+        if packed is None:
+            _post_unable_to_generate_async(
+                client,
+                channel_id=channel_id,
+                message_ts=message_ts,
+                thread_ts=thread_ts,
+                is_app_mention=is_app_mention,
+                user_id=user_id,
+            )
+            return
+
+        blocks, formatted_body = packed
+        fallback = truncate_for_slack_fallback(formatted_body)
         if user_id and not message_ts and not is_app_mention:
-            _post_slash_command_dm(
+            if not _post_slash_command_dm(
                 client,
                 user_id,
                 blocks=blocks,
                 fallback_text=fallback,
-            )
+            ):
+                with contextlib.suppress(SlackApiError):
+                    client.chat_postEphemeral(
+                        channel=channel_id,
+                        user=user_id,
+                        text=ERROR_POSTING_RESPONSE,
+                    )
         else:
             client.chat_postMessage(
                 channel=channel_id,
