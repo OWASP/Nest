@@ -228,7 +228,13 @@ describe('ChapterMap Refactored Tests', () => {
         expect(mockZoomControl.addTo).toHaveBeenCalledTimes(1)
       })
 
-      fireEvent.mouseLeave(container.firstChild as HTMLElement)
+      const section = container.querySelector('section')
+      const rect = section?.getBoundingClientRect() ?? { left: 0, top: 0, right: 0, bottom: 0 }
+      fireEvent.pointerLeave(section!, {
+        clientX: rect.left - 10,
+        clientY: rect.top - 10,
+        relatedTarget: null,
+      })
       await waitFor(() => {
         expect(mockZoomControl.remove).toHaveBeenCalled()
         expect(getByText('Unlock map')).toBeInTheDocument()
@@ -243,13 +249,18 @@ describe('ChapterMap Refactored Tests', () => {
       })
     })
 
-    it('locks map again on mouse leave', async () => {
+    it('locks map again on pointer leave when pointer is outside section', async () => {
       const { getByText, container } = render(<ChapterMap {...defaultProps} />)
 
       const unlockButton = getByText('Unlock map').closest('button')
       fireEvent.click(unlockButton)
-      const wrapper = container.firstChild as HTMLElement
-      fireEvent.mouseLeave(wrapper)
+      const section = container.querySelector('section')
+      const rect = section?.getBoundingClientRect() ?? { left: 0, top: 0, right: 0, bottom: 0 }
+      fireEvent.pointerLeave(section!, {
+        clientX: rect.left - 10,
+        clientY: rect.top - 10,
+        relatedTarget: null,
+      })
 
       await waitFor(() => {
         expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()

@@ -3,8 +3,8 @@ import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import L from 'leaflet'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useRef, useState, useMemo } from 'react'
-import { FaLock, FaUnlock } from 'react-icons/fa'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FaUnlock } from 'react-icons/fa'
 import { FaLocationDot } from 'react-icons/fa6'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
@@ -126,6 +126,16 @@ const MapViewUpdater = ({
   return null
 }
 
+const MapRefBridge = ({ onMap }: { onMap: (map: L.Map) => void }) => {
+  const map = useMap()
+
+  useEffect(() => {
+    onMap(map)
+  }, [map, onMap])
+
+  return null
+}
+
 const ChapterMap = ({
   geoLocData,
   showLocal,
@@ -141,6 +151,29 @@ const ChapterMap = ({
 }) => {
   const router = useRouter()
   const [isMapActive, setIsMapActive] = useState(false)
+  const sectionRef = useRef<HTMLElement | null>(null)
+  const mapRef = useRef<L.Map | null>(null)
+  const handleMap = useCallback((map: L.Map) => {
+    mapRef.current = map
+  }, [])
+
+  const handlePointerLeave = (e: React.PointerEvent<HTMLElement>) => {
+    if (!isMapActive) return
+
+    // Leaflet overlays/popups can trigger a leave-like event without the pointer
+    // truly exiting the map container (e.g. `relatedTarget` becomes null during DOM updates).
+    const rect = sectionRef.current?.getBoundingClientRect()
+    if (rect) {
+      const withinX = e.clientX >= rect.left && e.clientX <= rect.right
+      const withinY = e.clientY >= rect.top && e.clientY <= rect.bottom
+      if (withinX && withinY) return
+    }
+
+    const next = e.relatedTarget
+    if (next instanceof Node && sectionRef.current?.contains(next)) return
+
+    setIsMapActive(false)
+  }
   const validGeoLocData = useMemo(() => {
     return geoLocData.filter((chapter) => {
       const lat = chapter._geoloc?.lat ?? chapter.geoLocation?.lat
@@ -177,7 +210,13 @@ const ChapterMap = ({
   )
 
   return (
-    <section aria-label="Chapter Map" className="relative" style={style}>
+    <section
+      aria-label="Chapter Map"
+      className="relative"
+      style={style}
+      ref={sectionRef}
+      onPointerLeave={handlePointerLeave}
+    >
       <MapContainer
         center={[20, 0]}
         zoom={2}
@@ -193,6 +232,7 @@ const ChapterMap = ({
         ]}
         maxBoundsViscosity={0.5}
       >
+        <MapRefBridge onMap={handleMap} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -289,16 +329,6 @@ const ChapterMap = ({
               </Button>
             </Tooltip>
           )}
-          <Tooltip showArrow content="Lock map" placement="bottom-start">
-            <Button
-              isIconOnly
-              className="h-[30px] w-[30px] min-w-[30px] rounded-xs bg-white text-gray-700 shadow-lg outline-2 outline-gray-400 hover:bg-gray-100 dark:outline-gray-700"
-              onPress={() => setIsMapActive(false)}
-              aria-label="Lock map"
-            >
-              <FaLock size={14} />
-            </Button>
-          </Tooltip>
         </div>
       )}
     </section>
