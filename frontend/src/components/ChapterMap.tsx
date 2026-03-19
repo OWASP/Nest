@@ -128,7 +128,7 @@ const MapViewUpdater = ({
           // the map container was removed before update complite
 
   }
-   [userLocation, showLocal, validGeoLocData, map])
+  }, [userLocation, showLocal, validGeoLocData, map])
 
    return null
 }
