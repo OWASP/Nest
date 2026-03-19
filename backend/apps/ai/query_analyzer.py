@@ -20,6 +20,7 @@ AGENT_DESCRIPTIONS = {
 }
 AGENT_SEPARATOR = "| agent:"
 
+
 def create_query_analyzer_agent() -> Agent:
     """Create query analyzer agent.
 
@@ -95,7 +96,7 @@ def analyze_query(query: str) -> dict:
                 if query_part and agent_part in AGENT_DESCRIPTIONS:
                     sub_queries.append({"query": query_part, "agent": agent_part})
 
-    if not sub_queries:
+    if not is_simple and not sub_queries:
         logger.warning("Query analysis returned no valid sub-queries for: %s", query)
         sub_queries = [{"query": query, "agent": "rag"}]
 
