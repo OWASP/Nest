@@ -107,13 +107,12 @@ def process_query(  # noqa: PLR0911
 
         # TODO(rudransh-shrivastava): Use analysis results for multi-agent orchestration
         query_analysis = analyze_query(query)
-        logger.warning(
+        logger.info(
             "Query analyzed",
             extra={
                 "is_simple": query_analysis["is_simple"],
-                "sub_queries": query_analysis["sub_queries"],
-                "required_agents": query_analysis["required_agents"],
                 "query": query,
+                "sub_queries": query_analysis["sub_queries"],
             },
         )
 

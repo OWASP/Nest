@@ -13,7 +13,9 @@ A query is COMPLEX if it combines multiple topics, requires information from mul
 
 For complex queries, break them into independent sub-queries where each sub-query is answerable by a single agent.
 
+Each SubQuery line pairs a sub-query with the single best agent to handle it
+
 Format your response as:
 IsSimple: true or false
-SubQueries: sub-query 1 | sub-query 2 | sub-query 3 (use pipe separator, or just the original query if simple)
-RequiredAgents: agent1, agent2 (comma-separated list of agent names)
+SubQuery: first sub-query text | Agent: agent_name
+SubQuery: second sub-query text | Agent: agent_name

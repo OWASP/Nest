@@ -50,7 +50,7 @@ def analyze_query(query: str) -> dict:
         query (str): User's question.
 
     Returns:
-        dict: Analysis with 'is_simple', 'sub_queries', and 'required_agents'.
+        dict: Analysis with 'is_simple' and 'sub_queries' (list of dicts with 'query' and 'agent').
 
     """
     analyzer_agent = create_query_analyzer_agent()
@@ -78,8 +78,7 @@ def analyze_query(query: str) -> dict:
 
     result_str = str(result)
     is_simple = True
-    sub_queries = [query]
-    required_agents = []
+    sub_queries = []
 
     for line in result_str.split("\n"):
         line_lower = line.lower().strip()
@@ -87,22 +86,20 @@ def analyze_query(query: str) -> dict:
             with contextlib.suppress(ValueError):
                 value = line.split(":", 1)[1].strip().lower()
                 is_simple = value in ("true", "yes", "1")
-        elif line_lower.startswith("subqueries:"):
-            value = line.split(":", 1)[1].strip()
-            if value and value.lower() != "none":
-                sub_queries = [q.strip() for q in value.split("|") if q.strip()] or [query]
-        elif line_lower.startswith("requiredagents:"):
-            value = line.split(":", 1)[1].strip().lower()
-            if value and value != "none":
-                required_agents = [
-                    a.strip() for a in value.split(",") if a.strip() in AGENT_DESCRIPTIONS
-                ]
+        elif line_lower.startswith("subquery:"):
+            content = line.split(":", 1)[1].strip()
+            if "| agent:" in content.lower():
+                separator_idx = content.lower().index("| agent:")
+                query_part = content[:separator_idx].strip()
+                agent_part = content[separator_idx + len("| agent:") :].strip().lower()
+                if query_part and agent_part in AGENT_DESCRIPTIONS:
+                    sub_queries.append({"query": query_part, "agent": agent_part})
 
-    if not required_agents:
-        logger.warning("Query analysis returned no valid agents for: %s", query)
+    if not sub_queries:
+        logger.warning("Query analysis returned no valid sub-queries for: %s", query)
+        sub_queries = [{"query": query, "agent": "rag"}]
 
     return {
         "is_simple": is_simple,
         "sub_queries": sub_queries,
-        "required_agents": required_agents,
     }
