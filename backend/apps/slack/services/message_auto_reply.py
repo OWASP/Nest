@@ -1,5 +1,6 @@
 """Slack service tasks for background processing."""
 
+import base64
 import contextlib
 import logging
 
@@ -7,10 +8,14 @@ from django_rq import job
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
-from apps.slack.blocks import markdown
+from apps.slack.blocks import markdown_blocks
 from apps.slack.common.handlers.ai import process_ai_query
 from apps.slack.models import Message
-from apps.slack.utils import format_ai_response_for_slack
+from apps.slack.utils import (
+    download_file,
+    format_ai_response_for_slack,
+    truncate_for_slack_fallback,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +30,51 @@ ERROR_UNEXPECTED_PROCESSING = (
 
 def _format_response_blocks(text: str) -> list[dict]:
     """Format final AI response as Slack blocks."""
-    return [markdown(format_ai_response_for_slack(text))]
+    return markdown_blocks(format_ai_response_for_slack(text))
+
+
+def _slack_files_to_image_uris(client, slack_image_files: list[dict]) -> list[str] | None:
+    """Download Slack-hosted files in the worker and build data URIs for vision flow."""
+    uris: list[str] = []
+    for file in slack_image_files:
+        url = file.get("url_private")
+        mime = file.get("mimetype") or "application/octet-stream"
+        if not url:
+            continue
+        content = download_file(url, client.token)
+        if content:
+            uris.append(f"data:{mime};base64,{base64.b64encode(content).decode()}")
+    return uris or None
+
+
+def _post_slash_command_dm(
+    client,
+    user_id: str,
+    *,
+    blocks: list[dict],
+    fallback_text: str,
+) -> None:
+    """Post AI reply to the user's DM (matches legacy /ai private behavior)."""
+    try:
+        conv = client.conversations_open(users=user_id)
+        dm_id = conv["channel"]["id"]
+    except SlackApiError:
+        logger.exception(
+            "Failed to open DM for slash command reply",
+            extra={"user_id": user_id},
+        )
+        return
+    try:
+        client.chat_postMessage(
+            channel=dm_id,
+            blocks=blocks,
+            text=fallback_text,
+        )
+    except SlackApiError:
+        logger.exception(
+            "Failed to post slash command reply to DM",
+            extra={"user_id": user_id},
+        )
 
 
 @job("ai")
@@ -114,7 +163,7 @@ def generate_ai_reply_if_unanswered(message_id: int):
         client.chat_postMessage(
             channel=channel_id,
             blocks=blocks,
-            text=ai_response_text,
+            text=truncate_for_slack_fallback(ai_response_text),
             thread_ts=message_ts,
         )
 
@@ -170,9 +219,11 @@ def process_ai_query_async(
     channel_id: str,
     message_ts: str | None,
     thread_ts: str | None = None,
+    *,
     is_app_mention: bool = False,
     user_id: str | None = None,
     images: list[str] | None = None,
+    slack_image_files: list[dict] | None = None,
 ):
     """Process an AI query asynchronously (app mention or slash command)."""
     if not SlackConfig.app:
@@ -181,6 +232,10 @@ def process_ai_query_async(
 
     client = SlackConfig.app.client
     thinking_ts = None
+
+    image_uris = images
+    if slack_image_files:
+        image_uris = _slack_files_to_image_uris(client, slack_image_files)
 
     if message_ts:
         try:
@@ -196,7 +251,7 @@ def process_ai_query_async(
     try:
         ai_response_text = process_ai_query(
             query=query,
-            images=images,
+            images=image_uris,
             channel_id=channel_id,
             is_app_mention=is_app_mention,
         )
@@ -233,12 +288,21 @@ def process_ai_query_async(
             return
 
         blocks = _format_response_blocks(ai_response_text)
-        client.chat_postMessage(
-            channel=channel_id,
-            blocks=blocks,
-            text=ai_response_text,
-            thread_ts=thread_ts or message_ts,
-        )
+        fallback = truncate_for_slack_fallback(ai_response_text)
+        if user_id and not message_ts and not is_app_mention:
+            _post_slash_command_dm(
+                client,
+                user_id,
+                blocks=blocks,
+                fallback_text=fallback,
+            )
+        else:
+            client.chat_postMessage(
+                channel=channel_id,
+                blocks=blocks,
+                text=fallback,
+                thread_ts=thread_ts or message_ts,
+            )
 
         if message_ts:
             with contextlib.suppress(SlackApiError):

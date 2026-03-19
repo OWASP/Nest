@@ -73,6 +73,21 @@ def format_links_for_slack(text: str) -> str:
     return markdown_link_pattern.sub(r"<\2|\1>", text)
 
 
+# https://api.slack.com/methods/chat.postMessage — ``text`` max 40000 characters.
+SLACK_CHAT_POST_FALLBACK_TEXT_MAX = 40_000
+
+
+def truncate_for_slack_fallback(
+    text: str, max_len: int = SLACK_CHAT_POST_FALLBACK_TEXT_MAX
+) -> str:
+    """Truncate notification/fallback text for chat.postMessage if needed."""
+    if len(text) <= max_len:
+        return text
+    tail = "\n… _(truncated)_"
+    cut = max(0, max_len - len(tail))
+    return text[:cut].rstrip() + tail
+
+
 def format_ai_response_for_slack(text: str) -> str:
     """Format AI response text for Slack by removing code blocks and fixing markdown.
 

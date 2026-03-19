@@ -1,10 +1,11 @@
 """Slack bot AI command."""
 
+import contextlib
 import hashlib
 import logging
-import contextlib
 
 import django_rq
+from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.commands.command import CommandBase
@@ -18,6 +19,9 @@ class Ai(CommandBase):
     def handler(self, ack, command, client):
         """Handle the Slack /ai command."""
         ack()
+
+        if not settings.SLACK_COMMANDS_ENABLED:
+            return
 
         channel_id = command.get("channel_id")
         user_id = command.get("user_id")

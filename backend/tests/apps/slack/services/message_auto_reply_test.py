@@ -7,7 +7,11 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.models import Conversation, Message, Workspace
-from apps.slack.services.message_auto_reply import generate_ai_reply_if_unanswered
+from apps.slack.services.message_auto_reply import (
+    ERROR_UNABLE_TO_GENERATE_RESPONSE,
+    generate_ai_reply_if_unanswered,
+)
+from apps.slack.utils import format_ai_response_for_slack, truncate_for_slack_fallback
 
 TEST_BOT_TOKEN = "xoxb-test-token"  # noqa: S105
 
@@ -45,10 +49,10 @@ class TestMessageAutoReply:
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
-    @patch("apps.slack.services.message_auto_reply.get_blocks")
+    @patch("apps.slack.services.message_auto_reply.markdown_blocks")
     def test_generate_ai_reply_success(
         self,
-        mock_get_blocks,
+        mock_markdown_blocks,
         mock_process_ai_query,
         mock_message_get,
         mock_app,
@@ -56,16 +60,18 @@ class TestMessageAutoReply:
     ):
         """Test successful AI reply generation."""
         mock_message_get.return_value = mock_message
-        mock_process_ai_query.return_value = "OWASP is a security organization..."
-        mock_get_blocks.return_value = [
+        ai_text = "OWASP is a security organization..."
+        mock_process_ai_query.return_value = ai_text
+        response_blocks = [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "OWASP is a security organization...",
+                    "text": ai_text,
                 },
             }
         ]
+        mock_markdown_blocks.return_value = response_blocks
         mock_client = Mock()
         mock_app.client = mock_client
         mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
@@ -80,24 +86,16 @@ class TestMessageAutoReply:
         mock_process_ai_query.assert_called_once_with(
             query=mock_message.text, channel_id=mock_message.conversation.slack_channel_id
         )
-        mock_get_blocks.assert_called_once_with(
-            "OWASP is a security organization...",
-            channel_id=mock_message.conversation.slack_channel_id,
-        )
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel=mock_message.conversation.slack_channel_id,
-            blocks=[
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "OWASP is a security organization...",
-                    },
-                }
-            ],
-            text="OWASP is a security organization...",
-            thread_ts=mock_message.slack_message_id,
-        )
+        mock_markdown_blocks.assert_called_once_with(format_ai_response_for_slack(ai_text))
+        block_posts = [
+            c
+            for c in mock_client.chat_postMessage.call_args_list
+            if c.kwargs.get("blocks") is not None
+        ]
+        assert len(block_posts) == 1
+        assert block_posts[0].kwargs["blocks"] == response_blocks
+        assert block_posts[0].kwargs["text"] == truncate_for_slack_fallback(ai_text)
+        assert block_posts[0].kwargs["thread_ts"] == mock_message.slack_message_id
 
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     def test_generate_ai_reply_message_not_found(self, mock_message_get):
@@ -151,12 +149,12 @@ class TestMessageAutoReply:
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     @patch("apps.slack.services.message_auto_reply.process_ai_query")
-    @patch("apps.slack.services.message_auto_reply.get_blocks")
+    @patch("apps.slack.services.message_auto_reply.markdown_blocks")
     @patch("apps.slack.services.message_auto_reply.logger")
     def test_generate_ai_reply_slack_api_error(
         self,
         mock_logger,
-        mock_get_blocks,
+        mock_markdown_blocks,
         mock_process_ai_query,
         mock_message_get,
         mock_app,
@@ -167,13 +165,14 @@ class TestMessageAutoReply:
         mock_client = Mock()
         mock_app.client = mock_client
         mock_client.conversations_replies.side_effect = SlackApiError("API Error", response=Mock())
-        mock_process_ai_query.return_value = "OWASP is a security organization..."
-        mock_get_blocks.return_value = [
+        ai_text = "OWASP is a security organization..."
+        mock_process_ai_query.return_value = ai_text
+        mock_markdown_blocks.return_value = [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "OWASP is a security organization...",
+                    "text": ai_text,
                 },
             }
         ]
@@ -182,7 +181,7 @@ class TestMessageAutoReply:
 
         mock_logger.exception.assert_called_once_with("Error checking for replies for message")
         mock_process_ai_query.assert_called_once()
-        mock_client.chat_postMessage.assert_called_once()
+        assert mock_client.chat_postMessage.call_count >= 1
 
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
@@ -203,7 +202,8 @@ class TestMessageAutoReply:
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
-        mock_client.chat_postMessage.assert_not_called()
+        post_texts = [c.kwargs.get("text") for c in mock_client.chat_postMessage.call_args_list]
+        assert ERROR_UNABLE_TO_GENERATE_RESPONSE in post_texts
 
     @patch.object(SlackConfig, "app")
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
@@ -224,4 +224,5 @@ class TestMessageAutoReply:
 
         generate_ai_reply_if_unanswered(mock_message.id)
 
-        mock_client.chat_postMessage.assert_not_called()
+        post_texts = [c.kwargs.get("text") for c in mock_client.chat_postMessage.call_args_list]
+        assert ERROR_UNABLE_TO_GENERATE_RESPONSE in post_texts

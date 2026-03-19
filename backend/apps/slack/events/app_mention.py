@@ -1,6 +1,5 @@
 """Slack app mention event handler."""
 
-import base64
 import contextlib
 import logging
 
@@ -9,7 +8,6 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
-from apps.slack.utils import download_file
 
 logger = logging.getLogger(__name__)
 
@@ -70,25 +68,21 @@ class AppMention(EventBase):
                 timestamp=message_ts,
                 name="eyes",
             )
-        except SlackApiError as e:
-            if e.response.get("error") != "already_reacted":
-                logger.exception(
-                    "Exception while adding reaction to message",
-                    extra={
-                        "channel_id": channel_id,
-                        "message_ts": message_ts,
-                        "error": str(e),
-                    },
-                )
+        except Exception as e:
+            logger.exception(
+                "Exception while adding reaction to message",
+                extra={
+                    "channel_id": channel_id,
+                    "message_ts": message_ts,
+                    "error": str(e),
+                },
+            )
 
-        image_uris = []
-        for image in images_raw:
-            content = download_file(image.get("url_private"), client.token)
-            if content:
-                image_uri = (
-                    f"data:{image.get('mimetype')};base64,{base64.b64encode(content).decode()}"
-                )
-                image_uris.append(image_uri)
+        slack_image_files = [
+            {"url_private": image.get("url_private"), "mimetype": image.get("mimetype")}
+            for image in images_raw
+            if image.get("url_private")
+        ]
 
         try:
             from apps.slack.services.message_auto_reply import process_ai_query_async
@@ -100,7 +94,7 @@ class AppMention(EventBase):
                 message_ts=message_ts,
                 thread_ts=thread_ts,
                 is_app_mention=True,
-                images=image_uris or None,
+                slack_image_files=slack_image_files or None,
             )
         except Exception as e:
             with contextlib.suppress(SlackApiError):

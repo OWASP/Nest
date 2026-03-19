@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from apps.slack.blocks import markdown
+from apps.slack.blocks import markdown_blocks
 from apps.slack.utils import format_ai_response_for_slack
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ def get_blocks(
     if ai_response:
         # Format the AI response for Slack (remove code blocks, fix markdown)
         formatted_response = format_ai_response_for_slack(ai_response)
-        return [markdown(formatted_response)]
+        return markdown_blocks(formatted_response)
     return get_error_blocks()
 
 
@@ -77,12 +77,10 @@ def get_error_blocks() -> list[dict]:
         list: A list of Slack blocks with error message.
 
     """
-    return [
-        markdown(
-            "⚠️ Unfortunately, I'm unable to answer your question at this time.\n"
-            "Please try again later or contact support if the issue persists."
-        )
-    ]
+    return markdown_blocks(
+        "⚠️ Unfortunately, I'm unable to answer your question at this time.\n"
+        "Please try again later or contact support if the issue persists."
+    )
 
 
 def get_default_response() -> str:

@@ -18,13 +18,13 @@ class MessagePosted(EventBase):
     """Handles new messages posted in channels."""
 
     event_type = "message"
-    _bot_user_id_by_team = {}
+    _bot_user_id_by_team: dict[str, str] = {}
 
     def __init__(self):
         """Initialize MessagePosted event handler."""
         self.question_detector = QuestionDetector()
 
-    def handle_event(self, event, client):
+    def handle_event(self, event, client):  # noqa: PLR0911
         """Handle an incoming message event."""
         if event.get("subtype") or event.get("bot_id"):
             logger.info("Ignored message due to subtype or bot_id.")
@@ -75,7 +75,7 @@ class MessagePosted(EventBase):
                     "Failed to get bot user ID from Slack API",
                     extra={"channel_id": channel_id, "team_id": team_id},
                 )
-                return
+                bot_user_id = None
 
         if bot_user_id:
             try:
