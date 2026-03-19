@@ -34,7 +34,7 @@ services:
       - 8000:8000
     volumes:
       - ../../backend:/home/owasp
-      - backend-venv:/home/owasp/.venv
+      - backend-venv-nestbot:/home/owasp/.venv
 
   cache:
     command: >
@@ -53,7 +53,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - cache-data:/data
+      - cache-data-nestbot:/data
 
   db:
     container_name: nest-db
@@ -70,13 +70,13 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data-nestbot:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
     command: >
       sh -c '
-        mkdocs serve -a 0.0.0.0:8002
+        mkdocs serve -a 0.0.0.0:8002 -f .mkdocs.yaml
       '
     build:
       context: ../../
@@ -87,6 +87,11 @@ services:
       - 8002:8002
     volumes:
       - ../../docs:/home/owasp/docs
+      - ../../backend:/home/owasp/backend:ro
+      - ../../frontend:/home/owasp/frontend:ro
+      - ../../README.md:/home/owasp/README.md:ro
+      - ../../CODE_OF_CONDUCT.md:/home/owasp/CODE_OF_CONDUCT.md:ro
+      - ../../CONTRIBUTING.md:/home/owasp/CONTRIBUTING.md:ro
       - docs-venv:/home/owasp/.venv
 
   frontend:
@@ -179,9 +184,9 @@ networks:
   nest-network:
 
 volumes:
-  backend-venv:
-  cache-data:
-  db-data:
+  backend-venv-nestbot:
+  cache-data-nestbot:
+  db-data-nestbot:
   docs-venv:
   frontend-next:
   frontend-node-modules:

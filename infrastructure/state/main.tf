@@ -1,13 +1,13 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.7.2"
+      version = "~> 3.8.0"
     }
   }
 }
@@ -24,8 +24,10 @@ locals {
 module "kms" {
   source = "../modules/kms"
 
-  common_tags  = local.common_tags
-  environment  = "state"
+  alias_name   = "alias/${var.project_name}-${each.key}-state"
+  for_each     = local.state_environments
+  common_tags  = merge(local.common_tags, { Environment = each.key })
+  environment  = "${each.key}-state"
   project_name = var.project_name
 }
 
@@ -84,33 +86,6 @@ data "aws_iam_policy_document" "state_https_only" {
       identifiers = ["*"]
       type        = "AWS"
     }
-  }
-}
-
-resource "aws_dynamodb_table" "state_lock" {
-  for_each = local.state_environments
-
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-  name         = "${var.project_name}-${each.key}-terraform-state-lock"
-  tags = merge(local.common_tags, {
-    Environment = each.key
-    Name        = "${var.project_name}-${each.key}-terraform-state-lock"
-  })
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-  lifecycle {
-    prevent_destroy = true
-  }
-  point_in_time_recovery {
-    enabled = true
-  }
-  server_side_encryption {
-    enabled     = true
-    kms_key_arn = module.kms.key_arn
   }
 }
 
@@ -235,7 +210,7 @@ resource "aws_s3_bucket_object_lock_configuration" "state" {
 
   bucket = aws_s3_bucket.state[each.key].id
 
-  depends_on = [aws_s3_bucket_versioning.state[each.key]]
+  depends_on = [aws_s3_bucket_versioning.state]
 
   rule {
     default_retention {
@@ -262,7 +237,6 @@ resource "aws_s3_bucket_public_access_block" "state" {
   restrict_public_buckets = true
 }
 
-#trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
   for_each = local.state_environments
 
@@ -270,7 +244,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      kms_master_key_id = module.kms[each.key].key_arn
+      sse_algorithm     = "aws:kms"
     }
   }
 }

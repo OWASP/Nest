@@ -64,6 +64,7 @@ frontend/yarn-error.log*
 logs
 node_modules/
 semgrep-security-report.txt
+site/
 TODO
 venv/
 zap.yaml

@@ -122,6 +122,24 @@ lint.per-file-ignores."tests/**/*.py" = [
   "SLF001",  # https://docs.astral.sh/ruff/rules/private-member-access/
 ]
 
+[tool.mypy]
+explicit_package_bases = true
+ignore_missing_imports = true
+mypy_path = "backend"
+plugins = [ "strawberry.ext.mypy_plugin" ]
+
+[[tool.mypy.overrides]]
+disable_error_code = [ "attr-defined" ]
+module = [ "apps.*.models.mixins.*", "apps.*.admin.*" ]
+
+[[tool.mypy.overrides]]
+disable_error_code = [ "var-annotated" ]
+module = [ "apps.*.migrations.*" ]
+
+[[tool.mypy.overrides]]
+disable_error_code = [ "return-value", "attr-defined", "misc" ]
+module = [ "apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*" ]
+
 [tool.pytest]
 ini_options.DJANGO_CONFIGURATION = "Test"
 ini_options.DJANGO_SETTINGS_MODULE = "settings.test"
@@ -155,24 +173,6 @@ run.omit = [
   "tests/*",
   "wsgi.py",
 ]
-
-[tool.mypy]
-explicit_package_bases = true
-ignore_missing_imports = true
-mypy_path = "backend"
-plugins = [ "strawberry.ext.mypy_plugin" ]
-
-[[tool.mypy.overrides]]
-disable_error_code = [ "attr-defined" ]
-module = [ "apps.*.models.mixins.*", "apps.*.admin.*" ]
-
-[[tool.mypy.overrides]]
-disable_error_code = [ "var-annotated" ]
-module = [ "apps.*.migrations.*" ]
-
-[[tool.mypy.overrides]]
-disable_error_code = [ "return-value", "attr-defined", "misc" ]
-module = [ "apps.*.api.internal.queries.*", "apps.*.api.internal.nodes.*" ]
 
 [tool.djlint]
 format = true

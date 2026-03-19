@@ -72,7 +72,17 @@ class MemberFilter(FilterSchema):
 def list_members(
     request: HttpRequest,
     filters: MemberFilter = Query(...),
-    ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
+    ordering: Literal[
+        "created_at",
+        "-created_at",
+        "updated_at",
+        "-updated_at",
+        "name",
+        "-name",
+        "login",
+        "-login",
+    ]
+    | None = Query(
         None,
         description="Ordering field",
     ),

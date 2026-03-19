@@ -7,8 +7,8 @@ const defaultProps = {
   key: 'test-snapshot-1',
   title: 'Test Snapshot',
   button: { label: 'Open', onclick: jest.fn() },
-  startAt: '2025-01-01T00:00:00Z',
-  endAt: '2025-01-10T00:00:00Z',
+  startAt: '2025-01-01T00:00:00.000Z',
+  endAt: '2025-01-10T00:00:00.000Z',
 }
 
 describe.each([

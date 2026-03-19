@@ -1,3 +1,2 @@
 bucket         = "REPLACE_WITH_TF_STATE_BUCKET_NAME"
-dynamodb_table = "nest-bootstrap-terraform-state-lock"
 region         = "us-east-2"

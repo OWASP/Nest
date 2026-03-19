@@ -30,13 +30,6 @@ export const exploreCards = [
     color: 'text-gray-900 dark:text-gray-100',
   },
   {
-    title: 'Organizations',
-    description: 'Browse OWASP organizations and their work.',
-    href: '/organizations',
-    icon: FaBuilding,
-    color: 'text-gray-900 dark:text-gray-100',
-  },
-  {
     title: 'Members',
     description: 'Meet the people behind OWASP.',
     href: '/members',
@@ -44,9 +37,16 @@ export const exploreCards = [
     color: 'text-gray-900 dark:text-gray-100',
   },
   {
-    title: 'Contribute',
-    description: 'Find issues and start contributing today.',
-    href: '/contribute',
+    title: 'Organizations',
+    description: 'Browse OWASP organizations.',
+    href: '/organizations',
+    icon: FaBuilding,
+    color: 'text-gray-900 dark:text-gray-100',
+  },
+  {
+    title: 'Snapshots',
+    description: 'View community snapshots.',
+    href: '/community/snapshots',
     icon: FaHandshakeAngle,
     color: 'text-gray-900 dark:text-gray-100',
   },

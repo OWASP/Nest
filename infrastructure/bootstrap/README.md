@@ -21,6 +21,7 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
    "Sid": "S3StateAccess",
    "Effect": "Allow",
    "Action": [
+    "s3:DeleteObject",
     "s3:GetObject",
     "s3:ListBucket",
     "s3:PutObject"
@@ -29,17 +30,6 @@ Use the following inline permissions for the `nest-bootstrap` IAM User
     "arn:aws:s3:::nest-bootstrap-terraform-state-*",
     "arn:aws:s3:::nest-bootstrap-terraform-state-*/*"
    ]
-  },
-  {
-   "Sid": "DynamoDBStateLocking",
-   "Effect": "Allow",
-   "Action": [
-    "dynamodb:DeleteItem",
-    "dynamodb:DescribeTable",
-    "dynamodb:GetItem",
-    "dynamodb:PutItem"
-   ],
-   "Resource": "arn:aws:dynamodb:*:AWS_ACCOUNT_ID:table/nest-bootstrap-terraform-state-lock"
   },
   {
    "Sid": "IAMManagement",
