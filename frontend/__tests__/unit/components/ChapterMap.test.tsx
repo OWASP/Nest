@@ -273,12 +273,22 @@ describe('ChapterMap Refactored Tests', () => {
       const { getByText, queryByText, container } = render(<ChapterMap {...defaultProps} />)
 
       fireEvent.click(getByText('Unlock map').closest('button'))
-      const section = container.querySelector('section')
-      const rect = section?.getBoundingClientRect() ?? { left: 0, top: 0, right: 0, bottom: 0 }
+      const section = container.querySelector('section') as HTMLElement
+      jest.spyOn(section, 'getBoundingClientRect').mockReturnValue({
+        x: 100,
+        y: 100,
+        left: 100,
+        top: 100,
+        right: 300,
+        bottom: 300,
+        width: 200,
+        height: 200,
+        toJSON: () => {},
+      } as DOMRect)
 
-      fireEvent.pointerLeave(section!, {
-        clientX: rect.left + 10,
-        clientY: rect.top + 10,
+      fireEvent.pointerLeave(section, {
+        clientX: 150,
+        clientY: 150,
         relatedTarget: null,
       })
 
