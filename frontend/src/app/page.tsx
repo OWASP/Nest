@@ -378,7 +378,7 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
-        <div className="grid lg:gap-6 lg:grid-cols-5">
+        <div className="grid lg:grid-cols-5 lg:gap-6">
           {counterData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
