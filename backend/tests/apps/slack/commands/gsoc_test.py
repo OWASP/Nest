@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.conf import settings
+from django.test import override_settings
 
 from apps.slack.blocks import markdown
 from apps.slack.commands.gsoc import Gsoc
@@ -32,18 +32,20 @@ class TestGsocCommand:
                 "invalid",
                 "*`/gsoc invalid` is not supported",
             ),
-            (True, "2011", "Year 2011 is not supported. Supported years: 2012-2025"),
+            (True, "2011", "Year 2011 is not supported. Supported years: 2012-2026"),
         ],
     )
     def test_handler_responses(
         self, commands_enabled, command_text, expected_message, mock_slack_client
     ):
-        settings.SLACK_COMMANDS_ENABLED = commands_enabled
         command = {"text": command_text, "user_id": "U123456"}
 
-        with patch(
-            "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
-            new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
+        with (
+            override_settings(SLACK_COMMANDS_ENABLED=commands_enabled),
+            patch(
+                "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
+                new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
+            ),
         ):
             ack = MagicMock()
             Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
@@ -67,6 +69,7 @@ class TestGsocCommand:
                 else:
                     assert any(expected_message in text for text in block_texts)
 
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
     def test_handler_with_projects(self, mock_slack_client):
         mock_projects = [
             {
@@ -75,7 +78,6 @@ class TestGsocCommand:
             }
         ]
         command = {"text": "2024", "user_id": "U123456"}
-        settings.SLACK_COMMANDS_ENABLED = True
         with patch(
             "apps.owasp.utils.gsoc.get_gsoc_projects",
             return_value=mock_projects,
@@ -91,3 +93,26 @@ class TestGsocCommand:
             assert (
                 "<https://owasp.org/www-project-bug-logging-tool/|Test Project>" in project_block
             )
+
+    @override_settings(SLACK_COMMANDS_ENABLED=True)
+    def test_handler_with_2026_projects(self, mock_slack_client):
+        mock_projects = [
+            {
+                "name": "Test Project 2026",
+                "url": "https://owasp.org/www-project-test/",
+            }
+        ]
+        command = {"text": "2026", "user_id": "U123456"}
+        with patch(
+            "apps.owasp.utils.gsoc.get_gsoc_projects",
+            return_value=mock_projects,
+        ):
+            ack = MagicMock()
+            Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
+
+            ack.assert_called_once()
+
+            blocks = mock_slack_client.chat_postMessage.call_args[1]["blocks"]
+            project_block = str(blocks[0])
+
+            assert "<https://owasp.org/www-project-test/|Test Project 2026>" in project_block

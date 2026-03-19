@@ -4,7 +4,7 @@ from http import HTTPStatus
 from typing import Literal
 
 from django.http import HttpRequest
-from ninja import Path, Query, Schema
+from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
@@ -54,6 +54,16 @@ class EventError(Schema):
     message: str
 
 
+class EventFilter(LocationFilter):
+    """Filter for Event."""
+
+    category: list[EventModel.Category] | None = Field(
+        None,
+        description="Filter events by category",
+        q="category__in",
+    )
+
+
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP events.",
@@ -64,7 +74,7 @@ class EventError(Schema):
 @decorate_view(cache_response())
 def list_events(
     request: HttpRequest,
-    filters: LocationFilter = Query(...),
+    filters: EventFilter = Query(...),
     ordering: Literal[
         "start_date",
         "-start_date",
@@ -86,12 +96,11 @@ def list_events(
     ),
 ) -> list[Event]:
     """Get list of events."""
-    if is_upcoming:
-        return filters.filter(
-            EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
-        )
-
-    return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
+    return filters.filter(
+        EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
+        if is_upcoming
+        else EventModel.objects.order_by(ordering or "-start_date", "-end_date")
+    )
 
 
 @router.get(

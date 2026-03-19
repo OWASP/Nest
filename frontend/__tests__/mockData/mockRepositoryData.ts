@@ -1,7 +1,7 @@
 export const mockRepositoryData = {
   repository: {
     name: 'Test Repo',
-    updatedAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
     license: 'MIT',
     size: 1200,
     url: 'https://github.com/test-repo',
@@ -13,11 +13,11 @@ export const mockRepositoryData = {
     languages: ['JavaScript', 'TypeScript'],
     topics: ['web', 'security'],
     description: 'A sample test repository',
-    createdAt: '2023-12-15T00:00:00Z',
+    createdAt: '2023-12-15T00:00:00.000Z',
     issues: [
       {
         title: 'Bug fix required',
-        createdAt: '2024-01-02T10:00:00Z',
+        createdAt: '2024-01-02T10:00:00.000Z',
         repositoryName: 'test-repo-2',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar.jpg',
@@ -35,7 +35,7 @@ export const mockRepositoryData = {
         name: 'v1.0.0',
         tagName: 'v1.0.0',
         isPreRelease: false,
-        publishedAt: '2024-01-01T12:00:00Z',
+        publishedAt: '2024-01-01T12:00:00.000Z',
         author: {
           avatarUrl: 'https://avatars.githubusercontent.com/avatar.jpg',
           name: 'Test User 2',
@@ -55,7 +55,7 @@ export const mockRepositoryData = {
         closedIssuesCount: 15,
         repositoryName: 'Repo One',
         organizationName: 'OWASP',
-        createdAt: '2025-03-01T10:00:00Z',
+        createdAt: '2025-03-01T11:00:00.000Z',
         url: 'https://github.com/OWASP/repo-one/milestone/1',
       },
     ],
@@ -64,7 +64,7 @@ export const mockRepositoryData = {
     {
       id: 'mock-repo-pr-1',
       title: 'Test Pull Request 1',
-      createdAt: 1727390000,
+      createdAt: '2024-09-26T22:33:20.000Z',
       url: 'https://github.com/test-org/test-repo-1/pull/1',
       author: {
         login: 'user1',
@@ -74,7 +74,7 @@ export const mockRepositoryData = {
     {
       id: 'mock-repo-pr-2',
       title: 'Test Pull Request 2',
-      createdAt: 1727380000,
+      createdAt: '2024-09-26T19:46:40.000Z',
       url: 'https://github.com/test-org/test-repo-2/pull/2',
       author: {
         login: 'user2',

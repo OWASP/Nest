@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    corepack enable && corepack install && \
+    corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts && \
     chown node:node /app
 

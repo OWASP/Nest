@@ -70,6 +70,10 @@ jest.mock('next-auth/react', () => ({
   useSession: jest.fn(() => ({ data: null, status: 'unauthenticated' })),
 }))
 
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(() => [jest.fn()]),
+}))
+
 const mockHealthMetricsData = [
   {
     ageDays: 365,
@@ -184,8 +188,8 @@ describe.each([
             name: 'Intro to Web',
             description: 'A beginner friendly module.',
             experienceLevel: ExperienceLevelEnum.Beginner,
-            startedAt: '2025-01-01',
-            endedAt: '2025-03-01',
+            startedAt: 1735689600, // 2025-01-01
+            endedAt: 1740787200, // 2025-03-01
             mentors: [
               {
                 id: 'mentor-mentor1',

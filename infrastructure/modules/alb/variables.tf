@@ -36,10 +36,21 @@ variable "frontend_port" {
   }
 }
 
-variable "lambda_function_name" {
-  description = "The name of the Lambda function for backend routing."
+variable "backend_health_check_path" {
+  description = "The health check path for the backend target group."
   type        = string
-  default     = null
+  default     = "/status/"
+}
+
+variable "backend_port" {
+  description = "The port for the backend target group."
+  type        = number
+  default     = 8000
+
+  validation {
+    condition     = var.backend_port > 0 && var.backend_port < 65536
+    error_message = "Port must be between 1 and 65535."
+  }
 }
 
 variable "log_retention_days" {
@@ -56,6 +67,11 @@ variable "project_name" {
 variable "public_subnet_ids" {
   description = "A list of public subnet IDs for the ALB."
   type        = list(string)
+
+  validation {
+    condition     = length(var.public_subnet_ids) > 0
+    error_message = "public_subnet_ids must contain at least one subnet."
+  }
 }
 
 variable "vpc_id" {

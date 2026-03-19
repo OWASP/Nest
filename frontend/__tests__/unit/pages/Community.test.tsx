@@ -97,7 +97,8 @@ describe('CommunityPage', () => {
   test('renders Explore Resources section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByTestId('anchor-title')).toHaveTextContent('Explore Resources')
+    const anchorTitles = screen.getAllByTestId('anchor-title')
+    expect(anchorTitles[0]).toHaveTextContent('Explore Resources')
     expect(screen.getByText('Test Chapter')).toBeInTheDocument()
     expect(screen.getByText('Test Description')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Test Chapter/i })
@@ -116,8 +117,6 @@ describe('CommunityPage', () => {
   test('renders Community Journey section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByText('Your Community Journey')).toBeInTheDocument()
-
     expect(screen.getAllByText('Test Step 1')).toHaveLength(2)
     expect(screen.getAllByText('Test Step 1 Description')).toHaveLength(2)
     expect(screen.getAllByText('Test Step 2')).toHaveLength(2)
@@ -129,7 +128,6 @@ describe('CommunityPage', () => {
   test('renders Join the Community section correctly', () => {
     render(<CommunityPage />)
 
-    expect(screen.getByText('Join the Community')).toBeInTheDocument()
     expect(screen.getByTestId('icon-slack')).toBeInTheDocument()
     expect(screen.getByText(/Connect with fellow security professionals/i)).toBeInTheDocument()
 

@@ -526,11 +526,13 @@ jest.mock('components/ModuleCard', () => ({
     modules,
     accessLevel: _accessLevel,
     admins: _admins,
+    programKey: _programKey,
     ...props
   }: {
     modules: unknown[]
     accessLevel: string
     admins?: unknown[]
+    programKey?: string
     [key: string]: unknown
   }) => (
     <div data-testid="module-card" {...props}>
@@ -729,7 +731,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       body: 'Milestone description',
       closedIssuesCount: 5,
-      createdAt: new Date(Date.now() - 2592000000).toISOString(),
+      createdAt: '2023-01-01T00:00:00.000Z',
       openIssuesCount: 2,
       repositoryName: 'test-repo',
       state: 'open',
@@ -1953,7 +1955,7 @@ describe('CardDetailsPage', () => {
           author: mockUser,
           body: `Milestone description ${i + 1}`,
           closedIssuesCount: 5,
-          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          createdAt: Math.floor((Date.now() - 10000000) / 1000),
           openIssuesCount: 2,
           repositoryName: `test-repo-${i}`,
           organizationName: 'test-org',

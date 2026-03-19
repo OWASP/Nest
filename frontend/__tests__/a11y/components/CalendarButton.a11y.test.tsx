@@ -8,8 +8,8 @@ const mockEvent = {
   title: 'Test Event',
   description: 'Test description',
   location: 'Test Location',
-  startDate: '2025-12-01',
-  endDate: '2025-12-02',
+  startDate: '2025-12-01T00:00:00Z', // 2025-12-01
+  endDate: '2025-12-02T00:00:00Z', // 2025-12-02
 }
 
 describe.each([
