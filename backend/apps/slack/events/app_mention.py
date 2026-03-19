@@ -1,12 +1,13 @@
 """Slack app mention event handler."""
 
-import base64
+import contextlib
 import logging
 
-from apps.slack.common.handlers.ai import get_blocks
+import django_rq
+from slack_sdk.errors import SlackApiError
+
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
-from apps.slack.utils import download_file
 
 logger = logging.getLogger(__name__)
 
@@ -62,55 +63,71 @@ class AppMention(EventBase):
         message_ts = event.get("ts")
 
         try:
-            result = client.reactions_add(
+            client.reactions_add(
                 channel=channel_id,
                 timestamp=message_ts,
                 name="eyes",
             )
-            if result.get("ok"):
-                logger.info("Successfully added 👀 reaction to message")
+        except SlackApiError as e:
+            err = (e.response or {}).get("error")
+            if err == "already_reacted":
+                logger.debug(
+                    "already_reacted when adding eyes to app mention",
+                    extra={"channel_id": channel_id, "message_ts": message_ts},
+                )
             else:
-                error = result.get("error")
-                # Handle common errors gracefully
-                if error == "already_reacted":
-                    logger.debug("Reaction already exists on message")
-                else:
-                    logger.warning(
-                        "Failed to add reaction: %s",
-                        error,
-                        extra={
-                            "channel_id": channel_id,
-                            "message_ts": message_ts,
-                            "response": result,
-                        },
-                    )
+                logger.warning(
+                    "Failed to add eyes reaction to app mention",
+                    extra={
+                        "channel_id": channel_id,
+                        "message_ts": message_ts,
+                        "error": err,
+                    },
+                )
 
+        slack_image_files = [
+            {"url_private": image.get("url_private"), "mimetype": image.get("mimetype")}
+            for image in images_raw
+            if image.get("url_private")
+        ]
+
+        try:
+            from apps.slack.services.message_auto_reply import process_ai_query_async
+
+            django_rq.get_queue("ai").enqueue(
+                process_ai_query_async,
+                query=query,
+                channel_id=channel_id,
+                message_ts=message_ts,
+                thread_ts=thread_ts,
+                is_app_mention=True,
+                slack_image_files=slack_image_files or None,
+            )
         except Exception as e:
+            with contextlib.suppress(SlackApiError):
+                client.reactions_remove(
+                    channel=channel_id,
+                    timestamp=message_ts,
+                    name="eyes",
+                )
+
+            with contextlib.suppress(SlackApiError):
+                client.chat_postMessage(
+                    channel=channel_id,
+                    text=(
+                        "⚠️ An error occurred while processing your query. Please try again later."
+                    ),
+                    thread_ts=thread_ts or message_ts,
+                )
+
             logger.exception(
-                "Exception while adding reaction to message",
+                "Failed to enqueue AI query processing",
                 extra={
                     "channel_id": channel_id,
                     "message_ts": message_ts,
+                    "thread_ts": thread_ts,
+                    "query": query[:100],
                     "error": str(e),
                 },
             )
-
-        image_uris = []
-        for image in images_raw:
-            content = download_file(image.get("url_private"), client.token)
-            if content:
-                image_uri = (
-                    f"data:{image.get('mimetype')};base64,{base64.b64encode(content).decode()}"
-                )
-                image_uris.append(image_uri)
-
-        # Get AI response and post it.
-        reply_blocks = get_blocks(
-            query=query, images=image_uris, channel_id=channel_id, is_app_mention=True
-        )
-        client.chat_postMessage(
-            channel=channel_id,
-            blocks=reply_blocks,
-            text=query,
-            thread_ts=thread_ts,
-        )
+            raise
