@@ -1,9 +1,12 @@
 """Slack app mention event handler."""
 
 import base64
+import contextlib
 import logging
 
-from apps.slack.common.handlers.ai import get_blocks
+import django_rq
+from slack_sdk.errors import SlackApiError
+
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
 from apps.slack.utils import download_file
@@ -62,38 +65,21 @@ class AppMention(EventBase):
         message_ts = event.get("ts")
 
         try:
-            result = client.reactions_add(
+            client.reactions_add(
                 channel=channel_id,
                 timestamp=message_ts,
                 name="eyes",
             )
-            if result.get("ok"):
-                logger.info("Successfully added 👀 reaction to message")
-            else:
-                error = result.get("error")
-                # Handle common errors gracefully
-                if error == "already_reacted":
-                    logger.debug("Reaction already exists on message")
-                else:
-                    logger.warning(
-                        "Failed to add reaction: %s",
-                        error,
-                        extra={
-                            "channel_id": channel_id,
-                            "message_ts": message_ts,
-                            "response": result,
-                        },
-                    )
-
-        except Exception as e:
-            logger.exception(
-                "Exception while adding reaction to message",
-                extra={
-                    "channel_id": channel_id,
-                    "message_ts": message_ts,
-                    "error": str(e),
-                },
-            )
+        except SlackApiError as e:
+            if e.response.get("error") != "already_reacted":
+                logger.exception(
+                    "Exception while adding reaction to message",
+                    extra={
+                        "channel_id": channel_id,
+                        "message_ts": message_ts,
+                        "error": str(e),
+                    },
+                )
 
         image_uris = []
         for image in images_raw:
@@ -104,13 +90,43 @@ class AppMention(EventBase):
                 )
                 image_uris.append(image_uri)
 
-        # Get AI response and post it.
-        reply_blocks = get_blocks(
-            query=query, images=image_uris, channel_id=channel_id, is_app_mention=True
-        )
-        client.chat_postMessage(
-            channel=channel_id,
-            blocks=reply_blocks,
-            text=query,
-            thread_ts=thread_ts,
-        )
+        try:
+            from apps.slack.services.message_auto_reply import process_ai_query_async
+
+            django_rq.get_queue("ai").enqueue(
+                process_ai_query_async,
+                query=query,
+                channel_id=channel_id,
+                message_ts=message_ts,
+                thread_ts=thread_ts,
+                is_app_mention=True,
+                images=image_uris or None,
+            )
+        except Exception as e:
+            with contextlib.suppress(SlackApiError):
+                client.reactions_remove(
+                    channel=channel_id,
+                    timestamp=message_ts,
+                    name="eyes",
+                )
+
+            with contextlib.suppress(SlackApiError):
+                client.chat_postMessage(
+                    channel=channel_id,
+                    text=(
+                        "⚠️ An error occurred while processing your query. Please try again later."
+                    ),
+                    thread_ts=thread_ts or message_ts,
+                )
+
+            logger.exception(
+                "Failed to enqueue AI query processing",
+                extra={
+                    "channel_id": channel_id,
+                    "message_ts": message_ts,
+                    "thread_ts": thread_ts,
+                    "query": query[:100],
+                    "error": str(e),
+                },
+            )
+            raise
