@@ -378,7 +378,7 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
-        <div className="grid gap-6 lg:grid-cols-5">
+        <div className="grid lg:gap-6 lg:grid-cols-5">
           {counterData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
@@ -391,7 +391,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-8 mb-20">
+        <div className="mb-20">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
