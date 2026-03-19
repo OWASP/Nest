@@ -49,7 +49,7 @@ jobs:
           python-version: '3.13'
 
       - name: Set up pre-commit cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -156,7 +156,7 @@ jobs:
         run: make security-scan-code-semgrep
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -646,7 +646,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -1251,7 +1251,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
