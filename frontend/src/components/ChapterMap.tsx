@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import L from 'leaflet'
 import { useRouter } from 'next/navigation'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FaUnlock } from 'react-icons/fa'
 import { FaLocationDot } from 'react-icons/fa6'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
@@ -126,16 +126,6 @@ const MapViewUpdater = ({
   return null
 }
 
-const MapRefBridge = ({ onMap }: { onMap: (map: L.Map) => void }) => {
-  const map = useMap()
-
-  useEffect(() => {
-    onMap(map)
-  }, [map, onMap])
-
-  return null
-}
-
 const ChapterMap = ({
   geoLocData,
   showLocal,
@@ -152,10 +142,6 @@ const ChapterMap = ({
   const router = useRouter()
   const [isMapActive, setIsMapActive] = useState(false)
   const sectionRef = useRef<HTMLElement | null>(null)
-  const mapRef = useRef<L.Map | null>(null)
-  const handleMap = useCallback((map: L.Map) => {
-    mapRef.current = map
-  }, [])
 
   const handlePointerLeave = (e: React.PointerEvent<HTMLElement>) => {
     if (!isMapActive) return
@@ -232,7 +218,6 @@ const ChapterMap = ({
         ]}
         maxBoundsViscosity={0.5}
       >
-        <MapRefBridge onMap={handleMap} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

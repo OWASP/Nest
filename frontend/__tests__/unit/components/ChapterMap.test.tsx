@@ -268,6 +268,26 @@ describe('ChapterMap Refactored Tests', () => {
         expect(getByText('Unlock map')).toBeInTheDocument()
       })
     })
+
+    it('keeps map unlocked when pointer leave fires but pointer is still inside section bounds', async () => {
+      const { getByText, queryByText, container } = render(<ChapterMap {...defaultProps} />)
+
+      fireEvent.click(getByText('Unlock map').closest('button'))
+      const section = container.querySelector('section')
+      const rect = section?.getBoundingClientRect() ?? { left: 0, top: 0, right: 0, bottom: 0 }
+
+      fireEvent.pointerLeave(section!, {
+        clientX: rect.left + 10,
+        clientY: rect.top + 10,
+        relatedTarget: null,
+      })
+
+      await waitFor(() => {
+        expect(queryByText('Unlock map')).not.toBeInTheDocument()
+      })
+      expect(mockMap.scrollWheelZoom.disable).not.toHaveBeenCalled()
+      expect(mockZoomControl.remove).not.toHaveBeenCalled()
+    })
   })
 
   describe('MapViewUpdater Logic', () => {
