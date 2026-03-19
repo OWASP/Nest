@@ -18,7 +18,7 @@ AGENT_DESCRIPTIONS = {
     "project": "Finds OWASP projects by topic, maturity level, or specific needs",
     "rag": "Searches OWASP documentation, policies, and repositories for general information",
 }
-
+AGENT_SEPARATOR = "| agent:"
 
 def create_query_analyzer_agent() -> Agent:
     """Create query analyzer agent.
@@ -88,10 +88,10 @@ def analyze_query(query: str) -> dict:
                 is_simple = value in ("true", "yes", "1")
         elif line_lower.startswith("subquery:"):
             content = line.split(":", 1)[1].strip()
-            if "| agent:" in content.lower():
-                separator_idx = content.lower().index("| agent:")
+            if AGENT_SEPARATOR in content.lower():
+                separator_idx = content.lower().index(AGENT_SEPARATOR)
                 query_part = content[:separator_idx].strip()
-                agent_part = content[separator_idx + len("| agent:") :].strip().lower()
+                agent_part = content[separator_idx + len(AGENT_SEPARATOR) :].strip().lower()
                 if query_part and agent_part in AGENT_DESCRIPTIONS:
                     sub_queries.append({"query": query_part, "agent": agent_part})
 
