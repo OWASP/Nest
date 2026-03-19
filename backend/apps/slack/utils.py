@@ -73,18 +73,21 @@ def format_links_for_slack(text: str) -> str:
     return markdown_link_pattern.sub(r"<\2|\1>", text)
 
 
-def format_ai_response_for_slack(text: str) -> str:
-    """Format AI response text for Slack by removing code blocks and fixing markdown.
+def format_ai_response_for_slack(text: str | None) -> str:
+    """Format AI response text for Slack (code fences, inline backticks).
+
+    Markdown [label](url) link conversion is applied in markdown() via
+    format_links_for_slack so it runs once per block.
 
     Args:
-        text (str): The AI response text that may contain markdown code blocks.
+        text (str | None): Raw model or user text (None treated as empty).
 
     Returns:
-        str: Text formatted for Slack mrkdwn format.
+        str: Text prepared for Slack mrkdwn section bodies.
 
     """
     if not text:
-        return text
+        return ""
 
     # Strip leading/trailing whitespace
     text = text.strip()
@@ -120,12 +123,9 @@ def format_ai_response_for_slack(text: str) -> str:
     # Remove single backticks that might wrap inline code
     # But preserve Slack channel/user links (format: <#...|...> or <@...|...>)
     # Pattern: `text` but not part of Slack link syntax
-    text = re.sub(r"`([^`<]+)`", r"\1", text)
-
-    # Preserve Slack channel links (format: <#channel_id|channel_name>)
-    # These should not be modified by format_links_for_slack
-    # Convert markdown links to Slack format (but preserve existing Slack links)
-    return format_links_for_slack(text)
+    # Link conversion is applied in markdown() / format_links_for_slack once per block
+    # to avoid double-processing when this output flows into Slack section blocks.
+    return re.sub(r"`([^`<]+)`", r"\1", text)
 
 
 # Import get_news_data and get_staff_data from owasp utils
