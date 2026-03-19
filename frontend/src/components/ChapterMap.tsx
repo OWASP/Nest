@@ -179,7 +179,7 @@ const ChapterMap = ({
   return (
     <section
       aria-label="Chapter Map"
-      className="relative"
+      className="relative overflow-hidden rounded-lg"
       style={style}
       onMouseLeave={() => setIsMapActive(false)}
     >
