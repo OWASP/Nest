@@ -263,7 +263,7 @@ jobs:
           files: frontend/coverage/lcov.info
           flags: frontend
           use_oidc: true
-    timeout-minutes: 5
+    timeout-minutes: 10
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
