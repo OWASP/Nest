@@ -8,7 +8,7 @@ from apps.ai.flows.collaborative import handle_collaborative_query
 class TestHandleCollaborativeQuery:
     """Test cases for handle_collaborative_query."""
 
-    @patch("apps.ai.flows.collaborative.get_fallback_response")
+    @patch("apps.ai.common.utils.get_fallback_response")
     @patch("apps.ai.flows.collaborative.env")
     @patch("apps.ai.flows.collaborative.create_synthesizer_agent")
     @patch("apps.ai.flows.collaborative.get_intent_to_agent_map")
