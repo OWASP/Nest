@@ -128,8 +128,8 @@ importers:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       posthog-js:
-        specifier: ^1.362.0
-        version: 1.362.0
+        specifier: ^1.363.1
+        version: 1.363.1
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -358,8 +358,8 @@ packages:
     resolution: {integrity: sha512-2SZFvqMyvboVV1d15lMf7XiI3m7SDqXUuKaTymJYLN6dSGadqp+fVojqJlVoMlbZnlTmu3S0TLwLTJpvBMO1Aw==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
 
-  '@asamuzakjp/dom-selector@7.0.3':
-    resolution: {integrity: sha512-Q6mU0Z6bfj6YvnX2k9n0JxiIwrCFN59x/nWmYQnAqP000ruX/yV+5bp/GRcF5T8ncvfwJQ7fgfP74DlpKExILA==}
+  '@asamuzakjp/dom-selector@7.0.4':
+    resolution: {integrity: sha512-jXR6x4AcT3eIrS2fSNAwJpwirOkGcd+E7F7CP3zjdTqz9B/2huHOL8YJZBgekKwLML+u7qB/6P1LXQuMScsx0w==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
 
   '@asamuzakjp/nwsapi@2.3.9':
@@ -2329,11 +2329,11 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@posthog/core@1.24.0':
-    resolution: {integrity: sha512-Wkp9mgNfgdf6+G4C1VMKakm2RXKQFf4bb5/CPQRAjpqv9l6BY36zZrD1+X5Y2XIAzZqbMKRxsDu3V1r6uKu7/A==}
+  '@posthog/core@1.24.1':
+    resolution: {integrity: sha512-e8AciAnc6MRFws89ux8lJKFAaI03yEon0ASDoUO7yS91FVqbUGXYekObUUR3LHplcg+pmyiJBI0jolY0SFbGRA==}
 
-  '@posthog/types@1.362.0':
-    resolution: {integrity: sha512-15wOI5uulkfzpkSQKVN4atZecAla2Hxr8IBIB8islqDvqY+42vbR+tMeDKMman9+FUoAqMzE0OnB8VIbM1QY0w==}
+  '@posthog/types@1.363.1':
+    resolution: {integrity: sha512-bFYk5XHgYEfVhQU0AwkG9MbMqq9QRbKDDJxOtYWGJ6Uw+/nLRNs/ZydXy3aMt0ldIdkNzZq+qaJ/p2Jg0+mP8g==}
 
   '@prisma/instrumentation@7.4.2':
     resolution: {integrity: sha512-r9JfchJF1Ae6yAxcaLu/V1TGqBhAuSDe3mRNOssBfx1rMzfZ4fdNvrgUBwyb/TNTGXFxlH9AZix5P257x07nrg==}
@@ -5731,8 +5731,8 @@ packages:
       canvas:
         optional: true
 
-  jsdom@29.0.0:
-    resolution: {integrity: sha512-9FshNB6OepopZ08unmmGpsF7/qCjxGPbo3NbgfJAnPeHXnsODE9WWffXZtRFRFe0ntzaAOcSKNJFz8wiyvF1jQ==}
+  jsdom@29.0.1:
+    resolution: {integrity: sha512-z6JOK5gRO7aMybVq/y/MlIpKh8JIi68FBKMUtKkK2KH/wMSRlCxQ682d08LB9fYXplyY/UXG8P4XXTScmdjApg==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
     peerDependencies:
       canvas: ^3.0.0
@@ -6514,8 +6514,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  posthog-js@1.362.0:
-    resolution: {integrity: sha512-qPHkAk9G19xVDAQLoQ1FOLNE9BBq+FDePhkOevbdUQcFJVNHVc+j7E/ndQ+olGnDuiSMdgAb5c6yGk7PD9Z0ug==}
+  posthog-js@1.363.1:
+    resolution: {integrity: sha512-iaDtRxCs/FiB+RXe83uo7RZXgpLlyB6qFoNHl3bNMgRCgrPI2nkzx2m9Va1l30HHl/zA1kPOXSy2/tZC5Ql5kg==}
 
   preact-render-to-string@5.2.6:
     resolution: {integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw==}
@@ -7266,8 +7266,8 @@ packages:
   tldts-core@6.1.86:
     resolution: {integrity: sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==}
 
-  tldts-core@7.0.26:
-    resolution: {integrity: sha512-5WJ2SqFsv4G2Dwi7ZFVRnz6b2H1od39QME1lc2y5Ew3eWiZMAeqOAfWpRP9jHvhUl881406QtZTODvjttJs+ew==}
+  tldts-core@7.0.27:
+    resolution: {integrity: sha512-YQ7uPjgWUibIK6DW5lrKujGwUKhLevU4hcGbP5O6TcIUb+oTjJYJVWPS4nZsIHrEEEG6myk/oqAJUEQmpZrHsg==}
 
   tldts-icann@6.1.86:
     resolution: {integrity: sha512-NFxmRT2lAEMcCOBgeZ0NuM0zsK/xgmNajnY6n4S1mwAKocft2s2ise1O3nQxrH3c+uY6hgHUV9GGNVp7tUE4Sg==}
@@ -7276,8 +7276,8 @@ packages:
     resolution: {integrity: sha512-WMi/OQ2axVTf/ykqCQgXiIct+mSQDFdH2fkwhPwgEwvJ1kSzZRiinb0zF2Xb8u4+OqPChmyI6MEu4EezNJz+FQ==}
     hasBin: true
 
-  tldts@7.0.26:
-    resolution: {integrity: sha512-WiGwQjr0qYdNNG8KpMKlSvpxz652lqa3Rd+/hSaDcY4Uo6SKWZq2LAF+hsAhUewTtYhXlorBKgNF3Kk8hnjGoQ==}
+  tldts@7.0.27:
+    resolution: {integrity: sha512-I4FZcVFcqCRuT0ph6dCDpPuO4Xgzvh+spkcTr1gK7peIvxWauoloVO0vuy1FQnijT63ss6AsHB6+OIM4aXHbPg==}
     hasBin: true
 
   tmp@0.0.33:
@@ -7468,8 +7468,8 @@ packages:
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
-  undici@7.24.4:
-    resolution: {integrity: sha512-BM/JzwwaRXxrLdElV2Uo6cTLEjhSb3WXboncJamZ15NgUURmvlXvxa6xkwIOILIjPNo9i8ku136ZvWV0Uly8+w==}
+  undici@7.24.5:
+    resolution: {integrity: sha512-3IWdCpjgxp15CbJnsi/Y9TCDE7HWVN19j1hmzVhoAkY/+CJx449tVxT5wZc1Gwg8J+P0LWvzlBzxYRnHJ+1i7Q==}
     engines: {node: '>=20.18.1'}
 
   unique-string@2.0.0:
@@ -7840,7 +7840,7 @@ snapshots:
       '@csstools/css-tokenizer': 4.0.0
       lru-cache: 11.2.7
 
-  '@asamuzakjp/dom-selector@7.0.3':
+  '@asamuzakjp/dom-selector@7.0.4':
     dependencies:
       '@asamuzakjp/nwsapi': 2.3.9
       bidi-js: 1.0.3
@@ -10588,11 +10588,11 @@ snapshots:
     dependencies:
       playwright: 1.58.2
 
-  '@posthog/core@1.24.0':
+  '@posthog/core@1.24.1':
     dependencies:
       cross-spawn: 7.0.6
 
-  '@posthog/types@1.362.0': {}
+  '@posthog/types@1.363.1': {}
 
   '@prisma/instrumentation@7.4.2(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -14275,7 +14275,7 @@ snapshots:
   isomorphic-dompurify@3.5.1:
     dependencies:
       dompurify: 3.3.3
-      jsdom: 29.0.0
+      jsdom: 29.0.1
     transitivePeerDependencies:
       - '@noble/hashes'
       - canvas
@@ -14735,10 +14735,10 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  jsdom@29.0.0:
+  jsdom@29.0.1:
     dependencies:
       '@asamuzakjp/css-color': 5.0.1
-      '@asamuzakjp/dom-selector': 7.0.3
+      '@asamuzakjp/dom-selector': 7.0.4
       '@bramus/specificity': 2.4.2
       '@csstools/css-syntax-patches-for-csstree': 1.1.1(css-tree@3.2.1)
       '@exodus/bytes': 1.15.0
@@ -14752,7 +14752,7 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 6.0.1
-      undici: 7.24.4
+      undici: 7.24.5
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -15498,15 +15498,15 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  posthog-js@1.362.0:
+  posthog-js@1.363.1:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.208.0
       '@opentelemetry/exporter-logs-otlp-http': 0.208.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.6.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-logs': 0.208.0(@opentelemetry/api@1.9.0)
-      '@posthog/core': 1.24.0
-      '@posthog/types': 1.362.0
+      '@posthog/core': 1.24.1
+      '@posthog/types': 1.363.1
       core-js: 3.49.0
       dompurify: 3.3.3
       fflate: 0.4.8
@@ -16360,7 +16360,7 @@ snapshots:
 
   tldts-core@6.1.86: {}
 
-  tldts-core@7.0.26: {}
+  tldts-core@7.0.27: {}
 
   tldts-icann@6.1.86:
     dependencies:
@@ -16370,9 +16370,9 @@ snapshots:
     dependencies:
       tldts-core: 6.1.86
 
-  tldts@7.0.26:
+  tldts@7.0.27:
     dependencies:
-      tldts-core: 7.0.26
+      tldts-core: 7.0.27
 
   tmp@0.0.33:
     dependencies:
@@ -16398,7 +16398,7 @@ snapshots:
 
   tough-cookie@6.0.1:
     dependencies:
-      tldts: 7.0.26
+      tldts: 7.0.27
 
   tr46@0.0.3: {}
 
@@ -16558,7 +16558,7 @@ snapshots:
 
   undici-types@7.18.2: {}
 
-  undici@7.24.4: {}
+  undici@7.24.5: {}
 
   unique-string@2.0.0:
     dependencies:
