@@ -78,18 +78,30 @@ def process_query(  # noqa: PLR0911
                 query = f"{query}{DELIMITER}Image context: {image_context}"
 
         # Step 1: Analyze query complexity before routing
-        query_analysis = analyze_query(query)
-        logger.info(
-            "Query analyzed",
-            extra={
-                "is_simple": query_analysis["is_simple"],
-                "query": query,
-                "sub_queries": query_analysis["sub_queries"],
-            },
-        )
+        try:
+            query_analysis = analyze_query(query)
+            logger.info(
+                "Query analyzed",
+                extra={
+                    "is_simple": query_analysis["is_simple"],
+                    "query": query,
+                    "sub_queries": query_analysis["sub_queries"],
+                },
+            )
+        except Exception:
+            logger.exception("Query Analyzer failed, falling back to single agent: %s", query)
+            query_analysis = {"is_simple": True, "sub_queries": []}
 
         # Step 2: Use collaborative flow for complex query
-        if not query_analysis["is_simple"] and len(query_analysis["sub_queries"]) > 1:
+        if (
+            not query_analysis["is_simple"]
+            and len(query_analysis["sub_queries"]) > 1
+            and (
+                channel_id
+                and normalize_channel_id(channel_id)
+                != normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
+            )
+        ):
             try:
                 return handle_collaborative_query(query, query_analysis["sub_queries"])
             except Exception:

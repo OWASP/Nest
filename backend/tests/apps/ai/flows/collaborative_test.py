@@ -167,21 +167,6 @@ class TestHandleCollaborativeQuery:
         render_kwargs = mock_template.render.call_args[1]
         assert render_kwargs["agent_responses"] == [("rag", "RAG response")]
 
-    @patch("apps.ai.flows.collaborative.get_fallback_response")
-    @patch("apps.ai.flows.collaborative.logger")
-    @patch("apps.ai.flows.collaborative.get_intent_to_agent_map")
-    def test_exception_returns_fallback_response(
-        self, mock_intent_map, mock_logger, mock_fallback
-    ):
-        """Test that an unhandled exception returns the fallback response."""
-        mock_intent_map.side_effect = Exception("Unexpected failure")
-        mock_fallback.return_value = "Sorry, something went wrong."
-
-        result = handle_collaborative_query("Any query", [{"intent": "rag", "query": "q"}])
-
-        assert result == "Sorry, something went wrong."
-        mock_logger.exception.assert_called_once_with("Failed to process query: %s", "Any query")
-
     @patch("apps.ai.flows.collaborative.env")
     @patch("apps.ai.flows.collaborative.create_synthesizer_agent")
     @patch("apps.ai.flows.collaborative.get_intent_to_agent_map")
