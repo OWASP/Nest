@@ -97,8 +97,8 @@ def process_query(  # noqa: PLR0911
             not query_analysis["is_simple"]
             and len(query_analysis["sub_queries"]) > 1
             and (
-                channel_id
-                and normalize_channel_id(channel_id)
+                not channel_id
+                or normalize_channel_id(channel_id)
                 != normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
             )
         ):
