@@ -10,10 +10,10 @@ from crewai import Agent, Crew, Task
 from apps.ai.agents.channel import create_channel_agent
 from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
 from apps.ai.common.intent import Intent
+from apps.ai.common.utils import get_fallback_response, get_intent_to_agent_map
 from apps.ai.flows.collaborative import handle_collaborative_query
 from apps.ai.query_analyzer import analyze_query
 from apps.ai.router import route
-from apps.ai.utils import get_fallback_response, get_intent_to_agent_map
 from apps.common.open_ai import OpenAi
 from apps.slack.constants import (
     OWASP_COMMUNITY_CHANNEL_ID,
