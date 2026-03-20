@@ -2,7 +2,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.api.internal.queries.project import ProjectQuery
 from apps.owasp.models.project import Project
@@ -148,10 +147,23 @@ class TestIsProjectLeaderResolution:
     def mock_info(self):
         return Mock()
 
-    def test_is_project_leader_user_not_found(self, mock_info):
-        """Test is_project_leader returns False when user doesn't exist."""
-        with patch("apps.owasp.api.internal.queries.project.GithubUser.objects.get") as mock_get:
-            mock_get.side_effect = GithubUser.DoesNotExist
+    def test_is_project_leader_returns_true_for_exact_login(self, mock_info):
+        """Test is_project_leader returns True for exact login match."""
+        with patch("apps.owasp.api.internal.queries.project.Project.objects.filter") as mock_filter:
+            mock_filter.return_value.exists.return_value = True
+
+            query = ProjectQuery()
+            result = query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="anurag"
+            )
+
+            assert result
+            mock_filter.assert_called_once_with(leaders__login__iexact="anurag")
+
+    def test_is_project_leader_returns_false_for_non_leader(self, mock_info):
+        """Test is_project_leader returns False when login has no matching leader."""
+        with patch("apps.owasp.api.internal.queries.project.Project.objects.filter") as mock_filter:
+            mock_filter.return_value.exists.return_value = False
 
             query = ProjectQuery()
             result = query.__class__.__dict__["is_project_leader"](
@@ -160,46 +172,37 @@ class TestIsProjectLeaderResolution:
 
             assert not result
 
-    def test_is_project_leader_user_is_leader(self, mock_info):
-        """Test is_project_leader returns True when user is a leader."""
-        mock_user = Mock()
-        mock_user.login = "testuser"
-        mock_user.name = "Test User"
+    def test_is_project_leader_no_substring_false_positive(self, mock_info):
+        """Test that 'devanurag' does not match a project led by 'anurag'."""
+        def filter_side_effect(**kwargs):
+            mock_qs = Mock()
+            login_filter = kwargs.get("leaders__login__iexact", "")
+            # Simulate DB: only "anurag" is a leader, not "devanurag"
+            mock_qs.exists.return_value = login_filter.lower() == "anurag"
+            return mock_qs
 
-        with (
-            patch(
-                "apps.owasp.api.internal.queries.project.GithubUser.objects.get"
-            ) as mock_get_user,
-            patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
+        with patch(
+            "apps.owasp.api.internal.queries.project.Project.objects.filter",
+            side_effect=filter_side_effect,
         ):
-            mock_get_user.return_value = mock_user
+            query = ProjectQuery()
+
+            assert query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="anurag"
+            )
+            assert not query.__class__.__dict__["is_project_leader"](
+                query, info=mock_info, login="devanurag"
+            )
+
+    def test_is_project_leader_case_insensitive(self, mock_info):
+        """Test that login matching is case-insensitive."""
+        with patch("apps.owasp.api.internal.queries.project.Project.objects.filter") as mock_filter:
             mock_filter.return_value.exists.return_value = True
 
             query = ProjectQuery()
             result = query.__class__.__dict__["is_project_leader"](
-                query, info=mock_info, login="testuser"
+                query, info=mock_info, login="ANURAG"
             )
 
             assert result
-
-    def test_is_project_leader_user_not_leader(self, mock_info):
-        """Test is_project_leader returns False when user is not a leader."""
-        mock_user = Mock()
-        mock_user.login = "testuser"
-        mock_user.name = "Test User"
-
-        with (
-            patch(
-                "apps.owasp.api.internal.queries.project.GithubUser.objects.get"
-            ) as mock_get_user,
-            patch("apps.owasp.models.project.Project.objects.filter") as mock_filter,
-        ):
-            mock_get_user.return_value = mock_user
-            mock_filter.return_value.exists.return_value = False
-
-            query = ProjectQuery()
-            result = query.__class__.__dict__["is_project_leader"](
-                query, info=mock_info, login="testuser"
-            )
-
-            assert not result
+            mock_filter.assert_called_once_with(leaders__login__iexact="ANURAG")

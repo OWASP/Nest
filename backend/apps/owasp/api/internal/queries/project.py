@@ -2,10 +2,8 @@
 
 import strawberry
 import strawberry_django
-from django.db.models import Q
 
 from apps.common.utils import normalize_limit
-from apps.github.models.user import User as GithubUser
 from apps.owasp.api.internal.nodes.project import ProjectNode
 from apps.owasp.models.project import Project
 
@@ -68,13 +66,5 @@ class ProjectQuery:
 
     @strawberry_django.field
     def is_project_leader(self, info: strawberry.Info, login: str) -> bool:
-        """Check if a GitHub login or name is listed as a project leader."""
-        try:
-            github_user = GithubUser.objects.get(login=login)
-        except GithubUser.DoesNotExist:
-            return False
-
-        return Project.objects.filter(
-            Q(leaders_raw__icontains=github_user.login)
-            | Q(leaders_raw__icontains=(github_user.name or ""))
-        ).exists()
+        """Check if a GitHub login is listed as a project leader."""
+        return Project.objects.filter(leaders__login__iexact=login).exists()
