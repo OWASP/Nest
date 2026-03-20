@@ -1055,6 +1055,7 @@ jobs:
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
             --services "$SERVICE_NAME"
+    timeout-minutes: 60
 
   run-staging-lighthouse-ci:
     name: Run staging Lighthouse CI
