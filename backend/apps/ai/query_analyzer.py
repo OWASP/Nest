@@ -5,20 +5,13 @@ import logging
 
 from crewai import Agent, Crew, Task
 
+from apps.ai.common.intent import Intent
 from apps.ai.common.llm_config import get_llm
 from apps.ai.template_loader import env
 
 logger = logging.getLogger(__name__)
 
-AGENT_DESCRIPTIONS = {
-    "channel": "Routes users to appropriate Slack channels for their questions",
-    "chapter": "Finds OWASP chapters, chapter leaders, and chapter activities worldwide",
-    "community": "Finds community leaders, committees, and entity Slack channels",
-    "contribution": "Helps find contribution opportunities and GSoC program information",
-    "project": "Finds OWASP projects by topic, maturity level, or specific needs",
-    "rag": "Searches OWASP documentation, policies, and repositories for general information",
-}
-AGENT_SEPARATOR = "| agent:"
+INTENT_SEPARATOR = "| intent:"
 
 
 def create_query_analyzer_agent() -> Agent:
@@ -35,7 +28,7 @@ def create_query_analyzer_agent() -> Agent:
             "agents, and decompose complex queries into sub-queries when needed."
         ),
         backstory=env.get_template("query_analyzer/backstory.jinja")
-        .render(agent_names=", ".join(AGENT_DESCRIPTIONS))  # nosemgrep: direct-use-of-jinja2
+        .render(intent_names=", ".join(Intent.values()))  # nosemgrep: direct-use-of-jinja2
         .strip(),
         llm=get_llm(),
         verbose=True,
@@ -51,15 +44,15 @@ def analyze_query(query: str) -> dict:
         query (str): User's question.
 
     Returns:
-        dict: Analysis with 'is_simple' and 'sub_queries' (list of dicts with 'query' and 'agent').
+        dict: Analysis with 'is_simple' and 'sub_queries'
+        (list of dicts with 'query' and 'intent').
 
     """
     analyzer_agent = create_query_analyzer_agent()
 
     task_template = env.get_template("query_analyzer/tasks/analyze.jinja")
-    agents = [{"name": name, "description": desc} for name, desc in AGENT_DESCRIPTIONS.items()]
     task_description = task_template.render(  # nosemgrep: direct-use-of-jinja2
-        query=query, agents=agents
+        query=query, intents=Intent.descriptions()
     ).strip()
 
     analysis_task = Task(
@@ -89,16 +82,16 @@ def analyze_query(query: str) -> dict:
                 is_simple = value in ("true", "yes", "1")
         elif line_lower.startswith("subquery:"):
             content = line.split(":", 1)[1].strip()
-            if AGENT_SEPARATOR in content.lower():
-                separator_idx = content.lower().index(AGENT_SEPARATOR)
+            if INTENT_SEPARATOR in content.lower():
+                separator_idx = content.lower().index(INTENT_SEPARATOR)
                 query_part = content[:separator_idx].strip()
-                agent_part = content[separator_idx + len(AGENT_SEPARATOR) :].strip().lower()
-                if query_part and agent_part in AGENT_DESCRIPTIONS:
-                    sub_queries.append({"query": query_part, "agent": agent_part})
+                intent_part = content[separator_idx + len(INTENT_SEPARATOR) :].strip().lower()
+                if query_part and intent_part in Intent.values():
+                    sub_queries.append({"query": query_part, "intent": intent_part})
 
     if not is_simple and not sub_queries:
         logger.warning("Query analysis returned no valid sub-queries for: %s", query)
-        sub_queries = [{"query": query, "agent": "rag"}]
+        sub_queries = [{"query": query, "intent": Intent.RAG.value}]
 
     return {
         "is_simple": is_simple,

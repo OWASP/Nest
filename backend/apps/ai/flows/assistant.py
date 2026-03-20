@@ -90,6 +90,17 @@ def process_query(  # noqa: PLR0911
             if image_context:
                 query = f"{query}{DELIMITER}Image context: {image_context}"
 
+        # TODO(rudransh-shrivastava): Use analysis results for multi-agent orchestration
+        query_analysis = analyze_query(query)
+        logger.info(
+            "Query analyzed",
+            extra={
+                "is_simple": query_analysis["is_simple"],
+                "query": query,
+                "sub_queries": query_analysis["sub_queries"],
+            },
+        )
+
         # Step 1: Route to appropriate expert agent
         router_result = route(query)
         intent = router_result["intent"]
@@ -102,17 +113,6 @@ def process_query(  # noqa: PLR0911
                 "confidence": confidence,
                 "query": query,
                 "channel_id": channel_id,
-            },
-        )
-
-        # TODO(rudransh-shrivastava): Use analysis results for multi-agent orchestration
-        query_analysis = analyze_query(query)
-        logger.info(
-            "Query analyzed",
-            extra={
-                "is_simple": query_analysis["is_simple"],
-                "query": query,
-                "sub_queries": query_analysis["sub_queries"],
             },
         )
 
