@@ -5,8 +5,8 @@ from __future__ import annotations
 import logging
 
 from apps.ai.agents.synthesizer import create_synthesizer_agent
+from apps.ai.common.utils import get_fallback_response, get_intent_to_agent_map
 from apps.ai.template_loader import env
-from apps.ai.utils import get_fallback_response, get_intent_to_agent_map
 
 logger = logging.getLogger(__name__)
 
