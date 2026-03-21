@@ -16,6 +16,7 @@ class Command(BaseCommand):
             "forks_count": "forks_count",
             "is_funding_requirements_compliant": "is_funding_requirements_compliant",
             "is_leader_requirements_compliant": "is_leader_requirements_compliant",
+            "is_level_non_compliant": "is_level_non_compliant",
             "last_committed_at": "pushed_at",
             "last_released_at": "released_at",
             "open_issues_count": "open_issues_count",
