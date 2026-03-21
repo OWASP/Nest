@@ -41,6 +41,7 @@ def sync_repository(
         tuple: A tuple containing the updated organization and repository instances.
 
     """
+    one_year_ago = timezone.now() - td(days=365)
     entity_key = gh_repository.name.lower()
     is_owasp_site_repository = check_owasp_site_repository(entity_key)
 
@@ -76,11 +77,13 @@ def sync_repository(
             "state": "all",
         }
 
-        until = (
+        latest = (
             latest_updated_milestone.updated_at
             if (latest_updated_milestone := repository.latest_updated_milestone)
-            else timezone.now() - td(days=30)
+            else None
         )
+
+        until = max(latest or one_year_ago, one_year_ago)
 
         for gh_milestone in gh_repository.get_milestones(**kwargs):
             if gh_milestone.updated_at < until:
@@ -102,7 +105,6 @@ def sync_repository(
 
         # GitHub repository issues.
         project_track_issues = repository.project.track_issues if repository.project else True
-        month_ago = timezone.now() - td(days=30)
 
         if repository.track_issues and project_track_issues:
             kwargs = {
@@ -110,11 +112,14 @@ def sync_repository(
                 "sort": "updated",
                 "state": "all",
             }
-            until = (
+            latest = (
                 latest_updated_issue.updated_at
                 if (latest_updated_issue := repository.latest_updated_issue)
-                else month_ago
+                else None
             )
+
+            until = max(latest or one_year_ago, one_year_ago)
+
             for gh_issue in gh_repository.get_issues(**kwargs):
                 if gh_issue.pull_request:  # Skip pull requests.
                     continue
@@ -161,11 +166,14 @@ def sync_repository(
             "sort": "updated",
             "state": "all",
         }
-        until = (
+        latest = (
             latest_updated_pull_request.updated_at
             if (latest_updated_pull_request := repository.latest_updated_pull_request)
-            else month_ago
+            else None
         )
+
+        until = max(latest or one_year_ago, one_year_ago)
+
         for gh_pull_request in gh_repository.get_pulls(**kwargs):
             if gh_pull_request.updated_at < until:
                 break
