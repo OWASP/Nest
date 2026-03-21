@@ -179,7 +179,7 @@ const ChapterMap = ({
   return (
     <section
       aria-label="Chapter Map"
-      className="relative"
+      className="relative isolate z-0 overflow-hidden rounded-lg bg-slate-200 dark:bg-[#1a1a1a]"
       style={style}
       onMouseLeave={() => setIsMapActive(false)}
     >
@@ -187,7 +187,7 @@ const ChapterMap = ({
         center={[20, 0]}
         zoom={2}
         scrollWheelZoom={isMapActive}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', outline: 'none', background: 'transparent' }}
         zoomControl={false}
         minZoom={1}
         maxZoom={18}
