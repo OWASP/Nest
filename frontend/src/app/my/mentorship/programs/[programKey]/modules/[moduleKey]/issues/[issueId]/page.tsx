@@ -6,11 +6,14 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { hasExtendedUser } from 'types/auth'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import { LabelList } from 'components/LabelList'
@@ -22,8 +25,13 @@ import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
+  const { data: session, status } = useSession()
   const [showAllPRs, setShowAllPRs] = useState(false)
   const { programKey, moduleKey, issueId } = params
+
+  const userName = hasExtendedUser(session) ? session.user.login : undefined
+  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
+  const isMentor = hasExtendedUser(session) ? session.user.isMentor : undefined
 
   const formatDeadline = (deadline: string | null) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
@@ -70,7 +78,7 @@ const ModuleIssueDetailsPage = () => {
   }
   const { data, loading, error } = useQuery(GetModuleIssueViewDocument, {
     variables: { programKey, moduleKey, number: Number(issueId) },
-    skip: !issueId,
+    skip: !issueId || !userName || (!isProjectLeader && !isMentor),
     fetchPolicy: 'cache-first',
     nextFetchPolicy: 'cache-and-network',
   })
@@ -100,10 +108,26 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
+  if (status === 'loading') {
+    return <LoadingSpinner />
+  }
+
+  if (!isProjectLeader && !isMentor) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Only project leaders and mentors can access this page."
+      />
+    )
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
   }
-  if (loading) return <LoadingSpinner />
   if (!issue)
     return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
 

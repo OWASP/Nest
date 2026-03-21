@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { handleAppError } from 'app/global-error'
 import IssuesPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/page'
 
@@ -14,11 +15,15 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
 }))
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(),
+}))
 
 const mockUseQuery = useQuery as unknown as jest.Mock
 const mockUseParams = useParams as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
 const mockUseSearchParams = useSearchParams as jest.Mock
+const mockUseSession = useSession as jest.Mock
 const mockPush = jest.fn()
 const mockReplace = jest.fn()
 
@@ -61,6 +66,17 @@ describe('IssuesPage', () => {
     mockUseParams.mockReturnValue({ programKey: 'prog1', moduleKey: 'mod1' })
     mockUseRouter.mockReturnValue({ push: mockPush, replace: mockReplace })
     mockUseSearchParams.mockReturnValue(new URLSearchParams())
+    mockUseSession.mockReturnValue({
+      data: {
+        user: {
+          name: 'DefaultUser',
+          login: 'defaultuser',
+          isLeader: true,
+          isMentor: false,
+        },
+      },
+      status: 'authenticated',
+    })
   })
 
   it('renders a loading spinner while data is being fetched', () => {
@@ -724,6 +740,211 @@ describe('IssuesPage', () => {
 
       rerender(<IssuesPage />)
       expect(mockHandleAppError).toHaveBeenCalledWith(newError)
+    })
+  })
+
+  describe('authorization', () => {
+    it('extracts userName, isLeader, and isMentor from session (lines 27-29)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'TestUser',
+            login: 'testuser',
+            isLeader: true,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: mockModuleData, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ skip: false })
+      )
+    })
+
+    it('handles session with isMentor=true extracted from useSession (lines 27-29)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'TestUser',
+            login: 'testuser',
+            isLeader: false,
+            isMentor: true,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: mockModuleData, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ skip: false })
+      )
+    })
+
+    it('skips query when userName is undefined (line 48 - authorization check)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: undefined,
+            login: undefined,
+            isLeader: false,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ skip: true })
+      )
+    })
+
+    it('skips query when user is neither project leader nor mentor (line 48 - authorization check)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'UnauthorizedUser',
+            login: 'unauth',
+            isLeader: false,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ skip: true })
+      )
+    })
+
+    it('shows AccessDeniedDisplay when user has no login (unauthenticated state)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: undefined,
+            login: undefined,
+            isLeader: false,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(
+        screen.getByText('Only project leaders and mentors can access this page.')
+      ).toBeInTheDocument()
+    })
+
+    it('skips query when userName is missing even if user has required role', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'LeaderWithoutLogin',
+            login: undefined,
+            isLeader: true,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ skip: true })
+      )
+    })
+
+    it('shows AccessDeniedDisplay when user is not authorized (lines 142-175)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'UnauthorizedUser',
+            login: 'unauth',
+            isLeader: false,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(
+        screen.getByText('Only project leaders and mentors can access this page.')
+      ).toBeInTheDocument()
+    })
+
+    it('shows AccessDeniedDisplay when session data is null (unauthenticated)', () => {
+      mockUseSession.mockReturnValue({ data: null, status: 'unauthenticated' })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(
+        screen.getByText('Only project leaders and mentors can access this page.')
+      ).toBeInTheDocument()
+    })
+
+    it('shows LoadingSpinner while session is loading (status === loading)', () => {
+      mockUseSession.mockReturnValue({ data: undefined, status: 'loading' })
+      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(screen.getAllByAltText('Loading indicator').length).toBeGreaterThan(0)
+    })
+
+    it('does not show AccessDeniedDisplay when user is authorized as project leader (lines 142-175)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'AuthorizedUser',
+            login: 'auth',
+            isLeader: true,
+            isMentor: false,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: mockModuleData, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(
+        screen.queryByText('Only project leaders and mentors can access this page.')
+      ).not.toBeInTheDocument()
+    })
+
+    it('does not show AccessDeniedDisplay when user is authorized as mentor (lines 142-175)', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            name: 'AuthorizedUser',
+            login: 'auth',
+            isLeader: false,
+            isMentor: true,
+          },
+        },
+        status: 'authenticated',
+      })
+      mockUseQuery.mockReturnValue({ data: mockModuleData, loading: false, error: undefined })
+
+      render(<IssuesPage />)
+      expect(
+        screen.queryByText('Only project leaders and mentors can access this page.')
+      ).not.toBeInTheDocument()
     })
   })
 })

@@ -4,10 +4,13 @@ import { useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
+import { hasExtendedUser } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import IssuesTable from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
@@ -19,6 +22,12 @@ const IssuesPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session, status } = useSession()
+
+  const userName = hasExtendedUser(session) ? session.user.login : undefined
+  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
+  const isMentor = hasExtendedUser(session) ? session.user.isMentor : undefined
+
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
   const [selectedDeadline, setSelectedDeadline] = useState<string>(
     searchParams.get('deadline') || DEADLINE_ALL
@@ -36,7 +45,7 @@ const IssuesPage = () => {
       offset: isDeadlineFilterActive ? 0 : (currentPage - 1) * ITEMS_PER_PAGE,
       label: selectedLabel === LABEL_ALL ? null : selectedLabel,
     },
-    skip: !programKey || !moduleKey,
+    skip: !programKey || !moduleKey || !userName || (!isProjectLeader && !isMentor),
     fetchPolicy: 'cache-and-network',
   })
 
@@ -126,7 +135,23 @@ const IssuesPage = () => {
     [router, programKey, moduleKey]
   )
 
-  if (loading) return <LoadingSpinner />
+  if (status === 'loading') {
+    return <LoadingSpinner />
+  }
+
+  if (!isProjectLeader && !isMentor) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Only project leaders and mentors can access this page."
+      />
+    )
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   if (!moduleData)
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 
