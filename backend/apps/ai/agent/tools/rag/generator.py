@@ -111,7 +111,7 @@ Answer:
                 temperature=self.TEMPERATURE,
                 max_tokens=self.MAX_TOKENS,
             )
-            answer = response.choices[0].message.content.strip()
+            answer = (response.choices[0].message.content or "").strip()
         except openai.OpenAIError:
             logger.exception("OpenAI API error")
             answer = "I'm sorry, I'm currently unable to process your request."
