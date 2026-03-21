@@ -40,7 +40,8 @@ export type Module = {
   description: string
   domains?: string[] | null
   endedAt: string
-  experienceLevel: ExperienceLevelEnum
+  /** Experience level from API (string); matches ExperienceLevelEnum values at runtime. */
+  experienceLevel: string
   id: string
   key: string
   labels?: string[] | null
