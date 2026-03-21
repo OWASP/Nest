@@ -143,14 +143,18 @@ class CommandBase:
                 )
         except Exception:
             logger.exception("Failed to handle command '%s'", self.command_name)
-            blocks = [markdown(":warning: An error occurred. Please try again later.")]
-            client.chat_postMessage(
-                blocks=blocks,
-                channel=client.conversations_open(
-                    users=self.get_user_id(command),
-                )["channel"]["id"],
-                text=get_text(blocks),
-            )
+            try:
+                blocks = [markdown(":warning: An error occurred. Please try again later.")]
+                channel_response = client.conversations_open(users=self.get_user_id(command))
+                channel_id = channel_response.get("channel", {}).get("id")
+                if channel_id:
+                    client.chat_postMessage(
+                        blocks=blocks,
+                        channel=channel_id,
+                        text=get_text(blocks),
+                    )
+            except Exception:
+                logger.exception("Failed to send error message for command '%s'", self.command_name)
 
     def register(self):
         """Register this command handler with the Slack app."""
