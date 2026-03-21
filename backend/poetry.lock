@@ -263,30 +263,30 @@ files = [
 
 [[package]]
 name = "attrs"
-version = "25.4.0"
+version = "26.1.0"
 description = "Classes Without Boilerplate"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "fuzz"]
 files = [
-    {file = "attrs-25.4.0-py3-none-any.whl", hash = "sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373"},
-    {file = "attrs-25.4.0.tar.gz", hash = "sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11"},
+    {file = "attrs-26.1.0-py3-none-any.whl", hash = "sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"},
+    {file = "attrs-26.1.0.tar.gz", hash = "sha256:d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32"},
 ]
 
 [[package]]
 name = "boto3"
-version = "1.42.70"
+version = "1.42.72"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "boto3-1.42.70-py3-none-any.whl", hash = "sha256:18a108c4d5df89a200b3949de0d39c0879b100c455e3229ea38275dd392db0f4"},
-    {file = "boto3-1.42.70.tar.gz", hash = "sha256:d060b0d83d2832e403671b9a895e73c3b025df8bb5896d89e401b0678705aac4"},
+    {file = "boto3-1.42.72-py3-none-any.whl", hash = "sha256:2b5fdac4f202b2ccb9ed21f8b84229463b15573ea16941c2b1b8db1c69e08b63"},
+    {file = "boto3-1.42.72.tar.gz", hash = "sha256:932f023ea3b54fd85df453dcfff7d8c5a0f8be144c0ad57568943505c72c1e6a"},
 ]
 
 [package.dependencies]
-botocore = ">=1.42.70,<1.43.0"
+botocore = ">=1.42.72,<1.43.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.16.0,<0.17.0"
 
@@ -295,14 +295,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.42.70"
+version = "1.42.72"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "botocore-1.42.70-py3-none-any.whl", hash = "sha256:54ed9d25f05f810efd22b0dfda0bb9178df3ad8952b2e4359e05156c9321bd3c"},
-    {file = "botocore-1.42.70.tar.gz", hash = "sha256:9ee17553b7febd1a0c1253b3b62ab5d79607eb6163c8fb943470a8893c31d4fa"},
+    {file = "botocore-1.42.72-py3-none-any.whl", hash = "sha256:038f34553da68df2ce70edc729f170cc198678daaad43f98649727c59f6404d4"},
+    {file = "botocore-1.42.72.tar.gz", hash = "sha256:491b75eb41d46cf99cf8d6cab89f2e2c3602ce8e90d738a1da217a5fb6b2b7ef"},
 ]
 
 [package.dependencies]
@@ -1060,14 +1060,14 @@ django = ">=4.2"
 
 [[package]]
 name = "django-ninja"
-version = "1.6.1"
+version = "1.6.2"
 description = "Django Ninja - Fast Django REST framework"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "django_ninja-1.6.1-py3-none-any.whl", hash = "sha256:acadf4fd928f6aef24850e61b135a6ca7b4ef78f491889f55f0848ee383d77d8"},
-    {file = "django_ninja-1.6.1.tar.gz", hash = "sha256:b074fe5d112086e63b34f3389ff24752801f19102ac9a78876cbf2ae79e5f5c7"},
+    {file = "django_ninja-1.6.2-py3-none-any.whl", hash = "sha256:20095f5900bada22ea00cf1a58af50bdb285b2354c61a9d9b47d0dc89ac462d6"},
+    {file = "django_ninja-1.6.2.tar.gz", hash = "sha256:d56ae5aa4791068ef4ac9a66cfdf2fc11f507413ded35abb79c51d0d52ad6412"},
 ]
 
 [package.dependencies]
@@ -2222,14 +2222,14 @@ orjson = ">=3.10.1"
 
 [[package]]
 name = "langsmith"
-version = "0.7.20"
+version = "0.7.22"
 description = "Client library to connect to the LangSmith Observability and Evaluation Platform."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "langsmith-0.7.20-py3-none-any.whl", hash = "sha256:0162faf791ea48d69009a12a3da917468556b99cf5d5fcacbb8cda064262e118"},
-    {file = "langsmith-0.7.20.tar.gz", hash = "sha256:fa983a74f75648ee0e80d3f9751162b6f9a438896d5f9bdb6cba9abda451e234"},
+    {file = "langsmith-0.7.22-py3-none-any.whl", hash = "sha256:6e9d5148314d74e86748cb9d3898632cad0320c9323d95f70f969e5bc078eee4"},
+    {file = "langsmith-0.7.22.tar.gz", hash = "sha256:35bfe795d648b069958280760564632fd28ebc9921c04f3e209c0db6a6c7dc04"},
 ]
 
 [package.dependencies]
@@ -4329,14 +4329,14 @@ crt = ["botocore[crt] (>=1.37.4,<2.0a.0)"]
 
 [[package]]
 name = "schemathesis"
-version = "4.12.1"
+version = "4.12.2"
 description = "Property-based testing framework for Open API and GraphQL based apps"
 optional = false
 python-versions = ">=3.10"
 groups = ["fuzz"]
 files = [
-    {file = "schemathesis-4.12.1-py3-none-any.whl", hash = "sha256:fbca23d71cf34ade35808cdc813a97c670dcfe2fe3f20c07599bc78b6b904207"},
-    {file = "schemathesis-4.12.1.tar.gz", hash = "sha256:c004411b8f358c03cf68f3478d195f54e6d69790d6159fd30918b175b2938bc1"},
+    {file = "schemathesis-4.12.2-py3-none-any.whl", hash = "sha256:435eb16623f1d7e916d9366e5da17096fc307d2129cd502820c8f7f1270aeeed"},
+    {file = "schemathesis-4.12.2.tar.gz", hash = "sha256:cf7ba3d2ed26d3df441e8282c05008e6c9fa0c619c8a89ca080a9ff135216f0f"},
 ]
 
 [package.dependencies]
