@@ -74,7 +74,7 @@ const MapViewUpdater = ({
 
   useEffect(() => {
     if (!map) return
-    try{
+
     const container = map.getContainer()
     if (!container) return
     const width = container.clientWidth
@@ -123,11 +123,7 @@ const MapViewUpdater = ({
       map.fitBounds(localBounds, { maxZoom: maxZoom, padding: [padding, padding] })
     } else {
       map.setView([20, 0], Math.max(dynamicMinZoom, 2))
-    } 
-  } catch {
-          // the map container was removed before update complite
-
-  }
+    }
   }, [userLocation, showLocal, validGeoLocData, map])
 
    return null
