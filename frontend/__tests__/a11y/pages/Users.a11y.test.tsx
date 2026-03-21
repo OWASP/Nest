@@ -1,10 +1,17 @@
 import { mockUserData } from '@mockData/mockUserData'
-import { screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import UsersPage from 'app/members/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
+
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useParams: () => ({ userKey: 'test-user' }),
+  useSearchParams: () => new URLSearchParams(),
+}))
 
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
@@ -28,6 +35,11 @@ describe.each([
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument()
+    })
+
+    // Wait for HeroUI Select component to finish async updates
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 100))
     })
 
     const results = await axe(container)

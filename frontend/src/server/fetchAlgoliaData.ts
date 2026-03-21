@@ -8,7 +8,7 @@ export const fetchAlgoliaData = async <T>(
   query = '',
   currentPage = 0,
   hitsPerPage = 25,
-  facetFilters: string[] = []
+  facetFilters: (string | string[])[] = []
 ): Promise<AlgoliaResponse<T>> => {
   try {
     if (['projects', 'chapters'].includes(indexName)) {

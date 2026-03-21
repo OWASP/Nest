@@ -15,10 +15,14 @@ export type User = {
   bio?: string
   company?: string
   contributionsCount?: number
+  country?: string
   createdAt?: string
   email?: string
   followersCount?: number
   followingCount?: number
+  hasChapterAffinity?: boolean
+  hasCommitteeAffinity?: boolean
+  hasProjectAffinity?: boolean
   isOwaspStaff?: boolean
   issues?: Issue[]
   issuesCount?: number
@@ -26,6 +30,8 @@ export type User = {
   location?: string
   login: string
   name?: string
+  owaspBoardMember?: boolean
+  owaspGsocMentor?: boolean
   publicRepositoriesCount?: number
   releases?: Release[]
   releasesCount?: number
