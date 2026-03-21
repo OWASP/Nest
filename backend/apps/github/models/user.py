@@ -55,7 +55,13 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     )
 
     contributions_count = models.PositiveIntegerField(
-        verbose_name="Contributions count", default=0
+        verbose_name="Contributions count",
+        default=0
+    )
+
+    calculated_score = models.FloatField(
+        default=0,
+        help_text="Computed score based on contribution signals"
     )
 
     contribution_data = models.JSONField(
@@ -84,6 +90,12 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         return self.created_issues.all()
+
+    def calculate_score(self):
+        score = 0.0
+        # Base contribution score
+        score += float( self.contributions_count or 0 )
+        return score
 
     @property
     def nest_url(self) -> str:
@@ -170,6 +182,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
                 setattr(self, model_field, value)
 
         self.is_bot = gh_user.type == "Bot"
+        self.calculated_score = self.calculate_score()
 
     def get_absolute_url(self):
         """Get absolute URL for the user."""
