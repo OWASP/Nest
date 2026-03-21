@@ -27,8 +27,12 @@ ASSIGNEE_NOT_FOUND_MSG = "Assignee not found."
 ISSUE_NOT_FOUND_MSG = "Issue not found in this module."
 MODULE_NOT_FOUND_MSG = "Module not found."
 NOT_MENTOR_ASSIGN_MSG = "Only mentors of this module can assign issues."
-NOT_MENTOR_CLEAR_DEADLINE_MSG = "Only mentors of this module can clear deadlines."
-NOT_MENTOR_SET_DEADLINE_MSG = "Only mentors of this module can set deadlines."
+NOT_MENTOR_OR_ADMIN_CLEAR_DEADLINE_MSG = (
+    "Only mentors of this module or program admins can clear deadlines."
+)
+NOT_MENTOR_OR_ADMIN_SET_DEADLINE_MSG = (
+    "Only mentors of this module or program admins can set deadlines."
+)
 NOT_MENTOR_UNASSIGN_MSG = "Only mentors of this module can unassign issues."
 
 logger = logging.getLogger(__name__)
@@ -245,7 +249,7 @@ class ModuleMutation:
     ) -> ModuleNode:
         """Set a deadline for a task.
 
-        The user must be a mentor of the module.
+        The user must be a mentor of the module or an admin of the program.
         """
         user = info.context.request.user
 
@@ -257,8 +261,10 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
-            raise PermissionDenied(NOT_MENTOR_SET_DEADLINE_MSG)
+        is_admin = module.program.admins.filter(nest_user=user).exists()
+        is_mentor = _is_mentor_of_module(user, module)
+        if not (is_admin or is_mentor):
+            raise PermissionDenied(NOT_MENTOR_OR_ADMIN_SET_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")
@@ -307,7 +313,7 @@ class ModuleMutation:
     ) -> ModuleNode:
         """Clear the deadline for a task.
 
-        The user must be a mentor of the module.
+        The user must be a mentor of the module or an admin of the program.
         """
         user = info.context.request.user
 
@@ -319,8 +325,10 @@ class ModuleMutation:
         if module is None:
             raise ObjectDoesNotExist(MODULE_NOT_FOUND_MSG)
 
-        if not _is_mentor_of_module(user, module):
-            raise PermissionDenied(NOT_MENTOR_CLEAR_DEADLINE_MSG)
+        is_admin = module.program.admins.filter(nest_user=user).exists()
+        is_mentor = _is_mentor_of_module(user, module)
+        if not (is_admin or is_mentor):
+            raise PermissionDenied(NOT_MENTOR_OR_ADMIN_CLEAR_DEADLINE_MSG)
 
         issue = (
             module.issues.select_related("repository")
