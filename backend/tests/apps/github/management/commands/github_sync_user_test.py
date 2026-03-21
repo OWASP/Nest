@@ -1,9 +1,10 @@
 import io
 from datetime import UTC, datetime
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 from github import GithubException
 
 from apps.github.management.commands.github_sync_user import Command
@@ -831,3 +832,209 @@ class TestGithubSyncUserCommand:
         mock_commit.bulk_save.assert_called_once()
         assert mock_commit_obj_1.committer == mock_saved_committer
         assert mock_commit_obj_2.committer == mock_saved_committer
+
+    @patch("apps.github.management.commands.github_sync_user.EntityMember.objects")
+    @patch("apps.github.management.commands.github_sync_user.RepositoryContributor.objects")
+    @patch("apps.github.management.commands.github_sync_user.MemberSnapshot.objects")
+    @patch("apps.github.management.commands.github_sync_user.ContentType.objects")
+    def test_calculate_member_score_basic(
+        self,
+        mock_content_type,
+        mock_member_snapshot,
+        mock_repo_contributor,
+        mock_entity_member,
+        command,
+    ):
+        """Test calculate_member_score with basic user data."""
+        mock_user = MagicMock(spec=User)
+        mock_user.authored_commits.count.return_value = 5
+        mock_user.created_pull_requests.count.return_value = 3
+        mock_user.created_issues.count.return_value = 2
+        mock_user.created_releases.count.return_value = 1
+        mock_profile = MagicMock()
+        mock_profile.is_owasp_board_member = False
+        mock_profile.is_gsoc_mentor = False
+        mock_user.owasp_profile = mock_profile
+
+        mock_repo_contributor_qs = MagicMock()
+        count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 3
+        mock_repo_contributor.filter.return_value = mock_repo_contributor_qs
+
+        mock_filter_qs = MagicMock()
+        count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 1
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
+        exclude_count = exclude_qs.distinct.return_value.count
+        exclude_count.return_value = 0
+        mock_entity_member.filter.return_value = mock_filter_qs
+
+        mock_member_snapshot_qs = MagicMock()
+        mock_member_snapshot_qs.values.return_value = [
+            {"contribution_heatmap_data": {"2024-01-01": 1, "2024-01-02": 2}}
+        ]
+        mock_member_snapshot.filter.return_value = mock_member_snapshot_qs
+
+        mock_ct = MagicMock()
+        mock_content_type.get_for_model.return_value = mock_ct
+
+        score = command.calculate_member_score(mock_user)
+
+        assert isinstance(score, float)
+        assert 0 <= score <= 100
+
+    @patch("apps.github.management.commands.github_sync_user.EntityMember.objects")
+    @patch("apps.github.management.commands.github_sync_user.RepositoryContributor.objects")
+    @patch("apps.github.management.commands.github_sync_user.MemberSnapshot.objects")
+    @patch("apps.github.management.commands.github_sync_user.ContentType.objects")
+    def test_calculate_member_score_with_leadership(
+        self,
+        mock_content_type,
+        mock_member_snapshot,
+        mock_repo_contributor,
+        mock_entity_member,
+        command,
+    ):
+        """Test calculate_member_score with leadership roles."""
+        mock_user = MagicMock(spec=User)
+        mock_user.authored_commits.count.return_value = 10
+        mock_user.created_pull_requests.count.return_value = 5
+        mock_user.created_issues.count.return_value = 3
+        mock_user.created_releases.count.return_value = 2
+        mock_profile = MagicMock()
+        mock_profile.is_owasp_board_member = True
+        mock_profile.is_gsoc_mentor = True
+        mock_user.owasp_profile = mock_profile
+
+        mock_repo_contributor_qs = MagicMock()
+        count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 5
+        mock_repo_contributor.filter.return_value = mock_repo_contributor_qs
+
+        mock_filter_qs = MagicMock()
+        count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 2
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
+        exclude_count = exclude_qs.distinct.return_value.count
+        exclude_count.return_value = 1
+        mock_entity_member.filter.return_value = mock_filter_qs
+
+        mock_member_snapshot_qs = MagicMock()
+        mock_member_snapshot_qs.values.return_value = [
+            {
+                "contribution_heatmap_data": {
+                    "2024-01-01": 5,
+                    "2024-01-02": 3,
+                    "2024-02-01": 2,
+                }
+            }
+        ]
+        mock_member_snapshot.filter.return_value = mock_member_snapshot_qs
+
+        mock_ct = MagicMock()
+        mock_content_type.get_for_model.return_value = mock_ct
+
+        score = command.calculate_member_score(mock_user)
+
+        assert isinstance(score, float)
+        assert score > 10
+
+    @patch("apps.github.management.commands.github_sync_user.EntityMember.objects")
+    @patch("apps.github.management.commands.github_sync_user.RepositoryContributor.objects")
+    @patch("apps.github.management.commands.github_sync_user.MemberSnapshot.objects")
+    @patch("apps.github.management.commands.github_sync_user.ContentType.objects")
+    def test_calculate_member_score_no_data(
+        self,
+        mock_content_type,
+        mock_member_snapshot,
+        mock_repo_contributor,
+        mock_entity_member,
+        command,
+    ):
+        """Test calculate_member_score for user with no data."""
+        mock_user = MagicMock(spec=User)
+        mock_user.authored_commits.count.return_value = 0
+        mock_user.created_pull_requests.count.return_value = 0
+        mock_user.created_issues.count.return_value = 0
+        mock_user.created_releases.count.return_value = 0
+        mock_profile = MagicMock()
+        mock_profile.is_owasp_board_member = False
+        mock_profile.is_gsoc_mentor = False
+        mock_user.owasp_profile = mock_profile
+
+        mock_repo_contributor_qs = MagicMock()
+        count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 0
+        mock_repo_contributor.filter.return_value = mock_repo_contributor_qs
+
+        mock_filter_qs = MagicMock()
+        count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 0
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
+        exclude_count = exclude_qs.distinct.return_value.count
+        exclude_count.return_value = 0
+        mock_entity_member.filter.return_value = mock_filter_qs
+
+        mock_member_snapshot_qs = MagicMock()
+        mock_member_snapshot_qs.values.return_value = []
+        mock_member_snapshot.filter.return_value = mock_member_snapshot_qs
+
+        mock_ct = MagicMock()
+        mock_content_type.get_for_model.return_value = mock_ct
+
+        score = command.calculate_member_score(mock_user)
+
+        assert score == pytest.approx(0.0)
+
+    @patch("apps.github.management.commands.github_sync_user.EntityMember.objects")
+    @patch("apps.github.management.commands.github_sync_user.RepositoryContributor.objects")
+    @patch("apps.github.management.commands.github_sync_user.MemberSnapshot.objects")
+    @patch("apps.github.management.commands.github_sync_user.ContentType.objects")
+    def test_calculate_member_score_missing_profile(
+        self,
+        mock_content_type,
+        mock_member_snapshot,
+        mock_repo_contributor,
+        mock_entity_member,
+        command,
+    ):
+        """Test calculate_member_score handles missing profile gracefully."""
+        mock_user = MagicMock(spec=User)
+        mock_user.authored_commits.count.return_value = 5
+        mock_user.created_pull_requests.count.return_value = 3
+        mock_user.created_issues.count.return_value = 2
+        mock_user.created_releases.count.return_value = 1
+        type(mock_user).owasp_profile = PropertyMock(side_effect=ObjectDoesNotExist)
+
+        mock_repo_contributor_qs = MagicMock()
+        count_val = mock_repo_contributor_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 2
+        mock_repo_contributor.filter.return_value = mock_repo_contributor_qs
+
+        mock_filter_qs = MagicMock()
+        count_val = mock_filter_qs.values_list.return_value.distinct.return_value.count
+        count_val.return_value = 0
+        exclude_qs = (
+            mock_filter_qs.exclude.return_value.exclude.return_value.values_list.return_value
+        )
+        exclude_count = exclude_qs.distinct.return_value.count
+        exclude_count.return_value = 0
+        mock_entity_member.filter.return_value = mock_filter_qs
+
+        mock_member_snapshot_qs = MagicMock()
+        mock_member_snapshot_qs.values.return_value = []
+        mock_member_snapshot.filter.return_value = mock_member_snapshot_qs
+
+        mock_ct = MagicMock()
+        mock_content_type.get_for_model.return_value = mock_ct
+
+        score = command.calculate_member_score(mock_user)
+
+        assert isinstance(score, float)
+        assert score > 0

@@ -3,6 +3,8 @@
 import logging
 from datetime import UTC, datetime
 
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from github.GithubException import GithubException
 
@@ -14,7 +16,12 @@ from apps.github.models.pull_request import PullRequest
 from apps.github.models.repository import Repository
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
+from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.member_profile import MemberProfile
+from apps.owasp.models.member_snapshot import MemberSnapshot
+from apps.owasp.models.project import Project
+from apps.owasp.utils.scoring import calculate_member_score
 
 logger = logging.getLogger(__name__)
 
@@ -478,3 +485,96 @@ class Command(BaseCommand):
 
         # Always populate first contribution date if not already set
         self.populate_first_contribution_only(username, user, gh)
+
+        # Calculate and update member ranking score
+        try:
+            score = self.calculate_member_score(user)
+            user.calculated_score = score
+            user.save(update_fields=["calculated_score"])
+            self.stdout.write(self.style.SUCCESS(f"Updated member ranking score: {score:.2f}"))
+            logger.info("Updated member ranking score for %s: %.2f", username, score)
+        except Exception as e:
+            self.stderr.write(self.style.WARNING(f"Error calculating member score: {e}"))
+            logger.exception("Error calculating member score for %s", username)
+
+    def calculate_member_score(self, user: User) -> float:
+        """Calculate a member's ranking score."""
+        contributions_count = (
+            user.authored_commits.count()
+            + user.created_pull_requests.count()
+            + user.created_issues.count()
+            + user.created_releases.count()
+        )
+
+        distinct_repository_count = (
+            RepositoryContributor.objects.filter(user=user)
+            .values_list("repository", flat=True)
+            .distinct()
+            .count()
+        )
+
+        try:
+            profile = user.owasp_profile
+            is_board_member = profile.is_owasp_board_member
+            is_gsoc_mentor = profile.is_gsoc_mentor
+        except ObjectDoesNotExist:
+            is_board_member = False
+            is_gsoc_mentor = False
+
+        chapter_ct = ContentType.objects.get_for_model(Chapter)
+        project_ct = ContentType.objects.get_for_model(Project)
+
+        chapter_leader_count = (
+            EntityMember.objects.filter(
+                member=user,
+                entity_type=chapter_ct,
+                role=EntityMember.Role.LEADER,
+                is_active=True,
+            )
+            .values_list("entity_id", flat=True)
+            .distinct()
+            .count()
+        )
+
+        project_leader_count = (
+            EntityMember.objects.filter(
+                member=user,
+                entity_type=project_ct,
+                role=EntityMember.Role.LEADER,
+                is_active=True,
+            )
+            .values_list("entity_id", flat=True)
+            .distinct()
+            .count()
+        )
+
+        committee_member_count = (
+            EntityMember.objects.filter(
+                member=user,
+                is_active=True,
+            )
+            .exclude(entity_type__in=[chapter_ct, project_ct])
+            .exclude(role=EntityMember.Role.CANDIDATE)
+            .values_list("entity_type", "entity_id")
+            .distinct()
+            .count()
+        )
+
+        contribution_data: dict[str, int] = {}
+        snapshots = MemberSnapshot.objects.filter(github_user=user).values(
+            "contribution_heatmap_data"
+        )
+        for snapshot in snapshots:
+            for date_key, count in snapshot["contribution_heatmap_data"].items():
+                contribution_data[date_key] = contribution_data.get(date_key, 0) + count
+
+        return calculate_member_score(
+            contributions_count=contributions_count,
+            distinct_repository_count=distinct_repository_count,
+            chapter_leader_count=chapter_leader_count,
+            project_leader_count=project_leader_count,
+            committee_member_count=committee_member_count,
+            is_board_member=is_board_member,
+            is_gsoc_mentor=is_gsoc_mentor,
+            contribution_data=contribution_data,
+        )

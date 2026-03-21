@@ -214,6 +214,16 @@ class UserIndexMixin:
         return self.contributions_count
 
     @property
+    def idx_calculated_score(self) -> float:
+        """Get the calculated ranking score for the user.
+
+        Returns:
+            float: The member ranking score based on contributions and community involvement.
+
+        """
+        return self.calculated_score
+
+    @property
     def idx_issues(self) -> list[dict]:
         """Get recent issues associated with the user for indexing.
 
