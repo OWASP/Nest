@@ -254,3 +254,8 @@ class TestUserModel:
             User, "created_releases", all=Mock(return_value=["release1", "release2"])
         ):
             assert user.releases == ["release1", "release2"]
+
+    def test_calculated_score_default(self):
+        """Test that calculated_score defaults to 0."""
+        user = User(login="testuser", node_id="U_test123")
+        assert user.calculated_score == 0

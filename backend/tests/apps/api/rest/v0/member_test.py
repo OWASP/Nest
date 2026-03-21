@@ -17,6 +17,7 @@ class TestMemberSchema:
         member_data = {
             "avatar_url": "https://github.com/images/johndoe.png",
             "bio": "Developer advocate",
+            "calculated_score": 42.5,
             "company": "GitHub",
             "created_at": created_at,
             "email": "john@example.com",
@@ -35,6 +36,7 @@ class TestMemberSchema:
 
         assert member.avatar_url == member_data["avatar_url"]
         assert member.bio == member_data["bio"]
+        assert member.calculated_score == member_data["calculated_score"]
         assert member.company == member_data["company"]
         assert member.created_at == datetime.fromisoformat(created_at)
         assert member.followers_count == member_data["followers_count"]
@@ -66,13 +68,15 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=None)
 
-        mock_user_model.objects.order_by.assert_called_with("-created_at")
+        mock_user_model.objects.order_by.assert_called_with("-calculated_score", "id")
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
 
     @pytest.mark.parametrize(
         "ordering",
         [
+            "calculated_score",
+            "-calculated_score",
             "created_at",
             "-created_at",
             "updated_at",
@@ -95,7 +99,7 @@ class TestListMembers:
 
         result = list_members(mock_request, mock_filters, ordering=ordering)
 
-        mock_user_model.objects.order_by.assert_called_once_with(ordering)
+        mock_user_model.objects.order_by.assert_called_once_with(ordering, "id")
         mock_filters.filter.assert_called_once_with(mock_ordered_queryset)
         assert result == mock_filtered_queryset
 
