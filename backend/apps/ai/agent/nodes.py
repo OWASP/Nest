@@ -211,7 +211,7 @@ class AgentNodes:
             content = extract_json_from_markdown(content)
             return json.loads(content)
 
-        except openai.OpenAIError:
+        except (openai.OpenAIError, json.JSONDecodeError):
             return {
                 "requested_fields": [],
                 "entity_types": [],
@@ -251,7 +251,7 @@ class AgentNodes:
             content = extract_json_from_markdown(content)
             return json.loads(content)
 
-        except openai.OpenAIError:
+        except (openai.OpenAIError, json.JSONDecodeError):
             return {
                 "complete": False,
                 "feedback": "Evaluator error or invalid response.",
