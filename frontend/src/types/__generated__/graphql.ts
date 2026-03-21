@@ -1111,6 +1111,7 @@ export type UserNode = {
   avatarUrl: Scalars['String']['output'];
   badges: Array<BadgeNode>;
   bio: Scalars['String']['output'];
+  calculatedScore: Scalars['Float']['output'];
   company: Scalars['String']['output'];
   contributionData?: Maybe<Scalars['JSON']['output']>;
   contributionsCount: Scalars['Int']['output'];
