@@ -87,7 +87,7 @@ After connecting your payout method, complete a tax form from your Sponsors dash
 
 Click **Request approval** from your Sponsors dashboard. Once approved, your profile goes live at:
 
-```
+```text
 https://github.com/sponsors/YOUR-USERNAME
 ```
 
