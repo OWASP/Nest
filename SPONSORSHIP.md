@@ -14,7 +14,7 @@ This is a one-time setup. GitHub needs to verify your identity and set up your p
 
 ### Step 1 — Check Your Eligibility & Region
 
-Anyone who contributes to open source — including mentorship — qualifies. Check if your country is supported:
+Contributors to open source - including mentorship - may be eligible, subject to GitHub Sponsors eligibility criteria. Check if your country is supported:
 
 - [Supported regions for GitHub Sponsors](https://docs.github.com/en/sponsors/receiving-sponsorships-through-github-sponsors/supported-regions-for-github-sponsors)
 
