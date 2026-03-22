@@ -51,11 +51,28 @@ def resolve_admins_from_logins(logins: list[str]) -> set:
 
 
 def _handle_program_save_integrity_error(exc: IntegrityError) -> None:
-    """Translate program save IntegrityError to GraphQLError for known constraints."""
-    msg = "A program with this name already exists."
+    """Translate program save IntegrityError to GraphQLError for known constraints.
+
+    Program ``key`` is derived from ``name`` on save, so name and key uniqueness
+    violations both map to validation on the ``name`` input.
+
+    Re-raises the original exception for unrecognized integrity failures.
+    """
+    db_exc = exc.__cause__ or exc
+    error_message = str(db_exc)
+
+    if (
+        "mentorship_programs_name_key" in error_message
+        or "mentorship_programs_key_key" in error_message
+    ):
+        msg = "A program with this name already exists."
+        field = "name"
+    else:
+        raise exc
+
     raise GraphQLError(
         msg,
-        extensions={"code": "VALIDATION_ERROR", "field": "name"},
+        extensions={"code": "VALIDATION_ERROR", "field": field},
     ) from exc
 
 
