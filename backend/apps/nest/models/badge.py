@@ -11,6 +11,8 @@ class Badge(BulkSaveModel, TimestampedModel):
     """Represents a user badge for roles or achievements."""
 
     class BadgeCssClass(models.TextChoices):
+        """Badge icon CSS class choices."""
+
         AWARD = "award", "Award"
         BUG_SLASH = "bug_slash", "Bug Slash"
         CERTIFICATE = "certificate", "Certificate"
@@ -19,6 +21,8 @@ class Badge(BulkSaveModel, TimestampedModel):
         STAR = "star", "Star"
 
     class Meta:
+        """Model options."""
+
         db_table = "nest_badges"
         ordering = ["weight", "name"]
         verbose_name_plural = "Badges"

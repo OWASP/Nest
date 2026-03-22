@@ -144,3 +144,27 @@ class TestProjectMetadataCommand:
             "url": "https://github.com/owasp/partial",
         }
         assert "description" not in metadata["repositories"][0]
+
+    def test_get_metadata_leader_with_no_fields(self, mock_project):
+        """Test leader with no login, no name, no email."""
+        command = Command()
+        leader_empty = MagicMock()
+        leader_empty.login = None
+        leader_empty.name = None
+        leader_empty.email = None
+        mock_project.leaders.all.return_value = [leader_empty]
+
+        metadata = command.get_metadata(mock_project)
+        assert metadata["leaders"] == [{}]
+
+    def test_get_metadata_repo_with_no_fields(self, mock_project):
+        """Test repo with no description, name, or url."""
+        command = Command()
+        repo_empty = MagicMock()
+        repo_empty.description = None
+        repo_empty.name = None
+        repo_empty.url = None
+        mock_project.repositories.all.return_value = [repo_empty]
+
+        metadata = command.get_metadata(mock_project)
+        assert metadata["repositories"] == []

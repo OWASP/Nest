@@ -13,9 +13,13 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     objects = models.Manager()
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
-    class State(models.TextChoices):
+    class IssueState(models.TextChoices):
+        """Issue state choices."""
+
         OPEN = "open", "Open"
         CLOSED = "closed", "Closed"
 
@@ -25,8 +29,8 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
     state = models.CharField(
         verbose_name="State",
         max_length=6,
-        choices=State.choices,
-        default=State.OPEN,
+        choices=IssueState.choices,
+        default=IssueState.OPEN,
     )
     url = models.URLField(verbose_name="URL", max_length=500, default="")
 
@@ -54,7 +58,7 @@ class GenericIssueModel(BulkSaveModel, IssueIndexMixin, NodeModel, TimestampedMo
             bool: True if the issue is open, False otherwise.
 
         """
-        return self.state == self.State.OPEN
+        return self.state == self.IssueState.OPEN
 
     @property
     def project(self):

@@ -6,7 +6,7 @@ import {
   IsProjectLeaderDocument,
 } from 'types/__generated__/mentorshipQueries.generated'
 import { ExtendedProfile, ExtendedSession } from 'types/auth'
-import { IS_GITHUB_AUTH_ENABLED } from 'utils/env.server'
+import { IS_GITHUB_AUTH_ENABLED, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } from 'utils/env.server'
 
 async function checkIfProjectLeader(login: string): Promise<boolean> {
   try {
@@ -18,7 +18,10 @@ async function checkIfProjectLeader(login: string): Promise<boolean> {
     })
     return data?.isProjectLeader ?? false
   } catch (err) {
-    throw new Error('Failed to fetch project leader status Error', err)
+    throw new Error(
+      `Failed to fetch project leader status: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err }
+    )
   }
 }
 
@@ -32,7 +35,10 @@ async function checkIfMentor(login: string): Promise<boolean> {
     })
     return data?.isMentor ?? false
   } catch (err) {
-    throw new Error('Failed to fetch mentor status Error', err)
+    throw new Error(
+      `Failed to fetch mentor status: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err }
+    )
   }
 }
 
@@ -41,8 +47,8 @@ const providers = []
 if (IS_GITHUB_AUTH_ENABLED) {
   providers.push(
     GitHubProvider({
-      clientId: process.env.NEXT_SERVER_GITHUB_CLIENT_ID,
-      clientSecret: process.env.NEXT_SERVER_GITHUB_CLIENT_SECRET,
+      clientId: GITHUB_CLIENT_ID!,
+      clientSecret: GITHUB_CLIENT_SECRET!,
       profile(profile) {
         return {
           email: profile.email,
@@ -82,7 +88,8 @@ const authOptions: AuthOptions = {
       }
 
       if (trigger === 'update' && session) {
-        token.isOwaspStaff = (session as ExtendedSession).user.isOwaspStaff || false
+        const extSession = session as ExtendedSession
+        token.isOwaspStaff = extSession.user?.isOwaspStaff || false
       }
       return token
     },
@@ -90,11 +97,12 @@ const authOptions: AuthOptions = {
     async session({ session, token }) {
       ;(session as ExtendedSession).accessToken = token.accessToken as string
 
-      if (session.user) {
-        ;(session as ExtendedSession).user.login = token.login as string
-        ;(session as ExtendedSession).user.isMentor = token.isMentor as boolean
-        ;(session as ExtendedSession).user.isLeader = token.isLeader as boolean
-        ;(session as ExtendedSession).user.isOwaspStaff = token.isOwaspStaff as boolean
+      if (session?.user) {
+        const extSession = session as ExtendedSession
+        extSession.user!.login = token.login as string
+        extSession.user!.isMentor = token.isMentor as boolean
+        extSession.user!.isLeader = token.isLeader as boolean
+        extSession.user!.isOwaspStaff = token.isOwaspStaff as boolean
       }
       return session
     },

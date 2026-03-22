@@ -91,3 +91,23 @@ class TestMilestoneModel:
         mock_from_github.assert_called_once_with(gh_milestone_mock, author, repository)
         mock_save.assert_called_once()
         assert milestone.node_id == "milestone_node_id_1"
+
+    @patch("apps.github.models.milestone.Milestone.get_node_id")
+    @patch("apps.github.models.milestone.Milestone.objects.get")
+    def test_update_data_without_save(self, mock_get, mock_get_node_id, gh_milestone_mock):
+        """Test update_data with save=False."""
+        mock_get_node_id.return_value = "milestone_node_id_1"
+        mock_milestone = Mock(spec=Milestone)
+        mock_get.return_value = mock_milestone
+
+        author = Mock(spec=User, _state=Mock(db=None))
+        repository = Mock(spec=Repository, _state=Mock(db=None))
+
+        milestone = Milestone.update_data(
+            gh_milestone_mock, author=author, repository=repository, save=False
+        )
+
+        mock_get.assert_called_once_with(node_id="milestone_node_id_1")
+        mock_milestone.from_github.assert_called_once_with(gh_milestone_mock, author, repository)
+        mock_milestone.save.assert_not_called()
+        assert milestone == mock_milestone

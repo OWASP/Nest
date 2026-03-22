@@ -1,17 +1,16 @@
 """Event API."""
 
-from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
 from django.http import HttpRequest
-from ninja import Path, Query, Schema
+from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
 from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
-from apps.api.rest.v0.common import LocationFilter
+from apps.api.rest.v0.common import LocationFilter, ValidationErrorSchema
 from apps.owasp.models.event import Event as EventModel
 
 router = RouterPaginated(tags=["Events"])
@@ -20,13 +19,23 @@ router = RouterPaginated(tags=["Events"])
 class EventBase(Schema):
     """Base schema for Event (used in list endpoints)."""
 
-    end_date: datetime | None = None
+    end_date: str | None = None
     key: str
     latitude: float | None = None
     longitude: float | None = None
     name: str
-    start_date: datetime
+    start_date: str
     url: str | None = None
+
+    @staticmethod
+    def resolve_end_date(event: EventModel) -> str | None:
+        """Resolve end date."""
+        return event.end_date.isoformat() if event.end_date else None
+
+    @staticmethod
+    def resolve_start_date(event: EventModel) -> str:
+        """Resolve start date."""
+        return event.start_date.isoformat()
 
 
 class Event(EventBase):
@@ -45,6 +54,16 @@ class EventError(Schema):
     message: str
 
 
+class EventFilter(LocationFilter):
+    """Filter for Event."""
+
+    category: list[EventModel.Category] | None = Field(
+        None,
+        description="Filter events by category",
+        q="category__in",
+    )
+
+
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP events.",
@@ -55,7 +74,7 @@ class EventError(Schema):
 @decorate_view(cache_response())
 def list_events(
     request: HttpRequest,
-    filters: LocationFilter = Query(...),
+    filters: EventFilter = Query(...),
     ordering: Literal[
         "start_date",
         "-start_date",
@@ -77,12 +96,11 @@ def list_events(
     ),
 ) -> list[Event]:
     """Get list of events."""
-    if is_upcoming:
-        return filters.filter(
-            EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
-        )
-
-    return filters.filter(EventModel.objects.order_by(ordering or "-start_date", "-end_date"))
+    return filters.filter(
+        EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
+        if is_upcoming
+        else EventModel.objects.order_by(ordering or "-start_date", "-end_date")
+    )
 
 
 @router.get(
@@ -90,6 +108,7 @@ def list_events(
     description="Retrieve an event details.",
     operation_id="get_event",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: EventError,
         HTTPStatus.OK: EventDetail,
     },

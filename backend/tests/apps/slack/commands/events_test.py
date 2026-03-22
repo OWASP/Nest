@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.conf import settings
 
-from apps.slack.commands.events import Events
+from apps.slack.commands.events import Events, get_events_data
 
 
 class MockEvent:
@@ -21,6 +21,7 @@ class MockEvent:
             else None
         )
         self.location = location
+        self.suggested_location = location
         self.url = url
         self.description = description
 
@@ -46,6 +47,18 @@ mock_events = sorted(
     ],
     key=lambda x: x.start_date or datetime.max.replace(tzinfo=UTC).date(),
 )
+
+
+class TestGetEventsData:
+    """Tests for get_events_data function."""
+
+    @patch("apps.owasp.models.event.Event.upcoming_events")
+    def test_get_events_data(self, mock_upcoming_events):
+        """Test get_events_data returns list of event data."""
+        mock_upcoming_events.return_value = mock_events
+        result = get_events_data()
+        assert isinstance(result, list)
+        assert len(result) == len(mock_events)
 
 
 class TestEventsHandler:

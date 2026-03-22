@@ -7,26 +7,6 @@ import { FaHeartPulse, FaSkull } from 'react-icons/fa6'
 import type { ProjectHealthType } from 'types/project'
 import ProjectTypeDashboardCard from 'components/ProjectTypeDashboardCard'
 
-jest.mock('next/link', () => {
-  return function MockedLink({
-    children,
-    href,
-    className,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    className?: string
-    [key: string]: unknown
-  }) {
-    return (
-      <a href={href} className={className} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
-
 jest.mock('components/SecondaryCard', () => {
   return function MockedSecondaryCard({
     title,

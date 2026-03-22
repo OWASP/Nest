@@ -7,28 +7,6 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
-jest.mock('next/link', () => {
-  return ({
-    children,
-    href,
-    onClick,
-  }: {
-    children: React.ReactNode
-    href: string
-    onClick?: () => void
-  }) => (
-    <a
-      href={href}
-      onClick={(e) => {
-        e.preventDefault()
-        onClick?.()
-      }}
-    >
-      {children}
-    </a>
-  )
-})
-
 describe('ActionButton', () => {
   afterEach(() => {
     cleanup()

@@ -1,5 +1,7 @@
 """Unit tests for Nest app's custom User model."""
 
+from unittest.mock import Mock, PropertyMock, patch
+
 from django.db import models
 
 from apps.github.models.user import User as GithubUser
@@ -21,7 +23,7 @@ class TestUserModel:
         username_field = User._meta.get_field("username")
         assert isinstance(username_field, models.CharField)
         assert username_field.max_length > 0
-        assert username_field.unique  # Comes from AbstractUser
+        assert username_field.unique
 
     def test_meta_options(self):
         """Test Meta class options like db_table and ordering."""
@@ -40,3 +42,22 @@ class TestUserModel:
         """Test __str__ returns the username."""
         user = User(username="testuser")
         assert str(user) == "testuser"
+
+    def test_active_api_keys_property(self):
+        """Test active_api_keys property returns filtered queryset."""
+        user = User(username="testuser")
+
+        mock_api_keys = Mock()
+        mock_filter_result = Mock()
+        mock_api_keys.filter.return_value = mock_filter_result
+
+        with patch.object(type(user), "api_keys", new_callable=PropertyMock) as mock_prop:
+            mock_prop.return_value = mock_api_keys
+
+            result = user.active_api_keys
+
+            assert mock_api_keys.filter.called
+            call_kwargs = mock_api_keys.filter.call_args[1]
+            assert "expires_at__gte" in call_kwargs
+            assert not call_kwargs["is_revoked"]
+            assert result == mock_filter_result

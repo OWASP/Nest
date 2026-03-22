@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useEffect, useId, useRef, useState } from 'react'
 import { FaGithub } from 'react-icons/fa'
-import { ExtendedSession } from 'types/auth'
 
 export default function UserMenu({
   isGitHubAuthEnabled,
@@ -19,7 +18,7 @@ export default function UserMenu({
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const dropdownId = useId()
-  const isProjectLeader = (session as ExtendedSession)?.user?.isLeader
+  const isProjectLeader = session?.user?.isLeader
   const isOwaspStaff = session?.user?.isOwaspStaff
 
   useEffect(() => {
@@ -61,7 +60,7 @@ export default function UserMenu({
   }
 
   const userMenuItemClasses =
-    'block w-full px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
+    'block w-full cursor-pointer px-4 py-2 text-left text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white'
 
   return (
     <div ref={dropdownRef} className="relative flex items-center justify-center">
@@ -71,12 +70,12 @@ export default function UserMenu({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-controls={dropdownId}
-        className="w-auto focus:outline-hidden"
+        className="w-auto cursor-pointer focus:outline-hidden"
         disabled={isLoggingOut}
       >
         <div className="h-10 w-10 overflow-hidden rounded-full">
           <Image
-            src={session.user?.image ?? '/default-avatar.png'}
+            src={session?.user?.image ?? '/default-avatar.png'}
             alt="User avatar"
             width={40}
             height={40}

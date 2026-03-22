@@ -3,3 +3,6 @@ contact_links:
   - name: Got questions about OWASP Nest? We're here to help!
     url: https://owasp.slack.com/archives/project-nest
     about: 'Join our OWASP Slack channel #project-nest'
+  - name: Connect with the OWASP Nest community on LinkedIn
+    url: https://www.linkedin.com/groups/14656108/
+    about: Join our LinkedIn group

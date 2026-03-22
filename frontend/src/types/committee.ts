@@ -2,10 +2,10 @@ import type { Contributor } from 'types/contributor'
 
 export type Committee = {
   contributorsCount?: number
-  createdAt: number
+  createdAt: string
   forksCount?: number
   issuesCount?: number
-  key?: string
+  key: string
   leaders: string[]
   name: string
   objectID?: string
@@ -14,6 +14,6 @@ export type Committee = {
   starsCount?: number
   summary: string
   topContributors?: Contributor[]
-  updatedAt: number
+  updatedAt: string
   url: string
 }

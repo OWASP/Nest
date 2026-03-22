@@ -31,67 +31,67 @@ from apps.owasp.models.project_health_metrics import ProjectHealthMetrics
 class ProjectHealthMetricsNode(strawberry.relay.Node):
     """Project health metrics node."""
 
-    @strawberry.field
-    def age_days(self) -> int:
+    @strawberry_django.field
+    def age_days(self, root: ProjectHealthMetrics) -> int:
         """Resolve project age in days."""
-        return self.age_days
+        return root.age_days
 
-    @strawberry.field
-    def age_days_requirement(self) -> int:
+    @strawberry_django.field
+    def age_days_requirement(self, root: ProjectHealthMetrics) -> int:
         """Resolve project age requirement in days."""
-        return self.age_days_requirement
+        return root.age_days_requirement
 
-    @strawberry.field
-    def created_at(self) -> datetime:
+    @strawberry_django.field
+    def created_at(self, root: ProjectHealthMetrics) -> datetime:
         """Resolve metrics creation date."""
-        return self.nest_created_at
+        return root.nest_created_at
 
-    @strawberry.field
-    def last_commit_days(self) -> int:
+    @strawberry_django.field
+    def last_commit_days(self, root: ProjectHealthMetrics) -> int:
         """Resolve last commit age in days."""
-        return self.last_commit_days
+        return root.last_commit_days
 
-    @strawberry.field
-    def last_commit_days_requirement(self) -> int:
+    @strawberry_django.field
+    def last_commit_days_requirement(self, root: ProjectHealthMetrics) -> int:
         """Resolve last commit age requirement in days."""
-        return self.last_commit_days_requirement
+        return root.last_commit_days_requirement
 
-    @strawberry.field
-    def last_pull_request_days(self) -> int:
+    @strawberry_django.field
+    def last_pull_request_days(self, root: ProjectHealthMetrics) -> int:
         """Resolve last pull request age in days."""
-        return self.last_pull_request_days
+        return root.last_pull_request_days
 
-    @strawberry.field
-    def last_pull_request_days_requirement(self) -> int:
+    @strawberry_django.field
+    def last_pull_request_days_requirement(self, root: ProjectHealthMetrics) -> int:
         """Resolve last pull request age requirement in days."""
-        return self.last_pull_request_days_requirement
+        return root.last_pull_request_days_requirement
 
-    @strawberry.field
-    def last_release_days(self) -> int:
+    @strawberry_django.field
+    def last_release_days(self, root: ProjectHealthMetrics) -> int:
         """Resolve last release age in days."""
-        return self.last_release_days
+        return root.last_release_days
 
-    @strawberry.field
-    def last_release_days_requirement(self) -> int:
+    @strawberry_django.field
+    def last_release_days_requirement(self, root: ProjectHealthMetrics) -> int:
         """Resolve last release age requirement in days."""
-        return self.last_release_days_requirement
+        return root.last_release_days_requirement
 
-    @strawberry.field
-    def project_key(self) -> str:
+    @strawberry_django.field(select_related=["project"])
+    def project_key(self, root: ProjectHealthMetrics) -> str:
         """Resolve project key."""
-        return self.project.nest_key
+        return root.project.nest_key
 
-    @strawberry.field
-    def project_name(self) -> str:
+    @strawberry_django.field(select_related=["project"])
+    def project_name(self, root: ProjectHealthMetrics) -> str:
         """Resolve project name."""
-        return self.project.name
+        return root.project.name
 
-    @strawberry.field
-    def owasp_page_last_update_days(self) -> int:
+    @strawberry_django.field
+    def owasp_page_last_update_days(self, root: ProjectHealthMetrics) -> int:
         """Resolve OWASP page last update age in days."""
-        return self.owasp_page_last_update_days
+        return root.owasp_page_last_update_days
 
-    @strawberry.field
-    def owasp_page_last_update_days_requirement(self) -> int:
+    @strawberry_django.field
+    def owasp_page_last_update_days_requirement(self, root: ProjectHealthMetrics) -> int:
         """Resolve OWASP page last update age requirement in days."""
-        return self.owasp_page_last_update_days_requirement
+        return root.owasp_page_last_update_days_requirement

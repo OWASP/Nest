@@ -7,6 +7,8 @@ class MatchingAttributes(models.Model):
     """Matching attributes model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     domains = models.JSONField(

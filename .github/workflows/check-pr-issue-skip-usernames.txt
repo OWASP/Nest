@@ -52,6 +52,7 @@ anthturner
 anuragayumishra
 anwar-haq
 aphilipti
+aramattamara
 aramhovsepyan
 aramrami
 aravind2000-786
@@ -171,6 +172,7 @@ edwingozeling
 eivindarvesen
 elarlang
 elvinmollinedo
+emaybu
 emergar07
 emomartin-owasp
 epabloseven
@@ -240,6 +242,7 @@ infosecdad
 inonshk
 int16-justin
 interference-security
+ioleksiuk
 irfaansantoe
 irishmoneyman
 isanori-sakanashi-owasp
@@ -305,6 +308,7 @@ kellysantalucia
 kenhuangus
 kenprole
 kerberosmansour
+kerlynnkep
 kevcody
 kingthorin
 kirk-owasp
@@ -313,6 +317,7 @@ kmcquade
 korniko98
 korvalas
 kozmic
+kritibirda
 ks-raj
 ksg97031
 ktreptow
@@ -360,6 +365,7 @@ matowasp
 matreurai
 matt-perrotti
 mavensecurity
+mavrick-1
 mbrg
 mccabe615
 meetsaad
@@ -411,6 +417,7 @@ nitinraghavendra
 njilav
 nkalexiou
 nodeswithsumit
+noland-crane
 noorazam
 noqcks
 northdpole
@@ -505,6 +512,7 @@ sagarbhure
 saidas45
 saikrishnagobburi
 sakerman
+salmandeveloperz
 salmankhwaja
 sampsonc
 samyak8ktr
@@ -578,6 +586,8 @@ tejax-v2
 tghosth
 thavisoukj1
 thecyberfang
+thecyberleader
+theinfosecguy
 thejonmccoy
 thekyles
 theseion
@@ -627,6 +637,7 @@ vxvera-owasp
 vyshnavvizz
 wadealcorn
 wagrodrigo
+wandji69
 wangjie8578
 warlordsam07
 weltraumschaf

@@ -79,58 +79,25 @@ class TestPullRequestModel:
         assert pr.milestone is related_objects["milestone"]
         assert pr.repository is related_objects["repository"]
 
+    @patch("apps.github.models.pull_request.BulkSaveModel.bulk_save")
+    def test_bulk_save(self, mock_bulk_save):
+        """Test that bulk_save calls the parent method correctly."""
+        pull_requests = [Mock(spec=PullRequest), Mock(spec=PullRequest)]
+        PullRequest.bulk_save(pull_requests, fields=["title"])
+        mock_bulk_save.assert_called_once_with(PullRequest, pull_requests, fields=["title"])
 
-@patch("apps.github.models.pull_request.BulkSaveModel.bulk_save")
-def test_bulk_save(mock_bulk_save):
-    """Test that bulk_save calls the parent method correctly."""
-    pull_requests = [Mock(spec=PullRequest), Mock(spec=PullRequest)]
-    PullRequest.bulk_save(pull_requests, fields=["title"])
-    mock_bulk_save.assert_called_once_with(PullRequest, pull_requests, fields=["title"])
+    @patch("apps.github.models.pull_request.PullRequest.get_node_id")
+    @patch("apps.github.models.pull_request.PullRequest.objects.get")
+    def test_update_data_existing_pr(self, mock_get, mock_get_node_id, gh_pull_request_mock):
+        """Test updating an existing pull request."""
+        mock_get_node_id.return_value = "pr_node_id_123"
+        mock_pr = Mock(spec=PullRequest)
+        mock_get.return_value = mock_pr
 
+        author = Mock(spec=User, _state=Mock(db=None))
+        milestone = Mock(spec=Milestone, _state=Mock(db=None))
+        repository = Mock(spec=Repository, _state=Mock(db=None))
 
-@patch("apps.github.models.pull_request.PullRequest.get_node_id")
-@patch("apps.github.models.pull_request.PullRequest.objects.get")
-def test_update_data_existing_pr(mock_get, mock_get_node_id, gh_pull_request_mock):
-    """Test updating an existing pull request."""
-    mock_get_node_id.return_value = "pr_node_id_123"
-    mock_pr = Mock(spec=PullRequest)
-    mock_get.return_value = mock_pr
-
-    author = Mock(spec=User, _state=Mock(db=None))
-    milestone = Mock(spec=Milestone, _state=Mock(db=None))
-    repository = Mock(spec=Repository, _state=Mock(db=None))
-
-    pr = PullRequest.update_data(
-        gh_pull_request_mock,
-        author=author,
-        milestone=milestone,
-        repository=repository,
-    )
-
-    mock_get.assert_called_once_with(node_id="pr_node_id_123")
-    mock_pr.from_github.assert_called_once_with(
-        gh_pull_request_mock,
-        author=author,
-        milestone=milestone,
-        repository=repository,
-    )
-    mock_pr.save.assert_called_once()
-    assert pr == mock_pr
-
-
-@patch("apps.github.models.pull_request.PullRequest.get_node_id")
-@patch("apps.github.models.pull_request.PullRequest.objects.get")
-@patch("apps.github.models.pull_request.PullRequest.from_github")
-def test_update_data_new_pr(mock_from_github, mock_get, mock_get_node_id, gh_pull_request_mock):
-    """Test creating a new pull request."""
-    mock_get_node_id.return_value = "pr_node_id_123"
-    mock_get.side_effect = PullRequest.DoesNotExist
-
-    author = Mock(spec=User, _state=Mock(db=None))
-    milestone = Mock(spec=Milestone, _state=Mock(db=None))
-    repository = Mock(spec=Repository, _state=Mock(db=None))
-
-    with patch("apps.github.models.pull_request.PullRequest.save") as mock_save:
         pr = PullRequest.update_data(
             gh_pull_request_mock,
             author=author,
@@ -138,12 +105,90 @@ def test_update_data_new_pr(mock_from_github, mock_get, mock_get_node_id, gh_pul
             repository=repository,
         )
 
-    mock_get.assert_called_once_with(node_id="pr_node_id_123")
-    mock_from_github.assert_called_once_with(
-        gh_pull_request_mock,
-        author=author,
-        milestone=milestone,
-        repository=repository,
-    )
-    mock_save.assert_called_once()
-    assert pr.node_id == "pr_node_id_123"
+        mock_get.assert_called_once_with(node_id="pr_node_id_123")
+        mock_pr.from_github.assert_called_once_with(
+            gh_pull_request_mock,
+            author=author,
+            milestone=milestone,
+            repository=repository,
+        )
+        mock_pr.save.assert_called_once()
+        assert pr == mock_pr
+
+    @patch("apps.github.models.pull_request.PullRequest.get_node_id")
+    @patch("apps.github.models.pull_request.PullRequest.objects.get")
+    @patch("apps.github.models.pull_request.PullRequest.from_github")
+    def test_update_data_new_pr(
+        self, mock_from_github, mock_get, mock_get_node_id, gh_pull_request_mock
+    ):
+        """Test creating a new pull request."""
+        mock_get_node_id.return_value = "pr_node_id_123"
+        mock_get.side_effect = PullRequest.DoesNotExist
+
+        author = Mock(spec=User, _state=Mock(db=None))
+        milestone = Mock(spec=Milestone, _state=Mock(db=None))
+        repository = Mock(spec=Repository, _state=Mock(db=None))
+
+        with patch("apps.github.models.pull_request.PullRequest.save") as mock_save:
+            pr = PullRequest.update_data(
+                gh_pull_request_mock,
+                author=author,
+                milestone=milestone,
+                repository=repository,
+            )
+
+        mock_get.assert_called_once_with(node_id="pr_node_id_123")
+        mock_from_github.assert_called_once_with(
+            gh_pull_request_mock,
+            author=author,
+            milestone=milestone,
+            repository=repository,
+        )
+        mock_save.assert_called_once()
+        assert pr.node_id == "pr_node_id_123"
+
+    def test_pr_save_method(self):
+        """Test the save method."""
+        with patch(
+            "apps.github.models.generic_issue_model.GenericIssueModel.save"
+        ) as mock_super_save:
+            pr = PullRequest()
+            pr.save()
+            mock_super_save.assert_called_once_with()
+
+    def test_repository_id(self):
+        """Test the repository_id property inherited from GenericIssueModel."""
+        repository = Mock(spec=Repository, _state=Mock(db=None))
+        repository.id = 999
+        pr = PullRequest(repository=repository)
+        assert pr.repository_id == 999
+
+    @patch("apps.github.models.pull_request.PullRequest.get_node_id")
+    @patch("apps.github.models.pull_request.PullRequest.objects.get")
+    def test_update_data_without_save(self, mock_get, mock_get_node_id, gh_pull_request_mock):
+        """Test update_data with save=False."""
+        mock_get_node_id.return_value = "pr_node_id_123"
+        mock_pr = Mock(spec=PullRequest)
+        mock_get.return_value = mock_pr
+
+        author = Mock(spec=User, _state=Mock(db=None))
+        milestone = Mock(spec=Milestone, _state=Mock(db=None))
+        repository = Mock(spec=Repository, _state=Mock(db=None))
+
+        pr = PullRequest.update_data(
+            gh_pull_request_mock,
+            author=author,
+            milestone=milestone,
+            repository=repository,
+            save=False,
+        )
+
+        mock_get.assert_called_once_with(node_id="pr_node_id_123")
+        mock_pr.from_github.assert_called_once_with(
+            gh_pull_request_mock,
+            author=author,
+            milestone=milestone,
+            repository=repository,
+        )
+        mock_pr.save.assert_not_called()
+        assert pr == mock_pr

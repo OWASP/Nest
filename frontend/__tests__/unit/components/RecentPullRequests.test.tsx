@@ -26,7 +26,7 @@ const mockUser = {
   bio: 'Test bio',
   company: 'Test Company',
   contributionsCount: 42,
-  createdAt: 1577836800000,
+  createdAt: '2020-01-01T00:00:00.000Z',
   email: 'test@example.com',
   followersCount: 10,
   followingCount: 5,

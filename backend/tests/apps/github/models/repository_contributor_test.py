@@ -220,9 +220,10 @@ class TestRepositoryContributor(TestCase):
             expected = [
                 {
                     "avatar_url": "url1",
+                    "contributions_count": 100,
+                    "id": "user1",
                     "login": "user1",
                     "name": "User One",
-                    "contributions_count": 100,
                 }
             ]
             assert result == expected
@@ -307,21 +308,17 @@ class TestRepositoryContributor(TestCase):
 
         for name in invalid_names:
             with self.subTest(name=name):
-                # Test regex doesn't match
                 regex_match = re.search(CONTRIBUTOR_FULL_NAME_REGEX, name) is not None
                 assert not regex_match, f"Invalid name '{name}' should not match regex pattern"
 
-                # Test filter behavior
                 with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
                     mock_queryset = MagicMock()
                     qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
                     qs.select_related.return_value = mock_queryset
 
-                    # Mock filter chain
                     mock_queryset.exclude.return_value = mock_queryset
                     mock_queryset.filter.return_value = mock_queryset
 
-                    # Mock aggregation chain
                     mock_values = MagicMock()
                     mock_annotate = MagicMock()
                     mock_order_by = MagicMock()
@@ -329,11 +326,10 @@ class TestRepositoryContributor(TestCase):
                     mock_queryset.values.return_value = mock_values
                     mock_values.annotate.return_value = mock_annotate
                     mock_annotate.order_by.return_value = mock_order_by
-                    mock_order_by.__getitem__.return_value = []  # No results for invalid names
+                    mock_order_by.__getitem__.return_value = []
 
                     result = RepositoryContributor.get_top_contributors(has_full_name=True)
 
-                    # Should be excluded (empty results)
                     assert not result, f"Name '{name}' should be excluded but was included"
 
     def test_has_full_name_filter_with_false_value(self):
@@ -343,11 +339,9 @@ class TestRepositoryContributor(TestCase):
             qs = mock_objects.by_humans.return_value.to_community_repositories.return_value
             qs.select_related.return_value = mock_queryset
 
-            # Mock filter chain
             mock_queryset.exclude.return_value = mock_queryset
             mock_queryset.filter.return_value = mock_queryset
 
-            # Mock aggregation chain
             mock_values = MagicMock()
             mock_annotate = MagicMock()
             mock_order_by = MagicMock()
@@ -359,7 +353,20 @@ class TestRepositoryContributor(TestCase):
 
             RepositoryContributor.get_top_contributors(has_full_name=False)
 
-            # Should not call filter with regex
             filter_calls = mock_queryset.filter.call_args_list
             regex_calls = [call for call in filter_calls if "user__name__regex" in call.kwargs]
             assert not regex_calls, "Should not apply regex filter when has_full_name=False"
+
+    def test_get_top_contributors_organization_filter(self):
+        """Test the organization filtering logic in get_top_contributors."""
+        with patch(REPOSITORY_CONTRIBUTOR_OBJECTS_PATH) as mock_objects:
+            mock_queryset = self._setup_mock_queryset(mock_objects)
+            mock_after_select = MagicMock()
+            mock_queryset.select_related.return_value = mock_after_select
+            mock_after_select.filter.return_value = mock_queryset
+
+            RepositoryContributor.get_top_contributors(organization="test-org")
+            mock_queryset.select_related.assert_called_with("repository__organization")
+            mock_after_select.filter.assert_called_once_with(
+                repository__organization__login="test-org"
+            )

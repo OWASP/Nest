@@ -11,6 +11,7 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.github.models.generic_issue_model import GenericIssueModel
 from apps.github.models.milestone import Milestone as MilestoneModel
 
@@ -22,7 +23,7 @@ class MilestoneBase(Schema):
 
     created_at: datetime
     number: int
-    state: GenericIssueModel.State
+    state: GenericIssueModel.IssueState
     title: str
     updated_at: datetime
     url: str
@@ -60,7 +61,7 @@ class MilestoneFilter(FilterSchema):
         description="Repository that milestones belong to",
         example="Nest",
     )
-    state: GenericIssueModel.State | None = Field(
+    state: GenericIssueModel.IssueState | None = Field(
         None,
         description="Milestone state",
     )
@@ -91,7 +92,12 @@ def list_milestones(
     if filters.state:
         milestones = milestones.filter(state=filters.state)
 
-    return milestones.order_by(ordering or "-created_at", "-updated_at")
+    primary_order = ordering or "-created_at"
+    order_fields = [primary_order]
+    if primary_order not in {"updated_at", "-updated_at"}:
+        order_fields.append("-updated_at")
+
+    return milestones.order_by(*order_fields)
 
 
 @router.get(
@@ -101,6 +107,7 @@ def list_milestones(
     ),
     operation_id="get_milestone",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: MilestoneError,
         HTTPStatus.OK: MilestoneDetail,
     },

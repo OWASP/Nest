@@ -12,6 +12,8 @@ class Commit(BulkSaveModel, NodeModel, TimestampedModel):
     """Commit model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "github_commits"
         indexes = [
             models.Index(fields=["-created_at"], name="commit_created_at_desc_idx"),

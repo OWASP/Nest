@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react'
+import { mockChapterDetailsData } from '@mockData/mockChapterDetailsData'
 import { screen, waitFor } from '@testing-library/react'
-import { mockChapterDetailsData } from '@unit/data/mockChapterDetailsData'
 import { render } from 'wrappers/testUtil'
 import ChapterDetailsPage from 'app/chapters/[chapterKey]/page'
 
@@ -43,6 +43,7 @@ describe('chapterDetailsPage Component', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: null,
+      loading: true,
     })
     render(<ChapterDetailsPage />)
     const loadingSpinner = screen.getAllByAltText('Loading indicator')
@@ -65,10 +66,23 @@ describe('chapterDetailsPage Component', () => {
     expect(screen.getByText('This is a test chapter summary.')).toBeInTheDocument()
   })
 
-  test('displays "No chapters found" when there are no chapters', async () => {
+  test('displays error message when GraphQL request fails', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: { chapter: null },
-      error: true,
+      data: null,
+      error: { message: 'GraphQL error' },
+      loading: false,
+    })
+    render(<ChapterDetailsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Error loading chapter')).toBeInTheDocument()
+    })
+  })
+
+  test('displays "Chapter not found" when data is null', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: null,
+      error: null,
+      loading: false,
     })
     render(<ChapterDetailsPage />)
     await waitFor(() => {
@@ -135,6 +149,65 @@ describe('chapterDetailsPage Component', () => {
       expect(screen.getByText('Leaders')).toBeInTheDocument()
       expect(screen.getByText('Bob')).toBeInTheDocument()
       expect(screen.getByText('Chapter Leader')).toBeInTheDocument()
+    })
+  })
+
+  test('handles missing suggestedLocation gracefully', async () => {
+    const chapterDataWithoutLocation = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        suggestedLocation: null,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithoutLocation,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Test City, Test Country')).not.toBeInTheDocument()
+  })
+
+  test('handles missing region gracefully', async () => {
+    const chapterDataWithoutRegion = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        region: null,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithoutRegion,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
+    })
+  })
+
+  test('handles missing suggestedLocation and region gracefully', async () => {
+    const chapterDataWithoutLocationAndRegion = {
+      ...mockChapterDetailsData,
+      chapter: {
+        ...mockChapterDetailsData.chapter,
+        suggestedLocation: undefined,
+        region: undefined,
+      },
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: chapterDataWithoutLocationAndRegion,
+      error: null,
+    })
+    render(<ChapterDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
   })
 })

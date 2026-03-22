@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from slack_sdk.errors import SlackApiError
 
+from apps.slack.blocks import DIVIDER, SECTION_BREAK
 from apps.slack.events.event import EventBase
 
 
@@ -168,3 +169,101 @@ class TestEventBase:
         mock_app.event.assert_called_once_with(
             event_instance.event_type, matchers=event_instance.matchers
         )
+
+    def test_configure_events_when_app_is_none(self, mocker):
+        """Tests that configure_events returns early when app is None."""
+        mock_slack_config = mocker.patch("apps.slack.events.event.SlackConfig")
+        mock_slack_config.app = None
+        mock_logger = mocker.patch("apps.slack.events.event.logger")
+
+        EventBase.configure_events()
+
+        mock_logger.warning.assert_called_once_with(
+            "SlackConfig.app is None. Event handlers are not registered."
+        )
+
+    def test_get_events_yields_subclasses(self):
+        """Tests that get_events yields all EventBase subclasses."""
+        subclasses = list(EventBase.get_events())
+        assert MockEvent in subclasses
+        assert EventBase not in subclasses
+
+    def test_get_direct_message(self, mocker, event_instance, mock_event_payload):
+        """Tests that get_direct_message returns blocks."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = "Direct message content"
+        mocker.patch.object(
+            MockEvent,
+            "direct_message_template",
+            new_callable=mocker.PropertyMock,
+            return_value=mock_template,
+        )
+
+        result = event_instance.get_direct_message(mock_event_payload)
+
+        assert isinstance(result, list)
+
+    def test_get_ephemeral_message(self, mocker, event_instance, mock_event_payload):
+        """Tests that get_ephemeral_message returns blocks."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = "Ephemeral message content"
+        mocker.patch.object(
+            MockEvent,
+            "ephemeral_message_template",
+            new_callable=mocker.PropertyMock,
+            return_value=mock_template,
+        )
+
+        result = event_instance.get_ephemeral_message(mock_event_payload)
+
+        assert isinstance(result, list)
+
+    def test_open_conversation_catches_cannot_dm_bot_error(self, event_instance, mock_client):
+        """Tests that open_conversation returns None for cannot_dm_bot error."""
+        mock_slack_error = SlackApiError(
+            message="Cannot DM bot", response={"ok": False, "error": "cannot_dm_bot"}
+        )
+        mock_client.conversations_open.side_effect = mock_slack_error
+
+        result = event_instance.open_conversation(client=mock_client, user_id="U123ABC")
+
+        assert result is None
+
+    def test_open_conversation_raises_other_errors(self, event_instance, mock_client):
+        """Tests that open_conversation re-raises other SlackApiErrors."""
+        mock_slack_error = SlackApiError(
+            message="Other error", response={"ok": False, "error": "channel_not_found"}
+        )
+        mock_client.conversations_open.side_effect = mock_slack_error
+
+        with pytest.raises(SlackApiError):
+            event_instance.open_conversation(client=mock_client, user_id="U123ABC")
+
+    def test_render_blocks_with_divider(self, mocker, event_instance):
+        """Tests that render_blocks handles divider sections."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = f"{DIVIDER}"
+
+        result = event_instance.render_blocks(template=mock_template, context={})
+
+        assert any(block.get("type") == "divider" for block in result)
+
+    def test_render_blocks_with_text_section(self, mocker, event_instance):
+        """Tests that render_blocks handles text sections."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = "This is some text content"
+
+        result = event_instance.render_blocks(template=mock_template, context={})
+
+        assert len(result) > 0
+        assert result[0]["type"] == "section"
+
+    def test_render_blocks_skips_empty_sections(self, event_instance):
+        """Tests that render_blocks skips empty sections from consecutive SECTION_BREAKs."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = f"Text before{SECTION_BREAK}{SECTION_BREAK}Text after"
+
+        result = event_instance.render_blocks(template=mock_template, context={})
+
+        assert len(result) == 2
+        assert all(block["type"] == "section" for block in result)

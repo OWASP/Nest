@@ -3,6 +3,8 @@ import { gql } from '@apollo/client'
 export const GET_CHAPTER_DATA = gql`
   query GetChapterData($key: String!) {
     chapter(key: $key) {
+      contributionData
+      contributionStats
       id
       entityLeaders {
         id
@@ -45,5 +47,11 @@ export const GET_CHAPTER_METADATA = gql`
       name
       summary
     }
+  }
+`
+
+export const GET_CHAPTER_COUNTRIES = gql`
+  query GetChapterCountries {
+    chapterCountries
   }
 `

@@ -4,6 +4,7 @@ import pytest
 from django.core.management.base import BaseCommand
 
 from apps.ai.management.commands.ai_update_project_chunks import Command
+from apps.owasp.models.project import Project
 
 
 @pytest.fixture
@@ -24,8 +25,6 @@ class TestAiCreateProjectChunksCommand:
         assert isinstance(command, BaseCommand)
 
     def test_model_class_property(self, command):
-        from apps.owasp.models.project import Project
-
         assert command.model_class == Project
 
     def test_entity_name_property(self, command):

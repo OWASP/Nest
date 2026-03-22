@@ -11,8 +11,21 @@ from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
-from apps.owasp.models.enums.project import ProjectLevel
+from apps.api.rest.v0.common import Leader, ValidationErrorSchema
+from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
+from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project as ProjectModel
+
+PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
+    "name": {
+        "type": "string",
+        "lookup": "icontains",
+    },
+    "stars": {
+        "type": "number",
+        "field": "stars_count",
+    },
+}
 
 router = RouterPaginated(tags=["Projects"])
 
@@ -24,6 +37,7 @@ class ProjectBase(Schema):
     key: str
     level: ProjectLevel
     name: str
+    type: ProjectType
     updated_at: datetime
 
     @staticmethod
@@ -40,6 +54,15 @@ class ProjectDetail(ProjectBase):
     """Detail schema for Project (used in single item endpoints)."""
 
     description: str
+    leaders: list[Leader]
+
+    @staticmethod
+    def resolve_leaders(obj):
+        """Resolve leaders."""
+        return [
+            Leader(key=leader.member.login if leader.member else None, name=leader.member_name)
+            for leader in obj.entity_leaders
+        ]
 
 
 class ProjectError(Schema):
@@ -54,6 +77,14 @@ class ProjectFilter(FilterSchema):
     level: ProjectLevel | None = Field(
         None,
         description="Level of the project",
+    )
+    q: str | None = Field(
+        None,
+        description="Structured search query (e.g. 'name:security stars:>100')",
+    )
+    type: list[ProjectType] | None = Field(
+        None,
+        description="Type of the project",
     )
 
 
@@ -74,11 +105,19 @@ def list_projects(
     ),
 ) -> list[Project]:
     """Get projects."""
-    return filters.filter(
-        ProjectModel.active_projects.order_by(
-            ordering or "-level_raw", "-stars_count", "-forks_count"
-        )
+    queryset = apply_structured_search(
+        queryset=ProjectModel.active_projects,
+        query=filters.q,
+        field_schema=PROJECT_SEARCH_FIELDS,
     )
+
+    if filters.level is not None:
+        queryset = queryset.filter(level=filters.level)
+
+    if filters.type is not None:
+        queryset = queryset.filter(type__in=filters.type)
+
+    return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 
 
 @router.get(
@@ -86,6 +125,7 @@ def list_projects(
     description="Retrieve project details.",
     operation_id="get_project",
     response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
         HTTPStatus.NOT_FOUND: ProjectError,
         HTTPStatus.OK: ProjectDetail,
     },

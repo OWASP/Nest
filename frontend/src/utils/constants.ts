@@ -7,12 +7,7 @@ import type { Section } from 'types/section'
 export const headerLinks: Link[] = [
   {
     text: 'Community',
-    submenu: [
-      { text: 'Chapters', href: '/chapters' },
-      { text: 'Members', href: '/members' },
-      { text: 'Organizations', href: '/organizations' },
-      { text: 'Snapshots', href: '/community/snapshots' },
-    ],
+    href: '/community',
   },
   {
     text: 'Projects',

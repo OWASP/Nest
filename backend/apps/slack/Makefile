@@ -11,7 +11,6 @@ slack-export-data:
 	@CMD="sed -E -i 's/(\"[^\"]*email\"): *\"([^\"]|\\\")*\"/\1: \"\"/g' data/slack-data.json" $(MAKE) exec-backend-command
 	@CMD="gzip data/slack-data.json" $(MAKE) exec-backend-command
 
-
 slack-set-conversation-sync-messages-flags:
 	@echo "Setting conversation sync messages flags"
 	@CMD="python manage.py slack_set_conversation_sync_messages_flags" $(MAKE) exec-backend-command

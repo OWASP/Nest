@@ -32,20 +32,14 @@ class CustomPagination(PaginationBase):
         """Paginate the queryset and return standardized output."""
         page = pagination.page
         page_size = pagination.page_size
-
-        # Calculate pagination.
         total_count = queryset.count()
-        # Ensure total_pages is at least 1 for consistent metadata.
         total_pages = max(1, (total_count + page_size - 1) // page_size)
-
-        # Validate that the requested page is within the valid range.
         if page > total_pages:
             message = f"Page {page} not found. Valid pages are 1 to {total_pages}."
             raise Http404(message)
 
         offset = (page - 1) * page_size
 
-        # Get the page items.
         items = list(queryset[offset : offset + page_size])
 
         return {

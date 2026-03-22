@@ -1,11 +1,27 @@
 """GitHub issue GraphQL node."""
 
+from datetime import datetime
+
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
+from strawberry.types import Info
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
+from apps.mentorship.models.task import Task
+
+MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
+    "pull_requests",
+    queryset=PullRequest.objects.filter(
+        merged_at__isnull=False,
+        state="closed",
+    ),
+    to_attr="merged_pull_requests",
+)
 
 
 @strawberry_django.type(
@@ -22,51 +38,62 @@ from apps.github.models.issue import Issue
 class IssueNode(strawberry.relay.Node):
     """GitHub issue node."""
 
-    @strawberry.field
-    def author(self) -> UserNode | None:
-        """Resolve author."""
-        return self.author
+    assignees: list[UserNode] = strawberry_django.field()
+    author: UserNode | None = strawberry_django.field()
+    pull_requests: list[PullRequestNode] = strawberry_django.field()
 
-    @strawberry.field
-    def organization_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository__organization", "repository"])
+    def organization_name(self, root: Issue) -> str | None:
         """Resolve organization name."""
         return (
-            self.repository.organization.login
-            if self.repository and self.repository.organization
+            root.repository.organization.login
+            if root.repository and root.repository.organization
             else None
         )
 
-    @strawberry.field
-    def repository_name(self) -> str | None:
+    @strawberry_django.field(select_related=["repository"])
+    def repository_name(self, root: Issue) -> str | None:
         """Resolve the repository name."""
-        return self.repository.name if self.repository else None
+        return root.repository.name if root.repository else None
 
-    @strawberry.field
-    def assignees(self) -> list[UserNode]:
-        """Resolve assignees list."""
-        return list(self.assignees.all())
-
-    @strawberry.field
-    def labels(self) -> list[str]:
+    @strawberry_django.field(prefetch_related=["labels"])
+    def labels(self, root: Issue) -> list[str]:
         """Resolve label names for the issue."""
-        return list(self.labels.values_list("name", flat=True))
+        return [label.name for label in root.labels.all()]
 
-    @strawberry.field
-    def is_merged(self) -> bool:
+    @strawberry_django.field(prefetch_related=[MERGED_PULL_REQUESTS_PREFETCH])
+    def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
-        return self.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
+        return bool(getattr(root, "merged_pull_requests", None))
 
-    @strawberry.field
-    def interested_users(self) -> list[UserNode]:
-        """Return all users who have expressed interest in this issue."""
-        return [
-            interest.user
-            for interest in self.participant_interests.select_related("user").order_by(
-                "user__login"
+    @strawberry_django.field(
+        prefetch_related=[
+            Prefetch(
+                "participant_interests",
+                queryset=IssueUserInterest.objects.select_related("user__owasp_profile").order_by(
+                    "user__login"
+                ),
+                to_attr="interests_users",
             )
         ]
+    )
+    def interested_users(self, root: Issue) -> list[UserNode]:
+        """Return all users who have expressed interest in this issue."""
+        return [interest.user for interest in getattr(root, "interests_users", [])]
 
     @strawberry.field
-    def pull_requests(self) -> list[PullRequestNode]:
-        """Return all pull requests linked to this issue."""
-        return list(self.pull_requests.select_related("author", "repository").all())
+    def task_deadline(self, root: Issue, info: Info) -> datetime | None:
+        """Return the deadline for the latest assigned task linked to this issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping is not None:
+            return mapping.get(root.number)
+
+        return (
+            Task.objects.filter(
+                issue=root,
+                deadline_at__isnull=False,
+            )
+            .order_by("-assigned_at")
+            .values_list("deadline_at", flat=True)
+            .first()
+        )

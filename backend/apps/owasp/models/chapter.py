@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 
 from apps.common.geocoding import get_location_coordinates
-from apps.common.index import IndexBase
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.open_ai import OpenAi
 from apps.common.utils import get_absolute_url, join_values
@@ -30,6 +28,8 @@ class Chapter(
     active_chapters = ActiveChapterManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_chapters"
         indexes = [
             models.Index(fields=["-created_at"], name="chapter_created_at_desc_idx"),
@@ -64,8 +64,18 @@ class Chapter(
     latitude = models.FloatField(verbose_name="Latitude", blank=True, null=True)
     longitude = models.FloatField(verbose_name="Longitude", blank=True, null=True)
 
-    # GRs.
-    members = GenericRelation("owasp.EntityMember")
+    contribution_data = models.JSONField(
+        verbose_name="Contribution Data",
+        default=dict,
+        blank=True,
+        help_text="Daily contribution counts (YYYY-MM-DD -> count mapping)",
+    )
+    contribution_stats = models.JSONField(
+        verbose_name="Contribution Statistics",
+        default=dict,
+        blank=True,
+        help_text="Detailed contribution breakdown (commits, issues, pull requests, releases)",
+    )
 
     def __str__(self) -> str:
         """Chapter human readable representation."""
@@ -85,7 +95,12 @@ class Chapter(
     @lru_cache
     def active_chapters_count():
         """Return active chapters count."""
-        return IndexBase.get_total_count("chapters", search_filters="idx_is_active:true")
+        return Chapter.objects.filter(
+            is_active=True,
+            latitude__isnull=False,
+            longitude__isnull=False,
+            owasp_repository__is_empty=False,
+        ).count()
 
     def from_github(self, repository) -> None:
         """Update instance based on GitHub repository data.
@@ -172,7 +187,7 @@ class Chapter(
         if not self.suggested_location:
             self.generate_suggested_location()
 
-        if not self.latitude or not self.longitude:
+        if self.latitude is None or self.longitude is None:
             self.generate_geo_location()
 
         super().save(*args, **kwargs)

@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import type { Program } from 'types/mentorship'
+import { formatDate } from 'utils/dateFormatter'
 import ProgramCard from 'components/ProgramCard'
 
 jest.mock('next/navigation', () => ({
@@ -54,12 +55,6 @@ jest.mock('@heroui/tooltip', () => ({
 
 jest.mock('components/EntityActions', () => jest.requireActual('components/EntityActions'))
 
-jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => {
-    return <a href={href}>{children}</a>
-  }
-})
-
 describe('ProgramCard', () => {
   const mockPush = jest.fn()
 
@@ -82,7 +77,7 @@ describe('ProgramCard', () => {
     description: 'This is a test program description',
     status: ProgramStatusEnum.Published,
     startedAt: '2024-01-01T00:00:00Z',
-    endedAt: '2024-12-31T12:00:00Z',
+    endedAt: '2024-12-31T00:00:00Z',
     userRole: 'admin',
   }
 
@@ -152,7 +147,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      const actionsButton = screen.getByTestId('program-actions-button')
+      const actionsButton = screen.getByRole('button', { name: /Program actions menu/ })
 
       await act(async () => {
         fireEvent.click(actionsButton)
@@ -329,7 +324,7 @@ describe('ProgramCard', () => {
   })
 
   describe('Date Formatting', () => {
-    it('shows date range when both startedAt and endedAt are provided', () => {
+    it('shows exact date range format when both startedAt and endedAt are provided', () => {
       render(
         <ProgramCard
           isAdmin={false}
@@ -339,9 +334,30 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(
-        screen.getByText((t) => t.includes('Jan 1, 2024') && t.includes('Dec 31, 2024'))
-      ).toBeInTheDocument()
+      expect(screen.getByText('Jan 1, 2024 – Dec 31, 2024')).toBeInTheDocument()
+    })
+
+    it('verifies formatDate explicitly uses timeZone UTC option (catches missing timeZone bug)', () => {
+      const testDate = '2024-01-01T00:00:00Z'
+
+      const spy = jest.spyOn(Date.prototype, 'toLocaleDateString')
+      formatDate(testDate)
+
+      const calls = spy.mock.calls
+      expect(calls.length).toBeGreaterThan(0)
+
+      const lastCall = calls.at(-1)
+      const options = lastCall[1]
+
+      expect(options).toHaveProperty('timeZone', 'UTC')
+      expect(options).toMatchObject({
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'UTC',
+      })
+
+      spy.mockRestore()
     })
 
     it('shows only start date when endedAt is missing', () => {
@@ -400,7 +416,30 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(screen.getByTestId('program-actions-button')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Program actions menu/ })).toBeInTheDocument()
+    })
+
+    it('handles mousedown event on actions wrapper', () => {
+      render(
+        <ProgramCard
+          program={baseMockProgram}
+          isAdmin={true}
+          href="/test/path"
+          accessLevel="admin"
+        />
+      )
+
+      const actionsWrapper = screen
+        .getByRole('button', { name: /Program actions menu/ })
+        .closest('[role="none"]')
+      expect(actionsWrapper).toBeInTheDocument()
+
+      // Create a real mousedown event and spy on stopPropagation
+      const mousedownEvent = new MouseEvent('mousedown', { bubbles: true })
+      const stopPropagationSpy = jest.spyOn(mousedownEvent, 'stopPropagation')
+
+      actionsWrapper!.dispatchEvent(mousedownEvent)
+      expect(stopPropagationSpy).toHaveBeenCalled()
     })
   })
 
@@ -415,7 +454,7 @@ describe('ProgramCard', () => {
         />
       )
 
-      expect(screen.getByTestId('program-actions-button')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Program actions menu/ })).toBeInTheDocument()
     })
 
     it('handles program with minimal data', () => {

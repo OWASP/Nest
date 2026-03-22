@@ -19,10 +19,14 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
     """Program model representing an overarching mentorship initiative."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_programs"
         verbose_name_plural = "Programs"
 
     class ProgramStatus(models.TextChoices):
+        """Program lifecycle status choices."""
+
         DRAFT = "draft", "Draft"
         PUBLISHED = "published", "Published"
         COMPLETED = "completed", "Completed"
@@ -66,7 +70,9 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
 
     # M2Ms.
     admins = models.ManyToManyField(
-        "mentorship.Mentor",
+        "mentorship.Admin",
+        through="mentorship.ProgramAdmin",
+        related_name="admin_programs",
         verbose_name="Admins",
         blank=True,
     )
@@ -79,6 +85,20 @@ class Program(MatchingAttributes, ProgramIndexMixin, StartEndRange, TimestampedM
 
         """
         return self.name
+
+    def user_has_access(self, user) -> bool:
+        """Check if the given user has admin or mentor access to this program.
+
+        Returns True if the user is authenticated and is either an admin or
+        a mentor of this program, False otherwise.
+        """
+        if not user.is_authenticated:
+            return False
+
+        return self.admins.filter(nest_user=user).exists() or bool(
+            user.github_user
+            and self.modules.filter(mentors__github_user=user.github_user).exists()
+        )
 
     def save(self, *args, **kwargs) -> None:
         """Save program."""

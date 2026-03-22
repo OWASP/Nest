@@ -1,23 +1,20 @@
 'use client'
+
 import { useQuery } from '@apollo/client/react'
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
 import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FaMapSigns, FaTools } from 'react-icons/fa'
 import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GetProjectMetadataDocument,
-  GetTopContributorsDocument,
-} from 'types/__generated__/projectQueries.generated'
-import { GetLeaderDataDocument } from 'types/__generated__/userQueries.generated'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
+import { GetAboutPageDataDocument } from 'types/__generated__/aboutQueries.generated'
+import type { ProjectTimeline } from 'types/about'
+import type { Leader } from 'types/leader'
 import {
   technologies,
   missionContent,
@@ -26,18 +23,22 @@ import {
   projectTimeline,
   projectStory,
 } from 'utils/aboutData'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
+import ContributorsList from 'components/ContributorsList'
 import Leaders from 'components/Leaders'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import AboutSkeleton from 'components/skeletons/AboutSkeleton'
-import TopContributorsList from 'components/TopContributorsList'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
 }
+
+const MILESTONE_LIMIT = 3
 
 const projectKey = 'nest'
 
@@ -61,57 +62,120 @@ const getMilestoneIcon = (progress: number) => {
   return FaClock
 }
 
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
+const INITIAL_YEAR_COUNT = 2
+
+const getMonthShortName = (yearStr: string) => {
+  return yearStr.split(' ')[0].substring(0, 3)
+}
+
+const getTimelineYear = (yearStr: string) => yearStr.split(' ').pop() || ''
+
+const getMonthIndex = (yearStr: string) => {
+  const month = yearStr.split(' ')[0]
+  const idx = MONTHS.indexOf(month)
+  return idx === -1 ? 0 : idx
+}
+
+type YearGroup = {
+  year: string
+  milestones: ProjectTimeline[]
+}
+
+const groupByYear = (milestones: ProjectTimeline[]): YearGroup[] => {
+  const groups: Record<string, { milestone: ProjectTimeline; idx: number }[]> = {}
+
+  milestones.forEach((m, idx) => {
+    const year = getTimelineYear(m.year)
+    if (!groups[year]) groups[year] = []
+    groups[year].push({ milestone: m, idx })
+  })
+
+  return Object.entries(groups)
+    .sort(([a], [b]) => Number(b) - Number(a))
+    .map(([year, items]) => ({
+      year,
+      milestones: [...items]
+        .sort(
+          (a, b) =>
+            getMonthIndex(b.milestone.year) - getMonthIndex(a.milestone.year) || b.idx - a.idx
+        )
+        .map(({ milestone }) => milestone),
+    }))
+}
+
 const About = () => {
-  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
-    GetProjectMetadataDocument,
-    {
-      variables: { key: projectKey },
-    }
-  )
+  const { data, loading, error } = useQuery(GetAboutPageDataDocument, {
+    variables: {
+      projectKey,
+      excludedUsernames: Object.keys(leaders),
+      hasFullName: true,
+      limit: 24,
+      leader1: 'arkid15r',
+      leader2: 'kasya',
+      leader3: 'mamicidal',
+    },
+  })
 
-  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
-    GetTopContributorsDocument,
-    {
-      variables: {
-        excludedUsernames: Object.keys(leaders),
-        hasFullName: true,
-        key: projectKey,
-        limit: 24,
-      },
-    }
-  )
+  // Derive data directly from response to prevent race conditions.
+  const projectMetadata = data?.project
+  const topContributors = data?.topContributors
 
-  const { leadersData, isLoading: leadersLoading } = useLeadersData()
+  const leadersData = [data?.leader1, data?.leader2, data?.leader3]
+    .filter(Boolean)
+    .map((user) => ({
+      description: user?.login ? leaders[user.login as keyof typeof leaders] : '',
+      memberName: user?.name || user?.login,
+      member: user,
+    }))
+    .filter((leader) => leader.memberName) as Leader[]
 
-  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
+  const [showAllRoadmap, setShowAllRoadmap] = useState(false)
+  const [showAllTimeline, setShowAllTimeline] = useState(false)
+  const [fillPercent, setFillPercent] = useState(0)
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const yearGroups = useMemo(() => groupByYear(projectTimeline), [])
+  const visibleYearGroups = showAllTimeline ? yearGroups : yearGroups.slice(0, INITIAL_YEAR_COUNT)
+
+  const updateProgress = useCallback(() => {
+    const el = timelineRef.current
+    if (!el) return
+
+    const rect = el.getBoundingClientRect()
+    const viewportH = window.innerHeight
+    const start = viewportH * 0.8
+    const end = viewportH * 0.5
+    const progress = (start - rect.top) / (start - end + rect.height)
+    setFillPercent(Math.min(1, Math.max(0, progress)))
+  }, [])
 
   useEffect(() => {
-    if (projectMetadataResponse?.project) {
-      setProjectMetadata(projectMetadataResponse.project)
-    }
-
-    if (projectMetadataRequestError) {
-      handleAppError(projectMetadataRequestError)
-    }
-  }, [projectMetadataResponse, projectMetadataRequestError])
+    updateProgress()
+    window.addEventListener('scroll', updateProgress, { passive: true })
+    return () => window.removeEventListener('scroll', updateProgress)
+  }, [updateProgress, visibleYearGroups.length])
 
   useEffect(() => {
-    if (topContributorsResponse?.topContributors) {
-      setTopContributors(topContributorsResponse.topContributors)
+    if (error) {
+      handleAppError(error)
     }
+  }, [error])
 
-    if (topContributorsRequestError) {
-      handleAppError(topContributorsRequestError)
-    }
-  }, [topContributorsResponse, topContributorsRequestError])
-
-  const isLoading =
-    !projectMetadataResponse ||
-    !topContributorsResponse ||
-    (projectMetadataRequestError && !projectMetadata) ||
-    (topContributorsRequestError && !topContributors) ||
-    leadersLoading
+  const isLoading = loading
 
   if (isLoading) {
     return <AboutSkeleton />
@@ -155,11 +219,12 @@ const About = () => {
         <Leaders users={leadersData} />
 
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
             icon={HiUserGroup}
-            label="Wall of Fame"
+            title="Wall of Fame"
             maxInitialDisplay={12}
+            getUrl={getMemberUrl}
           />
         )}
 
@@ -210,45 +275,56 @@ const About = () => {
 
         {projectMetadata.recentMilestones.length > 0 && (
           <SecondaryCard icon={FaMapSigns} title={<AnchorTitle title="Roadmap" />}>
-            <div className="grid gap-4">
-              {[...projectMetadata.recentMilestones]
+            {(() => {
+              const filteredMilestones = [...projectMetadata.recentMilestones]
                 .filter((milestone) => milestone.state !== 'closed')
                 .sort((a, b) => (a.title > b.title ? 1 : -1))
-                .map((milestone, index) => (
-                  <div
-                    key={milestone.url || milestone.title || index}
-                    className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
-                  >
-                    <div className="flex-1">
-                      <div className="relative">
-                        <Link
-                          href={milestone.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block"
+              return (
+                <>
+                  <div className="grid gap-4">
+                    {filteredMilestones
+                      .slice(0, showAllRoadmap ? filteredMilestones.length : MILESTONE_LIMIT)
+                      .map((milestone, index) => (
+                        <div
+                          key={milestone.url || milestone.title || index}
+                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
                         >
-                          <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
-                            {milestone.title}
-                          </h3>
-                        </Link>
-                        <Tooltip
-                          closeDelay={100}
-                          content={getMilestoneStatus(milestone.progress)}
-                          id={`tooltip-state-${index}`}
-                          delay={100}
-                          placement="top"
-                          showArrow
-                        >
-                          <span className="absolute top-0 right-0 text-xl text-gray-400">
-                            <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
-                          </span>
-                        </Tooltip>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
-                    </div>
+                          <div className="flex-1">
+                            <div className="relative">
+                              <Link
+                                href={milestone.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
+                                  {milestone.title}
+                                </h3>
+                              </Link>
+                              <Tooltip
+                                closeDelay={100}
+                                content={getMilestoneStatus(milestone.progress)}
+                                id={`tooltip-state-${index}`}
+                                delay={100}
+                                placement="top"
+                                showArrow
+                              >
+                                <span className="absolute top-0 right-0 text-xl text-gray-400">
+                                  <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
+                                </span>
+                              </Tooltip>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                          </div>
+                        </div>
+                      ))}
                   </div>
-                ))}
-            </div>
+                  {filteredMilestones.length > MILESTONE_LIMIT && (
+                    <ShowMoreButton onToggle={() => setShowAllRoadmap(!showAllRoadmap)} />
+                  )}
+                </>
+              )
+            })()}
           </SecondaryCard>
         )}
         <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
@@ -261,24 +337,62 @@ const About = () => {
           ))}
         </SecondaryCard>
         <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
-          <div className="space-y-6">
-            {[...projectTimeline].reverse().map((milestone, index) => (
-              <div key={`${milestone.year}-${milestone.title}`} className="relative pl-10">
-                {index !== projectTimeline.length - 1 && (
-                  <div className="absolute top-5 left-[5px] h-full w-0.5 bg-gray-400"></div>
-                )}
-                <div
-                  aria-hidden="true"
-                  className="absolute top-2.5 left-0 h-3 w-3 rounded-full bg-gray-400"
-                ></div>
-                <div>
-                  <h3 className="text-lg font-semibold text-blue-400">{milestone.title}</h3>
-                  <h4 className="mb-1 font-medium text-gray-400">{milestone.year}</h4>
-                  <p className="text-gray-600 dark:text-gray-300">{milestone.description}</p>
+          <div ref={timelineRef} className="relative ml-3 md:ml-5">
+            <div
+              aria-hidden="true"
+              className="absolute top-0 bottom-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute top-0 left-0 w-0.5 origin-top bg-blue-400"
+              style={{ height: `${fillPercent * 100}%` }}
+            />
+
+            {visibleYearGroups.map((group, groupIdx) => (
+              <div
+                key={group.year}
+                className={groupIdx === visibleYearGroups.length - 1 ? '' : 'mb-8'}
+              >
+                <div className="relative flex items-center">
+                  <div
+                    aria-hidden="true"
+                    className="absolute left-0 z-10 h-3.5 w-3.5 -translate-x-[6px] rounded-full border-2 border-blue-400 bg-blue-100 dark:bg-blue-300"
+                  />
+                </div>
+
+                <div className="ml-5 rounded-lg bg-gray-200 p-4 md:p-6 dark:bg-gray-700">
+                  <span className="mb-3 inline-block rounded-full border border-blue-200 bg-blue-50 px-3 py-0.5 text-sm font-semibold text-blue-400 dark:border-blue-400/30 dark:bg-blue-400/10">
+                    {group.year}
+                  </span>
+
+                  <div className="space-y-2">
+                    {group.milestones.map((milestone) => (
+                      <div
+                        key={`${milestone.year}-${milestone.title}`}
+                        className="flex cursor-default items-start gap-4 rounded-md px-3 py-1.5 transition-all hover:bg-gray-300/50 dark:hover:bg-gray-600/50"
+                      >
+                        <span className="w-10 shrink-0 pt-0.5 text-sm font-semibold text-blue-400">
+                          {getMonthShortName(milestone.year)}
+                        </span>
+                        <div className="min-w-0">
+                          <span className="font-semibold text-gray-700 dark:text-gray-200">
+                            {milestone.title}
+                          </span>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-300">
+                            {milestone.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {yearGroups.length > INITIAL_YEAR_COUNT && (
+            <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
+          )}
         </SecondaryCard>
 
         <div className="grid gap-0 md:grid-cols-4 md:gap-6">
@@ -301,48 +415,6 @@ const About = () => {
       </div>
     </div>
   )
-}
-
-const useLeadersData = () => {
-  const {
-    data: leader1Data,
-    loading: loading1,
-    error: error1,
-  } = useQuery(GetLeaderDataDocument, {
-    variables: { key: 'arkid15r' },
-  })
-  const {
-    data: leader2Data,
-    loading: loading2,
-    error: error2,
-  } = useQuery(GetLeaderDataDocument, {
-    variables: { key: 'kasya' },
-  })
-  const {
-    data: leader3Data,
-    loading: loading3,
-    error: error3,
-  } = useQuery(GetLeaderDataDocument, {
-    variables: { key: 'mamicidal' },
-  })
-
-  const isLoading = loading1 || loading2 || loading3
-
-  useEffect(() => {
-    if (error1) handleAppError(error1)
-    if (error2) handleAppError(error2)
-    if (error3) handleAppError(error3)
-  }, [error1, error2, error3])
-
-  const leadersData = [leader1Data?.user, leader2Data?.user, leader3Data?.user]
-    .filter(Boolean)
-    .map((user) => ({
-      description: leaders[user.login],
-      memberName: user.name || user.login,
-      member: user,
-    }))
-
-  return { leadersData, isLoading }
 }
 
 export default About

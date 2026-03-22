@@ -1,0 +1,23 @@
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime.js'
+
+dayjs.extend(relativeTime)
+
+export const mockContributeData = {
+  issues: [
+    {
+      commentsCount: 1,
+      createdAt: dayjs().subtract(4, 'months').toISOString(),
+      hint: 'Hint',
+      labels: [],
+      objectID: '9180',
+      projectKey: 'project-nest',
+      projectName: 'Owasp Nest',
+      repositoryLanguages: ['Python', 'TypeScript'],
+      summary: 'This is a summary of Contribution 1',
+      title: 'Contribution 1',
+      updatedAt: '2024-12-20T20:37:11.000Z',
+      url: 'https://github.com/OWASP/Nest/issues/225',
+    },
+  ],
+}

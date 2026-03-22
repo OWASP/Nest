@@ -1,0 +1,345 @@
+html {
+    background-color: #f4f6fc;
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100%;
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.swagger-ui .loading-container {
+    margin: 0;
+    height: calc(100vh - 4rem);
+}
+
+.swagger-ui .scheme-container {
+    background-color: inherit;
+}
+
+.swagger-ui .scheme-container .schemes-server-container .servers-title,
+.swagger-ui .title,
+.swagger-ui .opblock-summary-path-description-wrapper .opblock-summary-description {
+    color: #4a5565;
+}
+
+.swagger-ui .info .description p {
+    color: #737373;
+}
+
+.nest-top-bar {
+    position: sticky;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    top: 0;
+    background-color: #98AFC7;
+    height: 4rem;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.nest-top-bar .logo,
+.logo-img-div,
+.nest-top-bar .toggle-theme-btn {
+    display: flex;
+    align-items: center;
+}
+
+/* Logo layout matches main site Header: flex, items-center, same proportions. */
+.nest-top-bar .logo {
+    gap: 0;
+    height: 100%;
+}
+
+.nest-top-bar .nest-logo-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.nest-top-bar .logo-text {
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 2rem;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.nest-logo {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Match main site: 64×64 box with py-2 (8px) so image shows at 48px. */
+.logo-img-div {
+    height: 4rem;
+    width: 4rem;
+    padding: 8px 0;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+.swagger-ui .opblock,
+.swagger-ui .opblock-summary,
+.swagger-ui .opblock-body {
+    background-color: #e5e7eb;
+}
+
+.swagger-ui .opblock,
+.swagger-ui .opblock[class*="opblock-"],
+.swagger-ui .opblock-summary,
+.swagger-ui .opblock[class*="opblock-"] .opblock-summary {
+    border-color: #e5e7eb;
+}
+
+.swagger-ui .opblock-summary-path-description-wrapper span {
+    color: #52a3ff;
+}
+
+/* Match main platform ModeToggle: bg-[#87a1bc] (light), dark:bg-slate-900 (#0f172a). */
+.nest-top-bar .toggle-theme-btn {
+    justify-content: center;
+    align-items: center;
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 100%;
+    background: #87a1bc;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    position: relative;
+}
+
+/* Theme icon: show opposite theme (moon in light = switch to dark, sun in dark = switch to light), consistent with main platform. */
+.nest-top-bar .toggle-theme-btn .theme-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    pointer-events: none;
+}
+
+/* Force icon visible in both themes (Swagger may set fill on svg path in dark). */
+.nest-top-bar .toggle-theme-btn .theme-icon path {
+    fill: #fff;
+}
+
+.nest-top-bar .toggle-theme-btn .theme-icon-sun {
+    visibility: hidden;
+}
+
+.nest-top-bar .toggle-theme-btn .theme-icon-moon {
+    visibility: visible;
+}
+
+html.dark .nest-top-bar .toggle-theme-btn .theme-icon-sun {
+    visibility: visible;
+}
+
+html.dark .nest-top-bar .toggle-theme-btn .theme-icon-moon {
+    visibility: hidden;
+}
+
+html.dark {
+    background-color: #212529;
+}
+
+.models article.json-schema-2020-12 button,
+html.dark .json-schema-2020-12-head button {
+    background-color: inherit;
+}
+
+html.dark .swagger-ui .info .description p {
+    color: #a3a3a3;
+}
+
+html.dark .nest-top-bar {
+    background-color: #1e2939;
+}
+
+html.dark .nest-top-bar .logo-text {
+    color: #cbd5e1;
+}
+
+html.dark .nest-top-bar .toggle-theme-btn {
+    background-color: #0f172a;
+}
+
+html.dark .swagger-ui .opblock-summary-path-description-wrapper .opblock-summary-description {
+    color: #99a1af;
+}
+
+html.dark .swagger-ui .title,
+html.dark .opblock-tag-section .opblock-tag,
+html.dark .swagger-ui .scheme-container .schemes-server-container .servers-title,
+html.dark .models .models-control span {
+    color: #d1d5dc;
+}
+
+html.dark .swagger-ui .opblock,
+html.dark .swagger-ui .opblock-summary,
+html.dark .swagger-ui .opblock-body,
+html.dark .json-schema-2020-12 {
+    background-color: #364153;
+}
+
+html.dark .swagger-ui .opblock,
+html.dark .swagger-ui .opblock[class*="opblock-"],
+html.dark .swagger-ui .opblock-summary,
+html.dark .swagger-ui .opblock[class*="opblock-"] .opblock-summary {
+    border-color: #364153;
+}
+
+
+html.dark .json-schema-2020-12__title
+{
+    color: #52a3ff;
+}
+
+html.dark .opblock-control-arrow .arrow path,
+html.dark .swagger-ui .opblock-tag .expand-operation .arrow path,
+html.dark .models .models-control svg path {
+    fill: #fff;
+}
+
+html.dark .swagger-ui .opblock .opblock-description-wrapper,
+html.dark .swagger-ui .opblock .responses-wrapper,
+html.dark .swagger-ui .opblock .responses-inner,
+html.dark .swagger-ui .opblock .response-col_description__inner,
+html.dark .swagger-ui .opblock .response-control-media-type__title,
+html.dark .swagger-ui .opblock .response-control-media-type__accept-message,
+html.dark .swagger-ui .opblock .parameter__name,
+html.dark .swagger-ui .opblock .parameter__type,
+html.dark .swagger-ui .opblock .parameter__in,
+html.dark .swagger-ui .opblock .parameter__enum,
+html.dark .swagger-ui .opblock .parameter__default,
+html.dark .swagger-ui .opblock .renderedMarkdown p,
+html.dark .swagger-ui .opblock .renderedMarkdown code,
+html.dark .swagger-ui .opblock .responses-table,
+html.dark .swagger-ui .opblock .response-col_status,
+html.dark .swagger-ui .opblock .response-col_links,
+html.dark .swagger-ui .opblock .tab {
+    color: #d1d5dc;
+}
+
+html.dark .swagger-ui .opblock .responses-table thead tr td,
+html.dark .swagger-ui .opblock .parameters thead tr th {
+    color: #e5e7eb;
+}
+
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12-json-viewer__name,
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12-json-viewer__value {
+    color: white;
+}
+
+html.dark .json-schema-2020-12-accordion .json-schema-2020-12-accordion__icon svg path {
+    fill: #FFFFFF;
+}
+
+html.dark .servers select {
+    color: #cad5e2;
+    background-color: #1e2939;
+}
+
+html.dark .swagger-ui .opblock-body input,
+html.dark .swagger-ui .opblock-body select
+{
+    color: rgba(255, 255, 255, 0.5);
+    background-color:#424E63;
+    border-color: #424E63;
+}
+
+html.dark .swagger-ui .responses-wrapper select{
+    color: white
+}
+
+html.dark .swagger-ui .parameter__name.required:after,
+html.dark .swagger-ui .parameter__name.required span {
+    color: #FF8A80;
+}
+
+html.dark .swagger-ui .opblock-section input::placeholder,
+html.dark .swagger-ui .opblock-section select::placeholder
+{
+    color:  rgba(255, 255, 255, 0.5);
+}
+
+html.dark .opblock .opblock-section-header {
+    background-color: #364153;
+    border-bottom:1px solid grey;
+    box-shadow: none;
+}
+
+html.dark .swagger-ui .opblock .opblock-section-header h4,
+html.dark .swagger-ui .btn{
+    color: #CBD5E1;
+}
+
+html.dark .swagger-ui .try-out__btn {
+    border-color: #4D5B71;
+}
+
+html.dark select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 14px;
+}
+
+html.dark .json-schema-2020-12-keyword--description {
+    color: #9E9E9E;
+}
+
+html.dark .swagger-ui .json-schema-2020-12__attribute--primary,
+html.dark .swagger-ui .json-schema-2020-12-keyword--enum .json-schema-2020-12__attribute {
+    color: #CE93D8;
+}
+
+html.dark .swagger-ui .json-schema-2020-12-body .json-schema-2020-12__title,
+html.dark .swagger-ui .json-schema-2020-12-body .json-schema-2020-12-keyword__name{
+    color: #E0E0E0
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #7689ad;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #3d4554;
+    border-radius: 4px;
+  }
+
+  html.dark::-webkit-scrollbar-track,
+  html.dark ::-webkit-scrollbar-track {
+    background: #2d3748;
+  }
+
+  html.dark::-webkit-scrollbar-thumb,
+  html.dark ::-webkit-scrollbar-thumb {
+    background: #4a5568;
+  }
+
+  html.dark::-webkit-scrollbar-thumb:hover,
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+  }

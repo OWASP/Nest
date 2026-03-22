@@ -170,6 +170,84 @@ describe('ContributionHeatmap', () => {
       )
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
     })
+
+    it('handles missing startDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap contributionData={mockData} startDate="" endDate="2024-01-31" />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      // Should render with default date range (1 year)
+      expect(screen.getByTestId('mock-heatmap-chart')).toHaveAttribute('data-series-length', '7')
+    })
+
+    it('handles missing endDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap contributionData={mockData} startDate="2024-01-01" endDate="" />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      expect(screen.getByTestId('mock-heatmap-chart')).toHaveAttribute('data-series-length', '7')
+    })
+
+    it('handles both missing startDate and endDate', () => {
+      renderWithTheme(<ContributionHeatmap contributionData={mockData} startDate="" endDate="" />)
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles invalid startDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="invalid-date"
+          endDate="2024-01-31"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles invalid endDate by using default dates', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="2024-01-01"
+          endDate="not-a-date"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles both invalid startDate and endDate', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="garbage"
+          endDate="also-garbage"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('handles swapped dates (startDate > endDate) by swapping them', () => {
+      renderWithTheme(
+        <ContributionHeatmap
+          contributionData={mockData}
+          startDate="2024-01-31"
+          endDate="2024-01-01"
+        />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+      expect(screen.getByTestId('mock-heatmap-chart')).toHaveAttribute('data-series-length', '7')
+    })
+
+    it('handles startDate after endDate and swaps them correctly', () => {
+      const data = {
+        '2024-01-15': 5,
+        '2024-01-20': 10,
+      }
+      renderWithTheme(
+        <ContributionHeatmap contributionData={data} startDate="2024-02-01" endDate="2024-01-01" />
+      )
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
   })
 
   describe('Theme & Styling', () => {
@@ -178,28 +256,26 @@ describe('ContributionHeatmap', () => {
         <ContributionHeatmap {...defaultProps} title="Light" />,
         'light'
       )
-      expect(screen.getByText('Light').parentElement).toHaveClass('text-gray-700')
+      expect(screen.getByText('Light').parentElement).toHaveClass('w-full')
       ;(useTheme as jest.Mock).mockReturnValue({ theme: 'dark', setTheme: jest.fn() })
       rerender(
         <ThemeProvider attribute="class">
           <ContributionHeatmap {...defaultProps} title="Dark" />
         </ThemeProvider>
       )
-      expect(screen.getByText('Dark').parentElement).toHaveClass('text-gray-700')
+      expect(screen.getByText('Dark').parentElement).toHaveClass('w-full')
     })
 
     it('applies correct container and style classes', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} title="Test" />)
-      expect(container.querySelector('.heatmap-container')).toBeInTheDocument()
-      expect(container.querySelector('style')).toBeInTheDocument()
       expect(container.querySelector('.w-full')).toBeInTheDocument()
+      expect(container.querySelector('style')).toBeInTheDocument()
     })
 
     it('includes responsive media queries', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const styleContent = container.querySelector('style')?.textContent
-      expect(styleContent).toContain('@media (max-width: 768px)')
-      expect(styleContent).toContain('@media (max-width: 480px)')
+      expect(styleContent).toContain('apexcharts-tooltip')
     })
   })
 
@@ -210,13 +286,13 @@ describe('ContributionHeatmap', () => {
       )
       const title = screen.getByText('Activity')
       expect(title).toHaveClass('font-semibold')
-      expect(title.parentElement).toHaveClass('mb-1', 'text-sm')
-      expect(container.querySelector('h4')).toBeInTheDocument()
+      expect(title.parentElement).toHaveClass('w-full')
+      expect(container.querySelector('h3')).toBeInTheDocument()
     })
 
     it('has accessible heading structure', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} title="Accessible" />)
-      expect(screen.getByRole('heading', { level: 4 })).toHaveTextContent('Accessible')
+      expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Accessible')
     })
   })
 
@@ -224,7 +300,7 @@ describe('ContributionHeatmap', () => {
     it('sets correct dimensions and series count', () => {
       renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const chart = screen.getByTestId('mock-heatmap-chart')
-      expect(chart).toHaveAttribute('data-height', '100%')
+      expect(chart).toHaveAttribute('data-height', '195')
       expect(chart).toHaveAttribute('data-series-length', '7')
     })
 
@@ -540,15 +616,14 @@ describe('ContributionHeatmap', () => {
   describe('Responsive Design', () => {
     it('applies responsive container classes', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
-      const heatmapContainer = container.querySelector('.heatmap-container')
+      const heatmapContainer = container.querySelector('.w-full')
       expect(heatmapContainer).toBeInTheDocument()
     })
 
     it('maintains aspect ratio on different screen sizes', () => {
       const { container } = renderWithTheme(<ContributionHeatmap {...defaultProps} />)
       const styleContent = container.querySelector('style')?.textContent
-      expect(styleContent).toContain('aspect-ratio: 4 / 1')
-      expect(styleContent).toContain('min-height: 132px')
+      expect(styleContent).toContain('apexcharts-tooltip')
     })
   })
 
@@ -618,6 +693,79 @@ describe('ContributionHeatmap', () => {
       )
 
       expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+  })
+
+  describe('Variants', () => {
+    it('renders default variant with full dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="default" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify full-size dimensions (195px height for default variant)
+      expect(chart).toHaveAttribute('data-height', '195')
+    })
+
+    it('renders medium variant with medium dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="medium" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify medium dimensions (172px height for medium variant)
+      expect(chart).toHaveAttribute('data-height', '172')
+    })
+
+    it('renders compact variant with smaller dimensions', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} variant="compact" />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Verify compact dimensions (150px height for compact variant)
+      expect(chart).toHaveAttribute('data-height', '150')
+    })
+
+    it('applies compact-specific container styling when variant is compact', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Compact" variant="compact" />
+      )
+      // Verify compact variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toBeInTheDocument()
+    })
+
+    it('applies default variant container styling when variant is default', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Default" variant="default" />
+      )
+      // Verify default variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toBeInTheDocument()
+    })
+
+    it('applies medium variant container styling', () => {
+      const { container } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Medium" variant="medium" />
+      )
+      // Verify medium variant uses inline-block class
+      const chartContainer = container.querySelector('.inline-block')
+      expect(chartContainer).toBeInTheDocument()
+    })
+
+    it('defaults to default variant when no variant is specified', () => {
+      renderWithTheme(<ContributionHeatmap {...defaultProps} />)
+      const chart = screen.getByTestId('mock-heatmap-chart')
+      // Should render with default variant dimensions
+      expect(chart).toHaveAttribute('data-height', '195')
+    })
+
+    it('renders title with same styling regardless of variant', () => {
+      const { rerender } = renderWithTheme(
+        <ContributionHeatmap {...defaultProps} title="Test Title" variant="default" />
+      )
+      let title = screen.getByText('Test Title')
+      expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')
+
+      rerender(
+        <ThemeProvider attribute="class">
+          <ContributionHeatmap {...defaultProps} title="Test Title" variant="medium" />
+        </ThemeProvider>
+      )
+      title = screen.getByText('Test Title')
+      expect(title).toHaveClass('mb-4', 'text-sm', 'font-semibold')
     })
   })
 })

@@ -23,6 +23,7 @@
     ],
     "paths": {
       "@e2e/*": ["__tests__/e2e/*"],
+      "@mockData/*": ["__tests__/mockData/*"],
       "@unit/*": ["__tests__/unit/*"],
       "*": ["./src/*"],
       "app/*": ["src/app/*"],
@@ -33,7 +34,7 @@
       "utils/*": ["src/utils/*"],
       "wrappers/*": ["src/wrappers/*"]
     },
-    "strict": false
+    "strict": true
   },
   "include": [
     ".next/dev/types/**/*.ts",
@@ -43,5 +44,5 @@
     "next-env.d.ts",
     "src"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["__tests__/**/*", "jest.setup.ts", "node_modules"]
 }

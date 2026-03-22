@@ -18,6 +18,8 @@ class User(AbstractUser):
     """Nest user model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "nest_users"
         verbose_name_plural = "Users"
         ordering = ["username"]

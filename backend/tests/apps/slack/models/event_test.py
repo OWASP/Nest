@@ -85,3 +85,18 @@ class TestEventModel:
         assert event.text == "query"
         assert event.user_id == "U555"
         assert event.user_name == "Eve"
+
+    def test_from_slack_value_error_in_command_parsing(self):
+        """Test from_slack handles ValueError when parsing command text."""
+        context = {"channel_id": "C666", "user_id": "U666"}
+        payload = {
+            "channel_name": "test",
+            "command": Owasp().command_name,
+            "text": "",
+            "user_name": "Frank",
+        }
+        event = Event()
+        event.from_slack(context, payload)
+
+        assert event.command == "owasp"
+        assert event.text == ""

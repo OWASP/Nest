@@ -4,9 +4,10 @@ import math
 from unittest.mock import Mock
 
 from apps.owasp.api.internal.nodes.committee import CommitteeNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestCommitteeNode:
+class TestCommitteeNode(GraphQLNodeBaseTest):
     def test_contributors_count_resolver(self):
         """Test contributors_count returns count from repository."""
         mock_repo = Mock()
@@ -15,7 +16,8 @@ class TestCommitteeNode:
         mock_committee = Mock()
         mock_committee.owasp_repository = mock_repo
 
-        result = CommitteeNode.contributors_count(mock_committee)
+        field = self._get_field_by_name("contributors_count", CommitteeNode)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 42
 
@@ -24,7 +26,8 @@ class TestCommitteeNode:
         mock_committee = Mock()
         mock_committee.idx_created_at = 1234567890.0
 
-        result = CommitteeNode.created_at(mock_committee)
+        field = self._get_field_by_name("created_at", CommitteeNode)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert math.isclose(result, 1234567890.0)
 
@@ -36,7 +39,8 @@ class TestCommitteeNode:
         mock_committee = Mock()
         mock_committee.owasp_repository = mock_repo
 
-        result = CommitteeNode.forks_count(mock_committee)
+        field = self._get_field_by_name("forks_count", CommitteeNode)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 15
 
@@ -48,7 +52,8 @@ class TestCommitteeNode:
         mock_committee = Mock()
         mock_committee.owasp_repository = mock_repo
 
-        result = CommitteeNode.issues_count(mock_committee)
+        field = self._get_field_by_name("issues_count", CommitteeNode)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 23
 
@@ -56,7 +61,8 @@ class TestCommitteeNode:
         """Test repositories_count always returns 1 for committees."""
         mock_committee = Mock()
 
-        result = CommitteeNode.repositories_count(mock_committee)
+        field = self._get_field_by_name("repositories_count", CommitteeNode)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 1
 
@@ -68,6 +74,7 @@ class TestCommitteeNode:
         mock_committee = Mock()
         mock_committee.owasp_repository = mock_repo
 
-        result = CommitteeNode.stars_count(mock_committee)
+        field = self._get_field_by_name("stars_count", CommitteeNode)
+        result = field.base_resolver.wrapped_func(None, mock_committee)
 
         assert result == 100

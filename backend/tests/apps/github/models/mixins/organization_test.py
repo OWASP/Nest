@@ -34,16 +34,16 @@ class TestOrganizationIndexMixin:
         assert getattr(organization, attr) == expected
 
     @pytest.mark.parametrize(
-        ("created_at_value", "expected_timestamp"),
+        ("created_at_value", "expected_created_at"),
         [
-            (datetime(2023, 1, 1, tzinfo=UTC), datetime(2023, 1, 1, tzinfo=UTC).timestamp()),
+            (datetime(2023, 1, 1, tzinfo=UTC), datetime(2023, 1, 1, tzinfo=UTC).isoformat()),
             (None, None),
         ],
     )
-    def test_idx_created_at(self, organization_instance, created_at_value, expected_timestamp):
-        """Tests the idx_created_at property returns the correct timestamp or None."""
+    def test_idx_created_at(self, organization_instance, created_at_value, expected_created_at):
+        """Tests the idx_created_at property returns the correct ISO value or None."""
         organization_instance.created_at = created_at_value
-        assert organization_instance.idx_created_at == expected_timestamp
+        assert organization_instance.idx_created_at == expected_created_at
 
     @pytest.mark.parametrize(
         ("attr", "expected"),

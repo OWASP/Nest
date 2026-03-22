@@ -1,13 +1,13 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
 import { useRouter, useParams } from 'next/navigation'
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { FaCalendar, FaRightToBracket } from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetSnapshotDetailsDocument } from 'types/__generated__/snapshotQueries.generated'
 import type { Chapter } from 'types/chapter'
 import type { Project } from 'types/project'
-import type { SnapshotDetails } from 'types/snapshot'
+import type { Release as ReleaseType } from 'types/release'
 import { level } from 'utils/data'
 import { formatDate } from 'utils/dateFormatter'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
@@ -18,24 +18,23 @@ import Release from 'components/Release'
 
 const SnapshotDetailsPage: React.FC = () => {
   const { id: snapshotKey } = useParams<{ id: string }>()
-  const [snapshot, setSnapshot] = useState<SnapshotDetails | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
   const router = useRouter()
 
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GetSnapshotDetailsDocument, {
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetSnapshotDetailsDocument, {
     variables: { key: snapshotKey },
   })
 
+  const snapshot = data?.snapshot
+
   useEffect(() => {
-    if (graphQLData) {
-      setSnapshot(graphQLData.snapshot)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError, snapshotKey])
+  }, [graphQLRequestError, snapshotKey])
 
   const renderProjectCard = (project: Project) => {
     const params: string[] = ['forksCount', 'starsCount', 'contributorsCount']
@@ -54,10 +53,12 @@ const SnapshotDetailsPage: React.FC = () => {
     return (
       <Card
         button={submitButton}
+        cardKey={project.key ?? project.name}
         icons={filteredIcons}
-        key={project.key}
-        level={level[`${project.level.toLowerCase() as keyof typeof level}`]}
-        summary={project.summary}
+        level={
+          project.level ? level[`${project.level.toLowerCase() as keyof typeof level}`] : undefined
+        }
+        summary={project.summary ?? ''}
         title={project.name}
         topContributors={project.topContributors}
         url={`/projects/${project.key}`}
@@ -68,7 +69,7 @@ const SnapshotDetailsPage: React.FC = () => {
   const renderChapterCard = (chapter: Chapter) => {
     const params: string[] = ['updatedAt']
     const filteredIcons = getFilteredIcons(chapter, params)
-    const formattedUrls = handleSocialUrls(chapter.relatedUrls)
+    const formattedUrls = handleSocialUrls(chapter.relatedUrls ?? [])
 
     const handleButtonClick = () => {
       router.push(`/chapters/${chapter.key}`)
@@ -83,10 +84,10 @@ const SnapshotDetailsPage: React.FC = () => {
     return (
       <Card
         button={submitButton}
+        cardKey={chapter.key}
         icons={filteredIcons}
-        key={chapter.key}
         social={formattedUrls}
-        summary={chapter.summary}
+        summary={chapter.summary ?? ''}
         title={chapter.name}
         url={`/chapters/${chapter.key}`}
       />
@@ -97,7 +98,17 @@ const SnapshotDetailsPage: React.FC = () => {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && snapshot == null) {
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading snapshot"
+        message="An error occurred while loading the snapshot data"
+      />
+    )
+  }
+
+  if (!data || !snapshot) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -134,14 +145,20 @@ const SnapshotDetailsPage: React.FC = () => {
           </h2>
           <div className="mb-4">
             <ChapterMapWrapper
-              geoLocData={snapshot.newChapters}
+              geoLocData={snapshot.newChapters as unknown as Chapter[]}
               showLocal={false}
               showLocationSharing={true}
               style={{ height: '400px', width: '100%', zIndex: '0' }}
             />
           </div>
           <div className="flex flex-col gap-6">
-            {snapshot.newChapters.filter((chapter) => chapter.isActive).map(renderChapterCard)}
+            {snapshot.newChapters
+              .filter((chapter) => chapter.isActive)
+              .map((chapter) => (
+                <React.Fragment key={chapter.key}>
+                  {renderChapterCard(chapter as unknown as Chapter)}
+                </React.Fragment>
+              ))}
           </div>
         </div>
       )}
@@ -152,7 +169,11 @@ const SnapshotDetailsPage: React.FC = () => {
             New Projects
           </h2>
           <div className="flex flex-col gap-6">
-            {snapshot.newProjects.filter((project) => project.isActive).map(renderProjectCard)}
+            {snapshot.newProjects
+              .filter((project) => project.isActive)
+              .map((project) => (
+                <React.Fragment key={project.key}>{renderProjectCard(project)}</React.Fragment>
+              ))}
           </div>
         </div>
       )}
@@ -163,14 +184,19 @@ const SnapshotDetailsPage: React.FC = () => {
             New Releases
           </h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {snapshot.newReleases.map((release, index) => (
-              <Release
-                key={`${release.tagName}-${index}`}
-                release={release}
-                showAvatar={true}
-                index={index}
-              />
-            ))}
+            {snapshot.newReleases.map((release, index) => {
+              return (
+                <Release
+                  key={
+                    release.id ||
+                    `${release.tagName}-${release.repositoryName ?? 'unknown'}-${index}`
+                  }
+                  release={release as unknown as ReleaseType}
+                  showAvatar={true}
+                  index={index}
+                />
+              )
+            })}
           </div>
         </div>
       )}

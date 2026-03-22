@@ -69,7 +69,7 @@ class TestUserChaptersProperty:
             _ = user.chapters
 
             call_kwargs = mock_chapter_filter.call_args[1]
-            assert call_kwargs["is_active"] is True
+            assert call_kwargs["is_active"]
 
     def test_chapters_ordered_alphabetically(self):
         user = User(id=1, login="testuser", node_id="U_test123")

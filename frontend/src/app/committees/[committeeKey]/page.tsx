@@ -2,45 +2,51 @@
 import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa'
 import { FaCode, FaCodeFork, FaStar } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetCommitteeDataDocument } from 'types/__generated__/committeeQueries.generated'
-import type { Committee } from 'types/committee'
-import type { Contributor } from 'types/contributor'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 export default function CommitteeDetailsPage() {
   const { committeeKey } = useParams<{ committeeKey: string }>()
-  const [committee, setCommittee] = useState<Committee | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const { data, error: graphQLRequestError } = useQuery(GetCommitteeDataDocument, {
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetCommitteeDataDocument, {
     variables: { key: committeeKey },
   })
 
+  const committee = data?.committee
+  const topContributors = data?.topContributors || []
+
   useEffect(() => {
-    if (data?.committee) {
-      setCommittee(data.committee)
-      setTopContributors(data.topContributors)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [data, graphQLRequestError, committeeKey])
+  }, [graphQLRequestError, committeeKey])
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  if (!committee && !isLoading)
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading committee"
+        message="An error occurred while loading the committee data"
+      />
+    )
+  }
+
+  if (!data || !committee) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -48,6 +54,7 @@ export default function CommitteeDetailsPage() {
         message="Sorry, the committee you're looking for doesn't exist"
       />
     )
+  }
 
   const details = [
     { label: 'Last Updated', value: formatDate(committee.updatedAt) },

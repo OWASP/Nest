@@ -7,6 +7,7 @@ import type React from 'react'
 import { useState, useEffect, useCallback } from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { SearchProjectNamesDocument } from 'types/__generated__/projectQueries.generated'
+import type { ValidationErrors } from 'utils/helpers/handleGraphQLError'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
@@ -41,6 +42,9 @@ interface ModuleFormProps {
   isEdit?: boolean
   title: string
   submitText?: string
+  minDate?: string
+  maxDate?: string
+  validationErrors?: ValidationErrors
 }
 
 const EXPERIENCE_LEVELS = [
@@ -58,6 +62,9 @@ const ModuleForm = ({
   title,
   isEdit,
   submitText = 'Save',
+  minDate,
+  maxDate,
+  validationErrors,
 }: ModuleFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
@@ -82,6 +89,9 @@ const ModuleForm = ({
   }
 
   const validateNameLocal = (value: string): string | undefined => {
+    if (validationErrors?.name) {
+      return validationErrors.name
+    }
     return validateName(value)
   }
 
@@ -114,7 +124,7 @@ const ModuleForm = ({
         validator: () => validateExperienceLevel(formData.experienceLevel),
       },
     ],
-    [formData, touched]
+    [formData, touched, validationErrors]
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -134,8 +144,7 @@ const ModuleForm = ({
     })
     setTouched(newTouched)
 
-    // Validate all required fields
-    const nameError = validateNameLocal(formData.name)
+    const nameError = validateName(formData.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDateLocal(formData.endedAt)
@@ -177,7 +186,7 @@ const ModuleForm = ({
                     handleInputChange('name', value)
                     setTouched((prev) => ({ ...prev, name: true }))
                   }}
-                  error={errors.name}
+                  error={errors.name || validationErrors?.name}
                   touched={touched.name}
                   required
                   className="w-full min-w-0 lg:col-span-2"
@@ -213,6 +222,8 @@ const ModuleForm = ({
                   error={errors.startedAt}
                   touched={touched.startedAt}
                   required
+                  min={minDate}
+                  max={maxDate}
                 />
                 <FormDateInput
                   id="module-end-date"
@@ -225,7 +236,8 @@ const ModuleForm = ({
                   error={errors.endedAt}
                   touched={touched.endedAt}
                   required
-                  min={formData.startedAt || undefined}
+                  min={formData.startedAt || minDate || undefined}
+                  max={maxDate}
                 />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                   <Select
@@ -365,10 +377,16 @@ export const ProjectSelector = ({
           variables: { query: trimmedQuery },
         })
 
-        const projects = data.searchProjects || []
+        const projects = data?.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
-      } catch {
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(
+          'Error fetching project suggestions:',
+          err instanceof Error ? err.message : String(err),
+          err
+        )
         setItems([])
       } finally {
         setIsLoading(false)
@@ -385,23 +403,15 @@ export const ProjectSelector = ({
     }
   }, [inputValue, fetchSuggestions])
 
-  const handleSelectionChange = (keys: React.Key | Set<React.Key> | 'all') => {
-    let keySet: Set<React.Key>
-    if (keys instanceof Set) {
-      keySet = keys
-    } else if (keys === 'all') {
-      keySet = new Set()
-    } else {
-      keySet = new Set([keys])
-    }
-    const selectedKey = Array.from(keySet as Set<string>)[0]
+  const handleSelectionChange = (keys: React.Key | null) => {
+    const selectedKey = keys as string
     if (selectedKey) {
       const selectedProject = items.find((item) => item.id === selectedKey)
       if (selectedProject) {
         setInputValue(selectedProject.name)
         onProjectChange(selectedProject.id, selectedProject.name)
       }
-    } else {
+    } else if (!value) {
       // Selection cleared
       setInputValue('')
       onProjectChange(null, '')
@@ -447,6 +457,9 @@ export const ProjectSelector = ({
             helperWrapper: 'min-w-0 max-w-full w-full',
             errorMessage: 'break-words whitespace-normal max-w-full w-full',
           },
+        }}
+        clearButtonProps={{
+          'aria-label': 'clear selected project',
         }}
       >
         {items.map((project) => (

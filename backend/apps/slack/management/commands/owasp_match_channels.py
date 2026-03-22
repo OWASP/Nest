@@ -159,6 +159,6 @@ class Command(BaseCommand):
         name_stripped = name.strip()
         if name_stripped.upper().startswith("OWASP"):
             cleaned = name_stripped[5:].strip(" -")
-            return cleaned if cleaned else name_stripped
+            return cleaned or name_stripped
 
         return name_stripped

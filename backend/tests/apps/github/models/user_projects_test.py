@@ -66,8 +66,8 @@ class TestUserProjectsProperty:
             _ = user.projects
 
             call_kwargs = mock_em_filter.call_args[1]
-            assert call_kwargs["is_active"] is True
-            assert call_kwargs["is_reviewed"] is True
+            assert call_kwargs["is_active"]
+            assert call_kwargs["is_reviewed"]
 
     def test_projects_filters_by_leader_role(self):
         user = User(id=1, login="testuser", node_id="U_test123")

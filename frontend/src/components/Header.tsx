@@ -1,6 +1,5 @@
 'use client'
 import { Button } from '@heroui/button'
-import { useIsMobile } from 'hooks/useIsMobile'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -15,6 +14,7 @@ import {
 } from 'react-icons/fa'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
+import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
@@ -22,7 +22,6 @@ import UserMenu from 'components/UserMenu'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
-  const isMobile = useIsMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
@@ -58,9 +57,13 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
-      <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
+      <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+        <Link
+          href="/"
+          onClick={() => setMobileMenuOpen(false)}
+          className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
           <div className="flex h-full items-center">
             <div className="flex h-16 w-16 items-center justify-center py-2">
               <Image
@@ -78,7 +81,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </Link>
         {/* Desktop Header Links */}
-        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
+        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
           <div className="flex justify-start pl-6">
             {headerLinks
               .filter((link) => {
@@ -106,32 +109,37 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="flex items-center justify-normal gap-4">
-          <NavButton
-            href="https://github.com/OWASP/Nest"
-            defaultIcon={FaRegStar}
-            hoverIcon={FaSolidStar}
-            defaultIconColor="#FDCE2D"
-            hoverIconColor="#FDCE2D"
-            text="Star"
-            className="hidden"
-          />
+        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+          <GlobalSearch />
+          <div className="hidden md:flex">
+            <NavButton
+              href="https://github.com/OWASP/Nest"
+              defaultIcon={FaRegStar}
+              hoverIcon={FaSolidStar}
+              defaultIconColor="#FDCE2D"
+              hoverIconColor="#FDCE2D"
+              text="Star"
+            />
+          </div>
 
-          <NavButton
-            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-            defaultIcon={FaRegHeart}
-            hoverIcon={FaSolidHeart}
-            defaultIconColor="#b55f95"
-            hoverIconColor="#d9156c"
-            text="Sponsor"
-            className="hidden"
-          />
-          {!isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
+          <div className="hidden md:flex">
+            <NavButton
+              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+              defaultIcon={FaRegHeart}
+              hoverIcon={FaSolidHeart}
+              defaultIconColor="#b55f95"
+              hoverIconColor="#d9156c"
+              text="Sponsor"
+            />
+          </div>
+          <div className="hidden md:flex">
+            <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
+          </div>
           <ModeToggle />
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="flex h-11 w-11 items-center justify-center bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
@@ -148,7 +156,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
           {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
               <div className="flex h-full items-center">
                 <div className="flex h-16 w-16 items-center justify-center py-2">
                   <Image
@@ -211,8 +223,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               )}
           </div>
 
-          <div className="flex flex-col gap-y-2">
-            {isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
+          <div className="flex flex-col gap-y-2 md:hidden">
+            <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
             <NavButton
               href="https://github.com/OWASP/Nest"
               defaultIcon={FaRegStar}

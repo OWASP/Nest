@@ -1,5 +1,6 @@
 import { sendGTMEvent } from '@next/third-parties/google'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import SearchBar from 'components/Search'
 
 jest.mock('@next/third-parties/google', () => ({
@@ -18,16 +19,21 @@ jest.mock('lodash/debounce', () => {
   }
 })
 
+jest.mock('hooks/useShouldAutoFocusSearch', () => ({
+  useShouldAutoFocusSearch: jest.fn(() => true),
+}))
+
 describe('SearchBar Component', () => {
   const mockOnSearch = jest.fn()
   const defaultProps = {
-    isLoaded: false,
+    isLoaded: true,
     onSearch: mockOnSearch,
     placeholder: 'Search projects...',
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
+    ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
     jest.useFakeTimers()
   })
 
@@ -52,8 +58,8 @@ describe('SearchBar Component', () => {
   })
 
   describe('Conditional rendering logic', () => {
-    it('shows skeleton when isLoaded is true', () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+    it('shows skeleton when isLoaded is false', () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const skeleton = container.querySelector('.h-12.rounded-lg:not(input)')
       const input = screen.queryByPlaceholderText('Search projects...')
       expect(input).not.toBeInTheDocument()
@@ -61,8 +67,8 @@ describe('SearchBar Component', () => {
       expect(skeleton).toHaveClass('h-12 rounded-lg')
     })
 
-    it('shows input when isLoaded is false', () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+    it('shows input when isLoaded is true', () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const skeleton = container.querySelector('.h-12.rounded-lg:not(input)')
       const input = screen.getByPlaceholderText('Search projects...')
       expect(skeleton).not.toBeInTheDocument()
@@ -70,7 +76,7 @@ describe('SearchBar Component', () => {
     })
 
     it('does not show clear button when searchQuery is empty', () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveValue('')
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
@@ -78,7 +84,7 @@ describe('SearchBar Component', () => {
     })
 
     it('shows clear button when searchQuery is not empty', () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
@@ -89,7 +95,7 @@ describe('SearchBar Component', () => {
   describe('Prop-based behavior – different props affect output', () => {
     it('uses initialValue prop as default search query', async () => {
       const initialValue = 'default search'
-      render(<SearchBar {...defaultProps} isLoaded={false} initialValue={initialValue} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} initialValue={initialValue} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       expect(input).toHaveValue(initialValue)
@@ -110,25 +116,34 @@ describe('SearchBar Component', () => {
   })
 
   describe('Auto-focus functionality', () => {
-    it('should auto-focus on initial render', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+    it('should auto-focus on initial render when shouldAutoFocus is true', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
     })
 
-    it('should not lose focus on re-renders', () => {
-      const { rerender } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+    it('should NOT auto-focus on mobile/touch devices', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).not.toHaveFocus()
+    })
+
+    it('should not lose focus on re-renders when shouldAutoFocus is true', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
+      const { rerender } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
 
-      rerender(<SearchBar {...defaultProps} isLoaded={false} placeholder="New placeholder" />)
+      rerender(<SearchBar {...defaultProps} isLoaded={true} placeholder="New placeholder" />)
       expect(input).toHaveFocus()
     })
   })
 
   describe('Event handling – simulate user actions and verify callbacks', () => {
     it('calls onSearch with debounced input value', async () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       fireEvent.change(input, { target: { value: 'test' } })
@@ -141,17 +156,34 @@ describe('SearchBar Component', () => {
     })
 
     it('clears input when clear button is clicked', async () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
-      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
+      input.blur()
+      // NOSONAR: Verifies input lost focus before testing refocus behavior
+      expect(input).not.toHaveFocus()
       fireEvent.click(clearButton)
       expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is refocused after clear when shouldAutoFocus is true
+      expect(input).toHaveFocus()
+    })
+
+    it('does not refocus input after clear when on mobile', async () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      fireEvent.change(input, { target: { value: 'test' } })
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
+      fireEvent.click(clearButton)
+      expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is not refocused on mobile when shouldAutoFocus is false
+      expect(input).not.toHaveFocus()
     })
 
     it('calls onSearch when input value changes', async () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
 
@@ -176,7 +208,7 @@ describe('SearchBar Component', () => {
     })
 
     it('sends GTM event when search query is not empty', async () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       fireEvent.change(input, { target: { value: 'test' } })
@@ -193,7 +225,7 @@ describe('SearchBar Component', () => {
 
   describe('State changes / internal logic', () => {
     it('updates searchQuery state when input value changes', async () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       fireEvent.change(input, { target: { value: 'new query' } })
@@ -220,7 +252,7 @@ describe('SearchBar Component', () => {
     })
 
     it('maintains internal state correctly during rapid input changes', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       fireEvent.change(input, { target: { value: 'a' } })
@@ -233,14 +265,14 @@ describe('SearchBar Component', () => {
 
   describe('Default values and fallbacks', () => {
     it('uses default empty string when no initialValue provided', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveValue('')
     })
 
     it('handles undefined props gracefully', () => {
       const minimalProps = {
-        isLoaded: false,
+        isLoaded: true,
         onSearch: mockOnSearch,
         placeholder: 'Search projects...',
       }
@@ -253,7 +285,7 @@ describe('SearchBar Component', () => {
 
   describe('Text and content rendering', () => {
     it('renders the correct placeholder text', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toBeInTheDocument()
       expect(input).toHaveAttribute('placeholder', 'Search projects...')
@@ -264,7 +296,7 @@ describe('SearchBar Component', () => {
     })
 
     it('displays typed text correctly in input', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       const testValue = 'search term'
@@ -275,7 +307,7 @@ describe('SearchBar Component', () => {
 
   describe('Handles edge cases and invalid inputs', () => {
     it('handles empty input gracefully', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       fireEvent.change(input, { target: { value: '' } })
@@ -286,7 +318,7 @@ describe('SearchBar Component', () => {
     })
 
     it('handles special characters in input', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?'
@@ -296,7 +328,7 @@ describe('SearchBar Component', () => {
     })
 
     it('handles very long input strings', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       const longString = 'balance'.repeat(140)
@@ -306,7 +338,7 @@ describe('SearchBar Component', () => {
     })
 
     it('cancels pending debounced search when clear button is clicked', async () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
 
       fireEvent.change(input, { target: { value: 'edge case' } })
@@ -324,11 +356,67 @@ describe('SearchBar Component', () => {
       expect(input).toHaveValue('')
       expect(input).toHaveFocus()
     })
+    it('does not send GTM event for whitespace-only input', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: '   ' } })
+
+      jest.advanceTimersByTime(750)
+
+      expect(mockOnSearch).toHaveBeenCalledWith('   ')
+      expect(sendGTMEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Keyboard event handling on clear button', () => {
+    it('clears search when Enter key is pressed on clear button', async () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: 'test query' } })
+      expect(input).toHaveValue('test query')
+
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      fireEvent.keyDown(clearButton, { key: 'Enter' })
+
+      expect(input).toHaveValue('')
+      expect(mockOnSearch).toHaveBeenCalledWith('')
+      expect(input).toHaveFocus()
+    })
+
+    it('clears search when Space key is pressed on clear button', async () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: 'test query' } })
+      expect(input).toHaveValue('test query')
+
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      fireEvent.keyDown(clearButton, { key: ' ' })
+
+      expect(input).toHaveValue('')
+      expect(mockOnSearch).toHaveBeenCalledWith('')
+      expect(input).toHaveFocus()
+    })
+
+    it('does not clear search when other keys are pressed on clear button', async () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+
+      fireEvent.change(input, { target: { value: 'test query' } })
+      expect(input).toHaveValue('test query')
+
+      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      fireEvent.keyDown(clearButton, { key: 'Tab' })
+
+      expect(input).toHaveValue('test query')
+    })
   })
 
   describe('Accessibility roles and labels', () => {
     it('has the correct accessibility labels', () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toBeInTheDocument()
       expect(input).toHaveAttribute('type', 'text')
@@ -340,7 +428,7 @@ describe('SearchBar Component', () => {
     })
 
     it('provides proper ARIA attributes for screen readers', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveAttribute('type', 'text')
       expect(input).toHaveAttribute('placeholder', 'Search projects...')
@@ -349,7 +437,7 @@ describe('SearchBar Component', () => {
 
   describe('DOM structure / classNames / styles', () => {
     it('has the correct class names and styles for input', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveClass(
         'h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300'
@@ -357,13 +445,13 @@ describe('SearchBar Component', () => {
     })
 
     it('has the correct class names for skeleton', () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
       const skeleton = container.querySelector('.h-12.rounded-lg:not(input)')
       expect(skeleton).toHaveClass('h-12 rounded-lg')
     })
 
     it('has the correct class names for clear button', () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={false} />)
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
@@ -372,14 +460,14 @@ describe('SearchBar Component', () => {
       )
     })
 
-    it('has the correct class names for search icon', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
-      const searchIcon = screen.getByTestId('search-icon')
-      expect(searchIcon).toBeInTheDocument()
+    it('renders the search input', () => {
+      render(<SearchBar {...defaultProps} isLoaded />)
+
+      expect(screen.getByRole('textbox')).toBeInTheDocument()
     })
 
     it('maintains proper DOM structure with all elements', () => {
-      render(<SearchBar {...defaultProps} isLoaded={false} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       const searchIcon = document.querySelector(
         String.raw`svg.pointer-events-none.absolute.left-3.top-1\/2.h-4.w-4.-translate-y-1\/2.text-gray-400`
@@ -387,6 +475,26 @@ describe('SearchBar Component', () => {
 
       expect(input).toBeInTheDocument()
       expect(searchIcon).toBeInTheDocument()
+    })
+
+    it('applies className prop to the input element', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} className="rounded-none" />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveClass('rounded-none')
+    })
+
+    it('applies className prop to the skeleton when not loaded', () => {
+      const { container } = render(
+        <SearchBar {...defaultProps} isLoaded={false} className="rounded-none" />
+      )
+      const skeleton = container.querySelector('.h-12')
+      expect(skeleton).toHaveClass('rounded-none')
+    })
+
+    it('renders wrapper with py-4 class', () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const wrapper = container.firstChild as HTMLElement
+      expect(wrapper).toHaveClass('py-4')
     })
   })
 })

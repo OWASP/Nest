@@ -3,7 +3,6 @@ import { render, screen } from 'wrappers/testUtil'
 import type { LeadersListProps } from 'types/leaders'
 import LeadersList from 'components/LeadersList'
 
-// Mock Next.js Link component
 jest.mock('next/link', () => {
   return function MockLink({
     children,
@@ -41,6 +40,7 @@ jest.mock('components/TruncatedText', () => ({
 
 describe('LeadersList Component', () => {
   const defaultProps: LeadersListProps = {
+    entityKey: 'test-entity',
     leaders: 'John Doe, Jane Smith, Bob Johnson',
   }
 
@@ -50,7 +50,7 @@ describe('LeadersList Component', () => {
 
   describe('Renders successfully with minimal required props', () => {
     it('renders with valid leaders string', () => {
-      render(<LeadersList leaders="John Doe" />)
+      render(<LeadersList entityKey="test" leaders="John Doe" />)
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByTestId('truncated-text')).toBeInTheDocument()
     })
@@ -63,31 +63,31 @@ describe('LeadersList Component', () => {
 
   describe('Conditional rendering logic', () => {
     it('renders "Unknown" when leaders prop is empty string', () => {
-      render(<LeadersList leaders="" />)
+      render(<LeadersList entityKey="test" leaders="" />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
 
     it('renders "Unknown" when leaders prop is null', () => {
-      render(<LeadersList leaders={null} />)
+      render(<LeadersList entityKey="test" leaders={null} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
 
     it('renders "Unknown" when leaders prop is undefined', () => {
-      render(<LeadersList leaders={undefined} />)
+      render(<LeadersList entityKey="test" leaders={undefined} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
 
     it('renders "Unknown" when leaders prop is only whitespace', () => {
-      render(<LeadersList leaders="   " />)
+      render(<LeadersList entityKey="test" leaders="   " />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
       expect(screen.queryByTestId('truncated-text')).not.toBeInTheDocument()
     })
 
     it('renders leaders when valid non-empty string is provided', () => {
-      render(<LeadersList leaders="John Doe" />)
+      render(<LeadersList entityKey="test" leaders="John Doe" />)
       expect(screen.queryByText('Unknown')).not.toBeInTheDocument()
       expect(screen.getByTestId('truncated-text')).toBeInTheDocument()
     })
@@ -95,7 +95,7 @@ describe('LeadersList Component', () => {
 
   describe('Prop-based behavior', () => {
     it('renders single leader correctly', () => {
-      render(<LeadersList leaders="John Doe" />)
+      render(<LeadersList entityKey="test" leaders="John Doe" />)
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getAllByTestId('leader-link')).toHaveLength(1)
     })
@@ -109,14 +109,16 @@ describe('LeadersList Component', () => {
     })
 
     it('handles leaders with extra whitespace', () => {
-      render(<LeadersList leaders="  John Doe  ,  Jane Smith  " />)
+      render(<LeadersList entityKey="test" leaders="  John Doe  ,  Jane Smith  " />)
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('Jane Smith')).toBeInTheDocument()
       expect(screen.getAllByTestId('leader-link')).toHaveLength(2)
     })
 
     it('handles leaders with special characters', () => {
-      render(<LeadersList leaders="John O'Connor, María García, Jean-Paul Dubois" />)
+      render(
+        <LeadersList entityKey="test" leaders="John O'Connor, María García, Jean-Paul Dubois" />
+      )
       expect(screen.getByText("John O'Connor")).toBeInTheDocument()
       expect(screen.getByText('María García')).toBeInTheDocument()
       expect(screen.getByText('Jean-Paul Dubois')).toBeInTheDocument()
@@ -138,7 +140,7 @@ describe('LeadersList Component', () => {
     })
 
     it('does not add comma after single leader', () => {
-      const { container } = render(<LeadersList leaders="John Doe" />)
+      const { container } = render(<LeadersList entityKey="test" leaders="John Doe" />)
       const textContent = container.textContent
       expect(textContent).toBe('John Doe')
       expect(textContent).not.toContain(',')
@@ -152,7 +154,7 @@ describe('LeadersList Component', () => {
     })
 
     it('applies correct CSS classes to links', () => {
-      render(<LeadersList leaders="John Doe" />)
+      render(<LeadersList entityKey="test" leaders="John Doe" />)
       const link = screen.getByTestId('leader-link')
       expect(link).toHaveClass('text-gray-600', 'hover:underline', 'dark:text-gray-400')
     })
@@ -167,7 +169,7 @@ describe('LeadersList Component', () => {
     })
 
     it('properly encodes special characters in URLs', () => {
-      render(<LeadersList leaders="John O'Connor, test@example.com" />)
+      render(<LeadersList entityKey="test" leaders="John O'Connor, test@example.com" />)
       const links = screen.getAllByTestId('leader-link')
 
       expect(links[0]).toHaveAttribute('href', "/members?q=John%20O'Connor")
@@ -195,7 +197,7 @@ describe('LeadersList Component', () => {
     })
 
     it('ensures links are focusable and have proper attributes', () => {
-      render(<LeadersList leaders="John Doe" />)
+      render(<LeadersList entityKey="test" leaders="John Doe" />)
       const link = screen.getByTestId('leader-link')
 
       expect(link).toHaveAttribute('href')
@@ -206,38 +208,37 @@ describe('LeadersList Component', () => {
 
   describe('Handles edge cases and invalid inputs', () => {
     it('handles empty array from split (single comma)', () => {
-      render(<LeadersList leaders="," />)
-      const { container } = render(<LeadersList leaders="," />)
-      expect(container.textContent).toBe(', ')
+      render(<LeadersList entityKey="test" leaders="," />)
+      expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles multiple consecutive commas', () => {
-      render(<LeadersList leaders="John Doe,, Jane Smith" />)
+      render(<LeadersList entityKey="test" leaders="John Doe,, Jane Smith" />)
       const links = screen.getAllByTestId('leader-link')
-      expect(links).toHaveLength(3) // John Doe, empty string, Jane Smith
+      expect(links).toHaveLength(2) // John Doe, Jane Smith (empty strings filtered out)
     })
 
     it('handles trailing comma', () => {
-      render(<LeadersList leaders="John Doe, Jane Smith," />)
+      render(<LeadersList entityKey="test" leaders="John Doe, Jane Smith," />)
       const links = screen.getAllByTestId('leader-link')
-      expect(links).toHaveLength(3) // John Doe, Jane Smith, empty string
+      expect(links).toHaveLength(2) // John Doe, Jane Smith (empty strings filtered out)
     })
 
     it('handles leading comma', () => {
-      render(<LeadersList leaders=", John Doe, Jane Smith" />)
+      render(<LeadersList entityKey="test" leaders=", John Doe, Jane Smith" />)
       const links = screen.getAllByTestId('leader-link')
-      expect(links).toHaveLength(3) // empty string, John Doe, Jane Smith
+      expect(links).toHaveLength(2) // John Doe, Jane Smith (empty strings filtered out)
     })
 
     it('handles very long leader names', () => {
       const longName = 'A'.repeat(100)
-      render(<LeadersList leaders={longName} />)
+      render(<LeadersList entityKey="test" leaders={longName} />)
       expect(screen.getByText(longName)).toBeInTheDocument()
       expect(screen.getByTestId('leader-link')).toHaveAttribute('title', longName)
     })
 
     it('handles numeric strings as leader names', () => {
-      render(<LeadersList leaders="123, 456" />)
+      render(<LeadersList entityKey="test" leaders="123, 456" />)
       expect(screen.getByText('123')).toBeInTheDocument()
       expect(screen.getByText('456')).toBeInTheDocument()
     })
@@ -245,17 +246,17 @@ describe('LeadersList Component', () => {
 
   describe('Default values and fallbacks', () => {
     it('shows Unknown when no valid leaders are provided', () => {
-      render(<LeadersList leaders="" />)
+      render(<LeadersList entityKey="test" leaders="" />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles undefined gracefully', () => {
-      render(<LeadersList leaders={undefined} />)
+      render(<LeadersList entityKey="test" leaders={undefined} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles null gracefully', () => {
-      render(<LeadersList leaders={null} />)
+      render(<LeadersList entityKey="test" leaders={null} />)
       expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
   })

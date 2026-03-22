@@ -1,0 +1,144 @@
+from datetime import UTC, datetime
+from typing import get_type_hints
+from unittest.mock import MagicMock
+
+import pytest
+import strawberry
+
+from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum, ProgramStatusEnum
+from apps.mentorship.api.internal.nodes.program import (
+    CreateProgramInput,
+    PaginatedPrograms,
+    ProgramNode,
+    UpdateProgramInput,
+    UpdateProgramStatusInput,
+)
+
+
+class FakeProgramNode:
+    def __init__(self):
+        self.id = strawberry.ID("prog-1")
+        self.key = "test-program"
+        self.name = "Test Program"
+        self.description = "A test mentorship program."
+        self.domains = ["backend", "frontend"]
+        self.ended_at = datetime(2026, 6, 30, tzinfo=UTC)
+        self.experience_levels = [ExperienceLevelEnum.BEGINNER, ExperienceLevelEnum.INTERMEDIATE]
+        self.mentees_limit = 10
+        self.started_at = datetime(2026, 1, 1, tzinfo=UTC)
+        self.status = ProgramStatusEnum.PUBLISHED
+        self.user_role = "admin"
+        self.tags = ["python", "javascript"]
+        self.admins = MagicMock()
+
+    # the real resolver code should behave similarly: return the manager's .all()
+    def mock_admins(self):
+        return ProgramNode.admins(self)
+
+
+@pytest.fixture
+def mock_program_node():
+    """Fixture returning a FakeProgramNode with a mocked admins manager."""
+    node = FakeProgramNode()
+
+    node.admins.order_by.return_value = [
+        MagicMock(name="admin1"),
+        MagicMock(name="admin2"),
+    ]
+
+    return node
+
+
+class TestProgramNodeFields:
+    def test_program_node_fields(self, mock_program_node):
+        """Test that ProgramNode fields are correctly assigned."""
+        assert mock_program_node.id == "prog-1"
+        assert mock_program_node.key == "test-program"
+        assert mock_program_node.name == "Test Program"
+        assert mock_program_node.description == "A test mentorship program."
+        assert mock_program_node.domains == ["backend", "frontend"]
+        assert mock_program_node.ended_at == datetime(2026, 6, 30, tzinfo=UTC)
+        assert mock_program_node.experience_levels == [
+            ExperienceLevelEnum.BEGINNER,
+            ExperienceLevelEnum.INTERMEDIATE,
+        ]
+        assert mock_program_node.mentees_limit == 10
+        assert mock_program_node.started_at == datetime(2026, 1, 1, tzinfo=UTC)
+        assert mock_program_node.status == ProgramStatusEnum.PUBLISHED
+        assert mock_program_node.user_role == "admin"
+        assert mock_program_node.tags == ["python", "javascript"]
+
+    def test_program_node_admins(self, mock_program_node):
+        """Test the admins resolver."""
+        admins = mock_program_node.mock_admins()
+        assert len(admins) == 2
+
+
+class TestPaginatedPrograms:
+    def test_paginated_programs_fields(self):
+        """Test that PaginatedPrograms fields are correctly defined."""
+        mock_programs = [MagicMock(spec=ProgramNode), MagicMock(spec=ProgramNode)]
+        paginated_programs = PaginatedPrograms(
+            current_page=1, programs=mock_programs, total_pages=5
+        )
+
+        assert paginated_programs.current_page == 1
+        assert paginated_programs.programs == mock_programs
+        assert paginated_programs.total_pages == 5
+
+
+class TestProgramInputNodes:
+    def test_create_program_input_fields(self):
+        """Test that CreateProgramInput fields are correctly defined."""
+        hints = get_type_hints(CreateProgramInput)
+        assert hints["name"] is str
+        assert hints["description"] is str
+        assert hints["domains"] == list[str]
+        assert hints["ended_at"] is datetime
+        assert hints["mentees_limit"] is int
+        assert hints["started_at"] is datetime
+        assert hints["tags"] == list[str]
+
+        create_input = CreateProgramInput(
+            name="New Program",
+            description="Description for new program",
+            ended_at=datetime.now(UTC),
+            mentees_limit=5,
+            started_at=datetime.now(UTC),
+        )
+        assert create_input.domains == []
+        assert create_input.tags == []
+
+    def test_update_program_input_fields(self):
+        """Test that UpdateProgramInput fields are correctly defined."""
+        hints = get_type_hints(UpdateProgramInput)
+        assert hints["key"] is str
+        assert hints["name"] is str
+        assert hints["description"] is str
+        assert hints["admin_logins"] == list[str] | None
+        assert hints["domains"] == list[str] | None
+        assert hints["ended_at"] is datetime
+        assert hints["mentees_limit"] is int
+        assert hints["started_at"] is datetime
+        assert hints["status"] is ProgramStatusEnum
+        assert hints["tags"] == list[str] | None
+
+        update_input = UpdateProgramInput(
+            key="update-program-key",
+            name="Updated Program",
+            description="Updated description",
+            ended_at=datetime.now(UTC),
+            mentees_limit=12,
+            started_at=datetime.now(UTC),
+            status=ProgramStatusEnum.COMPLETED,
+        )
+        assert update_input.domains is None
+        assert update_input.admin_logins is None
+        assert update_input.tags is None
+
+    def test_update_program_status_input_fields(self):
+        """Test that UpdateProgramStatusInput fields are correctly defined."""
+        hints = get_type_hints(UpdateProgramStatusInput)
+        assert hints["key"] is str
+        assert hints["name"] is str
+        assert hints["status"] is ProgramStatusEnum

@@ -3,9 +3,18 @@ import type { Leader } from 'types/leader'
 
 export type Chapter = {
   _geoloc?: GeoLocation
-  createdAt?: number
+  contributionData?: Record<string, number>
+  contributionStats?: {
+    commits: number
+    issues: number
+    pullRequests: number
+    releases: number
+    total: number
+  }
+  country?: string
+  createdAt?: string
   entityLeaders?: Leader[]
-  geoLocation?: GeoLocation
+  geoLocation?: GeoLocation | null
   isActive?: boolean
   key: string
   leaders?: string[]
@@ -16,7 +25,7 @@ export type Chapter = {
   suggestedLocation: string
   summary?: string
   topContributors?: Contributor[]
-  updatedAt?: number
+  updatedAt?: string
   url?: string
 }
 

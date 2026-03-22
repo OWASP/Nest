@@ -52,8 +52,9 @@ def create_mock_repository(**kwargs):
 class TestRepositoryContentExtractor:
     """Test cases for repository content extraction."""
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_content_full_data(self, mock_get_content):
+    def test_extract_repository_content_full_data(self, mock_get_content, mock_sleep):
         """Test extraction with complete repository data."""
         mock_get_content.return_value = "[]"
 
@@ -185,8 +186,9 @@ class TestRepositoryContentExtractor:
         assert "Repository Name: empty-repo" in metadata
         assert "Repository Key: empty-repo-key" in metadata
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_content_with_organization_only(self, mock_get_content):
+    def test_extract_repository_content_with_organization_only(self, mock_get_content, mock_sleep):
         """Test extraction when repository has organization but no owner."""
         mock_get_content.return_value = "[]"
         organization = MagicMock()
@@ -208,8 +210,9 @@ class TestRepositoryContentExtractor:
         assert "Repository Key: org-repo-key" in metadata
         assert "Organization: test-org" in metadata
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_content_with_owner_only(self, mock_get_content):
+    def test_extract_repository_content_with_owner_only(self, mock_get_content, mock_sleep):
         """Test extraction when repository has owner but no organization."""
         mock_get_content.return_value = "[]"
         owner = MagicMock()
@@ -253,12 +256,93 @@ class TestRepositoryContentExtractor:
         )
         assert metadata == expected_metadata
 
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_content_with_null_fields(self, mock_get_content, mock_sleep):
+        """Test extraction when repository has None for optional fields."""
+        mock_get_content.return_value = "[]"
+
+        repository = create_mock_repository(
+            name=None, key=None, description=None, organization=None, owner=None
+        )
+
+        json_content, metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert "name" not in data
+        assert "key" not in data
+        assert "description" not in data
+        assert metadata == ""
+
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_tab_files_with_non_dict_items(self, mock_get_content, mock_sleep):
+        """Test that non-dict items are skipped when extracting tab files."""
+        mock_get_content.side_effect = [
+            '["not_a_dict", {"name": "regular.md"}, {"name": "tab_test.md"}]',
+            None,
+            None,
+            None,
+            None,
+            "Tab file content",
+        ]
+
+        owner = MagicMock()
+        owner.login = "test-owner"
+
+        repository = create_mock_repository(
+            name="test-repo", key="test-key", owner=owner, default_branch="main"
+        )
+
+        json_content, _ = extract_repository_content(repository)
+        data = json.loads(json_content)
+
+        assert "markdown_content" in data
+        assert "tab_test.md" in data["markdown_content"]
+        assert data["markdown_content"]["tab_test.md"] == "Tab file content"
+
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_tab_files_without_tab_prefix(self, mock_get_content, mock_sleep):
+        """Test that files without tab_ prefix are not added to tab_files."""
+        mock_get_content.side_effect = [
+            '[{"name": "readme.md"}, {"name": "notab.md"},'
+            ' {"name": "tab_missing_ext"}, {"name": "tab_valid.md"}]',
+            "README content",
+            None,
+            None,
+            None,
+            "Valid tab file",
+        ]
+
+        owner = MagicMock()
+        owner.login = "test-owner"
+
+        repository = create_mock_repository(
+            name="test-repo", key="test-key", owner=owner, default_branch="main"
+        )
+
+        json_content, _ = extract_repository_content(repository)
+        data = json.loads(json_content)
+
+        assert "markdown_content" in data
+        assert "tab_valid.md" in data["markdown_content"]
+        assert data["markdown_content"]["tab_valid.md"] == "Valid tab file"
+        assert "tab_missing_ext" not in data["markdown_content"]
+        assert "notab.md" not in data["markdown_content"]
+        assert "readme.md" not in data["markdown_content"]
+        assert "README.md" in data["markdown_content"]
+        assert data["markdown_content"]["README.md"] == "README content"
+
 
 class TestRepositoryMarkdownContentExtractor:
     """Test cases for repository markdown content extraction."""
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_with_description(self, mock_get_content):
+    def test_extract_repository_markdown_content_with_description(
+        self, mock_get_content, mock_sleep
+    ):
         """Test extraction with repository description."""
         organization = MagicMock()
         organization.login = "test-org"
@@ -283,8 +367,9 @@ class TestRepositoryMarkdownContentExtractor:
         assert "Repository Key: test-repo" in metadata
         assert "Organization: test-org" in metadata
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_with_readme(self, mock_get_content):
+    def test_extract_repository_markdown_content_with_readme(self, mock_get_content, mock_sleep):
         """Test extraction with README.md file."""
         organization = MagicMock()
         organization.login = "test-org"
@@ -311,8 +396,11 @@ class TestRepositoryMarkdownContentExtractor:
             == "# Test Repository\n\nThis is a test repository."
         )
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_with_owner_fallback(self, mock_get_content):
+    def test_extract_repository_markdown_content_with_owner_fallback(
+        self, mock_get_content, mock_sleep
+    ):
         """Test extraction when organization is None, falls back to owner."""
         owner = MagicMock()
         owner.login = "test-user"
@@ -335,9 +423,10 @@ class TestRepositoryMarkdownContentExtractor:
         assert "markdown_content" in data
         assert "README.md" in data["markdown_content"]
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_with_default_branch_fallback(
-        self, mock_get_content
+        self, mock_get_content, mock_sleep
     ):
         """Test extraction when default_branch is None, falls back to 'main'."""
         organization = MagicMock()
@@ -360,8 +449,11 @@ class TestRepositoryMarkdownContentExtractor:
         assert "markdown_content" in data
         assert "README.md" in data["markdown_content"]
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_multiple_files(self, mock_get_content):
+    def test_extract_repository_markdown_content_multiple_files(
+        self, mock_get_content, mock_sleep
+    ):
         """Test extraction with multiple markdown files."""
         organization = MagicMock()
         organization.login = "test-org"
@@ -402,8 +494,11 @@ class TestRepositoryMarkdownContentExtractor:
         assert "leaders.md" in data["markdown_content"]
         assert data["markdown_content"]["leaders.md"] == "# Leaders Content"
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_file_fetch_exception(self, mock_get_content):
+    def test_extract_repository_markdown_content_file_fetch_exception(
+        self, mock_get_content, mock_sleep
+    ):
         """Test extraction when file fetching raises an exception."""
         organization = MagicMock()
         organization.login = "test-org"
@@ -438,8 +533,11 @@ class TestRepositoryMarkdownContentExtractor:
         assert "Organization: test-org" in metadata
         mock_get_content.assert_any_call(problematic_url)
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_empty_file_content(self, mock_get_content):
+    def test_extract_repository_markdown_content_empty_file_content(
+        self, mock_get_content, mock_sleep
+    ):
         """Test extraction when file content is empty or whitespace."""
         organization = MagicMock()
         organization.login = "test-org"
@@ -461,8 +559,11 @@ class TestRepositoryMarkdownContentExtractor:
         assert data["ownership"]["organization"] == "test-org"
         assert "markdown_content" not in data
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_no_description(self, mock_get_content):
+    def test_extract_repository_markdown_content_no_description(
+        self, mock_get_content, mock_sleep
+    ):
         """Test extraction when repository has no description."""
         organization = MagicMock()
         organization.login = "test-org"
@@ -490,8 +591,11 @@ class TestRepositoryMarkdownContentExtractor:
         assert "Repository Key: test-repo" in metadata
         assert "Organization: test-org" in metadata
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_url_construction(self, mock_get_content):
+    def test_extract_repository_markdown_content_url_construction(
+        self, mock_get_content, mock_sleep
+    ):
         """Test that URLs are constructed correctly for file fetching."""
         organization = MagicMock()
         organization.login = "test-org"
@@ -530,8 +634,9 @@ class TestRepositoryMarkdownContentExtractor:
         assert "Repository Name: test-repo" in metadata
         assert "Repository Key: test-repo" in metadata
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
-    def test_extract_repository_markdown_content_no_key(self, mock_get_content):
+    def test_extract_repository_markdown_content_no_key(self, mock_get_content, mock_sleep):
         """Test extraction when repository has no key."""
         mock_get_content.return_value = "[]"
         organization = MagicMock()
@@ -555,10 +660,11 @@ class TestRepositoryMarkdownContentExtractor:
         assert "Repository Name: test-repo" in metadata
         assert "Organization: test-org" in metadata
 
+    @patch("time.sleep")
     @patch("apps.ai.common.extractors.repository.logger")
     @patch("apps.ai.common.extractors.repository.get_repository_file_content")
     def test_extract_repository_markdown_content_logs_debug_on_exception(
-        self, mock_get_content, mock_logger
+        self, mock_get_content, mock_logger, mock_sleep
     ):
         """Test that debug logging occurs when file fetching fails."""
         organization = MagicMock()
@@ -591,3 +697,74 @@ class TestRepositoryMarkdownContentExtractor:
         mock_logger.debug.assert_called_once()
         debug_call_args = mock_logger.debug.call_args[0][0]
         assert "Failed to fetch markdown file" in debug_call_args
+
+    def test_extract_repository_no_description(self):
+        """Test extraction when repository has no description."""
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-key",
+            description=None,
+        )
+
+        json_content, _metadata = extract_repository_content(repository)
+
+        data = json.loads(json_content)
+        assert data["name"] == "test-repo"
+        assert data["key"] == "test-key"
+        assert "description" not in data
+
+    @patch("time.sleep")
+    @patch("apps.ai.common.extractors.repository.logger")
+    @patch("apps.ai.common.extractors.repository.get_repository_file_content")
+    def test_extract_repository_markdown_file_exception_types(
+        self, mock_get_content, mock_logger, mock_sleep
+    ):
+        """Test that all exception types in handler are caught properly."""
+        organization = MagicMock()
+        organization.login = "test-org"
+
+        repository = create_mock_repository(
+            name="test-repo",
+            key="test-repo",
+            organization=organization,
+        )
+
+        mock_get_content.side_effect = [
+            "[]",
+            TypeError("Type error"),
+            "",
+            "",
+            "",
+        ]
+
+        json_content, _ = extract_repository_content(repository)
+        assert json_content is not None
+        mock_logger.debug.assert_called()
+
+        mock_logger.reset_mock()
+
+        mock_get_content.side_effect = [
+            "[]",
+            "",
+            OSError("OS error"),
+            "",
+            "",
+        ]
+
+        json_content, _ = extract_repository_content(repository)
+        assert json_content is not None
+        mock_logger.debug.assert_called()
+
+        mock_logger.reset_mock()
+
+        mock_get_content.side_effect = [
+            "[]",
+            "",
+            "",
+            ValueError("Value error"),
+            "",
+        ]
+
+        json_content, _ = extract_repository_content(repository)
+        assert json_content is not None
+        mock_logger.debug.assert_called()

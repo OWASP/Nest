@@ -5,7 +5,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
-import type { ComponentPropsWithoutRef } from 'react'
 import { FaHome } from 'react-icons/fa'
 import { FaUser } from 'react-icons/fa6'
 import type { NavButtonProps } from 'types/button'
@@ -37,17 +36,6 @@ jest.mock('wrappers/IconWrapper', () => ({
     return IconComponent ? <IconComponent className={className} style={style} /> : null
   },
 }))
-
-// Mock Next.js Link
-jest.mock('next/link', () => {
-  return function MockLink({ children, href, ...props }: ComponentPropsWithoutRef<'a'>) {
-    return (
-      <a href={href} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
 
 describe('<NavButton />', () => {
   const defaultProps: NavButtonProps & { defaultIcon: typeof FaHome; hoverIcon: typeof FaUser } = {

@@ -8,6 +8,7 @@ export const GET_MODULES_BY_PROGRAM = gql`
       name
       description
       experienceLevel
+      order
       startedAt
       endedAt
       projectId
@@ -59,6 +60,8 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
   query GetProgramAdminsAndModules($programKey: String!, $moduleKey: String!) {
     getProgram(programKey: $programKey) {
       id
+      startedAt
+      endedAt
       admins {
         id
         login
@@ -91,6 +94,22 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         name
         avatarUrl
       }
+      recentPullRequests {
+        id
+        title
+        url
+        state
+        createdAt
+        mergedAt
+        organizationName
+        repositoryName
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
     }
   }
 `
@@ -114,6 +133,7 @@ export const GET_MODULE_ISSUES = gql`
         state
         isMerged
         labels
+        taskDeadline
         assignees {
           avatarUrl
           login

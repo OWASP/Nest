@@ -1,5 +1,5 @@
+import { mockUserData } from '@mockData/mockUserData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockUserData } from '@unit/data/mockUserData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import UsersPage from 'app/members/page'
@@ -145,6 +145,27 @@ describe('UsersPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('@fallback_login')).toBeInTheDocument()
+    })
+  })
+
+  test('handles missing company field', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [
+        {
+          key: 'user_4',
+          login: 'user_no_company',
+          name: 'User Without Company',
+          avatarUrl: 'https://example.com/avatar.jpg',
+          company: null,
+        },
+      ],
+      totalPages: 1,
+    })
+
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('User Without Company')).toBeInTheDocument()
     })
   })
 })

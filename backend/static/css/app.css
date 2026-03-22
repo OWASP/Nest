@@ -77,3 +77,20 @@ input:checked + .slider:before {
     vertical-align: text-top;
     margin-right: 2px;
 }
+
+button,
+a,
+[role="button"],
+[role="menuitem"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+}

@@ -30,6 +30,8 @@ class Organization(
     related_organizations = RelatedOrganizationsManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_organizations"
         verbose_name_plural = "Organizations"
 
@@ -54,7 +56,9 @@ class Organization(
         """Return organization related projects."""
         return (
             apps.get_model("owasp", "Project")  # Dynamic import.
-            .objects.filter(
+            .objects.select_related("owasp_repository")
+            .prefetch_related("organizations", "owners", "repositories")
+            .filter(
                 repositories__in=self.repositories.all(),
             )
             .distinct()
@@ -86,9 +90,9 @@ class Organization(
         return set(Organization.objects.values_list("login", flat=True))
 
     @staticmethod
-    def bulk_save(organizations) -> None:  # type: ignore[override]
+    def bulk_save(organizations, fields=None) -> None:  # type: ignore[override]
         """Bulk save organizations."""
-        BulkSaveModel.bulk_save(Organization, organizations)
+        BulkSaveModel.bulk_save(Organization, organizations, fields=fields)
 
     @staticmethod
     def update_data(gh_organization, *, save: bool = True) -> Organization:

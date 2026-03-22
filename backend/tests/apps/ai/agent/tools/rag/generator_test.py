@@ -322,3 +322,32 @@ class TestGenerator:
         """Test class constants have expected values."""
         assert Generator.MAX_TOKENS == 2000
         assert math.isclose(Generator.TEMPERATURE, 0.5)
+
+    def test_prepare_context_with_additional_context(self):
+        """Test context preparation with chunks that have additional_context."""
+        with (
+            patch.dict(os.environ, {"DJANGO_OPEN_AI_SECRET_KEY": "test-key"}),
+            patch("openai.OpenAI"),
+        ):
+            generator = Generator()
+
+            chunks = [
+                {
+                    "source_name": "Chapter 1",
+                    "text": "This is chapter 1 content",
+                    "additional_context": {"location": "New York", "region": "North America"},
+                },
+                {
+                    "source_name": "Chapter 2",
+                    "text": "This is chapter 2 content",
+                    "additional_context": {},
+                },
+            ]
+
+            result = generator.prepare_context(chunks)
+
+            assert "Additional Context:" in result
+            assert "location" in result
+            assert "New York" in result
+            assert "Source Name: Chapter 1" in result
+            assert "Source Name: Chapter 2" in result

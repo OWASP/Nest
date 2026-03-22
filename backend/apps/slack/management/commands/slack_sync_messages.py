@@ -243,6 +243,7 @@ class Command(BaseCommand):
                     )
 
                     self._handle_slack_response(response, "search_messages")
+                    retry_count = 0
 
                     messages_data = response.get("messages", {}).get("matches", [])
                     if not messages_data:
@@ -399,20 +400,18 @@ class Command(BaseCommand):
         """Fetch all parent messages (non-thread) for a conversation."""
         cursor = None
         has_more = True
+        retry_count = 0
         while has_more:
             try:
-                retry_count = 0
                 response = client.conversations_history(
                     channel=conversation.slack_channel_id,
                     cursor=cursor,
                     limit=batch_size,
-                    oldest=(
-                        latest_message.ts
-                        if (latest_message := conversation.latest_message)
-                        else "0"
-                    ),
+                    oldest=conversation.latest_message.ts if conversation.latest_message else "0",
                 )
+
                 self._handle_slack_response(response, "conversations_history")
+                retry_count = 0
 
                 messages = [
                     message
@@ -454,7 +453,7 @@ class Command(BaseCommand):
 
             Message.bulk_save(messages.copy())
             if include_replies and messages:
-                print("Fetching message replies...")
+                self.stdout.write("Fetching message replies...")
                 for message in messages:
                     if not message.has_replies:
                         continue
@@ -478,8 +477,8 @@ class Command(BaseCommand):
         try:
             cursor = None
             has_more = True
+            retry_count = 0
             while has_more:
-                retry_count = 0
                 try:
                     params = {
                         "channel": message.conversation.slack_channel_id,
@@ -493,6 +492,7 @@ class Command(BaseCommand):
                     }
                     response = client.conversations_replies(**params)
                     self._handle_slack_response(response, "conversations_replies")
+                    retry_count = 0
 
                     messages = response.get("messages", [])
                     if not messages:
@@ -546,7 +546,7 @@ class Command(BaseCommand):
             )
 
         if replies_count := len(replies):
-            print(
+            self.stdout.write(
                 f"Saving {replies_count} repl{pluralize(replies_count, 'y,ies')} for {message.url}"
             )
             Message.bulk_save(replies)

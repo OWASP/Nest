@@ -67,6 +67,7 @@ jest.mock('next/image', () => ({
 const now = Date.now()
 const mockReleases: Release[] = [
   {
+    id: 'release-recent-1',
     name: 'v1.0 The First Release',
     publishedAt: now,
     repositoryName: 'our-awesome-project',
@@ -79,7 +80,7 @@ const mockReleases: Release[] = [
       avatarUrl: 'https://example.com/avatar.png',
       key: 'testuser',
       contributionsCount: 0,
-      createdAt: 0,
+      createdAt: '1970-01-01T00:00:00.000Z',
       followersCount: 0,
       followingCount: 0,
       publicRepositoriesCount: 0,
@@ -87,6 +88,7 @@ const mockReleases: Release[] = [
     },
   },
   {
+    id: 'release-recent-2',
     name: 'v2.0 The Second Release',
     publishedAt: now,
     repositoryName: 'another-cool-project',
@@ -99,7 +101,7 @@ const mockReleases: Release[] = [
       avatarUrl: 'https://example.com/avatar2.png',
       key: 'jane-doe',
       contributionsCount: 0,
-      createdAt: 0,
+      createdAt: '1970-01-01T00:00:00.000Z',
       followersCount: 0,
       followingCount: 0,
       publicRepositoriesCount: 0,
@@ -381,7 +383,7 @@ describe('RecentReleases Component', () => {
 
     // Check for main card structure - look for the card wrapper
     const cardElement = container.querySelector(
-      '.mb-4.w-full.rounded-lg.bg-gray-200.p-4.dark\\:bg-gray-700'
+      String.raw`.mb-4.w-full.rounded-lg.bg-gray-200.p-4.dark\:bg-gray-700`
     )
     expect(cardElement).toBeInTheDocument()
 

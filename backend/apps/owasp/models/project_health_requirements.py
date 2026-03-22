@@ -10,6 +10,8 @@ class ProjectHealthRequirements(TimestampedModel):
     """Project health requirements model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_project_health_requirements"
         verbose_name_plural = "Project Health Requirements"
         ordering = ["level"]

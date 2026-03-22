@@ -306,6 +306,46 @@ describe('UserMenu Component', () => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
       })
     })
+
+    it('does not close dropdown when clicking inside the dropdown', async () => {
+      mockUseSession.mockReturnValue({
+        session: mockSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'true')
+      })
+
+      const dropdownId = avatarButton.getAttribute('aria-controls')
+      const dropdown = document.getElementById(dropdownId!)
+      expect(dropdown).toBeInTheDocument()
+
+      fireEvent.mouseDown(dropdown!)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'true')
+      })
+    })
+
+    it('handles mousedown events gracefully when safely syncing (ref is null)', () => {
+      mockUseSession.mockReturnValue({
+        session: null,
+        isSyncing: true,
+        status: 'loading',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      fireEvent.mouseDown(document.body)
+
+      expect(document.querySelector('.animate-pulse')).toBeInTheDocument()
+    })
   })
 
   describe('State changes / internal logic', () => {
@@ -771,6 +811,78 @@ describe('UserMenu Component', () => {
       expect(removeEventListenerSpy).toHaveBeenCalledWith('mousedown', expect.any(Function))
 
       removeEventListenerSpy.mockRestore()
+    })
+  })
+
+  describe('Project Leader and OWASP Staff links', () => {
+    it('closes dropdown when My Mentorship link is clicked', async () => {
+      const leaderSession: ExtendedSession = {
+        user: {
+          name: 'Leader User',
+          email: 'leader@example.com',
+          image: 'https://example.com/avatar.jpg',
+          isLeader: true,
+          isOwaspStaff: false,
+        },
+        expires: '2024-12-31',
+      }
+
+      mockUseSession.mockReturnValue({
+        session: leaderSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('My Mentorship')).toBeInTheDocument()
+      })
+
+      const mentorshipLink = screen.getByText('My Mentorship')
+      fireEvent.click(mentorshipLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+
+    it('closes dropdown when Project Health Dashboard link is clicked', async () => {
+      const staffSession: ExtendedSession = {
+        user: {
+          name: 'Staff User',
+          email: 'staff@example.com',
+          image: 'https://example.com/avatar.jpg',
+          isLeader: false,
+          isOwaspStaff: true,
+        },
+        expires: '2024-12-31',
+      }
+
+      mockUseSession.mockReturnValue({
+        session: staffSession,
+        isSyncing: false,
+        status: 'authenticated',
+      })
+
+      render(<UserMenu isGitHubAuthEnabled={true} />)
+
+      const avatarButton = screen.getByRole('button')
+      fireEvent.click(avatarButton)
+
+      await waitFor(() => {
+        expect(screen.getByText('Project Health Dashboard')).toBeInTheDocument()
+      })
+
+      const dashboardLink = screen.getByText('Project Health Dashboard')
+      fireEvent.click(dashboardLink)
+
+      await waitFor(() => {
+        expect(avatarButton).toHaveAttribute('aria-expanded', 'false')
+      })
     })
   })
 })

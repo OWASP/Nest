@@ -3,27 +3,34 @@
 from unittest.mock import Mock
 
 from apps.owasp.api.internal.nodes.board_of_directors import BoardOfDirectorsNode
+from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
-class TestBoardOfDirectorsNode:
+class TestBoardOfDirectorsNode(GraphQLNodeBaseTest):
+    """Test cases for BoardOfDirectorsNode class."""
+
     def test_node_fields(self):
-        node = BoardOfDirectorsNode.__strawberry_definition__
-
-        field_names = {field.name for field in node.fields}
-
-        assert "year" in field_names
-        assert "created_at" in field_names
-        assert "updated_at" in field_names
-        assert "owasp_url" in field_names
-        assert "candidates" in field_names
-        assert "members" in field_names
+        field_names = {
+            field.name for field in BoardOfDirectorsNode.__strawberry_definition__.fields
+        }
+        expected_field_names = {
+            "_id",
+            "candidates",
+            "created_at",
+            "members",
+            "owasp_url",
+            "updated_at",
+            "year",
+        }
+        assert field_names == expected_field_names
 
     def test_owasp_url_resolver(self):
         """Test owasp_url returns URL from board instance."""
         mock_board = Mock()
         mock_board.owasp_url = "https://board.owasp.org/elections/2025_elections"
 
-        result = BoardOfDirectorsNode.owasp_url(mock_board)
+        field = self._get_field_by_name("owasp_url", BoardOfDirectorsNode)
+        result = field.base_resolver.wrapped_func(None, mock_board)
 
         assert result == "https://board.owasp.org/elections/2025_elections"
 
@@ -35,7 +42,8 @@ class TestBoardOfDirectorsNode:
         mock_board = Mock()
         mock_board.get_candidates.return_value = [mock_candidate1, mock_candidate2]
 
-        result = BoardOfDirectorsNode.candidates(mock_board)
+        field = self._get_field_by_name("candidates", BoardOfDirectorsNode)
+        result = field.base_resolver.wrapped_func(None, mock_board)
 
         assert result == [mock_candidate1, mock_candidate2]
         mock_board.get_candidates.assert_called_once()
@@ -48,7 +56,8 @@ class TestBoardOfDirectorsNode:
         mock_board = Mock()
         mock_board.get_members.return_value = [mock_member1, mock_member2]
 
-        result = BoardOfDirectorsNode.members(mock_board)
+        field = self._get_field_by_name("members", BoardOfDirectorsNode)
+        result = field.base_resolver.wrapped_func(None, mock_board)
 
         assert result == [mock_member1, mock_member2]
         mock_board.get_members.assert_called_once()

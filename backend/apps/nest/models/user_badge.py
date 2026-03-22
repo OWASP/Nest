@@ -11,6 +11,8 @@ class UserBadge(BulkSaveModel, TimestampedModel):
     """Represents a user badge relation."""
 
     class Meta:
+        """Model options."""
+
         db_table = "nest_user_badges"
         unique_together = (
             "badge",
@@ -48,3 +50,8 @@ class UserBadge(BulkSaveModel, TimestampedModel):
     def __str__(self) -> str:
         """Return a human-readable representation of the user badge."""
         return f"{self.user.login} - {self.badge.name}"
+
+    @staticmethod
+    def bulk_save(user_badges, fields=None) -> None:  # type: ignore[override]
+        """Bulk save user badges."""
+        BulkSaveModel.bulk_save(UserBadge, user_badges, fields=fields)

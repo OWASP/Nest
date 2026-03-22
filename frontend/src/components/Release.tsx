@@ -22,6 +22,19 @@ const Release: React.FC<ReleaseProps> = ({
   index = 0,
 }) => {
   const router = useRouter()
+  const handleClickRepository = () => {
+    const org = release.organizationName || ''
+    const repo = release.repositoryName || ''
+    if (!org || !repo) return
+    router.push(`/organizations/${org}/repositories/${repo}`)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleClickRepository()
+    }
+  }
 
   return (
     <div className={`mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700 ${className}`}>
@@ -55,14 +68,18 @@ const Release: React.FC<ReleaseProps> = ({
             </Tooltip>
           )}
           <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
-            <Link
-              className="text-blue-400 hover:underline"
-              href={`https://github.com/${release.organizationName}/${release.repositoryName}/releases/tag/${release.tagName}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            {release.organizationName && release.repositoryName ? (
+              <Link
+                className="text-blue-400 hover:underline"
+                href={`https://github.com/${release.organizationName}/${release.repositoryName}/releases/tag/${release.tagName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <TruncatedText text={release.name || release.tagName} />
+              </Link>
+            ) : (
               <TruncatedText text={release.name || release.tagName} />
-            </Link>
+            )}
           </h3>
         </div>
         <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
@@ -76,15 +93,11 @@ const Release: React.FC<ReleaseProps> = ({
               type="button"
               className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
               disabled={!release.organizationName || !release.repositoryName}
-              onClick={() => {
-                const org = release.organizationName || ''
-                const repo = release.repositoryName || ''
-                if (!org || !repo) return
-                router.push(`/organizations/${org}/repositories/${repo}`)
-              }}
-              aria-label={`View repository ${release.repositoryName}`}
+              onClick={handleClickRepository}
+              onKeyDown={handleKeyDown}
+              aria-label={`View repository ${release.repositoryName ?? 'Unknown repository'}`}
             >
-              <TruncatedText text={release.repositoryName} />
+              <TruncatedText text={release.repositoryName ?? 'Unknown repository'} />
             </button>
           </div>
         </div>

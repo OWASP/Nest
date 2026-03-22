@@ -1,5 +1,5 @@
+import { mockProjectDetailsData } from '@mockData/mockProjectDetailsData'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { mockProjectDetailsData } from '@unit/data/mockProjectDetailsData'
 import { useRouter } from 'next/navigation'
 import Leaders from 'components/Leaders'
 
@@ -53,5 +53,21 @@ describe('Leaders Component', () => {
     fireEvent.click(viewProfileButton)
 
     expect(push).toHaveBeenCalledWith('/members/alice')
+  })
+
+  it('navigates to search page when user.member is undefined', () => {
+    const userWithoutMember = [
+      {
+        memberName: 'John Doe',
+        description: 'Team Lead',
+        member: undefined,
+      },
+    ]
+    render(<Leaders users={userWithoutMember} />)
+
+    const viewProfileButton = screen.getByText('View Profile')
+    fireEvent.click(viewProfileButton)
+
+    expect(push).toHaveBeenCalledWith('/members?q=John%20Doe')
   })
 })

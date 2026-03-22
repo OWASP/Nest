@@ -9,21 +9,24 @@ import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
 import DisplayIcon from 'components/DisplayIcon'
+import { LabelList } from 'components/LabelList'
 import Markdown from 'components/MarkdownWrapper'
 
 const Card = ({
-  title,
-  url,
-  summary,
-  level,
-  icons,
-  topContributors,
   button,
-  projectName,
+  cardKey,
+  icons,
+  labels,
+  level,
   projectLink,
+  projectName,
   social,
-  tooltipLabel,
+  summary,
   timeline,
+  title,
+  tooltipLabel,
+  topContributors,
+  url,
 }: CardProps) => {
   return (
     <div className="mx-auto mt-4 mb-2 flex w-full max-w-[95%] flex-col items-start rounded-md border-1 border-gray-200 bg-white p-4 md:max-w-6xl dark:border-gray-700 dark:bg-[#212529]">
@@ -64,10 +67,10 @@ const Card = ({
         {/* Icons associated with the project */}
         {icons && Object.keys(ICONS).some((key) => icons[key]) && (
           <div className="mt-3 flex flex-wrap">
-            {Object.keys(ICONS).map((key, index) =>
+            {Object.keys(ICONS).map((key) =>
               icons[key] ? (
                 <DisplayIcon
-                  key={`${key}-${index}`}
+                  key={key}
                   item={key}
                   icons={Object.fromEntries(Object.entries(icons).filter(([_, value]) => value))}
                 />
@@ -97,8 +100,10 @@ const Card = ({
         </Link>
       )}
 
-      {/* Project summary */}
-      <Markdown content={summary} className="mt-2 w-full text-gray-600 dark:text-gray-300" />
+      <Markdown
+        content={summary}
+        className="mt-2 w-full [overflow-wrap:anywhere] break-words text-gray-600 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
+      />
 
       <div className="mt-4 w-full">
         {/* Social icons section */}
@@ -124,8 +129,14 @@ const Card = ({
           </div>
         )}
 
-        {/* Flexible bottom row with contributors and action button */}
+        {/* Flexible bottom row with labels, contributors and action button */}
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+          {/* Labels Section */}
+          {labels && labels.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <LabelList entityKey={`${cardKey}-labels`} labels={labels} maxVisible={5} />
+            </div>
+          )}
           {/* Contributors section */}
           <div className="flex flex-wrap items-center gap-2">
             {topContributors?.map((contributor, index) => (
@@ -139,7 +150,12 @@ const Card = ({
 
           {/* Action Button */}
           <div className="flex sm:justify-end">
-            <ActionButton tooltipLabel={tooltipLabel} url={button.url} onClick={button.onclick}>
+            <ActionButton
+              tooltipLabel={tooltipLabel}
+              url={button.url}
+              onClick={button.onclick}
+              onKeyDown={button.onkeydown}
+            >
               {button.icon}
               {button.label}
             </ActionButton>

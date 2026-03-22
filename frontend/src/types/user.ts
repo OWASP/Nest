@@ -15,7 +15,7 @@ export type User = {
   bio?: string
   company?: string
   contributionsCount?: number
-  createdAt?: number | string
+  createdAt?: string
   email?: string
   followersCount?: number
   followingCount?: number
@@ -30,6 +30,6 @@ export type User = {
   releases?: Release[]
   releasesCount?: number
   topRepositories?: RepositoryCardProps[]
-  updatedAt?: number | string
+  updatedAt?: string
   url?: string
 }

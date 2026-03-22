@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -15,8 +15,9 @@ def mock_slack_app():
 
 @pytest.fixture
 def slack_bot(mock_slack_app):
-    SlackConfig.app = mock_slack_app
-    return SlackConfig
+    """Provide mocked SlackConfig.app, restored after the test."""
+    with patch.object(SlackConfig, "app", mock_slack_app):
+        yield SlackConfig
 
 
 class TestUrlVerification:

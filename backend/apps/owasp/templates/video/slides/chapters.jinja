@@ -1,0 +1,17 @@
+{% extends "base.jinja" %}
+{% block content %}
+    <div class="flex h-full flex-col p-12 px-24">
+        <h1 class="text-6xl font-bold mb-12 text-center">{{ title }}</h1>
+        <div class="flex flex-wrap gap-4 justify-center w-full">
+            {% for chapter in chapters[:24] %}
+                <div class="rounded-lg border-2 bg-card p-4 shrink-0 w-96 h-32">
+                    <div class="text-2xl font-bold text-nest-blue line-clamp-2">{{ chapter.name }}</div>
+                    <div class="text-lg text-gray-300 mt-1">{{ chapter.location }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        {% if chapters|length > 24 %}
+            <p class="text-center text-gray-400 mt-8 text-xl">+ {{ chapters|length - 24 }} more chapters not shown</p>
+        {% endif %}
+    </div>
+{% endblock %}

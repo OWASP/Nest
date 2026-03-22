@@ -4,6 +4,7 @@ from typing import Any
 
 from django.conf import settings
 from ninja import NinjaAPI, Swagger
+from ninja.errors import ValidationError
 from ninja.pagination import RouterPaginated
 from ninja.throttling import AuthRateThrottle
 
@@ -44,7 +45,7 @@ api_settings = {
     "docs": Swagger(settings={"persistAuthorization": True}),
     "throttle": [AuthRateThrottle("10/s")],
     "title": "OWASP Nest",
-    "version": "0.3.6",
+    "version": "0.4.1",
 }
 
 api_settings_customization: dict[str, Any] = {}
@@ -56,6 +57,28 @@ if settings.IS_PRODUCTION_ENVIRONMENT:
                 "url": settings.SITE_URL,
             }
         ],
+    }
+elif settings.IS_E2E_ENVIRONMENT:
+    api_settings_customization = {
+        "auth": None,
+        "servers": [
+            {
+                "description": "E2E",
+                "url": settings.SITE_URL,
+            }
+        ],
+        "throttle": [],
+    }
+elif settings.IS_FUZZ_ENVIRONMENT:
+    api_settings_customization = {
+        "auth": None,
+        "servers": [
+            {
+                "description": "Fuzz",
+                "url": settings.SITE_URL,
+            }
+        ],
+        "throttle": [],
     }
 elif settings.IS_STAGING_ENVIRONMENT:
     api_settings_customization = {
@@ -79,6 +102,16 @@ elif settings.IS_LOCAL_ENVIRONMENT:
     }
 
 api = NinjaAPI(**{**api_settings, **api_settings_customization})
+
+
+@api.exception_handler(ValidationError)
+def validation_exception_handler(request, exc):
+    """Handle validation exceptions."""
+    return api.create_response(
+        request,
+        {"message": "Invalid request", "errors": exc.errors},
+        status=400,
+    )
 
 
 @api.get("/", include_in_schema=False)

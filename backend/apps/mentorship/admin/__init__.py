@@ -1,5 +1,6 @@
 """Mentorship app admin."""
 
+from .admin import AdminAdmin
 from .issue_user_interest import IssueUserInterest
 from .mentee import MenteeAdmin
 from .mentee_module import MenteeModuleAdmin

@@ -11,6 +11,8 @@ class Release(BulkSaveModel, NodeModel, ReleaseIndexMixin, TimestampedModel):
     """Release model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "github_releases"
         indexes = [
             models.Index(fields=["-created_at"], name="release_created_at_desc_idx"),

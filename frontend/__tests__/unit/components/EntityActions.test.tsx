@@ -1,3 +1,5 @@
+import { useMutation } from '@apollo/client/react'
+import { addToast } from '@heroui/toast'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
@@ -9,18 +11,27 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }))
 
+jest.mock('@apollo/client/react', () => ({
+  useMutation: jest.fn(),
+}))
+
+jest.mock('@heroui/toast', () => ({
+  addToast: jest.fn(),
+}))
+
 describe('EntityActions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
     })
+    ;(useMutation as unknown as jest.Mock).mockReturnValue([jest.fn()])
   })
 
   describe('Program Actions - Create Module', () => {
     it('navigates to create module page when Add Module is clicked', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const addModuleButton = screen.getByText('Add Module')
@@ -31,7 +42,7 @@ describe('EntityActions', () => {
 
     it('closes dropdown after clicking Add Module', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -45,7 +56,7 @@ describe('EntityActions', () => {
   describe('Module Actions - Edit Module', () => {
     it('navigates to edit module page when Edit is clicked with moduleKey', () => {
       render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const editButton = screen.getByText('Edit')
@@ -58,7 +69,7 @@ describe('EntityActions', () => {
 
     it('does not navigate when moduleKey is missing for edit action', () => {
       render(<EntityActions type="module" programKey="test-program" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const editButton = screen.getByText('Edit')
@@ -69,7 +80,7 @@ describe('EntityActions', () => {
 
     it('closes dropdown after clicking Edit', () => {
       render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -82,8 +93,15 @@ describe('EntityActions', () => {
 
   describe('Module Actions - View Issues', () => {
     it('navigates to view issues page when View Issues is clicked with moduleKey', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const viewIssuesButton = screen.getByText('View Issues')
@@ -95,8 +113,8 @@ describe('EntityActions', () => {
     })
 
     it('does not navigate when moduleKey is missing for view issues action', () => {
-      render(<EntityActions type="module" programKey="test-program" />)
-      const button = screen.getByTestId('module-actions-button')
+      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
 
       const viewIssuesButton = screen.getByText('View Issues')
@@ -106,8 +124,15 @@ describe('EntityActions', () => {
     })
 
     it('closes dropdown after clicking View Issues', () => {
-      render(<EntityActions type="module" programKey="test-program" moduleKey="test-module" />)
-      const button = screen.getByTestId('module-actions-button')
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -129,7 +154,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const publishButton = screen.getByText('Publish')
@@ -142,7 +167,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Publish')).toBeInTheDocument()
@@ -156,7 +181,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Publish')).not.toBeInTheDocument()
@@ -172,7 +197,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -194,7 +219,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const unpublishButton = screen.getByText('Unpublish')
@@ -213,7 +238,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const unpublishButton = screen.getByText('Unpublish')
@@ -230,7 +255,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Unpublish')).toBeInTheDocument()
@@ -244,7 +269,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Completed}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Unpublish')).toBeInTheDocument()
@@ -254,7 +279,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Unpublish')).not.toBeInTheDocument()
@@ -270,7 +295,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -292,7 +317,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const completedButton = screen.getByText('Mark as Completed')
@@ -309,7 +334,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.getByText('Mark as Completed')).toBeInTheDocument()
@@ -319,7 +344,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Mark as Completed')).not.toBeInTheDocument()
@@ -333,7 +358,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Completed}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(screen.queryByText('Mark as Completed')).not.toBeInTheDocument()
@@ -349,7 +374,7 @@ describe('EntityActions', () => {
           setStatus={mockSetStatus}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -363,7 +388,7 @@ describe('EntityActions', () => {
   describe('Click Outside Behavior', () => {
     it('closes dropdown when clicking outside', async () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -376,7 +401,7 @@ describe('EntityActions', () => {
 
     it('does not close dropdown when clicking inside', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
       expect(button).toHaveAttribute('aria-expanded', 'true')
 
@@ -403,7 +428,7 @@ describe('EntityActions', () => {
       render(
         <EntityActions type="program" programKey="test-program" status={ProgramStatusEnum.Draft} />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const publishButton = screen.getByText('Publish')
@@ -419,7 +444,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const unpublishButton = screen.getByText('Unpublish')
@@ -434,7 +459,7 @@ describe('EntityActions', () => {
           status={ProgramStatusEnum.Published}
         />
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const completedButton = screen.getByText('Mark as Completed')
@@ -443,7 +468,7 @@ describe('EntityActions', () => {
 
     it('handles undefined status gracefully', () => {
       render(<EntityActions type="program" programKey="test-program" />)
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       // Should still show Edit and Add Module
@@ -461,7 +486,7 @@ describe('EntityActions', () => {
           <EntityActions type="program" programKey="test-program" />
         </div>
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       expect(mockParentClick).not.toHaveBeenCalled()
@@ -475,13 +500,588 @@ describe('EntityActions', () => {
           <EntityActions type="program" programKey="test-program" />
         </div>
       )
-      const button = screen.getByTestId('program-actions-button')
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
       fireEvent.click(button)
 
       const editButton = screen.getByText('Edit')
       fireEvent.click(editButton)
 
       expect(mockParentClick).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('handles keyboard navigation', () => {
+    it('closes menu when escape key is pressed', async () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
+
+      const menu = screen.getByRole('menu')
+      fireEvent.keyDown(menu, { key: 'Escape' })
+
+      await waitFor(() => {
+        expect(button).toHaveAttribute('aria-expanded', 'false')
+      })
+    })
+
+    it('returns focus to trigger button when escape is pressed', async () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
+      fireEvent.click(button)
+
+      const menu = screen.getByRole('menu')
+      fireEvent.keyDown(menu, { key: 'Escape' })
+
+      await waitFor(() => {
+        expect(button).toHaveFocus()
+      })
+    })
+  })
+
+  it('focuses first menu item when menu opens', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const editButton = screen.getByText('Edit')
+    expect(editButton).toHaveFocus()
+  })
+
+  it('navigates down through menu items with ArrowDown', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const editButton = screen.getByText('Edit')
+    const addModuleButton = screen.getByText('Add Module')
+
+    expect(editButton).toHaveFocus()
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    await waitFor(() => {
+      expect(addModuleButton).toHaveFocus()
+    })
+  })
+
+  it('navigates up through menu items with ArrowUp', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const editButton = screen.getByText('Edit')
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+    fireEvent.keyDown(menu, { key: 'ArrowUp' })
+
+    await waitFor(() => {
+      expect(editButton).toHaveFocus()
+    })
+  })
+
+  it('wraps around to last item when ArrowUp is pressed on first item', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    const menuItems = screen.getAllByRole('menuitem')
+
+    fireEvent.keyDown(menu, { key: 'ArrowUp' })
+
+    await waitFor(() => {
+      expect(menuItems[menuItems.length - 1]).toHaveFocus()
+    })
+  })
+
+  it('wraps around to first item when ArrowDown is pressed on last item', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    const menuItems = screen.getAllByRole('menuitem')
+
+    for (let i = 0; i < menuItems.length - 1; i++) {
+      fireEvent.keyDown(menu, { key: 'ArrowDown' })
+    }
+
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    await waitFor(() => {
+      expect(menuItems[0]).toHaveFocus()
+    })
+  })
+
+  it('activates menu item when Enter is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
+  })
+
+  it('activates menu item when Space is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: ' ' })
+
+    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
+  })
+
+  it('closes menu after activating item with Enter', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
+  it('closes menu after activating item with Space', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: ' ' })
+
+    await waitFor(() => {
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
+  it('navigates to specific action with keyboard', async () => {
+    const mockSetStatus = jest.fn()
+    render(
+      <EntityActions
+        type="program"
+        programKey="test-program"
+        status={ProgramStatusEnum.Draft}
+        setStatus={mockSetStatus}
+      />
+    )
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    expect(mockSetStatus).toHaveBeenCalledWith(ProgramStatusEnum.Published)
+  })
+
+  it('sets appropriate tabIndex for focused and non-focused items', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menuItems = screen.getAllByRole('menuitem')
+
+    expect(menuItems[0]).toHaveAttribute('tabIndex', '0')
+
+    expect(menuItems[1]).toHaveAttribute('tabIndex', '-1')
+  })
+
+  it('updates tabIndex as focus changes with arrow keys', async () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menuItems = screen.getAllByRole('menuitem')
+    const menu = screen.getByRole('menu')
+
+    expect(menuItems[0]).toHaveAttribute('tabIndex', '0')
+
+    fireEvent.keyDown(menu, { key: 'ArrowDown' })
+
+    await waitFor(() => {
+      expect(menuItems[0]).toHaveAttribute('tabIndex', '-1')
+      expect(menuItems[1]).toHaveAttribute('tabIndex', '0')
+    })
+  })
+
+  it('does not process keyboard events when menu is closed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+
+    expect(() => {
+      fireEvent.keyDown(button, { key: 'ArrowDown' })
+    }).not.toThrow()
+  })
+
+  it('navigates to edit page when enter key is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    const editButton = screen.getByText('Edit')
+
+    expect(editButton).toHaveFocus()
+
+    fireEvent.keyDown(menu, { key: 'Enter' })
+
+    expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program/edit')
+  })
+  it('does nothing when an unhandled key is pressed', () => {
+    render(<EntityActions type="program" programKey="test-program" />)
+    const button = screen.getByRole('button', { name: /Program actions menu/ })
+    fireEvent.click(button)
+
+    const menu = screen.getByRole('menu')
+    fireEvent.keyDown(menu, { key: 'a' })
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  describe('Toggle Behavior', () => {
+    it('closes the dropdown and resets focus when toggled off via click', () => {
+      render(<EntityActions type="program" programKey="test-program" />)
+      const button = screen.getByRole('button', { name: /Program actions menu/ })
+
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
+
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+    })
+  })
+
+  describe('Module Actions - Delete Module', () => {
+    let mockDeleteMutation: jest.Mock
+
+    beforeEach(() => {
+      mockDeleteMutation = jest.fn()
+      ;(useMutation as unknown as jest.Mock).mockReturnValue([mockDeleteMutation])
+    })
+
+    it('opens delete modal when Delete is clicked', () => {
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      const button = screen.getByRole('button', { name: /Module actions menu/ })
+      fireEvent.click(button)
+
+      const deleteButton = screen.getByText('Delete')
+      fireEvent.click(deleteButton)
+
+      expect(screen.getByText('Delete Module')).toBeInTheDocument()
+      expect(screen.getByText(/Are you sure you want to delete this module/)).toBeInTheDocument()
+    })
+
+    it('closes delete modal when Cancel is clicked', async () => {
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      expect(screen.getByText('Delete Module')).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: /Cancel/i }))
+
+      await waitFor(() => {
+        expect(screen.queryByText('Delete Module')).not.toBeInTheDocument()
+      })
+    })
+
+    it('closes delete modal when Modal close button is clicked (onClose)', async () => {
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      expect(screen.getByText('Delete Module')).toBeInTheDocument()
+
+      const closeButton = screen.getByRole('button', { name: /Close/i })
+      fireEvent.click(closeButton)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Delete Module')).not.toBeInTheDocument()
+      })
+    })
+
+    it('does not do anything if moduleKey is missing on submit', async () => {
+      render(<EntityActions type="module" programKey="test-program" isAdmin={true} />)
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      const confirmButton = screen.getByRole('button', { name: 'Delete' })
+      fireEvent.click(confirmButton)
+
+      expect(mockDeleteMutation).not.toHaveBeenCalled()
+    })
+
+    it('handles successful module deletion', async () => {
+      mockDeleteMutation.mockResolvedValueOnce({ data: { deleteModule: true } })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      const confirmButton = screen.getByRole('button', { name: 'Delete' })
+      fireEvent.click(confirmButton)
+
+      await waitFor(() => {
+        expect(mockDeleteMutation).toHaveBeenCalledWith({
+          variables: { programKey: 'test-program', moduleKey: 'test-module' },
+          update: expect.any(Function),
+        })
+        expect(addToast).toHaveBeenCalledWith({
+          title: 'Success',
+          description: 'Module has been deleted successfully.',
+          color: 'success',
+        })
+        expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+      })
+    })
+
+    it('calls update cache function when delete is successful', async () => {
+      const mockCache = {
+        readQuery: jest.fn().mockReturnValue({
+          getProgramModules: [{ key: 'test-module' }, { key: 'other-module' }],
+        }),
+        writeQuery: jest.fn(),
+      }
+
+      mockDeleteMutation.mockImplementationOnce(({ update }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (update) update(mockCache as any)
+        return Promise.resolve({ data: { deleteModule: true } })
+      })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(mockCache.readQuery).toHaveBeenCalled()
+        expect(mockCache.writeQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: {
+              getProgramModules: [{ key: 'other-module' }],
+            },
+          })
+        )
+      })
+    })
+
+    it('handles mutation structural failure', async () => {
+      mockDeleteMutation.mockResolvedValueOnce({ data: { deleteModule: false } })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Failed to delete module. Please try again.',
+          })
+        )
+      })
+    })
+
+    it('handles Permission Denied error from server', async () => {
+      mockDeleteMutation.mockRejectedValueOnce(
+        new Error('Permission denied: You do not have permission')
+      )
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description:
+              'You do not have permission to delete this module. Only program admins can delete modules.',
+          })
+        )
+      })
+    })
+
+    it('handles Unauthorized error from server', async () => {
+      mockDeleteMutation.mockRejectedValueOnce(new Error('Unauthorized request'))
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Unauthorized: You must be a program admin to delete modules.',
+          })
+        )
+      })
+    })
+
+    it('handles a generic network error from server', async () => {
+      mockDeleteMutation.mockRejectedValueOnce(new Error('Network disconnected'))
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Failed to delete module. Please try again.',
+          })
+        )
+      })
+    })
+
+    it('skips cache update when getProgramModules is not in cache', async () => {
+      const mockCache = {
+        readQuery: jest.fn().mockReturnValue(null),
+        writeQuery: jest.fn(),
+      }
+
+      mockDeleteMutation.mockImplementationOnce(({ update }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (update) update(mockCache as any)
+        return Promise.resolve({ data: { deleteModule: true } })
+      })
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(mockCache.readQuery).toHaveBeenCalled()
+        expect(mockCache.writeQuery).not.toHaveBeenCalled()
+        expect(mockPush).toHaveBeenCalledWith('/my/mentorship/programs/test-program')
+      })
+    })
+
+    it('handles non-Error thrown values gracefully', async () => {
+      mockDeleteMutation.mockRejectedValueOnce('string error')
+
+      render(
+        <EntityActions
+          type="module"
+          programKey="test-program"
+          moduleKey="test-module"
+          isAdmin={true}
+        />
+      )
+      fireEvent.click(screen.getByRole('button', { name: /Module actions menu/ }))
+      fireEvent.click(screen.getByText('Delete'))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+
+      await waitFor(() => {
+        expect(addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Error',
+            color: 'danger',
+            description: 'Failed to delete module. Please try again.',
+          })
+        )
+      })
     })
   })
 })

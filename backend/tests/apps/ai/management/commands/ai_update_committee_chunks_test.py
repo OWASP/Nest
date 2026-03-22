@@ -6,6 +6,7 @@ import pytest
 from django.core.management.base import BaseCommand
 
 from apps.ai.management.commands.ai_update_committee_chunks import Command
+from apps.owasp.models.committee import Committee
 
 
 @pytest.fixture
@@ -35,8 +36,6 @@ class TestAiCreateCommitteeChunksCommand:
 
     def test_model_class_method(self, command):
         """Test the model_class method returns Committee."""
-        from apps.owasp.models.committee import Committee
-
         assert command.model_class == Committee
 
     def test_entity_name_method(self, command):
