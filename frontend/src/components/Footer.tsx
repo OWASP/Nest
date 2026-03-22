@@ -28,7 +28,7 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
-      <div className="w-full px-4 py-4 text-slate-800 md:px-8 md:py-8 dark:text-slate-200">
+      <div className="w-full px-10 py-4 text-slate-800 md:px-8 md:py-8 dark:text-slate-200">
         <div className="mx-auto grid w-full max-w-6xl gap-6">
           <div className="grid w-full sm:grid-cols-2 sm:gap-x-8 sm:gap-y-6 md:grid-cols-[repeat(5,max-content)] md:justify-between md:gap-x-8 lg:gap-x-8">
           {footerSections.map((section: Section) => (
