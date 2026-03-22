@@ -102,6 +102,10 @@ export const footerSections: Section[] = [
       { text: 'Team', href: 'https://owasp.org/corporate/' },
     ],
   },
+  {
+    title: 'Socials',
+    links: footerIcons.map((social) => ({ href: social.href, text: social.label })),
+  },
 ]
 
 export const tooltipStyle = {

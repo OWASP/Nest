@@ -28,8 +28,9 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
-      <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
-        <div className="grid w-full sm:grid-cols-2 sm:gap-x-10 sm:gap-y-6 md:grid-cols-4 md:gap-x-14 lg:gap-x-20">
+      <div className="w-full px-4 py-4 text-slate-800 md:px-8 md:py-8 dark:text-slate-200">
+        <div className="mx-auto grid w-full max-w-6xl gap-6">
+          <div className="grid w-full sm:grid-cols-2 sm:gap-x-8 sm:gap-y-6 md:grid-cols-[repeat(5,max-content)] md:justify-between md:gap-x-8 lg:gap-x-8">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="flex flex-col gap-4">
               {/*link*/}
@@ -57,6 +58,10 @@ export default function Footer() {
               >
                 {section.links.map((link) => {
                   const isExternal = link.href?.startsWith('http')
+                  const Socials = section.title === 'Socials'
+                    ? footerIcons.find((icon) => icon.label === link.text)
+                    : undefined
+                  const SocialIcon = Socials?.icon
 
                   return (
                     <div key={link.href || `span-${link.text}`} className="py-1">
@@ -64,11 +69,15 @@ export default function Footer() {
                         <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                       ) : (
                         <Link
-                          className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                          className={`rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100 ${
+                            section.title === 'Socials' ? 'inline-flex items-center gap-2' : ''
+                          }`}
                           href={link.href || '/'}
                           target={isExternal ? '_blank' : undefined}
                           rel={isExternal ? 'noopener noreferrer' : undefined}
+                          aria-label={section.title === 'Socials' ? `OWASP Nest ${link.text}` : undefined}
                         >
+                          {SocialIcon && <SocialIcon className="h-4 w-4" />}
                           {link.text}
                         </Link>
                       )}
@@ -78,29 +87,10 @@ export default function Footer() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
 
-        {/* Social Media Icons Section */}
-        <div className="mb-0 flex flex-row justify-center gap-6">
-          {footerIcons.map((social) => {
-            const SocialIcon = social.icon
-            return (
-              <Link
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`OWASP Nest ${social.label}`}
-                className="rounded-full p-2 text-slate-600 transition-colors duration-200 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
-              >
-                <SocialIcon className="h-4 w-4" />
-              </Link>
-            )
-          })}
-        </div>
-
-        {/* Logos Section */}
-        <div className="flex items-center justify-center gap-6">
+          {/* Logos Section */}
+          <div className="flex items-center justify-center gap-6">
           <Link
             href="https://owasp.org/"
             target="_blank"
@@ -134,30 +124,31 @@ export default function Footer() {
             />
             <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
           </Link>
-        </div>
+          </div>
 
-        {/* Footer bottom section with copyright and version */}
-        <div className="grid w-full place-content-center">
-          <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
-            </p>
-            {RELEASE_VERSION && (
+          {/* Footer bottom section with copyright and version */}
+          <div className="grid w-full place-content-center">
+            <div className="flex w-full flex-col items-center gap-2 sm:flex-col sm:text-left">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                <Link
-                  className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
-                  href={
-                    ENVIRONMENT === 'production'
-                      ? `https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`
-                      : `https://github.com/OWASP/Nest/commit/${RELEASE_VERSION.split('-').pop()}`
-                  }
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <span>v{RELEASE_VERSION}</span>
-                </Link>
+                © <span id="year">{new Date().getFullYear()}</span> OWASP Nest. All rights reserved.
               </p>
-            )}
+              {RELEASE_VERSION && (
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <Link
+                    className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                    href={
+                      ENVIRONMENT === 'production'
+                        ? `https://github.com/OWASP/Nest/releases/tag/${RELEASE_VERSION}`
+                        : `https://github.com/OWASP/Nest/commit/${RELEASE_VERSION.split('-').pop()}`
+                    }
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <span>v{RELEASE_VERSION}</span>
+                  </Link>
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
