@@ -46,7 +46,7 @@ GitHub offers two options:
 
 #### Option A — Stripe Connect (bank account)
 
-Most common. GitHub uses Stripe Connect Express, which supports more countries than standard Stripe — so even if your country isn't fully supported by Stripe directly, GitHub's integration may still work for you. Your bank account region must match your country of residence.
+Most common. Your bank account region must match your country of residence. Check the official GitHub Sponsors payout documentation and supported regions for full details.
 
 - [Stripe Connect cross-border payouts — supported countries](https://stripe.com/docs/connect/cross-border-payouts)
 - Double-check your identity info (name, date of birth) before submitting — it is difficult to update after the fact.
