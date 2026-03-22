@@ -28,12 +28,14 @@ if TYPE_CHECKING:
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     """User model."""
     calculated_score = models.FloatField( default=0 )
+
     def calculate_score(self):
         return (
                 self._contribution_score()
                 + self._consistency_score()
                 + self._recency_score()
         )
+
     def _contribution_score(self):
         return (self.contributions_count or 0) * 1.0
     def _consistency_score(self):
@@ -108,12 +110,6 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         """
         return self.created_issues.all()
-
-    def calculate_score(self):
-        score = 0.0
-        # Base contribution score
-        score += float( self.contributions_count or 0 )
-        return score
 
     @property
     def nest_url(self) -> str:
