@@ -48,6 +48,13 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     def _recency_score(self):
         return 5 if (self.contributions_count or 0) > 0 else 0
 
+    def _leadership_score(self):
+        score = 0
+        # Simple leadership signal
+        if self.is_owasp_staff:
+            score += 30
+        return score
+
     class Meta:
         """Model options."""
 
