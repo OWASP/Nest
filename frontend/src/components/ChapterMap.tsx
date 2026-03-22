@@ -141,22 +141,21 @@ const ChapterMap = ({
 }) => {
   const router = useRouter()
   const [isMapActive, setIsMapActive] = useState(false)
-  const sectionRef = useRef<HTMLElement | null>(null)
 
   const handlePointerLeave = (e: React.PointerEvent<HTMLElement>) => {
     if (!isMapActive) return
 
+    const host = e.currentTarget
+
     // Leaflet overlays/popups can trigger a leave-like event without the pointer
     // truly exiting the map container (e.g. `relatedTarget` becomes null during DOM updates).
-    const rect = sectionRef.current?.getBoundingClientRect()
-    if (rect) {
-      const withinX = e.clientX >= rect.left && e.clientX <= rect.right
-      const withinY = e.clientY >= rect.top && e.clientY <= rect.bottom
-      if (withinX && withinY) return
-    }
+    const rect = host.getBoundingClientRect()
+    const withinX = e.clientX >= rect.left && e.clientX <= rect.right
+    const withinY = e.clientY >= rect.top && e.clientY <= rect.bottom
+    if (withinX && withinY) return
 
     const next = e.relatedTarget
-    if (next instanceof Node && sectionRef.current?.contains(next)) return
+    if (next instanceof Node && host.contains(next)) return
 
     setIsMapActive(false)
   }
@@ -200,7 +199,6 @@ const ChapterMap = ({
       aria-label="Chapter Map"
       className="relative"
       style={style}
-      ref={sectionRef}
       onPointerLeave={handlePointerLeave}
     >
       <MapContainer

@@ -1,3 +1,4 @@
+import { fireEvent as domFireEvent } from '@testing-library/dom'
 import { render, fireEvent, waitFor } from '@testing-library/react'
 import * as L from 'leaflet'
 import React, { useEffect } from 'react'
@@ -229,8 +230,9 @@ describe('ChapterMap Refactored Tests', () => {
       })
 
       const section = container.querySelector('section')
-      const rect = section?.getBoundingClientRect() ?? { left: 0, top: 0, right: 0, bottom: 0 }
-      fireEvent.pointerLeave(section!, {
+      expect(section).not.toBeNull()
+      const rect = section.getBoundingClientRect()
+      fireEvent.pointerLeave(section, {
         clientX: rect.left - 10,
         clientY: rect.top - 10,
         relatedTarget: null,
@@ -255,8 +257,9 @@ describe('ChapterMap Refactored Tests', () => {
       const unlockButton = getByText('Unlock map').closest('button')
       fireEvent.click(unlockButton)
       const section = container.querySelector('section')
-      const rect = section?.getBoundingClientRect() ?? { left: 0, top: 0, right: 0, bottom: 0 }
-      fireEvent.pointerLeave(section!, {
+      expect(section).not.toBeNull()
+      const rect = section.getBoundingClientRect()
+      fireEvent.pointerLeave(section, {
         clientX: rect.left - 10,
         clientY: rect.top - 10,
         relatedTarget: null,
@@ -273,7 +276,12 @@ describe('ChapterMap Refactored Tests', () => {
       const { getByText, queryByText, container } = render(<ChapterMap {...defaultProps} />)
 
       fireEvent.click(getByText('Unlock map').closest('button'))
-      const section = container.querySelector('section') as HTMLElement
+      await waitFor(() => {
+        expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+      })
+
+      const section = container.querySelector('section')
+      expect(section).not.toBeNull()
       jest.spyOn(section, 'getBoundingClientRect').mockReturnValue({
         x: 100,
         y: 100,
@@ -283,10 +291,12 @@ describe('ChapterMap Refactored Tests', () => {
         bottom: 300,
         width: 200,
         height: 200,
-        toJSON: () => {},
+        toJSON: () => ({}),
       } as DOMRect)
 
-      fireEvent.pointerLeave(section, {
+      jest.clearAllMocks()
+
+      domFireEvent.pointerLeave(section, {
         clientX: 150,
         clientY: 150,
         relatedTarget: null,
