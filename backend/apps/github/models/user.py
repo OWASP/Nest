@@ -27,6 +27,24 @@ if TYPE_CHECKING:
 
 class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     """User model."""
+    calculated_score = models.FloatField( default=0 )
+    def calculate_score(self):
+        return (
+                self._contribution_score()
+                + self._consistency_score()
+                + self._recency_score()
+        )
+    def _contribution_score(self):
+        return (self.contributions_count or 0) * 1.0
+    def _consistency_score(self):
+        base = self.contributions_count or 0
+        if base > 50:
+            return 25
+        elif base > 10:
+            return 10
+        return 0
+    def _recency_score(self):
+        return 5 if (self.contributions_count or 0) > 0 else 0
 
     class Meta:
         """Model options."""
@@ -183,6 +201,7 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
 
         self.is_bot = gh_user.type == "Bot"
         self.calculated_score = self.calculate_score()
+
 
     def get_absolute_url(self):
         """Get absolute URL for the user."""
