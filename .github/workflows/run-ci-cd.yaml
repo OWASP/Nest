@@ -1054,7 +1054,7 @@ jobs:
           boto3.client('ecs').get_waiter('services_stable').wait(
               cluster=os.environ['CLUSTER_NAME'],
               services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 15, 'MaxAttempts': 120}
+              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
           )
           "
 
@@ -1068,7 +1068,7 @@ jobs:
           boto3.client('ecs').get_waiter('services_stable').wait(
               cluster=os.environ['CLUSTER_NAME'],
               services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 15, 'MaxAttempts': 120}
+              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
           )
           "
     timeout-minutes: 60
