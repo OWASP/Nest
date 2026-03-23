@@ -193,9 +193,9 @@ module "storage" {
   source = "../modules/storage"
 
   common_tags          = local.common_tags
-  kms_key_arn          = module.kms.key_arn
   environment          = var.environment
   fixtures_bucket_name = local.fixtures_bucket_name
+  kms_key_arn          = module.kms.key_arn
   project_name         = var.project_name
 }
 

@@ -5,7 +5,8 @@ import logging
 import strawberry
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
-from django.db import transaction
+from django.db import IntegrityError, transaction
+from graphql import GraphQLError
 
 from apps.github.models import User as GithubUser
 from apps.mentorship.api.internal.nodes.enum import ProgramStatusEnum
@@ -49,6 +50,32 @@ def resolve_admins_from_logins(logins: list[str]) -> set:
     return admins
 
 
+def _handle_program_save_integrity_error(exc: IntegrityError) -> None:
+    """Translate program save IntegrityError to GraphQLError for known constraints.
+
+    Program ``key`` is derived from ``name`` on save, so name and key uniqueness
+    violations both map to validation on the ``name`` input.
+
+    Re-raises the original exception for unrecognized integrity failures.
+    """
+    db_exc = exc.__cause__ or exc
+    error_message = str(db_exc)
+
+    if (
+        "mentorship_programs_name_key" in error_message
+        or "mentorship_programs_key_key" in error_message
+    ):
+        msg = "A program with this name already exists."
+        field = "name"
+    else:
+        raise exc
+
+    raise GraphQLError(
+        msg,
+        extensions={"code": "VALIDATION_ERROR", "field": field},
+    ) from exc
+
+
 @strawberry.type
 class ProgramMutation:
     """GraphQL mutations related to program."""
@@ -69,16 +96,19 @@ class ProgramMutation:
             )
             raise ValidationError(msg)
 
-        program = Program.objects.create(
-            name=input_data.name,
-            description=input_data.description,
-            mentees_limit=input_data.mentees_limit,
-            started_at=input_data.started_at,
-            ended_at=input_data.ended_at,
-            domains=input_data.domains,
-            tags=input_data.tags,
-            status=ProgramStatusEnum.DRAFT.value,
-        )
+        try:
+            program = Program.objects.create(
+                name=input_data.name,
+                description=input_data.description,
+                mentees_limit=input_data.mentees_limit,
+                started_at=input_data.started_at,
+                ended_at=input_data.ended_at,
+                domains=input_data.domains,
+                tags=input_data.tags,
+                status=ProgramStatusEnum.DRAFT.value,
+            )
+        except IntegrityError as e:
+            _handle_program_save_integrity_error(e)
 
         admin, _ = Admin.objects.get_or_create(github_user=user.github_user)
         if not admin.nest_user:
@@ -145,7 +175,10 @@ class ProgramMutation:
         if input_data.status is not None:
             program.status = input_data.status.value
 
-        program.save()
+        try:
+            program.save()
+        except IntegrityError as e:
+            _handle_program_save_integrity_error(e)
 
         if input_data.admin_logins is not None:
             program.admins.set(resolve_admins_from_logins(input_data.admin_logins))
