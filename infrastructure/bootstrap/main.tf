@@ -43,6 +43,9 @@ data "aws_iam_policy_document" "part_one" {
       "kms:DescribeKey",
       "logs:DescribeLogGroups",
       "rds:DescribeDBInstances",
+      "rds:DescribeDBProxies",
+      "rds:DescribeDBProxyTargetGroups",
+      "rds:DescribeDBProxyTargets",
       "rds:DescribeDBSubnetGroups",
       "secretsmanager:DescribeSecret",
       "ssm:DescribeParameters",
@@ -358,10 +361,12 @@ data "aws_iam_policy_document" "part_two" {
       "iam:DeletePolicy",
       "iam:DeletePolicyVersion",
       "iam:DeleteRole",
+      "iam:DeleteRolePolicy",
       "iam:DetachRolePolicy",
       "iam:GetPolicy",
       "iam:GetPolicyVersion",
       "iam:GetRole",
+      "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
       "iam:ListInstanceProfilesForRole",
       "iam:ListPolicyVersions",
@@ -465,16 +470,25 @@ data "aws_iam_policy_document" "part_two" {
     actions = [
       "rds:AddTagsToResource",
       "rds:CreateDBInstance",
+      "rds:CreateDBProxy",
+      "rds:CreateDBProxyTargetGroup",
       "rds:CreateDBSubnetGroup",
       "rds:DeleteDBInstance",
+      "rds:DeleteDBProxy",
+      "rds:DeleteDBProxyTargetGroup",
       "rds:DeleteDBSubnetGroup",
+      "rds:DeregisterDBProxyTargets",
       "rds:ListTagsForResource",
       "rds:ModifyDBInstance",
+      "rds:ModifyDBProxy",
+      "rds:ModifyDBProxyTargetGroup",
       "rds:ModifyDBSubnetGroup",
+      "rds:RegisterDBProxyTargets",
       "rds:RemoveTagsFromResource",
     ]
     resources = [
       "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:${var.project_name}-${each.key}-*",
       "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*"
     ]
   }

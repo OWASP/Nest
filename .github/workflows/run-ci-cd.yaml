@@ -639,8 +639,7 @@ jobs:
     if: |
       (github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')) ||
-      (github.event_name == 'release' &&
-      github.event.action == 'published')
+      (github.event_name == 'release' && github.event.action == 'published')
 
     needs:
       - run-infrastructure-tests
@@ -1262,8 +1261,8 @@ jobs:
     name: Plan Nest Production
     env:
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
-      TF_INPUT: false
       TF_IN_AUTOMATION: true
+      TF_INPUT: false
     environment: production
     if: |
       github.event_name == 'release' &&
@@ -1380,8 +1379,8 @@ jobs:
   deploy-production-nest:
     name: Deploy Nest Production
     env:
-      TF_INPUT: false
       TF_IN_AUTOMATION: true
+      TF_INPUT: false
     environment: production
     if: |
       github.event_name == 'release' &&
