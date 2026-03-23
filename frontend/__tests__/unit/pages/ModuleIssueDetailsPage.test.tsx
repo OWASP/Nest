@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import { useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import ModuleIssueDetailsPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/[issueId]/page'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
@@ -44,6 +45,7 @@ jest.mock('next-auth/react', () => ({
 const mockUseQuery = useQuery as unknown as jest.Mock
 const mockUseParams = useParams as jest.Mock
 const mockUseIssueMutations = useIssueMutations as unknown as jest.Mock
+const mockUseSession = useSession as jest.Mock
 
 const mockAssignIssue = jest.fn()
 const mockUnassignIssue = jest.fn()
@@ -750,5 +752,136 @@ describe('ModuleIssueDetailsPage', () => {
     const deadlineButton = screen.getByRole('button', { name: /No deadline set/i })
     fireEvent.click(deadlineButton)
     expect(setIsEditingDeadline).not.toHaveBeenCalled()
+  })
+
+  describe('Authorization', () => {
+    it('denies access for unauthenticated users', () => {
+      mockUseSession.mockReturnValue({
+        data: null,
+        status: 'unauthenticated',
+      })
+
+      const deniedAccessData = {
+        getProgram: {
+          admins: [],
+        },
+        getModule: {
+          mentors: [],
+        },
+      }
+      setupQueryMock(mockIssueData, deniedAccessData)
+      render(<ModuleIssueDetailsPage />)
+
+      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
+      expect(assignButtons.length).toBe(0)
+    })
+
+    it('denies access for authenticated user who is not an admin or mentor', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'unauthorized-user',
+            email: 'unauth@example.com',
+            name: 'Unauthorized User',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const deniedAccessData = {
+        getProgram: {
+          admins: [{ login: 'other-admin' }],
+        },
+        getModule: {
+          mentors: [{ login: 'other-mentor' }],
+        },
+      }
+      setupQueryMock(mockIssueData, deniedAccessData)
+      render(<ModuleIssueDetailsPage />)
+
+      const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
+      expect(assignButtons.length).toBe(0)
+    })
+
+    it('grants access for authenticated user who is a program admin', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'admin-user',
+            email: 'admin@example.com',
+            name: 'Admin User',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const adminAccessData = {
+        getProgram: {
+          admins: [{ login: 'admin-user' }],
+        },
+        getModule: {
+          mentors: [],
+        },
+      }
+      setupQueryMock(mockIssueData, adminAccessData)
+      render(<ModuleIssueDetailsPage />)
+
+      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+    })
+
+    it('grants access for authenticated user who is a module mentor', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'mentor-user',
+            email: 'mentor@example.com',
+            name: 'Mentor User',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const mentorAccessData = {
+        getProgram: {
+          admins: [],
+        },
+        getModule: {
+          mentors: [{ login: 'mentor-user' }],
+        },
+      }
+      setupQueryMock(mockIssueData, mentorAccessData)
+      render(<ModuleIssueDetailsPage />)
+
+      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+    })
+
+    it('displays Access Denied when user authorization is revoked', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'revoked-user',
+            email: 'revoked@example.com',
+            name: 'Revoked User',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const revokedAccessData = {
+        getProgram: {
+          admins: [],
+        },
+        getModule: {
+          mentors: [],
+        },
+      }
+      setupQueryMock(mockIssueData, revokedAccessData)
+      render(<ModuleIssueDetailsPage />)
+
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only program admins and module mentors can access this page.')
+      ).toBeInTheDocument()
+    })
   })
 })

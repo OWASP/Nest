@@ -4,6 +4,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { handleAppError } from 'app/global-error'
 import IssuesPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/page'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 
 // Mock dependencies
 jest.mock('@apollo/client/react', () => ({
@@ -93,9 +94,8 @@ describe('IssuesPage', () => {
       },
       status: 'authenticated',
     })
-    // Mock for access data query (first call) and issues data query (second call)
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: mockModuleData, loading: false, error: undefined }
@@ -104,7 +104,7 @@ describe('IssuesPage', () => {
 
   it('renders a loading spinner while data is being fetched', () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: undefined, loading: true, error: undefined }
@@ -116,7 +116,7 @@ describe('IssuesPage', () => {
   it('calls handleAppError on query error', () => {
     const error = new Error('Test error')
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: undefined, loading: false, error }
@@ -127,7 +127,7 @@ describe('IssuesPage', () => {
 
   it('renders a 404 error if the module is not found', () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: { getModule: null }, loading: false, error: undefined }
@@ -138,7 +138,7 @@ describe('IssuesPage', () => {
 
   it('displays a "no issues found" message when there are no issues', () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return {
@@ -153,7 +153,7 @@ describe('IssuesPage', () => {
 
   it('renders the list of issues successfully', () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: mockModuleData, loading: false, error: undefined }
@@ -168,7 +168,7 @@ describe('IssuesPage', () => {
 
   it('navigates to the correct issue details page on click', () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: mockModuleData, loading: false, error: undefined }
@@ -181,7 +181,7 @@ describe('IssuesPage', () => {
 
   it('filters issues based on the selected label', async () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: mockModuleData, loading: false, error: undefined }
@@ -202,7 +202,7 @@ describe('IssuesPage', () => {
 
   it('resets to page 1 when a new label is selected', async () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: mockModuleData, loading: false, error: undefined }
@@ -223,7 +223,7 @@ describe('IssuesPage', () => {
 
   it('clears the filter when "All" is selected', async () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: mockModuleData, loading: false, error: undefined }
@@ -258,7 +258,7 @@ describe('IssuesPage', () => {
       },
     }
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return { data: twentyFiveIssues, loading: false, error: undefined }
@@ -291,7 +291,7 @@ describe('IssuesPage', () => {
         isMerged,
       }
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -314,7 +314,7 @@ describe('IssuesPage', () => {
       labels: ['bug', 'feature', 'docs', 'help', 'question', 'wontfix'],
     }
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return {
@@ -347,7 +347,7 @@ describe('IssuesPage', () => {
       assignees: multipleAssignees,
     }
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return {
@@ -380,7 +380,7 @@ describe('IssuesPage', () => {
       },
     }
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return {
@@ -414,7 +414,7 @@ describe('IssuesPage', () => {
       },
     }
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return {
@@ -439,7 +439,7 @@ describe('IssuesPage', () => {
       assignees: null,
     }
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return {
@@ -459,7 +459,7 @@ describe('IssuesPage', () => {
   })
   it('extracts labels from issues and handles null labels when availableLabels is empty', async () => {
     mockUseQuery.mockImplementation((document) => {
-      if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+      if (document === GetProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
       return {
@@ -501,7 +501,7 @@ describe('IssuesPage', () => {
       const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -549,7 +549,7 @@ describe('IssuesPage', () => {
       const twentyDaysLater = new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000)
 
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -596,7 +596,7 @@ describe('IssuesPage', () => {
       const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
 
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -634,7 +634,7 @@ describe('IssuesPage', () => {
 
     it('filters issues by "no-deadline" category', async () => {
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -679,7 +679,7 @@ describe('IssuesPage', () => {
     it('clears deadline filter when "All" is selected', async () => {
       mockUseSearchParams.mockReturnValue(new URLSearchParams('?deadline=overdue'))
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -715,7 +715,7 @@ describe('IssuesPage', () => {
       }))
 
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -740,7 +740,7 @@ describe('IssuesPage', () => {
       })
 
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -770,7 +770,7 @@ describe('IssuesPage', () => {
       const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -812,7 +812,7 @@ describe('IssuesPage', () => {
 
       mockUseSearchParams.mockReturnValue(new URLSearchParams('?label=bug&deadline=overdue'))
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -852,7 +852,7 @@ describe('IssuesPage', () => {
     it('handles errors from useQuery and triggers handleAppError', () => {
       const error = new Error('GraphQL error')
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -869,7 +869,7 @@ describe('IssuesPage', () => {
 
     it('does not call handleAppError when there is no error', () => {
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -886,7 +886,7 @@ describe('IssuesPage', () => {
 
     it('calls handleAppError when error changes from undefined to an error', () => {
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -901,7 +901,7 @@ describe('IssuesPage', () => {
 
       const newError = new Error('Network error')
       mockUseQuery.mockImplementation((document) => {
-        if (document.definitions?.[0]?.name?.value === 'GetProgramAdminsAndModules') {
+        if (document === GetProgramAdminsAndModulesDocument) {
           return { data: mockAccessData, loading: false, error: undefined }
         }
         return {
@@ -913,6 +913,164 @@ describe('IssuesPage', () => {
 
       rerender(<IssuesPage />)
       expect(mockHandleAppError).toHaveBeenCalledWith(newError)
+    })
+  })
+
+  describe('Authorization', () => {
+    it('denies access for unauthenticated users', () => {
+      mockUseSession.mockReturnValue({
+        data: null,
+        status: 'unauthenticated',
+      })
+
+      const deniedAccessData = {
+        getProgram: {
+          admins: [],
+        },
+        getModule: {
+          mentors: [],
+        },
+      }
+
+      mockUseQuery.mockImplementation((document) => {
+        if (document === GetProgramAdminsAndModulesDocument) {
+          return { data: deniedAccessData, loading: false, error: undefined }
+        }
+        return { data: mockModuleData, loading: false, error: undefined }
+      })
+
+      render(<IssuesPage />)
+
+      expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
+    })
+
+    it('denies access for authenticated user who is not an admin or mentor', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'unauthorized-user',
+            email: 'unauth@example.com',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const deniedAccessData = {
+        getProgram: {
+          admins: [{ id: 'admin-1', login: 'other-admin', name: 'Other Admin', avatarUrl: '' }],
+        },
+        getModule: {
+          mentors: [{ id: 'mentor-1', login: 'other-mentor', name: 'Other Mentor', avatarUrl: '' }],
+        },
+      }
+
+      mockUseQuery.mockImplementation((document) => {
+        if (document === GetProgramAdminsAndModulesDocument) {
+          return { data: deniedAccessData, loading: false, error: undefined }
+        }
+        return { data: mockModuleData, loading: false, error: undefined }
+      })
+
+      render(<IssuesPage />)
+
+      // User should not see the issues list when not authorized
+      expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
+    })
+
+    it('grants access for authenticated user who is a program admin', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'admin-user',
+            email: 'admin@example.com',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const adminAccessData = {
+        getProgram: {
+          admins: [{ id: 'admin-1', login: 'admin-user', name: 'Admin User', avatarUrl: '' }],
+        },
+        getModule: {
+          mentors: [],
+        },
+      }
+
+      mockUseQuery.mockImplementation((document) => {
+        if (document === GetProgramAdminsAndModulesDocument) {
+          return { data: adminAccessData, loading: false, error: undefined }
+        }
+        return { data: mockModuleData, loading: false, error: undefined }
+      })
+
+      render(<IssuesPage />)
+
+      expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
+    })
+
+    it('grants access for authenticated user who is a module mentor', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'mentor-user',
+            email: 'mentor@example.com',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const mentorAccessData = {
+        getProgram: {
+          admins: [],
+        },
+        getModule: {
+          mentors: [{ id: 'mentor-1', login: 'mentor-user', name: 'Mentor User', avatarUrl: '' }],
+        },
+      }
+
+      mockUseQuery.mockImplementation((document) => {
+        if (document === GetProgramAdminsAndModulesDocument) {
+          return { data: mentorAccessData, loading: false, error: undefined }
+        }
+        return { data: mockModuleData, loading: false, error: undefined }
+      })
+
+      render(<IssuesPage />)
+
+      expect(screen.getByText('Test Module Issues')).toBeInTheDocument()
+    })
+
+    it('displays an access denied message when access is revoked', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'revoked-user',
+            email: 'revoked@example.com',
+          },
+        },
+        status: 'authenticated',
+      })
+
+      const revokedAccessData = {
+        getProgram: {
+          admins: [],
+        },
+        getModule: {
+          mentors: [],
+        },
+      }
+
+      mockUseQuery.mockImplementation((document) => {
+        if (document === GetProgramAdminsAndModulesDocument) {
+          return { data: revokedAccessData, loading: false, error: undefined }
+        }
+        return { data: mockModuleData, loading: false, error: undefined }
+      })
+
+      render(<IssuesPage />)
+
+      expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
     })
   })
 })

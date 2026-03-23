@@ -3,6 +3,7 @@
 import { useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { useAccessControl } from 'hooks/useAccessControl'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -36,7 +37,6 @@ const IssuesPage = () => {
     searchParams.get('deadline') || DEADLINE_ALL
   )
   const [currentPage, setCurrentPage] = useState(1)
-  const [hasAccess, setHasAccess] = useState(false)
 
   const isDeadlineFilterActive = selectedDeadline !== DEADLINE_ALL
   const MAX_ISSUES_FOR_DEADLINE_FILTER = 1000
@@ -50,6 +50,8 @@ const IssuesPage = () => {
     }
   )
 
+  const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
+
   const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
     variables: {
       programKey,
@@ -61,27 +63,6 @@ const IssuesPage = () => {
     skip: !programKey || !moduleKey || !hasAccess,
     fetchPolicy: 'cache-and-network',
   })
-
-  useEffect(() => {
-    if (!accessData?.getProgram || !accessData?.getModule || sessionStatus === 'unauthenticated') {
-      setHasAccess(false)
-      return
-    }
-
-    const isAdmin = accessData.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === currentUserLogin
-    )
-
-    const isMentor = accessData.getModule.mentors?.some(
-      (mentor: { login: string }) => mentor.login === currentUserLogin
-    )
-
-    if (isAdmin || isMentor) {
-      setHasAccess(true)
-    } else {
-      setHasAccess(false)
-    }
-  }, [sessionStatus, currentUserLogin, accessLoading, accessData, programKey, router])
 
   useEffect(() => {
     if (error) handleAppError(error)
@@ -169,7 +150,7 @@ const IssuesPage = () => {
     [router, programKey, moduleKey]
   )
 
-  if (sessionStatus === 'loading' || accessLoading) {
+  if (sessionStatus === 'loading' || accessLoading || !accessData || hasAccess === undefined) {
     return <LoadingSpinner />
   }
 

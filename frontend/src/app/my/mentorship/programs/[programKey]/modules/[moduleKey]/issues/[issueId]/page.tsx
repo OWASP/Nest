@@ -2,12 +2,13 @@
 
 import { useQuery } from '@apollo/client/react'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { useAccessControl } from 'hooks/useAccessControl'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay } from 'app/global-error'
@@ -30,9 +31,7 @@ const ModuleIssueDetailsPage = () => {
     data: ExtendedSession | null
     status: string
   }
-  const router = useRouter()
   const [showAllPRs, setShowAllPRs] = useState(false)
-  const [hasAccess, setHasAccess] = useState(false)
   const { programKey, moduleKey, issueId } = params
   const currentUserLogin = session?.user?.login
 
@@ -45,26 +44,7 @@ const ModuleIssueDetailsPage = () => {
     }
   )
 
-  useEffect(() => {
-    if (!accessData?.getProgram || !accessData?.getModule || sessionStatus === 'unauthenticated') {
-      setHasAccess(false)
-      return
-    }
-
-    const isAdmin = accessData.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === currentUserLogin
-    )
-
-    const isMentor = accessData.getModule.mentors?.some(
-      (mentor: { login: string }) => mentor.login === currentUserLogin
-    )
-
-    if (isAdmin || isMentor) {
-      setHasAccess(true)
-    } else {
-      setHasAccess(false)
-    }
-  }, [sessionStatus, currentUserLogin, accessLoading, accessData, programKey, router])
+  const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 
   const formatDeadline = (deadline: string | null) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
@@ -141,7 +121,7 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
-  if (sessionStatus === 'loading' || accessLoading) {
+  if (sessionStatus === 'loading' || accessLoading || !accessData || hasAccess === undefined) {
     return <LoadingSpinner />
   }
 
