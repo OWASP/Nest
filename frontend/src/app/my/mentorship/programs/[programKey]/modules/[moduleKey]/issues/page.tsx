@@ -7,8 +7,11 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
-import { hasExtendedUser } from 'types/auth'
+import {
+  GetModuleIssuesDocument,
+  GetProgramAdminsAndModulesDocument,
+} from 'types/__generated__/moduleQueries.generated'
+import type { ExtendedSession } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import IssuesTable from 'components/IssuesTable'
@@ -22,20 +25,30 @@ const IssuesPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { data: session, status } = useSession()
-
-  const userName = hasExtendedUser(session) ? session.user.login : undefined
-  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
-  const isMentor = hasExtendedUser(session) ? session.user.isMentor : undefined
+  const { data: session, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
+  const currentUserLogin = session?.user?.login
 
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
   const [selectedDeadline, setSelectedDeadline] = useState<string>(
     searchParams.get('deadline') || DEADLINE_ALL
   )
   const [currentPage, setCurrentPage] = useState(1)
+  const [hasAccess, setHasAccess] = useState(false)
 
   const isDeadlineFilterActive = selectedDeadline !== DEADLINE_ALL
   const MAX_ISSUES_FOR_DEADLINE_FILTER = 1000
+
+  const { data: accessData, loading: accessLoading } = useQuery(
+    GetProgramAdminsAndModulesDocument,
+    {
+      variables: { programKey, moduleKey },
+      skip: !programKey || !moduleKey,
+      fetchPolicy: 'network-only',
+    }
+  )
 
   const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
     variables: {
@@ -45,9 +58,30 @@ const IssuesPage = () => {
       offset: isDeadlineFilterActive ? 0 : (currentPage - 1) * ITEMS_PER_PAGE,
       label: selectedLabel === LABEL_ALL ? null : selectedLabel,
     },
-    skip: !programKey || !moduleKey || !userName || (!isProjectLeader && !isMentor),
+    skip: !programKey || !moduleKey || !hasAccess,
     fetchPolicy: 'cache-and-network',
   })
+
+  useEffect(() => {
+    if (!accessData?.getProgram || !accessData?.getModule || sessionStatus === 'unauthenticated') {
+      setHasAccess(false)
+      return
+    }
+
+    const isAdmin = accessData.getProgram.admins?.some(
+      (admin: { login: string }) => admin.login === currentUserLogin
+    )
+
+    const isMentor = accessData.getModule.mentors?.some(
+      (mentor: { login: string }) => mentor.login === currentUserLogin
+    )
+
+    if (isAdmin || isMentor) {
+      setHasAccess(true)
+    } else {
+      setHasAccess(false)
+    }
+  }, [sessionStatus, currentUserLogin, accessLoading, accessData, programKey, router])
 
   useEffect(() => {
     if (error) handleAppError(error)
@@ -135,15 +169,15 @@ const IssuesPage = () => {
     [router, programKey, moduleKey]
   )
 
-  if (status === 'loading') {
+  if (sessionStatus === 'loading' || accessLoading) {
     return <LoadingSpinner />
   }
 
-  if (!isProjectLeader && !isMentor) {
+  if (!hasAccess) {
     return (
       <AccessDeniedDisplay
         title="Access Denied"
-        message="Only project leaders and mentors can access this page."
+        message="Only program admins and module mentors can access this page."
       />
     )
   }

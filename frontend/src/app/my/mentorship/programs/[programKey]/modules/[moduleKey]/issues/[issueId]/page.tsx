@@ -5,14 +5,15 @@ import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
-import { hasExtendedUser } from 'types/auth'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import type { ExtendedSession } from 'types/auth'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
@@ -25,13 +26,45 @@ import ShowMoreButton from 'components/ShowMoreButton'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
-  const { data: session, status } = useSession()
+  const { data: session, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
+  const router = useRouter()
   const [showAllPRs, setShowAllPRs] = useState(false)
+  const [hasAccess, setHasAccess] = useState(false)
   const { programKey, moduleKey, issueId } = params
+  const currentUserLogin = session?.user?.login
 
-  const userName = hasExtendedUser(session) ? session.user.login : undefined
-  const isProjectLeader = hasExtendedUser(session) ? session.user.isLeader : undefined
-  const isMentor = hasExtendedUser(session) ? session.user.isMentor : undefined
+  const { data: accessData, loading: accessLoading } = useQuery(
+    GetProgramAdminsAndModulesDocument,
+    {
+      variables: { programKey, moduleKey },
+      skip: !programKey || !moduleKey,
+      fetchPolicy: 'network-only',
+    }
+  )
+
+  useEffect(() => {
+    if (!accessData?.getProgram || !accessData?.getModule || sessionStatus === 'unauthenticated') {
+      setHasAccess(false)
+      return
+    }
+
+    const isAdmin = accessData.getProgram.admins?.some(
+      (admin: { login: string }) => admin.login === currentUserLogin
+    )
+
+    const isMentor = accessData.getModule.mentors?.some(
+      (mentor: { login: string }) => mentor.login === currentUserLogin
+    )
+
+    if (isAdmin || isMentor) {
+      setHasAccess(true)
+    } else {
+      setHasAccess(false)
+    }
+  }, [sessionStatus, currentUserLogin, accessLoading, accessData, programKey, router])
 
   const formatDeadline = (deadline: string | null) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
@@ -78,7 +111,7 @@ const ModuleIssueDetailsPage = () => {
   }
   const { data, loading, error } = useQuery(GetModuleIssueViewDocument, {
     variables: { programKey, moduleKey, number: Number(issueId) },
-    skip: !issueId || !userName || (!isProjectLeader && !isMentor),
+    skip: !issueId || !hasAccess,
     fetchPolicy: 'cache-first',
     nextFetchPolicy: 'cache-and-network',
   })
@@ -108,15 +141,15 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
-  if (status === 'loading') {
+  if (sessionStatus === 'loading' || accessLoading) {
     return <LoadingSpinner />
   }
 
-  if (!isProjectLeader && !isMentor) {
+  if (!hasAccess) {
     return (
       <AccessDeniedDisplay
         title="Access Denied"
-        message="Only project leaders and mentors can access this page."
+        message="Only program admins and module mentors can access this page."
       />
     )
   }

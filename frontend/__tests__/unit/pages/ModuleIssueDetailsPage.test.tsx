@@ -2,8 +2,9 @@ import { useQuery } from '@apollo/client/react'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import { useParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import ModuleIssueDetailsPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/[issueId]/page'
+import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 
 // Mock dependencies
 jest.mock('@apollo/client/react', () => ({
@@ -19,10 +20,6 @@ jest.mock('next/navigation', () => ({
   })),
 }))
 
-jest.mock('next-auth/react', () => ({
-  useSession: jest.fn(),
-}))
-
 jest.mock('components/MarkdownWrapper', () => {
   return jest.fn(({ content }: { content: string }) => (
     <div data-testid="markdown-content">{content}</div>
@@ -31,15 +28,36 @@ jest.mock('components/MarkdownWrapper', () => {
 
 jest.mock('hooks/useIssueMutations')
 
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(() => ({
+    data: {
+      user: {
+        login: 'test-user',
+        email: 'test@example.com',
+        name: 'Test User',
+      },
+    },
+    status: 'authenticated',
+  })),
+}))
+
 const mockUseQuery = useQuery as unknown as jest.Mock
 const mockUseParams = useParams as jest.Mock
-const mockUseSession = useSession as jest.Mock
 const mockUseIssueMutations = useIssueMutations as unknown as jest.Mock
 
 const mockAssignIssue = jest.fn()
 const mockUnassignIssue = jest.fn()
 const mockSetTaskDeadline = jest.fn()
 const mockClearTaskDeadline = jest.fn()
+
+const mockAccessData = {
+  getProgram: {
+    admins: [{ login: 'test-user' }],
+  },
+  getModule: {
+    mentors: [{ login: 'test-user' }],
+  },
+}
 
 const mockIssueData = {
   getModule: {
@@ -89,6 +107,45 @@ const mockIssueData = {
   },
 }
 
+function setupQueryMock(
+  issueData: typeof mockIssueData = mockIssueData,
+  accessData: typeof mockAccessData = mockAccessData
+) {
+  mockUseQuery.mockImplementation((query) => {
+    if (query === GetProgramAdminsAndModulesDocument) {
+      return { data: accessData, loading: false, error: undefined }
+    }
+    if (query === GetModuleIssueViewDocument) {
+      return { data: issueData, loading: false, error: undefined }
+    }
+    return { data: undefined, loading: false, error: undefined }
+  })
+}
+
+function setupQueryMockLoading() {
+  mockUseQuery.mockImplementation((query) => {
+    if (query === GetProgramAdminsAndModulesDocument) {
+      return { data: mockAccessData, loading: false, error: undefined }
+    }
+    if (query === GetModuleIssueViewDocument) {
+      return { data: undefined, loading: true, error: undefined }
+    }
+    return { data: undefined, loading: true, error: undefined }
+  })
+}
+
+function setupQueryMockError(error: Error) {
+  mockUseQuery.mockImplementation((query) => {
+    if (query === GetProgramAdminsAndModulesDocument) {
+      return { data: mockAccessData, loading: false, error: undefined }
+    }
+    if (query === GetModuleIssueViewDocument) {
+      return { data: undefined, loading: false, error }
+    }
+    return { data: undefined, loading: false, error: undefined }
+  })
+}
+
 describe('ModuleIssueDetailsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -96,17 +153,6 @@ describe('ModuleIssueDetailsPage', () => {
       programKey: 'prog1',
       moduleKey: 'mod1',
       issueId: '123',
-    })
-    mockUseSession.mockReturnValue({
-      data: {
-        user: {
-          name: 'DefaultUser',
-          login: 'defaultuser',
-          isLeader: true,
-          isMentor: false,
-        },
-      },
-      status: 'authenticated',
     })
     mockUseIssueMutations.mockReturnValue({
       assignIssue: mockAssignIssue,
@@ -122,34 +168,32 @@ describe('ModuleIssueDetailsPage', () => {
       deadlineInput: '',
       setDeadlineInput: jest.fn(),
     })
+
+    setupQueryMock()
   })
 
   it('renders a loading spinner while data is being fetched', () => {
-    mockUseQuery.mockReturnValue({ data: undefined, loading: true, error: undefined })
+    setupQueryMockLoading()
     render(<ModuleIssueDetailsPage />)
     expect(screen.getAllByAltText('Loading indicator')[0]).toBeInTheDocument()
   })
 
   it('renders an error display on query error', () => {
     const error = new Error('Test error')
-    mockUseQuery.mockReturnValue({ data: undefined, loading: false, error })
+    setupQueryMockError(error)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('Error Loading Issue')).toBeInTheDocument()
     expect(screen.getByText(error.message)).toBeInTheDocument()
   })
 
   it('renders a 404 error if the issue is not found', () => {
-    mockUseQuery.mockReturnValue({
-      data: { getModule: { issueByNumber: null } },
-      loading: false,
-      error: undefined,
-    })
+    setupQueryMock({ getModule: { issueByNumber: null } } as typeof mockIssueData)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('Issue Not Found')).toBeInTheDocument()
   })
 
   it('renders the issue details successfully', () => {
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock()
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
     expect(screen.getByText('This is the issue body.')).toBeInTheDocument()
@@ -162,7 +206,7 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   it('calls assignIssue when assigning an interested user', async () => {
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock()
     render(<ModuleIssueDetailsPage />)
     const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
     const userGrid = interestedUsersHeading.nextElementSibling
@@ -183,7 +227,7 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   it('calls unassignIssue when unassigning a user', async () => {
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock()
     render(<ModuleIssueDetailsPage />)
     const unassignButton = screen.getByRole('button', { name: /Unassign @user1/i })
     fireEvent.click(unassignButton)
@@ -210,7 +254,7 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({ data: noPrData, loading: false, error: undefined })
+    setupQueryMock(noPrData)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('No linked pull requests.')).toBeInTheDocument()
   })
@@ -222,7 +266,7 @@ describe('ModuleIssueDetailsPage', () => {
         interestedUsers: [],
       },
     }
-    mockUseQuery.mockReturnValue({ data: noInterestedData, loading: false, error: undefined })
+    setupQueryMock(noInterestedData)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('No interested users yet.')).toBeInTheDocument()
   })
@@ -256,7 +300,7 @@ describe('ModuleIssueDetailsPage', () => {
           ...mockIssueData,
           getModule: { ...mockIssueData.getModule, taskDeadline: deadline },
         }
-        mockUseQuery.mockReturnValue({ data: dataWithDeadline, loading: false, error: undefined })
+        setupQueryMock(dataWithDeadline)
         render(<ModuleIssueDetailsPage />)
         const deadlineElement = screen.getByText(expectedText)
         expect(deadlineElement).toBeInTheDocument()
@@ -275,7 +319,7 @@ describe('ModuleIssueDetailsPage', () => {
           },
         },
       }
-      mockUseQuery.mockReturnValue({ data: noAssigneesData, loading: false, error: undefined })
+      setupQueryMock(noAssigneesData)
       render(<ModuleIssueDetailsPage />)
       const deadlineButton = screen.getByRole('button', { name: /No deadline set/i })
       expect(deadlineButton).toBeDisabled()
@@ -288,7 +332,7 @@ describe('ModuleIssueDetailsPage', () => {
         ...baseMocks,
         setIsEditingDeadline,
       })
-      mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+      setupQueryMock()
       render(<ModuleIssueDetailsPage />)
       const deadlineButton = screen.getByRole('button', { name: /No deadline set/i })
       fireEvent.click(deadlineButton)
@@ -306,7 +350,7 @@ describe('ModuleIssueDetailsPage', () => {
         setTaskDeadlineMutation,
         deadlineInput: '', // Ensure input is controlled and can be found
       })
-      mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+      setupQueryMock()
       render(<ModuleIssueDetailsPage />)
 
       const dateInput = screen.getByDisplayValue('')
@@ -333,7 +377,7 @@ describe('ModuleIssueDetailsPage', () => {
         getModule: { ...mockIssueData.getModule, taskDeadline: pastDate },
       }
 
-      mockUseQuery.mockReturnValue({ data: dataWithDeadline, loading: false, error: undefined })
+      setupQueryMock(dataWithDeadline)
       render(<ModuleIssueDetailsPage />)
 
       const deadlineButton = screen.getByRole('button', { name: /\(overdue\)/i })
@@ -363,7 +407,7 @@ describe('ModuleIssueDetailsPage', () => {
           },
         },
       }
-      mockUseQuery.mockReturnValue({ data: issueWithState, loading: false, error: undefined })
+      setupQueryMock(issueWithState)
       render(<ModuleIssueDetailsPage />)
       expect(screen.getAllByText(expectedText)[0]).toBeInTheDocument()
     })
@@ -393,7 +437,7 @@ describe('ModuleIssueDetailsPage', () => {
         interestedUsers: [{ id: 'u1', login: 'user2', avatarUrl: null }],
       },
     }
-    mockUseQuery.mockReturnValue({ data: dataWithMissingFields, loading: false, error: undefined })
+    setupQueryMock(dataWithMissingFields)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('No description.')).toBeInTheDocument()
     expect(screen.getByText('Not assigned')).toBeInTheDocument()
@@ -411,7 +455,7 @@ describe('ModuleIssueDetailsPage', () => {
       clearTaskDeadlineMutation,
       deadlineInput: '2025-12-25', // Mock an existing value
     })
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock()
     render(<ModuleIssueDetailsPage />)
 
     const dateInput = screen.getByDisplayValue('2025-12-25')
@@ -435,7 +479,7 @@ describe('ModuleIssueDetailsPage', () => {
       assigning: true,
       unassigning: true,
     })
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock()
     render(<ModuleIssueDetailsPage />)
 
     const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
@@ -457,7 +501,7 @@ describe('ModuleIssueDetailsPage', () => {
       ...mockIssueData,
       getModule: { ...mockIssueData.getModule, taskDeadline: todayDeadline },
     }
-    mockUseQuery.mockReturnValue({ data: dataWithTodayDeadline, loading: false, error: undefined })
+    setupQueryMock(dataWithTodayDeadline)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText(/\(today\)/)).toBeInTheDocument()
   })
@@ -468,7 +512,7 @@ describe('ModuleIssueDetailsPage', () => {
       moduleKey: 'mod1',
       issueId: '',
     })
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock()
     render(<ModuleIssueDetailsPage />)
 
     const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
@@ -499,7 +543,7 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({ data: manyPRsData, loading: false, error: undefined })
+    setupQueryMock(manyPRsData)
     render(<ModuleIssueDetailsPage />)
 
     // Initially only 4 PRs should be visible
@@ -534,11 +578,7 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({
-      data: dataWithNameOnlyAssignee,
-      loading: false,
-      error: undefined,
-    })
+    setupQueryMock(dataWithNameOnlyAssignee)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('Fallback Name')).toBeInTheDocument()
   })
@@ -561,11 +601,7 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({
-      data: dataWithNoAvatarAssignee,
-      loading: false,
-      error: undefined,
-    })
+    setupQueryMock(dataWithNoAvatarAssignee)
     render(<ModuleIssueDetailsPage />)
     const placeholderDiv = document.querySelector('[aria-hidden="true"].rounded-full.bg-gray-400')
     expect(placeholderDiv).toBeInTheDocument()
@@ -582,7 +618,7 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({ data: dataWithNullPRs, loading: false, error: undefined })
+    setupQueryMock(dataWithNullPRs)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('No linked pull requests.')).toBeInTheDocument()
   })
@@ -601,11 +637,7 @@ describe('ModuleIssueDetailsPage', () => {
         ],
       },
     }
-    mockUseQuery.mockReturnValue({
-      data: dataWithNoAvatarInterestedUser,
-      loading: false,
-      error: undefined,
-    })
+    setupQueryMock(dataWithNoAvatarInterestedUser)
     render(<ModuleIssueDetailsPage />)
     const placeholderDivs = document.querySelectorAll(
       '[aria-hidden="true"].rounded-full.bg-gray-400'
@@ -625,7 +657,7 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({ data: dataWithNulls, loading: false, error: undefined })
+    setupQueryMock(dataWithNulls)
     render(<ModuleIssueDetailsPage />)
 
     expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
@@ -650,7 +682,7 @@ describe('ModuleIssueDetailsPage', () => {
       setDeadlineInput: jest.fn(),
     })
 
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock(mockIssueData)
     render(<ModuleIssueDetailsPage />)
 
     const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
@@ -684,7 +716,7 @@ describe('ModuleIssueDetailsPage', () => {
       assigning: false,
     })
 
-    mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
+    setupQueryMock(mockIssueData)
     render(<ModuleIssueDetailsPage />)
 
     const interestedUsersHeading = screen.getByRole('heading', { name: /Interested Users/i })
@@ -712,237 +744,11 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({ data: noAssigneesData, loading: false, error: undefined })
+    setupQueryMock(noAssigneesData)
     render(<ModuleIssueDetailsPage />)
 
     const deadlineButton = screen.getByRole('button', { name: /No deadline set/i })
     fireEvent.click(deadlineButton)
     expect(setIsEditingDeadline).not.toHaveBeenCalled()
-  })
-
-  describe('authorization', () => {
-    it('extracts userName, isProjectLeader, and isMentor from session (lines 32-34)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'TestUser',
-            login: 'testuser',
-            isLeader: true,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
-    })
-
-    it('extracts isMentor=true from session (lines 32-34)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'TestUser',
-            login: 'testuser',
-            isLeader: false,
-            isMentor: true,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
-    })
-
-    it('skips query when issueId is missing (line 81 - skip condition)', () => {
-      mockUseParams.mockReturnValue({
-        programKey: 'prog1',
-        moduleKey: 'mod1',
-        issueId: '',
-      })
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'AuthorizedUser',
-            login: 'auth',
-            isLeader: true,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: undefined, loading: true, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(mockUseQuery).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({ skip: true })
-      )
-    })
-
-    it('does not skip query when all conditions are met (line 81 - skip condition)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'AuthorizedUser',
-            login: 'auth',
-            isLeader: true,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(mockUseQuery).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({ skip: false })
-      )
-    })
-
-    it('skips query when user is neither project leader nor mentor (line 81 - skip condition)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'UnauthorizedUser',
-            login: 'unauth',
-            isLeader: false,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(mockUseQuery).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({ skip: true })
-      )
-    })
-
-    it('shows AccessDeniedDisplay when userName is undefined (line 115)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: undefined,
-            login: undefined,
-            isLeader: false,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: undefined, loading: true, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only project leaders and mentors can access this page.')
-      ).toBeInTheDocument()
-    })
-
-    it('skips query when userName is missing even if user has required role', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'LeaderWithoutLogin',
-            login: undefined,
-            isLeader: true,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(mockUseQuery).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({ skip: true })
-      )
-    })
-
-    it('shows AccessDeniedDisplay when user is not authorized (line 115)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'UnauthorizedUser',
-            login: 'unauth',
-            isLeader: false,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only project leaders and mentors can access this page.')
-      ).toBeInTheDocument()
-    })
-
-    it('shows AccessDeniedDisplay when session data is unavailable (line 115)', () => {
-      mockUseSession.mockReturnValue({ data: null, status: 'unauthenticated' })
-      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-      expect(
-        screen.getByText('Only project leaders and mentors can access this page.')
-      ).toBeInTheDocument()
-    })
-
-    it('shows LoadingSpinner while session is loading (status === loading)', () => {
-      mockUseSession.mockReturnValue({ data: undefined, status: 'loading' })
-      mockUseQuery.mockReturnValue({ data: undefined, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.getAllByAltText('Loading indicator')[0]).toBeInTheDocument()
-    })
-
-    it('does not show AccessDeniedDisplay when user is authorized as project leader (line 115)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'AuthorizedUser',
-            login: 'auth',
-            isLeader: true,
-            isMentor: false,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.queryByText('Access Denied')).not.toBeInTheDocument()
-      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
-    })
-
-    it('does not show AccessDeniedDisplay when user is authorized as mentor (line 115)', () => {
-      mockUseSession.mockReturnValue({
-        data: {
-          user: {
-            name: 'AuthorizedUser',
-            login: 'auth',
-            isLeader: false,
-            isMentor: true,
-          },
-        },
-        status: 'authenticated',
-      })
-      mockUseQuery.mockReturnValue({ data: mockIssueData, loading: false, error: undefined })
-
-      render(<ModuleIssueDetailsPage />)
-      expect(screen.queryByText('Access Denied')).not.toBeInTheDocument()
-      expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
-    })
   })
 })
