@@ -417,6 +417,10 @@ def execute_task(
         Response string
 
     """
+    if not task_description and not query:
+        err_msg = "Either query or task_description must be provided"
+        raise ValueError(err_msg)
+
     if not task_description:
         task_description = (
             f"Answer this query: {query}\n\n"
