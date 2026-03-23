@@ -164,7 +164,7 @@ const IssuesPage = () => {
       <ErrorDisplay
         statusCode={500}
         title="Error Loading Access Information"
-        message={accessError.message}
+        message="Failed to verify access permissions. Please try again later."
       />
     )
   }
