@@ -115,6 +115,7 @@ body {
     border-radius: 100%;
     background: #87a1bc;
     border: none;
+    cursor: pointer;
     color: #fff;
     position: relative;
 }

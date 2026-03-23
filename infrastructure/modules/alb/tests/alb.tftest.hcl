@@ -211,6 +211,15 @@ run "test_csp_directive_count" {
   }
 }
 
+run "test_csp_max_length" {
+  command = plan
+
+  assert {
+    condition     = length(local.content_security_policy) <= 1000
+    error_message = "Content-Security-Policy header value must be 1000 characters or fewer."
+  }
+}
+
 run "test_backend_listener_rules_created" {
   command = plan
 

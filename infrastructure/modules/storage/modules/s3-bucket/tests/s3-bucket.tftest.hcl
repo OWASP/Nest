@@ -2,7 +2,6 @@ mock_provider "aws" {}
 
 variables {
   bucket_name = "test-bucket"
-  kms_key_arn = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   tags        = { Environment = "test", Project = "nest" }
 }
 
@@ -42,8 +41,8 @@ run "test_encryption_algorithm" {
   command = plan
 
   assert {
-    condition     = one(aws_s3_bucket_server_side_encryption_configuration.this.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "aws:kms"
-    error_message = "S3 bucket must use KMS encryption."
+    condition     = one(aws_s3_bucket_server_side_encryption_configuration.this.rule).apply_server_side_encryption_by_default[0].sse_algorithm == "AES256"
+    error_message = "S3 bucket must use SSE-S3 (AES256) encryption."
   }
 }
 

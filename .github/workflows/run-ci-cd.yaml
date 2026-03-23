@@ -49,7 +49,7 @@ jobs:
           python-version: '3.13'
 
       - name: Set up pre-commit cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -88,7 +88,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
         with:
           version: 10
           run_install: true
@@ -156,7 +156,7 @@ jobs:
         run: make security-scan-code-semgrep
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -208,7 +208,7 @@ jobs:
           exit $EXIT_CODE
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad
         with:
           fail_ci_if_error: false
           files: backend/coverage.xml
@@ -257,13 +257,13 @@ jobs:
           exit $EXIT_CODE
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad
         with:
           fail_ci_if_error: false
           files: frontend/coverage/lcov.info
           flags: frontend
           use_oidc: true
-    timeout-minutes: 5
+    timeout-minutes: 10
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
@@ -327,7 +327,7 @@ jobs:
         run: |
           timeout 5m bash -c '
             until wget --spider http://localhost:9000/a; do
-              echo "Waiting for backend..."
+              echo "Waiting for the backend..."
               sleep 5
             done
           '
@@ -342,12 +342,53 @@ jobs:
           echo "Loading data from dump..." &&
           pg_restore -h localhost -U nest_user_e2e -d nest_db_e2e < backend/data/nest.dump
 
-      - name: Build frontend end-to-end testing image
+      - name: Build frontend image
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
+        with:
+          build-args: |
+            ENV_FILE=.env.e2e.example
+            NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:frontend-e2e-cache
+          cache-to: |
+            type=gha,compression=zstd
+          context: frontend
+          file: docker/frontend/Dockerfile
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:frontend-e2e-latest
+
+      - name: Run frontend in the background
+        run: |
+          docker run \
+            --env-file frontend/.env.e2e.example \
+            --name e2e-nest-frontend \
+            --network host \
+            -d \
+            -e NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
+            -e NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
+            -p 3000:3000 \
+            owasp/nest:frontend-e2e-latest
+
+      - name: Wait for frontend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:3000/; do
+              echo "Waiting for the frontend..."
+              sleep 5
+            done
+          '
+          echo "Frontend is up!"
+
+      - name: Build e2e testing image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
           cache-from: |
             type=gha
-            type=registry,ref=owasp/nest:test-frontend-e2e-cache
+            type=registry,ref=owasp/nest:frontend-e2e-tests-cache
+          cache-to: |
+            type=gha,compression=zstd
           context: frontend
           file: docker/frontend/Dockerfile.e2e.test
           load: true
@@ -356,8 +397,11 @@ jobs:
 
       - name: Run frontend end-to-end tests
         run: |
-          docker run --env-file frontend/.env.e2e.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
-    timeout-minutes: 15
+          docker run \
+            --network host \
+            -e FRONTEND_URL=http://localhost:3000 \
+            owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+    timeout-minutes: 20
 
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
@@ -493,7 +537,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
+        uses: aws-actions/amazon-ecr-login@261fc3d4806db1fa66a15cc11113c456db8870a7
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
@@ -605,7 +649,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -997,23 +1041,37 @@ jobs:
             --service "$SERVICE_NAME" \
             --force-new-deployment
 
+      - name: Install boto3 for ECS waiter
+        run: pip install -q boto3
+
       - name: Wait for backend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
-          aws ecs wait services-stable \
-            --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
+          python3 -c "
+          import boto3, os
+          boto3.client('ecs').get_waiter('services_stable').wait(
+              cluster=os.environ['CLUSTER_NAME'],
+              services=[os.environ['SERVICE_NAME']],
+              WaiterConfig={'Delay': 15, 'MaxAttempts': 120}
+          )
+          "
 
       - name: Wait for frontend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
-          aws ecs wait services-stable \
-            --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
+          python3 -c "
+          import boto3, os
+          boto3.client('ecs').get_waiter('services_stable').wait(
+              cluster=os.environ['CLUSTER_NAME'],
+              services=[os.environ['SERVICE_NAME']],
+              WaiterConfig={'Delay': 15, 'MaxAttempts': 120}
+          )
+          "
+    timeout-minutes: 60
 
   run-staging-lighthouse-ci:
     name: Run staging Lighthouse CI
@@ -1027,7 +1085,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
         with:
           run_install: true
           version: 10
@@ -1210,7 +1268,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -1424,7 +1482,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
         with:
           run_install: true
           version: 10
