@@ -41,16 +41,21 @@ const IssuesPage = () => {
   const isDeadlineFilterActive = selectedDeadline !== DEADLINE_ALL
   const MAX_ISSUES_FOR_DEADLINE_FILTER = 1000
 
-  const { data: accessData, loading: accessLoading } = useQuery(
-    GetProgramAdminsAndModulesDocument,
-    {
-      variables: { programKey, moduleKey },
-      skip: !programKey || !moduleKey,
-      fetchPolicy: 'network-only',
-    }
-  )
+  const {
+    data: accessData,
+    loading: accessLoading,
+    error: accessError,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
+    variables: { programKey, moduleKey },
+    skip: !programKey || !moduleKey,
+    fetchPolicy: 'network-only',
+  })
 
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
+
+  useEffect(() => {
+    if (accessError) handleAppError(accessError)
+  }, [accessError])
 
   const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
     variables: {
@@ -150,7 +155,7 @@ const IssuesPage = () => {
     [router, programKey, moduleKey]
   )
 
-  if (sessionStatus === 'loading' || accessLoading || !accessData || hasAccess === undefined) {
+  if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
     return <LoadingSpinner />
   }
 

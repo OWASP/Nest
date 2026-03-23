@@ -29,7 +29,7 @@ export const useAccessControl = (
     }
 
     if (!accessData?.getProgram?.admins || !accessData?.getModule?.mentors) {
-      setHasAccess(undefined)
+      setHasAccess(false)
       return
     }
 

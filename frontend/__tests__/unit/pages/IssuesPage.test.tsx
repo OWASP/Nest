@@ -941,6 +941,11 @@ describe('IssuesPage', () => {
 
       render(<IssuesPage />)
 
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only program admins and module mentors can access this page.')
+      ).toBeInTheDocument()
+      expect(screen.queryAllByAltText('Loading indicator')).toHaveLength(0)
       expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
     })
 
@@ -973,6 +978,13 @@ describe('IssuesPage', () => {
 
       render(<IssuesPage />)
 
+      // Verify access denied UI is displayed
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only program admins and module mentors can access this page.')
+      ).toBeInTheDocument()
+      // Ensure we're not in a loading state
+      expect(screen.queryAllByAltText('Loading indicator')).toHaveLength(0)
       // User should not see the issues list when not authorized
       expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
     })
@@ -1070,6 +1082,11 @@ describe('IssuesPage', () => {
 
       render(<IssuesPage />)
 
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only program admins and module mentors can access this page.')
+      ).toBeInTheDocument()
+      expect(screen.queryAllByAltText('Loading indicator')).toHaveLength(0)
       expect(screen.queryByText('Test Module Issues')).not.toBeInTheDocument()
     })
   })

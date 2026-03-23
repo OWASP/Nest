@@ -772,6 +772,10 @@ describe('ModuleIssueDetailsPage', () => {
       setupQueryMock(mockIssueData, deniedAccessData)
       render(<ModuleIssueDetailsPage />)
 
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only program admins and module mentors can access this page.')
+      ).toBeInTheDocument()
       const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
       expect(assignButtons.length).toBe(0)
     })
@@ -799,6 +803,10 @@ describe('ModuleIssueDetailsPage', () => {
       setupQueryMock(mockIssueData, deniedAccessData)
       render(<ModuleIssueDetailsPage />)
 
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(
+        screen.getByText('Only program admins and module mentors can access this page.')
+      ).toBeInTheDocument()
       const assignButtons = screen.queryAllByRole('button', { name: /Assign/i })
       expect(assignButtons.length).toBe(0)
     })

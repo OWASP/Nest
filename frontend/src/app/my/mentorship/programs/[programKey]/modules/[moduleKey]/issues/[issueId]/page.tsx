@@ -8,10 +8,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaCodeBranch, FaLink, FaPlus, FaTags, FaXmark } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
@@ -35,16 +35,21 @@ const ModuleIssueDetailsPage = () => {
   const { programKey, moduleKey, issueId } = params
   const currentUserLogin = session?.user?.login
 
-  const { data: accessData, loading: accessLoading } = useQuery(
-    GetProgramAdminsAndModulesDocument,
-    {
-      variables: { programKey, moduleKey },
-      skip: !programKey || !moduleKey,
-      fetchPolicy: 'network-only',
-    }
-  )
+  const {
+    data: accessData,
+    loading: accessLoading,
+    error: accessError,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
+    variables: { programKey, moduleKey },
+    skip: !programKey || !moduleKey,
+    fetchPolicy: 'network-only',
+  })
 
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
+
+  useEffect(() => {
+    if (accessError) handleAppError(accessError)
+  }, [accessError])
 
   const formatDeadline = (deadline: string | null) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
@@ -121,7 +126,7 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
-  if (sessionStatus === 'loading' || accessLoading || !accessData || hasAccess === undefined) {
+  if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
     return <LoadingSpinner />
   }
 
