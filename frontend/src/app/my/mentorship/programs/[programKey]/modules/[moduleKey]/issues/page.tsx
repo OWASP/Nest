@@ -159,6 +159,16 @@ const IssuesPage = () => {
     return <LoadingSpinner />
   }
 
+  if (accessError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error Loading Access Information"
+        message={accessError.message}
+      />
+    )
+  }
+
   if (!hasAccess) {
     return (
       <AccessDeniedDisplay
