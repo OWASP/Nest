@@ -2,10 +2,11 @@
 import { sendGAEvent } from '@next/third-parties/google'
 import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import { debounce } from 'lodash'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { FaTimes, FaSearch } from 'react-icons/fa'
+import { FaTimes, FaSearch, FaArrowRight } from 'react-icons/fa'
 import { FaUser, FaCalendar, FaFolder, FaBuilding, FaLocationDot } from 'react-icons/fa6'
 import { SiAlgolia } from 'react-icons/si'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
@@ -20,6 +21,30 @@ type SearchHit = Chapter | Event | Organization | Project | User
 
 const INDEXES = ['chapters', 'events', 'organizations', 'projects', 'users']
 const SUGGESTION_COUNT = 3
+
+const SEARCH_STARTER_PROJECTS = [
+  { label: 'Cheat Sheet Series', query: 'cheat sheet series' },
+  { label: 'Defect Dojo', query: 'defect dojo' },
+  { label: 'Nest', query: 'nest' },
+] as const
+
+const SEARCH_STARTER_CHAPTERS = [
+  { label: 'London', query: 'london' },
+  { label: 'Belgium', query: 'belgium' },
+  { label: 'Toronto', query: 'toronto' },
+] as const
+
+const SEARCH_STARTER_ORGANIZATIONS = [
+  { label: 'OWASP', query: 'owasp' },
+  { label: 'OWASP Amass Project', query: 'owasp amass' },
+  { label: 'OWASP Juice Shop', query: 'owasp juice shop' },
+] as const
+
+const SEARCH_STARTER_GROUPS = [
+  { title: 'Projects', Icon: FaFolder, items: SEARCH_STARTER_PROJECTS },
+  { title: 'Chapters', Icon: FaLocationDot, items: SEARCH_STARTER_CHAPTERS },
+  { title: 'Organizations', Icon: FaBuilding, items: SEARCH_STARTER_ORGANIZATIONS },
+] as const
 
 export default function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false)
@@ -246,6 +271,13 @@ export default function GlobalSearch() {
     setHighlightedIndex(null)
   }
 
+  const applyStarterQuery = (query: string) => {
+    setSearchQuery(query)
+    debouncedSearch(query)
+    setHighlightedIndex(null)
+    inputRef.current?.focus()
+  }
+
   const handleClearSearch = () => {
     searchVersionRef.current++
     setSearchQuery('')
@@ -380,8 +412,42 @@ export default function GlobalSearch() {
     }
 
     return (
-      <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
-        Start typing to search across projects, chapters, events, organizations, and members.
+      <div className="px-4 py-4">
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+          Start typing to search across projects, chapters, events, organizations, and members.
+        </p>
+        <div className="space-y-4 mb-4">
+          {SEARCH_STARTER_GROUPS.map(({ title, Icon, items }) => (
+            <div key={title} className='mb-4'>
+              <div className="px-0 pb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                {title}
+              </div>
+              <div className="mt-2 flex flex-col flex-wrap gap-2">
+                {items.map(({ label, query }) => (
+                  <button
+                    key={`${title}-${query}`}
+                    type="button"
+                    onClick={() => applyStarterQuery(query)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:border-blue-200 mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700 text-center">
+          <Link
+            href="/community"
+            onClick={() => setIsOpen(false)}
+            className="text-sm flex items-center justify-center gap-2 text-gray-400 hover:text-gray-600 dark:border-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
+          >
+            Explore the community for more info
+            <FaArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          </Link>
+        </div>
       </div>
     )
   }
