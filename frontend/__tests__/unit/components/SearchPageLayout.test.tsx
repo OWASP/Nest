@@ -462,7 +462,6 @@ describe('<SearchPageLayout />', () => {
     expect(sortElements.length).toBeGreaterThan(0)
     expect(screen.getByText('Content')).toBeInTheDocument()
 
-    // Verify styling regression: check that rounded-l-none is applied to sort wrapper
     const sortWrapper = container.querySelector('div[class*="rounded-l-none"]')
     expect(sortWrapper).toBeInTheDocument()
     expect(sortWrapper).toHaveClass('[&>div>div:first-child]:rounded-l-none')
@@ -591,7 +590,7 @@ describe('<SearchPageLayout />', () => {
       </SearchPageLayout>
     )
 
-    const filterWrapper = container.querySelector('div[class*="\\[&>div\\]:rounded-r-none"]')
+    const filterWrapper = container.querySelector(String.raw`div[class*="[&>div]:rounded-r-none"]`)
     expect(filterWrapper).toBeInTheDocument()
   })
 

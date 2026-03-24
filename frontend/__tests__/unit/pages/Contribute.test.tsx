@@ -151,7 +151,7 @@ describe('Contribute Component', () => {
       })
       expect(visibleInput).toBeDefined()
       expect(visibleInput).toBeVisible()
-      fireEvent.change(visibleInput!, { target: { value: '' } })
+      fireEvent.change(visibleInput, { target: { value: '' } })
     })
 
     expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1, undefined, [])

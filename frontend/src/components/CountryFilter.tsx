@@ -31,8 +31,11 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         size="md"
         isLoading={isLoading}
         defaultItems={options}
-        selectedKey={selectedCountry === '' ? '__all__' : selectedCountry || null}
+        selectedKey={selectedCountry === '' ? '__all__' : selectedCountry}
         onSelectionChange={(key) => {
+          if (key == null) {
+            return // Don't update on clear - keeps input empty
+          }
           const countryKey = key as string
           onCountryChange(countryKey === '__all__' ? '' : countryKey)
         }}
