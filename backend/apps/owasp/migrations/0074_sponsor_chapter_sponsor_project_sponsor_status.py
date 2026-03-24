@@ -5,25 +5,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0073_sponsor_contact_email_sponsor_created_at'),
+        ("owasp", "0073_sponsor_contact_email_sponsor_created_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sponsor',
-            name='chapter',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='owasp.chapter'),
+            model_name="sponsor",
+            name="chapter",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="owasp.chapter"
+            ),
         ),
         migrations.AddField(
-            model_name='sponsor',
-            name='project',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='owasp.project'),
+            model_name="sponsor",
+            name="project",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="owasp.project"
+            ),
         ),
         migrations.AddField(
-            model_name='sponsor',
-            name='status',
-            field=models.CharField(choices=[('Draft', 'Draft'), ('Active', 'Active'), ('Archived', 'Archived')], default='Draft', max_length=20),
+            model_name="sponsor",
+            name="status",
+            field=models.CharField(
+                choices=[("Draft", "Draft"), ("Active", "Active"), ("Archived", "Archived")],
+                default="Draft",
+                max_length=20,
+            ),
         ),
     ]

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0072_project_project_name_gin_idx_and_more'),
+        ("owasp", "0072_project_project_name_gin_idx_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sponsor',
-            name='contact_email',
+            model_name="sponsor",
+            name="contact_email",
             field=models.EmailField(blank=True, max_length=254),
         ),
         migrations.AddField(
-            model_name='sponsor',
-            name='created_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Created At'),
+            model_name="sponsor",
+            name="created_at",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Created At"),
         ),
     ]

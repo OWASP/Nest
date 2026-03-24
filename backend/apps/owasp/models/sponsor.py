@@ -76,9 +76,9 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     status = models.CharField(max_length=20, choices=StatusType.choices, default=StatusType.DRAFT)
 
     # FKs
-    chapter = models.ForeignKey("owasp.Chapter", on_delete=models.SET_NULL, null=True)
+    chapter = models.ForeignKey("owasp.Chapter", on_delete=models.SET_NULL, null=True, blank=True)
 
-    project = models.ForeignKey("owasp.Project", on_delete=models.SET_NULL, null=True)
+    project = models.ForeignKey("owasp.Project", on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self) -> str:
         """Sponsor human readable representation."""

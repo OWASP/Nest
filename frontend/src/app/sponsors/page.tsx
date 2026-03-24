@@ -64,11 +64,25 @@ const SponsorEntryCard = ({ sponsor }: { sponsor: Sponsor }) => (
 export default function SponsorsPage() {
   const router = useRouter()
 
-  const { data: sponsorsData, loading } = useQuery(GetSponsorsDataDocument)
+  const { data: sponsorsData, loading, error } = useQuery(GetSponsorsDataDocument)
 
-  return loading ? (
-    <div></div>
-  ) : (
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <span className="text-gray-500">Loading sponsors...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <span className="text-red-500">Failed to load sponsors. Please try again later.</span>
+      </div>
+    )
+  }
+
+  return (
     <div className="min-h-screen w-full px-8 py-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <SecondaryCard
         icon={FaHandHoldingHeart}
@@ -85,12 +99,16 @@ export default function SponsorsPage() {
           </button>
         </div>
       </SecondaryCard>
-      <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {sponsorsData?.activeSponsors &&
-          sponsorsData.activeSponsors.map((sponsor: Sponsor) => (
+
+      {sponsorsData?.activeSponsors && sponsorsData?.activeSponsors.length > 0 ? (
+        <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          {sponsorsData.activeSponsors.map((sponsor: Sponsor) => (
             <SponsorEntryCard key={sponsor.id} sponsor={sponsor} />
           ))}
-      </div>
+        </div>
+      ) : (
+        <p className="text-center text-lg font-medium">No Sponsors Found</p>
+      )}
     </div>
   )
 }

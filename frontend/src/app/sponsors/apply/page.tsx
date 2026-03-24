@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 import { CreateSponsorDocument } from 'types/__generated__/sponsorMutations.generated'
 import SponsorForm from 'components/SponsorForm'
 
-const CreateProgramPage = () => {
+const SponsorApplicationPage = () => {
   const router = useRouter()
   const [createSponsor, { loading }] = useMutation(CreateSponsorDocument)
 
@@ -67,4 +67,4 @@ const CreateProgramPage = () => {
   )
 }
 
-export default CreateProgramPage
+export default SponsorApplicationPage

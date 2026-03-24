@@ -18,7 +18,7 @@ from apps.mentorship.api.internal.queries import (
     ProgramQuery,
 )
 from apps.nest.api.internal.mutations import NestMutations
-from apps.owasp.api.internal.mutations.sponsor import SponsorMutation
+from apps.owasp.api.internal.mutations import SponsorMutation
 from apps.owasp.api.internal.queries import OwaspQuery
 
 

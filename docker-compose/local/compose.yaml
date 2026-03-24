@@ -147,9 +147,9 @@ networks:
   nest-network:
 
 volumes:
-  backend-venv:
-  cache-data:
-  db-data:
-  docs-venv:
-  frontend-next:
-  frontend-node-modules:
+  backend-venv_4259:
+  cache-data_4259:
+  db-data_4259:
+  docs-venv_4259:
+  frontend-next_4259:
+  frontend-node-modules_4259:

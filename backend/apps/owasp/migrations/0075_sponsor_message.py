@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0074_sponsor_chapter_sponsor_project_sponsor_status'),
+        ("owasp", "0074_sponsor_chapter_sponsor_project_sponsor_status"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sponsor',
-            name='message',
-            field=models.TextField(blank=True, verbose_name='Message'),
+            model_name="sponsor",
+            name="message",
+            field=models.TextField(blank=True, verbose_name="Message"),
         ),
     ]
