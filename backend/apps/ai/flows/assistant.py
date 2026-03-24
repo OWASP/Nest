@@ -325,9 +325,7 @@ def process_query(  # noqa: PLR0911
             keyword in query_lower for keyword in contribution_keywords
         )
 
-        # Step 4: Handle low confidence - invoke clarification agent (except for RAG)
-        # RAG intent can proceed with lower confidence since it's the fallback
-        # for general questions that may not fit other categories
+        # Step 4: Handle low confidence - invoke clarification agent
         if confidence < CONFIDENCE_THRESHOLD:
             logger.warning(
                 "Low confidence routing - invoking clarification",
