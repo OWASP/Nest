@@ -1,15 +1,12 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
-import { AppError, handleAppError } from 'app/global-error'
+
 import { GRAPHQL_URL } from 'utils/env.client'
 import { getCsrfToken } from 'utils/utility'
+
 const createApolloClient = () => {
   if (!GRAPHQL_URL) {
-    const error = new AppError(
-      500,
-      'GraphQL client configuration is missing. Set NEXT_PUBLIC_GRAPHQL_URL and ensure the backend GraphQL service is running.'
-    )
-    handleAppError(error)
+    // Only create the error for logging or throwing, do not emit a toast here
     return null
   }
 

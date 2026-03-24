@@ -6,8 +6,8 @@ import { useDjangoSession } from 'hooks/useDjangoSession'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import React, { Suspense } from 'react'
-import apolloClient from 'utils/helpers/apolloClient'
 import { ENVIRONMENT, GRAPHQL_URL } from 'utils/env.client'
+import apolloClient from 'utils/helpers/apolloClient'
 import { getCsrfToken } from 'utils/utility'
 
 // <AppInitializer> is a component that initializes the Django session.
@@ -26,17 +26,18 @@ export function Providers({
   children: React.ReactNode
 }>) {
   const isProduction = ENVIRONMENT === 'production'
-  const [isGraphQLEndpointUnreachable, setIsGraphQLEndpointUnreachable] = React.useState(false)
+  const [graphQLReachability, setGraphQLReachability] = React.useState<
+    'pending' | 'reachable' | 'unreachable'
+  >('pending')
   const lastToastMessageRef = React.useRef<string | null>(null)
 
   React.useEffect(() => {
     if (!apolloClient || !GRAPHQL_URL) {
+      setGraphQLReachability('unreachable')
       return
     }
     const graphqlUrl = GRAPHQL_URL
-
     const abortController = new AbortController()
-
 
     const verifyGraphQLEndpoint = async () => {
       try {
@@ -53,18 +54,19 @@ export function Providers({
         })
 
         if (!response.ok) {
-          setIsGraphQLEndpointUnreachable(true)
+          setGraphQLReachability('unreachable')
           return
         }
 
-        setIsGraphQLEndpointUnreachable(false)
+        setGraphQLReachability('reachable')
       } catch {
         if (!abortController.signal.aborted) {
-          setIsGraphQLEndpointUnreachable(true)
+          setGraphQLReachability('unreachable')
         }
       }
     }
 
+    setGraphQLReachability('pending')
     void verifyGraphQLEndpoint()
 
     return () => {
@@ -76,7 +78,7 @@ export function Providers({
     ? isProduction
       ? 'Something went wrong'
       : 'GraphQL client setup required. Ensure backend is running and GraphQL environment variables are configured.'
-    : isGraphQLEndpointUnreachable
+    : graphQLReachability === 'unreachable'
       ? isProduction
         ? 'Something went wrong'
         : 'GraphQL endpoint is unreachable. Ensure the backend service is running and NEXT_PUBLIC_GRAPHQL_URL is correct.'
@@ -105,7 +107,15 @@ export function Providers({
         <HeroUIProvider>
           <NextThemesProvider attribute="class" defaultTheme="dark">
             <ToastProvider />
-            {apolloClient ? (
+            {graphQLReachability === 'pending' && (
+              <div style={{ padding: 32, textAlign: 'center' }}>Checking GraphQL endpoint…</div>
+            )}
+            {graphQLReachability === 'unreachable' && (
+              <div style={{ padding: 32, textAlign: 'center', color: 'red' }}>
+                GraphQL endpoint is unreachable.
+              </div>
+            )}
+            {apolloClient && graphQLReachability === 'reachable' ? (
               <ApolloProvider client={apolloClient}>
                 <AppInitializer />
                 {children}
