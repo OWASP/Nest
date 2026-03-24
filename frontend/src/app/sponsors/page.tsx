@@ -48,16 +48,17 @@ const SponsorEntryCard = ({ sponsor }: { sponsor: Sponsor }) => (
         {sponsor.name}
       </div>
     </div>
-
-    <Link
-      href={sponsor.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mt-2 inline-flex items-center gap-2 self-center text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-    >
-      Visit website
-      <FaArrowUpRightFromSquare className="h-3.5 w-3.5" aria-hidden="true" />
-    </Link>
+    {sponsor.url && (
+      <Link
+        href={sponsor.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2 inline-flex items-center gap-2 self-center text-sm font-semibold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+      >
+        Visit website
+        <FaArrowUpRightFromSquare className="h-3.5 w-3.5" aria-hidden="true" />
+      </Link>
+    )}
   </div>
 )
 
