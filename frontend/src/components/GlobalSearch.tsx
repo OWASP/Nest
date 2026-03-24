@@ -344,11 +344,10 @@ export default function GlobalSearch() {
     return (
       <li
         key={`global-search-${indexName}-${hitRecord.key || hitRecord.login || hitRecord.url}`}
-        className={`mx-2 rounded-lg ${
-          isHighlighted
-            ? 'bg-blue-50 dark:bg-blue-900/30'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-        }`}
+        className={`mx-2 rounded-lg ${isHighlighted
+          ? 'bg-blue-50 dark:bg-blue-900/30'
+          : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+          }`}
       >
         <button
           type="button"
@@ -428,7 +427,7 @@ export default function GlobalSearch() {
                     key={`${title}-${query}`}
                     type="button"
                     onClick={() => applyStarterQuery(query)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:border-blue-200 mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:border-blue-200 mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
                   >
                     <Icon className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden />
                     {label}

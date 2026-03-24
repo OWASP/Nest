@@ -13,6 +13,12 @@ jest.mock('@next/third-parties/google', () => ({
   sendGAEvent: jest.fn(),
 }))
 
+jest.mock('next/link', () => {
+  return ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...props}>{children}</a>
+  )
+})
+
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
@@ -30,6 +36,11 @@ jest.mock('react-icons/fa', () => ({
     <svg data-testid="fa-search-icon" {...props} />
   ),
   FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-times-icon" {...props} />,
+  FaSearch: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="fa-search-icon" {...props} />
+  ),
+  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-times-icon" {...props} />,
+  FaArrowRight: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-arrow-right-icon" {...props} />,
 }))
 
 jest.mock('react-icons/fa6', () => ({
@@ -48,6 +59,7 @@ jest.mock('react-icons/fa6', () => ({
   ),
 }))
 
+
 jest.mock('react-icons/si', () => ({
   SiAlgolia: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="si-algolia-icon" {...props} />
@@ -59,8 +71,8 @@ const mockWindowOpen = jest.fn()
 
 describe('GlobalSearch', () => {
   beforeEach(() => {
-    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
+    ; (useRouter as jest.Mock).mockReturnValue(mockRouter)
+      ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({ hits: [], totalPages: 0 })
     jest.clearAllMocks()
     Object.defineProperty(globalThis, 'open', { value: mockWindowOpen, writable: true })
   })
@@ -125,13 +137,79 @@ describe('GlobalSearch', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Start typing to search across projects, chapters/)
+        screen.getByText(/Start typing to search across projects, chapters, events, organizations, and members./)
       ).toBeInTheDocument()
     })
   })
 
+  test('shows starter query buttons in empty state', async () => {
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Cheat Sheet Series')).toBeInTheDocument()
+      expect(screen.getByText('London')).toBeInTheDocument()
+      expect(screen.getByText('OWASP')).toBeInTheDocument()
+    })
+  })
+
+  test('shows explore community link in empty state', async () => {
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Explore the community for more info')).toBeInTheDocument()
+    })
+  })
+
+  test('clicking a starter query button populates the search input', async () => {
+    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [{ key: 'nest', name: 'Nest' }],
+      totalPages: 1,
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Nest')).toBeInTheDocument() // starter button
+    })
+
+    fireEvent.click(screen.getByText('Nest'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    expect(input).toHaveValue('nest')
+  })
+
+  test('navigates to organization page when clicking an organization suggestion', async () => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+      if (index === 'organizations') {
+        return Promise.resolve({
+          hits: [{ login: 'owasp', name: 'OWASP' }],
+          totalPages: 1,
+        })
+      }
+      return Promise.resolve({ hits: [], totalPages: 0 })
+    })
+
+    render(<GlobalSearch />)
+    fireEvent.click(screen.getByLabelText('Open search'))
+
+    const input = screen.getByPlaceholderText('Search the OWASP community...')
+    await userEvent.type(input, 'owasp')
+
+    await waitFor(() => {
+      expect(screen.getByText('OWASP')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByText('OWASP'))
+
+    expect(mockRouter.push).toHaveBeenCalledWith('/organizations/owasp')
+  })
+
+
   test('shows search results when typing', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
         return Promise.resolve({
           hits: [{ key: 'test-project', name: 'Test Project' }],
@@ -153,7 +231,7 @@ describe('GlobalSearch', () => {
   })
 
   test('shows no results message for empty search results', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+    ; (fetchAlgoliaData as jest.Mock).mockResolvedValue({
       hits: [],
       totalPages: 0,
     })
@@ -170,7 +248,7 @@ describe('GlobalSearch', () => {
   })
 
   test('clears search when clear button is clicked', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
         return Promise.resolve({
           hits: [{ key: 'test-project', name: 'Test Project' }],
@@ -198,7 +276,7 @@ describe('GlobalSearch', () => {
   })
 
   test('navigates to project page when clicking a project suggestion', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
         return Promise.resolve({
           hits: [{ key: 'test-project', name: 'Test Project' }],
@@ -224,7 +302,7 @@ describe('GlobalSearch', () => {
   })
 
   test('navigates to chapter page when clicking a chapter suggestion', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'chapters') {
         return Promise.resolve({
           hits: [{ key: 'test-chapter', name: 'Test Chapter' }],
@@ -250,7 +328,7 @@ describe('GlobalSearch', () => {
   })
 
   test('navigates to member page when clicking a user suggestion', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'users') {
         return Promise.resolve({
           hits: [{ key: 'test-user', name: 'Test User' }],
@@ -276,7 +354,7 @@ describe('GlobalSearch', () => {
   })
 
   test('resets state when overlay is closed', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
         return Promise.resolve({
           hits: [{ key: 'test-project', name: 'Test Project' }],
@@ -309,13 +387,13 @@ describe('GlobalSearch', () => {
       const newInput = screen.getByPlaceholderText('Search the OWASP community...')
       expect(newInput).toHaveValue('')
       expect(
-        screen.getByText(/Start typing to search across projects, chapters/)
+        screen.getByText(/Start typing to search across projects, chapters, events, organizations, and members./)
       ).toBeInTheDocument()
     })
   })
 
   test('shows Algolia attribution link in results', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'projects') {
         return Promise.resolve({
           hits: [{ key: 'test-project', name: 'Test Project' }],
@@ -337,7 +415,7 @@ describe('GlobalSearch', () => {
   })
 
   test('shows error message when search fails', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockRejectedValue(new Error('Search service error'))
+    ; (fetchAlgoliaData as jest.Mock).mockRejectedValue(new Error('Search service error'))
 
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
@@ -353,7 +431,7 @@ describe('GlobalSearch', () => {
   })
 
   test('opens event URL when clicking an event suggestion', async () => {
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+    ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
       if (index === 'events') {
         return Promise.resolve({
           hits: [{ key: 'test-event', name: 'Test Event', url: 'https://example.com/event' }],
@@ -391,21 +469,21 @@ describe('GlobalSearch', () => {
     )
 
     let callCount = 0
-    ;(fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
-      callCount++
-      // First batch of calls (first keystroke) returns a slow, pending promise
-      if (callCount <= 5) {
-        return firstPromise
-      }
-      // Second batch (second keystroke) resolves immediately
-      if (index === 'projects') {
-        return Promise.resolve({
-          hits: [{ key: 'second-result', name: 'Second Result' }],
-          totalPages: 1,
-        })
-      }
-      return Promise.resolve({ hits: [], totalPages: 0 })
-    })
+      ; (fetchAlgoliaData as jest.Mock).mockImplementation((index: string) => {
+        callCount++
+        // First batch of calls (first keystroke) returns a slow, pending promise
+        if (callCount <= 5) {
+          return firstPromise
+        }
+        // Second batch (second keystroke) resolves immediately
+        if (index === 'projects') {
+          return Promise.resolve({
+            hits: [{ key: 'second-result', name: 'Second Result' }],
+            totalPages: 1,
+          })
+        }
+        return Promise.resolve({ hits: [], totalPages: 0 })
+      })
 
     render(<GlobalSearch />)
     fireEvent.click(screen.getByLabelText('Open search'))
