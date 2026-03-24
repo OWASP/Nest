@@ -132,7 +132,7 @@ export default function Footer() {
               height={32}
               className="h-8 w-auto"
             />
-            <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
+            <span className="text-lg text-slate-800 dark:text-slate-200">Nest</span>
           </a>
         </div>
 
