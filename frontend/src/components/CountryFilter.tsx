@@ -16,10 +16,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   isLoading = false,
 }) => {
   const options = useMemo(
-    () => [
-      { key: '__all__', label: 'All Countries' },
-      ...countries.map((c) => ({ key: c, label: c })),
-    ],
+    () => [{ key: '', label: 'All Countries' }, ...countries.map((c) => ({ key: c, label: c }))],
     [countries]
   )
 
@@ -31,15 +28,14 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         size="md"
         isLoading={isLoading}
         defaultItems={options}
-        selectedKey={selectedCountry === '' ? '__all__' : selectedCountry}
+        selectedKey={selectedCountry}
         onSelectionChange={(key) => {
           if (key == null) {
-            return // Don't update on clear - keeps input empty
+            return
           }
           const countryKey = key as string
           onCountryChange(countryKey === '__all__' ? '' : countryKey)
         }}
-        isClearable={true}
         allowsCustomValue={false}
         scrollShadowProps={{
           isEnabled: false,
