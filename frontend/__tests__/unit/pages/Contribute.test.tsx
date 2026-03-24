@@ -143,8 +143,15 @@ describe('Contribute Component', () => {
     render(<ContributePage />)
 
     await waitFor(() => {
-      const searchInput = screen.getByPlaceholderText('Search for issues...')
-      fireEvent.change(searchInput, { target: { value: '' } })
+      const searchInputs = screen.getAllByPlaceholderText('Search for issues...')
+      const visibleInput =
+        searchInputs.find((input) => {
+          const style = window.getComputedStyle(
+            input.closest('.md\\:hidden') || input.closest('.md\\:flex')
+          )
+          return style.display !== 'none'
+        }) || searchInputs[0]
+      fireEvent.change(visibleInput, { target: { value: '' } })
     })
 
     expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1, undefined, [])

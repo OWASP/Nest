@@ -16,33 +16,38 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   isLoading = false,
 }) => {
   const options = useMemo(
-    () => [{ key: '', label: 'All Countries' }, ...countries.map((c) => ({ key: c, label: c }))],
+    () => [
+      { key: '__all__', label: 'All Countries' },
+      ...countries.map((c) => ({ key: c, label: c })),
+    ],
     [countries]
   )
 
   return (
-    <div className="relative inline-flex h-12 items-center rounded-lg border border-r-0 border-gray-300 bg-white shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
+    <div className="relative inline-flex h-12 items-center rounded-lg border border-gray-300 bg-white shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
       <Autocomplete
         aria-label="Country"
         labelPlacement="outside-left"
         size="md"
         isLoading={isLoading}
         defaultItems={options}
-        selectedKey={selectedCountry}
+        selectedKey={selectedCountry === '' ? '__all__' : selectedCountry || null}
         onSelectionChange={(key) => {
-          onCountryChange((key as string) ?? '')
+          const countryKey = key as string
+          onCountryChange(countryKey === '__all__' ? '' : countryKey)
         }}
+        isClearable={true}
         allowsCustomValue={false}
         scrollShadowProps={{
           isEnabled: false,
         }}
         clearButtonProps={{ 'aria-label': 'Clear country selection' }}
         classNames={{
-          base: 'w-52',
+          base: 'w-42 md:w-52',
           clearButton: 'p-0',
           listbox: 'p-0 focus:outline-none',
           popoverContent:
-            'z-[1000] mt-1 !w-52 !min-w-52 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-72 p-1 focus:outline-none',
+            'z-[1000] mt-1 !w-42 md:!w-52 !min-w-42 md:!min-w-42 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-72 p-1 focus:outline-none',
           selectorButton: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
         }}
         inputProps={{

@@ -72,7 +72,13 @@ describe('Committees Component', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for committees...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for committees...')
+      const visibleInput =
+        searchInputs.find((input) => {
+          const closest = input.closest('.md\\:hidden') || input.closest('.md\\:flex')
+          return closest ? window.getComputedStyle(closest).display !== 'none' : true
+        }) || searchInputs[0]
+      expect(visibleInput).toBeInTheDocument()
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

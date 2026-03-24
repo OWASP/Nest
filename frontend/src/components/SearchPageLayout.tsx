@@ -54,7 +54,20 @@ const SearchPageLayout = ({
 
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-      <div className={`flex w-full items-center justify-center ${inlineSort ? 'gap-0' : 'gap-2'}`}>
+      <div className="flex w-full justify-center md:hidden">
+        <SearchBar
+          isLoaded={!isFirstLoad}
+          onSearch={onSearch}
+          placeholder={searchPlaceholder}
+          initialValue={searchQuery}
+          className="rounded-lg"
+        />
+      </div>
+
+      {/* Desktop layout */}
+      <div
+        className={`hidden w-full items-center justify-center md:flex ${inlineSort ? 'gap-0' : 'gap-2'}`}
+      >
         {filterChildren &&
           (isFirstLoad ? (
             <Skeleton
@@ -78,9 +91,33 @@ const SearchPageLayout = ({
               <Skeleton className="h-12 w-48 rounded-none" aria-hidden="true" />
             </div>
           ) : (
-            <div className="[&>div>div:first-child]:rounded-l-none" data-testid="sort-inline">
-              {sortChildren}
+            <div className="[&>div>div:first-child]:rounded-l-none">{sortChildren}</div>
+          ))}
+      </div>
+
+      {/* Mobile layout */}
+      <div
+        className={`mb-4 flex w-full items-center justify-between md:hidden ${inlineSort ? 'gap-0' : 'gap-4'} mt-2`}
+      >
+        {filterChildren &&
+          (isFirstLoad ? (
+            <Skeleton
+              className={`h-12 w-40 md:w-60 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
+              aria-hidden="true"
+            />
+          ) : (
+            <div className={`${inlineSort ? '[&>div]:rounded-r-none' : ''} max-w-40`}>
+              {filterChildren}
             </div>
+          ))}
+        {inlineSort &&
+          sortChildren &&
+          (isFirstLoad ? (
+            <div className="flex items-center">
+              <Skeleton className="h-12 w-32 rounded-none md:w-48" aria-hidden="true" />
+            </div>
+          ) : (
+            <div className="max-w-40 [&>div>div:first-child]:rounded-l-none">{sortChildren}</div>
           ))}
       </div>
       {isLoaded ? (
