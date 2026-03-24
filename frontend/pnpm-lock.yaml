@@ -95,8 +95,8 @@ importers:
         specifier: ^16.13.1
         version: 16.13.1
       ics:
-        specifier: ^3.9.0
-        version: 3.9.0
+        specifier: ^3.9.1
+        version: 3.9.1
       isomorphic-dompurify:
         specifier: ^3.6.0
         version: 3.6.0
@@ -5239,8 +5239,8 @@ packages:
     resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
     engines: {node: '>=0.10.0'}
 
-  ics@3.9.0:
-    resolution: {integrity: sha512-a2dlnljjbkXicDVL318sDayPk1lpee2yh1nTuE9hhv8UF1Imm2Imqe7SxXkgS6a/LpjblaRJf20Eyxehn3wXaw==}
+  ics@3.9.1:
+    resolution: {integrity: sha512-wanjdE/xKJJOkIujddNzxzI4R3V5vKKCgonzid30dDr1tJG4/nciCq82I5rgVAGzcHu+osQakTOA44jwG8RV7w==}
 
   identity-obj-proxy@3.0.0:
     resolution: {integrity: sha512-00n6YnVHKrinT9t0d9+5yZC6UBNJANpYEQvL2LlX6Ab9lnmxzIRcEmTPuyGScvl1+jKuCICX1Z0Ab1pPKKdikA==}
@@ -7212,6 +7212,10 @@ packages:
 
   tapable@2.3.0:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
+    engines: {node: '>=6'}
+
+  tapable@2.3.2:
+    resolution: {integrity: sha512-1MOpMXuhGzGL5TTCZFItxCc0AARf1EZFQkGqMm7ERKj8+Hgr5oLvJOVFcC+lRmR8hCe2S3jC4T5D7Vg/d7/fhA==}
     engines: {node: '>=6'}
 
   tar-fs@3.1.2:
@@ -14022,7 +14026,7 @@ snapshots:
     dependencies:
       safer-buffer: 2.1.2
 
-  ics@3.9.0:
+  ics@3.9.1:
     dependencies:
       nanoid: 3.3.11
       runes2: 1.1.4
@@ -16300,6 +16304,8 @@ snapshots:
 
   tapable@2.3.0: {}
 
+  tapable@2.3.2: {}
+
   tar-fs@3.1.2:
     dependencies:
       pump: 3.0.4
@@ -16733,7 +16739,7 @@ snapshots:
       mime-types: 2.1.35
       neo-async: 2.6.2
       schema-utils: 4.3.3
-      tapable: 2.3.0
+      tapable: 2.3.2
       terser-webpack-plugin: 5.4.0(@swc/core@1.15.21(@swc/helpers@0.5.19))(webpack@5.103.0(@swc/core@1.15.21(@swc/helpers@0.5.19)))
       watchpack: 2.5.1
       webpack-sources: 3.3.4
