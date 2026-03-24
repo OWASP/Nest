@@ -5,17 +5,29 @@ interface GraphQLErrorLike {
   extensions?: Record<string, unknown>
 }
 
-interface ApolloErrorLike {
-  graphQLErrors: GraphQLErrorLike[]
-}
+function getGraphQLErrors(error: unknown): GraphQLErrorLike[] | null {
+  if (typeof error !== 'object' || error === null) return null
 
-function isApolloErrorLike(error: unknown): error is ApolloErrorLike {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
+  let candidates: unknown[] | null = null
+  if ('errors' in error && Array.isArray((error as { errors: unknown }).errors)) {
+    candidates = (error as { errors: unknown[] }).errors
+  } else if (
     'graphQLErrors' in error &&
-    Array.isArray((error as ApolloErrorLike).graphQLErrors)
+    Array.isArray((error as { graphQLErrors: unknown }).graphQLErrors)
+  ) {
+    candidates = (error as { graphQLErrors: unknown[] }).graphQLErrors
+  }
+
+  if (!candidates || candidates.length === 0) return null
+
+  const gqlErrors = candidates.filter(
+    (item): item is GraphQLErrorLike =>
+      typeof item === 'object' &&
+      item !== null &&
+      typeof (item as GraphQLErrorLike).message === 'string'
   )
+
+  return gqlErrors.length > 0 ? gqlErrors : null
 }
 
 export function extractGraphQLErrors(error: unknown): {
@@ -26,8 +38,9 @@ export function extractGraphQLErrors(error: unknown): {
   const validationErrors: ValidationErrors = {}
   const unmappedErrors: string[] = []
 
-  if (isApolloErrorLike(error)) {
-    for (const gqlError of error.graphQLErrors) {
+  const gqlErrors = getGraphQLErrors(error)
+  if (gqlErrors) {
+    for (const gqlError of gqlErrors) {
       const extensions = gqlError.extensions as { code?: string; field?: unknown } | undefined
       if (extensions?.code === 'VALIDATION_ERROR' && typeof extensions.field === 'string') {
         validationErrors[extensions.field] = gqlError.message
