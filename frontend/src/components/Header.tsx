@@ -59,9 +59,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <Link
+        <a
           href="/"
-          onClick={() => setMobileMenuOpen(false)}
           className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <div className="flex h-full items-center">
@@ -79,7 +78,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               Nest
             </div>
           </div>
-        </Link>
+        </a>
         {/* Desktop Header Links */}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
           <div className="flex justify-start pl-6">
