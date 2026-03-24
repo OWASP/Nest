@@ -81,7 +81,7 @@ const Card = ({
 
         {/* Timeline Section (Optional) */}
         {timeline?.start && timeline?.end && (
-          <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-2 text-sm flex items-center text-gray-500 dark:text-gray-400">
             <FaCalendar className="mr-2 h-4 w-4" />
             <span>{formatDateRange(timeline.start, timeline.end)}</span>
           </div>
