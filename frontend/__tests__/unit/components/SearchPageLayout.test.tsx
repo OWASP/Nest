@@ -437,7 +437,7 @@ describe('<SearchPageLayout />', () => {
   })
 
   it('renders both filterChildren and inlineSort together', () => {
-    render(
+    const { container } = render(
       <SearchPageLayout
         isLoaded={true}
         totalPages={3}
@@ -461,6 +461,11 @@ describe('<SearchPageLayout />', () => {
     expect(filterElements.length).toBeGreaterThan(0)
     expect(sortElements.length).toBeGreaterThan(0)
     expect(screen.getByText('Content')).toBeInTheDocument()
+
+    // Verify styling regression: check that rounded-l-none is applied to sort wrapper
+    const sortWrapper = container.querySelector('div[class*="rounded-l-none"]')
+    expect(sortWrapper).toBeInTheDocument()
+    expect(sortWrapper).toHaveClass('[&>div>div:first-child]:rounded-l-none')
   })
 
   it('renders root layout with expected structure and classNames', () => {
@@ -537,7 +542,7 @@ describe('<SearchPageLayout />', () => {
     )
 
     const flexRow = container.querySelector(
-      'div.hidden.w-full.items-center.justify-center.md\\:flex.gap-0'
+      String.raw`div.hidden.w-full.items-center.justify-center.md\:flex.gap-0`
     )
     expect(flexRow).toBeInTheDocument()
   })
@@ -561,7 +566,7 @@ describe('<SearchPageLayout />', () => {
     )
 
     const flexRow = container.querySelector(
-      'div.hidden.w-full.items-center.justify-center.md\\:flex.gap-2'
+      String.raw`div.hidden.w-full.items-center.justify-center.md\:flex.gap-2`
     )
     expect(flexRow).toBeInTheDocument()
   })

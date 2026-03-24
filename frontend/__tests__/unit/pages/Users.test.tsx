@@ -66,12 +66,13 @@ describe('UsersPage Component', () => {
     // Check loaded state
     await waitFor(() => {
       const searchInputs = screen.getAllByPlaceholderText('Search for members...')
-      const visibleInput =
-        searchInputs.find((input) => {
-          const closest = input.closest('.md\\:hidden') || input.closest('.md\\:flex')
-          return closest ? window.getComputedStyle(closest).display !== 'none' : true
-        }) || searchInputs[0]
-      expect(visibleInput).toBeInTheDocument()
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })

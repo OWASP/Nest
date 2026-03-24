@@ -144,14 +144,14 @@ describe('Contribute Component', () => {
 
     await waitFor(() => {
       const searchInputs = screen.getAllByPlaceholderText('Search for issues...')
-      const visibleInput =
-        searchInputs.find((input) => {
-          const style = window.getComputedStyle(
-            input.closest('.md\\:hidden') || input.closest('.md\\:flex')
-          )
-          return style.display !== 'none'
-        }) || searchInputs[0]
-      fireEvent.change(visibleInput, { target: { value: '' } })
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
+      fireEvent.change(visibleInput!, { target: { value: '' } })
     })
 
     expect(fetchAlgoliaData).toHaveBeenCalledWith('issues', '', 1, undefined, [])

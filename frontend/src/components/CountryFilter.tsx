@@ -43,11 +43,11 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         }}
         clearButtonProps={{ 'aria-label': 'Clear country selection' }}
         classNames={{
-          base: 'w-42 md:w-52',
+          base: 'w-[10.5rem] md:w-52',
           clearButton: 'p-0',
           listbox: 'p-0 focus:outline-none',
           popoverContent:
-            'z-[1000] mt-1 !w-42 md:!w-52 !min-w-42 md:!min-w-42 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-72 p-1 focus:outline-none',
+            'z-[1000] mt-1 !w-[10.5rem] md:!w-52 !min-w-[10.5rem] md:!min-w-[10.5rem] bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-72 p-1 focus:outline-none',
           selectorButton: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
         }}
         inputProps={{
