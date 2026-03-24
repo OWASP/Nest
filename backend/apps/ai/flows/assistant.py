@@ -9,6 +9,7 @@ from crewai import Agent, Crew, Task
 
 from apps.ai.agents.channel import create_channel_agent
 from apps.ai.agents.chapter import create_chapter_agent
+from apps.ai.agents.clarification import create_clarification_agent
 from apps.ai.agents.community import create_community_agent
 from apps.ai.agents.contribution import create_contribution_agent
 from apps.ai.agents.project import create_project_agent
@@ -324,13 +325,12 @@ def process_query(  # noqa: PLR0911
             keyword in query_lower for keyword in contribution_keywords
         )
 
-        # Step 4: Handle low confidence - skip or provide short message
-        # Exception: RAG intent can proceed with lower confidence since it's the fallback
+        # Step 4: Handle low confidence - invoke clarification agent (except for RAG)
+        # RAG intent can proceed with lower confidence since it's the fallback
         # for general questions that may not fit other categories
-        rag_intent = Intent.RAG.value
-        if confidence < CONFIDENCE_THRESHOLD and intent != rag_intent:
+        if confidence < CONFIDENCE_THRESHOLD:
             logger.warning(
-                "Low confidence routing",
+                "Low confidence routing - invoking clarification",
                 extra={
                     "intent": intent,
                     "confidence": confidence,
@@ -338,20 +338,31 @@ def process_query(  # noqa: PLR0911
                 },
             )
 
-            # For channel monitored messages: skip the answer
+            # For channel monitored messages: skip the answer unless explicitly mentioned
             if channel_id and not is_app_mention:
                 logger.info(
-                    "Skipping response for channel monitored message with low confidence",
+                    "Skipping clarification for channel monitored non-app-mention",
                     extra={"intent": intent, "confidence": confidence},
                 )
                 return None
 
-            # For app mentions: provide short message about constraints
-            return (
-                "I'm unable to provide a confident answer to your question based on my "
-                "current knowledge and available tools. Please try rephrasing your question "
-                "or wait for a response from one of the community members."
-            )
+            # Invoke Clarification Agent
+            try:
+                clarification_agent = create_clarification_agent()
+                clarification_result = execute_task(clarification_agent, query)
+            except Exception:
+                logger.exception("Clarification agent failed, falling back to generic message")
+                return (
+                    "I'm unable to provide a confident answer to your question based on my "
+                    "current knowledge and available tools. Please try rephrasing your question "
+                    "or wait for a response from one of the community members."
+                )
+            else:
+                logger.info(
+                    "Clarification agent returned",
+                    extra={"clarification_preview": (clarification_result or "")[:200]},
+                )
+                return clarification_result
 
         # Step 5: Get appropriate expert agent
         agent_factory = INTENT_TO_AGENT.get(intent)
