@@ -125,7 +125,7 @@ describe('GlobalSearch', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Start typing to search across projects, chapters/)
+        screen.getByText(/Try searches like "OWASP", "London"/)
       ).toBeInTheDocument()
     })
   })
@@ -309,7 +309,7 @@ describe('GlobalSearch', () => {
       const newInput = screen.getByPlaceholderText('Search the OWASP community...')
       expect(newInput).toHaveValue('')
       expect(
-        screen.getByText(/Start typing to search across projects, chapters/)
+        screen.getByText(/Try searches like "OWASP", "London"/)
       ).toBeInTheDocument()
     })
   })
