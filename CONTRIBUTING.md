@@ -275,7 +275,6 @@ To setup NestBot development environment, follow these steps:
       ```bash
       make run
       ```
-      
    1. **Direct Message**: Send a direct message to the bot in your Slack workspace.
    1. **Channel Mention**: Add the bot to a channel and mention it.
    1. **Check Logs**: In a new terminal, run the following command to check Django logs for incoming Slack events:
