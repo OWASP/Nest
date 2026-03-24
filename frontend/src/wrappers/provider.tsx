@@ -8,6 +8,7 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import React, { Suspense } from 'react'
 import apolloClient from 'utils/helpers/apolloClient'
 import { ENVIRONMENT, GRAPHQL_URL } from 'utils/env.client'
+import { getCsrfToken } from 'utils/utility'
 
 // <AppInitializer> is a component that initializes the Django session.
 // It ensures the session is synced with Django when the app starts.
@@ -36,13 +37,16 @@ export function Providers({
 
     const abortController = new AbortController()
 
+
     const verifyGraphQLEndpoint = async () => {
       try {
+        const csrfToken = await getCsrfToken()
         const response = await fetch(graphqlUrl, {
           body: JSON.stringify({ query: 'query { __typename }' }),
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
           },
           method: 'POST',
           signal: abortController.signal,
