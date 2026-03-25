@@ -36,10 +36,6 @@ jest.mock('react-icons/fa', () => ({
     <svg data-testid="fa-search-icon" {...props} />
   ),
   FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-times-icon" {...props} />,
-  FaSearch: (props: React.SVGProps<SVGSVGElement>) => (
-    <svg data-testid="fa-search-icon" {...props} />
-  ),
-  FaTimes: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-times-icon" {...props} />,
   FaArrowRight: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="fa-arrow-right-icon" {...props} />,
 }))
 
@@ -199,10 +195,10 @@ describe('GlobalSearch', () => {
     await userEvent.type(input, 'owasp')
 
     await waitFor(() => {
-      expect(screen.getByText('OWASP')).toBeInTheDocument()
+      expect(screen.getByText('Search by Algolia')).toBeInTheDocument()
     })
 
-    fireEvent.click(screen.getByText('OWASP'))
+    fireEvent.click(screen.getByRole('button', { name: 'OWASP' }))
 
     expect(mockRouter.push).toHaveBeenCalledWith('/organizations/owasp')
   })

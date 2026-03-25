@@ -92,16 +92,6 @@ export default function GlobalSearch() {
     }
   }, [isOpen, shouldAutoFocus])
 
-  useEffect(() => {
-    if (!isOpen) {
-      searchVersionRef.current++
-      setSearchQuery('')
-      setSuggestions([])
-      setShowSuggestions(false)
-      setHighlightedIndex(null)
-      setSearchError(false)
-    }
-  }, [isOpen])
 
   const debouncedSearch = useMemo(
     () =>
@@ -149,6 +139,20 @@ export default function GlobalSearch() {
       }, 300),
     []
   )
+
+  const resetSearchState = useCallback(() => {
+    debouncedSearch.cancel()
+    searchVersionRef.current++
+    setSearchQuery('')
+    setSuggestions([])
+    setShowSuggestions(false)
+    setHighlightedIndex(null)
+    setSearchError(false)
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) resetSearchState()
+  }, [isOpen, resetSearchState])
 
   useEffect(() => {
     return () => {
@@ -279,11 +283,7 @@ export default function GlobalSearch() {
   }
 
   const handleClearSearch = () => {
-    searchVersionRef.current++
-    setSearchQuery('')
-    setSuggestions([])
-    setShowSuggestions(false)
-    setHighlightedIndex(null)
+    resetSearchState()
     if (shouldAutoFocus) {
       inputRef.current?.focus()
     }
