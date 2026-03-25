@@ -17,8 +17,14 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   const map = useMap()
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
+  const isMounted = useRef(true)
   useEffect(() => {
-    if (!map) return
+    return () => {
+      isMounted.current = false
+    }
+  }, [])
+  useEffect(() => {
+    if (!map || !isMounted.current) return
     if (!map.getContainer()) return
     if (isMapActive) {
       map.scrollWheelZoom.enable()
@@ -74,6 +80,7 @@ const MapViewUpdater = ({
 
   useEffect(() => {
     if (!map) return
+    if (!map._loaded) return
 
     const container = map.getContainer()
     if (!container) return
