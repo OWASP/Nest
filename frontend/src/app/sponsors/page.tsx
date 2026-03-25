@@ -47,6 +47,11 @@ const SponsorEntryCard = ({ sponsor }: { sponsor: Sponsor }) => (
       <div className="text-center text-xl font-medium text-gray-900 dark:text-white">
         {sponsor.name}
       </div>
+      {sponsor.description && (
+        <p className="line-clamp-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          {sponsor.description}
+        </p>
+      )}
     </div>
     {sponsor.url && (
       <Link
@@ -85,10 +90,19 @@ export default function SponsorsPage() {
 
   return (
     <div className="min-h-screen w-full px-8 py-10 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+      {sponsorsData?.activeSponsors && sponsorsData?.activeSponsors.length > 0 ? (
+        <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          {sponsorsData.activeSponsors.map((sponsor: Sponsor) => (
+            <SponsorEntryCard key={sponsor.id} sponsor={sponsor} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-lg font-medium">No Sponsors Found</p>
+      )}
       <SecondaryCard
         icon={FaHandHoldingHeart}
         title="Become a Sponsor"
-        className="rounded-[1.75rem] bg-gray-100 p-8 dark:bg-gray-800"
+        className="mt-12 rounded-[1.75rem] bg-gray-100 p-8 dark:bg-gray-800"
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <button
@@ -100,16 +114,6 @@ export default function SponsorsPage() {
           </button>
         </div>
       </SecondaryCard>
-
-      {sponsorsData?.activeSponsors && sponsorsData?.activeSponsors.length > 0 ? (
-        <div className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 xl:grid-cols-4">
-          {sponsorsData.activeSponsors.map((sponsor: Sponsor) => (
-            <SponsorEntryCard key={sponsor.id} sponsor={sponsor} />
-          ))}
-        </div>
-      ) : (
-        <p className="text-center text-lg font-medium">No Sponsors Found</p>
-      )}
     </div>
   )
 }
