@@ -18,5 +18,5 @@ exec gunicorn wsgi:application \
   --graceful-timeout "${GUNICORN_GRACEFUL_TIMEOUT:-30}" \
   --max-requests "${GUNICORN_MAX_REQUESTS:-1000}" \
   --max-requests-jitter "${GUNICORN_MAX_REQUESTS_JITTER:-50}" \
-  --access-logfile - \
-  --error-logfile -
+  --access-logfile "${GUNICORN_ACCESS_LOGFILE:--}" \
+  --error-logfile "${GUNICORN_ERROR_LOGFILE:--}"
