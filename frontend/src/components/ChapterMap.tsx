@@ -45,8 +45,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   }, [isMapActive, map])
   useEffect(() => {
     return () => {
-      if (!map) return
-      if (!map.getContainer()) return
+     if (!map || !map.getContainer()) return
       map.scrollWheelZoom.disable()
       map.dragging.disable()
       map.touchZoom.disable()
@@ -126,7 +125,7 @@ const MapViewUpdater = ({
     }
   }, [userLocation, showLocal, validGeoLocData, map])
 
-   return null
+  return null
 }
 
 const ChapterMap = ({
