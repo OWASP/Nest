@@ -53,8 +53,8 @@ const SearchPageLayout = ({
   }
 
   return (
-    <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-      <div className={`flex w-full items-center justify-center ${inlineSort ? 'gap-0' : 'gap-2'}`}>
+    <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5 overflow-x-hidden">
+      <div className={`flex w-full flex-wrap items-center justify-center ${inlineSort ? 'gap-0' : 'gap-2'}`}>
         {filterChildren &&
           (isFirstLoad ? (
             <Skeleton
@@ -62,7 +62,7 @@ const SearchPageLayout = ({
               aria-hidden="true"
             />
           ) : (
-            <div className={inlineSort ? '[&>div]:rounded-r-none' : ''}>{filterChildren}</div>
+            <div className={`min-w-0 ${inlineSort ? '[&>div]:rounded-r-none' : ''}`}>{filterChildren}</div>
           ))}
         <SearchBar
           isLoaded={!isFirstLoad}
