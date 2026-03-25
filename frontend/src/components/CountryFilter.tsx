@@ -1,6 +1,6 @@
 import { Autocomplete, AutocompleteItem } from '@heroui/autocomplete'
 import type React from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 interface CountryFilterProps {
   countries: string[]
@@ -19,7 +19,11 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
     () => [{ key: '', label: 'All Countries' }, ...countries.map((c) => ({ key: c, label: c }))],
     [countries]
   )
-  const [inputValue, setInputValue] = useState(selectedCountry || 'All Countries')
+ const [inputValue, setInputValue] = useState(selectedCountry || 'All Countries')
+
+  useEffect(() => {
+    setInputValue(selectedCountry || 'All Countries')
+  }, [selectedCountry])
   return (
     <div className="relative inline-flex h-12 items-center rounded-lg border border-r-0 border-gray-300 bg-white shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
       <Autocomplete
