@@ -148,7 +148,7 @@ export default function GlobalSearch() {
     setShowSuggestions(false)
     setHighlightedIndex(null)
     setSearchError(false)
-  }, [])
+  }, [debouncedSearch])
 
   useEffect(() => {
     if (!isOpen) resetSearchState()

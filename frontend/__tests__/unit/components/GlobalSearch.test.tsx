@@ -154,7 +154,15 @@ describe('GlobalSearch', () => {
     fireEvent.click(screen.getByLabelText('Open search'))
 
     await waitFor(() => {
-      expect(screen.getByText('Explore the community for more info')).toBeInTheDocument()
+      const link = screen.getByRole('link', { name: 'Explore the community for more info' })
+      expect(link).toBeInTheDocument()
+      expect(link).toHaveAttribute('href', '/community')
+    })
+
+    fireEvent.click(screen.getByRole('link', { name: 'Explore the community for more info' }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
   })
 
