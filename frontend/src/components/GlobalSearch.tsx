@@ -46,6 +46,36 @@ const SEARCH_STARTER_GROUPS = [
   { title: 'Organizations', Icon: FaBuilding, items: SEARCH_STARTER_ORGANIZATIONS },
 ] as const
 
+interface StarterGroupProps {
+  title: string
+  Icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
+  items: readonly { label: string; query: string }[]
+  onApply: (query: string) => void
+}
+
+function StarterGroup({ title, Icon, items, onApply }: StarterGroupProps) {
+  return (
+    <div className='mb-4'>
+      <div className="px-0 pb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+        {title}
+      </div>
+      <div className="mt-2 flex flex-col flex-wrap gap-2">
+        {items.map(({ label, query }) => (
+          <button
+            key={`${title}-${query}`}
+            type="button"
+            onClick={() => onApply(query)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:border-blue-200 mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+          >
+            <Icon className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden />
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -410,32 +440,6 @@ export default function GlobalSearch() {
       )
     }
 
-    const renderStarterGroup = (
-      title: string,
-      Icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>,
-      items: readonly { label: string; query: string }[],
-      onApply: (query: string) => void
-    ) => (
-      <div key={title} className='mb-4'>
-        <div className="px-0 pb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
-          {title}
-        </div>
-        <div className="mt-2 flex flex-col flex-wrap gap-2">
-          {items.map(({ label, query }) => (
-            <button
-              key={`${title}-${query}`}
-              type="button"
-              onClick={() => applyStarterQuery(query)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm hover:border-blue-200 mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
-            >
-              <Icon className="h-3.5 w-3.5 shrink-0 text-gray-400" aria-hidden />
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-    )
-
     return (
       <div className="px-4 py-4">
         <p className="mb-4 text-sm text-gray-500 dark:text-gray-400 text-center">
@@ -443,7 +447,13 @@ export default function GlobalSearch() {
         </p>
         <div className="space-y-4 mb-4">
           {SEARCH_STARTER_GROUPS.map(({ title, Icon, items }) => (
-            renderStarterGroup(title, Icon, items, applyStarterQuery)
+            <StarterGroup
+              key={title}
+              title={title}
+              Icon={Icon}
+              items={items}
+              onApply={applyStarterQuery}
+            />
           ))}
         </div>
         <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700 text-center">
@@ -483,7 +493,7 @@ export default function GlobalSearch() {
           open
           aria-modal="true"
           aria-label="Global search"
-          className="fixed inset-0 z-[100] m-0 flex h-full max-h-full w-full max-w-full items-start justify-center border-none bg-transparent p-0 px-3 pt-[10vh] sm:px-0 sm:pt-[15vh]"
+          className="fixed inset-0 z-100 m-0 flex h-full max-h-full w-full max-w-full items-start justify-center border-none bg-transparent p-0 px-3 pt-[10vh] sm:px-0 sm:pt-[15vh]"
         >
           {/* Backdrop */}
           <button
