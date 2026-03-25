@@ -491,10 +491,10 @@ describe('SearchBar Component', () => {
       expect(skeleton).toHaveClass('rounded-none')
     })
 
-    it('renders wrapper with py-4 class', () => {
+    it('renders wrapper with md:py-4 class', () => {
       const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const wrapper = container.firstChild as HTMLElement
-      expect(wrapper).toHaveClass('py-4')
+      expect(wrapper).toHaveClass('md:py-4')
     })
   })
 })
