@@ -19,11 +19,20 @@ import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
 import UserMenu from 'components/UserMenu'
+import { useTheme } from 'next-themes'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
+  const { theme } = useTheme()
+  const [logoSrc, setLogoSrc] = useState('/img/logo_light.png')
+  useEffect(() => {
+    console.log('theme changed:', theme, '→', theme === 'dark' ? 'logo_dark' : 'logo_light')
+    setLogoSrc(theme === 'dark' ? '/img/logo_dark.png' : '/img/logo_light.png')
+  }, [theme])
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -70,7 +79,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 width={64}
                 height={64}
                 priority={true}
-                src={'/img/logo_dark.png'}
+                src={logoSrc}
                 className="h-full w-auto object-contain"
                 alt="OWASP Logo"
               />
@@ -167,10 +176,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     width={64}
                     height={64}
                     priority={true}
-                    src={'/img/logo_dark.png'}
+                    src={logoSrc}
                     className="h-full w-auto object-contain"
                     alt="OWASP Logo"
                   />
+
                 </div>
                 <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
                   Nest
