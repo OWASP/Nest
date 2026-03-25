@@ -26,13 +26,13 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
-  const { Theme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
-  const logoSrc = mounted && Theme === 'light' ? '/img/logo_light.png' : '/img/logo_dark.png'
+  const logoSrc = mounted && resolvedTheme === 'light' ? '/img/logo_light.png' : '/img/logo_dark.png'
 
   useEffect(() => {
     const handleResize = () => {
