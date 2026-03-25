@@ -1,3 +1,4 @@
+import { fireEvent as domFireEvent } from '@testing-library/dom'
 import { render, fireEvent, waitFor } from '@testing-library/react'
 import * as L from 'leaflet'
 import React, { useEffect } from 'react'
@@ -228,7 +229,14 @@ describe('ChapterMap Refactored Tests', () => {
         expect(mockZoomControl.addTo).toHaveBeenCalledTimes(1)
       })
 
-      fireEvent.mouseLeave(container.firstChild as HTMLElement)
+      const section = container.querySelector('section')
+      expect(section).not.toBeNull()
+      const rect = section.getBoundingClientRect()
+      fireEvent.pointerLeave(section, {
+        clientX: rect.left - 10,
+        clientY: rect.top - 10,
+        relatedTarget: null,
+      })
       await waitFor(() => {
         expect(mockZoomControl.remove).toHaveBeenCalled()
         expect(getByText('Unlock map')).toBeInTheDocument()
@@ -243,19 +251,62 @@ describe('ChapterMap Refactored Tests', () => {
       })
     })
 
-    it('locks map again on mouse leave', async () => {
+    it('locks map again on pointer leave when pointer is outside section', async () => {
       const { getByText, container } = render(<ChapterMap {...defaultProps} />)
 
       const unlockButton = getByText('Unlock map').closest('button')
       fireEvent.click(unlockButton)
-      const wrapper = container.firstChild as HTMLElement
-      fireEvent.mouseLeave(wrapper)
+      const section = container.querySelector('section')
+      expect(section).not.toBeNull()
+      const rect = section.getBoundingClientRect()
+      fireEvent.pointerLeave(section, {
+        clientX: rect.left - 10,
+        clientY: rect.top - 10,
+        relatedTarget: null,
+      })
 
       await waitFor(() => {
         expect(mockMap.scrollWheelZoom.disable).toHaveBeenCalled()
         expect(mockZoomControl.remove).toHaveBeenCalled()
         expect(getByText('Unlock map')).toBeInTheDocument()
       })
+    })
+
+    it('keeps map unlocked when pointer leave fires but pointer is still inside section bounds', async () => {
+      const { getByText, queryByText, container } = render(<ChapterMap {...defaultProps} />)
+
+      fireEvent.click(getByText('Unlock map').closest('button'))
+      await waitFor(() => {
+        expect(mockMap.scrollWheelZoom.enable).toHaveBeenCalled()
+      })
+
+      const section = container.querySelector('section')
+      expect(section).not.toBeNull()
+      jest.spyOn(section, 'getBoundingClientRect').mockReturnValue({
+        x: 100,
+        y: 100,
+        left: 100,
+        top: 100,
+        right: 300,
+        bottom: 300,
+        width: 200,
+        height: 200,
+        toJSON: () => ({}),
+      } as DOMRect)
+
+      jest.clearAllMocks()
+
+      domFireEvent.pointerLeave(section, {
+        clientX: 150,
+        clientY: 150,
+        relatedTarget: null,
+      })
+
+      await waitFor(() => {
+        expect(queryByText('Unlock map')).not.toBeInTheDocument()
+      })
+      expect(mockMap.scrollWheelZoom.disable).not.toHaveBeenCalled()
+      expect(mockZoomControl.remove).not.toHaveBeenCalled()
     })
   })
 
