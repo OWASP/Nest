@@ -121,8 +121,7 @@ export default function Footer() {
           <div className="h-8 w-px bg-slate-400 dark:bg-white"></div>
 
           <a
-             href="https://nest.owasp.org/"
-             target="_self"
+            href="/"
             className="flex items-center gap-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             aria-label="Nest home"
           >
