@@ -12,25 +12,30 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ imageUrl }) => {
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <div
-        className="animate-custom-spin relative h-16 w-16 rounded-full border-4 border-[#98AFC7] dark:border-white"
-        style={{ borderTopColor: 'transparent' }}
-      >
+      {/* Wrapper: positions the spinner ring and logo independently */}
+      <div className="relative h-16 w-16">
+        {/* Spinning ring only — logo is NOT inside this div */}
+        <div
+          className="animate-custom-spin absolute inset-0 rounded-full border-4 border-[#98AFC7] dark:border-white"
+          style={{ borderTopColor: 'transparent' }}
+          aria-hidden="true"
+        />
+        {/* Static logo — sibling of the spinner, not a child */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="animate-fade-in-out">
             <Image
               src={image}
               alt="Loading indicator"
               className="hidden rounded-full dark:block"
-              width={60}
-              height={60}
+              width={40}
+              height={40}
             />
             <Image
               src={dark}
               alt="Loading indicator"
               className="rounded-full dark:hidden"
-              width={60}
-              height={60}
+              width={40}
+              height={40}
             />
           </div>
         </div>
