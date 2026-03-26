@@ -487,9 +487,10 @@ data "aws_iam_policy_document" "part_two" {
       "rds:RemoveTagsFromResource",
     ]
     resources = [
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:*",
       "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*"
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:target-group:*",
     ]
   }
 
