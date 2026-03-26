@@ -34,7 +34,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
     const handleOutsideClick = (event: Event) => {
       const navbar = document.getElementById('navbar-sticky')
-      const sidebar = document.querySelector('.fixed.inset-y-0')
+      const sidebar = document.getElementById('mobile-sidebar')
       if (
         mobileMenuOpen &&
         navbar &&
@@ -46,10 +46,17 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       }
     }
 
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
     globalThis.addEventListener('resize', handleResize)
     globalThis.addEventListener('click', handleOutsideClick)
 
     return () => {
+      document.body.style.overflow = ''
       globalThis.removeEventListener('resize', handleResize)
       globalThis.removeEventListener('click', handleOutsideClick)
     }
@@ -148,8 +155,9 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         </div>
       </div>
       <div
+        id="mobile-sidebar"
         className={cn(
-          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
+          'bg-owasp-blue fixed top-0 left-0 z-50 h-[100dvh] w-64 transform shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >

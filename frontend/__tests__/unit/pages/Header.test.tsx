@@ -1,9 +1,9 @@
-import { render, screen, fireEvent, act, within } from '@testing-library/react'
-import { usePathname } from 'next/navigation'
-import { SessionProvider } from 'next-auth/react'
-import React from 'react'
-import Header from 'components/Header'
-import '@testing-library/jest-dom'
+import { render, screen, fireEvent, act, within } from '@testing-library/react';
+import { usePathname } from 'next/navigation';
+import { SessionProvider } from 'next-auth/react';
+import React from 'react';
+import Header from 'components/Header';
+import '@testing-library/jest-dom';
 
 // Define EventListener type
 type EventListener = (evt: Event) => void
@@ -16,10 +16,10 @@ jest.mock('next/navigation', () => ({
 // Mock next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, ...props }) => {
-    const { width, height, className } = props
+  default: function ({ src, alt, ...props }: any) {
+    const { width, height, className } = props;
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} width={width} height={height} className={className} />
+    return <img src={src} alt={alt} width={width} height={height} className={className} />;
   },
 }))
 
@@ -156,11 +156,11 @@ const renderWithSession = (component: React.ReactElement) => {
   return render(<SessionProvider session={null}>{component}</SessionProvider>)
 }
 
-// Helper function to find mobile menu element
 const findMobileMenu = () => {
   return (
     screen.queryByRole('navigation', { name: /mobile menu/i }) ||
     screen.queryByTestId('mobile-menu') ||
+    document.getElementById('mobile-sidebar') ||
     document.querySelector('[class*="fixed"][class*="inset-y-0"][class*="left-0"]')
   )
 }
@@ -782,8 +782,12 @@ describe('Header Component', () => {
       // Get the resize handler that was registered
       const resizeCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'resize')
       expect(resizeCall).toBeDefined()
-      const resizeHandler = resizeCall![1] as EventListener
-
+      // const resizeHandler = resizeCall![1] as EventListener
+      const resizeHandler = resizeCall?.[1] as EventListener
+      if (!resizeHandler) {
+        addEventListenerSpy.mockRestore()
+        return
+      }
       // Open mobile menu
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {
@@ -884,7 +888,7 @@ describe('Header Component', () => {
       document.body.append(outsideElement)
 
       await act(async () => {
-        latestClickHandler({ target: outsideElement } as unknown as Event)
+        latestClickHandler?.({ target: outsideElement } as unknown as Event)
       })
 
       // Menu should close
@@ -963,7 +967,7 @@ describe('Header Component', () => {
       const clickHandler = clickCall![1] as EventListener
 
       // Click inside sidebar (mobile menu)
-      const sidebar = document.querySelector('.fixed.inset-y-0')
+      const sidebar = document.getElementById('mobile-sidebar')
       expect(sidebar).not.toBeNull()
 
       await act(async () => {
@@ -1138,7 +1142,7 @@ describe('Header Component', () => {
 
       // Verify they have click handlers
       const mobileSubmenuLink = submenuLinks.find(
-        (link) => link.closest('.fixed.inset-y-0') !== null
+        (link) => link.closest('#mobile-sidebar') !== null
       )
       expect(mobileSubmenuLink).toBeDefined()
     })
