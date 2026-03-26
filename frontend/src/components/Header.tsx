@@ -111,7 +111,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     font-semibold
                   `
                 )}
-                aria-current="page"
+                aria-current={pathname === link.href ? 'page' : undefined}
               >
                 {link.text}
               </Link>
