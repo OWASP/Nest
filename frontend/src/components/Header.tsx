@@ -26,6 +26,10 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   useEffect(() => {
+    
+
+
+
     const handleResize = () => {
       if (globalThis.innerWidth >= desktopViewMinWidth) {
         setMobileMenuOpen(false)
@@ -48,10 +52,16 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
     globalThis.addEventListener('resize', handleResize)
     globalThis.addEventListener('click', handleOutsideClick)
+      if (mobileMenuOpen) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = 'auto'
+  }
 
     return () => {
       globalThis.removeEventListener('resize', handleResize)
       globalThis.removeEventListener('click', handleOutsideClick)
+       document.body.style.overflow = 'auto'
     }
   }, [mobileMenuOpen])
 
@@ -149,11 +159,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       </div>
       <div
         className={cn(
-          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
+          'bg-owasp-blue fixed top-0 left-0 h-dvh z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
+        <div className="flex min-h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
           {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
             <Link
