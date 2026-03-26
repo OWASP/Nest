@@ -63,14 +63,14 @@ export default function Footer() {
                       {link.isSpan ? (
                         <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
                       ) : (
-                        <a
+                        <Link
                           className="rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                           href={link.href || '/'}
                           target={isExternal ? '_blank' : undefined}
                           rel={isExternal ? 'noopener noreferrer' : undefined}
                         >
                           {link.text}
-                        </a>
+                        </Link>
                       )}
                     </div>
                   )
