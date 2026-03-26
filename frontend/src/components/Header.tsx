@@ -60,7 +60,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
         {/* Logo */}
         <a
-          href="https://nest.owasp.org/" target="_self"
+           href="/"
           onClick={() => setMobileMenuOpen(false)}
           className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
@@ -157,7 +157,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
             <a
-              href="https://nest.owasp.org/" target="_self"
+               href="/"
               onClick={() => setMobileMenuOpen(false)}
               className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
