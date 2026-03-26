@@ -782,12 +782,8 @@ describe('Header Component', () => {
       // Get the resize handler that was registered
       const resizeCall = addEventListenerSpy.mock.calls.find((call) => call[0] === 'resize')
       expect(resizeCall).toBeDefined()
-      // const resizeHandler = resizeCall![1] as EventListener
-      const resizeHandler = resizeCall?.[1] as EventListener
-      if (!resizeHandler) {
-        addEventListenerSpy.mockRestore()
-        return
-      }
+      if (!resizeCall) throw new Error('resize event listener was not registered')
+      const resizeHandler = resizeCall[1] as EventListener
       // Open mobile menu
       const toggleButton = screen.getByRole('button', { name: /open main menu/i })
       await act(async () => {

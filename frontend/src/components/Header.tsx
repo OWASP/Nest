@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   FaRegHeart,
   FaRegStar,
@@ -24,6 +24,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
+  const previousOverflowRef = useRef('')
 
   useEffect(() => {
     const handleResize = () => {
@@ -47,16 +49,17 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
     }
 
     if (mobileMenuOpen) {
+      previousOverflowRef.current = document.body.style.overflow
       document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = previousOverflowRef.current
     }
 
     globalThis.addEventListener('resize', handleResize)
     globalThis.addEventListener('click', handleOutsideClick)
 
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = previousOverflowRef.current
       globalThis.removeEventListener('resize', handleResize)
       globalThis.removeEventListener('click', handleOutsideClick)
     }
