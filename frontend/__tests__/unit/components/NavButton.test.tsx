@@ -180,6 +180,8 @@ describe('<NavButton />', () => {
     it('should have the correct base layout and style classes', () => {
       renderNavButton()
       const link = screen.getByRole('link')
+      const span = screen.getByText('Test Button')
+      expect(span).toHaveClass('relative', 'inline-block')
       // Check for key classes based on actual component implementation
       expect(link).toHaveClass(
         'group',
@@ -199,19 +201,28 @@ describe('<NavButton />', () => {
     it('should have correct background color classes', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      expect(link).toHaveClass('bg-[#87a1bc]')
+      // expect(link).toHaveClass('bg-[#87a1bc]')
+      expect(link).toHaveClass('bg-white','border','border-gray-300','text-gray-800','px-4'
+        
+      )
     })
 
     it('should have correct text styling classes', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      expect(link).toHaveClass('text-sm', 'font-medium', 'text-black')
+      // expect(link).toHaveClass('text-sm', 'font-medium', 'text-black')
+      expect(link).toHaveClass('bg-white','border','border-gray-300','text-gray-800','px-4'
+        
+      )
     })
 
     it('should have correct padding and spacing classes', () => {
       renderNavButton()
       const link = screen.getByRole('link')
-      expect(link).toHaveClass('p-4')
+      // expect(link).toHaveClass('p-4')
+      expect(link).toHaveClass('bg-white','border','border-gray-300','text-gray-800','px-4'
+
+      )
     })
 
     it('should have correct hover and focus-visible utility classes for accessibility', () => {

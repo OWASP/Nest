@@ -98,12 +98,14 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     key={link.text}
                     href={link.href || '/'}
                     className={cn(
-                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                      'group relative navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
                       pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                     )}
                     aria-current="page"
                   >
+                  <span className="relative inline-block after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-slate-600 after:transition-all after:duration-300 group-hover:after:w-full dark:after:bg-slate-300">
                     {link.text}
+                  </span>
                   </Link>
                 )
               })}
