@@ -44,7 +44,7 @@
     "dompurify": "^3.3.3",
     "framer-motion": "^12.38.0",
     "graphql": "^16.13.2",
-    "ics": "^3.10.0",
+    "ics": "^3.11.0",
     "isomorphic-dompurify": "^3.7.1",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
