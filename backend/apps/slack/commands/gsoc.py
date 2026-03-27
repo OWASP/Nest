@@ -1,11 +1,9 @@
 """Slack bot gsoc command."""
 
-from django.utils import timezone
-
 from apps.common.utils import get_absolute_url
 from apps.slack.commands.command import CommandBase
 from apps.slack.common.constants import COMMAND_START
-from apps.slack.common.gsoc import MARCH
+from apps.slack.common.gsoc import get_gsoc_year
 from apps.slack.constants import (
     OWASP_CONTRIBUTE_CHANNEL_ID,
     OWASP_GSOC_CHANNEL_ID,
@@ -18,8 +16,7 @@ SUPPORTED_ANNOUNCEMENT_YEARS_EXCLUDED = {2012, 2013, 2014, 2015, 2016, 2018}
 
 def get_supported_year_end():
     """Get the current supported year end based on the current date."""
-    now = timezone.now()
-    return now.year if now.month >= MARCH else now.year - 1
+    return get_gsoc_year()
 
 
 def get_supported_years():
@@ -45,8 +42,7 @@ class Gsoc(CommandBase):
             dict: The template context.
 
         """
-        now = timezone.now()
-        gsoc_year = now.year if now.month >= MARCH else now.year - 1
+        gsoc_year = get_gsoc_year()
         supported_years = get_supported_years()
         supported_year_end = get_supported_year_end()
         command_text = command["text"].strip()
