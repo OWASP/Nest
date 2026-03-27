@@ -80,8 +80,8 @@ const MapViewUpdater = ({
 
   useEffect(() => {
     if (!map) return
-    if (!map._loaded) return
 
+    if (!map) return
     const container = map.getContainer()
     if (!container) return
     const width = container.clientWidth
