@@ -98,13 +98,15 @@ class TestProcessQueryImageEnrichment:
         mock_openai_cls.assert_not_called()
 
 
+@patch("apps.ai.flows.assistant.analyze_query")
 @patch("apps.ai.flows.assistant.create_clarification_agent")
 @patch("apps.ai.flows.assistant.route")
 @patch("apps.ai.flows.assistant.execute_task")
 def test_low_confidence_non_rag_triggers_clarification(
-    mock_execute_task, mock_route, mock_create_clarify
+    mock_execute_task, mock_route, mock_create_clarify, mock_analyze_query
 ):
     """Low-confidence non-RAG routing should call Clarification Agent."""
+    mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
     mock_route.return_value = {"intent": "project", "confidence": 0.5}
     clarification_agent = MagicMock(name="clarification_agent")
     mock_create_clarify.return_value = clarification_agent
@@ -117,13 +119,15 @@ def test_low_confidence_non_rag_triggers_clarification(
     assert res == "Clarify: which project?"
 
 
+@patch("apps.ai.flows.assistant.analyze_query")
 @patch("apps.ai.flows.assistant.create_clarification_agent")
 @patch("apps.ai.flows.assistant.route")
 @patch("apps.ai.flows.assistant.execute_task")
 def test_low_confidence_rag_triggers_clarification_when_policy_removed(
-    mock_execute_task, mock_route, mock_create_clarify
+    mock_execute_task, mock_route, mock_create_clarify, mock_analyze_query
 ):
     """Low-confidence RAG routing should also call Clarification Agent."""
+    mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
     mock_route.return_value = {"intent": "rag", "confidence": 0.4}
     clarification_agent = MagicMock(name="clarification_agent")
     mock_create_clarify.return_value = clarification_agent
