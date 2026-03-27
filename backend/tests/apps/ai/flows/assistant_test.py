@@ -8,13 +8,15 @@ from apps.ai.flows.assistant import process_query
 class TestProcessQueryImageEnrichment:
     """Test cases for image context enrichment in process_query."""
 
+    @patch("apps.ai.flows.assistant.analyze_query")
     @patch("apps.ai.flows.assistant.route")
     @patch("apps.ai.flows.assistant.execute_task")
     @patch("apps.ai.flows.assistant.OpenAi")
     def test_process_query_with_images_enriches_query(
-        self, mock_openai_cls, mock_execute_task, mock_route
+        self, mock_openai_cls, mock_execute_task, mock_route, mock_analyze_query
     ):
         """Test that images trigger OpenAI vision call and enrich the query."""
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_openai_instance = MagicMock()
         mock_openai_instance.set_prompt.return_value = mock_openai_instance
         mock_openai_instance.set_input.return_value = mock_openai_instance
@@ -37,13 +39,15 @@ class TestProcessQueryImageEnrichment:
         assert "Image context: A screenshot of a login page" in enriched_query
         assert "What is this?" in enriched_query
 
+    @patch("apps.ai.flows.assistant.analyze_query")
     @patch("apps.ai.flows.assistant.route")
     @patch("apps.ai.flows.assistant.execute_task")
     @patch("apps.ai.flows.assistant.OpenAi")
     def test_process_query_with_images_vision_failure(
-        self, mock_openai_cls, mock_execute_task, mock_route
+        self, mock_openai_cls, mock_execute_task, mock_route, mock_analyze_query
     ):
         """Test that failed vision call proceeds with original query."""
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_openai_instance = MagicMock()
         mock_openai_instance.set_prompt.return_value = mock_openai_instance
         mock_openai_instance.set_input.return_value = mock_openai_instance
@@ -61,13 +65,15 @@ class TestProcessQueryImageEnrichment:
         assert enriched_query == "What is this?"
         assert "Image context" not in enriched_query
 
+    @patch("apps.ai.flows.assistant.analyze_query")
     @patch("apps.ai.flows.assistant.route")
     @patch("apps.ai.flows.assistant.execute_task")
     @patch("apps.ai.flows.assistant.OpenAi")
     def test_process_query_without_images_skips_vision(
-        self, mock_openai_cls, mock_execute_task, mock_route
+        self, mock_openai_cls, mock_execute_task, mock_route, mock_analyze_query
     ):
         """Test that no images means no vision API call."""
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_route.return_value = {"intent": "rag", "confidence": 0.9}
         mock_execute_task.return_value = "Response"
 
@@ -75,13 +81,15 @@ class TestProcessQueryImageEnrichment:
 
         mock_openai_cls.assert_not_called()
 
+    @patch("apps.ai.flows.assistant.analyze_query")
     @patch("apps.ai.flows.assistant.route")
     @patch("apps.ai.flows.assistant.execute_task")
     @patch("apps.ai.flows.assistant.OpenAi")
     def test_process_query_empty_images_skips_vision(
-        self, mock_openai_cls, mock_execute_task, mock_route
+        self, mock_openai_cls, mock_execute_task, mock_route, mock_analyze_query
     ):
         """Test that empty images list means no vision API call."""
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_route.return_value = {"intent": "rag", "confidence": 0.9}
         mock_execute_task.return_value = "Response"
 
