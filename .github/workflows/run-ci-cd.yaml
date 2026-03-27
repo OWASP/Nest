@@ -534,7 +534,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@261fc3d4806db1fa66a15cc11113c456db8870a7
+        uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
