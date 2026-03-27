@@ -328,7 +328,7 @@ def process_query(  # noqa: PLR0911
         # Step 4: Handle low confidence - invoke clarification agent
         if confidence < CONFIDENCE_THRESHOLD:
             logger.warning(
-                "Low confidence routing - invoking clarification",
+                "Low confidence routing",
                 extra={
                     "intent": intent,
                     "confidence": confidence,
@@ -336,18 +336,17 @@ def process_query(  # noqa: PLR0911
                 },
             )
 
-            # For channel monitored messages: skip the answer unless explicitly mentioned
+            # For channel monitored messages: skip the answer
             if channel_id and not is_app_mention:
                 logger.info(
-                    "Skipping clarification for channel monitored non-app-mention",
+                    "Skipping response for channel monitored message with low confidence",
                     extra={"intent": intent, "confidence": confidence},
                 )
                 return None
 
             # Invoke Clarification Agent
             try:
-                clarification_agent = create_clarification_agent()
-                clarification_result = execute_task(clarification_agent, query)
+                clarification_result = execute_task(create_clarification_agent(), query)
             except Exception:
                 logger.exception("Clarification agent failed, falling back to generic message")
                 return (
