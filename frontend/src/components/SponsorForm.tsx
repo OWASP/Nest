@@ -1,12 +1,16 @@
 'use client'
 
-import type React from 'react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
-import { validateName, validateRequired } from 'components/forms/shared/formValidationUtils'
+import {
+  validateName,
+  validateWebsite,
+  validateContactEmail,
+  validateMessage,
+} from 'components/forms/shared/formValidationUtils'
 import { useFormValidation } from 'components/forms/shared/useFormValidation'
 
 interface SponsorFormProps {
@@ -21,37 +25,6 @@ interface SponsorFormProps {
   loading: boolean
   title: string
   submitText?: string
-}
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-const validateWebsite = (value: string): string | undefined => {
-  const requiredError = validateRequired(value, 'Website')
-  if (requiredError) return requiredError
-
-  try {
-    const parsedUrl = new URL(value)
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      return 'Website must start with http:// or https://'
-    }
-  } catch {
-    return 'Enter a valid website URL'
-  }
-
-  return undefined
-}
-
-const validateContactEmail = (value: string): string | undefined => {
-  const requiredError = validateRequired(value, 'Contact email')
-  if (requiredError) return requiredError
-  if (!EMAIL_REGEX.test(value.trim())) {
-    return 'Enter a valid contact email'
-  }
-  return undefined
-}
-
-const validateMessage = (value: string): string | undefined => {
-  return validateRequired(value, 'Message')
 }
 
 const SponsorForm = ({
