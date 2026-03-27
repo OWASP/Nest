@@ -6,6 +6,7 @@ Thank you for your contributions to the OWASP Nest project! This document outlin
 
 ## Phase 1 — Set Up GitHub Sponsors on Your Personal Account
 
+> [!NOTE]
 > **Official Docs:** [Setting up GitHub Sponsors for your personal account](https://docs.github.com/en/sponsors/receiving-sponsorships-through-github-sponsors/setting-up-github-sponsors-for-your-personal-account)
 
 This is a one-time setup. GitHub needs to verify your identity and set up your payout method before your profile goes live.
@@ -40,6 +41,7 @@ Once submitted, GitHub will review your application — this typically takes a f
 
 ### Step 4 — Choose Your Payout Method
 
+> [!NOTE]
 > ⚠️ This must be decided at sign-up — it is difficult to change later.
 
 GitHub offers two options:
@@ -68,6 +70,7 @@ GitHub currently supports these fiscal hosts:
 - [Software in the Public Interest](https://www.spi-inc.org/)
 - [Software Underground](https://softwareunderground.org/)
 
+> [!NOTE]
 > **Official Docs:** [Using a fiscal host to receive GitHub Sponsors payouts](https://docs.github.com/en/sponsors/receiving-sponsorships-through-github-sponsors/using-a-fiscal-host-to-receive-github-sponsors-payouts)
 
 ---
