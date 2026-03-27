@@ -76,11 +76,11 @@ def analyze_query(query: str) -> dict:
 
     for line in result_str.split("\n"):
         line_lower = line.lower().strip()
-        if line_lower.startswith("issimple:"):
+        if line_lower.startswith("is_simple:"):
             with contextlib.suppress(ValueError):
                 value = line.split(":", 1)[1].strip().lower()
-                is_simple = value in ("true", "yes", "1")
-        elif line_lower.startswith("subquery:"):
+                is_simple = value in {"true", "yes", "1"}
+        elif line_lower.startswith("sub_query:"):
             content = line.split(":", 1)[1].strip()
             if INTENT_SEPARATOR in content.lower():
                 separator_idx = content.lower().index(INTENT_SEPARATOR)

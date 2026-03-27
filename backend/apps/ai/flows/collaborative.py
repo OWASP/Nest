@@ -27,8 +27,7 @@ def handle_collaborative_query(query: str, sub_queries: list[dict]) -> str:
     responses: list[tuple[str, str]] = []
 
     for sub_query in sub_queries:
-        agent_factory = get_intent_to_agent_map().get(sub_query["intent"])
-        if not agent_factory:
+        if not (agent_factory := get_intent_to_agent_map().get(sub_query["intent"])):
             logger.warning("Unknown agent in collaborative flow: %s", sub_query["intent"])
             continue
 

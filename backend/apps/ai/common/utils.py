@@ -95,7 +95,7 @@ def get_fallback_response() -> str:
     from django.conf import settings  # noqa: PLC0415
 
     # Only show detailed error message in local/development environment
-    if getattr(settings, "IS_LOCAL_ENVIRONMENT", False) or getattr(settings, "DEBUG", False):
+    if settings.IS_LOCAL_ENVIRONMENT or settings.DEBUG:
         return (
             "⚠️ I encountered an error processing your request. "
             "Please try rephrasing your question or contact support if the issue persists."
