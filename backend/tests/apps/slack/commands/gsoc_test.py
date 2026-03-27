@@ -4,7 +4,7 @@ import pytest
 from django.test import override_settings
 
 from apps.slack.blocks import markdown
-from apps.slack.commands.gsoc import SUPPORTED_YEAR_START, Gsoc
+from apps.slack.commands.gsoc import SUPPORTED_YEAR_START, Gsoc, get_supported_year_end
 from apps.slack.constants import FEEDBACK_SHARING_INVITE
 
 
@@ -35,7 +35,8 @@ class TestGsocCommand:
             (
                 True,
                 "2011",
-                f"Year 2011 is not supported. Supported years: {SUPPORTED_YEAR_START}-",
+                f"Year 2011 is not supported. Supported years: "
+                f"{SUPPORTED_YEAR_START}-{get_supported_year_end()}",
             ),
         ],
     )
