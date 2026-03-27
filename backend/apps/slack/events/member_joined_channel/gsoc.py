@@ -3,9 +3,8 @@
 import logging
 from pathlib import Path
 
-from django.utils import timezone
-
 from apps.common.utils import convert_to_snake_case
+from apps.slack.common.gsoc import get_gsoc_year
 from apps.slack.constants import (
     OWASP_GSOC_CHANNEL_ID,
 )
@@ -60,5 +59,5 @@ class Gsoc(EventBase):
         """
         return {
             **super().get_context(event),
-            "PREVIOUS_YEAR": timezone.now().year - 1,
+            "PREVIOUS_YEAR": get_gsoc_year(),
         }
