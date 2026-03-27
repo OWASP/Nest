@@ -61,7 +61,7 @@ class TestParseQueryAnalyzerAgentResult:
             "IS_SIMPLE:true\n"
             "SUB_QUERY:Query A| INTENT:rag\n"
             "SUB_QUERY:Query B | INTENT: rag\n"
-            "SUB_QUERY:Query C | INTENT : rag\n"
+            "SUB_QUERY:Query C | INTENT: rag\n"
             "SUB_QUERY:Query D | intent:rag\n"
         )
 
