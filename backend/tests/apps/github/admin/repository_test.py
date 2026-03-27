@@ -1,43 +1,103 @@
+"""Tests for GitHub app RepositoryAdmin."""
+
 from unittest.mock import MagicMock
 
-import pytest
 from django.contrib.admin.sites import AdminSite
 
 from apps.github.admin.repository import RepositoryAdmin
 from apps.github.models.repository import Repository
 
 
-@pytest.fixture
-def repository_admin_instance():
-    return RepositoryAdmin(model=Repository, admin_site=AdminSite())
-
-
 class TestRepositoryAdmin:
-    """Test suite for the RepositoryAdmin class."""
+    """Test cases for RepositoryAdmin."""
 
-    def test_custom_field_title(self, repository_admin_instance):
-        mock_repository = MagicMock()
-        mock_repository.owner.login = "mock-owner"
-        mock_repository.name = "mock-repo"
+    def setup_method(self):
+        """Set up test fixtures."""
+        self.site = AdminSite()
+        self.admin = RepositoryAdmin(Repository, self.site)
 
-        result = repository_admin_instance.custom_field_title(mock_repository)
+    # --- configuration ---
 
-        assert result == "mock-owner/mock-repo"
+    def test_list_display_contains_expected_fields(self):
+        """Test list_display contains all required column fields."""
+        assert "custom_field_title" in self.admin.list_display
+        assert "custom_field_github_url" in self.admin.list_display
+        assert "stars_count" in self.admin.list_display
+        assert "forks_count" in self.admin.list_display
+        assert "commits_count" in self.admin.list_display
+        assert "created_at" in self.admin.list_display
+        assert "updated_at" in self.admin.list_display
 
-    def test_custom_field_github_url(self, repository_admin_instance):
-        """Test that custom_field_github_url generates the correct HTML link."""
-        mock_repository = MagicMock()
-        mock_repository.owner.login = "mock-owner"
-        mock_repository.name = "mock-repo"
+    def test_ordering_is_descending_created_at(self):
+        """Test ordering is by descending created_at."""
+        assert self.admin.ordering == ("-created_at",)
 
-        result = repository_admin_instance.custom_field_github_url(mock_repository)
-        expected_html = "<a href='https://github.com/mock-owner/mock-repo' target='_blank'>↗️</a>"
+    def test_search_fields_contains_name_and_node_id(self):
+        """Test search_fields allows querying by name and node_id."""
+        assert "name" in self.admin.search_fields
+        assert "node_id" in self.admin.search_fields
 
-        assert result == expected_html
+    def test_list_filter_contains_expected_filters(self):
+        """Test list_filter includes archival, fork, template, and org filters."""
+        assert "is_archived" in self.admin.list_filter
+        assert "is_fork" in self.admin.list_filter
+        assert "is_template" in self.admin.list_filter
+        assert "is_owasp_repository" in self.admin.list_filter
+        assert "organization" in self.admin.list_filter
 
-    def test_list_display_contains_custom_fields(self, repository_admin_instance):
-        """Test that the list_display includes custom fields."""
-        admin_list_display = repository_admin_instance.list_display
+    def test_autocomplete_fields(self):
+        """Test autocomplete_fields contains owner and organization."""
+        assert "organization" in self.admin.autocomplete_fields
+        assert "owner" in self.admin.autocomplete_fields
 
-        assert "custom_field_title" in admin_list_display
-        assert "custom_field_github_url" in admin_list_display
+    # --- custom_field_title ---
+
+    def test_custom_field_title_returns_owner_slash_name(self):
+        """Test custom_field_title formats the title as 'owner/name'."""
+        obj = MagicMock()
+        obj.owner.login = "OWASP"
+        obj.name = "Nest"
+
+        assert self.admin.custom_field_title(obj) == "OWASP/Nest"
+
+    def test_custom_field_title_with_different_owner(self):
+        """Test custom_field_title works with any owner/name combination."""
+        obj = MagicMock()
+        obj.owner.login = "torvalds"
+        obj.name = "linux"
+
+        assert self.admin.custom_field_title(obj) == "torvalds/linux"
+
+    def test_custom_field_title_short_description(self):
+        """Test custom_field_title has correct short_description label."""
+        assert self.admin.custom_field_title.short_description == "Name"
+
+    # --- custom_field_github_url ---
+
+    def test_custom_field_github_url_returns_anchor_tag(self):
+        """Test custom_field_github_url returns an anchor tag with correct href."""
+        obj = MagicMock()
+        obj.owner.login = "OWASP"
+        obj.name = "Nest"
+
+        result = self.admin.custom_field_github_url(obj)
+
+        assert "href" in result
+        assert "https://github.com/OWASP/Nest" in result
+        assert 'target="_blank"' in result
+        assert "↗️" in result
+
+    def test_custom_field_github_url_exact_html(self):
+        """Test custom_field_github_url produces the expected exact HTML."""
+        obj = MagicMock()
+        obj.owner.login = "mock-owner"
+        obj.name = "mock-repo"
+
+        result = self.admin.custom_field_github_url(obj)
+        expected = "<a href='https://github.com/mock-owner/mock-repo' target='_blank'>↗️</a>"
+
+        assert result == expected
+
+    def test_custom_field_github_url_short_description(self):
+        """Test custom_field_github_url has correct short_description label."""
+        assert self.admin.custom_field_github_url.short_description == "GitHub 🔗"
