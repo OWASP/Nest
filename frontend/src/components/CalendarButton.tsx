@@ -41,17 +41,18 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
         variant: 'solid',
       })
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to download ICS file:', err)
-      addToast({
-        description: 'Failed to download ICS file',
-        title: 'Download Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
-    } finally {
+  console.warn('ICS download failed:', err);
+
+  addToast({
+    description: err?.message || 'Failed to download ICS file',
+    title: 'Download Failed',
+    timeout: 3000,
+    shouldShowTimeoutProgress: true,
+    color: 'danger',
+    variant: 'solid',
+  });
+}
+ finally {
       if (link) link.remove()
       if (url) URL.revokeObjectURL(url)
       setIsDownloading(false)
