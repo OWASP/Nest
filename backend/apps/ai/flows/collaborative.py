@@ -31,8 +31,7 @@ def handle_collaborative_query(query: str, sub_queries: list[dict]) -> str:
             logger.warning("Unknown agent in collaborative flow: %s", sub_query["intent"])
             continue
 
-        agent = agent_factory()
-        response = execute_task(agent, sub_query["query"])
+        response = execute_task(agent_factory(), sub_query["query"])
         responses.append((sub_query["intent"], response))
 
     synthesizer_agent = create_synthesizer_agent()
