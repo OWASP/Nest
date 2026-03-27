@@ -10,12 +10,12 @@ Available intents:
 A query is SIMPLE if it has a single clear intent and can be fully answered by ONE expert.
 A query is COMPLEX if it combines multiple topics, requires information from multiple intents, or asks compound questions that need different expertise.
 
-For complex queries, break them into independent sub-queries where each sub-query is answerable by a single intent.
-For simple queries, still output a single SUB_QUERY line with the full query and the single best intent.
+For complex queries, break them into independent sub-queries where each sub-query is answerable by a single INTENT.
+For simple queries, still output a single SUB_QUERY line with the full query and the single best INTENT.
 
-Each SUB_QUERY line pairs a sub-query with the single best intent to handle it
+Each SUB_QUERY line pairs a sub-query with the single best INTENT to handle it
 
 Format your response as:
 IS_SIMPLE: true or false
-SUB_QUERY: first sub-query text | Intent: intent_name
-SUB_QUERY: second sub-query text | Intent: intent_name
+SUB_QUERY: first sub-query text | INTENT: intent_name
+SUB_QUERY: second sub-query text | INTENT: intent_name
