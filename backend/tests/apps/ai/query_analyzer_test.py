@@ -23,7 +23,7 @@ class TestParseQueryAnalyzerAgentResult:
         result = (
             "IS_SIMPLE: false\n"
             "SUB_QUERY: Needs an intent but none provided\n"
-            "SUB_QUERY: Bad separator |INTT: rag\n"
+            "SUB_QUERY: Bad separator |INT: rag\n"
             "Random irrelevant line: do not parse\n"
             "SUB_QUERY: Finally valid | INTENT: rag\n"
         )
