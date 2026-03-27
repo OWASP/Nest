@@ -13,9 +13,23 @@ from apps.slack.constants import (
 from apps.slack.utils import get_gsoc_projects
 
 SUPPORTED_YEAR_START = 2012
-SUPPORTED_YEAR_END = 2026
-SUPPORTED_YEARS = set(range(SUPPORTED_YEAR_START, SUPPORTED_YEAR_END + 1))
-SUPPORTED_ANNOUNCEMENT_YEARS = SUPPORTED_YEARS - {2012, 2013, 2014, 2015, 2016, 2018}
+SUPPORTED_ANNOUNCEMENT_YEARS_EXCLUDED = {2012, 2013, 2014, 2015, 2016, 2018}
+
+
+def get_supported_year_end():
+    """Get the current supported year end based on the current date."""
+    now = timezone.now()
+    return now.year if now.month >= MARCH else now.year - 1
+
+
+def get_supported_years():
+    """Get the set of supported GSoC years."""
+    return set(range(SUPPORTED_YEAR_START, get_supported_year_end() + 1))
+
+
+def get_supported_announcement_years():
+    """Get the set of years with announcements."""
+    return get_supported_years() - SUPPORTED_ANNOUNCEMENT_YEARS_EXCLUDED
 
 
 class Gsoc(CommandBase):
@@ -32,7 +46,9 @@ class Gsoc(CommandBase):
 
         """
         now = timezone.now()
-        gsoc_year = now.year if now.month > MARCH else now.year - 1
+        gsoc_year = now.year if now.month >= MARCH else now.year - 1
+        supported_years = get_supported_years()
+        supported_year_end = get_supported_year_end()
         command_text = command["text"].strip()
         context = {}
 
@@ -48,10 +64,10 @@ class Gsoc(CommandBase):
             )
         elif command_text.isnumeric():
             year = int(command_text)
-            if year in SUPPORTED_YEARS:
+            if year in supported_years:
                 context.update(
                     {
-                        "HAS_ANNOUNCEMENT": year in SUPPORTED_ANNOUNCEMENT_YEARS,
+                        "HAS_ANNOUNCEMENT": year in get_supported_announcement_years(),
                         "MODE": "YEAR",
                         "PROJECTS": sorted(get_gsoc_projects(year), key=lambda p: p["idx_name"]),
                         "YEAR": year,
@@ -61,7 +77,7 @@ class Gsoc(CommandBase):
                 context.update(
                     {
                         "MODE": "UNSUPPORTED_YEAR",
-                        "SUPPORTED_YEAR_END": SUPPORTED_YEAR_END,
+                        "SUPPORTED_YEAR_END": supported_year_end,
                         "SUPPORTED_YEAR_START": SUPPORTED_YEAR_START,
                         "YEAR": year,
                     }
