@@ -70,16 +70,33 @@ const BarChart: React.FC<{
             theme: theme,
           },
           dataLabels: {
-            formatter: (val: number, opts) => {
-              const goal = opts.w.config.series[opts.seriesIndex].data[opts.dataPointIndex].goals[0]
-              if (goal) {
-                return `${val} / ${goal.value}`
+            formatter: (
+              val: string | number | number[],
+              opts?: { dataPointIndex?: number }
+            ): string => {
+              const idx = opts?.dataPointIndex ?? 0
+              const requirement = requirements[idx]
+              if (requirement !== undefined) {
+                const displayVal = typeof val === 'number' ? val : Array.isArray(val) ? val[0] : val
+                return `${displayVal} / ${requirement}`
               }
-              return val.toString()
+              return typeof val === 'number'
+                ? String(val)
+                : Array.isArray(val)
+                  ? String(val[0])
+                  : String(val)
             },
           },
           colors: [
-            function ({ value, dataPointIndex, _ }) {
+            function ({
+              value,
+              dataPointIndex,
+              _,
+            }: {
+              value: number
+              dataPointIndex: number
+              _: unknown
+            }) {
               const requirement = requirements[dataPointIndex]
               if (reverseColors?.[dataPointIndex]) {
                 if (value < requirement * 0.75) {

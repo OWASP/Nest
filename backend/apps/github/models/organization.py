@@ -30,6 +30,8 @@ class Organization(
     related_organizations = RelatedOrganizationsManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_organizations"
         verbose_name_plural = "Organizations"
 

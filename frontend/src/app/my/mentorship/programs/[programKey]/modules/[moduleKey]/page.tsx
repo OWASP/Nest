@@ -1,5 +1,6 @@
 'use client'
 import { useQuery } from '@apollo/client/react'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
 import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
@@ -49,30 +50,35 @@ const ModuleDetailsPage = () => {
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(mentorshipModule.experienceLevel) },
-    { label: 'Start Date', value: formatDate(mentorshipModule.startedAt) },
-    { label: 'End Date', value: formatDate(mentorshipModule.endedAt) },
+    { label: 'Start Date', value: formatDate(String(mentorshipModule.startedAt)) },
+    { label: 'End Date', value: formatDate(String(mentorshipModule.endedAt)) },
     {
       label: 'Duration',
-      value: getSimpleDuration(mentorshipModule.startedAt, mentorshipModule.endedAt),
+      value: getSimpleDuration(
+        String(mentorshipModule.startedAt),
+        String(mentorshipModule.endedAt)
+      ),
     },
   ]
 
   return (
-    <DetailsCard
-      accessLevel="admin"
-      admins={admins}
-      details={moduleDetails}
-      domains={mentorshipModule.domains}
-      entityKey={moduleKey}
-      labels={mentorshipModule.labels}
-      mentees={mentorshipModule.mentees}
-      mentors={mentorshipModule.mentors}
-      programKey={programKey}
-      summary={mentorshipModule.description}
-      tags={mentorshipModule.tags}
-      title={mentorshipModule.name}
-      type="module"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        accessLevel="admin"
+        admins={admins ?? undefined}
+        details={moduleDetails}
+        domains={mentorshipModule.domains ?? undefined}
+        entityKey={moduleKey}
+        labels={mentorshipModule.labels ?? undefined}
+        mentees={mentorshipModule.mentees}
+        mentors={mentorshipModule.mentors}
+        programKey={programKey}
+        summary={mentorshipModule.description}
+        tags={mentorshipModule.tags ?? undefined}
+        title={mentorshipModule.name}
+        type="module"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

@@ -1,5 +1,6 @@
 """Tests for community member contributions aggregation command."""
 
+from argparse import ArgumentParser
 from datetime import UTC, datetime, timedelta
 from unittest import mock
 
@@ -43,6 +44,16 @@ class MockQuerySet:
 
 class TestAggregateContributionsCommand:
     """Test suite for community member contributions aggregation command."""
+
+    def test_add_arguments(self):
+        """Test add_arguments adds expected arguments."""
+        command = Command()
+        parser = ArgumentParser()
+        command.add_arguments(parser)
+        args = parser.parse_args([])
+        assert args.user is None
+        assert args.days == 365
+        assert args.batch_size == 100
 
     def test_aggregate_user_contributions_empty(self):
         """Test aggregation with no contributions."""
@@ -154,7 +165,7 @@ class TestAggregateContributionsCommand:
             command.handle(user="testuser", days=365, batch_size=100)
 
             assert mock_user.contribution_data == {"2024-01-01": 5}
-            assert mock_user_model.bulk_save.called
+            mock_user_model.bulk_save.assert_called()
             call_args = mock_user_model.bulk_save.call_args
             assert call_args[0][0] == [mock_user]
             assert call_args[1]["fields"] == ["contribution_data"]
@@ -210,7 +221,7 @@ class TestAggregateContributionsCommand:
 
             assert mock_user1.contribution_data == {"2024-01-01": 5}
             assert mock_user2.contribution_data == {"2024-01-01": 5}
-            assert mock_user_model.bulk_save.called
+            mock_user_model.bulk_save.assert_called()
             call_args = mock_user_model.bulk_save.call_args
             assert len(call_args[0][0]) == 2
             assert mock_user1 in call_args[0][0]
@@ -246,7 +257,7 @@ class TestAggregateContributionsCommand:
 
             command.handle(user=None, days=90, batch_size=100)
 
-            assert mock_aggregate.called
+            mock_aggregate.assert_called()
             call_args = mock_aggregate.call_args[0]
             start_date = call_args[1]
             expected_start = datetime(2024, 1, 31, tzinfo=UTC) - timedelta(days=90)

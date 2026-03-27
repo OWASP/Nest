@@ -1,4 +1,5 @@
 'use client'
+
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
 import { FaRightToBracket } from 'react-icons/fa6'
@@ -36,7 +37,7 @@ const OrganizationPage = () => {
 
     return (
       <UserCard
-        avatar={organization.avatarUrl}
+        avatar={organization.avatarUrl ?? ''}
         button={submitButton}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={organization.company || ''}
@@ -63,7 +64,7 @@ const OrganizationPage = () => {
       totalPages={totalPages}
     >
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {organizations && organizations.map(renderOrganizationCard)}
+        {organizations?.map(renderOrganizationCard)}
       </div>
     </SearchPageLayout>
   )

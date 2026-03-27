@@ -16,6 +16,8 @@ class MemberProfile(TimestampedModel):
     """
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_member_profiles"
         verbose_name_plural = "Member Profiles"
 

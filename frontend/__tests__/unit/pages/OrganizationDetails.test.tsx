@@ -210,4 +210,62 @@ describe('OrganizationDetailsPage', () => {
       expect(screen.queryByText('Want to become a sponsor?')).toBeNull()
     })
   })
+
+  test('handles repositories with null organization gracefully', async () => {
+    const dataWithNullOrgRepo = {
+      ...mockOrganizationDetailsData,
+      repositories: [
+        {
+          name: 'test-repo',
+          url: 'https://github.com/test-org/test-repo',
+          contributorsCount: 10,
+          forksCount: 100,
+          openIssuesCount: 20,
+          starsCount: 500,
+          key: 'test-org/test-repo',
+          organization: null,
+        },
+      ],
+    }
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithNullOrgRepo,
+      loading: false,
+      error: null,
+    })
+
+    render(<OrganizationDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Test Organization' })).toBeInTheDocument()
+    })
+  })
+  test('renders repositories with organization details', async () => {
+    const dataWithRepos = {
+      ...mockOrganizationDetailsData,
+      repositories: [
+        {
+          name: 'Test Repo With Org',
+          url: 'https://github.com/test-org/test-repo-org',
+          contributorsCount: 10,
+          forksCount: 5,
+          openIssuesCount: 2,
+          starsCount: 20,
+          key: 'test-org/test-repo-org',
+          organization: { login: 'test-org' },
+        },
+      ],
+    }
+
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: dataWithRepos,
+      error: null,
+      loading: false,
+    })
+
+    render(<OrganizationDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Repo With Org')).toBeInTheDocument()
+    })
+  })
 })

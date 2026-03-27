@@ -24,7 +24,6 @@ class TestQuestionDetector:
 
         monkeypatch.setattr("openai.OpenAI", MagicMock(return_value=mock_client))
 
-        # Mock the Retriever class
         mock_retriever = MagicMock()
         mock_retriever.retrieve.return_value = []
         monkeypatch.setattr(
@@ -67,14 +66,12 @@ class TestQuestionDetector:
 
     def test_init(self, detector):
         """Test QuestionDetector initialization."""
-        # Test that detector initializes properly
         assert detector is not None
         assert hasattr(detector, "openai_client")
         assert hasattr(detector, "retriever")
 
     def test_is_owasp_question_true_cases(self, detector, sample_context_chunks, monkeypatch):
         """Test cases that should be detected as OWASP questions."""
-        # Mock OpenAI to return True for OWASP questions
         mock_openai_method = MagicMock(return_value=True)
         monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
 
@@ -89,14 +86,12 @@ class TestQuestionDetector:
 
     def test_is_owasp_question_false_cases(self, detector, sample_context_chunks, monkeypatch):
         """Test cases that should not be detected as OWASP questions."""
-        # Mock OpenAI to return False for non-OWASP questions
         mock_openai_method = MagicMock(return_value=False)
         monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
 
         assert not detector.is_owasp_question("What is Python?")
         assert not detector.is_owasp_question("How do I cook pasta?")
 
-        # Test non-questions (should return False regardless of OpenAI result)
         assert not detector.is_owasp_question("OWASP is great")
         assert not detector.is_owasp_question("Security is important")
         assert not detector.is_owasp_question("OWASP provides security resources")
@@ -110,7 +105,6 @@ class TestQuestionDetector:
 
     def test_case_insensitive_detection(self, detector, monkeypatch):
         """Test that detection is case insensitive."""
-        # Mock OpenAI to return True for OWASP questions
         mock_openai_method = MagicMock(return_value=True)
         monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
 
@@ -121,7 +115,6 @@ class TestQuestionDetector:
 
     def test_question_with_special_characters(self, detector, monkeypatch):
         """Test question detection with special characters."""
-        # Mock OpenAI to return True for OWASP questions
         mock_openai_method = MagicMock(return_value=True)
         monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
 
@@ -132,7 +125,6 @@ class TestQuestionDetector:
 
     def test_whitespace_handling(self, detector, monkeypatch):
         """Test proper handling of whitespace in questions."""
-        # Mock OpenAI to return True for OWASP questions
         mock_openai_method = MagicMock(return_value=True)
         monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
 
@@ -156,7 +148,6 @@ class TestQuestionDetector:
     )
     def test_complex_owasp_questions(self, detector, question, monkeypatch):
         """Test complex real-world OWASP questions."""
-        # Mock OpenAI to return True for OWASP questions
         mock_openai_method = MagicMock(return_value=True)
         monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
 
@@ -175,7 +166,6 @@ class TestQuestionDetector:
             mock_openai.return_value = MagicMock()
             detector = QuestionDetector()
 
-            # Test that detector initializes properly
             assert detector is not None
             assert hasattr(detector, "openai_client")
             assert hasattr(detector, "retriever")
@@ -247,7 +237,7 @@ class TestQuestionDetector:
                 "What is OWASP?", sample_context_chunks
             )
 
-            assert result is True
+            assert result
 
     def test_is_owasp_question_with_openai_success_no(self, sample_context_chunks):
         """Test OpenAI question detection with NO response."""
@@ -271,7 +261,7 @@ class TestQuestionDetector:
                 "What is Python?", sample_context_chunks
             )
 
-            assert result is False
+            assert not result
 
     def test_is_owasp_question_with_openai_empty_response(self, sample_context_chunks):
         """Test OpenAI question detection with empty response."""
@@ -388,7 +378,7 @@ class TestQuestionDetector:
                 "What is OWASP?", sample_context_chunks
             )
 
-            assert result is True
+            assert result
 
     def test_is_owasp_question_with_openai_no_in_response(self, sample_context_chunks):
         """Test OpenAI question detection with 'no' in response."""
@@ -412,7 +402,7 @@ class TestQuestionDetector:
                 "What is Python?", sample_context_chunks
             )
 
-            assert result is False
+            assert not result
 
     def test_format_context_chunks(self, detector, sample_context_chunks):
         """Test formatting of context chunks."""
@@ -422,7 +412,7 @@ class TestQuestionDetector:
         assert "Source Name: XSS Prevention" in formatted
         assert "The OWASP Top 10 is a standard awareness document" in formatted
         assert "Cross-Site Scripting (XSS) attacks are a type of injection" in formatted
-        assert "---" in formatted  # Separator between chunks
+        assert "---" in formatted
 
     def test_format_context_chunks_empty(self, detector):
         """Test formatting of empty context chunks."""
@@ -433,3 +423,39 @@ class TestQuestionDetector:
         """Test formatting of None context chunks."""
         formatted = detector.format_context_chunks(None)
         assert formatted == "No context provided"
+
+    def test_format_context_chunks_without_additional_context(self, detector):
+        """Test formatting of context chunks without additional_context."""
+        chunks = [
+            {
+                "source_name": "Test Source",
+                "text": "Some content here",
+            }
+        ]
+        formatted = detector.format_context_chunks(chunks)
+
+        assert "Source Name: Test Source" in formatted
+        assert "Content: Some content here" in formatted
+        assert "Additional Context:" not in formatted
+
+    def test_initialization_without_api_key(self, monkeypatch):
+        """Test QuestionDetector initialization without API key."""
+        monkeypatch.delenv("DJANGO_OPEN_AI_SECRET_KEY", raising=False)
+
+        with pytest.raises(
+            ValueError, match="DJANGO_OPEN_AI_SECRET_KEY environment variable not set"
+        ):
+            QuestionDetector()
+
+    def test_is_owasp_question_with_openai_none_logs_warning(
+        self, detector, sample_context_chunks, monkeypatch
+    ):
+        """Test that None result from OpenAI logs a warning."""
+        mock_openai_method = MagicMock(return_value=None)
+        monkeypatch.setattr(detector, "is_owasp_question_with_openai", mock_openai_method)
+
+        with patch("apps.slack.common.question_detector.logger") as mock_logger:
+            result = detector.is_owasp_question("What is OWASP?")
+
+            mock_logger.warning.assert_called_with("OpenAI detection failed.")
+            assert not result

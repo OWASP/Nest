@@ -4,7 +4,7 @@ This document tracks mentors participating in various coding events year by year
 
 ## Google Summer of Code 2026
 
-#### Arkadii Yakovets
+### Arkadii Yakovets
 
 Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
@@ -12,7 +12,31 @@ Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
 Arkadii is an OWASP Nest founder and current leader focusing on project strategic goals as well as day-to-day contribution and maintenance making sure the project aligns with OWASP community needs.
 
-#### Kate Golovanova
+### Collins Wandji
+
+Software Engineer at Tech Chantier | Open Source Contributor
+
+[GitHub](https://github.com/wandji69) • [LinkedIn](https://www.linkedin.com/in/wandji-collins) • [Slack](https://owasp.slack.com/team/U0ALBPLP7U6) • [Cameroon (West African Time)](https://time-time.net/time/douala-cameroon.php)
+
+Collins Wandji is a software engineer at Tech Chantier and a contributor to MediaWiki core/extensions. He is an open-source enthusiast and active contributor, specialized in backend engineering, has experience in building tools, and DevOps. Collins builds and maintains scalable tools and applications powered by Wikidata, production-grade distributed systems.
+
+### Illia Oleksiuk
+
+Senior DevOps Engineer | OWASP GenAI Data Security Risk and Mitigations Initiative 2026 Contributor
+
+[GitHub](https://github.com/ioleksiuk) • [LinkedIn](https://linkedin.com/in/ioleksiuk) • [Slack](https://owasp.slack.com/team/U0AAP59RN87) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
+
+Illia is a Senior DevOps Engineer with experience building and operating large-scale systems, with a focus on infrastructure, automation, reliability, and security.
+
+### Ime Iyonsi
+
+Software Engineer | Application Security (in transition)
+
+[GitHub](https://github.com/emaybu/) • [LinkedIn](https://linkedin.com/in/imeiyonsi/) • [Slack](https://owasp.slack.com/team/U06H942K9UY) • [United States (Eastern Time)](https://time-time.net/times/time-zones/usa-canada/current-eastern-time-est.php)
+
+Ime (Emay) is a software engineer with experience building and supporting production applications. She is currently focusing more on application security, with interests in secure coding and application security fundamentals. She enjoys supporting and sharing knowledge with folks as they navigate real-world open-source projects.
+
+### Kate Golovanova
 
 Senior Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
 
@@ -20,7 +44,7 @@ Senior Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
 
 Kateryna is OWASP Nest Project Leader who enjoys mentoring open source contributions focused on full-stack features implementation. She wrote the initial OWASP Nest frontend that was later migrated to Next.js and React.
 
-#### Kerlyn Manyi
+### Kerlyn Manyi
 
 Cybersecurity Engineer | GSoC'23 contributor at Mifos Initiative
 
@@ -28,39 +52,31 @@ Cybersecurity Engineer | GSoC'23 contributor at Mifos Initiative
 
 Kerlyn is a cybersecurity practitioner with a strong focus on penetration testing and offensive security. She previously mentored GSoC'25 under the Mifos Initiative. She mentors open-source contributions focused on penetration testing, ML-driven threat detection, and secure architecture design. She helps contributors build real-world offensive security skills.
 
-#### Keshav Malik
+### Keshav Malik
 
 Senior Security Engineer at LinkedIn
 
-[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik/) • [Slack](https://owasp.slack.com/team/U0AB7UGB1NV) • Country (Timezone)
+[GitHub](https://github.com/theinfosecguy) • [LinkedIn](https://www.linkedin.com/in/keshav-malik/) • [Slack](https://owasp.slack.com/team/U0AB7UGB1NV) • [India (IST)](https://time-time.net/time/new-delhi-india.php) • [About me](https://theinfosecguy.xyz/)
 
-*This section is reserved for the mentor to add their own description.*
+Keshav is a Senior Security Engineer at LinkedIn who works at the intersection of security and developer experience. He believes complex security problems can be solved using unique engineering solutions.
 
-#### Kriti Birda
+### Kriti Birda
 
 AI/ML enthusiast | GSoC'25 contributor at PSF
 
-[GitHub](https://github.com/kritibirda) • [LinkedIn](https://www.linkedin.com/in/kritibirda/) • [Slack](https://owasp.slack.com/team/U08KZ9Z7MFX) • Country (Timezone)
+[GitHub](https://github.com/kritibirda) • [LinkedIn](https://www.linkedin.com/in/kritibirda/) • [Slack](https://owasp.slack.com/team/U08KZ9Z7MFX) • [India (IST)](https://time-time.net/time/new-delhi-india.php)
 
-*This section is reserved for the mentor to add their own description.*
+Kriti Birda is an AI/ML enthusiast interested in applying her skills to real-world challenges and modern software systems. She is an active open-source contributor who enjoys building reliable, well-tested tools and helping simplify complex concepts for the community. She is also a two-time Google Summer of Code contributor. She contributed to OSGeo (GRASS) in 2024 and to Python Software Foundation (OWHF) in 2025.
 
-#### Marie Wang
+### Marie Wang
 
 Senior GRC & Technology Risk Leader, CISSP
 
-[GitHub](https://github.com/TheCyberLeader) • [LinkedIn](https://www.linkedin.com/in/mariezw/) • [Slack](https://owasp.slack.com/team/U0A23223B8B) • Country (Timezone)
+[GitHub](https://github.com/TheCyberLeader) • [LinkedIn](https://www.linkedin.com/in/mariezw/) • [Slack](https://owasp.slack.com/team/U0A23223B8B) • [United States (Eastern Time)](https://time-time.net/times/time-zones/usa-canada/current-eastern-time-est.php)
 
-*This section is reserved for the mentor to add their own description.*
+Marie is a cybersecurity professional focused on Governance, Risk, and Compliance. She enjoys helping people navigate the sometimes confusing world of GRC, whether they are just starting out, prepping for their CISSP, or tackling real-world risk management challenges. She is happy to share what she has learned, answer questions, and help others build practical skills. She welcomes outreach on LinkedIn or Slack and is always happy to chat about security, risk, or career paths in this field.
 
-#### Muhammad Salman
-
-Software Developer | GSoC'25 contributor at FOSSology
-
-[GitHub](https://github.com/SalmanDeveloperz/) • [LinkedIn](https://www.linkedin.com/in/msalman199/) • [Slack](https://owasp.slack.com/team/U0A7YV0SPNE) • [Pakistan (Pakistan Standard Time)](https://time-time.net/time/islamabad-pakistan.php)
-
-Muhammad Salman is a Linux-focused software engineer and GSoC'25 contributor at FOSSology (Linux Foundation). He works on infrastructure, backend reliability, and production debugging in cloud-native systems. For GSoC 2026, his focus is infrastructure reliability, observability, and operational best practices.
-
-#### Noland Crane
+### Noland Crane
 
 Application Security Analyst at Bloomreach, CISSP
 
@@ -68,27 +84,27 @@ Application Security Analyst at Bloomreach, CISSP
 
 Noland Crane is a Product Security Engineer at Bloomreach where he conducts pentesting, threat modeling, secure code reviews, and vulnerability) management. He holds a Bachelor's degree in Cyber Security along with several industry certifications.
 
-#### Raja Nagori
+### Raja Nagori
 
 Product Security Engineer at Splunk
 
-[GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • [India (IST)](https://time-time.net/time/india-ist.php) • [About me](https://rajanagori.in/)
+[GitHub](https://github.com/RAJANAGORI) • [LinkedIn](https://www.linkedin.com/in/raja-nagori/) • [Slack](https://owasp.slack.com/team/U03HUR536TG) • [India (IST)](https://time-time.net/time/new-delhi-india.php) • [About me](https://rajanagori.in/)
 
 Raja Nagori is a Product Security Engineer at Splunk with a strong focus on information security and continuous learning. He holds a Bachelor's degree in Computer Science and Engineering and has experience in penetration testing, threat modeling, and DevSecOps. Raja is an active member of the OWASP community and leads the Nightingale project, a Docker-based environment for penetration testers.
 
-#### Tamara Lazerka
+### Rishi Mondal
 
-QA Analyst at Cart\.com | GSoC'25 mentor at OWASP
+SRE at Obmondo | Maintainer of CNCF KubeStellar
 
-[GitHub](https://github.com/aramattamara/) • [LinkedIn](https://www.linkedin.com/in/aramattamara/) • [Slack](https://owasp.slack.com/team/U0881RRPBDY) • [United States (Pacific Time)](https://time-time.net/times/time-zones/usa-canada/current-pacific-time-pst.php)
+[GitHub](https://github.com/MAVRICK-1/) • [LinkedIn](https://www.linkedin.com/in/rishi-mondal-5238b2282/) • [Slack](https://owasp.slack.com/team/U0AHVMYHMJB) • [India (IST)](https://time-time.net/time/kolkata-india.php) • [About me](https://mentorship.lfx.linuxfoundation.org/mentor/711a2840-0900-42c7-b115-b59799027e80)
 
-Tamara is a Fullstack Engineer who builds web applications from scratch using Node.js (Express), React, Tailwind, and MySQL. She graduated from Hackbright Academy (April 2023), is a quick learner who enjoys challenges, and collaborates well in teams.
+Rishi Mondal is a Site Reliability Engineer (SRE) at Obmondo and a CNCF KubeStellar Maintainer. He is a Linux Foundation Mentor and active open-source contributor, specializing in Kubernetes, cloud-native infrastructure, Terraform, and AWS. He builds and maintains scalable, production-grade distributed systems.
 
 ---
 
 ## Google Summer of Code 2025
 
-#### Arkadii Yakovets
+### Arkadii Yakovets
 
 Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
@@ -96,7 +112,7 @@ Cybersecurity Lead, CCSP, CISSP, CSSLP | OWASP Nest Project Leader
 
 Arkadii is an OWASP Nest founder and current leader focusing on project strategic goals as well as day-to-day contribution and maintenance making sure the project aligns with OWASP community needs.
 
-#### Kate Golovanova
+### Kate Golovanova
 
 Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
 
@@ -104,7 +120,7 @@ Software Engineer at Skill Struck, CC | OWASP Nest Project Leader
 
 Kateryna is OWASP Nest Project Leader who enjoys mentoring open source contributions focused on full-stack features implementation. She wrote the initial OWASP Nest frontend that was later migrated to Next.js and React.
 
-#### Tamara Lazerka
+### Tamara Lazerka
 
 Full-Stack Software Engineer
 

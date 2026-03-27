@@ -25,19 +25,21 @@ export async function generateMetadata({
     repositoryKey: string
     organizationKey: string
   }>
-}): Promise<Metadata> {
+}): Promise<Metadata | undefined> {
   const { repositoryKey, organizationKey } = await params
   const data = await getRepositoryMetadata(organizationKey, repositoryKey)
   const repository = data?.repository
 
-  return repository
-    ? generateSeoMetadata({
-        canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
-        description: repository.description ?? `${repository.name} repository details`,
-        keywords: ['owasp', 'repository', repositoryKey, repository.name],
-        title: repository.name,
-      })
-    : null
+  if (!repository) {
+    return {}
+  }
+
+  return generateSeoMetadata({
+    canonicalPath: `/organizations/${organizationKey}/repositories/${repositoryKey}`,
+    description: repository.description ?? `${repository.name} repository details`,
+    keywords: ['owasp', 'repository', repositoryKey, repository.name],
+    title: repository.name,
+  })
 }
 
 export default async function RepositoryDetailsLayout({

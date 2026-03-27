@@ -2,10 +2,13 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
+import { LabelList } from 'components/LabelList'
+
+const mockPush = jest.fn()
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockPush,
   }),
 }))
 
@@ -45,6 +48,36 @@ jest.mock('@heroui/tooltip', () => ({
       </div>
     )
   },
+}))
+
+interface MockLabelListProps {
+  entityKey: string
+  labels: string[]
+  maxVisible?: number
+  className?: string
+}
+
+const MockLabelList = (props: MockLabelListProps) => {
+  const { entityKey, labels, maxVisible = 5, className } = props
+  if (!labels || labels.length === 0) return null
+  const visibleLabels = labels.slice(0, maxVisible)
+  const remainingCount = labels.length - maxVisible
+  return (
+    <div data-testid="label-list" className={className}>
+      {visibleLabels.map((label) => (
+        <span key={`${entityKey}-${label}`} data-testid="label">
+          {label}
+        </span>
+      ))}
+      {remainingCount > 0 && <span data-testid="label-more">+{remainingCount} more</span>}
+    </div>
+  )
+}
+
+jest.mock('components/LabelList', () => ({
+  // Must match the module export name for the mock to be used by IssuesTable
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- component export name
+  LabelList: jest.fn((props: MockLabelListProps) => <MockLabelList {...props} />),
 }))
 
 const mockIssues: IssueRow[] = [
@@ -102,6 +135,10 @@ describe('<IssuesTable />', () => {
     issues: mockIssues,
   }
 
+  beforeEach(() => {
+    jest.mocked(LabelList).mockClear()
+  })
+
   describe('Rendering', () => {
     it('renders table view', () => {
       render(<IssuesTable {...defaultProps} />)
@@ -143,8 +180,9 @@ describe('<IssuesTable />', () => {
 
     it('renders Merged status badge when isMerged is true', () => {
       render(<IssuesTable issues={[mockIssues[2]]} />)
-      const mergedBadges = screen.getAllByText('Merged')
-      expect(mergedBadges.length).toBeGreaterThan(0)
+      // Merged issues display with "Closed" text (purple badge)
+      const closedBadges = screen.getAllByText('Closed')
+      expect(closedBadges.length).toBeGreaterThan(0)
     })
 
     it('defaults to Closed status for unknown states', () => {
@@ -200,6 +238,83 @@ describe('<IssuesTable />', () => {
       render(<IssuesTable issues={[manyLabelsIssue]} maxVisibleLabels={3} />)
       expect(screen.getByText('+2 more')).toBeInTheDocument()
     })
+
+    it('uses LabelList with entityKey derived from issue objectID', () => {
+      render(<IssuesTable issues={[mockIssues[0]]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-1',
+          labels: ['bug', 'enhancement'],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('passes maxVisibleLabels to LabelList as maxVisible', () => {
+      render(<IssuesTable issues={[mockIssues[0]]} maxVisibleLabels={3} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-1',
+          labels: ['bug', 'enhancement'],
+          maxVisible: 3,
+        }),
+        undefined
+      )
+    })
+
+    it('passes empty array to LabelList when issue has no labels', () => {
+      render(<IssuesTable issues={[mockIssues[2]]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-3',
+          labels: [],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('passes empty array to LabelList when issue.labels is undefined', () => {
+      const issueWithUndefinedLabels = {
+        ...mockIssues[0],
+        objectID: 'undefined-labels',
+        labels: undefined,
+      } as IssueRow
+      render(<IssuesTable issues={[issueWithUndefinedLabels]} />)
+      expect(LabelList).toHaveBeenCalledTimes(1)
+      expect(LabelList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityKey: 'issue-undefined-labels',
+          labels: [],
+          maxVisible: 5,
+        }),
+        undefined
+      )
+    })
+
+    it('calls LabelList once per issue row with correct labels', () => {
+      render(<IssuesTable issues={mockIssues} />)
+      expect(LabelList).toHaveBeenCalledTimes(3)
+      expect(LabelList).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ entityKey: 'issue-1', labels: ['bug', 'enhancement'] }),
+        undefined
+      )
+      expect(LabelList).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ entityKey: 'issue-2', labels: ['documentation'] }),
+        undefined
+      )
+      expect(LabelList).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ entityKey: 'issue-3', labels: [] }),
+        undefined
+      )
+    })
   })
 
   describe('Assignee Column', () => {
@@ -254,6 +369,26 @@ describe('<IssuesTable />', () => {
       const user4Texts = screen.getAllByText('user4')
       expect(user4Texts.length).toBeGreaterThan(0)
     })
+
+    it('uses name when login is not available', () => {
+      const issueWithoutLogin: IssueRow = {
+        objectID: '8-no-login',
+        number: 133,
+        title: 'Issue Without Login',
+        state: 'open',
+        labels: [],
+        assignees: [
+          {
+            avatarUrl: 'https://example.com/avatar5.jpg',
+            login: '',
+            name: 'User Five',
+          },
+        ],
+      }
+      render(<IssuesTable issues={[issueWithoutLogin]} />)
+      const user5Texts = screen.getAllByText('User Five')
+      expect(user5Texts.length).toBeGreaterThan(0)
+    })
   })
 
   describe('Click Handlers', () => {
@@ -264,6 +399,24 @@ describe('<IssuesTable />', () => {
       expect(issueButtons.length).toBeGreaterThan(0)
       fireEvent.click(issueButtons[0])
       expect(onIssueClick).toHaveBeenCalledWith(123)
+    })
+
+    it('navigates to issue URL when onIssueClick is not provided', () => {
+      const issueUrl = (num: number) => `/issues/${num}`
+      render(<IssuesTable {...defaultProps} onIssueClick={undefined} issueUrl={issueUrl} />)
+      const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
+      expect(issueButtons.length).toBeGreaterThan(0)
+      fireEvent.click(issueButtons[0])
+      expect(mockPush).toHaveBeenCalledWith('/issues/123')
+    })
+
+    it('does nothing when onIssueClick and issueUrl are not provided', () => {
+      mockPush.mockClear()
+      render(<IssuesTable {...defaultProps} onIssueClick={undefined} issueUrl={undefined} />)
+      const issueButtons = screen.getAllByRole('button', { name: /Test Issue 1/i })
+      expect(issueButtons.length).toBeGreaterThan(0)
+      fireEvent.click(issueButtons[0])
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 
@@ -396,6 +549,140 @@ describe('<IssuesTable />', () => {
       }
       render(<IssuesTable issues={[manyLabelsIssue]} />)
       expect(screen.getByText('+1 more')).toBeInTheDocument()
+    })
+  })
+
+  describe('Deadline Column', () => {
+    it('shows deadline column when showDeadline is true', () => {
+      render(<IssuesTable {...defaultProps} showDeadline={true} />)
+      expect(screen.getByText('Deadline')).toBeInTheDocument()
+    })
+
+    it('hides deadline column when showDeadline is false', () => {
+      render(<IssuesTable {...defaultProps} showDeadline={false} />)
+      expect(screen.queryByText('Deadline')).not.toBeInTheDocument()
+    })
+
+    it('shows "No Deadline" when deadline is null', () => {
+      const issueWithoutDeadline: IssueRow = {
+        objectID: '11',
+        number: 134,
+        title: 'No Deadline Issue',
+        state: 'open',
+        labels: [],
+        deadline: null,
+      }
+      render(<IssuesTable issues={[issueWithoutDeadline]} showDeadline={true} />)
+      const noDeadlineElements = screen.getAllByText('No Deadline')
+      expect(noDeadlineElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "No Deadline" when deadline is undefined', () => {
+      const issueWithoutDeadline: IssueRow = {
+        objectID: '12',
+        number: 135,
+        title: 'Undefined Deadline Issue',
+        state: 'open',
+        labels: [],
+        deadline: undefined,
+      }
+      render(<IssuesTable issues={[issueWithoutDeadline]} showDeadline={true} />)
+      const noDeadlineElements = screen.getAllByText('No Deadline')
+      expect(noDeadlineElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Overdue" when deadline is in the past', () => {
+      const pastDate = new Date()
+      pastDate.setDate(pastDate.getDate() - 5)
+      const issueWithPastDeadline: IssueRow = {
+        objectID: '13',
+        number: 136,
+        title: 'Overdue Issue',
+        state: 'open',
+        labels: [],
+        deadline: pastDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithPastDeadline]} showDeadline={true} />)
+      const overdueElements = screen.getAllByText('Overdue')
+      expect(overdueElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Due Soon" when deadline is within 7 days', () => {
+      const soonDate = new Date()
+      soonDate.setDate(soonDate.getDate() + 3)
+      const issueWithSoonDeadline: IssueRow = {
+        objectID: '14',
+        number: 137,
+        title: 'Due Soon Issue',
+        state: 'open',
+        labels: [],
+        deadline: soonDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithSoonDeadline]} showDeadline={true} />)
+      const dueSoonElements = screen.getAllByText('Due Soon')
+      expect(dueSoonElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Due Soon" when deadline is exactly 7 days away', () => {
+      const sevenDaysDate = new Date()
+      sevenDaysDate.setDate(sevenDaysDate.getDate() + 7)
+      const issueWith7DaysDeadline: IssueRow = {
+        objectID: '15',
+        number: 138,
+        title: 'Seven Days Issue',
+        state: 'open',
+        labels: [],
+        deadline: sevenDaysDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWith7DaysDeadline]} showDeadline={true} />)
+      const dueSoonElements = screen.getAllByText('Due Soon')
+      expect(dueSoonElements.length).toBeGreaterThan(0)
+    })
+
+    it('shows "Upcoming" when deadline is more than 7 days away', () => {
+      const futureDate = new Date()
+      futureDate.setDate(futureDate.getDate() + 10)
+      const issueWithFutureDeadline: IssueRow = {
+        objectID: '16',
+        number: 139,
+        title: 'Upcoming Issue',
+        state: 'open',
+        labels: [],
+        deadline: futureDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithFutureDeadline]} showDeadline={true} />)
+      const upcomingElements = screen.getAllByText('Upcoming')
+      expect(upcomingElements.length).toBeGreaterThan(0)
+    })
+
+    it('renders deadline status in mobile view', () => {
+      const soonDate = new Date()
+      soonDate.setDate(soonDate.getDate() + 2)
+      const issueWithDeadline: IssueRow = {
+        objectID: '17',
+        number: 140,
+        title: 'Deadline Mobile Issue',
+        state: 'open',
+        labels: [],
+        deadline: soonDate.toISOString(),
+      }
+      render(<IssuesTable issues={[issueWithDeadline]} showDeadline={true} />)
+      const dueSoonElements = screen.getAllByText('Due Soon')
+      expect(dueSoonElements.length).toBeGreaterThan(0)
+    })
+
+    it('calculates correct column count with deadline column', () => {
+      render(<IssuesTable issues={[]} showAssignee={true} showDeadline={true} />)
+      const table = screen.getByRole('table')
+      const headers = within(table).getAllByRole('columnheader')
+      expect(headers).toHaveLength(5)
+    })
+
+    it('calculates correct column count without assignee but with deadline', () => {
+      render(<IssuesTable issues={[]} showAssignee={false} showDeadline={true} />)
+      const table = screen.getByRole('table')
+      const headers = within(table).getAllByRole('columnheader')
+      expect(headers).toHaveLength(4)
     })
   })
 })

@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import L from 'leaflet'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useRef, useState, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FaUnlock } from 'react-icons/fa'
 import { FaLocationDot } from 'react-icons/fa6'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
@@ -26,10 +26,9 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
       map.doubleClickZoom.enable()
       map.keyboard.enable()
 
-      if (!zoomControlRef.current) {
-        zoomControlRef.current = L.control.zoom({ position: 'topleft' })
-        zoomControlRef.current.addTo(map)
-      }
+      zoomControlRef.current?.remove()
+      zoomControlRef.current = L.control.zoom({ position: 'topleft' })
+      zoomControlRef.current.addTo(map)
     } else {
       map.scrollWheelZoom.disable()
       map.dragging.disable()
@@ -104,8 +103,8 @@ const MapViewUpdater = ({
       const localChapters = validGeoLocData.slice(0, maxNearestChapters - 1)
       const localBounds = L.latLngBounds(
         localChapters.map((chapter) => [
-          chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-          chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+          (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+          (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
         ])
       )
       const maxZoom = 7
@@ -113,8 +112,8 @@ const MapViewUpdater = ({
       const nearestChapter = validGeoLocData[0]
       map.setView(
         [
-          nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat,
-          nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng,
+          (nearestChapter._geoloc?.lat ?? nearestChapter.geoLocation?.lat) as number,
+          (nearestChapter._geoloc?.lng ?? nearestChapter.geoLocation?.lng) as number,
         ],
         maxZoom
       )
@@ -142,6 +141,24 @@ const ChapterMap = ({
 }) => {
   const router = useRouter()
   const [isMapActive, setIsMapActive] = useState(false)
+
+  const handlePointerLeave = (e: React.PointerEvent<HTMLElement>) => {
+    if (!isMapActive) return
+
+    const host = e.currentTarget
+
+    // Leaflet overlays/popups can trigger a leave-like event without the pointer
+    // truly exiting the map container (e.g. `relatedTarget` becomes null during DOM updates).
+    const rect = host.getBoundingClientRect()
+    const withinX = e.clientX >= rect.left && e.clientX <= rect.right
+    const withinY = e.clientY >= rect.top && e.clientY <= rect.bottom
+    if (withinX && withinY) return
+
+    const next = e.relatedTarget
+    if (next instanceof Node && host.contains(next)) return
+
+    setIsMapActive(false)
+  }
   const validGeoLocData = useMemo(() => {
     return geoLocData.filter((chapter) => {
       const lat = chapter._geoloc?.lat ?? chapter.geoLocation?.lat
@@ -180,15 +197,15 @@ const ChapterMap = ({
   return (
     <section
       aria-label="Chapter Map"
-      className="relative"
+      className="relative isolate z-0 overflow-hidden rounded-lg bg-slate-200 dark:bg-[#1a1a1a]"
       style={style}
-      onMouseLeave={() => setIsMapActive(false)}
+      onPointerLeave={handlePointerLeave}
     >
       <MapContainer
         center={[20, 0]}
         zoom={2}
         scrollWheelZoom={isMapActive}
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', outline: 'none', background: 'transparent' }}
         zoomControl={false}
         minZoom={1}
         maxZoom={18}
@@ -219,8 +236,8 @@ const ChapterMap = ({
                 <Marker
                   key={chapter.key}
                   position={[
-                    chapter._geoloc?.lat ?? chapter.geoLocation?.lat,
-                    chapter._geoloc?.lng ?? chapter.geoLocation?.lng,
+                    (chapter._geoloc?.lat ?? chapter.geoLocation?.lat) as number,
+                    (chapter._geoloc?.lng ?? chapter.geoLocation?.lng) as number,
                   ]}
                   icon={chapterIcon}
                 >
@@ -272,7 +289,7 @@ const ChapterMap = ({
         </div>
       )}
       {isMapActive && (
-        <div className="absolute top-20 left-3 z-[999] w-fit">
+        <div className="absolute top-20 left-3 z-[999] flex gap-2">
           {onShareLocation && (
             <Tooltip
               showArrow

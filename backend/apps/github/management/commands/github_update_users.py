@@ -48,7 +48,7 @@ class Command(BaseCommand):
         users = []
         for idx, user in enumerate(active_users[offset:]):
             prefix = f"{idx + offset + 1} of {active_users_count - offset}"
-            print(f"{prefix:<10} {user.title}")
+            self.stdout.write(f"{prefix:<10} {user.title}\n")
 
             user.contributions_count = user_contributions.get(user.id, 0)
             users.append(user)

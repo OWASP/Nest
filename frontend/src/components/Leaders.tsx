@@ -28,7 +28,7 @@ const Leaders: React.FC<LeadersProps> = ({ users }) => {
         {users.map((user) => (
           <UserCard
             key={user.member?.login || user.memberName}
-            avatar={user.member?.avatarUrl}
+            avatar={user.member?.avatarUrl || ''}
             button={{
               icon: <IconWrapper icon={FaRightToBracket} />,
               label: 'View Profile',

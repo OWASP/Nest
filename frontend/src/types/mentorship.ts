@@ -17,7 +17,7 @@ export type Program = {
   endedAt: string
   domains?: string[]
   tags?: string[]
-  userRole?: string
+  userRole?: string | null
   admins?: Contributor[]
   modules?: Module[]
   recentMilestones?: Milestone[]
@@ -39,7 +39,7 @@ export type ProgramList = {
 export type Module = {
   description: string
   domains?: string[] | null
-  endedAt: string | number
+  endedAt: string
   experienceLevel: ExperienceLevelEnum
   id: string
   key: string
@@ -47,6 +47,7 @@ export type Module = {
   mentees?: Contributor[]
   mentors: Contributor[]
   name: string
+  order?: number
   startedAt: string | number
   status?: ProgramStatusEnum
   tags?: string[] | null
@@ -99,7 +100,7 @@ export type MenteeDetails = {
   name: string
   avatarUrl: string
   email?: string
-  bio?: string
+  bio?: string | null
   domains?: string[] | null
   tags?: string[] | null
   experienceLevel?: string

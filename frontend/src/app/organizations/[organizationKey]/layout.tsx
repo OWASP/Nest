@@ -14,7 +14,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ organizationKey: string }>
-}): Promise<Metadata> {
+}): Promise<Metadata | undefined> {
   const { organizationKey } = await params
   const { data } = await apolloClient.query({
     query: GetOrganizationMetadataDocument,
@@ -23,7 +23,7 @@ export async function generateMetadata({
     },
   })
   const organization = data?.organization
-  const title = organization?.name ?? organization?.login
+  const title = organization?.name ?? organization?.login ?? ''
 
   return organization
     ? generateSeoMetadata({
@@ -31,7 +31,7 @@ export async function generateMetadata({
         description: organization?.description ?? `${title} organization details`,
         title: title,
       })
-    : null
+    : undefined
 }
 
 async function generateOrganizationStructuredData(organizationKey: string) {

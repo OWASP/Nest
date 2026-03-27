@@ -19,7 +19,7 @@ const RecentIssues: React.FC<RecentIssuesProps> = ({ data, showAvatar = true }) 
     <ItemCardList
       title={
         <div className="flex items-center gap-2">
-          <AnchorTitle title="Recent Issues" className="flex items-center leading-none" />
+          <AnchorTitle title="Recent Issues" />
         </div>
       }
       data={data}

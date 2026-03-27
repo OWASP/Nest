@@ -34,7 +34,7 @@ export const useDjangoSession: () => {
       // The cookie name is set in SESSION_COOKIE_NAME of backend/settings/base.py.
       syncSession({
         variables: {
-          accessToken: (session as ExtendedSession).accessToken,
+          accessToken: (session as ExtendedSession).accessToken ?? '',
         },
       })
         .then((response) => {

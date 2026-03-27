@@ -6,11 +6,8 @@ import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useMemo, useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import {
-  GetModuleMenteeDetailsDocument,
-  type GetModuleMenteeDetailsQuery,
-} from 'types/__generated__/menteeQueries.generated'
-import { MenteeDetails } from 'types/mentorship'
+import { GetModuleMenteeDetailsDocument } from 'types/__generated__/menteeQueries.generated'
+import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
 import IssuesTable, { type IssueRow } from 'components/IssuesTable'
 import { LabelList } from 'components/LabelList'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -26,12 +23,8 @@ const MenteeProfilePage = () => {
     menteeKey: string
   }>()
 
-  const [menteeDetails, setMenteeDetails] = useState<MenteeDetails | null>(null)
-  const [menteeIssuesData, setMenteeIssuesData] = useState<
-    GetModuleMenteeDetailsQuery['getMenteeModuleIssues']
-  >([])
-
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [selectedDeadline, setSelectedDeadline] = useState<string>(DEADLINE_ALL)
   const [currentPage, setCurrentPage] = useState(1)
 
   const {
@@ -49,17 +42,16 @@ const MenteeProfilePage = () => {
   })
 
   useEffect(() => {
-    if (data) {
-      setMenteeDetails(data.getMenteeDetails ?? null)
-      setMenteeIssuesData(data.getMenteeModuleIssues ?? [])
-    }
     if (error) {
       handleAppError(error)
     }
-  }, [data, error])
+  }, [error])
+
+  const menteeDetails = data?.getMenteeDetails ?? null
 
   const menteeIssues: IssueRow[] = useMemo(() => {
-    return menteeIssuesData.map((issue) => ({
+    const issues = data?.getMenteeModuleIssues ?? []
+    return issues.map((issue) => ({
       objectID: issue.id,
       number: issue.number,
       title: issue.title,
@@ -67,11 +59,22 @@ const MenteeProfilePage = () => {
       isMerged: issue.isMerged,
       labels: issue.labels || [],
       assignees: issue.assignees || [],
+      deadline: issue.taskDeadline ?? null,
       url: issue.url,
     }))
-  }, [menteeIssuesData])
+  }, [data])
 
   if (isLoading) return <LoadingSpinner />
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading mentee"
+        message="An error occurred while loading the mentee data."
+      />
+    )
+  }
 
   if (!menteeDetails) {
     return (
@@ -91,7 +94,13 @@ const MenteeProfilePage = () => {
     open: openIssues,
     closed: closedIssues,
   }
-  const filteredIssues = issueMap[statusFilter] || menteeIssues
+  let filteredIssues = issueMap[statusFilter] || menteeIssues
+
+  if (selectedDeadline !== DEADLINE_ALL) {
+    filteredIssues = filteredIssues.filter(
+      (issue) => getDeadlineCategory(issue.deadline) === selectedDeadline
+    )
+  }
 
   const totalPages = Math.ceil(filteredIssues.length / ITEMS_PER_PAGE)
   const paginatedIssues = filteredIssues.slice(
@@ -153,7 +162,7 @@ const MenteeProfilePage = () => {
         </div>
 
         {/* Domains and Skills */}
-        {(menteeDetails.domains?.length > 0 || menteeDetails.tags?.length > 0) && (
+        {((menteeDetails.domains ?? []).length > 0 || (menteeDetails.tags ?? []).length > 0) && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {menteeDetails.domains && menteeDetails.domains.length > 0 && (
               <SecondaryCard title="Domains">
@@ -182,7 +191,36 @@ const MenteeProfilePage = () => {
           <div className="w-full">
             <div className="flex justify-between">
               <h1 className="text-3xl font-bold">Assigned Issues</h1>
-              <div className="mb-4 flex justify-end">
+              <div className="mb-4 flex justify-end gap-3">
+                <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
+                  <Select
+                    size="md"
+                    aria-label="Filter by deadline"
+                    selectedKeys={new Set([selectedDeadline])}
+                    onSelectionChange={(keys) => {
+                      const [key] = Array.from(keys as Set<string>)
+                      if (key) {
+                        setSelectedDeadline(key)
+                        setCurrentPage(1)
+                      }
+                    }}
+                    classNames={{
+                      trigger: 'bg-gray-200 dark:bg-[#323232] pl-4 text-nowrap w-36',
+                      popoverContent: 'text-md min-w-36 dark:bg-[#323232] rounded-none p-0',
+                    }}
+                  >
+                    {DEADLINE_OPTIONS.map((option) => (
+                      <SelectItem
+                        key={option.key}
+                        classNames={{
+                          base: 'text-sm hover:bg-[#D1DBE6] dark:hover:bg-[#454545] rounded-none px-3 py-0.5',
+                        }}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
                 <div className="inline-flex h-12 items-center rounded-lg bg-gray-200 dark:bg-[#323232]">
                   <Select
                     size="md"
@@ -218,6 +256,7 @@ const MenteeProfilePage = () => {
             <IssuesTable
               issues={paginatedIssues}
               showAssignee={false}
+              showDeadline={true}
               onIssueClick={handleIssueClick}
               emptyMessage="No issues found for the selected filter."
             />

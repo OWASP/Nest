@@ -13,8 +13,8 @@ import {
   GetMyProgramsDocument,
   GetProgramDetailsDocument,
 } from 'types/__generated__/programsQueries.generated'
-import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -33,16 +33,26 @@ const EditProgramPage = () => {
     skip: !programKey,
     fetchPolicy: 'network-only',
   })
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    menteesLimit: 0,
-    startedAt: '',
-    endedAt: '',
-    tags: '',
-    domains: '',
+  const [formData, setFormData] = useState<{
+    adminLogins?: string
+    description: string
+    domains: string
+    endedAt: string
+    menteesLimit: number
+    name: string
+    startedAt: string
+    status?: string
+    tags: string
+  }>({
     adminLogins: '',
+    description: '',
+    domains: '',
+    endedAt: '',
+    menteesLimit: 0,
+    name: '',
+    startedAt: '',
     status: ProgramStatusEnum.Draft,
+    tags: '',
   })
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
   useEffect(() => {
@@ -54,8 +64,13 @@ const EditProgramPage = () => {
       return
     }
 
+    const userLogin: string | undefined =
+      session?.user && 'login' in session.user
+        ? (session.user as { login?: string }).login
+        : undefined
+
     const isAdmin = data.getProgram.admins?.some(
-      (admin: { login: string }) => admin.login === (session as ExtendedSession)?.user?.login
+      (admin: { login: string }) => admin.login === userLogin
     )
 
     if (isAdmin) {
@@ -96,16 +111,16 @@ const EditProgramPage = () => {
     e.preventDefault()
     try {
       const input = {
-        key: programKey,
-        name: formData.name,
-        description: formData.description,
-        menteesLimit: Number(formData.menteesLimit),
-        startedAt: formData.startedAt,
-        endedAt: formData.endedAt,
-        tags: parseCommaSeparated(formData.tags),
-        domains: parseCommaSeparated(formData.domains),
         adminLogins: parseCommaSeparated(formData.adminLogins),
-        status: formData.status,
+        description: formData.description,
+        domains: parseCommaSeparated(formData.domains),
+        endedAt: formData.endedAt,
+        key: programKey,
+        menteesLimit: Number(formData.menteesLimit),
+        name: formData.name,
+        startedAt: formData.startedAt,
+        status: (formData.status ?? ProgramStatusEnum.Draft) as ProgramStatusEnum,
+        tags: parseCommaSeparated(formData.tags),
       }
 
       const result = await updateProgram({
@@ -125,14 +140,18 @@ const EditProgramPage = () => {
 
       router.push(`/my/mentorship/programs/${updatedProgramKey}`)
     } catch (err) {
-      addToast({
-        title: 'Update Failed',
-        description: 'There was an error updating the program.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 3000,
-      })
-      handleAppError(err)
+      const { hasValidationErrors } = extractGraphQLErrors(err)
+      if (!hasValidationErrors) {
+        addToast({
+          title: 'Update Failed',
+          description: 'There was an error updating the program.',
+          color: 'danger',
+          variant: 'solid',
+          timeout: 3000,
+        })
+        handleAppError(err)
+      }
+      throw err
     }
   }
   if (accessStatus === 'checking') {
@@ -156,7 +175,6 @@ const EditProgramPage = () => {
       title="Edit Program"
       submitText="Save"
       isEdit={true}
-      currentProgramKey={programKey}
     />
   )
 }

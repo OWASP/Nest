@@ -37,18 +37,14 @@ const Pagination: React.FC<PaginationProps> = ({
       i <= Math.min(totalPages - 1, currentPage + 1);
       i++
     ) {
-      if (!pageNumbers.includes(i)) {
-        pageNumbers.push(i)
-      }
+      pageNumbers.push(i)
     }
 
     if (currentPage < totalPages - 3) {
       pageNumbers.push('...')
     }
 
-    if (totalPages > 3 && !pageNumbers.includes(totalPages)) {
-      pageNumbers.push(totalPages)
-    }
+    pageNumbers.push(totalPages)
 
     return pageNumbers
   }

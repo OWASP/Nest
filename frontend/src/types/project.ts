@@ -47,7 +47,7 @@ export type Project = {
   topics?: string[]
   topContributors?: Contributor[]
   type?: string
-  updatedAt?: number
+  updatedAt?: string
   url?: string
   recentIssues?: Issue[]
   recentPullRequests?: PullRequest[]
@@ -68,7 +68,7 @@ export type RepositoryCardProps = {
   key?: string
   name: string
   openIssuesCount: number
-  organization?: Organization
+  organization?: Organization | null
   starsCount: number
   subscribersCount?: number
   url: string

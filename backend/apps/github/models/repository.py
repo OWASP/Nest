@@ -25,6 +25,8 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     """Repository model."""
 
     class Meta:
+        """Model options."""
+
         constraints = [
             models.UniqueConstraint(fields=("key", "owner"), name="unique_key_owner"),
         ]

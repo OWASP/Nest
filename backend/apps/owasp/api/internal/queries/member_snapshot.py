@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from apps.common.utils import normalize_limit
 from apps.github.models.user import User
 from apps.owasp.api.internal.nodes.member_snapshot import MemberSnapshotNode
 from apps.owasp.models.member_snapshot import MemberSnapshot
@@ -67,6 +68,7 @@ class MemberSnapshotQuery:
             except User.DoesNotExist:
                 return []
 
-        return (
-            snapshots.order_by("-start_at")[:limit] if (limit := min(limit, MAX_LIMIT)) > 0 else []
-        )
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
+        return snapshots.order_by("-start_at")[:normalized_limit]

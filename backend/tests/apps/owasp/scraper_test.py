@@ -212,3 +212,154 @@ class TestOwaspScraper:
         scraper = OwaspScraper("https://test.org")
 
         assert scraper.page_tree is None
+
+    def test_get_audience_with_none_page_tree(self, mock_session):
+        """Test get_audience returns empty list when page_tree is None."""
+        mock_session.get.side_effect = requests.exceptions.RequestException
+        scraper = OwaspScraper("https://test.org")
+
+        assert scraper.page_tree is None
+        assert scraper.get_audience() == []
+
+    def test_get_audience_with_text_content(self, mock_session):
+        """Test get_audience extracts audience from text content in sidebar."""
+        html_with_audience = (
+            b'<div class="sidebar"><ul><li>For Builders</li><li>For Defenders</li></ul></div>'
+        )
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_audience
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert "builder" in audience
+        assert "defender" in audience
+
+    def test_get_audience_with_paragraph_content(self, mock_session):
+        """Test get_audience extracts audience from paragraph text."""
+        html_with_audience = b'<div class="sidebar"><p>For Breakers</p></div>'
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_audience
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert "breaker" in audience
+
+    def test_get_audience_with_image_alt_text(self, mock_session):
+        """Test get_audience extracts audience from image alt text."""
+        html_with_audience = (
+            b'<div class="sidebar"><img src="test.jpg" alt="For Builders" /></div>'
+        )
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_audience
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert "builder" in audience
+
+    def test_get_audience_with_complementary_role(self, mock_session):
+        """Test get_audience works with complementary role containers."""
+        html_with_audience = b'<div role="complementary"><p>For Defenders</p></div>'
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_audience
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert "defender" in audience
+
+    def test_get_audience_with_empty_text_content(self, mock_session):
+        """Test get_audience handles empty text content."""
+        html_with_empty = b'<div class="sidebar"></div>'
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_empty
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert audience == []
+
+    def test_get_audience_with_empty_alt_text(self, mock_session):
+        """Test get_audience handles images with no alt text."""
+        html_with_no_alt = b'<div class="sidebar"><img src="test.jpg" alt="" /></div>'
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_no_alt
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert audience == []
+
+    def test_get_audience_returns_sorted_list(self, mock_session):
+        """Test get_audience returns sorted unique audience list."""
+        html_with_all = (
+            b'<div class="sidebar"><ul><li>For Builders</li></ul>'
+            b"<p>For Defenders</p><p>For Breakers</p></div>"
+        )
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_all
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert audience == ["breaker", "builder", "defender"]
+
+    def test_verify_url_request_exception(self, mock_session, mock_response, caplog):
+        """Test verify_url handles request exceptions during verification."""
+        mock_session.get.return_value = mock_response
+        scraper = OwaspScraper("https://test.org")
+        mock_session.get.reset_mock()
+
+        mock_session.get.side_effect = requests.exceptions.RequestException("Connection error")
+
+        with caplog.at_level(logging.ERROR):
+            result = scraper.verify_url("https://example.org")
+
+        assert result is None
+        assert "Request failed" in caplog.text
+
+    def test_get_audience_skips_empty_text(self, mock_session):
+        """Test get_audience skips components with empty text content."""
+        html_with_empty = b"""
+            <div class="sidebar">
+                <li></li>
+                <p>Builder</p>
+                <li>   </li>
+                <p></p>
+            </div>
+        """
+        mock_response = Mock()
+        mock_response.status_code = HTTPStatus.OK
+        mock_response.content = html_with_empty
+        mock_session.get.return_value = mock_response
+
+        scraper = OwaspScraper("https://test.org")
+        audience = scraper.get_audience()
+
+        assert audience == ["builder"]
+
+    def test_urls_with_none_page_tree(self, mock_session):
+        """Test get_urls returns empty set when request fails (page_tree is None)."""
+        mock_session.get.side_effect = requests.exceptions.RequestException
+
+        scraper = OwaspScraper("https://test.org")
+
+        assert scraper.page_tree is None
+        assert scraper.get_urls() == set()
+        mock_session.get.assert_called_once()

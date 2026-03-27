@@ -11,8 +11,8 @@ class Command(BaseCommand):
 
     def handle(self, *_args, **_options) -> None:
         """Update synonyms for Algolia indices."""
-        print("\nThe following models synonyms were reindexed:")
+        self.stdout.write("\nThe following models synonyms were reindexed:")
         for index in (IssueIndex, ProjectIndex):
             count = index.update_synonyms()
             if count:
-                print(f"{7 * ' '} * {index.index_name.capitalize()} --> {count}")
+                self.stdout.write(f"{7 * ' '} * {index.index_name.capitalize()} --> {count}")

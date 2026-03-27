@@ -566,3 +566,85 @@ class TestSlackSyncDataCommand:
         output = stdout.getvalue()
         assert "Processing workspace: Workspace 1" in output
         assert "Processing workspace: Workspace 2" in output
+
+    @patch("apps.slack.management.commands.slack_sync_data.WebClient")
+    @patch("apps.slack.management.commands.slack_sync_data.time.sleep")
+    def test_handle_delay_zero_skips_sleep(
+        self,
+        mock_sleep,
+        mock_web_client,
+        command,
+        mock_workspace,
+        mock_slack_conversations_response,
+        mock_slack_conversations_response_final,
+        mock_slack_users_response_final,
+    ):
+        """Test that time.sleep is not called when delay=0."""
+        mock_workspaces = Mock()
+        mock_workspaces.exists.return_value = True
+        mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
+
+        mock_client = Mock()
+        mock_web_client.return_value = mock_client
+
+        mock_client.conversations_list.side_effect = [
+            mock_slack_conversations_response,
+            mock_slack_conversations_response_final,
+        ]
+        mock_slack_users_response_final["response_metadata"] = {}
+        mock_client.users_list.return_value = mock_slack_users_response_final
+
+        mock_conversation = Mock()
+        mock_member = Mock()
+
+        stdout = StringIO()
+        with (
+            patch.object(Workspace.objects, "all", return_value=mock_workspaces),
+            patch.object(Conversation, "update_data", return_value=mock_conversation),
+            patch.object(Member, "update_data", return_value=mock_member),
+            patch.object(Conversation, "bulk_save"),
+            patch.object(Member, "bulk_save"),
+        ):
+            command.stdout = stdout
+            command.handle(batch_size=1000, delay=0)
+
+        mock_sleep.assert_not_called()
+
+    @patch("apps.slack.management.commands.slack_sync_data.WebClient")
+    def test_handle_conversations_api_error(
+        self,
+        mock_web_client,
+        command,
+        mock_workspace,
+        mock_slack_users_response_final,
+    ):
+        """Test handling Slack API error when fetching conversations."""
+        mock_workspaces = Mock()
+        mock_workspaces.exists.return_value = True
+        mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
+
+        mock_client = Mock()
+        mock_web_client.return_value = mock_client
+
+        slack_error = SlackApiError(
+            message="API Error",
+            response={"error": "invalid_auth"},
+        )
+        mock_client.conversations_list.side_effect = slack_error
+
+        mock_slack_users_response_final["response_metadata"] = {}
+        mock_client.users_list.return_value = mock_slack_users_response_final
+
+        mock_member = Mock()
+
+        stdout = StringIO()
+        with (
+            patch.object(Workspace.objects, "all", return_value=mock_workspaces),
+            patch.object(Member, "update_data", return_value=mock_member),
+            patch.object(Member, "bulk_save"),
+        ):
+            command.stdout = stdout
+            command.handle(batch_size=1000, delay=0.5)
+
+        output = stdout.getvalue()
+        assert "Failed to fetch conversations: invalid_auth" in output

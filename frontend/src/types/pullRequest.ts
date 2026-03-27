@@ -1,8 +1,8 @@
 import type { User } from 'types/user'
 
 export type PullRequest = {
-  author?: User
-  createdAt: string | number
+  author?: User | null
+  createdAt: string
   id?: string
   mergedAt?: string
   organizationName?: string | null

@@ -1,11 +1,27 @@
 """GitHub issue GraphQL node."""
 
+from datetime import datetime
+
 import strawberry
 import strawberry_django
+from django.db.models import Prefetch
+from strawberry.types import Info
 
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
+from apps.github.models.pull_request import PullRequest
+from apps.mentorship.models.issue_user_interest import IssueUserInterest
+from apps.mentorship.models.task import Task
+
+MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
+    "pull_requests",
+    queryset=PullRequest.objects.filter(
+        merged_at__isnull=False,
+        state="closed",
+    ),
+    to_attr="merged_pull_requests",
+)
 
 
 @strawberry_django.type(
@@ -45,17 +61,39 @@ class IssueNode(strawberry.relay.Node):
         """Resolve label names for the issue."""
         return [label.name for label in root.labels.all()]
 
-    @strawberry_django.field(prefetch_related=["pull_requests"])
+    @strawberry_django.field(prefetch_related=[MERGED_PULL_REQUESTS_PREFETCH])
     def is_merged(self, root: Issue) -> bool:
         """Return True if this issue has at least one merged pull request."""
-        return root.pull_requests.filter(state="closed", merged_at__isnull=False).exists()
+        return bool(getattr(root, "merged_pull_requests", None))
 
-    @strawberry_django.field(prefetch_related=["participant_interests__user"])
-    def interested_users(self, root: Issue) -> list[UserNode]:
-        """Return all users who have expressed interest in this issue."""
-        return [
-            interest.user
-            for interest in root.participant_interests.select_related("user").order_by(
-                "user__login"
+    @strawberry_django.field(
+        prefetch_related=[
+            Prefetch(
+                "participant_interests",
+                queryset=IssueUserInterest.objects.select_related("user__owasp_profile").order_by(
+                    "user__login"
+                ),
+                to_attr="interests_users",
             )
         ]
+    )
+    def interested_users(self, root: Issue) -> list[UserNode]:
+        """Return all users who have expressed interest in this issue."""
+        return [interest.user for interest in getattr(root, "interests_users", [])]
+
+    @strawberry.field
+    def task_deadline(self, root: Issue, info: Info) -> datetime | None:
+        """Return the deadline for the latest assigned task linked to this issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping is not None:
+            return mapping.get(root.number)
+
+        return (
+            Task.objects.filter(
+                issue=root,
+                deadline_at__isnull=False,
+            )
+            .order_by("-assigned_at")
+            .values_list("deadline_at", flat=True)
+            .first()
+        )

@@ -11,6 +11,8 @@ class Member(TimestampedModel):
     """Slack Member model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "slack_members"
         verbose_name_plural = "Members"
 

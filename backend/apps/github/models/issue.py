@@ -23,6 +23,8 @@ class Issue(GenericIssueModel):
     open_issues = OpenIssueManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_issues"
         indexes = [
             models.Index(fields=["-created_at"]),

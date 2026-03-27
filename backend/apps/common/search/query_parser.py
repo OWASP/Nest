@@ -1,7 +1,7 @@
 """Query parser module for parsing search queries into structured conditions."""
 
+import enum
 from dataclasses import asdict, dataclass
-from enum import Enum
 
 from pyparsing import (
     Group,
@@ -18,7 +18,7 @@ from pyparsing import (
 )
 
 
-class FieldType(str, Enum):
+class FieldType(enum.StrEnum):
     """Supported field types for query parsing."""
 
     BOOLEAN = "boolean"

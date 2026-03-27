@@ -9,6 +9,8 @@ class TaskLevel(models.Model):
     """Task level model representing difficulty and prerequisites for mentorship tasks."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_task_levels"
         verbose_name_plural = "Task Levels"
         ordering = ["name"]

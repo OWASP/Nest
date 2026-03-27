@@ -150,7 +150,7 @@ class TestUserModel:
             mock_save.assert_not_called()
         else:
             if "is_staff" in update_kwargs:
-                assert result.is_staff is True
+                assert result.is_staff
             if expect_save:
                 mock_save.assert_called_once()
             else:
@@ -246,3 +246,11 @@ class TestUserModel:
         user.contribution_data = {"2025-01-01": 15, "2025-01-02": 5}
         assert user.contribution_data["2025-01-01"] == 15
         assert user.contribution_data["2025-01-02"] == 5
+
+    def test_releases_property(self):
+        """Test the releases property."""
+        user = User(login="test-user")
+        with patch.object(
+            User, "created_releases", all=Mock(return_value=["release1", "release2"])
+        ):
+            assert user.releases == ["release1", "release2"]

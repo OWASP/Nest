@@ -1,4 +1,4 @@
-from datetime import UTC
+from datetime import UTC, datetime
 from unittest.mock import Mock
 
 from apps.github.models.release import Release
@@ -73,8 +73,6 @@ class TestReleaseModel:
 
     def test_summary_property(self):
         """Tests the summary property returns the correct format."""
-        from datetime import datetime
-
         release = Release(tag_name="v1.0", published_at=datetime(2023, 1, 1, tzinfo=UTC))
         assert release.summary == "v1.0 on Jan 01, 2023"
 
@@ -85,3 +83,35 @@ class TestReleaseModel:
         mock_repository._state = mocker.Mock()
         release = Release(tag_name="v1.0", repository=mock_repository)
         assert release.url == "https://github.com/test/repo/releases/tag/v1.0"
+
+    def test_from_github_with_none_value(self):
+        """Test from_github when a field value is None."""
+        gh_release_mock = Mock()
+        gh_release_mock.created_at = None
+        gh_release_mock.body = "Description"
+        gh_release_mock.title = None
+        gh_release_mock.tag_name = "v1.0.0"
+
+        release = Release()
+        release.from_github(gh_release_mock)
+
+        assert release.description == "Description"
+        assert release.tag_name == "v1.0.0"
+        assert release.name == ""
+        assert not hasattr(release, "created_at") or release.created_at is None
+
+    def test_update_data_without_save(self, mocker):
+        """Test update_data with save=False."""
+        gh_release_mock = mocker.Mock()
+        gh_release_mock.raw_data = {"node_id": "release_node_123"}
+
+        mock_release = mocker.Mock(spec=Release)
+        mocker.patch("apps.github.models.release.Release.objects.get", return_value=mock_release)
+
+        release = Release.update_data(gh_release_mock, save=False)
+
+        mock_release.from_github.assert_called_once_with(
+            gh_release_mock, author=None, repository=None
+        )
+        mock_release.save.assert_not_called()
+        assert release == mock_release

@@ -1,3 +1,7 @@
+owasp-add-project-custom-tags:
+	@echo "Adding project custom tags from $(FILE)"
+	@CMD="python manage.py add_project_custom_tags $(FILE)" $(MAKE) exec-backend-command
+
 owasp-aggregate-projects:
 	@echo "Aggregating OWASP projects"
 	@CMD="python manage.py owasp_aggregate_projects" $(MAKE) exec-backend-command
@@ -41,7 +45,7 @@ owasp-generate-community-snapshot-video:
 	@mkdir -p backend/generated_videos
 	@docker run \
 		--env-file backend/.env \
-		--mount type=bind,src="$(PWD)/backend/generated_videos",dst=/home/owasp/generated_videos \
+		--mount type=bind,src="$(CURDIR)/backend/generated_videos",dst=/home/owasp/generated_videos \
 		--network nest-local_nest-network \
 		--rm \
 		nest-snapshot-video \

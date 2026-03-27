@@ -8,7 +8,8 @@ from typing import TYPE_CHECKING, cast
 import strawberry
 from django.db.models import Prefetch
 
-from apps.github.api.internal.nodes.issue import IssueNode
+from apps.common.utils import normalize_limit
+from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH, IssueNode
 from apps.github.models import Label
 from apps.github.models.user import User as GithubUser
 from apps.mentorship.api.internal.nodes.mentee import MenteeNode
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from apps.github.api.internal.nodes.issue import IssueNode
 
 logger = logging.getLogger(__name__)
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -97,6 +99,9 @@ class MentorshipQuery:
         offset: int = 0,
     ) -> list[IssueNode]:
         """Get issues assigned to a mentee in a specific module."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
         try:
             module = Module.objects.only("id").get(key=module_key, program__key=program_key)
 
@@ -114,15 +119,16 @@ class MentorshipQuery:
                 module.issues.filter(assignees=github_user)
                 .only("id", "number", "title", "state", "created_at", "url")
                 .prefetch_related(
-                    Prefetch("labels", queryset=Label.objects.only("id", "name")),
                     Prefetch(
                         "assignees",
                         queryset=GithubUser.objects.only("id", "login", "name", "avatar_url"),
                     ),
+                    Prefetch("labels", queryset=Label.objects.only("id", "name")),
+                    MERGED_PULL_REQUESTS_PREFETCH,
                 )
                 .order_by("-created_at")
             )
-            issues = issues_qs[offset : offset + limit]
+            issues = issues_qs[offset : offset + normalized_limit]
 
             return list(issues)
 

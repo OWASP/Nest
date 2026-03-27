@@ -1,3 +1,0 @@
-vulnerabilities:
-  # TODO(arkid15r): Remove when v5.9.3 is no longer current.
-  - id: CVE-2025-64756  # glob: Command Injection Vulnerability via Malicious Filenames.

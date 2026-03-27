@@ -3,7 +3,7 @@ import millify from 'millify'
 import React from 'react'
 import { FaUser } from 'react-icons/fa'
 import { pluralize } from 'utils/pluralize'
-import InfoItem from 'components/InfoItem'
+import InfoItem, { TextInfoItem } from 'components/InfoItem'
 
 jest.mock('millify', () => jest.fn())
 jest.mock('utils/pluralize', () => ({
@@ -116,5 +116,50 @@ describe('InfoItem', () => {
     const tooltip = screen.getByTestId('tooltip')
     expect(tooltip).toHaveAttribute('title', 'No 0 items')
     expect(screen.getByText('0')).toBeInTheDocument()
+  })
+})
+
+describe('TextInfoItem', () => {
+  it('renders successfully with required props', () => {
+    render(<TextInfoItem icon={FaUser} label="Author" value="John Doe" />)
+
+    expect(screen.getByText('Author:')).toBeInTheDocument()
+    expect(screen.getByText('John Doe')).toBeInTheDocument()
+    expect(document.querySelector('svg')).toBeInTheDocument()
+  })
+
+  it('applies correct DOM structure and classes', () => {
+    render(<TextInfoItem icon={FaUser} label="Role" value="Developer" />)
+
+    const container = screen.getByText('Role:').closest('div')
+    expect(container).toHaveClass(
+      'flex',
+      'items-center',
+      'gap-2',
+      'text-sm',
+      'text-gray-600',
+      'dark:text-gray-300'
+    )
+
+    const labelSpan = screen.getByText('Role:')
+    expect(labelSpan).toHaveClass('font-medium')
+
+    const icon = document.querySelector('svg')
+    expect(icon).toBeInTheDocument()
+    expect(icon).toHaveClass('text-xs')
+  })
+
+  it('handles empty value string', () => {
+    render(<TextInfoItem icon={FaUser} label="Status" value="" />)
+
+    expect(screen.getByText('Status:')).toBeInTheDocument()
+  })
+
+  it('handles long value strings', () => {
+    const longValue = 'This is a very long value string that might be displayed'
+    render(<TextInfoItem icon={FaUser} label="Description" value={longValue} />)
+
+    expect(screen.getByText('Description:')).toBeInTheDocument()
+    expect(screen.getByText(longValue)).toBeInTheDocument()
   })
 })

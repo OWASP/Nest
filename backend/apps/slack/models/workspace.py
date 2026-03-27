@@ -12,6 +12,8 @@ class Workspace(TimestampedModel):
     """Slack Workspace model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "slack_workspaces"
         verbose_name_plural = "Workspaces"
 

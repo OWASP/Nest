@@ -9,7 +9,7 @@ import { useSession } from 'next-auth/react'
 import React, { useState } from 'react'
 import { FaFolderOpen } from 'react-icons/fa'
 import { HiUserGroup } from 'react-icons/hi'
-import { ExtendedSession } from 'types/auth'
+import type { ExtendedSession } from 'types/auth'
 import type { Contributor } from 'types/contributor'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
@@ -28,23 +28,29 @@ interface SingleModuleCardProps {
 }
 
 const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel, admins }) => {
-  const { data } = useSession()
+  const { data: sessionData } = useSession() as { data: ExtendedSession | null }
   const pathname = usePathname()
   const [showAllMentors, setShowAllMentors] = useState(false)
   const [showAllMentees, setShowAllMentees] = useState(false)
 
+  const currentUserLogin = sessionData?.user?.login
+
   const isAdmin =
-    accessLevel === 'admin' &&
-    admins?.some((admin) => admin.login === (data as ExtendedSession)?.user?.login)
+    accessLevel === 'admin' && admins?.some((admin) => admin.login === currentUserLogin)
+
+  const isMentor = module.mentors?.some((mentor) => mentor.login === currentUserLogin)
 
   // Extract programKey from pathname (e.g., /my/mentorship/programs/[programKey])
   const programKey = pathname?.split('/programs/')[1]?.split('/')[0] || ''
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(module.experienceLevel) },
-    { label: 'Start Date', value: formatDate(module.startedAt) },
-    { label: 'End Date', value: formatDate(module.endedAt) },
-    { label: 'Duration', value: getSimpleDuration(module.startedAt, module.endedAt) },
+    { label: 'Start Date', value: formatDate(String(module.startedAt)) },
+    { label: 'End Date', value: formatDate(String(module.endedAt)) },
+    {
+      label: 'Duration',
+      value: getSimpleDuration(String(module.startedAt), String(module.endedAt)),
+    },
   ]
 
   const maxInitialDisplay = 6
@@ -120,7 +126,15 @@ const SingleModuleCard: React.FC<SingleModuleCardProps> = ({ module, accessLevel
           </Link>
         </div>
 
-        {isAdmin && <EntityActions type="module" programKey={programKey} moduleKey={module.key} />}
+        {(isAdmin || isMentor) && (
+          <EntityActions
+            type="module"
+            programKey={programKey}
+            moduleKey={module.key}
+            isAdmin={isAdmin}
+            isMentor={isMentor}
+          />
+        )}
       </div>
 
       {/* Description */}

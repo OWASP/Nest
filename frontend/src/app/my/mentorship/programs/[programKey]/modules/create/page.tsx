@@ -4,7 +4,7 @@ import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
 import {
@@ -13,6 +13,7 @@ import {
 } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
@@ -34,7 +35,19 @@ const CreateModulePage = () => {
     fetchPolicy: 'network-only',
   })
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    description: string
+    domains: string
+    endedAt: string
+    experienceLevel: string
+    labels: string
+    mentorLogins: string
+    name: string
+    projectId: string
+    projectName: string
+    startedAt: string
+    tags: string
+  }>({
     description: '',
     domains: '',
     endedAt: '',
@@ -49,6 +62,7 @@ const CreateModulePage = () => {
   })
 
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
@@ -82,20 +96,21 @@ const CreateModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setValidationErrors({})
 
     try {
       const input = {
         description: formData.description,
         domains: parseCommaSeparated(formData.domains),
-        endedAt: formData.endedAt || null,
-        experienceLevel: formData.experienceLevel,
+        endedAt: formData.endedAt,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
         labels: parseCommaSeparated(formData.labels),
         mentorLogins: parseCommaSeparated(formData.mentorLogins),
         name: formData.name,
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        startedAt: formData.startedAt || null,
+        startedAt: formData.startedAt,
         tags: parseCommaSeparated(formData.tags),
       }
 
@@ -115,13 +130,18 @@ const CreateModulePage = () => {
 
       router.push(`/my/mentorship/programs/${programKey}`)
     } catch (error) {
-      addToast({
-        title: 'Creation Failed',
-        description: error.message || 'Something went wrong while creating the module.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 4000,
-      })
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(error)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
+      } else if (unmappedErrors.length > 0) {
+        setValidationErrors({ name: unmappedErrors[0] })
+      } else {
+        handleAppError(error)
+      }
     }
   }
 
@@ -148,6 +168,7 @@ const CreateModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       isEdit={false}
+      validationErrors={validationErrors}
       minDate={
         programData?.getProgram?.startedAt
           ? formatDateForInput(programData.getProgram.startedAt)

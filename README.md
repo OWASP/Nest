@@ -1,12 +1,14 @@
 <div align="center">
 
-[![OWASP](https://img.shields.io/badge/Lab-blue?&label=owasp%20level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=OWASP%20Type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=OWASP%20Slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/messages/project-nest)
-
-[![License](https://img.shields.io/github/license/owasp/nest?color=blue&label=License&style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors)
+[![OWASP](https://img.shields.io/badge/production-blue?&label=level&style=for-the-badge)](https://owasp.org/www-project-nest/) [![OWASP](https://img.shields.io/badge/Code-blue?label=type&style=for-the-badge)](https://owasp.org/www-project-nest/) [![project-nest](https://img.shields.io/badge/%23project--nest-blue?label=slack&logoColor=white&style=for-the-badge)](https://owasp.slack.com/archives/project-nest)
 
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-ci-cd.yaml?branch=main&color=blue&label=Build&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-ci-cd.yaml?query=branch%3Amain) [![CodeQL](https://img.shields.io/github/actions/workflow/status/owasp/nest/run-code-ql.yaml?branch=main&color=blue&label=CodeQL&style=for-the-badge)](https://github.com/owasp/nest/actions/workflows/run-code-ql.yaml?query=branch%3Amain) [![Sonarqube](https://img.shields.io/sonar/quality_gate/OWASP_Nest?color=blue&server=https://sonarcloud.io&style=for-the-badge&label=Sonarqube)](https://sonarcloud.io/summary/new_code?id=OWASP_Nest&branch=main)
 
+[![License](https://img.shields.io/badge/license-%20MIT-blue?style=for-the-badge)](https://github.com/OWASP/Nest/blob/main/LICENSE) [![Last Commit](https://img.shields.io/github/last-commit/owasp/nest/main?color=blue&style=for-the-badge&label=Last%20commit)](https://github.com/OWASP/Nest/commits/main/) [![Contributors](https://img.shields.io/github/contributors/owasp/nest?style=for-the-badge&label=Contributors&color=blue)](https://github.com/OWASP/Nest/graphs/contributors)
+
 [![Issues](https://img.shields.io/github/issues/owasp/nest?color=blue&style=for-the-badge&label=Issues)](https://github.com/OWASP/Nest/issues) [![Pull Requests](https://img.shields.io/github/issues-pr/owasp/nest?color=blue&style=for-the-badge&label=Pull%20Requests)](https://github.com/OWASP/Nest/pulls)
+
+[![DeepWiki](https://img.shields.io/badge/docs-deep%20wiki-blue?style=for-the-badge)](https://deepwiki.com/OWASP/Nest) [![ReadTheDocs](https://img.shields.io/badge/docs-read%20the%20docs-blue?style=for-the-badge)](https://owasp-nest.readthedocs.io/latest/)
 
 [![OpenSSF](https://img.shields.io/badge/OpenSSF-passing-blue?style=for-the-badge)](https://www.bestpractices.dev/projects/10174) [![Snyk Security](https://img.shields.io/badge/Snyk-Scanning-blue?style=for-the-badge)](https://snyk.io)
 
@@ -14,15 +16,16 @@
 
 [![CREATED](https://img.shields.io/badge/created-aug,%202024-blue?style=for-the-badge)](https://github.com/OWASP/Nest/commit/2a213c2efcfc2f8889c2f1d330da0d2e6f649fc1)
 
+# [OWASP Nest](https://nest.owasp.org/)
+
 <picture>
   <source srcset="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_dark.png" media="(prefers-color-scheme: dark)">
   <img src="https://raw.githubusercontent.com/OWASP/Nest/refs/heads/main/frontend/public/img/logo_light.png" alt="OWASP Nest Logo" width="200">
 </picture>
 
-# [OWASP Nest](https://nest.owasp.org/)
-
 </div>
 
+<!-- --8<-- [start:docs] -->
 **OWASP Nest** is a comprehensive, community-first platform built to enhance collaboration and contribution across the OWASP community. The application serves as a central hub for exploring OWASP projects and ways to contribute to them, empowering contributors to find opportunities that align with their interests and expertise.
 
 Key features of the platform include:
@@ -58,6 +61,11 @@ OWASP Nest thrives on community contributions. Whether you are a developer, desi
 
 To get started, visit the [OWASP Nest Repository](https://github.com/OWASP/Nest), explore the [Contributing Guidelines](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md), and [Code of Conduct](https://github.com/OWASP/Nest/blob/main/CODE_OF_CONDUCT.md).
 
+## External Documentation
+
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest)
+- [OWASP Nest ReadTheDocs](https://owasp-nest.readthedocs.io/latest/)
+
 ## About
 
 OWASP Nest was **originally created by Arkadii Yakovets** (Ark) to address challenges in navigating OWASP projects. The project was **built from scratch based on Ark's ideas and discussions with Starr Brown** (Starr), ensuring a well-structured system design aligned with OWASP's ecosystem. Ark, an experienced software development professional with over 10 years of expertise in Python, Django, Django REST Framework (DRF), and related backend technologies, led the development of the backend using widely adopted Python **open-source frameworks and libraries**, including DRF, django-filter, OpenAI, Algolia Search, slack-bolt, PyGitHub, pre-commit, pytest, and more. The initial frontend, based on Vue.js, was introduced by **Kateryna Golovanova** (Kate), who later became the project co-leader due to her invaluable frontend and project management skills. The **code is licensed under the MIT License**, encouraging contributions while protecting the authors from legal claims. All OWASP Nest leaders are OWASP members and adhere to the OWASP Code of Conduct.
@@ -68,6 +76,7 @@ Over time, OWASP Nest has expanded to address broader OWASP community needs, suc
 
 ### Community and Social Media
 
-- [BlueSky account](https://bsky.app/profile/nest.owasp.org)
-- [LinkedIn group](https://www.linkedin.com/groups/14656108/)
-- [Slack channel](https://owasp.slack.com/archives/project-nest) (join [here](https://owasp.org/slack/invite))
+- [BlueSky](https://bsky.app/profile/nest.owasp.org)
+- [LinkedIn](https://www.linkedin.com/groups/14656108/)
+- [OWASP Slack](https://owasp.slack.com/archives/project-nest) -- join [#project-nest](https://owasp.org/slack/invite)
+<!-- --8<-- [end:docs] -->

@@ -12,6 +12,8 @@ class Comment(BulkSaveModel, TimestampedModel):
     """Represents a comment on a GitHub Issue."""
 
     class Meta:
+        """Model options."""
+
         db_table = "github_comments"
         verbose_name = "Comment"
         verbose_name_plural = "Comments"

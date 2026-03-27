@@ -21,6 +21,8 @@ class RepositoryContributor(BulkSaveModel, TimestampedModel):
     objects = RepositoryContributorManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_repository_contributors"
         indexes = [
             models.Index(

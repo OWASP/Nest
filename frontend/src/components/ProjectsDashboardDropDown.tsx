@@ -6,6 +6,7 @@ import {
   DropdownSection,
   Button,
 } from '@heroui/react'
+import type { Key } from 'react'
 
 import { FC } from 'react'
 import type { IconType } from 'react-icons'
@@ -14,7 +15,7 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import { DropDownSectionProps } from 'types/DropDownSectionProps'
 
 const ProjectsDashboardDropDown: FC<{
-  onAction: (key: string) => void
+  onAction: (key: Key) => void
   selectedKeys?: string[]
   selectedLabels?: string[]
   selectionMode: 'single' | 'multiple'

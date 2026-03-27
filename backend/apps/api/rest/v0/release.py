@@ -91,7 +91,12 @@ def list_release(
     if filters.tag_name:
         releases = releases.filter(tag_name=filters.tag_name)
 
-    return releases.order_by(ordering or "-published_at", "-created_at")
+    primary_order = ordering or "-published_at"
+    order_fields = [primary_order]
+    if primary_order not in {"created_at", "-created_at"}:
+        order_fields.append("-created_at")
+
+    return releases.order_by(*order_fields)
 
 
 @router.get(

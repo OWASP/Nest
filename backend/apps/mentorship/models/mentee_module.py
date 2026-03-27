@@ -12,6 +12,8 @@ class MenteeModule(StartEndRange, TimestampedModel):
     """Mentee module enrollment."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_mentee_modules"
         verbose_name_plural = "Mentee modules"
         unique_together = ("mentee", "module")

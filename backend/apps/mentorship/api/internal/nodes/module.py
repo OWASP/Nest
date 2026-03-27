@@ -3,8 +3,10 @@
 from datetime import datetime
 
 import strawberry
+from strawberry.types import Info
 
-from apps.github.api.internal.nodes.issue import IssueNode
+from apps.common.utils import normalize_limit
+from apps.github.api.internal.nodes.issue import MERGED_PULL_REQUESTS_PREFETCH, IssueNode
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models import Label
@@ -15,6 +17,8 @@ from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
+
+MAX_LIMIT = 1000
 
 
 @strawberry.type
@@ -31,6 +35,7 @@ class ModuleNode:
     ended_at: datetime
     experience_level: ExperienceLevelEnum
     labels: list[str] | None = None
+    order: int = 0
     program: ProgramNode | None = None
     project_id: strawberry.ID | None = None
     started_at: datetime
@@ -76,17 +81,50 @@ class ModuleNode:
 
     @strawberry.field
     def issues(
-        self, limit: int = 20, offset: int = 0, label: str | None = None
+        self, info: Info, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
+        info.context.current_module = self
+
+        # BULK load data
+        deadline_rows = (
+            Task.objects.filter(module=self, deadline_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "deadline_at")
+        )
+        assigned_rows = (
+            Task.objects.filter(module=self, assigned_at__isnull=False)
+            .order_by("issue__number", "-assigned_at")
+            .values("issue__number", "assigned_at")
+        )
+
+        deadline_map = {}
+        assigned_map = {}
+
+        for row in deadline_rows:
+            num = row["issue__number"]
+            if num not in deadline_map:
+                deadline_map[num] = row["deadline_at"]
+        for row in assigned_rows:
+            num = row["issue__number"]
+            if num not in assigned_map:
+                assigned_map[num] = row["assigned_at"]
+
+        info.context.task_deadlines_by_issue = deadline_map
+        info.context.task_assigned_at_by_issue = assigned_map
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
         queryset = self.issues.select_related("repository", "author").prefetch_related(
-            "assignees", "labels"
+            "assignees",
+            "labels",
+            MERGED_PULL_REQUESTS_PREFETCH,
         )
 
         if label and label != "all":
             queryset = queryset.filter(labels__name=label)
 
-        return list(queryset.order_by("-updated_at")[offset : offset + limit])
+        return list(queryset.order_by("-updated_at")[offset : offset + normalized_limit])
 
     @strawberry.field
     def issues_count(self, label: str | None = None) -> int:
@@ -110,11 +148,17 @@ class ModuleNode:
         return sorted(label_names)
 
     @strawberry.field
-    def issue_by_number(self, number: int) -> IssueNode | None:
+    def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
+        info.context.current_module = self
+
         return (
             self.issues.select_related("repository", "author")
-            .prefetch_related("assignees", "labels")
+            .prefetch_related(
+                "assignees",
+                "labels",
+                MERGED_PULL_REQUESTS_PREFETCH,
+            )
             .filter(number=number)
             .first()
         )
@@ -133,8 +177,13 @@ class ModuleNode:
         return [i.user for i in interests]
 
     @strawberry.field
-    def task_deadline(self, issue_number: int) -> datetime | None:
+    def task_deadline(self, info: Info, issue_number: int) -> datetime | None:
         """Return the deadline for the latest assigned task linked to this module and issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping is not None:
+            return mapping.get(issue_number)
+
+        # fallback (single issue query)
         return (
             Task.objects.filter(
                 module=self,
@@ -147,8 +196,12 @@ class ModuleNode:
         )
 
     @strawberry.field
-    def task_assigned_at(self, issue_number: int) -> datetime | None:
-        """Return the latest assignment time for tasks linked to this module and issue number."""
+    def task_assigned_at(self, info: Info, issue_number: int) -> datetime | None:
+        """Return the latest assignment time for tasks linked to this module and issue."""
+        mapping = getattr(info.context, "task_assigned_at_by_issue", None)
+        if mapping is not None:
+            return mapping.get(issue_number)
+
         return (
             Task.objects.filter(
                 module=self,
@@ -163,12 +216,15 @@ class ModuleNode:
     @strawberry.field
     def recent_pull_requests(self, limit: int = 5) -> list[PullRequestNode]:
         """Return recent pull requests linked to issues in this module."""
+        if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
+            return []
+
         issue_ids = self.issues.values_list("id", flat=True)
         return list(
             PullRequest.objects.filter(related_issues__id__in=issue_ids)
             .select_related("author")
             .distinct()
-            .order_by("-created_at")[:limit]
+            .order_by("-created_at")[:normalized_limit]
         )
 
 
@@ -207,3 +263,11 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+
+
+@strawberry.input
+class ReorderModulesInput:
+    """Input for reordering modules within a program."""
+
+    program_key: str
+    module_keys: list[str]
