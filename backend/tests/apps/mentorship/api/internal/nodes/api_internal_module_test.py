@@ -20,13 +20,14 @@ def _call_module_resolver(instance: object, name: str, *args: object, **kwargs: 
     field = next((f for f in definition.fields if f.name == name), None)
     assert field is not None
     assert field.base_resolver is not None
-    return field.base_resolver.wrapped_func(instance, *args, **kwargs)
+    return field.base_resolver.wrapped_func(instance, instance, *args, **kwargs)
 
 
 class FakeModuleNode:
     """Minimal ModuleNode-like object for testing."""
 
     def __init__(self):
+        self.pk = 1
         self.id = strawberry.ID("1")
         self.key = "test-module"
         self.name = "Test Module"
@@ -90,6 +91,12 @@ class FakeModuleNode:
         info = MagicMock()
         info.context.task_assigned_at_by_issue = None
         return _call_module_resolver(self, "task_assigned_at", info, issue_number=issue_number)
+
+    def mock_program(self):
+        return _call_module_resolver(self, "program")
+
+    def mock_project_id(self):
+        return _call_module_resolver(self, "project_id")
 
 
 @pytest.fixture
@@ -181,7 +188,10 @@ class TestModuleNodeResolvers:
     def test_module_node_issue_mentees_no_issue(self, mock_module_node):
         """Test issue_mentees when no issue is found."""
         mock_module_node.issues.filter.return_value.values_list.return_value = []
-        mentees = mock_module_node.mock_issue_mentees(issue_number=123)
+        with patch("apps.mentorship.models.task.Task.objects") as mock_task_objects:
+            task_chain = mock_task_objects.filter.return_value.select_related.return_value
+            task_chain.values_list.return_value.distinct.return_value = []
+            mentees = mock_module_node.mock_issue_mentees(issue_number=123)
         assert mentees == []
 
     def test_module_node_project_name(self, mock_module_node):
@@ -193,6 +203,16 @@ class TestModuleNodeResolvers:
         mock = FakeModuleNode()
         mock.project = None
         assert mock.mock_project_name() is None
+
+    def test_module_node_program(self, mock_module_node):
+        """Test the program resolver."""
+        result = mock_module_node.mock_program()
+        assert result == mock_module_node.program
+
+    def test_module_node_project_id(self, mock_module_node):
+        """Test the project_id resolver."""
+        result = mock_module_node.mock_project_id()
+        assert str(result) == "project-1"
 
     def test_module_node_issues_with_label(self, mock_module_node):
         """Test the issues resolver with a label filter."""
@@ -257,10 +277,13 @@ class TestModuleNodeResolvers:
             mock_interest2 = MagicMock()
             mock_interest2.user = MagicMock(login="user2")
             mock_user_interests = mock_issue_user_interest_objects.select_related.return_value
-            mock_user_interests.filter.return_value.order_by.return_value = [
+            # Resolver chain is .filter().order_by().distinct("user") — distinct returns the list
+            order_by_result = MagicMock()
+            order_by_result.distinct.return_value = [
                 mock_interest1,
                 mock_interest2,
             ]
+            mock_user_interests.filter.return_value.order_by.return_value = order_by_result
 
             users = mock_module_node.mock_interested_users(issue_number=789)
             assert len(users) == 2
@@ -275,7 +298,16 @@ class TestModuleNodeResolvers:
     def test_module_node_interested_users_no_issue(self, mock_module_node):
         """Test interested_users when no issue is found."""
         mock_module_node.issues.filter.return_value.values_list.return_value = []
-        users = mock_module_node.mock_interested_users(issue_number=789)
+        with patch(
+            "apps.mentorship.models.issue_user_interest.IssueUserInterest.objects"
+        ) as mock_issue_user_interest_objects:
+            order_by_result = MagicMock()
+            order_by_result.distinct.return_value = []
+            filter_return = (
+                mock_issue_user_interest_objects.select_related.return_value.filter.return_value
+            )
+            filter_return.order_by.return_value = order_by_result
+            users = mock_module_node.mock_interested_users(issue_number=789)
         assert users == []
 
     def test_module_node_task_deadline(self, mock_module_node):

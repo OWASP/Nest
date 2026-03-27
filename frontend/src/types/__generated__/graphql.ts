@@ -313,9 +313,9 @@ export type ModuleNode = {
   __typename?: 'ModuleNode';
   availableLabels: Array<Scalars['String']['output']>;
   description: Scalars['String']['output'];
-  domains?: Maybe<Array<Scalars['String']['output']>>;
+  domains: Scalars['JSON']['output'];
   endedAt: Scalars['DateTime']['output'];
-  experienceLevel: ExperienceLevelEnum;
+  experienceLevel: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   interestedUsers: Array<UserNode>;
   issueByNumber?: Maybe<IssueNode>;
@@ -323,7 +323,7 @@ export type ModuleNode = {
   issues: Array<IssueNode>;
   issuesCount: Scalars['Int']['output'];
   key: Scalars['String']['output'];
-  labels?: Maybe<Array<Scalars['String']['output']>>;
+  labels: Scalars['JSON']['output'];
   mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
@@ -333,7 +333,7 @@ export type ModuleNode = {
   projectName?: Maybe<Scalars['String']['output']>;
   recentPullRequests: Array<PullRequestNode>;
   startedAt: Scalars['DateTime']['output'];
-  tags?: Maybe<Array<Scalars['String']['output']>>;
+  tags: Scalars['JSON']['output'];
   taskAssignedAt?: Maybe<Scalars['DateTime']['output']>;
   taskDeadline?: Maybe<Scalars['DateTime']['output']>;
 };
