@@ -77,54 +77,7 @@ def process_query(  # noqa: PLR0911
             if image_context:
                 query = f"{query}{DELIMITER}Image context: {image_context}"
 
-        # Step 1: Analyze query complexity before routing
-        try:
-            query_analysis = analyze_query(query)
-            logger.info(
-                "Query analyzed",
-                extra={
-                    "is_simple": query_analysis["is_simple"],
-                    "query": query,
-                    "sub_queries": query_analysis["sub_queries"],
-                },
-            )
-        except Exception:
-            logger.exception("Query Analyzer failed, falling back to single agent: %s", query)
-            query_analysis = {"is_simple": True, "sub_queries": []}
-
-        # Step 2: Use collaborative flow for complex query
-        if (
-            not query_analysis["is_simple"]
-            and len(query_analysis["sub_queries"]) > 1
-            and (
-                not channel_id
-                or normalize_channel_id(channel_id)
-                != normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID)
-            )
-        ):
-            try:
-                return handle_collaborative_query(query, query_analysis["sub_queries"])
-            except Exception:
-                logger.exception(
-                    "Collaborative flow failed, falling back to single agent: %s", query
-                )
-
-        # Step 3: Route to appropriate expert agent (single-agent flow)
-        router_result = route(query)
-        intent = router_result["intent"]
-        confidence = router_result["confidence"]
-
-        logger.info(
-            "Query routed",
-            extra={
-                "intent": intent,
-                "confidence": confidence,
-                "query": query,
-                "channel_id": channel_id,
-            },
-        )
-
-        # Step 4: Handle queries in owasp-community channel - suggest channels
+        # Step 1: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
         # for channel suggestions regardless of intent
         if channel_id:
@@ -137,7 +90,6 @@ def process_query(  # noqa: PLR0911
                     "channel_id": channel_id,
                     "normalized_channel_id": normalized_channel_id,
                     "community_channel_id": community_channel_id,
-                    "intent": intent,
                 },
             )
 
@@ -190,12 +142,9 @@ def process_query(  # noqa: PLR0911
                     "Query from owasp-community channel detected (intent: %s, "
                     "has_contribution_keywords: %s), routing to community agent for "
                     "channel suggestions",
-                    intent,
                     has_contribution_keywords,
                     extra={
                         "channel_id": channel_id,
-                        "intent": intent,
-                        "confidence": confidence,
                         "has_contribution_keywords": has_contribution_keywords,
                         "community_channel_id": community_channel_id,
                     },
@@ -315,6 +264,45 @@ def process_query(  # noqa: PLR0911
                     channel_id=channel_id,
                     is_channel_suggestion=True,
                 )
+
+        # Step 2: Analyze query complexity before routing
+        try:
+            query_analysis = analyze_query(query)
+            logger.info(
+                "Query analyzed",
+                extra={
+                    "is_simple": query_analysis["is_simple"],
+                    "query": query,
+                    "sub_queries": query_analysis["sub_queries"],
+                },
+            )
+        except Exception:
+            logger.exception("Query Analyzer failed, falling back to single agent: %s", query)
+            query_analysis = {"is_simple": True, "sub_queries": []}
+
+        # Step 3: Use collaborative flow for complex query
+        if not query_analysis["is_simple"] and len(query_analysis["sub_queries"]) > 1:
+            try:
+                return handle_collaborative_query(query, query_analysis["sub_queries"])
+            except Exception:
+                logger.exception(
+                    "Collaborative flow failed, falling back to single agent: %s", query
+                )
+
+        # Step 4: Route to appropriate expert agent (single-agent flow)
+        router_result = route(query)
+        intent = router_result["intent"]
+        confidence = router_result["confidence"]
+
+        logger.info(
+            "Query routed",
+            extra={
+                "intent": intent,
+                "confidence": confidence,
+                "query": query,
+                "channel_id": channel_id,
+            },
+        )
 
         # Step 5: Check for contribution intent even if misclassified
         # This is a fallback to catch contribution queries that might be misclassified
