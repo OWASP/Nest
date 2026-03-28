@@ -75,7 +75,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 alt="OWASP Logo"
               />
             </div>
-            <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+            <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
               Nest
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     alt="OWASP Logo"
                   />
                 </div>
-                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
                   Nest
                 </div>
               </div>
