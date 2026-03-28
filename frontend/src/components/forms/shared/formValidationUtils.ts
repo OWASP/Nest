@@ -37,11 +37,14 @@ export const validateWebsite = (value: string): string | undefined => {
   const requiredError = validateRequired(value, 'Website')
   if (requiredError) return requiredError
 
+  const trimValue = value.trim()
+
+  if (!trimValue.startsWith('http://') && !trimValue.startsWith('https://')) {
+    return 'Website must start with http:// or https://'
+  }
+
   try {
-    const parsedUrl = new URL(value)
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-      return 'Website must start with http:// or https://'
-    }
+    new URL(trimValue)
   } catch {
     return 'Enter a valid website URL'
   }
@@ -53,7 +56,7 @@ export const validateContactEmail = (value: string): string | undefined => {
   const requiredError = validateRequired(value, 'Contact email')
   if (requiredError) return requiredError
   if (!validator.isEmail(value.trim())) {
-    return 'Enter a valid contact email'
+    return 'Enter a valid email'
   }
   return undefined
 }
