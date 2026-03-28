@@ -1,4 +1,4 @@
-"""Slack app utils."""
+"""Formatting and Slack content helpers."""
 
 from __future__ import annotations
 
