@@ -19,7 +19,7 @@ from apps.github.models.pull_request import PullRequest
 class PullRequestNode(strawberry.relay.Node):
     """GitHub pull request node."""
 
-    author: UserNode | None = strawberry_django.field()
+    author: UserNode | None = strawberry_django.field(select_related=["author"])
 
     @strawberry_django.field(select_related=["repository__organization"])
     def organization_name(self, root: PullRequest) -> str | None:
