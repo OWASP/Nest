@@ -39,7 +39,8 @@ export const validateWebsite = (value: string): string | undefined => {
 
   const trimValue = value.trim()
 
-  if (!trimValue.startsWith('http://') && !trimValue.startsWith('https://')) {
+  const normalizedValue = trimValue.toLowerCase()
+  if (!normalizedValue.startsWith('http://') && !normalizedValue.startsWith('https://')) {
     return 'Website must start with http:// or https://'
   }
 
