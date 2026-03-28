@@ -29,6 +29,14 @@ test.describe('Mentorship Programs Page', () => {
     await expect(page.getByText('This is a summary of Program 1.')).toBeVisible()
   })
 
+  test('program card link navigates to program details', async ({ page }) => {
+    const programLink = page.getByRole('link', { name: 'Program 1' })
+    await programLink.waitFor({ state: 'visible' })
+    await expect(programLink).toHaveAttribute('href', '/mentorship/programs/program_1')
+    await programLink.click()
+    await expect(page).toHaveURL('/mentorship/programs/program_1')
+  })
+
   test('search input is visible', async ({ page }) => {
     await expect(page.getByPlaceholder('Search for programs...')).toBeVisible()
   })
