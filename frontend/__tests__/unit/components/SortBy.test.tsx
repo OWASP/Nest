@@ -3,8 +3,7 @@ import { act } from 'react'
 import SortBy from 'components/SortBy'
 
 describe('<SortBy />', () => {
-  /** Select trigger is always the first button; order toggle is second when visible. */
-  const getSortTrigger = () => screen.getByRole('button', { name: 'Sort by' })
+  const getSortTrigger = () => screen.getByRole('button', { name: /Sort by/i })
 
   const defaultProps = {
     sortOptions: [
