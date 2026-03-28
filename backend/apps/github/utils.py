@@ -3,12 +3,20 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 import requests
+from django.utils import timezone
+from github.GithubException import GithubException
 from requests.exceptions import RequestException
 
-from apps.github.constants import GITHUB_REPOSITORY_RE
+from apps.github.constants import GITHUB_REPOSITORY_RE, OWASP_GITHUB_IO, OWASP_LOGIN
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from github import Github
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -115,3 +123,64 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
     )
 
     return normalized_url.split("#")[0].strip().rstrip("/")
+
+
+def get_latest_invite_link_commit(
+    github: Github,
+    *,
+    commit_message_substring: str = "Update Slack invite",
+    file_path: str = "_includes/slack_invite.html",
+    max_commits_to_scan: int = 500,
+    repository_name: str | None = None,
+) -> tuple[datetime | None, str | None]:
+    """Return commit date and SHA of the newest matching change to the public Slack invite file.
+
+    Matches commits whose message contains ``commit_message_substring`` (case-insensitive).
+    Uses committer date (when the change landed).
+
+    Args:
+        github: Authenticated PyGithub client.
+        commit_message_substring: Substring that must appear in the commit message
+            (matched case-insensitively).
+        file_path: Path within the repo to filter commits (default: Slack invite include).
+        max_commits_to_scan: Stop after this many commits with no match.
+        repository_name: Repository in ``owner/name`` form (default: ``owasp/owasp.github.io``).
+
+    Returns:
+        ``(timezone-aware datetime, full commit SHA)`` for the first matching commit
+        (newest first), or ``(None, None)`` if none.
+
+    """
+    repo_name = repository_name or f"{OWASP_LOGIN}/{OWASP_GITHUB_IO}"
+    try:
+        repo = github.get_repo(repo_name)
+    except GithubException:
+        logger.exception("Failed to load repo %s", repo_name)
+        raise
+
+    commits = repo.get_commits(path=file_path)
+    substring_lower = commit_message_substring.lower()
+    for index, commit in enumerate(commits):
+        if index >= max_commits_to_scan:
+            logger.warning(
+                "No commit matched within first %s commits for %s",
+                max_commits_to_scan,
+                file_path,
+            )
+            return None, None
+        if substring_lower not in commit.commit.message.lower():
+            continue
+        dt = commit.commit.committer.date
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.utc)
+        return dt, commit.sha
+    return None, None
+
+
+def get_latest_invite_link_commit_date(
+    github: Github,
+    **kwargs,
+) -> datetime | None:
+    """Return commit date only; see :func:`get_latest_invite_link_commit`."""
+    dt, _ = get_latest_invite_link_commit(github, **kwargs)
+    return dt

@@ -1,5 +1,1 @@
-from apps.slack import (
-    actions,
-    commands,
-    events,
-)
+"""OWASP Nest Slack app."""
