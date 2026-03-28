@@ -55,10 +55,10 @@ class FakeWorkspace:
         return self._bot_token
 
     def save(self, update_fields=None):
-        pass
+        """No-op: fake is in-memory only; the command mutates attributes directly."""
 
     def refresh_from_db(self):
-        pass
+        """No-op: there is no database row; tests read attributes already set on this instance."""
 
 
 @pytest.fixture

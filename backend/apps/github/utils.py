@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 import logging
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
@@ -14,8 +15,6 @@ from requests.exceptions import RequestException
 from apps.github.constants import GITHUB_REPOSITORY_RE, OWASP_GITHUB_IO, OWASP_LOGIN
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
     from github import Github
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -132,7 +131,7 @@ def get_latest_invite_link_commit(
     file_path: str = "_includes/slack_invite.html",
     max_commits_to_scan: int = 500,
     repository_name: str | None = None,
-) -> tuple[datetime | None, str | None]:
+) -> tuple[datetime.datetime | None, str | None]:
     """Return commit date and SHA of the newest matching change to the public Slack invite file.
 
     Matches commits whose message contains ``commit_message_substring`` (case-insensitive).
@@ -172,6 +171,6 @@ def get_latest_invite_link_commit(
             continue
         dt = data.commit.committer.date
         if timezone.is_naive(dt):
-            dt = timezone.make_aware(dt, timezone.utc)
+            dt = timezone.make_aware(dt, datetime.UTC)
         return dt, data.sha
     return None, None
