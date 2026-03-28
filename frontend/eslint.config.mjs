@@ -141,7 +141,7 @@ const eslintConfig = [
           pathGroupsExcludedImportTypes: ['builtin'],
         },
       ],
-      'no-console': 'error',
+      'no-console': ['error', { allow: ['warn'] }],
       'no-restricted-imports': [
         'error',
         {

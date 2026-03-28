@@ -121,7 +121,7 @@ describe('CalendarButton', () => {
     })
 
     it('handles errors gracefully when generation fails', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
       const errorMock = new Error('Failed to generate')
       ;(getIcsFileUrl as jest.Mock).mockRejectedValueOnce(errorMock)
 
@@ -141,7 +141,7 @@ describe('CalendarButton', () => {
         })
         expect(consoleSpy).toHaveBeenCalledWith(
           expect.stringContaining('Failed to download ICS file'),
-          errorMock
+          errorMock.message
         )
       })
 

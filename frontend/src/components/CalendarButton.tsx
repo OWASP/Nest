@@ -41,8 +41,7 @@ export default function CalendarButton(props: Readonly<CalendarButtonProps>) {
         variant: 'solid',
       })
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to download ICS file:', err)
+      console.warn('Failed to download ICS file:', (err as Error)?.message || err)
       addToast({
         description: 'Failed to download ICS file',
         title: 'Download Failed',
