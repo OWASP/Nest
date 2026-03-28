@@ -208,7 +208,7 @@ jobs:
           exit $EXIT_CODE
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
         with:
           fail_ci_if_error: false
           files: backend/coverage.xml
@@ -257,7 +257,7 @@ jobs:
           exit $EXIT_CODE
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
         with:
           fail_ci_if_error: false
           files: frontend/coverage/lcov.info
@@ -534,7 +534,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@261fc3d4806db1fa66a15cc11113c456db8870a7
+        uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
