@@ -1,6 +1,17 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
-import { mockPrograms } from '@mockData/mockProgramData'
 import { test, expect } from '@playwright/test'
+
+const mockPrograms = [
+  {
+    key: 'program_1',
+    name: 'Program 1',
+    description: 'This is a summary of Program 1.',
+    startedAt: '2025-01-01T00:00:00Z',
+    endedAt: '2025-12-31T00:00:00Z',
+    status: 'PUBLISHED',
+    modules: ['Module A', 'Module B'],
+  },
+]
 
 test.describe('Mentorship Programs Page', () => {
   test.beforeEach(async ({ page }) => {
