@@ -59,7 +59,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <a
+        <Link
           href="/"
           onClick={() => setMobileMenuOpen(false)}
           className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -79,7 +79,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               Nest
             </div>
           </div>
-        </a>
+        </Link>
         {/* Desktop Header Links */}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
           <div className="flex justify-start pl-6">
@@ -156,7 +156,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
           {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
-            <a
+            <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
               className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
@@ -176,7 +176,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                   Nest
                 </div>
               </div>
-            </a>
+            </Link>
             {headerLinks
               .filter((link) => {
                 if (link.requiresGitHubAuth) {

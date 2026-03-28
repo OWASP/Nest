@@ -120,10 +120,11 @@ export default function Footer() {
           {/* Vertical Separator */}
           <div className="h-8 w-px bg-slate-400 dark:bg-white"></div>
 
-          <a
+          <Link
             href="/"
             className="flex items-center gap-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             aria-label="Nest home"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <Image
               src={nestLogoSrc}
@@ -133,7 +134,7 @@ export default function Footer() {
               className="h-8 w-auto"
             />
             <span className="text-lg font-semibold text-slate-800 dark:text-slate-200">Nest</span>
-          </a>
+          </Link>
         </div>
 
         {/* Footer bottom section with copyright and version */}
