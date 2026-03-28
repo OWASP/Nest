@@ -1,10 +1,8 @@
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
-import { FaCalendar } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import type { CardProps } from 'types/card'
 import { ICONS } from 'utils/data'
-import { formatDateRange } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
@@ -22,7 +20,6 @@ const Card = ({
   projectName,
   social,
   summary,
-  timeline,
   title,
   tooltipLabel,
   topContributors,
@@ -54,7 +51,7 @@ const Card = ({
           {/* Project title and link */}
           <Link href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
             <h1
-              className="max-w-full text-base font-semibold break-words text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
+              className="max-w-full text-base font-semibold wrap-break-word text-blue-400 hover:text-blue-600 sm:text-lg sm:break-normal lg:text-2xl"
               style={{
                 transition: 'color 0.3s ease',
               }}
@@ -78,14 +75,6 @@ const Card = ({
             )}
           </div>
         )}
-
-        {/* Timeline Section (Optional) */}
-        {timeline?.start && timeline?.end && (
-          <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-            <FaCalendar className="mr-2 h-4 w-4" />
-            <span>{formatDateRange(timeline.start, timeline.end)}</span>
-          </div>
-        )}
       </div>
 
       {/* Project name link (if provided) */}
@@ -102,7 +91,7 @@ const Card = ({
 
       <Markdown
         content={summary}
-        className="mt-2 w-full [overflow-wrap:anywhere] break-words text-gray-600 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
+        className="mt-2 w-full wrap-anywhere text-gray-600 dark:text-gray-300 [&_a]:break-all [&_code]:break-all"
       />
 
       <div className="mt-4 w-full">

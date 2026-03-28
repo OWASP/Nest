@@ -648,48 +648,6 @@ describe('Card', () => {
     expect(screen.getAllByTestId('label')).toHaveLength(5)
   })
 
-  describe('timeline rendering', () => {
-    it('renders timeline when both start and end dates are provided', () => {
-      const propsWithTimeline = {
-        ...baseProps,
-        timeline: {
-          start: '2024-01-01',
-          end: '2024-12-31',
-        },
-      }
-      render(<Card {...propsWithTimeline} />)
-      expect(screen.getByTestId('calendar-icon')).toBeInTheDocument()
-    })
-
-    it('does not render timeline when start date is empty string', () => {
-      const propsWithEmptyStart = {
-        ...baseProps,
-        timeline: {
-          start: '',
-          end: '2024-12-31',
-        },
-      }
-      render(<Card {...propsWithEmptyStart} />)
-      expect(screen.queryByTestId('calendar-icon')).not.toBeInTheDocument()
-    })
-
-    it('does not render timeline when end date is empty string', () => {
-      const propsWithEmptyEnd = {
-        ...baseProps,
-        timeline: {
-          start: '2024-01-01',
-          end: '',
-        },
-      }
-      render(<Card {...propsWithEmptyEnd} />)
-      expect(screen.queryByTestId('calendar-icon')).not.toBeInTheDocument()
-    })
-
-    it('does not render timeline when timeline is undefined', () => {
-      render(<Card {...baseProps} />)
-      expect(screen.queryByTestId('calendar-icon')).not.toBeInTheDocument()
-    })
-  })
 
   describe('social media aria-label fallback', () => {
     it('uses item title as aria-label when provided', () => {
