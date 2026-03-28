@@ -43,7 +43,12 @@ class FakeWorkspace:
     def invite_link_alert_threshold(self):
         if self.invite_link_member_count is None:
             return None
-        return self.invite_link_member_count + self.invite_link_alert_member_offset
+        offset = (
+            self.invite_link_alert_member_offset
+            if self.invite_link_alert_member_offset is not None
+            else 350
+        )
+        return self.invite_link_member_count + offset
 
     @property
     def bot_token(self):

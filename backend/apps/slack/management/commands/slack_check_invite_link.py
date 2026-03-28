@@ -58,7 +58,7 @@ class Command(BaseCommand):
 
         baseline = workspace.invite_link_member_count
         created = workspace.invite_link_created_at
-        sha = workspace.invite_link_commit_sha.strip()
+        sha = (workspace.invite_link_commit_sha or "").strip()
         commit_url = f"https://github.com/{OWASP_LOGIN}/{OWASP_GITHUB_IO}/commit/{sha}"
         link_label = created.date().isoformat() if created else sha[:7]
         last_updated = f"<{commit_url}|{link_label}>"
@@ -133,7 +133,11 @@ class Command(BaseCommand):
         return f"\n\ncc: {' '.join(parts)}"
 
     def set_baseline(self, workspace: Workspace, current_members: int) -> None:
-        offset = workspace.invite_link_alert_member_offset
+        offset = (
+            workspace.invite_link_alert_member_offset
+            if workspace.invite_link_alert_member_offset is not None
+            else 350
+        )
         threshold = current_members + offset
         workspace.invite_link_member_count = current_members
         workspace.invite_link_last_alert_sent_at = None
