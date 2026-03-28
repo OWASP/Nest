@@ -151,16 +151,16 @@ def get_latest_invite_link_commit(
         (newest first), or ``(None, None)`` if none.
 
     """
-    repo_name = repository_name or f"{OWASP_LOGIN}/{OWASP_GITHUB_IO}"
+    repository_name = repository_name or f"{OWASP_LOGIN}/{OWASP_GITHUB_IO}"
     try:
-        repo = github.get_repo(repo_name)
+        repository = github.get_repo(repository_name)
     except GithubException:
-        logger.exception("Failed to load repo %s", repo_name)
+        logger.exception("Failed to load repo %s", repository_name)
         raise
 
-    commits = repo.get_commits(path=file_path)
+    commits = repository.get_commits(path=file_path)
     substring_lower = commit_message_substring.lower()
-    for index, commit in enumerate(commits):
+    for index, data in enumerate(commits):
         if index >= max_commits_to_scan:
             logger.warning(
                 "No commit matched within first %s commits for %s",
@@ -168,19 +168,10 @@ def get_latest_invite_link_commit(
                 file_path,
             )
             return None, None
-        if substring_lower not in commit.commit.message.lower():
+        if substring_lower not in data.commit.message.lower():
             continue
-        dt = commit.commit.committer.date
+        dt = data.commit.committer.date
         if timezone.is_naive(dt):
             dt = timezone.make_aware(dt, timezone.utc)
-        return dt, commit.sha
+        return dt, data.sha
     return None, None
-
-
-def get_latest_invite_link_commit_date(
-    github: Github,
-    **kwargs,
-) -> datetime | None:
-    """Return commit date only; see :func:`get_latest_invite_link_commit`."""
-    dt, _ = get_latest_invite_link_commit(github, **kwargs)
-    return dt

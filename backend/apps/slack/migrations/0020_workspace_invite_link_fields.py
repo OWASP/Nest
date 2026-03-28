@@ -26,6 +26,19 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="workspace",
+            name="invite_link_alert_user_ids",
+            field=models.JSONField(
+                blank=True,
+                default=list,
+                help_text=(
+                    'Optional JSON list of Slack user IDs (e.g. ["U01ABC…"]). '
+                    "A trailing cc: line with <@mentions> is added to invite-limit alerts."
+                ),
+                verbose_name="Invite alert Slack user IDs to mention",
+            ),
+        ),
+        migrations.AddField(
+            model_name="workspace",
             name="invite_link_alert_member_offset",
             field=models.PositiveSmallIntegerField(
                 default=350,
