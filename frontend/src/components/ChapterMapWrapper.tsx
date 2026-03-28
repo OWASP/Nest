@@ -21,8 +21,7 @@ const ChapterMapWrapper: React.FC<ChapterMapWrapperProps> = (props) => {
   const [sortedData, setSortedData] = useState<Chapter[] | null>(null)
 
   const enableLocationSharing = props.showLocationSharing === true
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { showLocationSharing, ...mapProps } = props
+  const { showLocationSharing: _, ...mapProps } = props
 
   if (!enableLocationSharing) {
     return <ChapterMap {...mapProps} />
@@ -44,7 +43,6 @@ const ChapterMapWrapper: React.FC<ChapterMapWrapperProps> = (props) => {
         setSortedData(sorted.map(({ _distance, ...chapter }) => chapter as unknown as Chapter))
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Error detecting location:', error)
     }
   }
