@@ -124,9 +124,7 @@ describe('GlobalSearch', () => {
     fireEvent.click(screen.getByLabelText('Open search'))
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Try searches like "OWASP", "London"/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/Try searches like "OWASP", "London"/)).toBeInTheDocument()
     })
   })
 
@@ -308,9 +306,7 @@ describe('GlobalSearch', () => {
     await waitFor(() => {
       const newInput = screen.getByPlaceholderText('Search the OWASP community...')
       expect(newInput).toHaveValue('')
-      expect(
-        screen.getByText(/Try searches like "OWASP", "London"/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/Try searches like "OWASP", "London"/)).toBeInTheDocument()
     })
   })
 
