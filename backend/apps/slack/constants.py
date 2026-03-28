@@ -80,7 +80,7 @@ OWASP_KEYWORDS = {
     "xss",
 }
 
-OWASP_WORKSPACE_ID = "T04T40NHX"
+OWASP_WORKSPACE_ID = "T09CFUJBUDT"
 
 VIEW_PROJECTS_ACTION = "view_projects_action"
 VIEW_PROJECTS_ACTION_NEXT = "view_projects_action_next"

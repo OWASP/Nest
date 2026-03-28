@@ -3,8 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.test import override_settings
 
-from apps.slack.blocks import markdown
-from apps.slack.commands.gsoc import SUPPORTED_YEAR_START, Gsoc, get_supported_year_end
+from apps.slack.commands.gsoc import SUPPORTED_YEAR_START, Gsoc
 from apps.slack.constants import FEEDBACK_SHARING_INVITE
 
 
@@ -26,7 +25,7 @@ class TestGsocCommand:
         ("commands_enabled", "command_text", "expected_message"),
         [
             (False, "", None),
-            (True, "", "GSOC_GENERAL_INFORMATION_BLOCKS"),
+            (True, "", None),
             (
                 True,
                 "invalid",
@@ -36,7 +35,7 @@ class TestGsocCommand:
                 True,
                 "2011",
                 f"Year 2011 is not supported. Supported years: "
-                f"{SUPPORTED_YEAR_START}-{get_supported_year_end()}",
+                f"{SUPPORTED_YEAR_START}-{Gsoc().supported_year_end}",
             ),
         ],
     )
@@ -45,13 +44,7 @@ class TestGsocCommand:
     ):
         command = {"text": command_text, "user_id": "U123456"}
 
-        with (
-            override_settings(SLACK_COMMANDS_ENABLED=commands_enabled),
-            patch(
-                "apps.slack.common.gsoc.GSOC_GENERAL_INFORMATION_BLOCKS",
-                new=[markdown("GSOC_GENERAL_INFORMATION_BLOCKS")],
-            ),
-        ):
+        with override_settings(SLACK_COMMANDS_ENABLED=commands_enabled):
             ack = MagicMock()
             Gsoc().handler(ack=ack, command=command, client=mock_slack_client)
 

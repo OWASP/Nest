@@ -14,23 +14,23 @@ SUPPORTED_YEAR_START = 2012
 SUPPORTED_ANNOUNCEMENT_YEARS_EXCLUDED = {2012, 2013, 2014, 2015, 2016, 2018}
 
 
-def get_supported_year_end():
-    """Get the current supported year end based on the current date."""
-    return get_gsoc_year()
-
-
-def get_supported_years():
-    """Get the set of supported GSoC years."""
-    return set(range(SUPPORTED_YEAR_START, get_supported_year_end() + 1))
-
-
-def get_supported_announcement_years():
-    """Get the set of years with announcements."""
-    return get_supported_years() - SUPPORTED_ANNOUNCEMENT_YEARS_EXCLUDED
-
-
 class Gsoc(CommandBase):
     """Slack bot /gsoc command."""
+
+    @property
+    def supported_year_end(self):
+        """Upper bound of GSoC years accepted by `/gsoc <year>` (current program year)."""
+        return get_gsoc_year()
+
+    @property
+    def supported_years(self):
+        """Set of GSoC years accepted by `/gsoc <year>`."""
+        return set(range(SUPPORTED_YEAR_START, self.supported_year_end + 1))
+
+    @property
+    def supported_announcement_years(self):
+        """Years for which announcement content is shown."""
+        return self.supported_years - SUPPORTED_ANNOUNCEMENT_YEARS_EXCLUDED
 
     def get_context(self, command: dict):
         """Get the template context.
@@ -42,9 +42,9 @@ class Gsoc(CommandBase):
             dict: The template context.
 
         """
-        gsoc_year = get_gsoc_year()
-        supported_years = get_supported_years()
-        supported_year_end = get_supported_year_end()
+        supported_year_end = self.supported_year_end
+        supported_years = self.supported_years
+        gsoc_year = supported_year_end
         command_text = command["text"].strip()
         context = {}
 
@@ -54,7 +54,7 @@ class Gsoc(CommandBase):
                     "CONTRIBUTE_CHANNEL_ID": OWASP_CONTRIBUTE_CHANNEL_ID,
                     "GSOC_CHANNEL_ID": OWASP_GSOC_CHANNEL_ID,
                     "MODE": "GENERAL",
-                    "PREVIOUS_YEAR": gsoc_year,
+                    "GSOC_YEAR": gsoc_year,
                     "PROJECTS_URL": get_absolute_url("/projects"),
                 }
             )
@@ -63,7 +63,7 @@ class Gsoc(CommandBase):
             if year in supported_years:
                 context.update(
                     {
-                        "HAS_ANNOUNCEMENT": year in get_supported_announcement_years(),
+                        "HAS_ANNOUNCEMENT": year in self.supported_announcement_years,
                         "MODE": "YEAR",
                         "PROJECTS": sorted(get_gsoc_projects(year), key=lambda p: p["idx_name"]),
                         "YEAR": year,

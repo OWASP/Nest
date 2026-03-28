@@ -59,5 +59,5 @@ class Gsoc(EventBase):
         """
         return {
             **super().get_context(event),
-            "PREVIOUS_YEAR": get_gsoc_year(),
+            "GSOC_YEAR": get_gsoc_year(),
         }
