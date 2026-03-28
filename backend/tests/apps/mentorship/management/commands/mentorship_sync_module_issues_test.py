@@ -238,9 +238,8 @@ class TestProcessModule:
 
         command.stdout.write.assert_any_call(
             command.style.SUCCESS(
-                f"Updated module '{mock_module.name}': set 3 issues from repos: [{
-                    mock_project_repo.name
-                }] and created 2 tasks."
+                f"Updated module '{mock_module.name}': set 3 issues from repos: "
+                f"[{mock_project_repo.name}] and created 2 tasks."
             )
         )
 
