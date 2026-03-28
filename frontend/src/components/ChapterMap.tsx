@@ -133,7 +133,7 @@ const MapViewUpdater = ({
     }
   }, [userLocation, showLocal, validGeoLocData, map])
 
-   return null
+  return null
 }
 
 const ChapterMap = ({
