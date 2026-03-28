@@ -18,6 +18,8 @@ import type { User } from 'types/user'
 
 type SearchHit = Chapter | Event | Organization | Project | User
 
+const isAlogliaConfigured =process.env.NEXT_PUBLIC_ALGOLIA_APP_ID && process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
+
 const INDEXES = ['chapters', 'events', 'organizations', 'projects', 'users']
 const SUGGESTION_COUNT = 3
 
@@ -81,6 +83,14 @@ export default function GlobalSearch() {
   const debouncedSearch = useMemo(
     () =>
       debounce(async (query: string) => {
+
+        if (isAlogliaConfigured){
+          setSearchError(true);
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
+        
         if (query && query.trim() !== '') {
           sendGAEvent({
             event: 'globalSearch',
@@ -431,6 +441,7 @@ export default function GlobalSearch() {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search the OWASP community..."
+                disabled={!isAlogliaConfigured}
                 aria-label="Search the OWASP community"
                 className="h-14 w-full bg-transparent pr-10 pl-11 text-base text-gray-900 placeholder-gray-400 focus:outline-none dark:text-white dark:placeholder-gray-500"
               />

@@ -108,6 +108,11 @@ export function useSearchPage<T>({
           computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
         }
 
+        if (!process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ||!process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY){
+          setIsLoaded(true)
+          return
+        } 
+
         const response = await fetchAlgoliaData<T>(
           computedIndexName,
           searchQuery,
