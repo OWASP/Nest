@@ -3,6 +3,7 @@
 import strawberry
 import strawberry_django
 
+from django.db.models import Prefetch
 from apps.common.utils import normalize_limit
 from apps.core.utils.index import deep_camelize
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -83,12 +84,12 @@ class ProjectNode(GenericEntityNode):
         """Resolve languages."""
         return root.idx_languages
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["repositories__issues"])
     def recent_issues(self, root: Project) -> list[IssueNode]:
         """Resolve recent issues."""
         return root.issues.order_by("-created_at")[:RECENT_ISSUES_LIMIT]
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["repositories__milestones"])
     def recent_milestones(self, root: Project, limit: int = 5) -> list[MilestoneNode]:
         """Resolve recent milestones."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
@@ -106,12 +107,12 @@ class ProjectNode(GenericEntityNode):
             .order_by("-created_at")[:normalized_limit]
         )
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["repositories__pull_requests"])
     def recent_pull_requests(self, root: Project) -> list[PullRequestNode]:
         """Resolve recent pull requests."""
         return root.pull_requests.order_by("-created_at")[:RECENT_PULL_REQUESTS_LIMIT]
 
-    @strawberry_django.field
+    @strawberry_django.field(prefetch_related=["repositories__releases"])
     def recent_releases(self, root: Project) -> list[ReleaseNode]:
         """Resolve recent releases."""
         return root.published_releases.order_by("-published_at")[:RECENT_RELEASES_LIMIT]
