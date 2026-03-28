@@ -3,6 +3,9 @@ import { act } from 'react'
 import SortBy from 'components/SortBy'
 
 describe('<SortBy />', () => {
+  /** Select trigger is always the first button; order toggle is second when visible. */
+  const getSortTrigger = () => screen.getAllByRole('button')[0]
+
   const defaultProps = {
     sortOptions: [
       { label: 'Name', key: 'name' },
@@ -22,8 +25,8 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    // HeroUI Select trigger exposes selected value as accessible name when no label is set
-    const sortTrigger = screen.getByRole('button', { name: 'Name' })
+    const sortTrigger = getSortTrigger()
+    expect(sortTrigger).toHaveAttribute('aria-label', 'Sort by')
     expect(sortTrigger).toBeInTheDocument()
     const selectedOption = screen.getByText('Name', { selector: '[data-slot="value"]' })
     expect(selectedOption).toBeInTheDocument()
@@ -33,7 +36,7 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} />)
     })
-    const sortTrigger = screen.getByRole('button', { name: 'Name' })
+    const sortTrigger = getSortTrigger()
     await act(async () => {
       sortTrigger.click()
     })
@@ -100,8 +103,8 @@ describe('<SortBy />', () => {
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
     expect(hiddenSelect.tagName).toBe('SELECT')
 
-    // Trigger exposes selected value as accessible name when no label is set
-    const sortTrigger = screen.getByRole('button', { name: 'Name' })
+    const sortTrigger = getSortTrigger()
+    expect(sortTrigger).toHaveAttribute('aria-label', 'Sort by')
     const container = sortTrigger.closest('div')
     expect(container).toBeInTheDocument()
   })
@@ -171,8 +174,7 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
     })
-    // Trigger shows selected value "Name" when showLabel is false
-    const container = screen.getByRole('button', { name: 'Name' }).closest('.flex.items-center')
+    const container = getSortTrigger().closest('.flex.items-center')
     expect(container).toBeInTheDocument()
     expect(container).not.toHaveClass('gap-2')
   })
@@ -189,8 +191,7 @@ describe('<SortBy />', () => {
     await act(async () => {
       render(<SortBy {...defaultProps} selectedSortOption="name" selectedOrder="asc" />)
     })
-    // Trigger shows selected value "Name" when showLabel is false
-    const sortButton = screen.getByRole('button', { name: 'Name' })
+    const sortButton = getSortTrigger()
     const outerWrapper = sortButton.closest('.h-12.items-center')
     expect(outerWrapper).toHaveClass('rounded-r-none')
     expect(outerWrapper).toHaveClass('border-r-0')
