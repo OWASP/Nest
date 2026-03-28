@@ -21,7 +21,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   )
 
   return (
-    <div className="relative inline-flex h-12 items-center rounded-lg border border-gray-300 bg-white shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
+    <div className="relative inline-flex h-12 items-center rounded-lg border border-gray-300 bg-white shadow-none transition-all duration-200 md:border-r-0 dark:border-gray-600 dark:bg-gray-800">
       <Autocomplete
         aria-label="Country"
         labelPlacement="outside-left"
