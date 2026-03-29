@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
+from django.db import IntegrityError
+from graphql import GraphQLError
 
 from apps.mentorship.api.internal.mutations.program import (
     ProgramMutation,
@@ -318,6 +320,38 @@ class TestUpdateProgram:
 
         with pytest.raises(ValidationError, match="End date must be after start date"):
             mutation.update_program(info, input_data)
+
+    @patch("apps.mentorship.api.internal.mutations.program.Program")
+    def test_update_program_duplicate_name_integrity_error(self, mock_program, mutation):
+        """GraphQLError when save violates unique name/key (another program)."""
+        user = MagicMock()
+        info = _make_info(user)
+
+        input_data = MagicMock()
+        input_data.key = "prog-1"
+        input_data.name = "Existing Program Name"
+        input_data.description = "Updated desc"
+        input_data.mentees_limit = 10
+        input_data.started_at = None
+        input_data.ended_at = None
+        input_data.domains = None
+        input_data.tags = None
+        input_data.status = None
+        input_data.admin_logins = None
+
+        mock_prog = MagicMock()
+        mock_prog.admins.filter.return_value.exists.return_value = True
+        mock_program.objects.select_for_update.return_value.get.return_value = mock_prog
+        mock_prog.save.side_effect = IntegrityError(
+            'duplicate key value violates unique constraint "mentorship_programs_name_key"'
+        )
+
+        with pytest.raises(GraphQLError) as raised:
+            mutation.update_program(info, input_data)
+
+        assert "name already exists" in str(raised.value)
+        assert raised.value.extensions.get("code") == "VALIDATION_ERROR"
+        assert raised.value.extensions.get("field") == "name"
 
     @patch("apps.mentorship.api.internal.mutations.program.Program")
     def test_update_program_with_none_dates(self, mock_program, mutation):

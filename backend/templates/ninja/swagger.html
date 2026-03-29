@@ -15,6 +15,16 @@
         <script>
             (() => {
                 const root = document.documentElement;
+                const getToggleLabel = (theme) => theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+
+                const syncToggleThemeText = (theme) => {
+                    const toggleButton = document.querySelector(".toggle-theme-btn");
+                    if (!toggleButton) return;
+
+                    const label = getToggleLabel(theme);
+                    toggleButton.setAttribute("aria-label", label);
+                    toggleButton.setAttribute("title", label);
+                };
 
                 const getCookie = (name) =>
                     document.cookie
@@ -27,9 +37,15 @@
 
                 const apply = (theme) => {
                     root.classList.toggle("dark", theme === "dark");
+                    syncToggleThemeText(theme);
                 };
 
                 apply(getTheme());
+
+                document.addEventListener("DOMContentLoaded", () => {
+                    const activeTheme = root.classList.contains("dark") ? "dark" : "light";
+                    syncToggleThemeText(activeTheme);
+                });
 
                 document.addEventListener("click", (e) => {
                     if (!e.target.closest(".toggle-theme-btn")) return;
@@ -54,7 +70,10 @@
                 </div>
                 <div class="logo-text">Nest</div>
             </a>
-            <button type="button" class="toggle-theme-btn" aria-label="Toggle theme">
+            <button type="button"
+                    class="toggle-theme-btn"
+                    aria-label="Switch to dark mode"
+                    title="Switch to dark mode">
                 <svg class="theme-icon theme-icon-sun"
                      aria-hidden="true"
                      width="24"

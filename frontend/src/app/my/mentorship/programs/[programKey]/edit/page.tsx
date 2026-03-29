@@ -14,6 +14,7 @@ import {
   GetProgramDetailsDocument,
 } from 'types/__generated__/programsQueries.generated'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -139,14 +140,18 @@ const EditProgramPage = () => {
 
       router.push(`/my/mentorship/programs/${updatedProgramKey}`)
     } catch (err) {
-      addToast({
-        title: 'Update Failed',
-        description: 'There was an error updating the program.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 3000,
-      })
-      handleAppError(err)
+      const { hasValidationErrors } = extractGraphQLErrors(err)
+      if (!hasValidationErrors) {
+        addToast({
+          title: 'Update Failed',
+          description: 'There was an error updating the program.',
+          color: 'danger',
+          variant: 'solid',
+          timeout: 3000,
+        })
+        handleAppError(err)
+      }
+      throw err
     }
   }
   if (accessStatus === 'checking') {
@@ -170,7 +175,6 @@ const EditProgramPage = () => {
       title="Edit Program"
       submitText="Save"
       isEdit={true}
-      currentProgramKey={programKey}
     />
   )
 }

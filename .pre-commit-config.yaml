@@ -41,7 +41,7 @@ repos:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.6
+    rev: v0.15.8
     hooks:
       - id: ruff-check
         args:
@@ -123,6 +123,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.18.1
+    rev: v2.20.0
     hooks:
       - id: pyproject-fmt

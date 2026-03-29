@@ -13,15 +13,7 @@ test.describe('Committees Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/committees')
+    await page.goto('/committees', { timeout: 25000 })
   })
 
   test('renders committee data correctly', async ({ page }) => {
@@ -43,7 +35,7 @@ test.describe('Committees Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
+    const nextPageButton = page.getByRole('button', { name: '2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
