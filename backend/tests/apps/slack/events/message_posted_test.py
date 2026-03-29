@@ -5,9 +5,21 @@ from unittest.mock import Mock, patch
 import pytest
 
 from apps.slack.events.message_posted import MessagePosted
-from apps.slack.models.message import Message
+from apps.slack.models.conversation import Conversation
 
 TEST_BOT_TOKEN = "xoxb-test-token"  # noqa: S105
+
+
+def _configure_conversation_get(mock_conversation, *, return_value=None, side_effect=None):
+    """Wire Conversation.objects.select_related('workspace').get(...) mocks."""
+    mock_conversation.DoesNotExist = Conversation.DoesNotExist
+    chain = Mock()
+    if side_effect is not None:
+        chain.get.side_effect = side_effect
+    else:
+        chain.get.return_value = return_value
+    mock_conversation.objects.select_related.return_value = chain
+    return chain
 
 
 class TestMessagePosted:
@@ -22,11 +34,12 @@ class TestMessagePosted:
         return workspace
 
     @pytest.fixture
-    def conversation_mock(self):
+    def conversation_mock(self, workspace_mock):
         """Mock conversation object."""
         conversation = Mock()
         conversation.slack_channel_id = "C123456"
         conversation.is_nest_bot_assistant_enabled = True
+        conversation.workspace = workspace_mock
         return conversation
 
     @pytest.fixture
@@ -89,12 +102,12 @@ class TestMessagePosted:
         client = Mock()
 
         with patch("apps.slack.events.message_posted.Message") as mock_message:
-            mock_message.DoesNotExist = Exception
-            mock_message.objects.get.side_effect = Exception("Message not found")
+            mock_queryset = Mock()
+            mock_message.objects.filter.return_value = mock_queryset
 
             message_handler.handle_event(event, client)
 
-        client.chat_postMessage.assert_not_called()
+            mock_queryset.update.assert_called_once_with(has_replies=True)
 
     def test_handle_event_thread_message_updates_parent(self, message_handler):
         """Test that thread messages update parent message has_replies flag."""
@@ -120,7 +133,7 @@ class TestMessagePosted:
             mock_queryset.update.assert_called_once_with(has_replies=True)
 
     def test_handle_event_thread_message_not_found_warning(self, message_handler):
-        """Test logger warning when thread parent message is not found."""
+        """Test debug log when thread parent row is not updated."""
         event = {
             "thread_ts": "1234567890.123455",
             "channel": "C123456",
@@ -134,14 +147,13 @@ class TestMessagePosted:
             patch("apps.slack.events.message_posted.Message") as mock_message,
             patch("apps.slack.events.message_posted.logger") as mock_logger,
         ):
-            mock_message.DoesNotExist = Message.DoesNotExist
             mock_queryset = Mock()
-            mock_queryset.update.side_effect = Message.DoesNotExist
+            mock_queryset.update.return_value = 0
             mock_message.objects.filter.return_value = mock_queryset
 
             message_handler.handle_event(event, client)
 
-            mock_logger.warning.assert_called_once_with("Thread message not found.")
+            mock_logger.debug.assert_called_once_with("Thread message not found for update.")
 
     def test_handle_event_conversation_not_found(self, message_handler):
         """Test handling when conversation is not found."""
@@ -156,10 +168,9 @@ class TestMessagePosted:
         client.auth_test.return_value = {"user_id": "U987654"}
 
         with patch("apps.slack.events.message_posted.Conversation") as mock_conversation:
-            from apps.slack.models.conversation import Conversation  # noqa: PLC0415
-
-            mock_conversation.DoesNotExist = Conversation.DoesNotExist
-            mock_conversation.objects.get.side_effect = Conversation.DoesNotExist
+            chain = _configure_conversation_get(
+                mock_conversation, side_effect=Conversation.DoesNotExist
+            )
 
             with patch.object(
                 message_handler.question_detector,
@@ -168,7 +179,8 @@ class TestMessagePosted:
             ):
                 message_handler.handle_event(event, client)
 
-            mock_conversation.objects.get.assert_called_once_with(
+            mock_conversation.objects.select_related.assert_called_once_with("workspace")
+            chain.get.assert_called_once_with(
                 slack_channel_id="C999999",
                 is_nest_bot_assistant_enabled=True,
             )
@@ -188,10 +200,9 @@ class TestMessagePosted:
         client.auth_test.return_value = {"user_id": "U987654"}
 
         with patch("apps.slack.events.message_posted.Conversation") as mock_conversation:
-            from apps.slack.models.conversation import Conversation  # noqa: PLC0415
-
-            mock_conversation.DoesNotExist = Conversation.DoesNotExist
-            mock_conversation.objects.get.side_effect = Conversation.DoesNotExist
+            chain = _configure_conversation_get(
+                mock_conversation, side_effect=Conversation.DoesNotExist
+            )
 
             with patch.object(
                 message_handler.question_detector,
@@ -200,7 +211,8 @@ class TestMessagePosted:
             ):
                 message_handler.handle_event(event, client)
 
-            mock_conversation.objects.get.assert_called_once_with(
+            mock_conversation.objects.select_related.assert_called_once_with("workspace")
+            chain.get.assert_called_once_with(
                 slack_channel_id="C123456",
                 is_nest_bot_assistant_enabled=True,
             )
@@ -218,7 +230,7 @@ class TestMessagePosted:
         member_mock,
     ):
         """Test handling when message is not an OWASP question."""
-        mock_conversation.objects.get.return_value = conversation_mock
+        _configure_conversation_get(mock_conversation, return_value=conversation_mock)
         mock_member.objects.get.return_value = member_mock
 
         event = {
@@ -255,7 +267,7 @@ class TestMessagePosted:
         member_mock,
     ):
         """Test successful handling of OWASP question."""
-        mock_conversation.objects.get.return_value = conversation_mock
+        _configure_conversation_get(mock_conversation, return_value=conversation_mock)
         mock_member.objects.get.return_value = member_mock
 
         event = {
@@ -298,18 +310,15 @@ class TestMessagePosted:
         }
 
         client = Mock()
+        client.auth_test.return_value = {"user_id": "U987654"}
         client.users_info.return_value = {"user": {"id": "U999999", "name": "Test User"}}
-
-        # Create a proper workspace mock
-        workspace_mock = Mock()
-        conversation_mock.workspace = workspace_mock
 
         with (
             patch("apps.slack.events.message_posted.Conversation") as mock_conversation,
             patch("apps.slack.events.message_posted.Member") as mock_member,
             patch("apps.slack.events.message_posted.Message") as mock_message_model,
         ):
-            mock_conversation.objects.get.return_value = conversation_mock
+            _configure_conversation_get(mock_conversation, return_value=conversation_mock)
 
             from apps.slack.models.member import Member  # noqa: PLC0415
 
@@ -344,10 +353,7 @@ class TestMessagePosted:
         client.auth_test.return_value = {"user_id": "U987654"}
 
         with patch("apps.slack.events.message_posted.Conversation") as mock_conversation:
-            from apps.slack.models.conversation import Conversation  # noqa: PLC0415
-
-            mock_conversation.DoesNotExist = Conversation.DoesNotExist
-            mock_conversation.objects.get.side_effect = Conversation.DoesNotExist
+            _configure_conversation_get(mock_conversation, side_effect=Conversation.DoesNotExist)
 
             with patch.object(
                 message_handler.question_detector,

@@ -3,10 +3,20 @@
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from slack_sdk.errors import SlackApiError
 
 from apps.slack.events.app_mention import AppMention
+from apps.slack.services.message_auto_reply import process_ai_query_async
 
-TEST_BOT_TOKEN = "xoxb-test-token"  # noqa: S105
+
+def _assert_ai_enqueued(mock_django_rq, **expected):
+    mock_django_rq.get_queue.assert_called_once_with("ai")
+    mock_queue = mock_django_rq.get_queue.return_value
+    mock_queue.enqueue.assert_called_once()
+    args, kwargs = mock_queue.enqueue.call_args
+    assert args[0] is process_ai_query_async
+    for key, value in expected.items():
+        assert kwargs.get(key) == value
 
 
 class TestAppMention:
@@ -37,10 +47,10 @@ class TestAppMention:
         """Test that event_type is set correctly."""
         assert handler.event_type == "app_mention"
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_ai_disabled(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
         """Test that handler returns early when AI assistant is disabled."""
         mock_conversation.objects.filter.return_value.exists.return_value = False
@@ -53,19 +63,18 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_not_called()
+        mock_django_rq.get_queue.assert_not_called()
         mock_client.chat_postMessage.assert_not_called()
 
-    @patch("apps.slack.events.app_mention.download_file")
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_filters_unsupported_mimetypes(
-        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test that files with unsupported MIME types are filtered out."""
+        """Test that files with unsupported MIME types are not enqueued as images."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-        mock_client.token = TEST_BOT_TOKEN
+        mock_queue = Mock()
+        mock_django_rq.get_queue.return_value = mock_queue
 
         event = {
             "channel": "C123456",
@@ -82,20 +91,24 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_download_file.assert_not_called()
-        call_kwargs = mock_get_blocks.call_args.kwargs
-        assert call_kwargs["images"] == []
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="Check this file",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
+        )
 
-    @patch("apps.slack.events.app_mention.download_file")
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_filters_oversized_images(
-        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test that images exceeding MAX_IMAGE_SIZE are filtered out."""
+        """Test that images exceeding MAX_IMAGE_SIZE are not enqueued."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-        mock_client.token = TEST_BOT_TOKEN
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -104,7 +117,7 @@ class TestAppMention:
             "files": [
                 {
                     "mimetype": "image/png",
-                    "size": 3 * 1024 * 1024,  # 3MB, exceeds 2MB limit
+                    "size": 3 * 1024 * 1024,
                     "url_private": "https://files.slack.com/big.png",
                 },
             ],
@@ -112,13 +125,19 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_download_file.assert_not_called()
-        call_kwargs = mock_get_blocks.call_args.kwargs
-        assert call_kwargs["images"] == []
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="Check this image",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
+        )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
-    def test_handle_event_no_query(self, mock_get_blocks, mock_conversation, handler, mock_client):
+    def test_handle_event_no_query(self, mock_conversation, mock_django_rq, handler, mock_client):
         """Test that handler returns early when no query is found."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
 
@@ -130,17 +149,17 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_not_called()
+        mock_django_rq.get_queue.assert_not_called()
         mock_client.chat_postMessage.assert_not_called()
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_extract_query_from_blocks(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
         """Test extracting query from rich text blocks."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -163,18 +182,24 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(
-            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is OWASP?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
         )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_extract_query_from_blocks_multiple_elements(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
         """Test extracting query from rich text blocks with multiple elements."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -198,18 +223,24 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(
-            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is OWASP?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
         )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_blocks_without_text_element(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
         """Test handle_event with blocks but no text elements falls back to event text."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -230,18 +261,24 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(
-            query="Fallback text", images=[], channel_id="C123456", is_app_mention=True
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="Fallback text",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
         )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_blocks_without_rich_text_section(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
         """Test handle_event with blocks but no rich_text_section."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -257,18 +294,24 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(
-            query="Fallback text", images=[], channel_id="C123456", is_app_mention=True
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="Fallback text",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
         )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_blocks_not_rich_text(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
         """Test that non-rich_text blocks don't extract query."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -284,19 +327,28 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_get_blocks.assert_called_once_with(
-            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is OWASP?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
         )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_reaction_already_exists(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test handling when reaction already exists."""
+        """Test handling when reaction already exists (SlackApiError)."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-        mock_client.reactions_add.return_value = {"ok": False, "error": "already_reacted"}
+        mock_django_rq.get_queue.return_value = Mock()
+        mock_client.reactions_add.side_effect = SlackApiError(
+            message="already_reacted",
+            response={"ok": False, "error": "already_reacted"},
+        )
 
         event = {
             "channel": "C123456",
@@ -307,17 +359,28 @@ class TestAppMention:
         handler.handle_event(event, mock_client)
 
         mock_client.reactions_add.assert_called_once()
-        mock_get_blocks.assert_called_once()
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is OWASP?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
+        )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_reaction_error(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test handling when reaction fails with error."""
+        """Test handling when reaction fails with a non-already_reacted Slack error."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-        mock_client.reactions_add.return_value = {"ok": False, "error": "invalid_name"}
+        mock_django_rq.get_queue.return_value = Mock()
+        mock_client.reactions_add.side_effect = SlackApiError(
+            message="invalid_name",
+            response={"ok": False, "error": "invalid_name"},
+        )
 
         event = {
             "channel": "C123456",
@@ -328,17 +391,25 @@ class TestAppMention:
         handler.handle_event(event, mock_client)
 
         mock_client.reactions_add.assert_called_once()
-        mock_get_blocks.assert_called_once()
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is OWASP?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
+        )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_reaction_exception(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test handling when reaction raises exception."""
+        """Test that non-SlackApiError from reactions_add aborts before enqueue."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-        mock_client.reactions_add.side_effect = Exception("Network error")
+        mock_django_rq.get_queue.return_value = Mock()
+        mock_client.reactions_add.side_effect = RuntimeError("Network error")
 
         event = {
             "channel": "C123456",
@@ -346,23 +417,20 @@ class TestAppMention:
             "ts": "1234567890.123456",
         }
 
-        handler.handle_event(event, mock_client)
+        with pytest.raises(RuntimeError, match="Network error"):
+            handler.handle_event(event, mock_client)
 
-        mock_client.reactions_add.assert_called_once()
-        mock_get_blocks.assert_called_once()
-        mock_client.chat_postMessage.assert_called_once()
+        mock_django_rq.get_queue.assert_not_called()
+        mock_client.chat_postMessage.assert_not_called()
 
-    @patch("apps.slack.events.app_mention.download_file")
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_with_image_files(
-        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test that image files are downloaded, base64 encoded, and passed to get_blocks."""
+        """Test that image metadata is enqueued for the worker (no download in handler)."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-        mock_download_file.return_value = b"\x89PNG\r\n"
-        mock_client.token = TEST_BOT_TOKEN
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -379,24 +447,26 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_download_file.assert_called_once_with(
-            "https://files.slack.com/image.png", TEST_BOT_TOKEN
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is in this image?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=[
+                {"url_private": "https://files.slack.com/image.png", "mimetype": "image/png"},
+            ],
         )
-        call_kwargs = mock_get_blocks.call_args.kwargs
-        assert len(call_kwargs["images"]) == 1
-        assert call_kwargs["images"][0].startswith("data:image/png;base64,")
 
-    @patch("apps.slack.events.app_mention.download_file")
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
-    def test_handle_event_image_download_failure(
-        self, mock_get_blocks, mock_conversation, mock_download_file, handler, mock_client
+    def test_handle_event_image_without_url_private(
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test that failed image downloads are skipped gracefully."""
+        """Test that images missing url_private are omitted from slack_image_files."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
-        mock_download_file.return_value = None
-        mock_client.token = TEST_BOT_TOKEN
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -406,23 +476,28 @@ class TestAppMention:
                 {
                     "mimetype": "image/jpeg",
                     "size": 500,
-                    "url_private": "https://files.slack.com/broken.jpg",
                 },
             ],
         }
 
         handler.handle_event(event, mock_client)
 
-        mock_download_file.assert_called_once()
-        call_kwargs = mock_get_blocks.call_args.kwargs
-        assert call_kwargs["images"] == []
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is in this image?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
+            thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
+        )
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
-    def test_handle_event_success(self, mock_get_blocks, mock_conversation, handler, mock_client):
-        """Test successful handling of app mention event."""
+    def test_handle_event_success(self, mock_conversation, mock_django_rq, handler, mock_client):
+        """Test successful handling enqueues async processing."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -437,24 +512,25 @@ class TestAppMention:
             timestamp="1234567890.123456",
             name="eyes",
         )
-        mock_get_blocks.assert_called_once_with(
-            query="What is OWASP?", images=[], channel_id="C123456", is_app_mention=True
-        )
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel="C123456",
-            blocks=[{"type": "section", "text": {"text": "Response"}}],
-            text="What is OWASP?",
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is OWASP?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
             thread_ts="1234567890.123456",
+            is_app_mention=True,
+            slack_image_files=None,
         )
+        mock_client.chat_postMessage.assert_not_called()
 
+    @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
-    @patch("apps.slack.events.app_mention.get_blocks")
     def test_handle_event_with_thread_ts(
-        self, mock_get_blocks, mock_conversation, handler, mock_client
+        self, mock_conversation, mock_django_rq, handler, mock_client
     ):
-        """Test handling event with thread_ts."""
+        """Test thread_ts is passed to the enqueued job."""
         mock_conversation.objects.filter.return_value.exists.return_value = True
-        mock_get_blocks.return_value = [{"type": "section", "text": {"text": "Response"}}]
+        mock_django_rq.get_queue.return_value = Mock()
 
         event = {
             "channel": "C123456",
@@ -465,9 +541,13 @@ class TestAppMention:
 
         handler.handle_event(event, mock_client)
 
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel="C123456",
-            blocks=[{"type": "section", "text": {"text": "Response"}}],
-            text="What is OWASP?",
+        _assert_ai_enqueued(
+            mock_django_rq,
+            query="What is OWASP?",
+            channel_id="C123456",
+            message_ts="1234567890.123456",
             thread_ts="1234567890.000000",
+            is_app_mention=True,
+            slack_image_files=None,
         )
+        mock_client.chat_postMessage.assert_not_called()
