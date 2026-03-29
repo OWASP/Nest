@@ -15,8 +15,12 @@ export const fetchAlgoliaData = async <T>(
       facetFilters.push('idx_is_active:true')
     }
 
-    if (!IDX_URL) {
-      throw new Error('IDX_URL is not defined')
+    // NEW: Explicit configuration validation
+    if (!IDX_URL || IDX_URL === 'None') {
+      throw new AppError(
+        500,
+        'Algolia is not configured. Please check your environment variables.'
+      )
     }
 
     const response = await fetch(IDX_URL, {
@@ -36,10 +40,19 @@ export const fetchAlgoliaData = async <T>(
     })
 
     if (!response.ok) {
+      // Optional: more descriptive error handling
+      if (response.status === 500) {
+        throw new AppError(
+          500,
+          'Search service error. Please verify Algolia configuration.'
+        )
+      }
+
       throw new AppError(response.status, 'Search service error')
     }
 
     const results = await response.json()
+
     if (results && results.hits.length > 0) {
       const { hits, nbPages } = results
 
@@ -54,6 +67,11 @@ export const fetchAlgoliaData = async <T>(
     if (error instanceof AppError) {
       throw error
     }
-    throw new AppError(500, 'Search service error')
+
+    // NEW: clearer fallback message
+    throw new AppError(
+      500,
+      'Search service error. Please verify Algolia configuration.'
+    )
   }
 }
