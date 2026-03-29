@@ -1,9 +1,14 @@
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, call, patch
 
+import openai
+
+from apps.ai.common.intent import Intent
 from apps.ai.common.utils import (
     create_chunks_and_embeddings,
     extract_json_from_markdown,
+    get_fallback_response,
+    get_intent_to_agent_map,
     regenerate_chunks_for_context,
 )
 
@@ -350,3 +355,55 @@ class TestExtractJsonFromMarkdown:
         content = '```json\n\n  {"key": "value"}  \n\n```'
         result = extract_json_from_markdown(content)
         assert result == '{"key": "value"}'
+
+
+class TestGetFunctions:
+    """Tests for get_ related helper functions."""
+
+    def test_get_fallback_response_development(self):
+        """Detailed message is shown in local/debug environments."""
+        from django.conf import settings  # noqa: PLC0415
+
+        with (
+            patch.object(settings, "IS_LOCAL_ENVIRONMENT", new=True),
+            patch.object(settings, "DEBUG", new=False),
+        ):
+            result = get_fallback_response()
+
+        assert "encountered an error processing your request" in result
+        # Development message includes a warning emoji
+        assert "⚠️" in result
+
+    def test_get_fallback_response_production(self):
+        """Generic message is returned in production (no debug/local)."""
+        from django.conf import settings  # noqa: PLC0415
+
+        with (
+            patch.object(settings, "IS_LOCAL_ENVIRONMENT", new=False),
+            patch.object(settings, "DEBUG", new=False),
+        ):
+            result = get_fallback_response()
+
+        assert result == (
+            "I'm sorry, I encountered an issue processing your request. "
+            "Please try again or rephrasing your question."
+        )
+
+    def test_get_intent_to_agent_map_contains_expected(self):
+        """Mapping contains expected intent keys and agent constructors."""
+        with (
+            patch("apps.ai.agents.chapter.create_chapter_agent") as mock_chapter,
+            patch("apps.ai.agents.community.create_community_agent") as mock_community,
+            patch("apps.ai.agents.contribution.create_contribution_agent") as mock_contribution,
+            patch("apps.ai.agents.project.create_project_agent") as mock_project,
+            patch("apps.ai.agents.rag.create_rag_agent") as mock_rag,
+        ):
+            mapping = get_intent_to_agent_map()
+
+        # Ensure all expected intents are present and map to our patched callables
+        assert mapping[Intent.CHAPTER.value] is mock_chapter
+        assert mapping[Intent.COMMUNITY.value] is mock_community
+        assert mapping[Intent.CONTRIBUTION.value] is mock_contribution
+        assert mapping[Intent.GSOC.value] is mock_contribution
+        assert mapping[Intent.PROJECT.value] is mock_project
+        assert mapping[Intent.RAG.value] is mock_rag
