@@ -436,8 +436,9 @@ export const ProjectSelector = ({
     }
   }
 
-  const displayError = errorMessage
-  const shouldShowInvalid = isInvalid
+  const isTyping = inputValue.trim() !== '' && !value
+  const displayError = isTyping ? undefined : errorMessage
+  const shouldShowInvalid = isTyping ? false : isInvalid
 
   return (
     <div data-testid="autocomplete" className="relative w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
