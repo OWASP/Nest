@@ -74,15 +74,22 @@ export function Providers({
     }
   }, [])
 
-  const graphQLErrorMessage = !apolloClient
-    ? isProduction
-      ? 'Something went wrong'
-      : 'GraphQL client setup required. Ensure backend is running and GraphQL environment variables are configured.'
-    : graphQLReachability === 'unreachable'
-      ? isProduction
-        ? 'Something went wrong'
-        : 'GraphQL endpoint is unreachable. Ensure the backend service is running and NEXT_PUBLIC_GRAPHQL_URL is correct.'
-      : null
+  let graphQLErrorMessage: string | null = null
+  if (!apolloClient) {
+    if (isProduction) {
+      graphQLErrorMessage = 'Something went wrong'
+    } else {
+      graphQLErrorMessage =
+        'GraphQL client setup required. Ensure backend is running and GraphQL environment variables are configured.'
+    }
+  } else if (graphQLReachability === 'unreachable') {
+    if (isProduction) {
+      graphQLErrorMessage = 'Something went wrong'
+    } else {
+      graphQLErrorMessage =
+        'GraphQL endpoint is unreachable. Ensure the backend service is running and NEXT_PUBLIC_GRAPHQL_URL is correct.'
+    }
+  }
 
   React.useEffect(() => {
     if (!graphQLErrorMessage || lastToastMessageRef.current === graphQLErrorMessage) {
