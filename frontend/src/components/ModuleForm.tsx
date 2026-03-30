@@ -424,7 +424,7 @@ export const ProjectSelector = ({
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setFocusedIndex((prev) => (prev <= 0 ? items.length - 1 : prev - 1))
-    } else if (e.key === 'Enter' && focusedIndex >= 0) {
+    } else if (e.key === 'Enter' && focusedIndex >= 0 && focusedIndex < items.length) {
       e.preventDefault()
       handleSelect(items[focusedIndex])
       setFocusedIndex(-1)
