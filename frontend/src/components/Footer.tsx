@@ -124,6 +124,7 @@ export default function Footer() {
             href="/"
             className="flex items-center gap-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             aria-label="Nest home"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <Image
               src={nestLogoSrc}

@@ -64,9 +64,9 @@ Keshav is a Senior Security Engineer at LinkedIn who works at the intersection o
 
 AI/ML enthusiast | GSoC'25 contributor at PSF
 
-[GitHub](https://github.com/kritibirda) • [LinkedIn](https://www.linkedin.com/in/kritibirda/) • [Slack](https://owasp.slack.com/team/U08KZ9Z7MFX) • Country (Timezone)
+[GitHub](https://github.com/kritibirda) • [LinkedIn](https://www.linkedin.com/in/kritibirda/) • [Slack](https://owasp.slack.com/team/U08KZ9Z7MFX) • [India (IST)](https://time-time.net/time/new-delhi-india.php)
 
-*This section is reserved for the mentor to add their own description.*
+Kriti Birda is an AI/ML enthusiast interested in applying her skills to real-world challenges and modern software systems. She is an active open-source contributor who enjoys building reliable, well-tested tools and helping simplify complex concepts for the community. She is also a two-time Google Summer of Code contributor. She contributed to OSGeo (GRASS) in 2024 and to Python Software Foundation (OWHF) in 2025.
 
 ### Marie Wang
 
