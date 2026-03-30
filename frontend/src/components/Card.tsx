@@ -75,7 +75,6 @@ const Card = ({
             )}
           </div>
         )}
-
       </div>
 
       {/* Project name link (if provided) */}

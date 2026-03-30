@@ -648,8 +648,6 @@ describe('Card', () => {
     expect(screen.getAllByTestId('label')).toHaveLength(5)
   })
 
-  // timeline rendering tests removed as timeline is no longer rendered
-
   describe('social media aria-label fallback', () => {
     it('uses item title as aria-label when provided', () => {
       const propsWithSocialTitle = {
