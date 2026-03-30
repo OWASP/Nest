@@ -138,7 +138,7 @@ const DetailsCard = ({
   const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
   return (
-    <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-brand-dark dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
@@ -239,7 +239,7 @@ const DetailsCard = ({
             </SecondaryCard>
           )}
           {type === 'chapter' && geolocationData && geolocationData.length > 0 && (
-            <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
+            <div className="mb-8 aspect-video md:aspect-auto md:col-span-4">
               <ChapterMapWrapper
                 geoLocData={geolocationData}
                 showLocal={true}

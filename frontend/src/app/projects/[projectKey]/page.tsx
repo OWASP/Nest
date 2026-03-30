@@ -18,7 +18,7 @@ import type { Release } from 'types/release'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
-import LoadingSpinner from 'components/LoadingSpinner'
+import SkeletonsBase from 'components/SkeletonsBase'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
@@ -40,7 +40,7 @@ const ProjectDetailsPage = () => {
   }, [graphQLRequestError])
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <SkeletonsBase type="project" />
   }
 
   if (graphQLRequestError) {
