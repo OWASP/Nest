@@ -466,6 +466,7 @@ export const ProjectSelector = ({
         aria-haspopup="listbox"
         className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
       />
+      {/* Hidden button used by tests to programmatically clear the selection */}
       <button
         type="button"
         data-testid="autocomplete-clear"
