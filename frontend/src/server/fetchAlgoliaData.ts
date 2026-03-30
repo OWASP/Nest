@@ -3,13 +3,20 @@ import type { AlgoliaResponse } from 'types/algolia'
 import { IDX_URL } from 'utils/env.client'
 import { getCsrfToken } from 'utils/utility'
 
+interface FetchAlgoliaDataOptions {
+  throwOnError?: boolean
+}
+
 export const fetchAlgoliaData = async <T>(
   indexName: string,
   query = '',
   currentPage = 0,
   hitsPerPage = 25,
-  facetFilters: string[] = []
+  facetFilters: string[] = [],
+  options: FetchAlgoliaDataOptions = {}
 ): Promise<AlgoliaResponse<T>> => {
+  const { throwOnError = true } = options
+
   try {
     if (['projects', 'chapters'].includes(indexName)) {
       facetFilters.push('idx_is_active:true')
@@ -36,6 +43,9 @@ export const fetchAlgoliaData = async <T>(
     })
 
     if (!response.ok) {
+      if (!throwOnError) {
+        return { hits: [], totalPages: 0 }
+      }
       throw new AppError(response.status, 'Search service error')
     }
 
@@ -51,6 +61,10 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
+    if (!throwOnError) {
+      return { hits: [], totalPages: 0 }
+    }
+
     if (error instanceof AppError) {
       throw error
     }

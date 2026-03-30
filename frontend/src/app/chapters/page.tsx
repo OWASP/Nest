@@ -50,22 +50,27 @@ const ChaptersPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const searchParams = {
-        indexName: 'chapters',
-        query: '',
-        currentPage,
-        hitsPerPage: currentPage === 1 ? 1000 : 25,
+      try {
+        const searchParams = {
+          indexName: 'chapters',
+          query: '',
+          currentPage,
+          hitsPerPage: currentPage === 1 ? 1000 : 25,
+        }
+        const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
+          searchParams.indexName,
+          searchParams.query,
+          searchParams.currentPage,
+          searchParams.hitsPerPage,
+          selectedCountry ? [`idx_country:${selectedCountry}`] : [],
+          { throwOnError: false }
+        )
+        setGeoLocData(data.hits)
+      } catch {
+        setGeoLocData([])
       }
-      const data: AlgoliaResponse<Chapter> = await fetchAlgoliaData(
-        searchParams.indexName,
-        searchParams.query,
-        searchParams.currentPage,
-        searchParams.hitsPerPage,
-        selectedCountry ? [`idx_country:${selectedCountry}`] : []
-      )
-      setGeoLocData(data.hits)
     }
-    fetchData()
+    void fetchData()
   }, [currentPage, selectedCountry])
 
   const handleCountryChange = (country: string) => {
