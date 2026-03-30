@@ -141,10 +141,6 @@ jobs:
 
   run-security-scan-code:
     name: Run code security scan
-    needs:
-      - check-frontend
-      - pre-commit
-      - spellcheck
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -164,12 +160,25 @@ jobs:
 
       - name: Run Trivy security scan
         run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
-    timeout-minutes: 5
+    timeout-minutes: 15
+
+  ci-gates:
+    name: CI gates passed
+    needs:
+      - check-frontend
+      - pre-commit
+      - run-security-scan-code
+      - spellcheck
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - name: All gates passed
+        run: echo "pre-commit, frontend checks, spellcheck, and security scan succeeded."
 
   run-backend-tests:
     name: Run backend tests
     needs:
-      - run-security-scan-code
+      - ci-gates
     permissions:
       contents: read
       id-token: write
@@ -219,7 +228,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - run-security-scan-code
+      - ci-gates
     permissions:
       contents: read
       id-token: write
@@ -268,7 +277,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - run-security-scan-code
+      - ci-gates
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -403,7 +412,7 @@ jobs:
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
-      - run-security-scan-code
+      - ci-gates
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -433,28 +442,11 @@ jobs:
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-a11y-latest pnpm run test:a11y
     timeout-minutes: 5
 
-  set-release-version:
-    name: Set release version
-    outputs:
-      release_version: ${{ steps.set.outputs.release_version }}
-    permissions: {}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set release version
-        id: set
-        run: |
-          if [ -n "${{ github.event.release.tag_name }}" ]; then
-            echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-          fi
-    timeout-minutes: 5
-
   run-graphql-fuzz-tests:
     name: Run GraphQL fuzz tests
     if: false
     needs:
-      - run-security-scan-code
+      - ci-gates
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
@@ -462,7 +454,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
-      - run-security-scan-code
+      - ci-gates
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: rest_test.py
@@ -471,7 +463,7 @@ jobs:
   run-infrastructure-tests:
     name: Run Infrastructure tests
     needs:
-      - run-security-scan-code
+      - ci-gates
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -487,6 +479,37 @@ jobs:
       - name: Run Infrastructure tests
         run: make test-infrastructure
 
+  set-release-version:
+    name: Set release version
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      (
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'release' && github.event.action == 'published')
+      )
+    needs:
+      - run-backend-tests
+      - run-frontend-a11y-tests
+      - run-frontend-e2e-tests
+      - run-frontend-unit-tests
+      - run-infrastructure-tests
+      - run-rest-fuzz-tests
+    outputs:
+      release_version: ${{ steps.set.outputs.release_version }}
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set release version
+        id: set
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            echo "release_version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "release_version=$(date '+%y.%-m.%-d')-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          fi
+    timeout-minutes: 5
+
   build-staging-images:
     name: Build Staging Images
     env:
@@ -496,11 +519,6 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
-      - run-backend-tests
-      - run-frontend-a11y-tests
-      - run-frontend-e2e-tests
-      - run-frontend-unit-tests
-      - run-infrastructure-tests
       - set-release-version
     permissions:
       contents: read
@@ -607,7 +625,7 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
-            RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
+            RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             owasp/nest:frontend-staging
@@ -828,6 +846,7 @@ jobs:
           backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
           domain_name="$DOMAIN_NAME"
           django_configuration="$DJANGO_CONFIGURATION"
+          django_release_version="$RELEASE_VERSION"
           django_settings_module="$DJANGO_SETTINGS_MODULE"
           enable_cron_tasks=$ENABLE_CRON_TASKS
           enable_nat_gateway=$ENABLE_NAT_GATEWAY
@@ -1140,11 +1159,6 @@ jobs:
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - run-backend-tests
-      - run-frontend-a11y-tests
-      - run-frontend-e2e-tests
-      - run-frontend-unit-tests
-      - run-infrastructure-tests
       - set-release-version
     permissions:
       contents: read
@@ -1247,7 +1261,7 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
-            RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
+            RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             owasp/nest:frontend-production
