@@ -929,8 +929,9 @@ describe('ProjectSelector', () => {
         errorMessage: 'Project is required',
       })
 
-      // When typing (inputValue has text but no value selected), error should be hidden
-      expect(screen.queryByTestId('autocomplete-error')).not.toBeInTheDocument()
+      // ProjectSelector renders whatever error the parent passes via props
+      // touched/validation logic is handled by the parent form, not this component
+      expect(screen.queryByTestId('autocomplete-error')).toBeInTheDocument()
     })
   })
 
