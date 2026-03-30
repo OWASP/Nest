@@ -13,7 +13,7 @@ variable "aws_role_external_id" {
 variable "environments" {
   description = "The environments to create Terraform roles for."
   type        = list(string)
-  default     = ["staging"]
+  default     = ["staging", "production"]
 }
 
 variable "project_name" {
