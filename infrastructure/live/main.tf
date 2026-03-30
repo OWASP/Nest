@@ -166,13 +166,16 @@ module "parameters" {
   django_db_port                = var.db_port
   django_db_user                = var.db_user
   django_redis_host             = module.cache.redis_primary_endpoint
+  django_release_version        = var.django_release_version
   django_settings_module        = var.django_settings_module
+  enable_additional_parameters  = var.enable_additional_parameters
   environment                   = var.environment
   next_server_csrf_url          = "https://${var.domain_name}/csrf/"
   next_server_graphql_url       = "https://${var.domain_name}/graphql/"
   nextauth_url                  = "https://${var.domain_name}"
   project_name                  = var.project_name
   redis_password_arn            = module.cache.redis_password_arn
+  slack_bot_token_suffix        = var.slack_bot_token_suffix
 }
 
 module "security" {

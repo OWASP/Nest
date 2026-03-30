@@ -32,6 +32,7 @@ const SortBy = ({
           labelPlacement="outside-left"
           size="md"
           label={showLabel ? 'Sort By :' : undefined}
+          aria-label={showLabel ? undefined : 'Sort by'}
           classNames={{
             label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
             trigger:
