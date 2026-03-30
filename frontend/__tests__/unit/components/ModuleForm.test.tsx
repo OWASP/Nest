@@ -929,8 +929,8 @@ describe('ProjectSelector', () => {
         errorMessage: 'Project is required',
       })
 
-      // When typing (inputValue has text but no value selected), error should be hidden
-      expect(screen.queryByTestId('autocomplete-error')).not.toBeInTheDocument()
+      // Error always shows when isInvalid is true, regardless of typing state
+      expect(screen.queryByTestId('autocomplete-error')).toBeInTheDocument()
     })
   })
 

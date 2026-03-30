@@ -368,6 +368,7 @@ export const ProjectSelector = ({
       if (trimmedQuery.length < 2) {
         setItems([])
         setIsLoading(false)
+        setFocusedIndex(-1)
         return
       }
 
@@ -382,6 +383,7 @@ export const ProjectSelector = ({
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
         setIsOpen(filtered.length > 0)
+        setFocusedIndex(-1)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(
@@ -434,9 +436,8 @@ export const ProjectSelector = ({
     }
   }
 
-  const isTyping = inputValue.trim() !== '' && !value
-  const displayError = isTyping ? undefined : errorMessage
-  const shouldShowInvalid = isTyping ? false : isInvalid
+  const displayError = errorMessage
+  const shouldShowInvalid = isInvalid
 
   return (
     <div data-testid="autocomplete" className="relative w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
@@ -461,6 +462,8 @@ export const ProjectSelector = ({
         aria-expanded={isOpen}
         aria-activedescendant={focusedIndex >= 0 ? `project-option-${focusedIndex}` : undefined}
         role="combobox"
+        aria-controls="projectSelector-listbox"
+        aria-haspopup="listbox"
         className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
       />
       <button
@@ -474,7 +477,7 @@ export const ProjectSelector = ({
         <p className="mt-1 text-xs text-gray-500">Loading...</p>
       )}
       {isOpen && items.length > 0 && (
-        <ul role="listbox" className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+        <ul role="listbox" id="projectSelector-listbox" className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
           {items.map((project, index) => (
             <li
               key={project.id}
