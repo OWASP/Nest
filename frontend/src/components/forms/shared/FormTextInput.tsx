@@ -38,8 +38,8 @@ export const FormTextInput = ({
         className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300"
       >
         {label}
-      </label>
       {required && <span aria-hidden="true" className="ml-1 text-red-500">*</span>}
+      </label>
       <input
         id={id}
         type={type}

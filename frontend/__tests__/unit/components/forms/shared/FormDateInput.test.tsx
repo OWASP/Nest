@@ -17,27 +17,27 @@ describe('FormDateInput Component', () => {
     it('renders with required props', () => {
       render(<FormDateInput {...defaultProps} />)
 
-      expect(screen.getByLabelText('Test Date')).toBeInTheDocument()
-      expect(screen.getByLabelText('Test Date')).toHaveValue('2024-01-01')
-      expect(screen.getByLabelText('Test Date')).toHaveAttribute('type', 'date')
+      expect(screen.getByLabelText(/Test Date/)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Test Date/)).toHaveValue('2024-01-01')
+      expect(screen.getByLabelText(/Test Date/)).toHaveAttribute('type', 'date')
     })
 
     it('renders with required true', () => {
       render(<FormDateInput {...defaultProps} required={true} />)
 
-      expect(screen.getByLabelText('Test Date')).toBeRequired()
+      expect(screen.getByLabelText(/Test Date/)).toBeRequired()
     })
 
     it('renders with required false (explicit)', () => {
       render(<FormDateInput {...defaultProps} required={false} />)
 
-      expect(screen.getByLabelText('Test Date')).not.toBeRequired()
+      expect(screen.getByLabelText(/Test Date/)).not.toBeRequired()
     })
 
     it('renders with required undefined (default)', () => {
       render(<FormDateInput {...defaultProps} required={undefined} />)
 
-      expect(screen.getByLabelText('Test Date')).not.toBeRequired()
+      expect(screen.getByLabelText(/Test Date/)).not.toBeRequired()
     })
   })
 
@@ -46,14 +46,14 @@ describe('FormDateInput Component', () => {
       render(<FormDateInput {...defaultProps} touched={true} error="Invalid date" />)
 
       expect(screen.getByTestId('error-message')).toHaveTextContent('Invalid date')
-      expect(screen.getByLabelText('Test Date')).toHaveAttribute('aria-invalid', 'true')
+      expect(screen.getByLabelText(/Test Date/)).toHaveAttribute('aria-invalid', 'true')
     })
 
     it('does not show error when not touched', () => {
       render(<FormDateInput {...defaultProps} touched={false} error="Invalid date" />)
 
       expect(screen.queryByTestId('error-message')).not.toBeInTheDocument()
-      expect(screen.getByLabelText('Test Date')).toHaveAttribute('aria-invalid', 'false')
+      expect(screen.getByLabelText(/Test Date/)).toHaveAttribute('aria-invalid', 'false')
     })
 
     it('does not show error when touched but no error', () => {
@@ -67,7 +67,7 @@ describe('FormDateInput Component', () => {
     it('calls onValueChange when input changes', () => {
       render(<FormDateInput {...defaultProps} />)
 
-      const input = screen.getByLabelText('Test Date')
+      const input = screen.getByLabelText(/Test Date/)
       fireEvent.change(input, { target: { value: '2024-02-02' } })
 
       expect(defaultProps.onValueChange).toHaveBeenCalledWith('2024-02-02')
@@ -78,7 +78,7 @@ describe('FormDateInput Component', () => {
     it('passes min and max props to input', () => {
       render(<FormDateInput {...defaultProps} min="2023-01-01" max="2025-01-01" />)
 
-      const input = screen.getByLabelText('Test Date')
+      const input = screen.getByLabelText(/Test Date/)
       expect(input).toHaveAttribute('min', '2023-01-01')
       expect(input).toHaveAttribute('max', '2025-01-01')
     })
@@ -104,7 +104,7 @@ describe('FormDateInput Component', () => {
     it('renders input with correct styling classes', () => {
       render(<FormDateInput {...defaultProps} />)
 
-      const input = screen.getByLabelText('Test Date')
+      const input = screen.getByLabelText(/Test Date/)
       expect(input).toHaveClass('w-full', 'rounded-md')
     })
   })

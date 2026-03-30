@@ -413,7 +413,7 @@ describe('ModuleForm', () => {
         jest.advanceTimersByTime(350)
       })
       await waitFor(() => expect(mockQuery).toHaveBeenCalled())
-      const items = screen.getAllByTestId('autocomplete-item')
+      const items = await screen.findAllByTestId('autocomplete-item')
       await act(async () => {
         fireEvent.click(items[0])
       })
@@ -797,7 +797,7 @@ describe('ProjectSelector', () => {
 
       await waitFor(() => expect(mockQuery).toHaveBeenCalled())
 
-      const items = screen.getAllByTestId('autocomplete-item')
+      const items = await screen.findAllByTestId('autocomplete-item')
       await act(async () => {
         fireEvent.click(items[0])
       })

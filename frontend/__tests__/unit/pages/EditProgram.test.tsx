@@ -104,7 +104,7 @@ describe('EditProgramPage', () => {
 
     render(<EditProgramPage />)
 
-    expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+    expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     expect(screen.getByDisplayValue('Test')).toBeInTheDocument()
   })
 
@@ -174,7 +174,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     })
 
     const submitButton = screen.getByRole('button', { name: /save/i })
@@ -218,7 +218,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     })
 
     const submitButton = screen.getByRole('button', { name: /save/i })
@@ -262,7 +262,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     })
 
     const submitButton = screen.getByRole('button', { name: /save/i })
@@ -293,7 +293,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     })
   })
 
@@ -322,7 +322,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     })
   })
 
@@ -381,7 +381,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      const nameInput = await screen.findByLabelText('Name')
+      const nameInput = await screen.findByLabelText(/^Name/)
       expect(nameInput).toHaveValue('')
     })
   })
@@ -414,7 +414,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     })
 
     const submitButton = screen.getByRole('button', { name: /save/i })
@@ -468,7 +468,7 @@ describe('EditProgramPage', () => {
     }))
     const { rerender } = render(<EditProgramPage />)
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
     })
     currentData = nullAdminsData
     rerender(<EditProgramPage />)
