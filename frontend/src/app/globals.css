@@ -471,4 +471,12 @@ select:disabled,
 
 .leaflet-container {
   background: transparent !important;
+  cursor: default;
+}
+
+.leaflet-interactive,
+.leaflet-marker-icon,
+.leaflet-popup-content button,
+.leaflet-control-zoom a {
+  cursor: pointer !important;
 }
