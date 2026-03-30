@@ -13,6 +13,7 @@ import Header from 'components/Header'
 import ScrollToTop from 'components/ScrollToTop'
 
 import 'app/globals.css'
+import { SkipLink } from '../components/SkipLink'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,23 +68,33 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ minHeight: '100vh' }}
-      >
-        <Providers>
-          <BreadcrumbRoot>
-            <div className="flex min-h-screen flex-col">
-              <AutoScrollToTop />
-              <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
-              <BreadCrumbsWrapper />
-              <main className="flex flex-1 flex-col justify-center">{children}</main>
-              <Footer />
-              <ScrollToTop />
-            </div>
-          </BreadcrumbRoot>
-        </Providers>
-      </body>
+     <body
+  className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+  style={{ minHeight: '100vh' }}
+>
+  <SkipLink /> {/* ✅ MUST BE FIRST */}
+
+  <Providers>
+    <BreadcrumbRoot>
+      <div className="flex min-h-screen flex-col">
+        <AutoScrollToTop />
+        <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
+        <BreadCrumbsWrapper />
+
+        <main
+          id="main-content"       
+          tabIndex={-1}              
+          className="flex flex-1 flex-col justify-center"
+        >
+          {children}
+        </main>
+
+        <Footer />
+        <ScrollToTop />
+      </div>
+    </BreadcrumbRoot>
+  </Providers>
+</body>
       {GTM_ID && <GoogleAnalytics gaId={GTM_ID} />}
     </html>
   )
