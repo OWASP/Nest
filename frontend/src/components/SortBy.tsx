@@ -22,20 +22,20 @@ const SortBy = ({
   }
   const showOrderButton = selectedSortOption !== 'default'
   return (
-    <div className="flex items-center">
+    <div className="flex w-full min-w-0 items-center">
       {/* Sort Attribute Dropdown */}
       <div
-        className={`-ml-px inline-flex h-12 items-center border border-gray-300 bg-white pl-3 shadow-none dark:border-gray-600 dark:bg-gray-800 ${showOrderButton ? 'rounded-l-lg rounded-r-none border-r-0' : 'rounded-lg'}`}
+        className={`-ml-px flex h-12 min-w-0 flex-1 items-center border border-gray-300 bg-white pl-3 shadow-none md:inline-flex md:flex-none dark:border-gray-600 dark:bg-gray-800 ${showOrderButton ? 'rounded-l-lg rounded-r-none border-r-0' : 'rounded-lg'}`}
       >
         <Select
-          className=""
+          className="min-w-0 flex-1 md:flex-none"
           labelPlacement="outside-left"
           size="md"
           label={showLabel ? 'Sort By :' : undefined}
           classNames={{
             label: 'font-medium text-sm text-gray-700 dark:text-gray-300 w-auto select-none pe-0',
             trigger:
-              'bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:underline border-none shadow-none text-nowrap w-32 min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0',
+              'bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:underline border-none shadow-none w-full min-w-0 text-nowrap md:w-32 min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0',
             value: 'text-gray-800 dark:text-gray-200 font-medium',
             selectorIcon: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
             popoverContent:
@@ -75,7 +75,7 @@ const SortBy = ({
             type="button"
             onClick={() => onOrderChange(selectedOrder === 'asc' ? 'desc' : 'asc')}
             onKeyDown={handleKeyDown}
-            className="inline-flex h-12 w-10 items-center justify-center rounded-l-none rounded-r-lg border border-l-0 border-gray-300 bg-white p-0 shadow-none transition-[background-color] duration-200 hover:bg-gray-100 focus:ring-0 focus:ring-offset-0 focus:outline-none active:ring-0 active:outline-none dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
+            className="inline-flex h-12 w-10 shrink-0 items-center justify-center rounded-l-none rounded-r-lg border border-l-0 border-gray-300 bg-white p-0 shadow-none transition-[background-color] duration-200 hover:bg-gray-100 focus:ring-0 focus:ring-offset-0 focus:outline-none active:ring-0 active:outline-none dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700"
             aria-label={
               selectedOrder === 'asc' ? 'Sort in ascending order' : 'Sort in descending order'
             }

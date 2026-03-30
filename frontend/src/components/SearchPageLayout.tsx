@@ -75,7 +75,9 @@ const SearchPageLayout = ({
               aria-hidden="true"
             />
           ) : (
-            <div className={inlineSort ? '[&>div]:rounded-r-none' : ''}>{filterChildren}</div>
+            <div className={inlineSort ? '[&>div]:rounded-r-none md:[&>div]:border-r-0' : ''}>
+              {filterChildren}
+            </div>
           ))}
         <SearchBar
           isLoaded={!isFirstLoad}
@@ -95,30 +97,34 @@ const SearchPageLayout = ({
           ))}
       </div>
 
-      {/* Mobile layout */}
+      {/* Mobile layout — max-w-md matches SearchBar so stacked controls align with search */}
       {(filterChildren || (inlineSort && sortChildren)) && (
         <div
-          className={`mb-4 flex w-full items-center justify-between md:hidden ${inlineSort ? 'gap-0' : 'gap-4'} mt-2`}
+          className={`mx-auto mt-2 mb-4 flex w-full max-w-md items-stretch md:hidden ${
+            inlineSort ? 'gap-0' : 'justify-between gap-4'
+          }`}
         >
           {filterChildren &&
             (isFirstLoad ? (
               <Skeleton
-                className={`h-12 w-40 md:w-60 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
+                className={`h-12 min-w-0 flex-1 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'max-w-40 rounded-lg'}`}
                 aria-hidden="true"
               />
             ) : (
-              <div className={`${inlineSort ? '[&>div]:rounded-r-none' : ''} max-w-40`}>
+              <div
+                className={`min-w-0 ${inlineSort && sortChildren ? 'flex-1' : 'max-w-40'} ${inlineSort ? '[&>div]:rounded-r-none' : ''}`}
+              >
                 {filterChildren}
               </div>
             ))}
           {inlineSort &&
             sortChildren &&
             (isFirstLoad ? (
-              <div className="flex items-center">
-                <Skeleton className="h-12 w-32 rounded-none md:w-48" aria-hidden="true" />
-              </div>
+              <Skeleton className="h-12 min-w-0 flex-1 rounded-none" aria-hidden="true" />
             ) : (
-              <div className="max-w-40 [&>div>div:first-child]:rounded-l-none">{sortChildren}</div>
+              <div className="min-w-0 flex-1 [&>div>div:first-child]:rounded-l-none">
+                {sortChildren}
+              </div>
             ))}
         </div>
       )}
