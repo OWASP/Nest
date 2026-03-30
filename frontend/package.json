@@ -25,7 +25,7 @@
     "@heroui/autocomplete": "^2.3.34",
     "@heroui/button": "^2.2.32",
     "@heroui/modal": "^2.2.29",
-    "@heroui/react": "^2.8.10",
+    "@heroui/react": "^3.0.1",
     "@heroui/select": "^2.4.33",
     "@heroui/skeleton": "^2.2.18",
     "@heroui/system": "^2.4.28",

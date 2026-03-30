@@ -1,6 +1,6 @@
 'use client'
 import { useApolloClient } from '@apollo/client/react'
-import { Autocomplete, AutocompleteItem } from '@heroui/react'
+import { Autocomplete, ListBoxItem } from '@heroui/react'
 import { Select, SelectItem } from '@heroui/select'
 import debounce from 'lodash/debounce'
 import type React from 'react'
@@ -240,10 +240,11 @@ const ModuleForm = ({
                   max={maxDate}
                 />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+      <label htmlFor="projectSelector" className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Project Name<span aria-hidden="true"> *</span></label>
                   <Select
                     id="experienceLevel"
                     label="Experience Level"
-                    labelPlacement="outside"
+            
                     selectedKeys={
                       formData.experienceLevel ? new Set([formData.experienceLevel]) : new Set()
                     }
@@ -293,6 +294,7 @@ const ModuleForm = ({
                   onValueChange={(value) => handleInputChange('labels', value)}
                 />
                 <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+      <label htmlFor="projectSelector" className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300">Project Name<span aria-hidden="true"> *</span></label>
                   <ProjectSelector
                     value={formData.projectId}
                     defaultName={formData.projectName}
@@ -350,6 +352,7 @@ export const ProjectSelector = ({
   const [inputValue, setInputValue] = useState(defaultName || '')
   const [items, setItems] = useState<{ id: string; name: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
     if (value && defaultName && defaultName !== inputValue) {
@@ -380,6 +383,7 @@ export const ProjectSelector = ({
         const projects = data?.searchProjects || []
         const filtered = projects.filter((proj) => proj.id !== value)
         setItems(filtered.slice(0, 5))
+        setIsOpen(filtered.length > 0)
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(
@@ -395,7 +399,6 @@ export const ProjectSelector = ({
     [client, value]
   )
 
-  // Trigger search suggestions on user input
   useEffect(() => {
     fetchSuggestions(inputValue)
     return () => {
@@ -403,19 +406,11 @@ export const ProjectSelector = ({
     }
   }, [inputValue, fetchSuggestions])
 
-  const handleSelectionChange = (keys: React.Key | null) => {
-    const selectedKey = keys as string
-    if (selectedKey) {
-      const selectedProject = items.find((item) => item.id === selectedKey)
-      if (selectedProject) {
-        setInputValue(selectedProject.name)
-        onProjectChange(selectedProject.id, selectedProject.name)
-      }
-    } else if (!value) {
-      // Selection cleared
-      setInputValue('')
-      onProjectChange(null, '')
-    }
+  const handleSelect = (project: { id: string; name: string }) => {
+    setInputValue(project.name)
+    setItems([])
+    setIsOpen(false)
+    onProjectChange(project.id, project.name)
   }
 
   const handleInputChange = (newValue: string) => {
@@ -423,51 +418,60 @@ export const ProjectSelector = ({
     onProjectChange(null, newValue)
   }
 
-  // Don't show validation error while user is actively typing (has text but no project selected)
   const isTyping = inputValue.trim() !== '' && !value
   const displayError = isTyping ? undefined : errorMessage
   const shouldShowInvalid = isTyping ? false : isInvalid
 
   return (
-    <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-      <Autocomplete
-        id="projectSelector"
-        label="Project Name"
-        labelPlacement="outside"
-        placeholder="Start typing project name..."
-        inputValue={inputValue}
-        selectedKey={value || null}
-        onInputChange={handleInputChange}
-        onSelectionChange={handleSelectionChange}
-        menuTrigger="input"
-        isRequired
-        isInvalid={shouldShowInvalid}
-        errorMessage={displayError}
-        isLoading={isLoading}
-        allowsCustomValue={false}
-        classNames={{
-          base: 'w-full min-w-0',
-          selectorButton: 'hidden',
-        }}
-        inputProps={{
-          classNames: {
-            label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-            input: 'text-gray-800 dark:text-gray-200',
-            inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-            helperWrapper: 'min-w-0 max-w-full w-full',
-            errorMessage: 'break-words whitespace-normal max-w-full w-full',
-          },
-        }}
-        clearButtonProps={{
-          'aria-label': 'clear selected project',
-        }}
+    <div data-testid="autocomplete" className="relative w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+      <label
+        htmlFor="projectSelector"
+        className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300"
       >
-        {items.map((project) => (
-          <AutocompleteItem key={project.id} textValue={project.name}>
-            {project.name}
-          </AutocompleteItem>
-        ))}
-      </Autocomplete>
+        Project Name<span aria-hidden="true"> *</span>
+      </label>
+      <input
+        id="projectSelector"
+        type="text"
+        data-testid="autocomplete-input"
+        placeholder="Start typing project name..."
+        value={inputValue}
+        onChange={(e) => handleInputChange(e.target.value)}
+        required
+        aria-invalid={shouldShowInvalid}
+        aria-describedby={shouldShowInvalid ? 'projectSelector-error' : undefined}
+        className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
+      />
+      <button
+        type="button"
+        data-testid="autocomplete-clear"
+        aria-label="Clear project selection"
+        className="hidden"
+        onClick={() => { setInputValue(''); setItems([]); setIsOpen(false); onProjectChange(null, '') }}
+      />
+      {isLoading && (
+        <p className="mt-1 text-xs text-gray-500">Loading...</p>
+      )}
+      {isOpen && items.length > 0 && (
+        <ul className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+          {items.map((project) => (
+            <li
+              key={project.id}
+              data-testid="autocomplete-item"
+              data-text-value={project.name}
+              onClick={() => handleSelect(project)}
+              className="cursor-pointer px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+            >
+              {project.name}
+            </li>
+          ))}
+        </ul>
+      )}
+      {shouldShowInvalid && displayError && (
+        <p id="projectSelector-error" data-testid="autocomplete-error" className="mt-1 break-words text-xs text-red-500">
+          {displayError}
+        </p>
+      )}
     </div>
   )
 }

@@ -1,16 +1,5 @@
 'use client'
 
-import { Input } from '@heroui/react'
-
-const COMMON_INPUT_CLASS_NAMES = {
-  base: 'w-full min-w-0',
-  label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-  input: 'text-gray-800 dark:text-gray-200',
-  inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-  helperWrapper: 'min-w-0 max-w-full w-full',
-  errorMessage: 'break-words whitespace-normal max-w-full w-full',
-}
-
 interface FormDateInputProps {
   id: string
   label: string
@@ -34,22 +23,34 @@ export const FormDateInput = ({
   min,
   max,
 }: FormDateInputProps) => {
+  const isInvalid = touched && !!error
+
   return (
     <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
-      <Input
+      <label
+        htmlFor={id}
+        className="mb-1 block text-sm font-semibold text-gray-600 dark:text-gray-300"
+      >
+        {label}
+      </label>
+      {required && <span aria-hidden="true" className="ml-1 text-red-500">*</span>}
+      <input
         id={id}
         type="date"
-        label={label}
-        labelPlacement="outside"
         value={value}
-        onValueChange={onValueChange}
-        isRequired={required}
-        isInvalid={touched && !!error}
-        errorMessage={touched ? error : undefined}
+        onChange={(e) => onValueChange(e.target.value)}
+        required={required}
+        aria-invalid={isInvalid}
+        aria-describedby={isInvalid ? `${id}-error` : undefined}
         min={min}
         max={max}
-        classNames={COMMON_INPUT_CLASS_NAMES}
+        className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
       />
+      {isInvalid && (
+        <p id={`${id}-error`} data-testid="error-message" className="mt-1 break-words text-xs text-red-500">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

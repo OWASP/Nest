@@ -1,50 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
 
-jest.mock('components/forms/shared/FormDateInput', () => {
-  const originalModule = jest.requireActual('components/forms/shared/FormDateInput')
-  return {
-    ...originalModule,
-  }
-})
-
-jest.mock('@heroui/react', () => ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Input: jest.fn(
-    ({
-      id,
-      label,
-      value,
-      onValueChange,
-      type,
-      isRequired,
-      isInvalid,
-      errorMessage,
-      min,
-      max,
-      labelPlacement,
-      classNames,
-    }) => (
-      <div data-testid="mock-input-container">
-        <label htmlFor={id}>{label}</label>
-        <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={(e) => onValueChange(e.target.value)}
-          required={isRequired}
-          min={min}
-          max={max}
-          aria-invalid={isInvalid}
-          data-label-placement={labelPlacement}
-          data-class-names={JSON.stringify(classNames)}
-        />
-        {errorMessage && <span data-testid="error-message">{errorMessage}</span>}
-      </div>
-    )
-  ),
-}))
-
 describe('FormDateInput Component', () => {
   const defaultProps = {
     id: 'test-date',
@@ -79,7 +35,6 @@ describe('FormDateInput Component', () => {
     })
 
     it('renders with required undefined (default)', () => {
-      // This specifically targets the "required = false" default assignment
       render(<FormDateInput {...defaultProps} required={undefined} />)
 
       expect(screen.getByLabelText('Test Date')).not.toBeRequired()
@@ -133,34 +88,24 @@ describe('FormDateInput Component', () => {
     it('renders with correct container classes', () => {
       const { container } = render(<FormDateInput {...defaultProps} />)
 
-      // The outer div in the component
       const wrapper = container.firstChild as HTMLElement
       expect(wrapper).toHaveClass('w-full', 'min-w-0')
       expect(wrapper).toHaveStyle({ maxWidth: '100%', overflow: 'hidden' })
     })
 
-    it('passes common class names to Input', () => {
+    it('renders label element associated with input', () => {
       render(<FormDateInput {...defaultProps} />)
 
-      const input = screen.getByLabelText('Test Date')
-      const classNames = JSON.parse(input.dataset.classNames || '{}')
-
-      expect(classNames).toEqual(
-        expect.objectContaining({
-          base: 'w-full min-w-0',
-          label: 'text-sm font-semibold text-gray-600 dark:text-gray-300',
-          input: 'text-gray-800 dark:text-gray-200',
-          inputWrapper: 'bg-gray-50 dark:bg-gray-800',
-          helperWrapper: 'min-w-0 max-w-full w-full',
-          errorMessage: 'break-words whitespace-normal max-w-full w-full',
-        })
-      )
+      const label = screen.getByText('Test Date')
+      expect(label.tagName).toBe('LABEL')
+      expect(label).toHaveAttribute('for', 'test-date')
     })
 
-    it('sets label placement to outside', () => {
+    it('renders input with correct styling classes', () => {
       render(<FormDateInput {...defaultProps} />)
+
       const input = screen.getByLabelText('Test Date')
-      expect(input).toHaveAttribute('data-label-placement', 'outside')
+      expect(input).toHaveClass('w-full', 'rounded-md')
     })
   })
 })
