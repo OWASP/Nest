@@ -38,7 +38,7 @@ export default function Footer() {
         <div className="mx-auto grid w-full max-w-6xl gap-6">
           <div className="grid w-full sm:grid-cols-2 sm:gap-x-8 sm:gap-y-6 md:grid-cols-[repeat(5,max-content)] md:justify-between md:gap-x-8 lg:gap-x-8">
             {normalizedFooterSections.map((section: Section) => (
-              <div key={section.title} className="flex flex-col gap-4">
+              <div key={section.title} className="flex flex-col gap-4 pl-2">
                 {/*link*/}
                 <Button
                   disableAnimation
@@ -71,21 +71,28 @@ export default function Footer() {
                     const SocialIcon = social?.icon
 
                     return (
-                      <div key={link.href || `span-${link.text}`} className="py-1">
+                      <div key={link.href || `span-${link.text}`} className="">
                         {link.isSpan ? (
                           <span className="text-slate-600 dark:text-slate-400">{link.text}</span>
-                        ) : (
-                          <Link
-                            className={`rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100 ${
-                              isSocialSection ? 'inline-flex items-center gap-2' : ''
-                            }`}
+                        ) : isSocialSection ? (
+                          <a
+                            className="flex items-center gap-2 rounded-md py-0.5 text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                             href={link.href || '/'}
                             target={isExternal ? '_blank' : undefined}
                             rel={isExternal ? 'noopener noreferrer' : undefined}
-                            aria-label={isSocialSection ? `OWASP Nest ${link.text}` : undefined}
+                            aria-label={`OWASP Nest ${link.text}`}
                           >
                             {SocialIcon && <SocialIcon className="h-4 w-4" />}
-                            {link.text}
+                            <span>{link.text}</span>
+                          </a>
+                        ) : (
+                          <Link
+                            className="flex items-center gap-2 rounded-md py-0.5 text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                            href={link.href || '/'}
+                            target={isExternal ? '_blank' : undefined}
+                            rel={isExternal ? 'noopener noreferrer' : undefined}
+                          >
+                            <span>{link.text}</span>
                           </Link>
                         )}
                       </div>
@@ -95,16 +102,16 @@ export default function Footer() {
               </div>
             ))}
             {!hasSocialSection && (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 pl-2">
                 <h3>Socials</h3>
                 <div className="flex flex-col gap-2 text-sm">
                   {footerIcons.map((social) => {
                     const SocialIcon = social.icon
 
                     return (
-                      <div key={social.label} className="py-1">
-                        <Link
-                          className="inline-flex items-center gap-2 rounded-md text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
+                      <div key={social.label} className="">
+                        <a
+                          className="flex items-center gap-2 rounded-md py-0.5 text-slate-600 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-slate-400 dark:hover:text-slate-100"
                           href={social.href}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -112,7 +119,7 @@ export default function Footer() {
                         >
                           <SocialIcon className="h-4 w-4" />
                           {social.label}
-                        </Link>
+                        </a>
                       </div>
                     )
                   })}
