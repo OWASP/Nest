@@ -468,6 +468,34 @@ class TestModuleNodeResolvers:
         result = _call_module_resolver(mock_module_node, "recent_pull_requests", limit=0)
         assert result == []
 
+    def test_module_node_issues_unauthorized(self, mock_module_node):
+        """Test issues resolver returns empty list for unauthorized user."""
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+        info.context.request.user = MagicMock()
+
+        mock_module_node.program.user_has_access.return_value = False
+
+        result = _call_module_resolver(
+            mock_module_node, "issues", info, limit=20, offset=0, label=None
+        )
+        assert result == []
+        mock_module_node.program.user_has_access.assert_called_once_with(info.context.request.user)
+
+    def test_module_node_issue_by_number_unauthorized(self, mock_module_node):
+        """Test issue_by_number resolver returns None for unauthorized user."""
+        info = MagicMock()
+        info.context.task_deadlines_by_issue = None
+        info.context.task_assigned_at_by_issue = None
+        info.context.request.user = MagicMock()
+
+        mock_module_node.program.user_has_access.return_value = False
+
+        result = _call_module_resolver(mock_module_node, "issue_by_number", info, number=456)
+        assert result is None
+        mock_module_node.program.user_has_access.assert_called_once_with(info.context.request.user)
+
 
 class TestModuleNodeInput:
     def test_create_update_input_defaults(self):
