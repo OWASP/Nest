@@ -921,7 +921,7 @@ describe('ProjectSelector', () => {
       expect(screen.getByTestId('autocomplete-error')).toHaveTextContent('Project is required')
     })
 
-    it('hides error message when user is typing', () => {
+    it('shows error message when user has typed but parent marks field invalid', () => {
       renderProjectSelector({
         value: '',
         defaultName: 'Typing...',
