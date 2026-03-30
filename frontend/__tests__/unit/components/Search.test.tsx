@@ -483,6 +483,12 @@ describe('SearchBar Component', () => {
       expect(input).toHaveClass('rounded-none')
     })
 
+    it('keeps rounded-lg for md:rounded-none (mobile radius, desktop flat bar)', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} className="md:rounded-none" />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveClass('rounded-lg', 'md:rounded-none')
+    })
+
     it('applies className prop to the skeleton when not loaded', () => {
       const { container } = render(
         <SearchBar {...defaultProps} isLoaded={false} className="rounded-none" />

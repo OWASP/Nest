@@ -541,7 +541,7 @@ describe('<SearchPageLayout />', () => {
     )
 
     const flexRow = container.querySelector(
-      String.raw`div.hidden.w-full.items-center.justify-center.md\:flex.gap-0`
+      String.raw`div.flex.w-full.flex-col.md\:flex-row.md\:items-center.md\:justify-center.md\:gap-0`
     )
     expect(flexRow).toBeInTheDocument()
   })
@@ -565,7 +565,7 @@ describe('<SearchPageLayout />', () => {
     )
 
     const flexRow = container.querySelector(
-      String.raw`div.hidden.w-full.items-center.justify-center.md\:flex.gap-2`
+      String.raw`div.flex.w-full.flex-col.md\:flex-row.md\:items-center.md\:justify-center.md\:gap-2`
     )
     expect(flexRow).toBeInTheDocument()
   })
