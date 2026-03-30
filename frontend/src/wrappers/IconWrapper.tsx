@@ -7,7 +7,7 @@ export interface IconWrapperProps extends ComponentProps<'svg'> {
 }
 
 const IconWrapper = ({ icon: Icon, className, ...props }: IconWrapperProps) => (
-  <Icon className={className} {...props} />
+  <Icon className={className} aria-hidden="true" {...props} />
 )
 
 export { IconWrapper }

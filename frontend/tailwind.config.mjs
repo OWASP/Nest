@@ -11,6 +11,8 @@ export default {
         border: 'var(--border)',
         text: 'var(--text)',
         'owasp-blue': '#98AFC7',
+        'owasp-blue-light': '#87a1bc',
+        'brand-dark': '#212529',
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',

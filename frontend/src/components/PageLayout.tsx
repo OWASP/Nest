@@ -11,7 +11,7 @@ type PageLayoutProps = Readonly<{
   children: ReactNode
 }>
 
-const defaultBreadcrumbClassName = 'bg-white dark:bg-[#212529]'
+const defaultBreadcrumbClassName = 'bg-white dark:bg-brand-dark'
 
 export default function PageLayout({
   title,
