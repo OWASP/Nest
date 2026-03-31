@@ -79,4 +79,8 @@ Over time, OWASP Nest has expanded to address broader OWASP community needs, suc
 - [BlueSky](https://bsky.app/profile/nest.owasp.org)
 - [LinkedIn](https://www.linkedin.com/groups/14656108/)
 - [OWASP Slack](https://owasp.slack.com/archives/project-nest) -- join [#project-nest](https://owasp.org/slack/invite)
+
+## Contribution Note
+
+This project helps new contributors easily understand and navigate the OWASP ecosystem. It serves as a helpful entry point for exploring projects, resources, and contribution opportunities within the community.
 <!-- --8<-- [end:docs] -->
