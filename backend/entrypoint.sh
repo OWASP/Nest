@@ -4,7 +4,7 @@ set -e
 
 # Add container's private IP to ALLOWED_HOSTS for ALB health checks.
 CONTAINER_IP=$(hostname -i)
-export DJANGO_ALLOWED_HOSTS="${DJANGO_ALLOWED_HOSTS},${CONTAINER_IP}"
+export DJANGO_ALLOWED_HOSTS="${DJANGO_ALLOWED_HOSTS},${CONTAINER_IP},localhost"
 
 python manage.py migrate
 python manage.py collectstatic --noinput

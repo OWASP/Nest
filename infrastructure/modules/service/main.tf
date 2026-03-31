@@ -19,9 +19,9 @@ locals {
       healthCheck = {
         command     = ["CMD-SHELL", "wget -qO- http://localhost:${var.container_port}${var.health_check_path} > /dev/null 2>&1 || exit 1"]
         interval    = 30
-        timeout     = 5
         retries     = 3
         startPeriod = 60
+        timeout     = 5
       }
       logConfiguration = {
         logDriver = "awslogs"
