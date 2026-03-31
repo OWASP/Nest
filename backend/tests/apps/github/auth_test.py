@@ -1,7 +1,6 @@
 """Tests for GitHub App authentication."""
 
 import os
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -76,61 +75,47 @@ class TestGitHubAppAuth:
                 auth = GitHubAppAuth()
                 assert auth._is_app_configured() is expected
 
-    def test_load_private_key_success(self):
-        """Test successful private key loading from file."""
+    def test_load_private_key_from_env(self):
+        """Test successful private key loading from environment variable."""
         with (
-            mock.patch.object(Path, "exists", return_value=True),
-            mock.patch.object(Path, "open", mock.mock_open(read_data="test-private-key")),
+            mock.patch.dict(
+                os.environ,
+                {"NEST_GITHUB_APP_PRIVATE_KEY": "test-private-key", "GITHUB_TOKEN": "test-pat"},
+            ),
             mock.patch("apps.github.auth.settings") as mock_settings,
         ):
-            mock_settings.BASE_DIR = "/test/path"
             mock_settings.GITHUB_APP_ID = None
             mock_settings.GITHUB_APP_INSTALLATION_ID = None
             auth = GitHubAppAuth()
             private_key = auth._load_private_key()
             assert private_key == "test-private-key"
 
-    def test_load_private_key_file_not_found(self):
-        """Test private key loading when file doesn't exist."""
+    def test_load_private_key_env_not_set(self):
+        """Test private key loading when environment variable is not set."""
         with (
-            mock.patch.object(Path, "exists", return_value=False),
+            mock.patch.dict(os.environ, {"GITHUB_TOKEN": "test-pat"}, clear=True),
             mock.patch("apps.github.auth.settings") as mock_settings,
         ):
-            mock_settings.BASE_DIR = "/test/path"
             mock_settings.GITHUB_APP_ID = None
             mock_settings.GITHUB_APP_INSTALLATION_ID = None
             auth = GitHubAppAuth()
             private_key = auth._load_private_key()
             assert private_key is None
 
-    def test_load_private_key_empty_file(self):
-        """Test private key loading from empty file."""
-        m = mock.mock_open(read_data="")
+    def test_load_private_key_strips_whitespace(self):
+        """Test that private key is stripped of whitespace."""
         with (
-            mock.patch.object(Path, "exists", return_value=True),
-            mock.patch.object(Path, "open", m),
+            mock.patch.dict(
+                os.environ,
+                {"NEST_GITHUB_APP_PRIVATE_KEY": "  test-key  \n", "GITHUB_TOKEN": "test-pat"},
+            ),
             mock.patch("apps.github.auth.settings") as mock_settings,
         ):
-            mock_settings.BASE_DIR = "/test/path"
             mock_settings.GITHUB_APP_ID = None
             mock_settings.GITHUB_APP_INSTALLATION_ID = None
             auth = GitHubAppAuth()
             private_key = auth._load_private_key()
-            assert private_key == ""
-
-    def test_load_private_key_file_error(self):
-        """Test private key loading with file read error."""
-        with (
-            mock.patch.object(Path, "exists", return_value=True),
-            mock.patch.object(Path, "open", side_effect=PermissionError("Access denied")),
-            mock.patch("apps.github.auth.settings") as mock_settings,
-        ):
-            mock_settings.BASE_DIR = "/test/path"
-            mock_settings.GITHUB_APP_ID = None
-            mock_settings.GITHUB_APP_INSTALLATION_ID = None
-            auth = GitHubAppAuth()
-            private_key = auth._load_private_key()
-            assert private_key is None
+            assert private_key == "test-key"
 
     def test_get_github_client_with_app_auth(self):
         """Test GitHub client creation with PyGithub App authentication."""
