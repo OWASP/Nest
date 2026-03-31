@@ -76,6 +76,9 @@ jest.mock('react-icons/fa6', () => ({
   FaXTwitter: (props: React.SVGProps<SVGSVGElement>) => (
     <svg data-testid="x-twitter-icon" {...props} />
   ),
+  FaCodePullRequest: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="pull-request-icon" {...props} />
+  ),
 }))
 
 jest.mock('react-icons/fa', () => ({
@@ -729,5 +732,15 @@ describe('Card', () => {
       const socialLink = screen.getByRole('link', { name: 'Social media link' })
       expect(socialLink).toHaveAttribute('aria-label', 'Social media link')
     })
+  })
+  it('renders PR count badge when pullRequestCount is provided', () => {
+    render(<Card {...baseProps} pullRequestCount={3} />)
+    expect(screen.getByText('3 open PRs')).toBeInTheDocument()
+    expect(screen.getByTestId('pull-request-icon')).toBeInTheDocument()
+  })
+
+  it('does not render PR count badge when pullRequestCount is 0', () => {
+    render(<Card {...baseProps} pullRequestCount={0} />)
+    expect(screen.queryByTestId('pull-request-icon')).not.toBeInTheDocument()
   })
 })

@@ -26,6 +26,7 @@ export type CardProps = {
   level?: Level
   projectLink?: string
   projectName?: string
+  pullRequestCount?: number
   social?: { title: string; icon: IconType; url: string }[]
   summary: string
   title: string

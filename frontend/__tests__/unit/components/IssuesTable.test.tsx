@@ -525,6 +525,19 @@ describe('<IssuesTable />', () => {
       const headers = within(table).getAllByRole('columnheader')
       expect(headers).toHaveLength(3)
     })
+    it('calculates correct column count with PR count column', () => {
+      render(<IssuesTable issues={[]} showAssignee={true} showPullRequestCount={true} />)
+      const table = screen.getByRole('table')
+      const headers = within(table).getAllByRole('columnheader')
+      expect(headers).toHaveLength(5)
+    })
+
+    it('calculates correct column count without assignee but with PR count column', () => {
+      render(<IssuesTable issues={[]} showAssignee={false} showPullRequestCount={true} />)
+      const table = screen.getByRole('table')
+      const headers = within(table).getAllByRole('columnheader')
+      expect(headers).toHaveLength(4)
+    })
   })
 
   describe('Default Props', () => {

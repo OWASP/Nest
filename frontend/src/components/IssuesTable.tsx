@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import type React from 'react'
 
+import { FaCodePullRequest } from 'react-icons/fa6'
 import { LabelList } from 'components/LabelList'
 
 export type IssueRow = {
@@ -17,12 +18,14 @@ export type IssueRow = {
   assignees?: Array<{ avatarUrl: string; login: string; name: string }>
   url?: string
   deadline?: string | null
+  pullRequestCount?: number
 }
 
 interface IssuesTableProps {
   issues: IssueRow[]
   showAssignee?: boolean
   showDeadline?: boolean
+  showPullRequestCount?: boolean
   onIssueClick?: (issueNumber: number) => void
   issueUrl?: (issueNumber: number) => string
   maxVisibleLabels?: number
@@ -35,6 +38,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
   issues,
   showAssignee = true,
   showDeadline = false,
+  showPullRequestCount = false,
   onIssueClick,
   issueUrl,
   maxVisibleLabels = MAX_VISIBLE_LABELS,
@@ -73,6 +77,7 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
     let count = 3 // Title, Status, Labels
     if (showAssignee) count++
     if (showDeadline) count++
+    if (showPullRequestCount) count++
     return count
   }
 
@@ -145,6 +150,14 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                 Deadline
               </th>
             )}
+            {showPullRequestCount && (
+              <th
+                scope="col"
+                className="px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+              >
+                Open PRs
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-[#1f2327]">
@@ -191,6 +204,19 @@ const IssuesTable: React.FC<IssuesTableProps> = ({
                   className="gap-1 lg:gap-2"
                 />
               </td>
+              {/* PR Count */}
+              {showPullRequestCount && (
+                <td className="block pb-3 text-center lg:table-cell lg:px-6 lg:py-4">
+                  {issue.pullRequestCount !== undefined && issue.pullRequestCount > 0 ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      <FaCodePullRequest className="h-3 w-3" />
+                      {issue.pullRequestCount}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-400">—</span>
+                  )}
+                </td>
+              )}
 
               {/* Assignee */}
               {showAssignee && (
