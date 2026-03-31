@@ -136,9 +136,7 @@ load-data-fuzz: purge-data-fuzz
 	@echo "Loading Nest fuzz data"
 	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
-load-data-staging:
-	@echo "Truncating content_type table"
-	@CMD="psql -U nest_user_staging -d nest_db_staging -c \"TRUNCATE django_content_type CASCADE;\"" $(MAKE) exec-db-command-staging
+load-data-staging: purge-data-staging
 	@echo "Loading Nest staging data"
 	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-staging
 
@@ -162,6 +160,9 @@ purge-data-e2e:
 
 purge-data-fuzz:
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-fuzz
+
+purge-data-staging:
+	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-staging
 
 recreate-schema:
 	@echo "Recreating Nest schema"
