@@ -490,9 +490,19 @@ jobs:
   set-release-version:
     name: Set release version
     if: |
-      github.event_name == 'schedule' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'release' && github.event.action == 'published')
+      github.repository == 'OWASP/Nest' &&
+      (
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'release' && github.event.action == 'published')
+      )
+    needs:
+      - run-backend-tests
+      - run-frontend-a11y-tests
+      - run-frontend-e2e-tests
+      - run-frontend-unit-tests
+      - run-infrastructure-tests
+      - run-rest-fuzz-tests
     outputs:
       release_version: ${{ steps.set.outputs.release_version }}
     permissions: {}
@@ -854,7 +864,6 @@ jobs:
           frontend_image_tag="$RELEASE_VERSION"
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
-          db_backup_retention_period=0
           EOF
 
       - name: Terraform Init
@@ -1074,6 +1083,7 @@ jobs:
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: production
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
@@ -1090,6 +1100,12 @@ jobs:
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
@@ -1112,13 +1128,25 @@ jobs:
           build-args: |
             OWASP_GID=1002
             OWASP_UID=1002
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:backend-staging-cache
           context: backend
           file: docker/backend/Dockerfile
           load: true
           platforms: linux/amd64
           push: true
           tags: |
+            owasp/nest:backend-production
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-backend:${{ env.RELEASE_VERSION }}
+
+      - name: Get backend image size
+        id: backend-size
+        run: |
+          IMAGE_NAME="owasp/nest:backend-production"
+          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
 
       - name: Prepare frontend public environment
         env:
@@ -1152,6 +1180,9 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:frontend-staging-cache
           context: frontend
           file: docker/frontend/Dockerfile
           load: true
@@ -1161,12 +1192,31 @@ jobs:
             RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
+            owasp/nest:frontend-production
             ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-frontend:${{ env.RELEASE_VERSION }}
+
+      - name: Get frontend image size
+        id: frontend-size
+        run: |
+          IMAGE_NAME="owasp/nest:frontend-production"
+          RAW_SIZE=$(docker image inspect "$IMAGE_NAME" --format='{{.Size}}')
+          DISPLAY_SIZE=$(numfmt --to=iec --suffix=B "$RAW_SIZE")
+          echo "human_readable=$DISPLAY_SIZE" >> $GITHUB_OUTPUT
+
+      - name: Create Docker image size report
+        run: |
+          {
+            echo "## Docker Image Size Report"
+            echo ""
+            echo "**Backend:** ${{ steps.backend-size.outputs.human_readable }}"
+            echo "**Frontend:** ${{ steps.frontend-size.outputs.human_readable }}"
+          } >> $GITHUB_STEP_SUMMARY
     timeout-minutes: 5
 
   scan-production-images:
     name: Scan Production Images
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
@@ -1217,6 +1267,7 @@ jobs:
       TF_INPUT: false
     environment: production
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
 
@@ -1297,6 +1348,7 @@ jobs:
       TF_INPUT: false
     environment: production
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
@@ -1350,7 +1402,7 @@ jobs:
           ENABLE_ADDITIONAL_PARAMETERS: true
           ENABLE_CRON_TASKS: true
           ENABLE_NAT_GATEWAY: true
-          ENABLE_RDS_PROXY: false
+          ENABLE_RDS_PROXY: true
           ENVIRONMENT: production
           FRONTEND_USE_FARGATE_SPOT: false
           PROJECT_NAME: nest
@@ -1376,7 +1428,6 @@ jobs:
           frontend_image_tag="$RELEASE_VERSION"
           project_name="$PROJECT_NAME"
           tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
-          db_backup_retention_period=0
           EOF
 
       - name: Terraform Init
