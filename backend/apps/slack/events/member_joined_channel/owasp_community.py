@@ -1,6 +1,7 @@
 """Slack member joined #owasp-community channel handler using templates."""
 
 from pathlib import Path
+from time import sleep
 
 from apps.common.utils import convert_to_snake_case
 from apps.slack.constants import OWASP_COMMUNITY_CHANNEL_ID
@@ -36,3 +37,12 @@ class OwaspCommunity(EventBase):
             f"{convert_to_snake_case(self.__class__.__name__)}/"
             "ephemeral_message.jinja"
         )
+
+    def handle_event(self, event, client):
+        """Handle member_joined_channel for #owasp-community with a short delay.
+
+        The delay gives Slack time to fully register a freshly joined user in the
+        channel to reduce `user_not_in_channel` errors when posting ephemerals.
+        """
+        sleep(5)
+        super().handle_event(event, client)
