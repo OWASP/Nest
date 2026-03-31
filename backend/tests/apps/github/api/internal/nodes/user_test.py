@@ -40,8 +40,10 @@ class TestUserNode(GraphQLNodeBaseTest):
             "linkedin_page_id",
             "location",
             "login",
+            "merged_pull_requests_count",
             "name",
             "public_repositories_count",
+            "pull_requests_count",
             "releases_count",
             "updated_at",
             "url",
@@ -66,6 +68,24 @@ class TestUserNode(GraphQLNodeBaseTest):
         field = self._get_field_by_name("issues_count", UserNode)
         result = field.base_resolver.wrapped_func(None, mock_user)
         assert result == 42
+
+    def test_pull_requests_count_field(self):
+        """Test pull_requests_count field resolution."""
+        mock_user = Mock()
+        mock_user.created_pull_requests.count.return_value = 10
+
+        field = self._get_field_by_name("pull_requests_count", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+        assert result == 10
+
+    def test_merged_pull_requests_count_field(self):
+        """Test merged_pull_requests_count field resolution."""
+        mock_user = Mock()
+        mock_user.created_pull_requests.filter.return_value.count.return_value = 7
+
+        field = self._get_field_by_name("merged_pull_requests_count", UserNode)
+        result = field.base_resolver.wrapped_func(None, mock_user)
+        assert result == 7
 
     def test_releases_count_field(self):
         """Test releases_count field resolution."""
