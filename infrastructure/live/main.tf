@@ -26,7 +26,7 @@ module "alb" {
   common_tags                = local.common_tags
   domain_name                = var.domain_name
   environment                = var.environment
-  frontend_health_check_path = "/"
+  frontend_health_check_path = "/_next/static/"
   frontend_port              = 3000
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
@@ -110,7 +110,7 @@ module "frontend" {
   desired_count       = var.frontend_desired_count
   enable_auto_scaling = var.frontend_enable_auto_scaling
   environment         = var.environment
-  health_check_path   = "/"
+  health_check_path   = "/_next/static/"
   image_tag           = var.frontend_image_tag
   kms_key_arn         = module.kms.key_arn
   max_count           = var.frontend_max_count
