@@ -84,6 +84,16 @@ class UserNode:
         """Resolve issues count."""
         return root.idx_issues_count
 
+    @strawberry_django.field
+    def pull_requests_count(self, root: User) -> int:
+        """Resolve pull requests count."""
+        return root.created_pull_requests.count()
+
+    @strawberry_django.field
+    def merged_pull_requests_count(self, root: User) -> int:
+        """Resolve merged pull requests count."""
+        return root.created_pull_requests.filter(merged_at__isnull=False).count()
+
     @strawberry_django.field(select_related=["owasp_profile"])
     def linkedin_page_id(self, root: User) -> str:
         """Resolve LinkedIn page ID."""
