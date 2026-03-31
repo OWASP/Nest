@@ -32,3 +32,31 @@ class TestWorkspaceModel:
             result = Workspace.get_default_workspace()
 
             assert result is None
+
+    def test_invite_link_alert_threshold_none_when_baseline_unset(self):
+        """Threshold is undefined until invite_link_member_count is set."""
+        workspace = Workspace(
+            slack_workspace_id="T_THRESH",
+            invite_link_member_count=None,
+        )
+
+        assert workspace.invite_link_alert_threshold is None
+
+    def test_invite_link_alert_threshold_uses_350_when_offset_null(self):
+        """Restored rows may have NULL offset; logic matches model default of 350."""
+        workspace = Workspace(
+            slack_workspace_id="T_THRESH",
+            invite_link_member_count=100,
+            invite_link_alert_member_offset=None,
+        )
+
+        assert workspace.invite_link_alert_threshold == 450
+
+    def test_invite_link_alert_threshold_with_explicit_offset(self):
+        workspace = Workspace(
+            slack_workspace_id="T_THRESH",
+            invite_link_member_count=50,
+            invite_link_alert_member_offset=10,
+        )
+
+        assert workspace.invite_link_alert_threshold == 60
