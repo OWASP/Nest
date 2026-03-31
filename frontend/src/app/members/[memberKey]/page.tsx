@@ -4,7 +4,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useMemo } from 'react'
-import { FaCodeMerge, FaFolderOpen, FaPersonWalkingArrowRight, FaUserPlus } from 'react-icons/fa6'
+import {
+  FaCodeMerge,
+  FaCodePullRequest,
+  FaFolderOpen,
+  FaPersonWalkingArrowRight,
+  FaUserPlus,
+} from 'react-icons/fa6'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 
 import { GetUserDataDocument } from 'types/__generated__/userQueries.generated'
@@ -191,6 +197,13 @@ const UserDetailsPage: React.FC = () => {
       value: user?.publicRepositoriesCount ?? 0,
     },
     { icon: FaCodeMerge, value: user?.contributionsCount || 0, unit: 'Contribution' },
+    { icon: FaCodePullRequest, value: user?.pullRequestsCount ?? 0, unit: 'Pull Request' },
+    {
+      icon: FaCodeMerge,
+      value: user?.mergedPullRequestsCount ?? 0,
+      unit: 'Merged PR',
+      pluralizedName: 'Merged PRs',
+    },
   ]
 
   return (
