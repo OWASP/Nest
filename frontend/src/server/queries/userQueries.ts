@@ -75,8 +75,10 @@ export const GET_USER_DATA = gql`
       issuesCount
       location
       login
+      mergedPullRequestsCount
       name
       publicRepositoriesCount
+      pullRequestsCount
       releasesCount
       updatedAt
       url
