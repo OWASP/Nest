@@ -61,6 +61,11 @@ variable "force_new_deployment" {
   default     = false
 }
 
+variable "health_check_path" {
+  description = "The path for the container health check."
+  type        = string
+}
+
 variable "image_tag" {
   description = "The Docker image tag."
   type        = string

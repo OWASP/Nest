@@ -46,6 +46,7 @@ module "backend" {
   desired_count         = var.backend_desired_count
   enable_auto_scaling   = var.backend_enable_auto_scaling
   environment           = var.environment
+  health_check_path     = "/status/"
   image_tag             = var.backend_image_tag
   kms_key_arn           = module.kms.key_arn
   max_count             = var.backend_max_count
@@ -109,6 +110,7 @@ module "frontend" {
   desired_count       = var.frontend_desired_count
   enable_auto_scaling = var.frontend_enable_auto_scaling
   environment         = var.environment
+  health_check_path   = "/"
   image_tag           = var.frontend_image_tag
   kms_key_arn         = module.kms.key_arn
   max_count           = var.frontend_max_count
