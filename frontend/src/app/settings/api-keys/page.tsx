@@ -20,6 +20,9 @@ import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkeleton'
 
 const MAX_ACTIVE_KEYS = 3
 
+const toEndOfDayUtcIso = (date: string): string =>
+  new Date(`${date}T23:59:59.999Z`).toISOString()
+
 // Content state components
 const ErrorState = () => (
   <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
@@ -184,7 +187,7 @@ export default function Page() {
     }
     const variables: { name: string; expiresAt: string } = {
       name: newKeyName.trim(),
-      expiresAt: new Date(newKeyExpiry).toISOString(),
+      expiresAt: toEndOfDayUtcIso(newKeyExpiry),
     }
     createApiKey({ variables })
   }

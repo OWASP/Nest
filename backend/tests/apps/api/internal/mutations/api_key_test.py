@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -55,6 +55,36 @@ class TestApiKeyMutations:
         assert result.message == "API key created successfully."
         assert result.api_key == mock_instance
         assert result.raw_key == raw_key
+
+    @patch("apps.api.internal.mutations.api_key.ApiKey.create")
+    @patch("apps.api.internal.mutations.api_key.timezone")
+    def test_create_api_key_end_of_day_is_valid(
+        self, mock_timezone, mock_api_key_create, api_key_mutations
+    ):
+        """Ensure an end-of-day expiry on the current date is accepted."""
+        info = mock_info()
+        user = info.context.request.user
+        fixed_now = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
+
+        mock_timezone.now.return_value = fixed_now
+        mock_timezone.utc = timezone.utc
+
+        expires_at = datetime(2026, 1, 1, 23, 59, 59, 999000, tzinfo=timezone.utc)
+
+        mock_instance = MagicMock(spec=ApiKey)
+        mock_api_key_create.return_value = (mock_instance, "raw_key")
+
+        result = api_key_mutations.create_api_key(info, name="Valid Name", expires_at=expires_at)
+
+        mock_api_key_create.assert_called_once_with(
+            user=user, name="Valid Name", expires_at=expires_at
+        )
+
+        assert isinstance(result, CreateApiKeyResult)
+        assert result.ok
+        assert result.code == "SUCCESS"
+        assert result.api_key == mock_instance
+        assert result.raw_key == "raw_key"
 
     @patch("apps.api.internal.mutations.api_key.ApiKey.create", return_value=None)
     def test_create_api_key_limit_reached(self, mock_api_key_create, api_key_mutations):
