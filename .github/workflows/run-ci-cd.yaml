@@ -1575,37 +1575,23 @@ jobs:
             --service "$SERVICE_NAME" \
             --force-new-deployment
 
-      - name: Install boto3 for ECS waiter
-        run: pip install -q boto3
-
       - name: Wait for backend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
 
       - name: Wait for frontend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
-    timeout-minutes: 60
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
 
   run-production-lighthouse-ci:
     name: Run production Lighthouse CI
