@@ -14,6 +14,16 @@ interface SearchProps {
   className?: string
 }
 
+/** True when search is visually joined to filter/sort (tighter outer padding). */
+function joinedToolbarInputClass(className: string): boolean {
+  return (
+    /(?:^|\s)rounded-none(?:\s|$)/.test(className) ||
+    /(?:^|\s)rounded-r-none(?:\s|$)/.test(className) ||
+    /\bmd:rounded-none\b/.test(className) ||
+    /\bmd:rounded-r-none\b/.test(className)
+  )
+}
+
 const SearchBar: React.FC<SearchProps> = ({
   isLoaded,
   onSearch,
@@ -84,9 +94,7 @@ const SearchBar: React.FC<SearchProps> = ({
 
   return (
     <div
-      className={`w-full max-w-md py-4 ${
-        className.includes('rounded-none') || className.includes('rounded-r-none') ? 'p-0' : 'p-4'
-      }`}
+      className={`w-full max-w-md md:py-4 ${joinedToolbarInputClass(className) ? 'p-0' : 'md:p-4'}`}
     >
       <div className="relative">
         {isLoaded ? (
@@ -101,7 +109,7 @@ const SearchBar: React.FC<SearchProps> = ({
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder={placeholder}
-              className={`h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300 ${className}`}
+              className={`box-border h-12 w-full rounded-lg border-1 border-gray-300 bg-white py-0 pr-10 pl-10 text-sm leading-12 text-black placeholder:leading-12 placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:focus:ring-blue-300 ${className}`}
             />
             {searchQuery && (
               <button

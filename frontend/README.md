@@ -52,7 +52,6 @@ Common `pnpm` scripts defined in `package.json`:
 | Generate GraphQL types | `pnpm run graphql-codegen` |
 | Run unit tests         | `pnpm run test:unit`       |
 
-
 See the `Makefile` for Docker-based convenience targets.
 
 ## GraphQL Codegen

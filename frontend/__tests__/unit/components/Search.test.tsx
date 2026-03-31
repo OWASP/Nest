@@ -448,7 +448,7 @@ describe('SearchBar Component', () => {
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveClass(
-        'h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300'
+        'box-border h-12 w-full rounded-lg border-1 border-gray-300 bg-white py-0 pr-10 pl-10 text-sm leading-12 text-black placeholder:leading-12 placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:focus:ring-blue-300'
       )
     })
 
@@ -491,6 +491,12 @@ describe('SearchBar Component', () => {
       expect(input).toHaveClass('rounded-none')
     })
 
+    it('keeps rounded-lg for md:rounded-none (mobile radius, desktop flat bar)', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} className="md:rounded-none" />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveClass('rounded-lg', 'md:rounded-none')
+    })
+
     it('applies className prop to the skeleton when not loaded', () => {
       const { container } = render(
         <SearchBar {...defaultProps} isLoaded={false} className="rounded-none" />
@@ -499,10 +505,10 @@ describe('SearchBar Component', () => {
       expect(skeleton).toHaveClass('rounded-none')
     })
 
-    it('renders wrapper with py-4 class', () => {
+    it('renders wrapper with md:py-4 class', () => {
       const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const wrapper = container.firstChild as HTMLElement
-      expect(wrapper).toHaveClass('py-4')
+      expect(wrapper).toHaveClass('md:py-4')
     })
   })
 })
