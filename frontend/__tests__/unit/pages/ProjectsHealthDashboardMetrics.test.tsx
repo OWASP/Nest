@@ -169,7 +169,7 @@ describe('MetricsPage', () => {
       expect(screen.getAllByText(metric.contributorsCount.toString())[0]).toBeInTheDocument()
       expect(
         screen.getAllByText(
-          new Date(metric.createdAt).toLocaleString('default', {
+          new Date(metric.createdAt).toLocaleString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric',

@@ -378,7 +378,9 @@ describe('SearchBar Component', () => {
       expect(input).toHaveValue('test query')
 
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      fireEvent.keyDown(clearButton, { key: 'Enter' })
+      // Native buttons convert Enter into a click event; jsdom does not simulate this,
+      // so we fire click directly to match real browser behavior.
+      fireEvent.click(clearButton!)
 
       expect(input).toHaveValue('')
       expect(mockOnSearch).toHaveBeenCalledWith('')
@@ -393,7 +395,9 @@ describe('SearchBar Component', () => {
       expect(input).toHaveValue('test query')
 
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      fireEvent.keyDown(clearButton, { key: ' ' })
+      // Native buttons convert Space into a click event; jsdom does not simulate this,
+      // so we fire click directly to match real browser behavior.
+      fireEvent.click(clearButton!)
 
       expect(input).toHaveValue('')
       expect(mockOnSearch).toHaveBeenCalledWith('')
