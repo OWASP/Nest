@@ -1128,8 +1128,10 @@ export type UserNode = {
   linkedinPageId: Scalars['String']['output'];
   location: Scalars['String']['output'];
   login: Scalars['String']['output'];
+  mergedPullRequestsCount: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   publicRepositoriesCount: Scalars['Int']['output'];
+  pullRequestsCount: Scalars['Int']['output'];
   releasesCount: Scalars['Int']['output'];
   updatedAt: Scalars['String']['output'];
   url: Scalars['String']['output'];
