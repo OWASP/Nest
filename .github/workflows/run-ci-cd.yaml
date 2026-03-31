@@ -978,16 +978,6 @@ jobs:
 
           echo "Index-data task started successfully (runs async, ~30 min)"
 
-      - name: Force new frontend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
       - name: Force new backend deployment
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
@@ -998,19 +988,29 @@ jobs:
             --service "$SERVICE_NAME" \
             --force-new-deployment
 
-      - name: Wait for frontend service stability
+      - name: Force new frontend deployment
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
-          aws ecs wait services-stable \
+          aws ecs update-service \
             --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
+            --service "$SERVICE_NAME" \
+            --force-new-deployment
 
       - name: Wait for backend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+
+      - name: Wait for frontend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
@@ -1542,6 +1542,16 @@ jobs:
 
           echo "Index-data task started successfully (runs async, ~30 min)"
 
+      - name: Force new backend deployment
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs update-service \
+            --cluster "$CLUSTER_NAME" \
+            --service "$SERVICE_NAME" \
+            --force-new-deployment
+
       - name: Force new frontend deployment
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
@@ -1552,24 +1562,14 @@ jobs:
             --service "$SERVICE_NAME" \
             --force-new-deployment
 
-      - name: Wait for frontend service stability
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs wait services-stable \
-            --cluster "$CLUSTER_NAME" \
-            --services "$SERVICE_NAME"
-
-      - name: Force new backend deployment
+      - name: Wait for backend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
-          aws ecs update-service \
+          aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
+            --services "$SERVICE_NAME"
 
       - name: Wait for frontend service stability
         env:
