@@ -978,19 +978,19 @@ jobs:
 
           echo "Index-data task started successfully (runs async, ~30 min)"
 
-      - name: Wait for frontend service stability
+      - name: Wait for backend service stability
         env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
             --services "$SERVICE_NAME"
 
-      - name: Wait for backend service stability
+      - name: Wait for frontend service stability
         env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
@@ -1522,16 +1522,16 @@ jobs:
 
           echo "Index-data task started successfully (runs async, ~30 min)"
 
-      - name: Wait for frontend service stability
+      - name: Wait for backend service stability
         env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
             --services "$SERVICE_NAME"
 
-      - name: Wait for backend service stability
+      - name: Wait for frontend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}

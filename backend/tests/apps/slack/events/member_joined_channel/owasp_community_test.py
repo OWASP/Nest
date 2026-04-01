@@ -1,6 +1,7 @@
 """Tests for OwaspCommunity member joined channel event handler."""
 
 from pathlib import Path
+from unittest.mock import patch
 
 from apps.slack.constants import OWASP_COMMUNITY_CHANNEL_ID
 from apps.slack.events.member_joined_channel.owasp_community import OwaspCommunity
@@ -34,3 +35,16 @@ class TestOwaspCommunity:
 
         assert matcher({"channel": channel_id})
         assert not matcher({"channel": "C00000000"})
+
+    @patch("apps.slack.events.event.EventBase.handle_event")
+    @patch("apps.slack.events.member_joined_channel.owasp_community.sleep")
+    def test_handle_event(self, mock_sleep, mock_handle_event):
+        """handle_event should sleep for 5 seconds and delegate to EventBase.handle_event."""
+        handler = OwaspCommunity()
+        event = {"channel": "C123"}
+        client = object()
+
+        handler.handle_event(event, client)
+
+        mock_sleep.assert_called_once_with(7)
+        mock_handle_event.assert_called_once_with(event, client)

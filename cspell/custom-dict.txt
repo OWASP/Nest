@@ -112,6 +112,7 @@ dvo
 elevenlabs
 env
 envsubst
+ephemerals
 euo
 facebookexternalhit
 gamesec
