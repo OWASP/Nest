@@ -68,6 +68,12 @@ updates:
       interval: daily
     target-branch: main
 
+  - package-ecosystem: npm
+    directory: frontend/__tests__/e2e
+    schedule:
+      interval: daily
+    target-branch: main
+
   - package-ecosystem: pip
     directory: backend
     schedule:
