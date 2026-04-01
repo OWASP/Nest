@@ -8,7 +8,6 @@ variables {
   container_port        = 3000
   desired_count         = 2
   environment           = "test"
-  health_check_path     = "/"
   image_tag             = "test-tag"
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
