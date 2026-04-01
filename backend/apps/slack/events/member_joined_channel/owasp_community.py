@@ -44,5 +44,5 @@ class OwaspCommunity(EventBase):
         The delay gives Slack time to fully register a freshly joined user in the
         channel to reduce `user_not_in_channel` errors when posting ephemerals.
         """
-        sleep(5)
+        sleep(7)
         super().handle_event(event, client)

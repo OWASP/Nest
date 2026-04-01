@@ -46,5 +46,5 @@ class TestOwaspCommunity:
 
         handler.handle_event(event, client)
 
-        mock_sleep.assert_called_once_with(5)
+        mock_sleep.assert_called_once_with(7)
         mock_handle_event.assert_called_once_with(event, client)
