@@ -50,13 +50,7 @@ class SponsorAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
         ),
         (
             "Status",
-            {
-                "fields": (
-                    "is_member",
-                    "member_type",
-                    "sponsor_type",
-                )
-            },
+            {"fields": ("is_member", "member_type", "sponsor_type", "status")},
         ),
     )
 
