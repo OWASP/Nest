@@ -34,7 +34,7 @@
     "@heroui/tooltip": "^2.2.29",
     "@next/third-parties": "^16.2.1",
     "@react-leaflet/core": "^3.0.0",
-    "@sentry/nextjs": "^10.46.0",
+    "@sentry/nextjs": "^10.47.0",
     "apexcharts": "^5.10.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
