@@ -344,8 +344,8 @@ run "test_frontend_health_check_healthy_threshold" {
 run "test_frontend_health_check_unhealthy_threshold" {
   command = plan
   assert {
-    condition     = aws_lb_target_group.frontend.health_check[0].unhealthy_threshold == 3
-    error_message = "Frontend health check unhealthy threshold must be 3."
+    condition     = aws_lb_target_group.frontend.health_check[0].unhealthy_threshold == 10
+    error_message = "Frontend health check unhealthy threshold must be 10."
   }
 }
 
