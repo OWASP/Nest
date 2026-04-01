@@ -75,7 +75,7 @@
     "@graphql-codegen/typescript-operations": "^5.0.9",
     "@lhci/cli": "^0.15.1",
     "@next/eslint-plugin-next": "^16.2.1",
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.59.0",
     "@swc/core": "^1.15.21",
     "@swc/jest": "^0.2.39",
     "@tailwindcss/postcss": "^4.2.2",
