@@ -10,4 +10,13 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 python manage.py clear_cache
 
-gunicorn wsgi:application --bind 0.0.0.0:8000
+gunicorn wsgi:application \
+  --access-logfile - \
+  --bind 0.0.0.0:8000 \
+  --error-logfile - \
+  --graceful-timeout "${GUNICORN_GRACEFUL_TIMEOUT:-60}" \
+  --max-requests "${GUNICORN_MAX_REQUESTS:-1000}" \
+  --max-requests-jitter "${GUNICORN_MAX_REQUESTS_JITTER:-50}" \
+  --threads "${GUNICORN_THREADS:-2}" \
+  --timeout "${GUNICORN_TIMEOUT:-60}" \
+  --workers "${GUNICORN_WORKERS:-3}"

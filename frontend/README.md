@@ -51,7 +51,6 @@ Common `pnpm` scripts defined in `package.json`:
 | Format code            | `pnpm run format`          |
 | Generate GraphQL types | `pnpm run graphql-codegen` |
 | Run unit tests         | `pnpm run test:unit`       |
-| Run e2e tests          | `pnpm run test:e2e`        |
 
 See the `Makefile` for Docker-based convenience targets.
 

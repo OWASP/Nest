@@ -165,7 +165,7 @@ resource "aws_lb_target_group" "backend" {
     path                = var.backend_health_check_path
     protocol            = "HTTP"
     timeout             = 5
-    unhealthy_threshold = 3
+    unhealthy_threshold = 10
   }
 }
 
@@ -188,7 +188,7 @@ resource "aws_lb_target_group" "frontend" {
     path                = var.frontend_health_check_path
     protocol            = "HTTP"
     timeout             = 5
-    unhealthy_threshold = 3
+    unhealthy_threshold = 10
   }
 }
 
