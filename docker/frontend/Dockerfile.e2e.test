@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.59.0-jammy
+FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
