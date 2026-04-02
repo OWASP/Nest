@@ -57,17 +57,16 @@ class TestApiKeyMutations:
         assert result.raw_key == raw_key
 
     @patch("apps.api.internal.mutations.api_key.ApiKey.create")
-    @patch("apps.api.internal.mutations.api_key.timezone")
+    @patch("apps.api.internal.mutations.api_key.timezone.now")
     def test_create_api_key_end_of_day_is_valid(
-        self, mock_timezone, mock_api_key_create, api_key_mutations
+        self, mock_now, mock_api_key_create, api_key_mutations
     ):
         """Ensure an end-of-day expiry on the current date is accepted."""
         info = mock_info()
         user = info.context.request.user
         fixed_now = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
 
-        mock_timezone.now.return_value = fixed_now
-        mock_timezone.utc = timezone.utc
+        mock_now.return_value = fixed_now
 
         expires_at = datetime(2026, 1, 1, 23, 59, 59, 999000, tzinfo=timezone.utc)
 
