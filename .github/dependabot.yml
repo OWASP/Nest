@@ -1,87 +1,76 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directory: docker/backend
+    cooldown:
+      default-days: 21
+    directories:
+      - docker/*
+    groups:
+      version-updates:
+        applies-to: version-updates
+        patterns:
+          - '*'
     schedule:
       interval: daily
-
-  - package-ecosystem: docker
-    directory: docker/cspell
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: docker/docs
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: docker/frontend
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: docker/semgrep
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: docker/trivy
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker
-    directory: docker/zap
-    schedule:
-      interval: daily
+    target-branch: main
 
   - package-ecosystem: docker-compose
-    directory: docker-compose/local
+    cooldown:
+      default-days: 21
+    directories:
+      - docker-compose/*
+    groups:
+      version-updates:
+        applies-to: version-updates
+        patterns:
+          - '*'
     schedule:
       interval: daily
-
-  - package-ecosystem: docker-compose
-    directory: docker-compose/production
-    schedule:
-      interval: daily
-
-  - package-ecosystem: docker-compose
-    directory: docker-compose/proxy
-    schedule:
-      interval: daily
+    target-branch: main
 
   - package-ecosystem: github-actions
-    directory: /
+    cooldown:
+      default-days: 21
+    directories:
+      - /
+    groups:
+      version-updates:
+        applies-to: version-updates
+        patterns:
+          - '*'
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: npm
-    directory: cspell
-    schedule:
-      interval: daily
-    target-branch: main
-
-  - package-ecosystem: npm
-    directory: frontend
-    schedule:
-      interval: daily
-    target-branch: main
-
-  - package-ecosystem: npm
-    directory: frontend/__tests__/e2e
+    cooldown:
+      default-days: 21
+    directories:
+      - cspell
+      - frontend
+      - frontend/__tests__/e2e
+    groups:
+      version-updates:
+        applies-to: version-updates
+        group-by: dependency-name
+        patterns:
+          - '*'
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: pip
-    directory: backend
-    schedule:
-      interval: daily
-    target-branch: main
-
-  - package-ecosystem: pip
-    directory: docs
+    cooldown:
+      default-days: 21
+    directories:
+      - backend
+      - docs
+    groups:
+      version-updates:
+        applies-to: version-updates
+        group-by: dependency-name
+        patterns:
+          - '*'
     schedule:
       interval: daily
     target-branch: main
