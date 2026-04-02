@@ -1,86 +1,118 @@
 version: 2
 updates:
   - package-ecosystem: docker
+    cooldown:
+      default-days: 21
     directory: docker/backend
     schedule:
       interval: daily
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 21
     directory: docker/cspell
     schedule:
       interval: daily
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 21
     directory: docker/docs
     schedule:
       interval: daily
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 21
     directory: docker/frontend
     schedule:
       interval: daily
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 21
     directory: docker/semgrep
     schedule:
       interval: daily
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 21
     directory: docker/trivy
     schedule:
       interval: daily
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 21
     directory: docker/zap
     schedule:
       interval: daily
 
   - package-ecosystem: docker-compose
+    cooldown:
+      default-days: 21
     directory: docker-compose/local
     schedule:
       interval: daily
 
   - package-ecosystem: docker-compose
+    cooldown:
+      default-days: 21
     directory: docker-compose/production
     schedule:
       interval: daily
 
   - package-ecosystem: docker-compose
+    cooldown:
+      default-days: 21
     directory: docker-compose/proxy
     schedule:
       interval: daily
 
   - package-ecosystem: github-actions
+    cooldown:
+      default-days: 21
     directory: /
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: npm
+    cooldown:
+      default-days: 21
     directory: cspell
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: npm
+    cooldown:
+      default-days: 21
     directory: frontend
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: npm
+    cooldown:
+      default-days: 21
     directory: frontend/__tests__/e2e
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: pip
+    cooldown:
+      default-days: 21
     directory: backend
     schedule:
       interval: daily
     target-branch: main
 
   - package-ecosystem: pip
+    cooldown:
+      default-days: 21
     directory: docs
     schedule:
       interval: daily
