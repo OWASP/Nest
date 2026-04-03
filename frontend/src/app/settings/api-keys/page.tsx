@@ -20,6 +20,26 @@ import { ApiKeysSkeleton } from 'components/skeletons/ApiKeySkeleton'
 
 const MAX_ACTIVE_KEYS = 3
 
+// Use local end-of-day so selecting "today" remains valid after UTC serialization.
+const toEndOfDayUtcIso = (date: string): string => {
+  const [yearStr, monthStr, dayStr] = date.split('-')
+  const year = Number(yearStr)
+  const month = Number(monthStr)
+  const day = Number(dayStr)
+
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+    const fallbackDate = new Date(date)
+    if (Number.isNaN(fallbackDate.getTime())) {
+      return new Date().toISOString()
+    }
+    fallbackDate.setHours(23, 59, 59, 999)
+    return fallbackDate.toISOString()
+  }
+
+  const endOfDayLocal = new Date(year, month - 1, day, 23, 59, 59, 999)
+  return endOfDayLocal.toISOString()
+}
+
 // Content state components
 const ErrorState = () => (
   <div className="rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">
@@ -184,7 +204,7 @@ export default function Page() {
     }
     const variables: { name: string; expiresAt: string } = {
       name: newKeyName.trim(),
-      expiresAt: new Date(newKeyExpiry).toISOString(),
+      expiresAt: toEndOfDayUtcIso(newKeyExpiry),
     }
     createApiKey({ variables })
   }

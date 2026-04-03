@@ -109,6 +109,16 @@ describe('ApiKeysPage Component', () => {
     }
   }
 
+  const toLocalEndOfDayIso = (date: string) => {
+    const [yearStr, monthStr, dayStr] = date.split('-')
+    const year = Number(yearStr)
+    const month = Number(monthStr)
+    const day = Number(dayStr)
+
+    const endOfDayLocal = new Date(year, month - 1, day, 23, 59, 59, 999)
+    return endOfDayLocal.toISOString()
+  }
+
   beforeEach(() => setupMocks())
   afterEach(() => jest.clearAllMocks())
 
@@ -154,7 +164,7 @@ describe('ApiKeysPage Component', () => {
       fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
 
       const expectedDate = format(addDays(new Date(), 30), 'yyyy-MM-dd')
-      const expectedIso = new Date(`${expectedDate}T00:00:00.000Z`).toISOString()
+      const expectedIso = toLocalEndOfDayIso(expectedDate)
 
       await waitFor(() => {
         expect(mockCreateMutation).toHaveBeenCalledWith({
@@ -176,7 +186,27 @@ describe('ApiKeysPage Component', () => {
         expect(mockCreateMutation).toHaveBeenCalledWith({
           variables: {
             name: 'Custom Expiry Key',
-            expiresAt: new Date('2025-12-31T00:00:00.000Z').toISOString(),
+            expiresAt: toLocalEndOfDayIso('2025-12-31'),
+          },
+        })
+      })
+    })
+
+    test('creates API key for today using end-of-day UTC', async () => {
+      render(<ApiKeysPage />)
+      await openCreateModal()
+
+      const today = format(new Date(), 'yyyy-MM-dd')
+      fillKeyForm('Today Key', today)
+      fireEvent.click(screen.getByRole('button', { name: /create api key/i }))
+
+      const expectedIso = toLocalEndOfDayIso(today)
+
+      await waitFor(() => {
+        expect(mockCreateMutation).toHaveBeenCalledWith({
+          variables: {
+            name: 'Today Key',
+            expiresAt: expectedIso,
           },
         })
       })
@@ -415,7 +445,7 @@ describe('ApiKeysPage Component', () => {
               name: 'third key',
               isRevoked: false,
               createdAt: '2025-07-10T08:17:45.406011+00:00',
-              expiresAt: '2025-12-31T00:00:00+00:00',
+              expiresAt: '2025-12-31T23:59:59.999Z',
             },
           ],
           activeApiKeyCount: 3,
