@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock
 
 from apps.owasp.api.internal.nodes.snapshot import SnapshotNode
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestSnapshotNode(GraphQLNodeBaseTest):

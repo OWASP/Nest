@@ -6,7 +6,7 @@ import pytest
 from strawberry.types.base import StrawberryList
 
 from apps.owasp.api.internal.nodes.project_health_stats import ProjectHealthStatsNode
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestHealthStatsNode(GraphQLNodeBaseTest):

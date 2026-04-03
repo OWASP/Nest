@@ -3,7 +3,7 @@
 from unittest.mock import Mock
 
 from apps.owasp.api.internal.nodes.member_snapshot import MemberSnapshotNode
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestMemberSnapshotNode(GraphQLNodeBaseTest):

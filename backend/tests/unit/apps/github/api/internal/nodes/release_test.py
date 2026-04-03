@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.release import ReleaseNode
 from apps.github.api.internal.nodes.user import UserNode
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestReleaseNode(GraphQLNodeBaseTest):

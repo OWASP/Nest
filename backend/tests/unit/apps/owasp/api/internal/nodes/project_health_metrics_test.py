@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from apps.owasp.api.internal.nodes.project_health_metrics import ProjectHealthMetricsNode
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestProjectHealthMetricsNode(GraphQLNodeBaseTest):

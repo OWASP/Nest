@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestIssueNode(GraphQLNodeBaseTest):
