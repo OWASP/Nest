@@ -10,6 +10,7 @@ variables {
   log_retention_days         = 90
   project_name               = "nest"
   public_subnet_ids          = ["subnet-public-1", "subnet-public-2"]
+  static_s3_bucket_name      = "nest-test-static-bucket"
   vpc_id                     = "vpc-12345678"
 }
 
