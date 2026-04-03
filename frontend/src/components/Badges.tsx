@@ -10,17 +10,12 @@ type BadgeProps = {
 
 const DEFAULT_ICON = BADGE_CLASS_MAP['medal']
 
-const normalizeCssClass = (cssClass: string | undefined) => {
-  if (!cssClass || cssClass.trim() === '') {
-    return ''
-  }
-  // Convert backend snake_case format to frontend camelCase format
-  return cssClass.trim().replaceAll(/_([a-z])/g, (_, letter) => letter.toUpperCase())
-}
-
 const resolveIcon = (cssClass: string | undefined) => {
-  const normalizedClass = normalizeCssClass(cssClass)
-  return BADGE_CLASS_MAP[normalizedClass] ?? DEFAULT_ICON
+  if (!cssClass) {
+    return DEFAULT_ICON
+  }
+
+  return BADGE_CLASS_MAP[cssClass] ?? DEFAULT_ICON
 }
 
 const Badges = ({ name, cssClass, showTooltip = true }: BadgeProps) => {
