@@ -15,6 +15,7 @@ from apps.github.models.user import User
 from apps.mentorship.api.internal.nodes.enum import ExperienceLevelEnum
 from apps.mentorship.api.internal.nodes.mentor import MentorNode
 from apps.mentorship.api.internal.nodes.program import ProgramNode
+from apps.mentorship.api.internal.utils import validate_domains, validate_tags
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
 
@@ -251,6 +252,13 @@ class CreateModuleInput:
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
 
+    def __post_init__(self):
+        """Validate input."""
+        if self.tags:
+            validate_tags(self.tags)
+        if self.domains:
+            validate_domains(self.domains)
+
 
 @strawberry.input
 class UpdateModuleInput:
@@ -269,6 +277,13 @@ class UpdateModuleInput:
     project_name: str
     started_at: datetime
     tags: list[str] = strawberry.field(default_factory=list)
+
+    def __post_init__(self):
+        """Validate input."""
+        if self.tags:
+            validate_tags(self.tags)
+        if self.domains:
+            validate_domains(self.domains)
 
 
 @strawberry.input
