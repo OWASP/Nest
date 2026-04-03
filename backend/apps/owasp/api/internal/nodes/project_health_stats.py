@@ -10,6 +10,7 @@ class ProjectHealthStatsNode:
     average_score: float | None
     monthly_overall_scores: list[float]
     monthly_overall_scores_months: list[int]
+    monthly_overall_scores_years: list[int]
     projects_count_healthy: int
     projects_count_need_attention: int
     projects_count_unhealthy: int

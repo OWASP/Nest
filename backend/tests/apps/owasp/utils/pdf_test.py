@@ -42,6 +42,7 @@ class TestGenerateMetricsPDF:
             projects_percentage_unhealthy=13.33,
             monthly_overall_scores=[],
             monthly_overall_scores_months=[],
+            monthly_overall_scores_years=[],
         )
         table_data = (
             ("Metric", "Value"),
