@@ -79,7 +79,7 @@ describe('CreateModulePage', () => {
     render(<CreateModulePage />)
 
     // Fill all inputs
-    await user.type(screen.getByLabelText('Name'), 'My Test Module')
+    await user.type(screen.getByLabelText(/^Name/), 'My Test Module')
     await user.type(screen.getByLabelText(/Description/i), 'This is a test module')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
@@ -281,7 +281,7 @@ describe('CreateModulePage', () => {
 
     render(<CreateModulePage />)
 
-    await user.type(screen.getByLabelText('Name'), 'Test Module')
+    await user.type(screen.getByLabelText(/^Name/), 'Test Module')
     await user.type(screen.getByLabelText(/Description/i), 'Desc')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
@@ -333,7 +333,7 @@ describe('CreateModulePage', () => {
 
     render(<CreateModulePage />)
 
-    await user.type(screen.getByLabelText('Name'), 'Test Module 2')
+    await user.type(screen.getByLabelText(/^Name/), 'Test Module 2')
     await user.type(screen.getByLabelText(/Description/i), 'Desc 2')
     await user.type(screen.getByLabelText(/Start Date/i), '2025-07-15')
     await user.type(screen.getByLabelText(/End Date/i), '2025-08-15')
