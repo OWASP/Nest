@@ -27,6 +27,16 @@ def mock_redis_cache():
         yield mock_cache
 
 
+@pytest.fixture(autouse=True)
+def mock_algolia_settings():
+    """Mock Algolia settings."""
+    with patch("apps.core.api.internal.algolia.settings") as mock_settings:
+        mock_settings.ALGOLIA_APPLICATION_ID = "test-app-id"
+        mock_settings.ALGOLIA_WRITE_API_KEY = "test-api-key"
+        mock_settings.ENVIRONMENT = "test"
+        yield mock_settings
+
+
 class TestAlgoliaSearch:
     def _build_request(self, *, facet_filters, hits_per_page, index_name, page, query):
         """Build mock requests with consistent structure."""
@@ -282,6 +292,62 @@ class TestAlgoliaSearch:
 
         assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
         assert response_data["error"] == "An internal error occurred. Please try again later."
+
+    @patch("apps.core.api.internal.algolia.settings")
+    def test_algolia_search_logs_warning_when_not_configured_in_local(self, mock_settings):
+        """Test warning is logged and empty results returned locally.
+
+        Verify that when Algolia is not configured in local environment,
+        a warning is logged and empty results are returned.
+        """
+        mock_settings.ENVIRONMENT = "local"
+        mock_settings.ALGOLIA_APPLICATION_ID = "None"
+        mock_settings.ALGOLIA_WRITE_API_KEY = "None"
+
+        mock_request = self._build_request(
+            index_name="projects",
+            query="test",
+            page=1,
+            hits_per_page=10,
+            facet_filters=[],
+        )
+
+        with patch("apps.core.api.internal.algolia.logger") as mock_logger:
+            response = algolia_search(mock_request)
+            response_data = json.loads(response.content)
+
+            mock_logger.error.assert_called_once_with(
+                "Algolia is not configured for local development. "
+                "Set ALGOLIA_APPLICATION_ID and ALGOLIA_WRITE_API_KEY "
+                "environment variables."
+            )
+            assert response.status_code == HTTPStatus.OK
+            assert response_data == {"hits": [], "nbPages": 0}
+
+    @patch("apps.core.api.internal.algolia.settings")
+    def test_algolia_search_does_not_block_non_local_when_not_configured(self, mock_settings):
+        """Test non-local requests are not blocked by config precheck."""
+        mock_settings.ENVIRONMENT = "test"
+        mock_settings.ALGOLIA_APPLICATION_ID = "None"
+        mock_settings.ALGOLIA_WRITE_API_KEY = "None"
+
+        expected_result = MOCKED_SEARCH_RESULTS
+        with patch(
+            "apps.core.api.internal.algolia.get_search_results", return_value=expected_result
+        ):
+            mock_request = self._build_request(
+                index_name="projects",
+                query="test",
+                page=1,
+                hits_per_page=10,
+                facet_filters=[],
+            )
+
+            response = algolia_search(mock_request)
+            response_data = json.loads(response.content)
+
+            assert response.status_code == HTTPStatus.OK
+            assert response_data == expected_result
 
     @patch("apps.core.api.internal.algolia.IndexBase.get_client")
     @patch("apps.core.api.internal.algolia.deep_camelize")

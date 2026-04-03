@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from http import HTTPStatus
 from typing import Any
 
@@ -17,6 +18,8 @@ from apps.common.utils import get_user_ip_address
 from apps.core.constants import CACHE_PREFIX
 from apps.core.utils.index import deep_camelize, get_params_for_index
 from apps.core.validators import validate_search_params
+
+logger = logging.getLogger(__name__)
 
 CACHE_TTL_IN_SECONDS = 3600  # 1 hour
 
@@ -58,6 +61,24 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
 
         if index_name == "chapters":
             cache_key = f"{cache_key}:{ip_address}"
+
+        environment = str(getattr(settings, "ENVIRONMENT", "")).strip().lower()
+        if environment == "local":
+            app_id = getattr(settings, "ALGOLIA_APPLICATION_ID", "")
+            api_key = getattr(settings, "ALGOLIA_WRITE_API_KEY", "")
+
+            is_app_id_invalid = not app_id or str(app_id).strip().lower() == "none"
+            is_api_key_invalid = not api_key or str(api_key).strip().lower() == "none"
+
+            if is_app_id_invalid or is_api_key_invalid:
+                logger.error(
+                    "Algolia is not configured for local development. "
+                    "Set ALGOLIA_APPLICATION_ID and ALGOLIA_WRITE_API_KEY "
+                    "environment variables."
+                )
+                return JsonResponse(
+                    {"hits": [], "nbPages": 0},
+                )
 
         result = cache.get(cache_key)
         if result is not None:
