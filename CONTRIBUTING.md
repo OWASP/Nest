@@ -265,6 +265,24 @@ To setup NestBot development environment, follow these steps:
    - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
+   ##### Testing NestBot Locally
+
+   To verify that your NestBot is configured correctly, test it using the following methods:
+
+   1. **Ensure the application is running**:
+      Start the development environment using Docker:
+
+      ```bash
+      make run
+      ```
+   1. **Direct Message**: Send a direct message to the bot in your Slack workspace.
+   1. **Channel Mention**: Add the bot to a channel and mention it.
+   1. **Check Logs**: In a new terminal, run the following command to check Django logs for incoming Slack events:
+
+      ```bash
+      make logs
+      ```
+
 #### Local Access to Internal Dashboards
 
 When running the project locally, some UI sections are visible only if your user has the required backend roles configured via Django Admin. Follow the steps below to enable access during development.
