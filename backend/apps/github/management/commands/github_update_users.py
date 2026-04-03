@@ -3,11 +3,10 @@
 import logging
 
 from django.core.management.base import BaseCommand
-from django.db.models import Q, Sum
 
 from apps.common.models import BATCH_SIZE
-from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
+from apps.github.services.score import compute_user_score, get_scoring_context
 
 logger = logging.getLogger(__name__)
 
@@ -35,25 +34,23 @@ class Command(BaseCommand):
         active_users = User.objects.order_by("-created_at")
         active_users_count = active_users.count()
         offset = options["offset"]
-        user_contributions = {
-            item["user_id"]: item["total_contributions"]
-            for item in RepositoryContributor.objects.exclude(
-                Q(repository__is_fork=True)
-                | Q(repository__organization__is_owasp_related_organization=False)
-                | Q(user__login__in=User.get_non_indexable_logins()),
-            )
-            .values("user_id")
-            .annotate(total_contributions=Sum("contributions_count"))
-        }
+
+        context = get_scoring_context()
+
         users = []
-        for idx, user in enumerate(active_users[offset:]):
-            prefix = f"{idx + offset + 1} of {active_users_count - offset}"
+        for idx, user in enumerate(active_users[offset:].iterator()):
+            prefix = f"{idx + 1} of {active_users_count - offset}"
             self.stdout.write(f"{prefix:<10} {user.title}\n")
 
-            user.contributions_count = user_contributions.get(user.id, 0)
+            repo_item = context["repo_data_map"].get(user.id, {})
+            user.contributions_count = repo_item.get("total_contributions", 0)
+            user.calculated_score = compute_user_score(user, context)
+
             users.append(user)
 
             if not len(users) % BATCH_SIZE:
-                User.bulk_save(users, fields=("contributions_count",))
+                User.bulk_save(list(users), fields=("contributions_count", "calculated_score"))
+                users.clear()
 
-        User.bulk_save(users, fields=("contributions_count",))
+        if users:
+            User.bulk_save(list(users), fields=("contributions_count", "calculated_score"))

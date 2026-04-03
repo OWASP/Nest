@@ -57,6 +57,13 @@ class User(NodeModel, GenericUserModel, TimestampedModel, UserIndexMixin):
     contributions_count = models.PositiveIntegerField(
         verbose_name="Contributions count", default=0
     )
+    calculated_score = models.FloatField(
+        verbose_name="Calculated score",
+        default=0,
+        db_default=0,
+        db_index=True,
+        help_text="Composite ranking score from multiple factors",
+    )
 
     contribution_data = models.JSONField(
         verbose_name="Contribution heatmap data",
