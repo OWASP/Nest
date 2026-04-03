@@ -7,6 +7,11 @@ import { useSession } from 'next-auth/react'
 import { render } from 'wrappers/testUtil'
 import CreateModulePage from 'app/my/mentorship/programs/[programKey]/modules/create/page'
 
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: (fn: (...args: unknown[]) => unknown) => fn,
+}))
+
 // Mock dependencies to isolate the component
 jest.mock('@heroui/toast', () => ({ addToast: jest.fn() }))
 jest.mock('app/global-error', () => ({
@@ -156,9 +161,7 @@ describe('CreateModulePage', () => {
 
     render(<CreateModulePage />)
 
-    await waitFor(() => {
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-    })
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
   })
 
   it('shows access denied when user is unauthenticated', async () => {
@@ -174,9 +177,7 @@ describe('CreateModulePage', () => {
 
     render(<CreateModulePage />)
 
-    await waitFor(() => {
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-    })
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
   })
 
   it('shows access denied when program data is not found', async () => {
@@ -192,9 +193,7 @@ describe('CreateModulePage', () => {
 
     render(<CreateModulePage />)
 
-    await waitFor(() => {
-      expect(screen.getByText('Access Denied')).toBeInTheDocument()
-    })
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
   })
 
   it('shows access denied and redirects when user is not an admin', async () => {
@@ -308,7 +307,7 @@ describe('CreateModulePage', () => {
   })
   it('handles non-Error submission failure via handleAppError', async () => {
     const { handleAppError } = jest.requireMock('app/global-error')
-    const user = userEvent.setup({ delay: null })
+    const user = userEvent.setup()
 
     ;(useSession as jest.Mock).mockReturnValue({
       data: { user: { login: 'admin-user' } },

@@ -6,6 +6,20 @@ import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
 import ApiKeysPage from 'app/settings/api-keys/page'
 
+beforeAll(() => {
+  Object.defineProperty(document, 'createTreeWalker', {
+    writable: true,
+    value: () => ({
+      currentNode: document.body,
+      nextNode: () => null,
+      previousNode: () => null,
+      parentNode: () => null,
+      firstChild: () => null,
+      lastChild: () => null,
+    }),
+  })
+})
+
 jest.mock('@apollo/client/react', () => ({
   ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),

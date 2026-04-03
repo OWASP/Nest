@@ -80,20 +80,10 @@ describe('deadlineUtils', () => {
     it('should ignore time component and only compare dates', () => {
       const today = new Date()
       const earlyMorning = new Date(
-        today.getUTCFullYear(),
-        today.getUTCMonth(),
-        today.getUTCDate(),
-        0,
-        0,
-        0
+        Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 0, 0, 0)
       )
       const lateNight = new Date(
-        today.getUTCFullYear(),
-        today.getUTCMonth(),
-        today.getUTCDate(),
-        23,
-        59,
-        59
+        Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 23, 59, 59)
       )
 
       expect(getDeadlineCategory(earlyMorning.toISOString())).toBe('due-soon')

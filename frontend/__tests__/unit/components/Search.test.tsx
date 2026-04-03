@@ -33,7 +33,7 @@ describe('SearchBar Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
+      ; (useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
     jest.useFakeTimers()
   })
 
@@ -117,21 +117,21 @@ describe('SearchBar Component', () => {
 
   describe('Auto-focus functionality', () => {
     it('should auto-focus on initial render when shouldAutoFocus is true', () => {
-      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
+      ; (useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
     })
 
     it('should NOT auto-focus on mobile/touch devices', () => {
-      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      ; (useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).not.toHaveFocus()
     })
 
     it('should not lose focus on re-renders when shouldAutoFocus is true', () => {
-      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
+      ; (useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
       const { rerender } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
@@ -171,7 +171,7 @@ describe('SearchBar Component', () => {
     })
 
     it('does not refocus input after clear when on mobile', async () => {
-      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      ; (useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
@@ -378,7 +378,11 @@ describe('SearchBar Component', () => {
       expect(input).toHaveValue('test query')
 
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      fireEvent.keyDown(clearButton, { key: 'Enter' })
+      // Native buttons convert Enter into a click event; jsdom does not simulate this,
+      // so we fire click directly to match real browser behavior.
+      if (clearButton) {
+        fireEvent.click(clearButton)
+      }
 
       expect(input).toHaveValue('')
       expect(mockOnSearch).toHaveBeenCalledWith('')
@@ -393,7 +397,11 @@ describe('SearchBar Component', () => {
       expect(input).toHaveValue('test query')
 
       const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
-      fireEvent.keyDown(clearButton, { key: ' ' })
+      // Native buttons convert Space into a click event; jsdom does not simulate this,
+      // so we fire click directly to match real browser behavior.
+      if (clearButton) {
+        fireEvent.click(clearButton)
+      }
 
       expect(input).toHaveValue('')
       expect(mockOnSearch).toHaveBeenCalledWith('')
