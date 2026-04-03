@@ -94,17 +94,27 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 return link.submenu ? (
                   <NavDropdown link={link} pathname={pathname} key={`${link.text}-${link.href}`} />
                 ) : (
-                  <Link
-                    key={link.text}
-                    href={link.href || '/'}
-                    className={cn(
-                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                    )}
-                    aria-current="page"
-                  >
-                    {link.text}
-                  </Link>
+              <Link
+                key={link.text}
+                href={link.href || '/'}
+                className={cn(
+                  `
+                  px-3 py-2 text-sm font-medium
+                  text-slate-700 dark:text-slate-300
+                  transition-colors duration-200
+
+                  hover:text-lime-600 dark:hover:text-blue-400
+                  `,
+                  pathname === link.href &&
+                    `
+                    text-lime-700 dark:text-blue-400
+                    font-semibold
+                  `
+                )}
+                aria-current={pathname === link.href ? 'page' : undefined}
+              >
+                {link.text}
+              </Link>
                 )
               })}
           </div>
