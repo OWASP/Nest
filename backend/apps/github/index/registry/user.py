@@ -16,6 +16,7 @@ class UserIndex(IndexBase):
         "idx_avatar_url",
         "idx_badge_count",
         "idx_bio",
+        "idx_calculated_score",
         "idx_company",
         "idx_contributions",
         "idx_contributions_count",
@@ -43,6 +44,7 @@ class UserIndex(IndexBase):
         "attributeForDistinct": "idx_login",
         "minProximity": 4,
         "customRanking": [
+            "desc(idx_calculated_score)",
             "desc(idx_contributions_count)",
             "desc(idx_followers_count)",
             "desc(idx_public_repositories_count)",
