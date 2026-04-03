@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 from slack_sdk.errors import SlackApiError
@@ -7,9 +7,20 @@ from slack_sdk.errors import SlackApiError
 from apps.slack.blocks import DIVIDER, SECTION_BREAK
 from apps.slack.events.event import EventBase
 
+DIRECT_MESSAGE_BODY = "This is a direct message."
+EPHEMERAL_MESSAGE_BODY = "This is an ephemeral message."
+
 
 class MockEvent(EventBase):
     event_type = "app_home_opened"
+
+
+class MockEventWithEphemeralTemplate(MockEvent):
+    """Subclass with a non-default ephemeral template path."""
+
+    @property
+    def ephemeral_message_template_path(self) -> Path:
+        return Path("events/mock_event_ephemeral.jinja")
 
 
 class TestEventBase:
@@ -33,76 +44,201 @@ class TestEventBase:
         """Tests that the direct_message_template_path is derived correctly."""
         assert event_instance.direct_message_template_path == Path("events/mock_event.jinja")
 
+    @patch("apps.slack.events.event.env.get_template")
+    def test_direct_message_template_loads_from_env(self, mock_get_template, event_instance):
+        """Tests that direct_message_template is loaded via slack_env."""
+        mock_template = MagicMock()
+        mock_get_template.return_value = mock_template
+
+        assert event_instance.direct_message_template is mock_template
+        mock_get_template.assert_called_once_with("events/mock_event.jinja")
+
+    @patch("apps.slack.events.event.env.get_template")
+    def test_ephemeral_message_template_loads_from_env(self, mock_get_template):
+        """Tests that ephemeral_message_template is loaded when path is set."""
+        mock_template = MagicMock()
+        mock_get_template.return_value = mock_template
+        event_instance = MockEventWithEphemeralTemplate()
+
+        assert event_instance.ephemeral_message_template is mock_template
+        mock_get_template.assert_called_once_with("events/mock_event_ephemeral.jinja")
+
     def test_ephemeral_message_template_path_is_none_by_default(self, event_instance):
         """Tests that the ephemeral message path is None by default."""
         assert event_instance.ephemeral_message_template_path is None
 
+    @patch.object(MockEvent, "handle_event")
     def test_handler_when_events_disabled(
-        self, settings, event_instance, mock_event_payload, mock_client
+        self, mock_handle_event, settings, event_instance, mock_event_payload, mock_client
     ):
         """Tests that the handler exits early if events are disabled."""
         settings.SLACK_EVENTS_ENABLED = False
         ack = MagicMock()
-        with patch.object(event_instance, "handle_event") as mock_handle_event:
-            event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
+        event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
         ack.assert_called_once()
         mock_handle_event.assert_not_called()
 
+    @patch("apps.slack.events.event.logger")
+    @patch.object(MockEvent, "handle_event")
     def test_handler_catches_and_logs_generic_exception(
-        self, mocker, settings, event_instance, mock_event_payload, mock_client
+        self,
+        mock_handle_event,
+        mock_logger,
+        settings,
+        event_instance,
+        mock_event_payload,
+        mock_client,
     ):
         """Tests that a generic exception in handle_event is caught and logged."""
         settings.SLACK_EVENTS_ENABLED = True
         ack = MagicMock()
-        mock_logger = mocker.patch("apps.slack.events.event.logger")
-        with patch.object(
-            event_instance, "handle_event", side_effect=Exception("Something went wrong")
-        ):
-            event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
+        mock_handle_event.side_effect = Exception("Something went wrong")
+        event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
         ack.assert_called_once()
         mock_logger.exception.assert_called_once_with("Error handling %s", "app_home_opened")
 
+    @patch("apps.slack.events.event.logger")
+    @patch.object(MockEvent, "handle_event")
     def test_handler_ignores_cannot_dm_bot_error(
-        self, mocker, settings, event_instance, mock_event_payload, mock_client
+        self,
+        mock_handle_event,
+        mock_logger,
+        settings,
+        event_instance,
+        mock_event_payload,
+        mock_client,
     ):
         """Tests that a SlackApiError for 'cannot_dm_bot' is caught and ignored."""
         settings.SLACK_EVENTS_ENABLED = True
         ack = MagicMock()
-        mock_logger = mocker.patch("apps.slack.events.event.logger")
         mock_slack_error = SlackApiError(
             message="Cannot DM bot", response={"ok": False, "error": "cannot_dm_bot"}
         )
-        with patch.object(event_instance, "handle_event", side_effect=mock_slack_error):
-            event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
+        mock_handle_event.side_effect = mock_slack_error
+        event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
         ack.assert_called_once()
         mock_logger.warning.assert_called_once()
         mock_logger.exception.assert_not_called()
 
+    @patch.object(MockEvent, "ephemeral_message_template", new_callable=PropertyMock)
+    @patch.object(MockEvent, "direct_message_template", new_callable=PropertyMock)
     def test_handle_event_sends_direct_message(
-        self, mocker, event_instance, mock_event_payload, mock_client
+        self,
+        mock_direct_template,
+        mock_ephemeral_template,
+        event_instance,
+        mock_event_payload,
+        mock_client,
     ):
         """Tests that a direct message is correctly sent."""
         mock_template = MagicMock()
-        mock_template.render.return_value = "This is a direct message."
-        mocker.patch.object(
-            MockEvent,
-            "direct_message_template",
-            new_callable=mocker.PropertyMock,
-            return_value=mock_template,
-        )
-        mocker.patch.object(
-            MockEvent,
-            "ephemeral_message_template",
-            new_callable=mocker.PropertyMock,
-            return_value=None,
-        )
+        mock_template.render.return_value = DIRECT_MESSAGE_BODY
+        mock_direct_template.return_value = mock_template
+        mock_ephemeral_template.return_value = None
         event_instance.handle_event(event=mock_event_payload, client=mock_client)
         mock_client.chat_postMessage.assert_called_once()
         assert mock_client.chat_postMessage.call_args[1]["channel"] == "ABCDEF"
         mock_client.chat_postEphemeral.assert_not_called()
 
+    @patch("apps.slack.events.event.logger")
+    @patch.object(MockEvent, "ephemeral_message_template", new_callable=PropertyMock)
+    @patch.object(MockEvent, "direct_message_template", new_callable=PropertyMock)
+    def test_handle_event_logs_when_direct_message_post_not_ok(
+        self,
+        mock_direct_template,
+        mock_ephemeral_template,
+        mock_logger,
+        event_instance,
+        mock_event_payload,
+        mock_client,
+    ):
+        """Tests that a failed chat_postMessage response is logged."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = DIRECT_MESSAGE_BODY
+        mock_direct_template.return_value = mock_template
+        mock_ephemeral_template.return_value = None
+        mock_client.chat_postMessage.return_value = {"ok": False, "error": "msg_too_long"}
+
+        event_instance.handle_event(event=mock_event_payload, client=mock_client)
+
+        mock_logger.error.assert_called_once_with(
+            "Failed to send direct message: %s", "msg_too_long"
+        )
+
+    @patch("apps.slack.events.event.logger")
+    @patch.object(MockEvent, "ephemeral_message_template", new_callable=PropertyMock)
+    @patch.object(MockEvent, "direct_message_template", new_callable=PropertyMock)
+    def test_handle_event_logs_exception_when_direct_message_post_raises(
+        self,
+        mock_direct_template,
+        mock_ephemeral_template,
+        mock_logger,
+        event_instance,
+        mock_event_payload,
+        mock_client,
+    ):
+        """Tests that exceptions from chat_postMessage are logged."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = DIRECT_MESSAGE_BODY
+        mock_direct_template.return_value = mock_template
+        mock_ephemeral_template.return_value = None
+        mock_client.chat_postMessage.side_effect = RuntimeError("slack unavailable")
+
+        event_instance.handle_event(event=mock_event_payload, client=mock_client)
+
+        mock_logger.exception.assert_called_once_with("Error sending direct message")
+
+    @patch("apps.slack.events.event.logger")
+    @patch.object(MockEvent, "ephemeral_message_template", new_callable=PropertyMock)
+    @patch.object(MockEvent, "direct_message_template", new_callable=PropertyMock)
+    def test_handle_event_logs_when_ephemeral_post_not_ok(
+        self,
+        mock_direct_template,
+        mock_ephemeral_template,
+        mock_logger,
+        event_instance,
+        mock_event_payload,
+        mock_client,
+    ):
+        """Tests that a failed chat_postEphemeral response is logged."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = EPHEMERAL_MESSAGE_BODY
+        mock_direct_template.return_value = None
+        mock_ephemeral_template.return_value = mock_template
+        mock_client.chat_postEphemeral.return_value = {"ok": False, "error": "user_not_found"}
+
+        event_instance.handle_event(event=mock_event_payload, client=mock_client)
+
+        mock_logger.error.assert_called_once_with(
+            "Failed to send ephemeral message: %s", "user_not_found"
+        )
+
+    @patch("apps.slack.events.event.logger")
+    @patch.object(MockEvent, "ephemeral_message_template", new_callable=PropertyMock)
+    @patch.object(MockEvent, "direct_message_template", new_callable=PropertyMock)
+    def test_handle_event_logs_exception_when_ephemeral_post_raises(
+        self,
+        mock_direct_template,
+        mock_ephemeral_template,
+        mock_logger,
+        event_instance,
+        mock_event_payload,
+        mock_client,
+    ):
+        """Tests that exceptions from chat_postEphemeral are logged."""
+        mock_template = MagicMock()
+        mock_template.render.return_value = EPHEMERAL_MESSAGE_BODY
+        mock_direct_template.return_value = None
+        mock_ephemeral_template.return_value = mock_template
+        mock_client.chat_postEphemeral.side_effect = RuntimeError("network")
+
+        event_instance.handle_event(event=mock_event_payload, client=mock_client)
+
+        mock_logger.exception.assert_called_once_with("Error sending ephemeral message")
+
+    @patch.object(MockEvent, "handle_event")
     def test_handler_fails_on_unknown_slack_error(
-        self, settings, event_instance, mock_event_payload, mock_client
+        self, mock_handle_event, settings, event_instance, mock_event_payload, mock_client
     ):
         """Tests that SlackApiErrors other than 'cannot_dm_bot' are re-raised."""
         settings.SLACK_EVENTS_ENABLED = True
@@ -110,30 +246,25 @@ class TestEventBase:
         mock_slack_error = SlackApiError(
             message="Other error", response={"ok": False, "error": "channel_not_found"}
         )
-        with (
-            patch.object(event_instance, "handle_event", side_effect=mock_slack_error),
-            pytest.raises(SlackApiError),
-        ):
+        mock_handle_event.side_effect = mock_slack_error
+        with pytest.raises(SlackApiError):
             event_instance.handler(event=mock_event_payload, client=mock_client, ack=ack)
 
+    @patch.object(MockEvent, "ephemeral_message_template", new_callable=PropertyMock)
+    @patch.object(MockEvent, "direct_message_template", new_callable=PropertyMock)
     def test_handle_event_sends_ephemeral_message(
-        self, mocker, event_instance, mock_event_payload, mock_client
+        self,
+        mock_direct_template,
+        mock_ephemeral_template,
+        event_instance,
+        mock_event_payload,
+        mock_client,
     ):
         """Tests that an ephemeral message is correctly sent."""
         mock_template = MagicMock()
-        mock_template.render.return_value = "This is an ephemeral message."
-        mocker.patch.object(
-            MockEvent,
-            "direct_message_template",
-            new_callable=mocker.PropertyMock,
-            return_value=None,
-        )
-        mocker.patch.object(
-            MockEvent,
-            "ephemeral_message_template",
-            new_callable=mocker.PropertyMock,
-            return_value=mock_template,
-        )
+        mock_template.render.return_value = EPHEMERAL_MESSAGE_BODY
+        mock_direct_template.return_value = None
+        mock_ephemeral_template.return_value = mock_template
         event_instance.handle_event(event=mock_event_payload, client=mock_client)
         mock_client.chat_postMessage.assert_not_called()
         mock_client.chat_postEphemeral.assert_called_once()
@@ -150,19 +281,20 @@ class TestEventBase:
         assert result is None
         mock_client.conversations_open.assert_not_called()
 
-    def test_configure_events_registers_events(self, mocker):
+    @patch.object(EventBase, "get_events")
+    @patch("apps.slack.events.event.SlackConfig")
+    def test_configure_events_registers_events(self, mock_slack_config, mock_get_events):
         """Tests that subclasses are discovered and registered."""
-        mock_slack_config = mocker.patch("apps.slack.events.event.SlackConfig")
         mock_app = MagicMock()
         mock_slack_config.app = mock_app
         mock_event_class = MagicMock()
-        mocker.patch.object(EventBase, "get_events", return_value=[mock_event_class])
+        mock_get_events.return_value = [mock_event_class]
         EventBase.configure_events()
         mock_event_class.return_value.register.assert_called_once()
 
-    def test_register(self, mocker, event_instance):
+    @patch("apps.slack.events.event.SlackConfig")
+    def test_register(self, mock_slack_config, event_instance):
         """Tests that the register method correctly calls the app's event decorator."""
-        mock_slack_config = mocker.patch("apps.slack.events.event.SlackConfig")
         mock_app = MagicMock()
         mock_slack_config.app = mock_app
         event_instance.register()
@@ -170,11 +302,11 @@ class TestEventBase:
             event_instance.event_type, matchers=event_instance.matchers
         )
 
-    def test_configure_events_when_app_is_none(self, mocker):
+    @patch("apps.slack.events.event.logger")
+    @patch("apps.slack.events.event.SlackConfig")
+    def test_configure_events_when_app_is_none(self, mock_slack_config, mock_logger):
         """Tests that configure_events returns early when app is None."""
-        mock_slack_config = mocker.patch("apps.slack.events.event.SlackConfig")
         mock_slack_config.app = None
-        mock_logger = mocker.patch("apps.slack.events.event.logger")
 
         EventBase.configure_events()
 
@@ -188,31 +320,28 @@ class TestEventBase:
         assert MockEvent in subclasses
         assert EventBase not in subclasses
 
-    def test_get_direct_message(self, mocker, event_instance, mock_event_payload):
+    @patch.object(MockEvent, "direct_message_template", new_callable=PropertyMock)
+    def test_get_direct_message(self, mock_direct_template, event_instance, mock_event_payload):
         """Tests that get_direct_message returns blocks."""
         mock_template = MagicMock()
         mock_template.render.return_value = "Direct message content"
-        mocker.patch.object(
-            MockEvent,
-            "direct_message_template",
-            new_callable=mocker.PropertyMock,
-            return_value=mock_template,
-        )
+        mock_direct_template.return_value = mock_template
 
         result = event_instance.get_direct_message(mock_event_payload)
 
         assert isinstance(result, list)
 
-    def test_get_ephemeral_message(self, mocker, event_instance, mock_event_payload):
+    @patch.object(MockEvent, "ephemeral_message_template", new_callable=PropertyMock)
+    def test_get_ephemeral_message(
+        self,
+        mock_ephemeral_template,
+        event_instance,
+        mock_event_payload,
+    ):
         """Tests that get_ephemeral_message returns blocks."""
         mock_template = MagicMock()
         mock_template.render.return_value = "Ephemeral message content"
-        mocker.patch.object(
-            MockEvent,
-            "ephemeral_message_template",
-            new_callable=mocker.PropertyMock,
-            return_value=mock_template,
-        )
+        mock_ephemeral_template.return_value = mock_template
 
         result = event_instance.get_ephemeral_message(mock_event_payload)
 
@@ -239,7 +368,7 @@ class TestEventBase:
         with pytest.raises(SlackApiError):
             event_instance.open_conversation(client=mock_client, user_id="U123ABC")
 
-    def test_render_blocks_with_divider(self, mocker, event_instance):
+    def test_render_blocks_with_divider(self, event_instance):
         """Tests that render_blocks handles divider sections."""
         mock_template = MagicMock()
         mock_template.render.return_value = f"{DIVIDER}"
@@ -248,7 +377,7 @@ class TestEventBase:
 
         assert any(block.get("type") == "divider" for block in result)
 
-    def test_render_blocks_with_text_section(self, mocker, event_instance):
+    def test_render_blocks_with_text_section(self, event_instance):
         """Tests that render_blocks handles text sections."""
         mock_template = MagicMock()
         mock_template.render.return_value = "This is some text content"
