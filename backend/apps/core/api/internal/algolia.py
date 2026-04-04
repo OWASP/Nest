@@ -37,6 +37,12 @@ def algolia_search(request: HttpRequest) -> JsonResponse | HttpResponseNotAllowe
             status=HTTPStatus.METHOD_NOT_ALLOWED,
         )
 
+    if not settings.ALGOLIA_APPLICATION_ID or not settings.ALGOLIA_WRITE_API_KEY:
+        return JsonResponse(
+            {"error": "Algolia is not configured. Please check your environment variables."},
+            status=HTTPStatus.SERVICE_UNAVAILABLE,
+        )
+
     try:
         data = json.loads(request.body)
 

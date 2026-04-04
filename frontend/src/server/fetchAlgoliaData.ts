@@ -36,7 +36,9 @@ export const fetchAlgoliaData = async <T>(
     })
 
     if (!response.ok) {
-      throw new AppError(response.status, 'Search service error')
+      const errorData = await response.json().catch(() => null)
+      const message = errorData?.error || 'Search service error'
+      throw new AppError(response.status, message)
     }
 
     const results = await response.json()
