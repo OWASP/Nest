@@ -87,7 +87,10 @@ const SearchPageLayout = ({
               <Skeleton className="h-12 w-48 rounded-none" aria-hidden="true" />
             </div>
           ) : (
-            <div data-testid="sort-inline" className="hidden shrink-0 md:flex md:w-fit [&>div>div:first-child]:rounded-l-none">
+            <div
+              data-testid="sort-inline"
+              className="hidden shrink-0 md:flex md:w-fit [&>div>div:first-child]:rounded-l-none"
+            >
               {sortChildren}
             </div>
           ))}
@@ -118,7 +121,10 @@ const SearchPageLayout = ({
             (isFirstLoad ? (
               <Skeleton className="h-12 min-w-0 flex-1 rounded-none" aria-hidden="true" />
             ) : (
-              <div data-testid="sort-inline" className="min-w-0 flex-1 [&>div>div:first-child]:rounded-l-none">
+              <div
+                data-testid="sort-inline"
+                className="min-w-0 flex-1 [&>div>div:first-child]:rounded-l-none"
+              >
                 {sortChildren}
               </div>
             ))}

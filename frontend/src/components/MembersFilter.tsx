@@ -1,5 +1,3 @@
-'use client'
-
 import { Select, SelectItem } from '@heroui/select'
 import type React from 'react'
 import { cn } from 'utils/utility'

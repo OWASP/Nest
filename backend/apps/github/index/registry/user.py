@@ -109,6 +109,10 @@ class UserIndex(IndexBase):
             QuerySet: A queryset of User objects to be indexed.
 
         """
-        return User.objects.exclude(
-            Q(is_bot=True) | Q(login__in=User.get_non_indexable_logins()),
-        ).select_related("owasp_profile").prefetch_related("chapters", "projects")
+        return (
+            User.objects.exclude(
+                Q(is_bot=True) | Q(login__in=User.get_non_indexable_logins()),
+            )
+            .select_related("owasp_profile")
+            .prefetch_related("chapters", "projects")
+        )
