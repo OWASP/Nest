@@ -74,10 +74,16 @@ export default function RootLayout({
         <Providers>
           <BreadcrumbRoot>
             <div className="flex min-h-screen flex-col">
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-blue-700 focus:shadow-lg focus:outline-none"
+              >
+                Skip to main content
+              </a>
               <AutoScrollToTop />
               <Header isGitHubAuthEnabled={IS_GITHUB_AUTH_ENABLED} />
               <BreadCrumbsWrapper />
-              <main className="flex flex-1 flex-col justify-center">{children}</main>
+              <main id="main-content" className="flex flex-1 flex-col justify-center">{children}</main>
               <Footer />
               <ScrollToTop />
             </div>
