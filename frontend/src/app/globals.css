@@ -471,4 +471,16 @@ select:disabled,
 
 .leaflet-container {
   background: transparent !important;
+  cursor: default !important;
+}
+
+.leaflet-container a,
+.leaflet-container button,
+.leaflet-container [role='button'] {
+  cursor: pointer !important;
+}
+
+.leaflet-container.leaflet-drag-target {
+  cursor: move !important;
+  cursor: grabbing !important;
 }
