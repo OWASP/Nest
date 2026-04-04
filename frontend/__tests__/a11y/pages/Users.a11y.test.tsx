@@ -1,5 +1,5 @@
 import { mockUserData } from '@mockData/mockUserData'
-import { act, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
 import { render } from 'wrappers/testUtil'
@@ -37,9 +37,9 @@ describe.each([
       expect(screen.getByText('John Doe')).toBeInTheDocument()
     })
 
-    // Wait for HeroUI Select component to finish async updates
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+    await waitFor(() => {
+      expect(screen.getAllByTestId('members-filter').length).toBeGreaterThan(0)
+      expect(screen.getAllByTestId('sort-inline').length).toBeGreaterThan(0)
     })
 
     const results = await axe(container)

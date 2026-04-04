@@ -30,8 +30,6 @@ export type User = {
   location?: string
   login: string
   name?: string
-  owaspBoardMember?: boolean
-  owaspGsocMentor?: boolean
   publicRepositoriesCount?: number
   releases?: Release[]
   releasesCount?: number
