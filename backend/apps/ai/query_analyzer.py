@@ -70,24 +70,7 @@ def analyze_query(query: str) -> dict:
     )
     result = crew.kickoff()
 
-    result_str = str(result)
-    is_simple = True
-    sub_queries = []
-
-    for line in result_str.split("\n"):
-        line_lower = line.lower().strip()
-        if line_lower.startswith("issimple:"):
-            with contextlib.suppress(ValueError):
-                value = line.split(":", 1)[1].strip().lower()
-                is_simple = value in ("true", "yes", "1")
-        elif line_lower.startswith("subquery:"):
-            content = line.split(":", 1)[1].strip()
-            if INTENT_SEPARATOR in content.lower():
-                separator_idx = content.lower().index(INTENT_SEPARATOR)
-                query_part = content[:separator_idx].strip()
-                intent_part = content[separator_idx + len(INTENT_SEPARATOR) :].strip().lower()
-                if query_part and intent_part in Intent.values():
-                    sub_queries.append({"query": query_part, "intent": intent_part})
+    is_simple, sub_queries = parse_query_analyzer_agent_result(str(result))
 
     if not is_simple and not sub_queries:
         logger.warning("Query analysis returned no valid sub-queries for: %s", query)
@@ -97,3 +80,35 @@ def analyze_query(query: str) -> dict:
         "is_simple": is_simple,
         "sub_queries": sub_queries,
     }
+
+
+def parse_query_analyzer_agent_result(result: str) -> tuple[bool, list[dict]]:
+    """Parse query analyzer agent result.
+
+    Args:
+        result: Result string to parse.
+
+    Returns:
+        is_simple(bool): Whether the query is simple.
+        sub_queries(list[dict]): A list of subqueries dict with 'query' and 'intent'
+
+    """
+    is_simple = True
+    sub_queries = []
+
+    for line in result.split("\n"):
+        line_lower = line.lower().strip()
+        if line_lower.startswith("is_simple:"):
+            with contextlib.suppress(ValueError):
+                value = line.split(":", 1)[1].strip().lower()
+                is_simple = value in {"true", "yes", "1"}
+        elif line_lower.startswith("sub_query:"):
+            content = line.split(":", 1)[1].strip()
+            if INTENT_SEPARATOR in content.lower():
+                separator_idx = content.lower().index(INTENT_SEPARATOR)
+                query_part = content[:separator_idx].strip()
+                intent_part = content[separator_idx + len(INTENT_SEPARATOR) :].strip().lower()
+                if query_part and intent_part in Intent.values():
+                    sub_queries.append({"query": query_part, "intent": intent_part})
+
+    return is_simple, sub_queries

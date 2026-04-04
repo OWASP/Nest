@@ -8,14 +8,10 @@ import logging
 from crewai import Agent, Crew, Task
 
 from apps.ai.agents.channel import create_channel_agent
-from apps.ai.agents.chapter import create_chapter_agent
 from apps.ai.agents.clarification import create_clarification_agent
-from apps.ai.agents.community import create_community_agent
-from apps.ai.agents.contribution import create_contribution_agent
-from apps.ai.agents.project import create_project_agent
-from apps.ai.agents.rag import create_rag_agent
 from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
-from apps.ai.common.intent import Intent
+from apps.ai.common.utils import get_fallback_response, get_intent_to_agent_map
+from apps.ai.flows.collaborative import handle_collaborative_query
 from apps.ai.query_analyzer import analyze_query
 from apps.ai.router import route
 from apps.common.open_ai import OpenAi
@@ -45,16 +41,6 @@ def normalize_channel_id(channel_id: str) -> str:
 
     """
     return channel_id.lstrip("#") if channel_id else ""
-
-
-INTENT_TO_AGENT = {
-    Intent.CHAPTER.value: create_chapter_agent,
-    Intent.COMMUNITY.value: create_community_agent,
-    Intent.CONTRIBUTION.value: create_contribution_agent,
-    Intent.GSOC.value: create_contribution_agent,  # GSoC queries handled by contribution agent
-    Intent.PROJECT.value: create_project_agent,
-    Intent.RAG.value: create_rag_agent,
-}
 
 
 def process_query(  # noqa: PLR0911
@@ -91,33 +77,7 @@ def process_query(  # noqa: PLR0911
             if image_context:
                 query = f"{query}{DELIMITER}Image context: {image_context}"
 
-        # TODO(rudransh-shrivastava): Use analysis results for multi-agent orchestration
-        query_analysis = analyze_query(query)
-        logger.info(
-            "Query analyzed",
-            extra={
-                "is_simple": query_analysis["is_simple"],
-                "query": query,
-                "sub_queries": query_analysis["sub_queries"],
-            },
-        )
-
-        # Step 1: Route to appropriate expert agent
-        router_result = route(query)
-        intent = router_result["intent"]
-        confidence = router_result["confidence"]
-
-        logger.info(
-            "Query routed",
-            extra={
-                "intent": intent,
-                "confidence": confidence,
-                "query": query,
-                "channel_id": channel_id,
-            },
-        )
-
-        # Step 2: Handle queries in owasp-community channel - suggest channels
+        # Step 1: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
         # for channel suggestions regardless of intent
         if channel_id:
@@ -130,7 +90,6 @@ def process_query(  # noqa: PLR0911
                     "channel_id": channel_id,
                     "normalized_channel_id": normalized_channel_id,
                     "community_channel_id": community_channel_id,
-                    "intent": intent,
                 },
             )
 
@@ -183,12 +142,9 @@ def process_query(  # noqa: PLR0911
                     "Query from owasp-community channel detected (intent: %s, "
                     "has_contribution_keywords: %s), routing to community agent for "
                     "channel suggestions",
-                    intent,
                     has_contribution_keywords,
                     extra={
                         "channel_id": channel_id,
-                        "intent": intent,
-                        "confidence": confidence,
                         "has_contribution_keywords": has_contribution_keywords,
                         "community_channel_id": community_channel_id,
                     },
@@ -309,7 +265,46 @@ def process_query(  # noqa: PLR0911
                     is_channel_suggestion=True,
                 )
 
-        # Step 3: Check for contribution intent even if misclassified
+        # Step 2: Analyze query complexity before routing
+        try:
+            query_analysis = analyze_query(query)
+            logger.info(
+                "Query analyzed",
+                extra={
+                    "is_simple": query_analysis["is_simple"],
+                    "query": query,
+                    "sub_queries": query_analysis["sub_queries"],
+                },
+            )
+        except Exception:
+            logger.exception("Query Analyzer failed, falling back to single agent: %s", query)
+            query_analysis = {"is_simple": True, "sub_queries": []}
+
+        # Step 3: Use collaborative flow for complex query
+        if not query_analysis["is_simple"] and len(query_analysis["sub_queries"]) > 1:
+            try:
+                return handle_collaborative_query(query, query_analysis["sub_queries"])
+            except Exception:
+                logger.exception(
+                    "Collaborative flow failed, falling back to single agent: %s", query
+                )
+
+        # Step 4: Route to appropriate expert agent (single-agent flow)
+        router_result = route(query)
+        intent = router_result["intent"]
+        confidence = router_result["confidence"]
+
+        logger.info(
+            "Query routed",
+            extra={
+                "intent": intent,
+                "confidence": confidence,
+                "query": query,
+                "channel_id": channel_id,
+            },
+        )
+
+        # Step 5: Check for contribution intent even if misclassified
         # This is a fallback to catch contribution queries that might be misclassified
         contribution_keywords = [
             "contribute",
@@ -337,7 +332,7 @@ def process_query(  # noqa: PLR0911
             keyword in query_lower for keyword in contribution_keywords
         )
 
-        # Step 4: Handle low confidence - invoke clarification agent
+        # Step 6: Handle low confidence - invoke clarification agent
         if confidence < CONFIDENCE_THRESHOLD:
             logger.warning(
                 "Low confidence routing",
@@ -373,8 +368,8 @@ def process_query(  # noqa: PLR0911
                 )
                 return clarification_result
 
-        # Step 5: Get appropriate expert agent
-        agent_factory = INTENT_TO_AGENT.get(intent)
+        # Step 7: Get appropriate expert agent
+        agent_factory = get_intent_to_agent_map().get(intent)
         if not agent_factory:
             logger.error("Unknown intent", extra={"intent": intent})
             # Handle unknown intent similar to low confidence
@@ -387,7 +382,7 @@ def process_query(  # noqa: PLR0911
 
         agent = agent_factory()
 
-        # Step 6: Execute task with agent
+        # Step 8: Execute task with agent
         return execute_task(agent, query)
 
     except Exception:
@@ -397,8 +392,9 @@ def process_query(  # noqa: PLR0911
 
 def execute_task(
     agent: Agent,
-    query: str,
+    query: str | None = None,
     channel_id: str | None = None,
+    task_description: str | None = None,
     *,
     is_channel_suggestion: bool = False,
 ) -> str:
@@ -406,8 +402,9 @@ def execute_task(
 
     Args:
         agent: The agent to execute the task
-        query: The user's query
+        query: Optional user's query
         channel_id: Optional Slack channel ID for context
+        task_description: Optional task description to execute the task
         is_channel_suggestion: Whether this is a channel suggestion scenario
             from owasp-community channel
 
@@ -415,22 +412,27 @@ def execute_task(
         Response string
 
     """
-    task_description = (
-        f"Answer this query: {query}\n\n"
-        "CRITICAL INSTRUCTIONS:\n"
-        "- You MUST use the provided tools to answer this question\n"
-        "- Do NOT rely on your training data or general knowledge\n"
-        "- If tools don't provide sufficient information, state that clearly\n"
-        "- Tool results are authoritative - use them exclusively\n"
-        "- Never guess or make assumptions based on general knowledge\n"
-        "- For RAG agent: ALWAYS call semantic_search tool first to retrieve relevant "
-        "context\n"
-        "- IMPORTANT: Do NOT retry the same tool call with the same input if it fails\n"
-        "- If a tool call fails or doesn't provide useful results, try a different "
-        "approach or tool\n"
-        "- If you've already tried a tool and it didn't work, do NOT call it again "
-        "with the same parameters"
-    )
+    if not task_description and not query:
+        err_msg = "Either query or task_description must be provided"
+        raise ValueError(err_msg)
+
+    if not task_description:
+        task_description = (
+            f"Answer this query: {query}\n\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "- You MUST use the provided tools to answer this question\n"
+            "- Do NOT rely on your training data or general knowledge\n"
+            "- If tools don't provide sufficient information, state that clearly\n"
+            "- Tool results are authoritative - use them exclusively\n"
+            "- Never guess or make assumptions based on general knowledge\n"
+            "- For RAG agent: ALWAYS call semantic_search tool first to retrieve relevant "
+            "context\n"
+            "- IMPORTANT: Do NOT retry the same tool call with the same input if it fails\n"
+            "- If a tool call fails or doesn't provide useful results, try a different "
+            "approach or tool\n"
+            "- If you've already tried a tool and it didn't work, do NOT call it again "
+            "with the same parameters"
+        )
 
     if is_channel_suggestion:
         task_description += (
@@ -513,26 +515,3 @@ def execute_task(
     crew = Crew(**crew_kwargs)
     result = crew.kickoff()
     return str(result)
-
-
-def get_fallback_response() -> str:
-    """Get fallback response on error.
-
-    Returns:
-        Fallback error message (detailed in development, generic in production)
-
-    """
-    from django.conf import settings  # noqa: PLC0415
-
-    # Only show detailed error message in local/development environment
-    if getattr(settings, "IS_LOCAL_ENVIRONMENT", False) or getattr(settings, "DEBUG", False):
-        return (
-            "⚠️ I encountered an error processing your request. "
-            "Please try rephrasing your question or contact support if the issue persists."
-        )
-
-    # Generic message for production
-    return (
-        "I'm sorry, I encountered an issue processing your request. "
-        "Please try again or rephrasing your question."
-    )
