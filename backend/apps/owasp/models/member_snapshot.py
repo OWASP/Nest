@@ -132,3 +132,12 @@ class MemberSnapshot(TimestampedModel):
     def total_contributions(self) -> int:
         """Return the total number of GitHub contributions in this snapshot."""
         return self.commits_count + self.pull_requests_count + self.issues_count
+
+    @property
+    def total_platform_contributions(self) -> int:
+        """Return the total number of contributions across all tracked platforms.
+
+        Combines GitHub contributions (commits, pull requests, issues) with
+        Slack messages to provide a unified cross-platform contribution count.
+        """
+        return self.total_contributions + self.messages_count

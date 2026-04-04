@@ -52,3 +52,8 @@ class MemberSnapshotNode(strawberry.relay.Node):
     def total_contributions(self, root: MemberSnapshot) -> int:
         """Resolve total contributions."""
         return root.total_contributions
+
+    @strawberry_django.field
+    def total_platform_contributions(self, root: MemberSnapshot) -> int:
+        """Resolve total contributions across all tracked platforms."""
+        return root.total_platform_contributions

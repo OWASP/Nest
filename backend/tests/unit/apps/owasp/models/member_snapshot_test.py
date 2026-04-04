@@ -57,6 +57,7 @@ class TestMemberSnapshotModel:
         assert hasattr(MemberSnapshot, "issues_count")
         assert hasattr(MemberSnapshot, "messages_count")
         assert hasattr(MemberSnapshot, "total_contributions")
+        assert hasattr(MemberSnapshot, "total_platform_contributions")
 
     def test_total_contributions_excludes_messages(self):
         """Test that total_contributions only includes GitHub contributions."""
@@ -285,3 +286,29 @@ class TestMemberSnapshotModel:
             result = snapshot.messages_count
         assert result == 15
         mock_manager.count.assert_called_once()
+
+    def test_total_platform_contributions_property(self):
+        """Test total_platform_contributions sums GitHub and Slack contributions."""
+        user = User(login="testuser")
+        snapshot = MemberSnapshot(
+            github_user=user,
+            start_at=datetime(2025, 1, 1, tzinfo=UTC),
+            end_at=datetime(2025, 1, 31, tzinfo=UTC),
+        )
+        snapshot.id = 1
+
+        with (
+            patch.object(
+                type(snapshot), "commits_count", new_callable=PropertyMock, return_value=10
+            ),
+            patch.object(
+                type(snapshot), "pull_requests_count", new_callable=PropertyMock, return_value=5
+            ),
+            patch.object(
+                type(snapshot), "issues_count", new_callable=PropertyMock, return_value=3
+            ),
+            patch.object(
+                type(snapshot), "messages_count", new_callable=PropertyMock, return_value=20
+            ),
+        ):
+            assert snapshot.total_platform_contributions == 38

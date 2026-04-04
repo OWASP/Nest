@@ -26,6 +26,7 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         assert "issues_count" in field_names
         assert "messages_count" in field_names
         assert "total_contributions" in field_names
+        assert "total_platform_contributions" in field_names
 
     def test_commits_count_resolver(self):
         """Test commits_count returns count from snapshot."""
@@ -87,3 +88,13 @@ class TestMemberSnapshotNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_snapshot)
 
         assert result == 80
+
+    def test_total_platform_contributions_resolver(self):
+        """Test total_platform_contributions returns cross-platform total from snapshot."""
+        mock_snapshot = Mock()
+        mock_snapshot.total_platform_contributions = 100
+
+        field = self._get_field_by_name("total_platform_contributions", MemberSnapshotNode)
+        result = field.base_resolver.wrapped_func(None, mock_snapshot)
+
+        assert result == 100
