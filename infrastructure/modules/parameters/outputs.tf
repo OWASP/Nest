@@ -17,6 +17,7 @@ output "django_ssm_parameter_arns" {
     "DJANGO_REDIS_HOST"              = aws_ssm_parameter.django_redis_host.arn
     "DJANGO_REDIS_PASSWORD"          = var.redis_password_arn
     "DJANGO_REDIS_USE_TLS"           = aws_ssm_parameter.django_redis_use_tls.arn
+    "DJANGO_RELEASE_VERSION"         = aws_ssm_parameter.django_release_version.arn
     "DJANGO_SECRET_KEY"              = aws_ssm_parameter.django_secret_key.arn
     "DJANGO_SENTRY_DSN"              = aws_ssm_parameter.django_sentry_dsn.arn
     "DJANGO_SETTINGS_MODULE"         = aws_ssm_parameter.django_settings_module.arn
@@ -27,7 +28,6 @@ output "django_ssm_parameter_arns" {
     var.enable_additional_parameters ? {
       "DJANGO_GITHUB_APP_ID"                          = aws_ssm_parameter.django_github_app_id[0].arn
       "DJANGO_GITHUB_APP_INSTALLATION_ID"             = aws_ssm_parameter.django_github_app_installation_id[0].arn
-      "DJANGO_RELEASE_VERSION"                        = aws_ssm_parameter.django_release_version.arn
       "NEST_GITHUB_APP_PRIVATE_KEY"                   = aws_ssm_parameter.nest_github_app_private_key[0].arn
       "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_ssm_parameter.slack_bot_token[0].arn
     } : {}
