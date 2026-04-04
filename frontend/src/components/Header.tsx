@@ -149,11 +149,11 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       </div>
       <div
         className={cn(
-          'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
+          'bg-owasp-blue fixed top-0 left-0 z-50 h-dvh w-64 transform shadow-md transition-transform dark:bg-slate-800',
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
+        <div className="flex h-full flex-col justify-between gap-1 overflow-y-auto px-2 pt-2 pb-3">
           {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
             <Link
