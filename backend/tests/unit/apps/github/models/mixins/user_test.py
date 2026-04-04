@@ -60,6 +60,7 @@ def user_index_mixin_instance():
     instance.user_badges.filter.return_value.count.return_value = 2
 
     instance.contributions_count = 150
+    instance.is_owasp_staff = True
 
     return instance
 

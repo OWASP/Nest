@@ -307,3 +307,78 @@ class UserIndexMixin:
 
         """
         return self.url
+
+    @property
+    def idx_has_chapter_affinity(self) -> bool:
+        """Get whether the user has chapter affinity for indexing.
+
+        Returns:
+            bool: True if the user contributed to a chapter repository or leads a chapter.
+
+        Note:
+            Prefers annotated value (annotated_idx_has_chapter_affinity) when available
+            to avoid N+1 queries during bulk reindexing. Falls back to database queries
+            only when the annotation is missing.
+
+        """
+        if hasattr(self, "annotated_idx_has_chapter_affinity"):
+            return self.annotated_idx_has_chapter_affinity
+
+        from apps.github.models.repository_contributor import RepositoryContributor
+
+        has_contributions = RepositoryContributor.objects.filter(
+            user=self,
+            repository__key__startswith="www-chapter-",
+        ).exists()
+        return has_contributions or self.chapters.exists()
+
+    @property
+    def idx_has_project_affinity(self) -> bool:
+        """Get whether the user has project affinity for indexing.
+
+        Returns:
+            bool: True if the user contributed to a project repository or leads a project.
+
+        Note:
+            Prefers annotated value (annotated_idx_has_project_affinity) when available
+            to avoid N+1 queries during bulk reindexing. Falls back to database queries
+            only when the annotation is missing.
+
+        """
+        if hasattr(self, "annotated_idx_has_project_affinity"):
+            return self.annotated_idx_has_project_affinity
+
+        from apps.github.models.repository_contributor import RepositoryContributor
+        from apps.owasp.models.project import Project
+
+        project_repos = Project.objects.values_list("owasp_repository_id", flat=True)
+        has_contributions = RepositoryContributor.objects.filter(
+            user=self,
+            repository_id__in=project_repos,
+        ).exists()
+        return has_contributions or self.projects.exists()
+
+    @property
+    def idx_has_committee_affinity(self) -> bool:
+        """Get whether the user has committee affinity for indexing.
+
+        Returns:
+            bool: True if the user contributed to a committee repository or leads a committee.
+
+        Note:
+            Prefers annotated value (annotated_idx_has_committee_affinity) when available
+            to avoid N+1 queries during bulk reindexing. Falls back to database queries
+            only when the annotation is missing.
+
+        """
+        if hasattr(self, "annotated_idx_has_committee_affinity"):
+            return self.annotated_idx_has_committee_affinity
+
+        from apps.github.models.repository_contributor import RepositoryContributor
+        from apps.owasp.models.committee import Committee
+
+        has_contributions = RepositoryContributor.objects.filter(
+            user=self,
+            repository__key__startswith="www-committee-",
+        ).exists()
+        return has_contributions or self._get_led_entities(Committee).exists()

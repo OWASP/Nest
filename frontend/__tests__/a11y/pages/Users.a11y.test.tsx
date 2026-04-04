@@ -6,6 +6,13 @@ import { render } from 'wrappers/testUtil'
 import UsersPage from 'app/members/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  useRouter: jest.fn(() => ({ push: jest.fn() })),
+  useParams: () => ({ userKey: 'test-user' }),
+  useSearchParams: () => new URLSearchParams(),
+}))
+
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
 }))
@@ -28,6 +35,11 @@ describe.each([
 
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument()
+    })
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('members-filter').length).toBeGreaterThan(0)
+      expect(screen.getAllByTestId('sort-inline').length).toBeGreaterThan(0)
     })
 
     const results = await axe(container)

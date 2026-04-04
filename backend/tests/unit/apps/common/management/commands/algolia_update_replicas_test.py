@@ -18,9 +18,11 @@ class TestUpdateReplicasCommand:
         with (
             patch("apps.owasp.index.ChapterIndex.configure_replicas") as chapter_replica_patch,
             patch("apps.owasp.index.ProjectIndex.configure_replicas") as project_replica_patch,
+            patch("apps.github.index.UserIndex.configure_replicas") as user_replica_patch,
         ):
             self.mock_chapter_replica_update = chapter_replica_patch
             self.mock_project_replica_update = project_replica_patch
+            self.mock_user_replica_update = user_replica_patch
             yield
 
     def test_successful_replica_configuration(self):
@@ -35,6 +37,7 @@ class TestUpdateReplicasCommand:
             assert fake_out.getvalue() == expected_output
             self.mock_chapter_replica_update.assert_called_once()
             self.mock_project_replica_update.assert_called_once()
+            self.mock_user_replica_update.assert_called_once()
 
     def test_handle_exception(self):
         """Test handling of exceptions during replica configuration."""
