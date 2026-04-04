@@ -167,7 +167,7 @@ module "parameters" {
   django_db_port                = var.db_port
   django_db_user                = var.db_user
   django_redis_host             = module.cache.redis_primary_endpoint
-  django_release_version        = var.backend_image_tag
+  django_release_version        = var.django_release_version
   django_settings_module        = var.django_settings_module
   enable_additional_parameters  = var.enable_additional_parameters
   environment                   = var.environment
