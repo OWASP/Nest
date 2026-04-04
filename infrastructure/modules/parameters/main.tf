@@ -352,3 +352,8 @@ resource "random_string" "nextauth_secret" {
   length  = 32
   special = true
 }
+
+moved {
+  from = aws_ssm_parameter.django_release_version[0]
+  to   = aws_ssm_parameter.django_release_version
+}
