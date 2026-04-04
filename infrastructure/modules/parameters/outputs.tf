@@ -27,7 +27,7 @@ output "django_ssm_parameter_arns" {
     var.enable_additional_parameters ? {
       "DJANGO_GITHUB_APP_ID"                          = aws_ssm_parameter.django_github_app_id[0].arn
       "DJANGO_GITHUB_APP_INSTALLATION_ID"             = aws_ssm_parameter.django_github_app_installation_id[0].arn
-      "DJANGO_RELEASE_VERSION"                        = aws_ssm_parameter.django_release_version[0].arn
+      "DJANGO_RELEASE_VERSION"                        = aws_ssm_parameter.django_release_version.arn
       "NEST_GITHUB_APP_PRIVATE_KEY"                   = aws_ssm_parameter.nest_github_app_private_key[0].arn
       "SLACK_BOT_TOKEN_${var.slack_bot_token_suffix}" = aws_ssm_parameter.slack_bot_token[0].arn
     } : {}
