@@ -4,7 +4,7 @@ import math
 from unittest.mock import Mock
 
 from apps.owasp.api.internal.nodes.chapter import ChapterNode, GeoLocationType
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestChapterNode(GraphQLNodeBaseTest):
