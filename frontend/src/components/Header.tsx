@@ -46,10 +46,17 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       }
     }
 
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
     globalThis.addEventListener('resize', handleResize)
     globalThis.addEventListener('click', handleOutsideClick)
 
     return () => {
+      document.body.style.overflow = ''
       globalThis.removeEventListener('resize', handleResize)
       globalThis.removeEventListener('click', handleOutsideClick)
     }
@@ -147,6 +154,13 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
           </div>
         </div>
       </div>
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <div
         className={cn(
           'bg-owasp-blue fixed inset-y-0 left-0 z-50 w-64 transform shadow-md transition-transform dark:bg-slate-800',
