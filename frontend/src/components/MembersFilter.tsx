@@ -32,27 +32,6 @@ export const AFFINITY_FILTERS: MemberFilter[] = [
   },
 ]
 
-export const ROLE_FILTERS: MemberFilter[] = [
-  {
-    key: 'staff',
-    label: 'OWASP Staff',
-    facetKey: 'idx_is_owasp_staff',
-    group: 'role',
-  },
-  {
-    key: 'board',
-    label: 'Board Member',
-    facetKey: 'idx_owasp_board_member',
-    group: 'role',
-  },
-  {
-    key: 'gsoc',
-    label: 'GSoC Mentor',
-    facetKey: 'idx_owasp_gsoc_mentor',
-    group: 'role',
-  },
-]
-
 export const AFFINITY_OPTIONS = [
   { key: 'all', label: 'All Affinity' },
   { key: 'projects', label: 'Projects' },
@@ -60,26 +39,12 @@ export const AFFINITY_OPTIONS = [
   { key: 'committees', label: 'Committees' },
 ]
 
-export const MEMBER_TYPE_OPTIONS = [
-  { key: 'all', label: 'All Types' },
-  { key: 'staff', label: 'OWASP Staff' },
-  { key: 'board', label: 'Board Member' },
-  { key: 'gsoc', label: 'GSoC Mentor' },
-]
-
 interface MembersFilterProps {
   selectedAffinity: string
   onAffinityChange: (value: string) => void
-  selectedMemberTypes: string[]
-  onMemberTypesChange: (value: string[]) => void
 }
 
-const MembersFilter: React.FC<MembersFilterProps> = ({
-  selectedAffinity,
-  onAffinityChange,
-  selectedMemberTypes,
-  onMemberTypesChange,
-}) => {
+const MembersFilter: React.FC<MembersFilterProps> = ({ selectedAffinity, onAffinityChange }) => {
   const selectClassNames = (isActive: boolean) => ({
     trigger:
       'bg-transparent data-[hover=true]:bg-transparent focus:outline-none focus:underline border-none shadow-none text-nowrap w-36 min-h-8 h-8 text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-0',
@@ -98,52 +63,27 @@ const MembersFilter: React.FC<MembersFilterProps> = ({
     { key: 'projects', label: 'Projects', type: 'affinity' as const },
     { key: 'chapters', label: 'Chapters', type: 'affinity' as const },
     { key: 'committees', label: 'Committees', type: 'affinity' as const },
-    { key: 'staff', label: 'OWASP Staff', type: 'role' as const },
-    { key: 'board', label: 'Board Member', type: 'role' as const },
-    { key: 'gsoc', label: 'GSoC Mentor', type: 'role' as const },
   ]
 
-  const getCurrentKey = () => {
-    if (
-      selectedAffinity === 'all' &&
-      (selectedMemberTypes.length === 0 || selectedMemberTypes.includes('all'))
-    ) {
-      return 'all'
-    }
-    if (selectedAffinity === 'all') {
-      return selectedMemberTypes[0]
-    }
-    return selectedAffinity
-  }
-
-  const currentKey = getCurrentKey()
+  const currentKey = selectedAffinity
   const isActive = currentKey !== 'all'
 
   const getTestId = (option: (typeof combinedOptions)[number]) => {
     if (option.type === 'affinity') {
       return `affinity-option-${option.key}`
     }
-    if (option.type === 'role') {
-      return `type-option-${option.key}`
-    }
     return 'filter-reset-all'
   }
 
   const handleChange = (value: string) => {
     if (value === 'all') {
-      if (selectedAffinity !== 'all') onAffinityChange('all')
-      if (!selectedMemberTypes.includes('all')) onMemberTypesChange(['all'])
+      onAffinityChange('all')
       return
     }
     const option = combinedOptions.find((o) => o.key === value)
     if (!option) return
     if (option.type === 'affinity') {
       onAffinityChange(option.key)
-      if (!selectedMemberTypes.includes('all')) onMemberTypesChange(['all'])
-    }
-    if (option.type === 'role') {
-      onMemberTypesChange([option.key])
-      if (selectedAffinity !== 'all') onAffinityChange('all')
     }
   }
 

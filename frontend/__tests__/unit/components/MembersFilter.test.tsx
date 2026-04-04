@@ -1,11 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import MembersFilter, { AFFINITY_FILTERS, ROLE_FILTERS } from 'components/MembersFilter'
+import MembersFilter, { AFFINITY_FILTERS } from 'components/MembersFilter'
 
 const defaultProps = {
   selectedAffinity: 'all',
   onAffinityChange: jest.fn(),
-  selectedMemberTypes: ['all'],
-  onMemberTypesChange: jest.fn(),
 }
 
 describe('<MembersFilter />', () => {
@@ -24,11 +22,6 @@ describe('<MembersFilter />', () => {
     expect(screen.getByRole('button')).toHaveTextContent('Projects')
   })
 
-  it('shows selected member type when provided', () => {
-    render(<MembersFilter {...defaultProps} selectedMemberTypes={['staff']} />)
-    expect(screen.getByRole('button')).toHaveTextContent('OWASP Staff')
-  })
-
   it('calls onAffinityChange when a new affinity is chosen', () => {
     render(<MembersFilter {...defaultProps} />)
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
@@ -36,24 +29,17 @@ describe('<MembersFilter />', () => {
     expect(defaultProps.onAffinityChange).toHaveBeenCalledWith('projects')
   })
 
-  it('calls onMemberTypesChange when a new member type is chosen', () => {
-    render(<MembersFilter {...defaultProps} />)
+  it('calls onAffinityChange with "all" when reset is chosen', () => {
+    render(<MembersFilter {...defaultProps} selectedAffinity="projects" />)
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
-    fireEvent.change(hiddenSelect, { target: { value: 'staff' } })
-    expect(defaultProps.onMemberTypesChange).toHaveBeenCalledWith(['staff'])
+    fireEvent.change(hiddenSelect, { target: { value: 'all' } })
+    expect(defaultProps.onAffinityChange).toHaveBeenCalledWith('all')
   })
 
-  it('does not call member type callback when only affinity changes', () => {
+  it('does not call onAffinityChange for unknown option', () => {
     render(<MembersFilter {...defaultProps} />)
     const hiddenSelect = screen.getByRole('combobox', { hidden: true })
-    fireEvent.change(hiddenSelect, { target: { value: 'chapters' } })
-    expect(defaultProps.onMemberTypesChange).not.toHaveBeenCalled()
-  })
-
-  it('does not call affinity callback when only member type changes', () => {
-    render(<MembersFilter {...defaultProps} />)
-    const hiddenSelect = screen.getByRole('combobox', { hidden: true })
-    fireEvent.change(hiddenSelect, { target: { value: 'board' } })
+    fireEvent.change(hiddenSelect, { target: { value: 'unknown' } })
     expect(defaultProps.onAffinityChange).not.toHaveBeenCalled()
   })
 
@@ -65,7 +51,6 @@ describe('<MembersFilter />', () => {
       expect(screen.getByTestId('affinity-option-projects')).toBeInTheDocument()
       expect(screen.getByTestId('affinity-option-chapters')).toBeInTheDocument()
       expect(screen.getByTestId('affinity-option-committees')).toBeInTheDocument()
-      expect(screen.getByTestId('type-option-staff')).toBeInTheDocument()
     })
   })
 
@@ -87,25 +72,5 @@ describe('<MembersFilter />', () => {
 
   it('AFFINITY_FILTERS all belong to group "affinity"', () => {
     expect(AFFINITY_FILTERS.every((f) => f.group === 'affinity')).toBe(true)
-  })
-
-  it('ROLE_FILTERS has keys [staff, board, gsoc]', () => {
-    expect(ROLE_FILTERS.map((f) => f.key)).toEqual(['staff', 'board', 'gsoc'])
-  })
-
-  it('ROLE_FILTERS has labels [OWASP Staff, Board Member, GSoC Mentor]', () => {
-    expect(ROLE_FILTERS.map((f) => f.label)).toEqual(['OWASP Staff', 'Board Member', 'GSoC Mentor'])
-  })
-
-  it('ROLE_FILTERS facetKeys follow idx_ convention', () => {
-    expect(ROLE_FILTERS.map((f) => f.facetKey)).toEqual([
-      'idx_is_owasp_staff',
-      'idx_owasp_board_member',
-      'idx_owasp_gsoc_mentor',
-    ])
-  })
-
-  it('ROLE_FILTERS all belong to group "role"', () => {
-    expect(ROLE_FILTERS.every((f) => f.group === 'role')).toBe(true)
   })
 })

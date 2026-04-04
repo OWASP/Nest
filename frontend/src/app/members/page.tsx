@@ -13,7 +13,6 @@ import UserCard from 'components/UserCard'
 
 const UsersPage = () => {
   const [selectedAffinity, setSelectedAffinity] = useState<string>('all')
-  const [selectedMemberTypes, setSelectedMemberTypes] = useState<string[]>([])
 
   const facetFilters = useMemo(() => {
     const filters: (string | string[])[] = []
@@ -26,16 +25,8 @@ const UsersPage = () => {
       filters.push('idx_has_committee_affinity:true')
     }
 
-    if (selectedMemberTypes.includes('staff')) {
-      filters.push('idx_is_owasp_staff:true')
-    } else if (selectedMemberTypes.includes('board')) {
-      filters.push('idx_owasp_board_member:true')
-    } else if (selectedMemberTypes.includes('gsoc')) {
-      filters.push('idx_owasp_gsoc_mentor:true')
-    }
-
     return filters
-  }, [selectedAffinity, selectedMemberTypes])
+  }, [selectedAffinity])
 
   const {
     items: users,
@@ -100,12 +91,7 @@ const UsersPage = () => {
       searchPlaceholder="Search for members..."
       searchQuery={searchQuery}
       filterChildren={
-        <MembersFilter
-          selectedAffinity={selectedAffinity}
-          onAffinityChange={setSelectedAffinity}
-          selectedMemberTypes={selectedMemberTypes}
-          onMemberTypesChange={setSelectedMemberTypes}
-        />
+        <MembersFilter selectedAffinity={selectedAffinity} onAffinityChange={setSelectedAffinity} />
       }
       inlineSort
       sortChildren={

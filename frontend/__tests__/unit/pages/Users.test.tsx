@@ -82,7 +82,8 @@ describe('UsersPage Component', () => {
     render(<UsersPage />)
 
     await waitFor(() => {
-      expect(screen.getByTestId('sort-inline')).toBeInTheDocument()
+      const sortInlines = screen.getAllByTestId('sort-inline')
+      expect(sortInlines.length).toBeGreaterThan(0)
     })
   })
 
@@ -90,7 +91,8 @@ describe('UsersPage Component', () => {
     render(<UsersPage />)
 
     await waitFor(() => {
-      expect(screen.getByTestId('members-filter')).toBeInTheDocument()
+      const filters = screen.getAllByTestId('members-filter')
+      expect(filters.length).toBeGreaterThan(0)
     })
   })
 
@@ -98,14 +100,18 @@ describe('UsersPage Component', () => {
     render(<UsersPage />)
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'All Filters' })).toBeInTheDocument()
+      const triggers = screen.getAllByRole('button', { name: 'All Filters' })
+      expect(triggers.length).toBeGreaterThan(0)
     })
   })
 
   test('does not render a standalone sidebar — filters are inline', async () => {
     render(<UsersPage />)
 
-    await screen.findByTestId('members-filter')
+    await waitFor(() => {
+      const filters = screen.getAllByTestId('members-filter')
+      expect(filters.length).toBeGreaterThan(0)
+    })
     expect(screen.queryByTestId('members-sidebar')).not.toBeInTheDocument()
   })
 

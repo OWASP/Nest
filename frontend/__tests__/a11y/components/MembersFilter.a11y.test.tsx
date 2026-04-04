@@ -6,8 +6,6 @@ import MembersFilter from 'components/MembersFilter'
 const defaultProps = {
   selectedAffinity: 'all',
   onAffinityChange: jest.fn(),
-  selectedMemberTypes: ['all'],
-  onMemberTypesChange: jest.fn(),
 }
 
 describe.each([

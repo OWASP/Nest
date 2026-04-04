@@ -32,9 +32,6 @@ class UserIndex(IndexBase):
         "idx_title",
         "idx_updated_at",
         "idx_url",
-        "idx_is_owasp_staff",
-        "idx_owasp_board_member",
-        "idx_owasp_gsoc_mentor",
         "idx_has_project_affinity",
         "idx_has_chapter_affinity",
         "idx_has_committee_affinity",
@@ -45,9 +42,6 @@ class UserIndex(IndexBase):
             "idx_key",
             "idx_name",
             "idx_title",
-            "idx_is_owasp_staff",
-            "idx_owasp_board_member",
-            "idx_owasp_gsoc_mentor",
             "idx_has_project_affinity",
             "idx_has_chapter_affinity",
             "idx_has_committee_affinity",
@@ -95,9 +89,6 @@ class UserIndex(IndexBase):
                 "idx_key",
                 "idx_name",
                 "idx_title",
-                "idx_is_owasp_staff",
-                "idx_owasp_board_member",
-                "idx_owasp_gsoc_mentor",
                 "idx_has_project_affinity",
                 "idx_has_chapter_affinity",
                 "idx_has_committee_affinity",
@@ -118,10 +109,6 @@ class UserIndex(IndexBase):
             QuerySet: A queryset of User objects to be indexed.
 
         """
-        return (
-            User.objects.exclude(
-                Q(is_bot=True) | Q(login__in=User.get_non_indexable_logins()),
-            )
-            .select_related("owasp_profile")
-            .prefetch_related("chapters", "projects")
-        )
+        return User.objects.exclude(
+            Q(is_bot=True) | Q(login__in=User.get_non_indexable_logins()),
+        ).select_related("owasp_profile").prefetch_related("chapters", "projects")

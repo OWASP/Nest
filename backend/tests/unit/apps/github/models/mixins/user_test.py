@@ -198,27 +198,3 @@ class TestUserIndexMixin:
         assert contributions[0]["repository_owner_key"] == "test-owner"
         assert contributions[1]["repository_latest_release"] == ""
         assert contributions[1]["repository_key"] == "other-repo"
-
-    def test_idx_is_owasp_staff(self, user_index_mixin_instance):
-        user_index_mixin_instance.owasp_profile = MagicMock(is_owasp_staff=True)
-        assert user_index_mixin_instance.idx_is_owasp_staff
-
-    def test_idx_is_owasp_staff_without_profile(self):
-        instance = UserIndexMixin()
-        assert not instance.idx_is_owasp_staff
-
-    def test_idx_owasp_board_member_with_profile(self, user_index_mixin_instance):
-        user_index_mixin_instance.owasp_profile = MagicMock(is_owasp_board_member=True)
-        assert user_index_mixin_instance.idx_owasp_board_member
-
-    def test_idx_owasp_board_member_without_profile(self):
-        instance = UserIndexMixin()
-        assert not instance.idx_owasp_board_member
-
-    def test_idx_owasp_gsoc_mentor_with_profile(self, user_index_mixin_instance):
-        user_index_mixin_instance.owasp_profile = MagicMock(is_gsoc_mentor=True)
-        assert user_index_mixin_instance.idx_owasp_gsoc_mentor
-
-    def test_idx_owasp_gsoc_mentor_without_profile(self):
-        instance = UserIndexMixin()
-        assert not instance.idx_owasp_gsoc_mentor

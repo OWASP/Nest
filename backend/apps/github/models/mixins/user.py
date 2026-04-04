@@ -309,42 +309,6 @@ class UserIndexMixin:
         return self.url
 
     @property
-    def idx_is_owasp_staff(self) -> bool:
-        """Get whether the user is OWASP staff for indexing.
-
-        Returns:
-            bool: True if the user is OWASP Foundation staff.
-
-        """
-        if hasattr(self, "owasp_profile"):
-            return self.owasp_profile.is_owasp_staff
-        return False
-
-    @property
-    def idx_owasp_board_member(self) -> bool:
-        """Get whether the user is an OWASP board member for indexing.
-
-        Returns:
-            bool: True if the user has an OWASP profile and is a board member.
-
-        """
-        if hasattr(self, "owasp_profile"):
-            return self.owasp_profile.is_owasp_board_member
-        return False
-
-    @property
-    def idx_owasp_gsoc_mentor(self) -> bool:
-        """Get whether the user is a GSoC mentor for indexing.
-
-        Returns:
-            bool: True if the user has an OWASP profile and is a GSoC mentor.
-
-        """
-        if hasattr(self, "owasp_profile"):
-            return self.owasp_profile.is_gsoc_mentor
-        return False
-
-    @property
     def idx_has_chapter_affinity(self) -> bool:
         """Get whether the user has chapter affinity for indexing.
 
@@ -367,31 +331,6 @@ class UserIndexMixin:
             repository__key__startswith="www-chapter-",
         ).exists()
         return has_contributions or self.chapters.exists()
-
-    @property
-    def idx_has_committee_affinity(self) -> bool:
-        """Get whether the user has committee affinity for indexing.
-
-        Returns:
-            bool: True if the user contributed to a committee repository or leads a committee.
-
-        Note:
-            Prefers annotated value (annotated_idx_has_committee_affinity) when available
-            to avoid N+1 queries during bulk reindexing. Falls back to database queries
-            only when the annotation is missing.
-
-        """
-        if hasattr(self, "annotated_idx_has_committee_affinity"):
-            return self.annotated_idx_has_committee_affinity
-
-        from apps.github.models.repository_contributor import RepositoryContributor
-        from apps.owasp.models.committee import Committee
-
-        has_contributions = RepositoryContributor.objects.filter(
-            user=self,
-            repository__key__startswith="www-committee-",
-        ).exists()
-        return has_contributions or self._get_led_entities(Committee).exists()
 
     @property
     def idx_has_project_affinity(self) -> bool:
@@ -418,3 +357,28 @@ class UserIndexMixin:
             repository_id__in=project_repos,
         ).exists()
         return has_contributions or self.projects.exists()
+
+    @property
+    def idx_has_committee_affinity(self) -> bool:
+        """Get whether the user has committee affinity for indexing.
+
+        Returns:
+            bool: True if the user contributed to a committee repository or leads a committee.
+
+        Note:
+            Prefers annotated value (annotated_idx_has_committee_affinity) when available
+            to avoid N+1 queries during bulk reindexing. Falls back to database queries
+            only when the annotation is missing.
+
+        """
+        if hasattr(self, "annotated_idx_has_committee_affinity"):
+            return self.annotated_idx_has_committee_affinity
+
+        from apps.github.models.repository_contributor import RepositoryContributor
+        from apps.owasp.models.committee import Committee
+
+        has_contributions = RepositoryContributor.objects.filter(
+            user=self,
+            repository__key__startswith="www-committee-",
+        ).exists()
+        return has_contributions or self._get_led_entities(Committee).exists()
