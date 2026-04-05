@@ -16,7 +16,10 @@ class TestSharedDataBucket:
 class TestSharedDataBucketOwner:
     def test_default(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv("SHARED_DATA_BUCKET_OWNER", raising=False)
-        assert common.shared_data_bucket_owner_account_id() == common.SHARED_DATA_BUCKET_OWNER_ACCOUNT_ID
+        assert (
+            common.shared_data_bucket_owner_account_id()
+            == common.SHARED_DATA_BUCKET_OWNER_ACCOUNT_ID
+        )
 
     def test_override(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("SHARED_DATA_BUCKET_OWNER", "999888777666")
