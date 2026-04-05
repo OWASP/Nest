@@ -44,6 +44,7 @@ module "backend" {
   container_cpu         = 1024
   container_memory      = 2048
   container_port        = 8000
+  health_check_path     = "/status/"
   desired_count         = var.backend_desired_count
   enable_auto_scaling   = var.backend_enable_auto_scaling
   environment           = var.environment
@@ -107,6 +108,7 @@ module "frontend" {
   aws_region          = var.aws_region
   common_tags         = local.common_tags
   container_port      = 3000
+  health_check_path   = "/"
   desired_count       = var.frontend_desired_count
   enable_auto_scaling = var.frontend_enable_auto_scaling
   environment         = var.environment
