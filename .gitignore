@@ -70,4 +70,5 @@ semgrep-security-report.txt
 site/
 TODO
 venv/
+ngrok.yml
 zap.yaml

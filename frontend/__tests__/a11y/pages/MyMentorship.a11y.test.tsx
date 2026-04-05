@@ -8,6 +8,15 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: jest.fn((fn: (...args: unknown[]) => unknown) => {
+    const debouncedFn = (...args: unknown[]) => fn(...args)
+    debouncedFn.cancel = jest.fn()
+    return debouncedFn
+  }),
+}))
+
 const mockProgramData = {
   myPrograms: {
     programs: [
@@ -40,6 +49,7 @@ describe.each([
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
     document.documentElement.classList.toggle('dark', theme === 'dark')
   })
+
   it('should have no accessibility violations', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockProgramData,
