@@ -69,6 +69,12 @@ exec-backend-command-fuzz:
 exec-backend-command-fuzz-it:
 	@docker exec -it fuzz-nest-backend $(CMD)
 
+exec-backend-command-staging:
+	@docker exec -i staging-nest-backend $(CMD)
+
+exec-backend-command-staging-it:
+	@docker exec -it staging-nest-backend $(CMD)
+
 exec-db-command:
 	@docker exec -i nest-db $(CMD)
 
