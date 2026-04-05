@@ -27,11 +27,11 @@ describe('ScrollToTop component test', () => {
     Object.defineProperty(globalThis, 'scrollY', { value: 400, writable: true })
     globalThis.dispatchEvent(new Event('scroll'))
 
-    Object.defineProperty(window, 'scrollY', {
+    Object.defineProperty(globalThis, 'scrollY', {
       value: 500,
       writable: true,
     })
-    window.dispatchEvent(new Event('scroll'))
+    globalThis.dispatchEvent(new Event('scroll'))
 
     await waitFor(() => {
       expect(button).toHaveClass('opacity-100')
