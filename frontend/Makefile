@@ -44,7 +44,7 @@ format-frontend-code:
 graphql-codegen:
 	@cd frontend && pnpm run graphql-codegen
 
-init-e2e-db:
+init-e2e-db: fetch-nest-dump
 	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
 	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
 	@DOCKER_BUILDKIT=1 docker compose \
@@ -124,7 +124,7 @@ test-frontend-a11y:
 		-t nest-test-frontend-a11y
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
-test-frontend-e2e-no-db-init:
+test-frontend-e2e-no-db-init: fetch-nest-dump
 	@DOCKER_BUILDKIT=1 docker compose \
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml up \
@@ -133,9 +133,10 @@ test-frontend-e2e-no-db-init:
 		--remove-orphans
 
 test-frontend-e2e: ## Run frontend e2e tests
-test-frontend-e2e: init-e2e-db test-frontend-e2e-no-db-init
+	@$(MAKE) init-e2e-db
+	@$(MAKE) test-frontend-e2e-no-db-init
 
-test-frontend-e2e-ui-no-db-init:
+test-frontend-e2e-ui-no-db-init: fetch-nest-dump
 	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml up \
@@ -143,7 +144,9 @@ test-frontend-e2e-ui-no-db-init:
 		--build \
 		--remove-orphans
 
-test-frontend-e2e-ui: init-e2e-db test-frontend-e2e-ui-no-db-init
+test-frontend-e2e-ui:
+	@$(MAKE) init-e2e-db
+	@$(MAKE) test-frontend-e2e-ui-no-db-init
 
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \

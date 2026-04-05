@@ -535,6 +535,8 @@ data "aws_iam_policy_document" "part_two" {
     resources = [
       "arn:aws:s3:::${var.project_name}-${each.key}-*",
       "arn:aws:s3:::${var.project_name}-${each.key}-*/*",
+      "arn:aws:s3:::${var.shared_data_bucket_name}",
+      "arn:aws:s3:::${var.shared_data_bucket_name}/*",
     ]
   }
 
