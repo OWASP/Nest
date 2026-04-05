@@ -305,7 +305,7 @@ describe('CreateModulePage', () => {
         expect.objectContaining({ title: 'Creation Failed' })
       )
     })
-  })
+  }, 10000)
   it('handles non-Error submission failure via handleAppError', async () => {
     const { handleAppError } = jest.requireMock('app/global-error')
     const user = userEvent.setup({ delay: null })

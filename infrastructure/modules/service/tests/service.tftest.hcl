@@ -277,3 +277,66 @@ run "test_fargate_standard_capacity_provider" {
     error_message = "Cluster must use FARGATE when use_fargate_spot is false."
   }
 }
+
+run "test_no_health_check_by_default" {
+  command = plan
+
+  assert {
+    condition     = !can(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck)
+    error_message = "Container health check must not be defined when health_check_command is null."
+  }
+}
+
+run "test_health_check_defined_when_command_provided" {
+  command = plan
+
+  variables {
+    health_check_command = ["CMD-SHELL", "wget --spider -q http://localhost:3000/status || exit 1"]
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.command == ["CMD-SHELL", "wget --spider -q http://localhost:3000/status || exit 1"]
+    error_message = "Container health check command must match health_check_command variable."
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.interval == 30
+    error_message = "Container health check interval must be 30 seconds."
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.retries == 3
+    error_message = "Container health check retries must be 3."
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.startPeriod == 60
+    error_message = "Container health check start period must be 60 seconds."
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.timeout == 5
+    error_message = "Container health check timeout must be 5 seconds."
+  }
+}
+
+run "test_health_check_with_backend_config" {
+  command = plan
+
+  variables {
+    command               = ["./entrypoint.sh"]
+    container_cpu         = 1024
+    container_memory      = 2048
+    container_port        = 8000
+    health_check_command  = ["CMD-SHELL", "wget --spider -q http://localhost:8000/status/ || exit 1"]
+    service_name          = "backend"
+    parameters_arns = {
+      "DJANGO_SECRET_KEY" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_SECRET_KEY"
+    }
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.command == ["CMD-SHELL", "wget --spider -q http://localhost:8000/status/ || exit 1"]
+    error_message = "Backend health check command must point to /status/."
+  }
+}
