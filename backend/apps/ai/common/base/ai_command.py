@@ -1,10 +1,8 @@
 """Base AI command class with common functionality."""
 
-import os
 from collections.abc import Callable
 from typing import Any
 
-import openai
 from django.core.management.base import BaseCommand
 from django.db.models import Model, QuerySet
 
@@ -16,11 +14,10 @@ class BaseAICommand(BaseCommand):
     key_field_name: str
 
     def __init__(self, *args, **kwargs):
-        """Initialize the AI command with OpenAI client placeholder."""
+        """Initialize the AI command."""
         super().__init__(*args, **kwargs)
         self.entity_name = self.model_class.__name__.lower()
         self.entity_name_plural = self.model_class.__name__.lower() + "s"
-        self.openai_client = None
 
     def source_name(self) -> str:
         """Return the source name for context creation. Override if different from default."""
@@ -71,16 +68,6 @@ class BaseAICommand(BaseCommand):
     def get_entity_key(self, entity: Model) -> str:
         """Get the key/identifier for an entity for display purposes."""
         return str(getattr(entity, self.key_field_name, entity.pk))
-
-    def setup_openai_client(self) -> bool:
-        """Set up OpenAI client if API key is available."""
-        if openai_api_key := os.getenv("DJANGO_OPEN_AI_SECRET_KEY"):
-            self.openai_client = openai.OpenAI(api_key=openai_api_key)
-            return True
-        self.stdout.write(
-            self.style.ERROR("DJANGO_OPEN_AI_SECRET_KEY environment variable not set")
-        )
-        return False
 
     def handle_batch_processing(
         self,
