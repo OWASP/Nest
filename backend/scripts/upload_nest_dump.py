@@ -20,6 +20,7 @@ from scripts.common import (
     NEST_DUMP_S3_OBJECT_KEY,
     nest_dump_path,
     shared_data_bucket,
+    shared_data_bucket_owner_account_id,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ def main() -> int:
     args = parse_args()
     local_path = Path(args.path).resolve()
     bucket = shared_data_bucket()
+    owner = shared_data_bucket_owner_account_id()
 
     if not local_path.is_file():
         logger.warning("Dump file not found: %s", local_path)
@@ -55,7 +57,10 @@ def main() -> int:
             str(local_path),
             bucket,
             NEST_DUMP_S3_OBJECT_KEY,
-            ExtraArgs={"ServerSideEncryption": "AES256"},
+            ExtraArgs={
+                "ServerSideEncryption": "AES256",
+                "ExpectedBucketOwner": owner,
+            },
         )
     except (BotoCoreError, ClientError) as exc:
         logger.warning("Upload failed: %s", exc)

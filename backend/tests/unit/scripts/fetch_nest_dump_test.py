@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from botocore.exceptions import ClientError
 
-from scripts import fetch_nest_dump
+from scripts import common, fetch_nest_dump
 
 
 class TestStripEtagQuotes:
@@ -79,11 +79,19 @@ class TestMain:
         }
         with patch("scripts.common.backend_root", return_value=tmp_path):
             assert fetch_nest_dump.main() == 0
+        mock_client.return_value.get_object.assert_called_once()
+        assert (
+            mock_client.return_value.get_object.call_args.kwargs["ExpectedBucketOwner"]
+            == common.SHARED_DATA_BUCKET_OWNER_ACCOUNT_ID
+        )
         mock_client.return_value.download_file.assert_called_once()
         args = mock_client.return_value.download_file.call_args[0]
         assert args[0] == "owasp-nest-shared-data"
         assert args[1] == "nest.dump"
         assert args[2] == str(tmp_path / "data" / "nest.dump")
+        assert mock_client.return_value.download_file.call_args.kwargs["ExtraArgs"] == {
+            "ExpectedBucketOwner": common.SHARED_DATA_BUCKET_OWNER_ACCOUNT_ID,
+        }
         etag_path = tmp_path / "data" / "nest.dump.etag"
         assert etag_path.read_text(encoding="utf-8") == "remote-1"
 

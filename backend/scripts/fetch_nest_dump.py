@@ -19,6 +19,7 @@ from scripts.common import (
     NEST_DUMP_S3_OBJECT_KEY,
     nest_dump_path,
     shared_data_bucket,
+    shared_data_bucket_owner_account_id,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ def main() -> int:
     target = nest_dump_path()
     etag_path = Path(str(target) + ".etag")
     bucket = shared_data_bucket()
+    owner = shared_data_bucket_owner_account_id()
 
     client = boto3.client(
         "s3",
@@ -57,6 +59,7 @@ def main() -> int:
             Bucket=bucket,
             Key=NEST_DUMP_S3_OBJECT_KEY,
             Range="bytes=0-0",
+            ExpectedBucketOwner=owner,
         )
         with probe["Body"] as stream:
             stream.read()
@@ -73,7 +76,12 @@ def main() -> int:
 
     logger.info("Downloading s3://%s/%s -> %s", bucket, NEST_DUMP_S3_OBJECT_KEY, target)
     try:
-        client.download_file(bucket, NEST_DUMP_S3_OBJECT_KEY, str(target))
+        client.download_file(
+            bucket,
+            NEST_DUMP_S3_OBJECT_KEY,
+            str(target),
+            ExtraArgs={"ExpectedBucketOwner": owner},
+        )
     except (BotoCoreError, ClientError) as exc:
         logger.warning("Download failed: %s", exc)
         return 1

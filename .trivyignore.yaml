@@ -11,7 +11,7 @@ misconfigurations:
     paths:
       - infrastructure/modules/storage/modules/s3-bucket/main.tf
       - infrastructure/modules/storage/modules/shared-data-bucket/main.tf
-  - id: AVD-AWS-0093  # Public buckets allowed for static bucket via allow_public_read
+  - id: AVD-AWS-0093  # Public buckets (static: allow_public_read; shared data: public read object)
     paths:
       - infrastructure/modules/storage/modules/s3-bucket/main.tf
       - infrastructure/modules/storage/modules/shared-data-bucket/main.tf

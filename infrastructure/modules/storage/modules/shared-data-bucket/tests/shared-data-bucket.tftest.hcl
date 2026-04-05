@@ -60,8 +60,8 @@ run "test_lifecycle_noncurrent_expiration_days" {
   command = plan
 
   assert {
-    condition     = one(aws_s3_bucket_lifecycle_configuration.nest_shared_data.rule).noncurrent_version_expiration[0].noncurrent_days == 30
-    error_message = "S3 lifecycle must expire noncurrent versions after 30 days."
+    condition     = one(aws_s3_bucket_lifecycle_configuration.nest_shared_data.rule).noncurrent_version_expiration[0].noncurrent_days == 120
+    error_message = "S3 lifecycle must expire noncurrent versions after 120 days."
   }
 }
 

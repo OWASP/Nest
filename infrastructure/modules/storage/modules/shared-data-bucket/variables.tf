@@ -26,4 +26,9 @@ variable "public_read_object_key" {
   default     = "nest.dump"
   description = "S3 object key allowing anonymous s3:GetObject (default nest.dump at bucket root)."
   type        = string
+
+  validation {
+    condition     = !can(regex("[*?]", var.public_read_object_key))
+    error_message = "public_read_object_key must be a literal object key and may not contain wildcards like * or ?."
+  }
 }

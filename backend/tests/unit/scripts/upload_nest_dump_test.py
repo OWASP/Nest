@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from botocore.exceptions import ClientError
 
-from scripts import upload_nest_dump
+from scripts import common, upload_nest_dump
 
 
 class TestParseArgs:
@@ -50,7 +50,10 @@ class TestMain:
             str(dump),
             "owasp-nest-shared-data",
             "nest.dump",
-            ExtraArgs={"ServerSideEncryption": "AES256"},
+            ExtraArgs={
+                "ServerSideEncryption": "AES256",
+                "ExpectedBucketOwner": common.SHARED_DATA_BUCKET_OWNER_ACCOUNT_ID,
+            },
         )
 
     @patch("scripts.upload_nest_dump.boto3.client")
@@ -72,7 +75,10 @@ class TestMain:
             str(dump),
             "env-bucket",
             "nest.dump",
-            ExtraArgs={"ServerSideEncryption": "AES256"},
+            ExtraArgs={
+                "ServerSideEncryption": "AES256",
+                "ExpectedBucketOwner": common.SHARED_DATA_BUCKET_OWNER_ACCOUNT_ID,
+            },
         )
 
     @patch("scripts.upload_nest_dump.boto3.client")
