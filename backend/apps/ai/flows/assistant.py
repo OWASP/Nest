@@ -8,8 +8,8 @@ import logging
 from crewai import Agent, Crew, Task
 
 from apps.ai.agents.channel import create_channel_agent
+from apps.ai.agents.clarification import create_clarification_agent
 from apps.ai.common.constants import DEFAULT_VISION_MODEL, DELIMITER
-from apps.ai.common.intent import Intent
 from apps.ai.common.utils import get_fallback_response, get_intent_to_agent_map
 from apps.ai.flows.collaborative import handle_collaborative_query
 from apps.ai.query_analyzer import analyze_query
@@ -332,11 +332,8 @@ def process_query(  # noqa: PLR0911
             keyword in query_lower for keyword in contribution_keywords
         )
 
-        # Step 6: Handle low confidence - skip or provide short message
-        # Exception: RAG intent can proceed with lower confidence since it's the fallback
-        # for general questions that may not fit other categories
-        rag_intent = Intent.RAG.value
-        if confidence < CONFIDENCE_THRESHOLD and intent != rag_intent:
+        # Step 6: Handle low confidence - invoke clarification agent
+        if confidence < CONFIDENCE_THRESHOLD:
             logger.warning(
                 "Low confidence routing",
                 extra={
@@ -354,12 +351,22 @@ def process_query(  # noqa: PLR0911
                 )
                 return None
 
-            # For app mentions: provide short message about constraints
-            return (
-                "I'm unable to provide a confident answer to your question based on my "
-                "current knowledge and available tools. Please try rephrasing your question "
-                "or wait for a response from one of the community members."
-            )
+            # Invoke Clarification Agent
+            try:
+                clarification_result = execute_task(create_clarification_agent(), query)
+            except Exception:
+                logger.exception("Clarification agent failed, falling back to generic message")
+                return (
+                    "I'm unable to provide a confident answer to your question based on my "
+                    "current knowledge and available tools. Please try rephrasing your question "
+                    "or wait for a response from one of the community members."
+                )
+            else:
+                logger.info(
+                    "Clarification agent returned",
+                    extra={"clarification_preview": (clarification_result or "")[:200]},
+                )
+                return clarification_result
 
         # Step 7: Get appropriate expert agent
         agent_factory = get_intent_to_agent_map().get(intent)
