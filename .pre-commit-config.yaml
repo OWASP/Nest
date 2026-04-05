@@ -40,6 +40,15 @@ repos:
         args:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
+  - repo: local
+    hooks:
+      - id: terraform_docs
+        name: terraform-docs
+        entry: python infrastructure/scripts/terraform_docs.py
+        language: system
+        files: ^infrastructure/.*\.tf$
+        pass_filenames: false
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.8
     hooks:

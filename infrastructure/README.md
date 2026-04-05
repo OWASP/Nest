@@ -16,6 +16,14 @@ Note: Refer to the respective `README.md` files for more information.
 
 - [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest/4.3-aws-infrastructure)
 
+## Terraform Docs
+
+Refresh generated Terraform reference sections locally with:
+
+```bash
+make terraform-docs-infrastructure
+```
+
 ## Setting up the infrastructure
 
 Follow these steps to set up the infrastructure:
