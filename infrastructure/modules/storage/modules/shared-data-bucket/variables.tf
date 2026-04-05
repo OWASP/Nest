@@ -6,7 +6,7 @@ variable "abort_incomplete_multipart_upload_days" {
 
 variable "bucket_name" {
   default     = "owasp-nest-shared-data"
-  description = "Global S3 bucket name for OWASP Nest shared public data (must be unique per AWS account)."
+  description = "Global S3 bucket name for OWASP Nest shared public data."
   type        = string
 }
 
