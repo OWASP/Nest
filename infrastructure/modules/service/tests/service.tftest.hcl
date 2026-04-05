@@ -8,6 +8,7 @@ variables {
   container_port        = 3000
   desired_count         = 2
   environment           = "test"
+  health_check_path     = "/"
   image_tag             = "test-tag"
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
@@ -118,6 +119,45 @@ run "test_task_definition_memory" {
   }
 }
 
+run "test_task_definition_has_container_health_check" {
+  command = plan
+
+  assert {
+    condition     = can(local.container_definition.healthCheck)
+    error_message = "Task definition container must include ECS healthCheck configuration."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.command[0] == "CMD-SHELL"
+    error_message = "Health check command must use CMD-SHELL."
+  }
+
+  assert {
+    condition     = strcontains(local.container_definition.healthCheck.command[1], ":${var.container_port}${var.health_check_path}")
+    error_message = "Health check command must target the configured container_port and health_check_path."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.interval == 30
+    error_message = "Health check interval must be 30 seconds."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.retries == 3
+    error_message = "Health check retries must be 3."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.startPeriod == 60
+    error_message = "Health check startPeriod must be 60 seconds."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.timeout == 5
+    error_message = "Health check timeout must be 5 seconds."
+  }
+}
+
 run "test_task_definition_network_mode" {
   command = plan
 
@@ -221,11 +261,12 @@ run "test_service_works_with_backend_config" {
   command = plan
 
   variables {
-    command          = ["./entrypoint.sh"]
-    container_cpu    = 1024
-    container_memory = 2048
-    container_port   = 8000
-    service_name     = "backend"
+    command           = ["./entrypoint.sh"]
+    container_cpu     = 1024
+    container_memory  = 2048
+    container_port    = 8000
+    health_check_path = "/status/"
+    service_name      = "backend"
     parameters_arns = {
       "DJANGO_SECRET_KEY" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_SECRET_KEY"
     }
@@ -249,6 +290,11 @@ run "test_service_works_with_backend_config" {
   assert {
     condition     = aws_ecs_task_definition.main.memory == "2048"
     error_message = "Task definition must use overridden memory value."
+  }
+
+  assert {
+    condition     = strcontains(local.container_definition.healthCheck.command[1], "/status/")
+    error_message = "Backend configuration must use /status/ for ECS container health checks."
   }
 }
 
