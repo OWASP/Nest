@@ -6,7 +6,7 @@ from apps.github.api.internal.nodes.organization import (
     OrganizationNode,
     OrganizationStatsNode,
 )
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestOrganizationNode(GraphQLNodeBaseTest):

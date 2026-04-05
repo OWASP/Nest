@@ -30,6 +30,7 @@ module "alb" {
   frontend_port              = 3000
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
+  static_s3_bucket_name      = module.storage.static_s3_bucket_name
   vpc_id                     = module.networking.vpc_id
 }
 

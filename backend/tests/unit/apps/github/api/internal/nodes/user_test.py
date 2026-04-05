@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 from apps.github.api.internal.nodes.user import UserNode
 from apps.nest.api.internal.nodes.badge import BadgeNode
-from tests.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
+from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
 
 class TestUserNode(GraphQLNodeBaseTest):

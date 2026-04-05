@@ -563,7 +563,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
@@ -981,56 +981,23 @@ jobs:
 
           echo "Index-data task started successfully (runs async, ~30 min)"
 
-      - name: Force new backend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
-      - name: Force new frontend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
-      - name: Install boto3 for ECS waiter
-        run: pip install -q boto3
-
       - name: Wait for backend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
 
       - name: Wait for frontend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
     timeout-minutes: 60
 
   run-staging-lighthouse-ci:
@@ -1136,7 +1103,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
@@ -1557,26 +1524,6 @@ jobs:
           fi
 
           echo "Index-data task started successfully (runs async, ~30 min)"
-
-      - name: Force new backend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
-      - name: Force new frontend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
 
       - name: Wait for backend service stability
         env:

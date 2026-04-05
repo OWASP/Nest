@@ -13,6 +13,7 @@ def configure_slack_events():
         catch_all,
         contribute,
         gsoc,
+        owasp_community,
         project_nest,
     )
 
