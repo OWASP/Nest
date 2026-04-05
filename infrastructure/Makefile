@@ -1,5 +1,11 @@
 ##@ Infrastructure
 
+terraform-docs-infrastructure: ## Generate terraform-docs for infrastructure projects and modules
+	@for dir in infrastructure/bootstrap infrastructure/live infrastructure/state $$(find infrastructure/modules -type f -name "*.tf" -not -path "*/.terraform/*" -exec dirname {} \; | sort -u); do \
+		echo "Generating terraform-docs for $$dir..."; \
+		terraform-docs --config "$(CURDIR)/infrastructure/.terraform-docs.yml" "$$dir" || exit 1; \
+	done
+
 test-infrastructure: ## Run infrastructure tests
 	@find infrastructure/modules \
 		-name "tests" \
