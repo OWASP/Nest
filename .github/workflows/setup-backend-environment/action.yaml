@@ -33,7 +33,7 @@ runs:
       shell: bash
 
     - name: Fetch nest.dump from S3
-      run: cd backend && poetry run python scripts/fetch_nest_dump.py
+      run: cd backend && poetry run python -m scripts.fetch_nest_dump
       shell: bash
 
     - name: Wait for database to be ready

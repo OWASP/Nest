@@ -124,7 +124,7 @@ test-frontend-a11y:
 		-t nest-test-frontend-a11y
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
 
-test-frontend-e2e-no-db-init: fetch-nest-dump
+test-frontend-e2e-no-db-init:
 	@DOCKER_BUILDKIT=1 docker compose \
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml up \
@@ -136,7 +136,7 @@ test-frontend-e2e: ## Run frontend e2e tests
 	@$(MAKE) init-e2e-db
 	@$(MAKE) test-frontend-e2e-no-db-init
 
-test-frontend-e2e-ui-no-db-init: fetch-nest-dump
+test-frontend-e2e-ui-no-db-init:
 	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
 		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml up \

@@ -82,3 +82,19 @@ resource "aws_s3_bucket_versioning" "nest_shared_data" {
     status = "Enabled"
   }
 }
+
+resource "aws_s3_bucket_lifecycle_configuration" "nest_shared_data" {
+  bucket = aws_s3_bucket.nest_shared_data.id
+
+  rule {
+    id     = "delete-old-versions"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = var.abort_incomplete_multipart_upload_days
+    }
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_expiration_days
+    }
+  }
+}

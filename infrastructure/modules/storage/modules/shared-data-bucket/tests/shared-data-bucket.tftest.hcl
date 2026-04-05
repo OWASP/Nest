@@ -38,6 +38,33 @@ run "test_versioning_enabled" {
   }
 }
 
+run "test_lifecycle_rule_enabled" {
+  command = plan
+
+  assert {
+    condition     = one(aws_s3_bucket_lifecycle_configuration.nest_shared_data.rule).status == "Enabled"
+    error_message = "S3 lifecycle rule must be enabled."
+  }
+}
+
+run "test_lifecycle_multipart_abort_days" {
+  command = plan
+
+  assert {
+    condition     = one(aws_s3_bucket_lifecycle_configuration.nest_shared_data.rule).abort_incomplete_multipart_upload[0].days_after_initiation == 7
+    error_message = "S3 lifecycle must abort incomplete multipart uploads after 7 days."
+  }
+}
+
+run "test_lifecycle_noncurrent_expiration_days" {
+  command = plan
+
+  assert {
+    condition     = one(aws_s3_bucket_lifecycle_configuration.nest_shared_data.rule).noncurrent_version_expiration[0].noncurrent_days == 30
+    error_message = "S3 lifecycle must expire noncurrent versions after 30 days."
+  }
+}
+
 run "test_encryption_algorithm" {
   command = plan
 

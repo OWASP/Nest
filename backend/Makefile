@@ -101,7 +101,7 @@ dump-data: ## Write masked database dump to backend/data/nest.dump (no S3 upload
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
 upload-nest-dump: ## Upload backend/data/nest.dump to shared S3 (host AWS creds; poetry run)
-	@cd backend && poetry run python scripts/upload_nest_dump.py
+	@cd backend && poetry run python -m scripts.upload_nest_dump
 
 enrich-data: ## Enrich data from external sources
 enrich-data: \
@@ -121,7 +121,7 @@ index-data: ## Index data for Algolia search
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
-	@cd backend && poetry run python scripts/fetch_nest_dump.py
+	@cd backend && poetry run python -m scripts.fetch_nest_dump
 
 load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
