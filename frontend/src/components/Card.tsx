@@ -143,7 +143,7 @@ const Card = ({
             <div className="flex items-center">
               <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                 <FaCodePullRequest className="h-3 w-3" />
-                {pullRequestCount} open PR{pullRequestCount !== 1 ? 's' : ''}
+                  {pullRequestCount} open PR{pullRequestCount === 1 ? '' : 's'}
               </span>
             </div>
           )}
