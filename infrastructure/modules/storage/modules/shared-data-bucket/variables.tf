@@ -2,6 +2,14 @@ variable "abort_incomplete_multipart_upload_days" {
   default     = 7
   description = "Days after which an incomplete multipart upload is aborted."
   type        = number
+
+  validation {
+    condition = (
+      var.abort_incomplete_multipart_upload_days >= 1 &&
+      var.abort_incomplete_multipart_upload_days == floor(var.abort_incomplete_multipart_upload_days)
+    )
+    error_message = "abort_incomplete_multipart_upload_days must be a positive integer (whole days, at least 1)."
+  }
 }
 
 variable "bucket_name" {
@@ -20,6 +28,14 @@ variable "noncurrent_version_expiration_days" {
   default     = 120
   description = "Days a noncurrent object version is retained before expiration."
   type        = number
+
+  validation {
+    condition = (
+      var.noncurrent_version_expiration_days >= 1 &&
+      var.noncurrent_version_expiration_days == floor(var.noncurrent_version_expiration_days)
+    )
+    error_message = "noncurrent_version_expiration_days must be a positive integer (whole days, at least 1)."
+  }
 }
 
 variable "public_read_object_key" {
