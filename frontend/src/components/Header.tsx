@@ -24,9 +24,14 @@ import UserMenu from 'components/UserMenu'
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
   const { resolvedTheme } = useTheme()
-
-  const logoSrc = resolvedTheme === 'dark' ? '/img/logo_dark.png' : '/img/logo_light.png'
+  const [mounted, setMounted] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const logoSrc = mounted && resolvedTheme === 'dark' ? '/img/logo_dark.png' : '/img/logo_light.png'
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
