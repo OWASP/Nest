@@ -86,7 +86,7 @@ const MenteeIssues: React.FC<MenteeIssuesProps> = ({ openIssues, closedIssues, m
                   <span>#{issue.number}</span>
                   <span>Created: {formatDate(issue.createdAt)}</span>
                   {issue.updatedAt && <span>Updated: {formatDate(issue.updatedAt)}</span>}
-                  {issue.pullRequests && issue.pullRequests.length > 0 && (
+                  {!!issue.pullRequests?.length && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
                       <FaCodePullRequest className="h-3 w-3" />
                       {issue.pullRequests.length} open PR
