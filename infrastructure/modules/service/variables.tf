@@ -1,3 +1,8 @@
+variable "health_check_command" {
+  description = "Shell command for ECS container health check (e.g. [\"CMD-SHELL\", \"wget ...\"]). If null, no health check is defined."
+  type        = list(string)
+  default     = null
+}
 variable "assign_public_ip" {
   description = "Whether to assign public IPs to ECS tasks (required for public subnets)."
   type        = bool

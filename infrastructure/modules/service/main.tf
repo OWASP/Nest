@@ -37,7 +37,16 @@ locals {
         valueFrom = valueFrom
       }]
     },
-    var.command != null ? { command = var.command } : {}
+    var.command != null ? { command = var.command } : {},
+    var.health_check_command != null ? {
+      healthCheck = {
+        command     = var.health_check_command
+        interval    = 30
+        retries     = 3
+        startPeriod = 60
+        timeout     = 5
+      }
+    } : {}
   )
 }
 
