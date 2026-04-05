@@ -16,6 +16,13 @@ locals {
     {
       essential = true
       image     = "${aws_ecr_repository.main.repository_url}:${var.image_tag}"
+      healthCheck = {
+        command     = ["CMD-SHELL", "wget -qO- http://$(hostname -i):${var.container_port}${var.health_check_path} > /dev/null 2>&1 || exit 1"]
+        interval    = 30
+        retries     = 3
+        startPeriod = 60
+        timeout     = 5
+      }
       logConfiguration = {
         logDriver = "awslogs"
         options = {

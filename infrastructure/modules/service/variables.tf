@@ -61,6 +61,17 @@ variable "force_new_deployment" {
   default     = false
 }
 
+variable "health_check_path" {
+  description = "The path used by ECS container health checks."
+  type        = string
+  default     = "/"
+
+  validation {
+    condition     = startswith(var.health_check_path, "/")
+    error_message = "health_check_path must start with '/'."
+  }
+}
+
 variable "image_tag" {
   description = "The Docker image tag."
   type        = string
