@@ -67,17 +67,17 @@ class Command(BaseCommand):
                             except Exception as exc:
                                 logger.exception("Error processing message %s", message_id)
                                 try:
-                                    dlq_entry = {
-                                        k.decode(): v.decode() for k, v in data.items()
-                                    }
-                                    dlq_entry.update({
-                                        "type": "processing_failed",
-                                        "original_message_id": message_id.decode()
-                                        if isinstance(message_id, bytes)
-                                        else str(message_id),
-                                        "error": str(exc),
-                                        "dlq_retries": "0",
-                                    })
+                                    dlq_entry = {k.decode(): v.decode() for k, v in data.items()}
+                                    dlq_entry.update(
+                                        {
+                                            "type": "processing_failed",
+                                            "original_message_id": message_id.decode()
+                                            if isinstance(message_id, bytes)
+                                            else str(message_id),
+                                            "error": str(exc),
+                                            "dlq_retries": "0",
+                                        }
+                                    )
                                     redis_conn.xadd(self.DLQ_STREAM_KEY, dlq_entry)
                                     # ACK so it doesn't stay stranded in PEL
                                     redis_conn.xack(stream_key, group_name, message_id)
@@ -410,8 +410,10 @@ class Command(BaseCommand):
 
         except model_class.DoesNotExist:
             logger.exception("%s matching ID not found.", model_class.__name__)
+            raise
         except Exception:
             logger.exception("Error handling %s event", notification_type)
+            raise
 
     def recover_pending_messages(self, redis_conn, stream_key, group_name, consumer_name):
         """Recover and reprocess stuck messages from PEL."""
@@ -435,17 +437,17 @@ class Command(BaseCommand):
                         self.stdout.write(f"Successfully recovered message {message_id}")
                     except Exception as exc:
                         logger.exception("Failed to recover message %s", message_id)
-                        dlq_entry = {
-                            k.decode(): v.decode() for k, v in data.items()
-                        }
-                        dlq_entry.update({
-                            "type": "recovery_failed",
-                            "original_message_id": message_id.decode()
-                            if isinstance(message_id, bytes)
-                            else str(message_id),
-                            "error": str(exc),
-                            "dlq_retries": "0",
-                        })
+                        dlq_entry = {k.decode(): v.decode() for k, v in data.items()}
+                        dlq_entry.update(
+                            {
+                                "type": "recovery_failed",
+                                "original_message_id": message_id.decode()
+                                if isinstance(message_id, bytes)
+                                else str(message_id),
+                                "error": str(exc),
+                                "dlq_retries": "0",
+                            }
+                        )
                         redis_conn.xadd(self.DLQ_STREAM_KEY, dlq_entry)
                         redis_conn.xack(stream_key, group_name, message_id)
             else:
