@@ -67,7 +67,7 @@
   "devDependencies": {
     "@axe-core/react": "^4.11.1",
     "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "@graphql-codegen/cli": "^6.2.1",
     "@graphql-codegen/near-operation-file-preset": "^5.0.0",
     "@graphql-codegen/typed-document-node": "^6.1.7",
