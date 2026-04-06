@@ -199,4 +199,52 @@ describe('extractGraphQLErrors', () => {
       expect(result.unmappedErrors).toEqual([])
     })
   })
+
+  describe('Apollo Client v4 CombinedGraphQLErrors (errors property)', () => {
+    it('extracts validation errors from errors array', () => {
+      const error = {
+        errors: [
+          {
+            message: 'A program with this name already exists.',
+            extensions: { code: 'VALIDATION_ERROR', field: 'name' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(true)
+      expect(result.validationErrors).toEqual({
+        name: 'A program with this name already exists.',
+      })
+      expect(result.unmappedErrors).toEqual([])
+    })
+
+    it('puts non-validation errors into unmappedErrors', () => {
+      const error = {
+        errors: [
+          {
+            message: 'Internal server error.',
+            extensions: { code: 'INTERNAL_ERROR' },
+          },
+        ],
+      }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
+      expect(result.unmappedErrors).toEqual(['Internal server error.'])
+    })
+
+    it('handles empty errors array', () => {
+      const error = { errors: [] }
+
+      const result = extractGraphQLErrors(error)
+
+      expect(result.hasValidationErrors).toBe(false)
+      expect(result.validationErrors).toEqual({})
+      expect(result.unmappedErrors).toEqual([])
+    })
+  })
 })

@@ -133,13 +133,13 @@ To do this locally:
 - Copy the contents from the template file into your new local terraform variables file:
 
     ```bash
-    cp terraform.tfvars.example terraform.tfvars
+    cp terraform.tfvars.staging.example terraform.tfvars
     ```
 
 - Copy the contents from the template file into your new local terraform backend file:
 
     ```bash
-    cp terraform.tfbackend.example terraform.tfbackend
+    cp terraform.tfbackend.staging.example terraform.tfbackend
     ```
 
   > [!NOTE]

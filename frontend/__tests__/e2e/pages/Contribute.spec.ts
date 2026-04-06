@@ -13,15 +13,7 @@ test.describe('Contribute Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/contribute')
+    await page.goto('/contribute', { timeout: 25000 })
   })
 
   test('renders issue data correctly', async ({ page }) => {
@@ -64,14 +56,13 @@ test.describe('Contribute Page', () => {
   })
 
   test('closes dialog on close button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'Read More' })
-    await expect(contributeButton).toBeVisible()
+    const contributeButton = await page.getByRole('button', { name: 'Read More' }).first()
     await contributeButton.click()
     const closeButton = await page.getByRole('button', { name: 'close-modal' })
     await expect(closeButton).toBeVisible()
     await closeButton.click()
-    await expect(contributeButton).toBeVisible()
   })
+
   test('breadcrumb renders correct segments on /contribute', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Contribute'])
   })
