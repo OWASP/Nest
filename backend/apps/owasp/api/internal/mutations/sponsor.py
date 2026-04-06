@@ -85,7 +85,7 @@ class SponsorMutations:
                 sort_name=name_clean,
                 key=key,
             )
-            temp_sponsor.full_clean()
+            temp_sponsor.full_clean(validate_unique=False)
 
             sponsor, created = Sponsor.objects.get_or_create(
                 key=key,

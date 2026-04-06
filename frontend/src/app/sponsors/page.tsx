@@ -23,6 +23,8 @@ const SponsorsPage = () => {
     return '#'
   }
 
+  const isValidUrl = (url: string): boolean => url !== '#'
+
   const { data, loading, error } = useQuery(GetSponsorsDocument)
 
   const groupedSponsors = useMemo(() => {
@@ -105,9 +107,11 @@ const SponsorsPage = () => {
     const baseClassName =
       'group relative mb-6 flex flex-row items-center justify-start gap-8 rounded-lg bg-gradient-to-r from-white to-blue-50 p-7 transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-lg dark:from-[#2d3139] dark:to-[#3a4250] dark:hover:shadow-xl'
     const safeUrl = getSafeHttpUrl(sponsor.url)
-    const interactiveClassName = safeUrl !== '#' ? `cursor-pointer ${baseClassName}` : baseClassName
+    const interactiveClassName = isValidUrl(safeUrl)
+      ? `cursor-pointer ${baseClassName}`
+      : baseClassName
 
-    if (safeUrl !== '#') {
+    if (isValidUrl(safeUrl)) {
       return (
         <Link
           key={sponsor.id}
@@ -129,6 +133,12 @@ const SponsorsPage = () => {
   }
 
   const renderSponsorCard = (sponsor: Sponsor, size: 'large' | 'medium' | 'small') => {
+    const getTextSizeClass = (): string => {
+      if (size === 'large') return 'text-base'
+      if (size === 'medium') return 'text-sm'
+      return 'text-xs'
+    }
+
     const cardClasses = {
       large: 'p-5 gap-4',
       medium: 'p-4 gap-3',
@@ -164,7 +174,7 @@ const SponsorsPage = () => {
           </div>
         )}
         <h3
-          className={`line-clamp-2 text-center font-semibold text-gray-900 dark:text-gray-100 ${size === 'large' ? 'text-base' : size === 'medium' ? 'text-sm' : 'text-xs'}`}
+          className={`line-clamp-2 text-center font-semibold text-gray-900 dark:text-gray-100 ${getTextSizeClass()}`}
         >
           {sponsor.name}
         </h3>
@@ -179,9 +189,11 @@ const SponsorsPage = () => {
     const baseClassName =
       'group relative flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg dark:border-gray-700 dark:bg-[#2d3139] dark:hover:border-gray-500 dark:hover:shadow-xl'
     const safeUrl = getSafeHttpUrl(sponsor.url)
-    const interactiveClassName = safeUrl !== '#' ? `cursor-pointer ${baseClassName}` : baseClassName
+    const interactiveClassName = isValidUrl(safeUrl)
+      ? `cursor-pointer ${baseClassName}`
+      : baseClassName
 
-    if (safeUrl !== '#') {
+    if (isValidUrl(safeUrl)) {
       return (
         <Link
           key={sponsor.id}
@@ -208,6 +220,7 @@ const SponsorsPage = () => {
   const hasSilver = groupedSponsors.silver.length > 0
   const hasSupporter = groupedSponsors.supporter.length > 0
   const hasAnySponsor = hasDiamond || hasPlatinum || hasGold || hasSilver || hasSupporter
+  const hasNoSponsors = !hasAnySponsor
 
   return (
     <PageLayout title="Sponsors" path="/sponsors">
@@ -238,7 +251,7 @@ const SponsorsPage = () => {
             </div>
           </div>
 
-          {!hasAnySponsor ? (
+          {hasNoSponsors ? (
             <div className="rounded-lg border border-gray-200 bg-white p-12 text-center dark:border-gray-700 dark:bg-[#212529]">
               <p className="text-gray-600 dark:text-gray-300">No active sponsors at this time.</p>
             </div>

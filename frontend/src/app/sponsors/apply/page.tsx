@@ -40,6 +40,31 @@ const SponsorApplyPage = () => {
   const [createSponsorApplication, { loading: mutationLoading }] = useMutation(
     CREATE_SPONSOR_APPLICATION
   )
+
+  const isNameEmpty = (): boolean => formData.name.trim() === ''
+  const isEmailEmpty = (): boolean => formData.contactEmail.trim() === ''
+  const isValidEmail = (): boolean => EMAIL_REGEX.test(formData.contactEmail)
+  const isInvalidEmail = (): boolean => !isValidEmail()
+  const isInterestEmpty = (): boolean => formData.sponsorshipInterest.trim() === ''
+  const getNameError = (): string | undefined => {
+    if (!touched.name) return undefined
+    if (isNameEmpty()) return 'Organization name is required'
+    return undefined
+  }
+
+  const getEmailError = (): string | undefined => {
+    if (!touched.contactEmail) return undefined
+    if (isEmailEmpty()) return 'Contact email is required'
+    if (isInvalidEmail()) return 'Please enter a valid email address'
+    return undefined
+  }
+
+  const getInterestError = (): string | undefined => {
+    if (!touched.sponsorshipInterest) return undefined
+    if (isInterestEmpty()) return 'Please tell us about your sponsorship interest'
+    return undefined
+  }
+
   const handleInputChange = (name: keyof FormData, value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -49,19 +74,19 @@ const SponsorApplyPage = () => {
   }
 
   const validateForm = (): boolean => {
-    if (!formData.name.trim()) {
+    if (isNameEmpty()) {
       setErrorMessage('Organization name is required')
       return false
     }
-    if (!formData.contactEmail.trim()) {
+    if (isEmailEmpty()) {
       setErrorMessage('Contact email is required')
       return false
     }
-    if (!EMAIL_REGEX.test(formData.contactEmail)) {
+    if (isInvalidEmail()) {
       setErrorMessage('Please enter a valid email address')
       return false
     }
-    if (!formData.sponsorshipInterest.trim()) {
+    if (isInterestEmpty()) {
       setErrorMessage('Please tell us about your sponsorship interest')
       return false
     }
@@ -163,13 +188,7 @@ const SponsorApplyPage = () => {
                 label="Organization Name"
                 value={formData.name}
                 onValueChange={(v) => handleInputChange('name', v)}
-                error={
-                  touched.name
-                    ? !formData.name.trim()
-                      ? 'Organization name is required'
-                      : undefined
-                    : undefined
-                }
+                error={getNameError()}
                 touched={touched.name}
                 required
                 placeholder="Your organization name"
@@ -180,15 +199,7 @@ const SponsorApplyPage = () => {
                 label="Contact Email"
                 value={formData.contactEmail}
                 onValueChange={(v) => handleInputChange('contactEmail', v)}
-                error={
-                  touched.contactEmail
-                    ? !formData.contactEmail.trim()
-                      ? 'Contact email is required'
-                      : !EMAIL_REGEX.test(formData.contactEmail)
-                        ? 'Please enter a valid email address'
-                        : undefined
-                    : undefined
-                }
+                error={getEmailError()}
                 touched={touched.contactEmail}
                 required
                 placeholder="your.email@example.com"
@@ -208,13 +219,7 @@ const SponsorApplyPage = () => {
                 label="Sponsorship Interest / Message"
                 value={formData.sponsorshipInterest}
                 onChange={(e) => handleInputChange('sponsorshipInterest', e.target.value)}
-                error={
-                  touched.sponsorshipInterest
-                    ? !formData.sponsorshipInterest.trim()
-                      ? 'Please tell us about your sponsorship interest'
-                      : undefined
-                    : undefined
-                }
+                error={getInterestError()}
                 touched={touched.sponsorshipInterest}
                 required
                 placeholder="Tell us about your interest in sponsoring OWASP Nest..."
