@@ -41,6 +41,14 @@ resource "aws_iam_policy" "fixtures_read_only" {
   tags = var.common_tags
 }
 
+module "shared_data_bucket" {
+  source = "./modules/shared-data-bucket"
+
+  common_tags = merge(var.common_tags, {
+    Purpose = "owasp-nest-shared-data"
+  })
+}
+
 module "static_bucket" {
   source = "./modules/s3-bucket"
 
