@@ -9,7 +9,7 @@ terraform {
   }
 }
 
-resource "aws_s3_bucket" "nest_shared_data" { # NOSONAR
+resource "aws_s3_bucket" "nest_shared_data" {
   bucket = var.bucket_name
 
   lifecycle {

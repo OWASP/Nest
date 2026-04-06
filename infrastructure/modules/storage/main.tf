@@ -27,14 +27,6 @@ module "fixtures_bucket" {
   })
 }
 
-module "shared_data_bucket" {
-  source = "./modules/shared-data-bucket"
-
-  common_tags = merge(var.common_tags, {
-    Purpose = "owasp-nest-shared-data"
-  })
-}
-
 resource "aws_iam_policy" "fixtures_read_only" {
   name        = "${var.project_name}-${var.environment}-fixtures-read-only"
   description = "Allows read-only access to the fixtures S3 bucket"
@@ -47,6 +39,14 @@ resource "aws_iam_policy" "fixtures_read_only" {
     }]
   })
   tags = var.common_tags
+}
+
+module "shared_data_bucket" {
+  source = "./modules/shared-data-bucket"
+
+  common_tags = merge(var.common_tags, {
+    Purpose = "owasp-nest-shared-data"
+  })
 }
 
 module "static_bucket" {
