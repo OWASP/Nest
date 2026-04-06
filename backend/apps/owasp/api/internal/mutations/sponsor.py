@@ -69,17 +69,33 @@ class SponsorMutations:
             )
 
         try:
-            key = slugify(name.strip())
+            name_clean = name.strip()
+            email_clean = contact_email.strip()
+            interest_clean = sponsorship_interest.strip()
+            url_clean = website.strip() if website else ""
+            key = slugify(name_clean)
+
+            # Validate before get_or_create to avoid saving invalid sponsor
+            temp_sponsor = Sponsor(
+                name=name_clean,
+                contact_email=email_clean,
+                url=url_clean,
+                description=interest_clean,
+                status=Sponsor.Status.DRAFT,
+                sort_name=name_clean,
+                key=key,
+            )
+            temp_sponsor.full_clean()
 
             sponsor, created = Sponsor.objects.get_or_create(
                 key=key,
                 defaults={
-                    "name": name.strip(),
-                    "contact_email": contact_email.strip(),
-                    "url": website.strip() if website else "",
-                    "description": sponsorship_interest.strip(),
+                    "name": name_clean,
+                    "contact_email": email_clean,
+                    "url": url_clean,
+                    "description": interest_clean,
                     "status": Sponsor.Status.DRAFT,
-                    "sort_name": name.strip(),
+                    "sort_name": name_clean,
                 },
             )
 
@@ -89,9 +105,6 @@ class SponsorMutations:
                     code="DUPLICATE",
                     message="A sponsor with this organization name already exists",
                 )
-
-            sponsor.full_clean()
-            sponsor.save()
 
             logger.info("Sponsor application created: %s - %s", sponsor.id, sponsor.name)
 

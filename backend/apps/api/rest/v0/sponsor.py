@@ -135,7 +135,7 @@ def get_sponsor(
     description="Submit a sponsor application.",
     operation_id="create_sponsor_application",
     response={
-        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
+        HTTPStatus.BAD_REQUEST: SponsorError,
         HTTPStatus.CREATED: SponsorApplicationResponse,
     },
     summary="Create sponsor application",

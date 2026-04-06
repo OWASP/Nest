@@ -10,10 +10,25 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import PageLayout from 'components/PageLayout'
 
 const SponsorsPage = () => {
+  const getSafeHttpUrl = (url: string | undefined | null): string => {
+    if (!url) return '#'
+    try {
+      const parsed = new URL(url)
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.toString()
+      }
+    } catch {
+      // Invalid URL, return fallback
+    }
+    return '#'
+  }
+
   const { data, loading, error } = useQuery(GetSponsorsDocument)
 
   const groupedSponsors = useMemo(() => {
-    const sponsors = data?.sponsors ?? []
+    const sponsors = (data?.sponsors ?? []).filter(
+      (sponsor) => sponsor.status?.toLowerCase() === 'active'
+    )
     const groups: Record<string, Sponsor[]> = {
       diamond: [],
       platinum: [],
@@ -89,13 +104,14 @@ const SponsorsPage = () => {
 
     const baseClassName =
       'group relative mb-6 flex flex-row items-center justify-start gap-8 rounded-lg bg-gradient-to-r from-white to-blue-50 p-7 transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-lg dark:from-[#2d3139] dark:to-[#3a4250] dark:hover:shadow-xl'
-    const interactiveClassName = sponsor.url ? `cursor-pointer ${baseClassName}` : baseClassName
+    const safeUrl = getSafeHttpUrl(sponsor.url)
+    const interactiveClassName = safeUrl !== '#' ? `cursor-pointer ${baseClassName}` : baseClassName
 
-    if (sponsor.url) {
+    if (safeUrl !== '#') {
       return (
         <Link
           key={sponsor.id}
-          href={sponsor.url}
+          href={safeUrl}
           target="_blank"
           rel="noopener noreferrer"
           className={interactiveClassName}
@@ -162,13 +178,14 @@ const SponsorsPage = () => {
 
     const baseClassName =
       'group relative flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg dark:border-gray-700 dark:bg-[#2d3139] dark:hover:border-gray-500 dark:hover:shadow-xl'
-    const interactiveClassName = sponsor.url ? `cursor-pointer ${baseClassName}` : baseClassName
+    const safeUrl = getSafeHttpUrl(sponsor.url)
+    const interactiveClassName = safeUrl !== '#' ? `cursor-pointer ${baseClassName}` : baseClassName
 
-    if (sponsor.url) {
+    if (safeUrl !== '#') {
       return (
         <Link
           key={sponsor.id}
-          href={sponsor.url}
+          href={safeUrl}
           target="_blank"
           rel="noopener noreferrer"
           className={interactiveClassName}

@@ -14,6 +14,10 @@ import PageLayout from 'components/PageLayout'
 
 type FormStatus = 'idle' | 'loading' | 'success' | 'error'
 
+// RFC-compliant email regex: explicit character classes, no backtracking ambiguity, linear complexity
+const EMAIL_REGEX =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+
 interface FormData {
   name: string
   contactEmail: string
@@ -53,7 +57,7 @@ const SponsorApplyPage = () => {
       setErrorMessage('Contact email is required')
       return false
     }
-    if (!/^.+@.+\..+$/.test(formData.contactEmail)) {
+    if (!EMAIL_REGEX.test(formData.contactEmail)) {
       setErrorMessage('Please enter a valid email address')
       return false
     }
@@ -180,7 +184,7 @@ const SponsorApplyPage = () => {
                   touched.contactEmail
                     ? !formData.contactEmail.trim()
                       ? 'Contact email is required'
-                      : !/^.+@.+\..+$/.test(formData.contactEmail)
+                      : !EMAIL_REGEX.test(formData.contactEmail)
                         ? 'Please enter a valid email address'
                         : undefined
                     : undefined
