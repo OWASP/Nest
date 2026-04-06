@@ -12,6 +12,7 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
+  slack_sync_data_schedule_expression               = var.enable_cron_tasks ? "cron(27 15 ? * MON-FRI *)" : null
   sync_data_schedule_expression                     = var.enable_cron_tasks ? "cron(17 05 * * ? *)" : null
   update_project_health_metrics_schedule_expression = var.enable_cron_tasks ? "cron(17 17 * * ? *)" : null
   update_project_health_scores_schedule_expression  = var.enable_cron_tasks ? "cron(22 17 * * ? *)" : null
@@ -238,6 +239,38 @@ module "sync_data_task" {
   security_group_ids           = [var.ecs_sg_id]
   subnet_ids                   = var.subnet_ids
   task_name                    = "sync-data"
+  use_fargate_spot             = var.use_fargate_spot
+}
+
+module "slack_sync_data_task" {
+  source = "./modules/task"
+
+  assign_public_ip = var.assign_public_ip
+  aws_region       = var.aws_region
+  command = [
+    "/bin/sh",
+    "-c",
+    <<-EOT
+    set -e
+    EXEC_MODE=direct make slack-sync-data
+    EXEC_MODE=direct make slack-check-invite-link
+    EOT
+  ]
+  common_tags                  = var.common_tags
+  container_parameters_arns    = var.container_parameters_arns
+  cpu                          = var.slack_sync_data_task_cpu
+  ecs_cluster_arn              = aws_ecs_cluster.main.arn
+  ecs_tasks_execution_role_arn = aws_iam_role.ecs_tasks_execution_role.arn
+  environment                  = var.environment
+  event_bridge_role_arn        = aws_iam_role.event_bridge_role.arn
+  image_url                    = "${var.ecr_repository_url}:${var.image_tag}"
+  kms_key_arn                  = var.kms_key_arn
+  memory                       = var.slack_sync_data_task_memory
+  project_name                 = var.project_name
+  schedule_expression          = local.slack_sync_data_schedule_expression
+  security_group_ids           = [var.ecs_sg_id]
+  subnet_ids                   = var.subnet_ids
+  task_name                    = "slack-sync-data"
   use_fargate_spot             = var.use_fargate_spot
 }
 
