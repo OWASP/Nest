@@ -130,15 +130,15 @@ variable "sync_data_task_memory" {
 }
 
 variable "slack_sync_data_task_cpu" {
-  description = "The CPU for the slack-sync-data scheduled task (Slack sync + invite link check)."
+  description = "The CPU for the slack-sync-data scheduled task."
   type        = string
-  default     = "256"
+  default     = "1024"
 }
 
 variable "slack_sync_data_task_memory" {
   description = "The memory for the slack-sync-data scheduled task."
   type        = string
-  default     = "1024"
+  default     = "2048"
 }
 
 variable "use_fargate_spot" {
