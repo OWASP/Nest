@@ -5,30 +5,48 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('owasp', '0072_project_project_name_gin_idx_and_more'),
+        ("owasp", "0072_project_project_name_gin_idx_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sponsor',
-            name='chapter',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sponsors', to='owasp.chapter', verbose_name='Associated Chapter'),
+            model_name="sponsor",
+            name="chapter",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="sponsors",
+                to="owasp.chapter",
+                verbose_name="Associated Chapter",
+            ),
         ),
         migrations.AddField(
-            model_name='sponsor',
-            name='contact_email',
-            field=models.EmailField(blank=True, max_length=254, verbose_name='Contact Email'),
+            model_name="sponsor",
+            name="contact_email",
+            field=models.EmailField(blank=True, max_length=254, verbose_name="Contact Email"),
         ),
         migrations.AddField(
-            model_name='sponsor',
-            name='project',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sponsors', to='owasp.project', verbose_name='Associated Project'),
+            model_name="sponsor",
+            name="project",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="sponsors",
+                to="owasp.project",
+                verbose_name="Associated Project",
+            ),
         ),
         migrations.AddField(
-            model_name='sponsor',
-            name='status',
-            field=models.CharField(choices=[('draft', 'Draft'), ('active', 'Active'), ('archived', 'Archived')], default='active', max_length=20, verbose_name='Status'),
+            model_name="sponsor",
+            name="status",
+            field=models.CharField(
+                choices=[("draft", "Draft"), ("active", "Active"), ("archived", "Archived")],
+                default="active",
+                max_length=20,
+                verbose_name="Status",
+            ),
         ),
     ]

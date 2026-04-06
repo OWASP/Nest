@@ -53,7 +53,7 @@ const SponsorApplyPage = () => {
       setErrorMessage('Contact email is required')
       return false
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)) {
+    if (!/^.+@.+\..+$/.test(formData.contactEmail)) {
       setErrorMessage('Please enter a valid email address')
       return false
     }
@@ -180,7 +180,7 @@ const SponsorApplyPage = () => {
                   touched.contactEmail
                     ? !formData.contactEmail.trim()
                       ? 'Contact email is required'
-                      : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail)
+                      : !/^.+@.+\..+$/.test(formData.contactEmail)
                         ? 'Please enter a valid email address'
                         : undefined
                     : undefined

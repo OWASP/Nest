@@ -74,6 +74,16 @@ const TIER_CONFIG: Record<
 const getTier = (sponsorType: string) =>
   TIER_CONFIG[sponsorType?.toLowerCase()] ?? TIER_CONFIG.default
 
+const getSafeExternalHref = (rawUrl: string): string => {
+  try {
+    const parsed = new URL(rawUrl)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return parsed.toString()
+  } catch {
+    // Invalid URL, return fallback
+  }
+  return '#'
+}
+
 interface SponsorBadgeProps {
   sponsor: SponsorInfo
   variant?: 'compact' | 'card'
@@ -81,11 +91,12 @@ interface SponsorBadgeProps {
 
 const SponsorBadge: React.FC<SponsorBadgeProps> = ({ sponsor, variant = 'compact' }) => {
   const tier = getTier(sponsor.sponsorType)
+  const safeHref = getSafeExternalHref(sponsor.url)
 
   if (variant === 'card') {
     return (
       <Link
-        href={sponsor.url || '#'}
+        href={safeHref}
         target="_blank"
         rel="noopener noreferrer"
         className={`group dark:to-gray-850 flex flex-col gap-4 rounded-xl border border-gray-200/60 bg-white p-6 transition-all duration-300 hover:border-gray-400 hover:shadow-xl hover:shadow-gray-200/50 dark:border-gray-700/40 dark:bg-gradient-to-br dark:from-gray-800 dark:hover:border-gray-600/50 dark:hover:shadow-xl dark:hover:shadow-black/30 ${tier.ring} ${tier.glow} `}
@@ -132,7 +143,7 @@ const SponsorBadge: React.FC<SponsorBadgeProps> = ({ sponsor, variant = 'compact
   }
   return (
     <Link
-      href={sponsor.url || '#'}
+      href={safeHref}
       target="_blank"
       rel="noopener noreferrer"
       className={`group flex flex-col items-center justify-center rounded-lg border border-gray-200/80 bg-white p-5 text-center transition-all duration-200 hover:border-gray-300 hover:shadow-md dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:border-gray-600 dark:hover:bg-gray-800/80 ${tier.ring} `}

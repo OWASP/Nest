@@ -40,5 +40,5 @@ export type Sponsor = {
   name: string
   sponsorType: string
   status?: string
-  url?: string
+  url: string
 }

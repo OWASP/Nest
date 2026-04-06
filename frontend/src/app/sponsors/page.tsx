@@ -59,14 +59,8 @@ const SponsorsPage = () => {
     'flex items-center justify-center rounded-lg px-3 py-2 border bg-white dark:bg-[#e8e8e8]/90 border-gray-200 dark:border-transparent'
 
   const renderDiamondCard = (sponsor: Sponsor) => {
-    return (
-      <Link
-        key={sponsor.id}
-        href={sponsor.url || '#'}
-        target={sponsor.url ? '_blank' : undefined}
-        rel={sponsor.url ? 'noopener noreferrer' : undefined}
-        className="group relative mb-6 flex cursor-pointer flex-row items-center justify-start gap-8 rounded-lg bg-gradient-to-r from-white to-blue-50 p-7 transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-lg dark:from-[#2d3139] dark:to-[#3a4250] dark:hover:shadow-xl"
-      >
+    const cardContent = (
+      <>
         {sponsor.imageUrl && (
           <div className={`h-28 w-48 shrink-0 shadow-sm ${logoWrapperBase}`}>
             <Image
@@ -90,7 +84,31 @@ const SponsorsPage = () => {
             </p>
           )}
         </div>
-      </Link>
+      </>
+    )
+
+    const baseClassName =
+      'group relative mb-6 flex flex-row items-center justify-start gap-8 rounded-lg bg-gradient-to-r from-white to-blue-50 p-7 transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-lg dark:from-[#2d3139] dark:to-[#3a4250] dark:hover:shadow-xl'
+    const interactiveClassName = sponsor.url ? `cursor-pointer ${baseClassName}` : baseClassName
+
+    if (sponsor.url) {
+      return (
+        <Link
+          key={sponsor.id}
+          href={sponsor.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={interactiveClassName}
+        >
+          {cardContent}
+        </Link>
+      )
+    }
+
+    return (
+      <div key={sponsor.id} className={baseClassName}>
+        {cardContent}
+      </div>
     )
   }
 
@@ -113,41 +131,57 @@ const SponsorsPage = () => {
       small: { height: 56, width: 128 },
     }
 
-    return (
-      <Link
-        key={sponsor.id}
-        href={sponsor.url || '#'}
-        target={sponsor.url ? '_blank' : undefined}
-        rel={sponsor.url ? 'noopener noreferrer' : undefined}
-        className="group relative flex cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 bg-white transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg dark:border-gray-700 dark:bg-[#2d3139] dark:hover:border-gray-500 dark:hover:shadow-xl"
+    const cardContent = (
+      <div
+        className={`relative flex w-full flex-col items-center justify-center ${cardClasses[size]}`}
       >
-        <div
-          className={`relative flex w-full flex-col items-center justify-center ${cardClasses[size]}`}
+        {sponsor.imageUrl && (
+          <div className={`${logoSizeClasses[size]} shadow-sm ${logoWrapperBase}`}>
+            <Image
+              src={sponsor.imageUrl}
+              alt={sponsor.name}
+              height={logoDimensions[size].height}
+              width={logoDimensions[size].width}
+              className="h-full w-full object-contain"
+              unoptimized
+            />
+          </div>
+        )}
+        <h3
+          className={`line-clamp-2 text-center font-semibold text-gray-900 dark:text-gray-100 ${size === 'large' ? 'text-base' : size === 'medium' ? 'text-sm' : 'text-xs'}`}
         >
-          {sponsor.imageUrl && (
-            <div className={`${logoSizeClasses[size]} shadow-sm ${logoWrapperBase}`}>
-              <Image
-                src={sponsor.imageUrl}
-                alt={sponsor.name}
-                height={logoDimensions[size].height}
-                width={logoDimensions[size].width}
-                className="h-full w-full object-contain"
-                unoptimized
-              />
-            </div>
-          )}
-          <h3
-            className={`line-clamp-2 text-center font-semibold text-gray-900 dark:text-gray-100 ${size === 'large' ? 'text-base' : size === 'medium' ? 'text-sm' : 'text-xs'}`}
-          >
-            {sponsor.name}
-          </h3>
-          {size === 'large' && sponsor.description && (
-            <p className="line-clamp-2 text-center text-xs text-gray-600 dark:text-gray-300">
-              {sponsor.description}
-            </p>
-          )}
-        </div>
-      </Link>
+          {sponsor.name}
+        </h3>
+        {size === 'large' && sponsor.description && (
+          <p className="line-clamp-2 text-center text-xs text-gray-600 dark:text-gray-300">
+            {sponsor.description}
+          </p>
+        )}
+      </div>
+    )
+
+    const baseClassName =
+      'group relative flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg dark:border-gray-700 dark:bg-[#2d3139] dark:hover:border-gray-500 dark:hover:shadow-xl'
+    const interactiveClassName = sponsor.url ? `cursor-pointer ${baseClassName}` : baseClassName
+
+    if (sponsor.url) {
+      return (
+        <Link
+          key={sponsor.id}
+          href={sponsor.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={interactiveClassName}
+        >
+          {cardContent}
+        </Link>
+      )
+    }
+
+    return (
+      <div key={sponsor.id} className={baseClassName}>
+        {cardContent}
+      </div>
     )
   }
 

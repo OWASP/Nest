@@ -16,6 +16,7 @@ import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import type { ContributionStats } from 'utils/contributionDataUtils'
 import type { CardType } from 'components/CardDetailsPage'
+import type { SponsorInfo } from 'components/SponsorBadge'
 
 export type CardProps = {
   button: Button
@@ -84,14 +85,7 @@ export interface DetailsCardProps {
   topContributors?: Contributor[]
   topics?: string[]
   tags?: string[]
-  sponsors?: {
-    key: string
-    name: string
-    sponsorType: string
-    imageUrl: string
-    url: string
-    description?: string
-  }[]
+  sponsors?: SponsorInfo[]
   type: CardType
   userSummary?: JSX.Element
 }

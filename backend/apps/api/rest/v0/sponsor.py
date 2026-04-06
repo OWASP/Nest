@@ -1,5 +1,6 @@
 """Sponsor API."""
 
+import logging
 from http import HTTPStatus
 from typing import Literal
 
@@ -15,6 +16,8 @@ from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import ValidationErrorSchema
 from apps.common.utils import slugify
 from apps.owasp.models.sponsor import Sponsor as SponsorModel
+
+logger = logging.getLogger(__name__)
 
 router = RouterPaginated(tags=["Sponsors"])
 
@@ -143,7 +146,23 @@ def create_sponsor_application(
 ) -> Response:
     """Create a sponsor application."""
     try:
-        key = slugify(payload.name)
+        name = payload.name.strip()
+        contact_email = payload.contact_email.strip()
+        sponsorship_interest = payload.sponsorship_interest.strip()
+        website = (payload.website or "").strip()
+
+        if not name or not contact_email or not sponsorship_interest:
+            return Response(
+                {"message": "Name, contact email, and sponsorship interest are required"},
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+        key = slugify(name)
+        if not key:
+            return Response(
+                {"message": "Organization name is invalid"},
+                status=HTTPStatus.BAD_REQUEST,
+            )
 
         if SponsorModel.objects.filter(key=key).exists():
             return Response(
@@ -152,14 +171,15 @@ def create_sponsor_application(
             )
 
         sponsor = SponsorModel(
-            name=payload.name,
+            name=name,
             key=key,
-            contact_email=payload.contact_email,
-            url=payload.website or "",
-            description=payload.sponsorship_interest,
+            contact_email=contact_email,
+            url=website,
+            description=sponsorship_interest,
             status=SponsorModel.Status.DRAFT,
-            sort_name=payload.name,
+            sort_name=name,
         )
+        sponsor.full_clean()
         sponsor.save()
 
         return Response(
@@ -171,7 +191,8 @@ def create_sponsor_application(
             status=HTTPStatus.CREATED,
         )
     except (ValueError, ValidationError, IntegrityError) as e:
+        logger.warning("Error creating sponsor application: %s", e)
         return Response(
-            {"message": f"Error creating sponsor application: {e!s}"},
+            {"message": "Error creating sponsor application"},
             status=HTTPStatus.BAD_REQUEST,
         )
