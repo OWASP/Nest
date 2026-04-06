@@ -27,17 +27,16 @@ class TestOwaspRunNotificationWorker:
         snapshot.key = "2025-02"
         return snapshot
 
-    @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.send_mail")
-    @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.Notification")
-    @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.settings")
+    @mock.patch("apps.owasp.utils.notifications.send_mail")
+    @mock.patch("apps.owasp.utils.notifications.Notification")
     def test_send_notification_success(
-        self, mock_settings, mock_notification, mock_send_mail, command, mock_user, mock_snapshot
+        self, mock_notification, mock_send_mail, command, mock_user, mock_snapshot
     ):
         """Test successful notification sending."""
-        mock_settings.SITE_URL = "https://example.com"
         mock_notification.objects.filter.return_value.exists.return_value = False
 
-        command.send_notification(
+        from apps.owasp.utils.notifications import send_notification
+        send_notification(
             user=mock_user,
             title=f"New Snapshot Published: {mock_snapshot.title}",
             message=f"Check out the latest OWASP snapshot: {mock_snapshot.title}",
@@ -54,15 +53,16 @@ class TestOwaspRunNotificationWorker:
             related_link=f"https://example.com/community/snapshots/{mock_snapshot.key}",
         )
 
-    @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.send_mail")
-    @mock.patch("apps.owasp.management.commands.owasp_run_notification_worker.Notification")
+    @mock.patch("apps.owasp.utils.notifications.send_mail")
+    @mock.patch("apps.owasp.utils.notifications.Notification")
     def test_send_notification_idempotency(
         self, mock_notification, mock_send_mail, command, mock_user, mock_snapshot
     ):
         """Test that notification is skipped if it already exists."""
         mock_notification.objects.filter.return_value.exists.return_value = True
 
-        command.send_notification(
+        from apps.owasp.utils.notifications import send_notification
+        send_notification(
             user=mock_user,
             title=f"New Snapshot Published: {mock_snapshot.title}",
             message=f"Check out the latest OWASP snapshot: {mock_snapshot.title}",

@@ -25,7 +25,7 @@ class TestEventSignals:
             "start_date": "2026-01-01",
             "end_date": "2026-01-02",
             "suggested_location": "Test Location",
-            "url": "http://test.com",
+            "url": "https://test.com",
             "description": "Test description",
         }
         # Set current values to be the same - no notification should be sent
@@ -33,7 +33,7 @@ class TestEventSignals:
         event.start_date = "2026-01-01"
         event.end_date = "2026-01-02"
         event.suggested_location = "Test Location"
-        event.url = "http://test.com"
+        event.url = "https://test.com"
         event.description = "Test description"
         event_post_save(sender=None, instance=event, created=False)
         # No changes, so no notification should be published

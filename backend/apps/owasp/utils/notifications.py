@@ -3,11 +3,13 @@
 import json
 import logging
 
+from django.core.mail import send_mail
 from django.utils.timezone import now
 from django_redis import get_redis_connection
 
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.event import Event
+from apps.owasp.models.notification import Notification
 from apps.owasp.models.snapshot import Snapshot
 
 logger = logging.getLogger(__name__)
@@ -101,3 +103,33 @@ def publish_event_notification(
             msg_type,
             event.id,
         )
+
+
+def send_notification(*, user, title, message, notification_type, related_link):
+    """Send notification to user and persist to DB."""
+    if Notification.objects.filter(
+        recipient_id=user.id,
+        type=notification_type,
+        related_link=related_link,
+        message=message,
+    ).exists():
+        logger.info("Already notified %s for %s, skipping", user.email, notification_type)
+        return
+
+    full_message = f"{message}\n\nView: {related_link}" if related_link else message
+    send_mail(
+        subject=title,
+        message=full_message,
+        from_email="noreply@owasp.org",
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+    logger.info("Sent %s email to %s", notification_type, user.email)
+
+    Notification.objects.create(
+        recipient=user,
+        type=notification_type,
+        title=title,
+        message=message,
+        related_link=related_link,
+    )

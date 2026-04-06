@@ -6,6 +6,9 @@ from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
 
+from apps.nest.models import User
+from apps.owasp.utils.notifications import send_notification
+
 
 class Command(BaseCommand):
     """Manage notification DLQ manually."""
@@ -106,17 +109,39 @@ class Command(BaseCommand):
                 message = self._get_value(data, b"message")
                 related_link = self._get_value(data, b"related_link")
 
+                user_id = self._get_value(data, b"user_id")
+                notification_type = self._get_value(data, b"notification_type")
+
                 if user_email and title and message:
-                    full_message = (
-                        f"{message}\n\nView: {related_link}" if related_link else message
-                    )
-                    send_mail(
-                        subject=title,
-                        message=full_message,
-                        from_email="noreply@owasp.org",
-                        recipient_list=[user_email],
-                        fail_silently=False,
-                    )
+                    if user_id and notification_type:
+                        try:
+                            user = User.objects.get(id=int(user_id))
+                            send_notification(
+                                user=user,
+                                title=title,
+                                message=message,
+                                notification_type=notification_type,
+                                related_link=related_link or "",
+                            )
+                        except User.DoesNotExist:
+                            self.stdout.write(
+                                self.style.WARNING(f"User {user_id} not found: {msg_id}")
+                            )
+                            error_count += 1
+                            continue
+                    else:
+                        # Fallback for old DLQ format
+                        full_message = (
+                            f"{message}\n\nView: {related_link}" if related_link else message
+                        )
+                        send_mail(
+                            subject=title,
+                            message=full_message,
+                            from_email="noreply@owasp.org",
+                            recipient_list=[user_email],
+                            fail_silently=False,
+                        )
+
                     redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                     success_count += 1
                     self.stdout.write(f"Retried: {msg_id} -> {user_email}")

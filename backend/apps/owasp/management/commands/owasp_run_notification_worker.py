@@ -8,14 +8,14 @@ import time
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django_redis import get_redis_connection
 
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.event import Event
-from apps.owasp.models.notification import Notification, Subscription
+from apps.owasp.models.notification import Subscription
 from apps.owasp.models.snapshot import Snapshot
+from apps.owasp.utils.notifications import send_notification
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +133,7 @@ class Command(BaseCommand):
 
         while retry_count <= self.MAX_RETRIES:
             try:
-                self.send_notification(
+                send_notification(
                     user=user,
                     title=title,
                     message=message,
@@ -171,35 +171,6 @@ class Command(BaseCommand):
                 return True
 
         return False
-
-    def send_notification(self, *, user, title, message, notification_type, related_link):
-        """Send notification to user."""
-        if Notification.objects.filter(
-            recipient_id=user.id,
-            type=notification_type,
-            related_link=related_link,
-            message=message,
-        ).exists():
-            logger.info("Already notified %s for %s, skipping", user.email, notification_type)
-            return
-
-        full_message = f"{message}\n\nView: {related_link}" if related_link else message
-        send_mail(
-            subject=title,
-            message=full_message,
-            from_email="noreply@owasp.org",
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
-        logger.info("Sent %s email to %s", notification_type, user.email)
-
-        Notification.objects.create(
-            recipient=user,
-            type=notification_type,
-            title=title,
-            message=message,
-            related_link=related_link,
-        )
 
     def handle_snapshot_published(self, data):
         """Handle snapshot published event."""
