@@ -305,6 +305,8 @@ class TestSyncRepository:
         recent_time = timezone.now()
         old_time = timezone.now() - td(days=60)
 
+        mock_repo.latest_updated_milestone = MagicMock(updated_at=timezone.now() - td(days=30))
+
         gh_milestone_recent = gh_item_factory(updated_at=recent_time)
         gh_milestone_old = gh_item_factory(updated_at=old_time)
         mock_gh_repository.get_milestones.return_value = [gh_milestone_recent, gh_milestone_old]
@@ -319,6 +321,10 @@ class TestSyncRepository:
         """Tests that pull request syncing stops when an older PR is reached."""
         recent_time = timezone.now()
         old_time = timezone.now() - td(days=60)
+
+        mock_repo.latest_updated_pull_request = MagicMock(
+            updated_at=timezone.now() - td(days=30)
+        )
 
         gh_pr_recent = gh_item_factory(updated_at=recent_time)
         gh_pr_old = gh_item_factory(updated_at=old_time)
