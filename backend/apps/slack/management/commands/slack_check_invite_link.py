@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 ERR_NO_DEFAULT_WORKSPACE = "Default OWASP Slack workspace is not configured in the database."
 ERR_INVITE_BASELINE_UNSET = "invite_link_member_count is unset; cannot evaluate alerts."
 
+MSG_SKIP_NO_ALERT_CHANNEL = (
+    "invite_link_alert_channel_id is not set; skipping invite link checks "
+    "(GitHub sync and threshold alerts). Set it on the Slack Workspace row when you want "
+    "this job enabled."
+)
+
 
 class Command(BaseCommand):
     help = (
@@ -27,6 +33,11 @@ class Command(BaseCommand):
         "is detected, and alert when member growth approaches the invite link cap. "
         "Uses Workspace.total_members_count from the last slack_sync_data run (users.list totals)."
     )
+
+    @staticmethod
+    def get_normalized_invite_link_alert_channel_id(workspace: Workspace) -> str:
+        """Return normalized alert channel id."""
+        return (workspace.invite_link_alert_channel_id or "").strip().removeprefix("#")
 
     def alert(self, workspace: Workspace, current_members: int) -> None:
         alert_threshold = workspace.invite_link_alert_threshold
@@ -42,16 +53,6 @@ class Command(BaseCommand):
                 self.style.WARNING(
                     "Threshold already reached; alert was sent earlier. "
                     "Set a new baseline in Django admin after publishing a new invite link."
-                )
-            )
-            return
-
-        raw = (workspace.invite_link_alert_channel_id or "").strip()
-        if not (channel_id := raw.removeprefix("#")):
-            self.stdout.write(
-                self.style.ERROR(
-                    "invite_link_alert_channel_id is empty; cannot post alert. "
-                    "Set it on the Slack Workspace row (e.g. in Django admin)."
                 )
             )
             return
@@ -77,7 +78,10 @@ class Command(BaseCommand):
 
         try:
             client = WebClient(token=workspace.bot_token)
-            client.chat_postMessage(channel=channel_id, text=text)
+            client.chat_postMessage(
+                channel=self.get_normalized_invite_link_alert_channel_id(workspace),
+                text=text,
+            )
         except SlackApiError as e:
             logger.exception("chat.postMessage failed")
             detail = e.response.get("error", e)
@@ -92,6 +96,10 @@ class Command(BaseCommand):
         workspace = Workspace.get_default_workspace()
         if workspace is None:
             raise CommandError(ERR_NO_DEFAULT_WORKSPACE)
+
+        if not self.get_normalized_invite_link_alert_channel_id(workspace):
+            self.stdout.write(self.style.WARNING(MSG_SKIP_NO_ALERT_CHANNEL))
+            return
 
         if not workspace.bot_token:
             wid = workspace.slack_workspace_id.upper()
