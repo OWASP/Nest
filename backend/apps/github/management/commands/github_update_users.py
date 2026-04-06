@@ -57,6 +57,7 @@ class Command(BaseCommand):
             .annotate(
                 total_contributions=Sum("contributions_count"),
                 repo_count=models.Count("repository", distinct=True),
+                project_count=models.Count("repository__project", distinct=True),
             )
         )
         repo_data_map = {item["user_id"]: item for item in repo_data}
@@ -106,7 +107,7 @@ class Command(BaseCommand):
             user.calculated_score = calculate_member_score(
                 contributions_count=user.contributions_count,
                 distinct_repository_count=repo_item.get("repo_count", 0),
-                distinct_project_count=leadership_id.get("project_leader", 0),
+                distinct_project_count=repo_item.get("project_count", 0),
                 release_count=user_release_counts.get(user.id, 0),
                 chapter_leader_count=leadership_id.get("chapter_leader", 0),
                 project_leader_count=leadership_id.get("project_leader", 0),

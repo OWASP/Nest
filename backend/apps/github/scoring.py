@@ -158,16 +158,14 @@ def _score_consistency(contribution_data: dict | None) -> float:
     active_weeks: set[tuple[int, int]] = set()
 
     for date_str, count in contribution_data.items():
-        if count <= 0:
-            continue
-        try:
-            date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
-        except (ValueError, TypeError):
-            continue
-
-        if date >= one_year_ago:
-            year, week, _ = date.isocalendar()
-            active_weeks.add((year, week))
+        if count:
+            try:
+                date = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=UTC)
+            except (ValueError, TypeError):
+                continue
+            if date >= one_year_ago:
+                year, week, _ = date.isocalendar()
+                active_weeks.add((year, week))
 
     consistency_ratio = min(len(active_weeks) / 52, 1.0)
     return consistency_ratio * 50.0

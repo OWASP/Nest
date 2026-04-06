@@ -83,6 +83,8 @@ class TestListMembers:
             "-name",
             "login",
             "-login",
+            "calculated_score",
+            "-calculated_score",
         ],
     )
     @patch("apps.api.rest.v0.member.UserModel")
