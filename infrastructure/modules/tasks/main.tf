@@ -12,7 +12,7 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 locals {
-  slack_sync_data_schedule_expression               = var.enable_cron_tasks ? "cron(27 15 ? * MON-FRI *)" : null
+  slack_sync_data_schedule_expression               = var.enable_cron_tasks ? "cron(0 */6 ? * MON-FRI *)" : null
   sync_data_schedule_expression                     = var.enable_cron_tasks ? "cron(17 05 * * ? *)" : null
   update_project_health_metrics_schedule_expression = var.enable_cron_tasks ? "cron(17 17 * * ? *)" : null
   update_project_health_scores_schedule_expression  = var.enable_cron_tasks ? "cron(22 17 * * ? *)" : null

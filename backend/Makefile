@@ -13,7 +13,7 @@ else
 SHELL := /bin/bash
 endif
 
-.PHONY: sbom-backend-image
+.PHONY: sbom-backend-image fetch-nest-dump upload-nest-dump
 
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
@@ -96,9 +96,12 @@ collect-static:
 django-shell: ## Open Django interactive shell
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
-dump-data: ## Dump database data
+dump-data: ## Write masked database dump to backend/data/nest.dump (no S3 upload)
 	@echo "Dumping Nest data"
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
+
+upload-nest-dump: ## Upload backend/data/nest.dump to shared S3 (host AWS creds; poetry run)
+	@cd backend && poetry run python -m scripts.upload_nest_dump
 
 enrich-data: ## Enrich data from external sources
 enrich-data: \
@@ -117,19 +120,22 @@ index-data: ## Index data for Algolia search
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data: ## Load initial data from fixtures
+fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
+	@cd backend && poetry run python -m scripts.fetch_nest_dump
+
+load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
 	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
 
-load-data-e2e:
+load-data-e2e: fetch-nest-dump
 	@echo "Loading Nest e2e data"
 	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) exec-db-command-e2e
 
-load-data-fuzz:
+load-data-fuzz: fetch-nest-dump
 	@echo "Loading Nest fuzz data"
 	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
-load-data-staging:
+load-data-staging: fetch-nest-dump
 	@echo "Loading Nest staging data"
 	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
