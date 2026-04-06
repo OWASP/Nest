@@ -13,14 +13,6 @@ test.describe('Users Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
     await page.goto('/members')
   })
 
@@ -60,6 +52,7 @@ test.describe('Users Page', () => {
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('2k')).toBeVisible()
   })
+
   test('breadcrumb renders correct segments on /members', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Members'])
   })

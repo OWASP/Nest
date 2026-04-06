@@ -23,6 +23,7 @@ export function hasExtendedUser(session: Session | null): session is Session & {
   user: {
     login?: string
     isLeader?: boolean
+    isMentor?: boolean
   }
 } {
   return !!session && !!session.user

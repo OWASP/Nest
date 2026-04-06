@@ -64,7 +64,7 @@ variable "image_tag" {
 variable "index_data_task_cpu" {
   description = "The CPU for the index-data task."
   type        = string
-  default     = "256"
+  default     = "1024"
 }
 
 variable "index_data_task_memory" {
@@ -125,6 +125,18 @@ variable "sync_data_task_cpu" {
 
 variable "sync_data_task_memory" {
   description = "The memory for the sync-data task."
+  type        = string
+  default     = "1024"
+}
+
+variable "slack_sync_data_task_cpu" {
+  description = "The CPU for the slack-sync-data scheduled task (Slack sync + invite link check)."
+  type        = string
+  default     = "256"
+}
+
+variable "slack_sync_data_task_memory" {
+  description = "The memory for the slack-sync-data scheduled task."
   type        = string
   default     = "1024"
 }
