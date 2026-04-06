@@ -37,7 +37,15 @@ locals {
         valueFrom = valueFrom
       }]
     },
-    var.command != null ? { command = var.command } : {}
+    var.command != null ? { command = var.command } : {},
+    var.health_check_command != null ? {
+      healthCheck = {
+        command     = var.health_check_command
+        interval    = var.health_check_interval
+        retries     = var.health_check_retries
+        startPeriod = var.health_check_start_period
+        timeout     = var.health_check_timeout
+    } } : {}
   )
 }
 

@@ -21,6 +21,36 @@ variable "command" {
   default     = null
 }
 
+variable "health_check_command" {
+  description = "A health check command that the container runs to determine if it is healthy. If null, no container-level health check is configured."
+  type        = list(string)
+  default     = null
+}
+
+variable "health_check_interval" {
+  description = "Time period between each health check execution (seconds)"
+  type        = number
+  default     = 30
+}
+
+variable "health_check_retries" {
+  description = "The number of consecutive failed health checks before marking container unhealthy"
+  type        = number
+  default     = 3
+}
+
+variable "health_check_start_period" {
+  description = "Grace period (seconds) before health check starts"
+  type        = number
+  default     = 60
+}
+
+variable "health_check_timeout" {
+  description = "Time period to wait for successful health check before marking container unhealthy"
+  type        = number
+  default     = 5
+}
+
 variable "container_cpu" {
   description = "The CPU units for the container (1024 = 1 vCPU)."
   type        = number
