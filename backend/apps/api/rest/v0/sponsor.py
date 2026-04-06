@@ -3,6 +3,8 @@
 from http import HTTPStatus
 from typing import Literal
 
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.http import HttpRequest
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -11,6 +13,7 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import ValidationErrorSchema
+from apps.common.utils import slugify
 from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
 router = RouterPaginated(tags=["Sponsors"])
@@ -43,6 +46,23 @@ class SponsorError(Schema):
     """Sponsor error schema."""
 
     message: str
+
+
+class SponsorApplicationRequest(Schema):
+    """Schema for sponsor application request."""
+
+    name: str = Field(..., description="Organization name")
+    contact_email: str = Field(..., description="Contact email")
+    website: str | None = Field(None, description="Organization website (optional)")
+    sponsorship_interest: str = Field(..., description="Message about sponsorship interest")
+
+
+class SponsorApplicationResponse(Schema):
+    """Schema for sponsor application response."""
+
+    id: int
+    name: str
+    status: str
 
 
 class SponsorFilter(FilterSchema):
@@ -105,3 +125,53 @@ def get_sponsor(
         return sponsor
 
     return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)
+
+
+@router.post(
+    "/applications/",
+    description="Submit a sponsor application.",
+    operation_id="create_sponsor_application",
+    response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
+        HTTPStatus.CREATED: SponsorApplicationResponse,
+    },
+    summary="Create sponsor application",
+)
+def create_sponsor_application(
+    request: HttpRequest,
+    payload: SponsorApplicationRequest,
+) -> Response:
+    """Create a sponsor application."""
+    try:
+        key = slugify(payload.name)
+
+        if SponsorModel.objects.filter(key=key).exists():
+            return Response(
+                {"message": "A sponsor with this organization name already exists"},
+                status=HTTPStatus.BAD_REQUEST,
+            )
+
+        sponsor = SponsorModel(
+            name=payload.name,
+            key=key,
+            contact_email=payload.contact_email,
+            url=payload.website or "",
+            description=payload.sponsorship_interest,
+            status=SponsorModel.Status.DRAFT,
+            sort_name=payload.name,
+        )
+        sponsor.save()
+
+        return Response(
+            SponsorApplicationResponse(
+                id=sponsor.id,
+                name=sponsor.name,
+                status=sponsor.status,
+            ),
+            status=HTTPStatus.CREATED,
+        )
+    except (ValueError, ValidationError, IntegrityError) as e:
+        return Response(
+            {"message": f"Error creating sponsor application: {e!s}"},
+            status=HTTPStatus.BAD_REQUEST,
+        )

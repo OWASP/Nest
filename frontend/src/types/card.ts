@@ -84,6 +84,14 @@ export interface DetailsCardProps {
   topContributors?: Contributor[]
   topics?: string[]
   tags?: string[]
+  sponsors?: {
+    key: string
+    name: string
+    sponsorType: string
+    imageUrl: string
+    url: string
+    description?: string
+  }[]
   type: CardType
   userSummary?: JSX.Element
 }

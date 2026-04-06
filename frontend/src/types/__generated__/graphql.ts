@@ -84,6 +84,7 @@ export type ChapterNode = Node & {
   postalCode: Scalars['String']['output'];
   region: Scalars['String']['output'];
   relatedUrls: Array<Scalars['String']['output']>;
+  sponsors: Array<SponsorNode>;
   suggestedLocation?: Maybe<Scalars['String']['output']>;
   summary: Scalars['String']['output'];
   tags: Scalars['JSON']['output'];
@@ -144,6 +145,14 @@ export type CreateProgramInput = {
   name: Scalars['String']['input'];
   startedAt: Scalars['DateTime']['input'];
   tags?: Array<Scalars['String']['input']>;
+};
+
+export type CreateSponsorApplicationResult = {
+  __typename?: 'CreateSponsorApplicationResult';
+  code?: Maybe<Scalars['String']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+  sponsor?: Maybe<SponsorNode>;
 };
 
 export type EntityMemberNode = Node & {
@@ -387,6 +396,7 @@ export type Mutation = {
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
+  createSponsorApplication: CreateSponsorApplicationResult;
   deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
@@ -428,6 +438,14 @@ export type MutationCreateModuleArgs = {
 
 export type MutationCreateProgramArgs = {
   inputData: CreateProgramInput;
+};
+
+
+export type MutationCreateSponsorApplicationArgs = {
+  contactEmail: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  sponsorshipInterest: Scalars['String']['input'];
+  website?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -672,6 +690,7 @@ export type ProjectNode = Node & {
   relatedUrls: Array<Scalars['String']['output']>;
   repositories: Array<RepositoryNode>;
   repositoriesCount: Scalars['Int']['output'];
+  sponsors: Array<SponsorNode>;
   starsCount: Scalars['Int']['output'];
   summary: Scalars['String']['output'];
   topContributors: Array<RepositoryContributorNode>;
@@ -1054,11 +1073,13 @@ export type SnapshotNode = Node & {
 
 export type SponsorNode = Node & {
   __typename?: 'SponsorNode';
-  /** The Globally Unique ID of this object */
+  description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   imageUrl: Scalars['String']['output'];
+  key: Scalars['String']['output'];
   name: Scalars['String']['output'];
   sponsorType: Scalars['String']['output'];
+  status: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
 

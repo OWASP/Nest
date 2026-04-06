@@ -46,6 +46,7 @@ import RecentReleases from 'components/RecentReleases'
 import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
 import ShowMoreButton from 'components/ShowMoreButton'
+import { SponsorList } from 'components/SponsorBadge'
 import SponsorCard from 'components/SponsorCard'
 import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
@@ -112,6 +113,7 @@ const DetailsCard = ({
   title,
   topContributors,
   topics,
+  sponsors,
   type,
   userSummary,
 }: DetailsCardProps) => {
@@ -194,6 +196,14 @@ const DetailsCard = ({
         )}
 
         {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
+        {sponsors && sponsors.length > 0 && ['project', 'chapter'].includes(type) && (
+          <SecondaryCard
+            icon={FaSignsPost}
+            title={<AnchorTitle title={`${type === 'project' ? 'Project' : 'Chapter'} Sponsors`} />}
+          >
+            <SponsorList sponsors={sponsors} variant="compact" />
+          </SecondaryCard>
+        )}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
             icon={FaRectangleList}

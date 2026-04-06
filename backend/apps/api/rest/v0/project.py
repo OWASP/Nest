@@ -15,6 +15,7 @@ from apps.api.rest.v0.common import Leader, ValidationErrorSchema
 from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
 from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project as ProjectModel
+from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
 PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
     "name": {
@@ -55,6 +56,7 @@ class ProjectDetail(ProjectBase):
 
     description: str
     leaders: list[Leader]
+    sponsors: list["ProjectSponsor"] = []
 
     @staticmethod
     def resolve_leaders(obj):
@@ -64,11 +66,37 @@ class ProjectDetail(ProjectBase):
             for leader in obj.entity_leaders
         ]
 
+    @staticmethod
+    def resolve_sponsors(obj):
+        """Resolve sponsors linked to this project."""
+        return [
+            ProjectSponsor(
+                key=sponsor.key,
+                name=sponsor.name,
+                sponsor_type=sponsor.sponsor_type,
+                image_url=sponsor.image_url,
+                url=sponsor.url,
+                description=sponsor.description,
+            )
+            for sponsor in obj.sponsors.filter(status=SponsorModel.Status.ACTIVE)
+        ]
+
 
 class ProjectError(Schema):
     """Project error schema."""
 
     message: str
+
+
+class ProjectSponsor(Schema):
+    """Schema for project sponsors."""
+
+    image_url: str
+    key: str
+    name: str
+    sponsor_type: str
+    url: str
+    description: str = ""
 
 
 class ProjectFilter(FilterSchema):

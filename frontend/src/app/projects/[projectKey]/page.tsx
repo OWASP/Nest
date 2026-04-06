@@ -19,6 +19,7 @@ import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import type { SponsorInfo } from 'components/SponsorBadge'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
@@ -32,6 +33,25 @@ const ProjectDetailsPage = () => {
 
   const project = data?.project
   const topContributors = data?.topContributors || []
+
+  const sponsors: SponsorInfo[] = (project?.sponsors || []).map(
+    (sponsor: {
+      key: string
+      name: string
+      sponsorType: string
+      imageUrl: string
+      url: string
+      description?: string
+      status?: string
+    }) => ({
+      key: sponsor.key,
+      name: sponsor.name,
+      sponsorType: sponsor.sponsorType,
+      imageUrl: sponsor.imageUrl,
+      url: sponsor.url,
+      description: sponsor.description || '',
+    })
+  )
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -108,29 +128,32 @@ const ProjectDetailsPage = () => {
   )
 
   return (
-    <DetailsCard
-      contributionData={project.contributionData}
-      contributionStats={contributionStats}
-      details={projectDetails}
-      endDate={endDate}
-      entityKey={project.key}
-      entityLeaders={project.entityLeaders}
-      healthMetricsData={project.healthMetricsList as unknown as HealthMetricsProps[]}
-      isActive={project.isActive}
-      languages={project.languages}
-      pullRequests={project.recentPullRequests as unknown as PullRequest[]}
-      recentIssues={project.recentIssues as unknown as Issue[]}
-      recentMilestones={project.recentMilestones as unknown as Milestone[]}
-      recentReleases={project.recentReleases as unknown as Release[]}
-      repositories={project.repositories as unknown as RepositoryCardProps[]}
-      startDate={startDate}
-      stats={projectStats}
-      summary={project.summary}
-      title={project.name}
-      topContributors={topContributors}
-      topics={project.topics}
-      type="project"
-    />
+    <div className="space-y-8">
+      <DetailsCard
+        contributionData={project.contributionData}
+        contributionStats={contributionStats}
+        details={projectDetails}
+        endDate={endDate}
+        entityKey={project.key}
+        entityLeaders={project.entityLeaders}
+        healthMetricsData={project.healthMetricsList as unknown as HealthMetricsProps[]}
+        isActive={project.isActive}
+        languages={project.languages}
+        pullRequests={project.recentPullRequests as unknown as PullRequest[]}
+        recentIssues={project.recentIssues as unknown as Issue[]}
+        recentMilestones={project.recentMilestones as unknown as Milestone[]}
+        recentReleases={project.recentReleases as unknown as Release[]}
+        repositories={project.repositories as unknown as RepositoryCardProps[]}
+        sponsors={sponsors}
+        startDate={startDate}
+        stats={projectStats}
+        summary={project.summary}
+        title={project.name}
+        topContributors={topContributors}
+        topics={project.topics}
+        type="project"
+      />
+    </div>
   )
 }
 
