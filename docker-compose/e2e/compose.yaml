@@ -24,7 +24,7 @@ services:
       retries: 10
       test: >
         sh -c '
-          wget --spider http://backend:9000/a/
+          wget --spider http://backend:9000/status/
         '
       timeout: 10s
       start_period: 5s
