@@ -291,32 +291,18 @@ run "test_django_redis_use_tls_is_string" {
   }
 }
 
-run "test_django_release_version_disabled_by_default" {
-  command = plan
-  assert {
-    condition     = length(aws_ssm_parameter.django_release_version) == 0
-    error_message = "DJANGO_RELEASE_VERSION must not be created when enable_additional_parameters is false."
-  }
-}
-
 run "test_django_release_version_is_string" {
   command = plan
-  variables {
-    enable_additional_parameters = true
-  }
   assert {
-    condition     = aws_ssm_parameter.django_release_version[0].type == "String"
+    condition     = aws_ssm_parameter.django_release_version.type == "String"
     error_message = "DJANGO_RELEASE_VERSION must be stored as String."
   }
 }
 
 run "test_django_release_version_path_format" {
   command = plan
-  variables {
-    enable_additional_parameters = true
-  }
   assert {
-    condition     = aws_ssm_parameter.django_release_version[0].name == "/${var.project_name}/${var.environment}/DJANGO_RELEASE_VERSION"
+    condition     = aws_ssm_parameter.django_release_version.name == "/${var.project_name}/${var.environment}/DJANGO_RELEASE_VERSION"
     error_message = "DJANGO_RELEASE_VERSION must follow path: /{project}/{environment}/DJANGO_RELEASE_VERSION."
   }
 }
