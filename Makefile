@@ -9,7 +9,7 @@ include infrastructure/Makefile
 .PHONY: build clean check help pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
 	security-scan-backend-image security-scan-frontend-image security-scan-zap \
-	test test-infrastructure update clean-trivy-cache
+	test test-nest-app test-infrastructure update clean-trivy-cache
 
 MAKEFLAGS += --no-print-directory
 
@@ -62,10 +62,10 @@ test: ## Run all tests
 test: \
 	test-nest-app
 
-test-nest-app: \
-	test-backend \
-	test-frontend \
-	test-infrastructure
+test-nest-app:
+	$(MAKE) test-backend
+	$(MAKE) test-frontend
+	$(MAKE) test-infrastructure
 
 ##@ Security
 
