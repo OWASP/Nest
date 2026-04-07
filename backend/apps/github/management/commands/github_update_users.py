@@ -103,15 +103,15 @@ class Command(BaseCommand):
             repo_item = repo_data_map.get(user.id, {})
             user.contributions_count = repo_item.get("total_contributions", 0)
 
-            leadership_id = leadership_data.get(user.id, {})
+            leadership_roles = leadership_data.get(user.id, {})
             user.calculated_score = calculate_member_score(
                 contributions_count=user.contributions_count,
                 distinct_repository_count=repo_item.get("repo_count", 0),
                 distinct_project_count=repo_item.get("project_count", 0),
                 release_count=user_release_counts.get(user.id, 0),
-                chapter_leader_count=leadership_id.get("chapter_leader", 0),
-                project_leader_count=leadership_id.get("project_leader", 0),
-                committee_member_count=leadership_id.get("committee_member", 0),
+                chapter_leader_count=leadership_roles.get("chapter_leader", 0),
+                project_leader_count=leadership_roles.get("project_leader", 0),
+                committee_member_count=leadership_roles.get("committee_member", 0),
                 is_board_member=user.id in board_members,
                 is_gsoc_mentor=user.id in gsoc_mentors,
                 contribution_data=user.contribution_data,

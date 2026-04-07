@@ -42,9 +42,9 @@ class TestGithubUpdateUsersCommand:
         mock_user,
     ):
         """Test command execution with default offset."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
-        mock_user3 = MagicMock(id=3, title="User 3", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
+        mock_user3 = MagicMock(id=3, title="User 3", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
@@ -95,8 +95,8 @@ class TestGithubUpdateUsersCommand:
         mock_user,
     ):
         """Test command execution with custom offset."""
-        mock_user1 = MagicMock(id=2, title="User 2", contributions_count=0)
-        mock_user2 = MagicMock(id=3, title="User 3", contributions_count=0)
+        mock_user1 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=3, title="User 3", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 3
@@ -141,8 +141,8 @@ class TestGithubUpdateUsersCommand:
         mock_user,
     ):
         """Test command execution when users have no contributions."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
@@ -180,7 +180,7 @@ class TestGithubUpdateUsersCommand:
         mock_user,
     ):
         """Test command execution with single user."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 1
@@ -248,8 +248,8 @@ class TestGithubUpdateUsersCommand:
         mock_user,
     ):
         """Test command execution when user count equals batch size."""
-        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0)
-        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0)
+        mock_user1 = MagicMock(id=1, title="User 1", contributions_count=0, contribution_data=None)
+        mock_user2 = MagicMock(id=2, title="User 2", contributions_count=0, contribution_data=None)
 
         mock_users_queryset = MagicMock()
         mock_users_queryset.count.return_value = 2
