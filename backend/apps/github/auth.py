@@ -2,7 +2,6 @@
 
 import logging
 import os
-from pathlib import Path
 
 from django.conf import settings
 from github import Auth, Github
@@ -27,8 +26,8 @@ class GitHubAppAuth:
         if not self._is_app_configured() and not self.pat_token:
             error_message = (
                 "GitHub App configuration is incomplete. "
-                "Please set GITHUB_APP_ID and GITHUB_APP_INSTALLATION_ID, "
-                "ensure backend/.github.pem file exists, "
+                "Please set GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID, "
+                "and NEST_GITHUB_APP_PRIVATE_KEY environment variables, "
                 "or provide GITHUB_TOKEN for PAT authentication."
             )
             raise ValueError(error_message)
@@ -38,12 +37,9 @@ class GitHubAppAuth:
         return all((self.app_id, self.private_key, self.app_installation_id))
 
     def _load_private_key(self):
-        """Load the GitHub App private key from a local file."""
-        try:
-            with (Path(settings.BASE_DIR) / ".github.pem").open("r") as key_file:
-                return key_file.read().strip()
-        except (FileNotFoundError, PermissionError):
-            return None
+        """Load the GitHub App private key from environment variable."""
+        private_key = os.getenv("NEST_GITHUB_APP_PRIVATE_KEY")
+        return private_key.strip() if private_key else None
 
     def get_github_client(self, per_page: int | None = None) -> Github:
         """Get authenticated GitHub client.
