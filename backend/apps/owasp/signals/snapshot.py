@@ -1,5 +1,6 @@
 """Snapshot signals."""
 
+from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
@@ -24,4 +25,4 @@ def snapshot_published(sender, instance, created, **kwargs):  # noqa: ARG001
     if instance.status == Snapshot.Status.COMPLETED and (
         created or instance._previous_status != Snapshot.Status.COMPLETED  # noqa: SLF001
     ):
-        publish_snapshot_notification(instance)
+        transaction.on_commit(lambda: publish_snapshot_notification(instance))

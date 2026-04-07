@@ -1,5 +1,6 @@
 """Event signals."""
 
+from django.db import transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
@@ -33,7 +34,7 @@ def event_pre_save(sender, instance, **kwargs):  # noqa: ARG001
 def event_post_save(sender, instance, created, **kwargs):  # noqa: ARG001
     """Signal handler for event creation and updates."""
     if created:
-        publish_event_notification(instance, "created")
+        transaction.on_commit(lambda: publish_event_notification(instance, "created"))
     else:
         changed_fields = {}
         previous_values = getattr(instance, "_previous_values", {})
@@ -42,9 +43,13 @@ def event_post_save(sender, instance, created, **kwargs):  # noqa: ARG001
             new_value = getattr(instance, field)
             if old_value != new_value:
                 changed_fields[field] = {
-                    "old": str(old_value) if old_value else None,
-                    "new": str(new_value) if new_value else None,
+                    "old": str(old_value) if old_value is not None else None,
+                    "new": str(new_value) if new_value is not None else None,
                 }
 
         if changed_fields:
-            publish_event_notification(instance, "updated", changed_fields=changed_fields)
+            transaction.on_commit(
+                lambda: publish_event_notification(
+                    instance, "updated", changed_fields=changed_fields
+                )
+            )

@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                ("object_id", models.PositiveIntegerField()),
+                ("object_id", models.PositiveBigIntegerField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "content_type",

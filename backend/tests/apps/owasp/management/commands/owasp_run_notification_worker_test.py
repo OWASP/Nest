@@ -36,6 +36,7 @@ class TestOwaspRunNotificationWorker:
         mock_notification.objects.filter.return_value.exists.return_value = False
 
         from apps.owasp.utils.notifications import send_notification
+
         send_notification(
             user=mock_user,
             title=f"New Snapshot Published: {mock_snapshot.title}",
@@ -62,6 +63,7 @@ class TestOwaspRunNotificationWorker:
         mock_notification.objects.filter.return_value.exists.return_value = True
 
         from apps.owasp.utils.notifications import send_notification
+
         send_notification(
             user=mock_user,
             title=f"New Snapshot Published: {mock_snapshot.title}",
