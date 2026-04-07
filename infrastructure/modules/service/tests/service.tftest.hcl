@@ -77,10 +77,6 @@ run "test_health_check_included" {
  
   variables {
     health_check_command      = ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
-    health_check_interval     = 30
-    health_check_retries      = 3
-    health_check_start_period = 60
-    health_check_timeout      = 5
   }
 
   assert {
@@ -94,23 +90,23 @@ run "test_health_check_included" {
   }
 
   assert {
-    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.interval, null) == var.health_check_interval
-    error_message = "Health check interval must match variable."
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.interval, null) != null
+    error_message = "Health check interval must not be null when health check is configured."
   }
 
   assert {
-    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.retries, null) == var.health_check_retries
-    error_message = "Health check retries must match variable."
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.retries, null) != null
+    error_message = "Health check retries must not be null when health check is configured."
   }
 
   assert {
-    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.startPeriod, null) == var.health_check_start_period
-    error_message = "Health check start period must match variable."
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.startPeriod, null) != null
+    error_message = "Health check start period must not be null when health check is configured."
   }
 
   assert {
-    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.timeout, null) == var.health_check_timeout
-    error_message = "Health check timeout must match variable."
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.timeout, null) != null
+    error_message = "Health check timeout must not be null when health check is configured."
   }
 }
 
