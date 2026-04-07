@@ -60,4 +60,10 @@ export const METADATA_CONFIG = {
     pageTitle: 'Organizations',
     type: 'website',
   },
+  sponsors: {
+    description: 'Meet the organizations sponsoring OWASP Nest and supporting open source security.',
+    keywords: ['OWASP sponsors', 'sponsorship', 'open source security', 'corporate supporters'],
+    pageTitle: 'Sponsors',
+    type: 'website',
+  },
 }

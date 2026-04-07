@@ -1054,6 +1054,7 @@ export type SnapshotNode = Node & {
 
 export type SponsorNode = Node & {
   __typename?: 'SponsorNode';
+  description: Scalars['String']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   imageUrl: Scalars['String']['output'];

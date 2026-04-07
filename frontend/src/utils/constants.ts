@@ -4,6 +4,10 @@ import { FaBluesky } from 'react-icons/fa6'
 import type { Link } from 'types/link'
 import type { Section } from 'types/section'
 
+/** OWASP Nest project donation (one-time or recurring via OWASP). */
+export const OWASP_NEST_DONATE_URL =
+  'https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest'
+
 export const headerLinks: Link[] = [
   {
     text: 'Community',
@@ -61,8 +65,8 @@ export const footerSections: Section[] = [
         href: 'https://owasp.org/www-community/initiatives/gsoc/gsoc2026ideas#owasp-nest',
       },
       {
-        text: 'Sponsor',
-        href: 'https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest',
+        text: 'Sponsors',
+        href: '/sponsors',
       },
     ],
   },

@@ -124,7 +124,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
 
           <div className="hidden md:flex">
             <NavButton
-              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+              href="/sponsors"
               defaultIcon={FaRegHeart}
               hoverIcon={FaSolidHeart}
               defaultIconColor="#b55f95"
@@ -234,7 +234,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               text="Star On Github"
             />
             <NavButton
-              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+              href="/sponsors"
               defaultIcon={FaRegHeart}
               hoverIcon={FaSolidHeart}
               defaultIconColor="#b55f95"
