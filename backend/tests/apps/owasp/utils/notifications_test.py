@@ -117,7 +117,7 @@ class TestPublishEventNotification:
         event = MagicMock()
         event.id = 10
 
-        publish_event_notification(event, "deadline_reminder", days_remaining="5")
+        publish_event_notification(event, "deadline_reminder", days_remaining=5)
 
         call_args = mock_conn.xadd.call_args
         assert call_args[0][1]["type"] == "event_deadline_reminder"

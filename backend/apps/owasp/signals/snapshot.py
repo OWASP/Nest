@@ -25,4 +25,4 @@ def snapshot_published(sender, instance, created, **kwargs):  # noqa: ARG001
     if instance.status == Snapshot.Status.COMPLETED and (
         created or instance._previous_status != Snapshot.Status.COMPLETED  # noqa: SLF001
     ):
-        transaction.on_commit(lambda: publish_snapshot_notification(instance))
+        transaction.on_commit(lambda inst=instance: publish_snapshot_notification(inst))

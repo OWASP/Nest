@@ -15,6 +15,7 @@ class TestEventSignals:
         event = MagicMock()
         event_post_save(sender=None, instance=event, created=True)
         mock_publish.assert_called_once_with(event, "created")
+        mock_on_commit.assert_called_once()
 
     @patch("apps.owasp.signals.event.transaction.on_commit", side_effect=lambda f: f())
     @patch("apps.owasp.signals.event.publish_event_notification")
@@ -40,6 +41,7 @@ class TestEventSignals:
         event_post_save(sender=None, instance=event, created=False)
         # No changes, so no notification should be published
         mock_publish.assert_not_called()
+        mock_on_commit.assert_not_called()
 
     @patch("apps.owasp.signals.event.transaction.on_commit", side_effect=lambda f: f())
     @patch("apps.owasp.signals.event.publish_event_notification")
@@ -73,3 +75,4 @@ class TestEventSignals:
         mock_publish.assert_called_once_with(
             event, "updated", changed_fields=expected_changed_fields
         )
+        mock_on_commit.assert_called_once()

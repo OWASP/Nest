@@ -27,7 +27,7 @@ def chapter_pre_save(sender, instance, **kwargs):  # noqa: ARG001
 def chapter_post_save(sender, instance, created, **kwargs):  # noqa: ARG001
     """Signal handler for chapter creation and updates."""
     if created:
-        transaction.on_commit(lambda: publish_chapter_notification(instance, "created"))
+        transaction.on_commit(lambda inst=instance: publish_chapter_notification(inst, "created"))
     else:
         changed_fields = {}
         previous_values = getattr(instance, "_previous_values", {})
@@ -42,5 +42,7 @@ def chapter_post_save(sender, instance, created, **kwargs):  # noqa: ARG001
 
         if changed_fields:
             transaction.on_commit(
-                lambda: publish_chapter_notification(instance, "updated", changed_fields)
+                lambda inst=instance, cf=changed_fields: publish_chapter_notification(
+                    inst, "updated", cf
+                )
             )

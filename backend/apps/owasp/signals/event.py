@@ -34,7 +34,7 @@ def event_pre_save(sender, instance, **kwargs):  # noqa: ARG001
 def event_post_save(sender, instance, created, **kwargs):  # noqa: ARG001
     """Signal handler for event creation and updates."""
     if created:
-        transaction.on_commit(lambda: publish_event_notification(instance, "created"))
+        transaction.on_commit(lambda inst=instance: publish_event_notification(inst, "created"))
     else:
         changed_fields = {}
         previous_values = getattr(instance, "_previous_values", {})
@@ -49,7 +49,7 @@ def event_post_save(sender, instance, created, **kwargs):  # noqa: ARG001
 
         if changed_fields:
             transaction.on_commit(
-                lambda: publish_event_notification(
-                    instance, "updated", changed_fields=changed_fields
+                lambda inst=instance, cf=changed_fields: publish_event_notification(
+                    inst, "updated", changed_fields=cf
                 )
             )

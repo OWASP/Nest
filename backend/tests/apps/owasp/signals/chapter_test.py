@@ -15,6 +15,7 @@ class TestChapterSignals:
         chapter = MagicMock()
         chapter_post_save(sender=None, instance=chapter, created=True)
         mock_publish.assert_called_once_with(chapter, "created")
+        mock_on_commit.assert_called_once()
 
     @patch("apps.owasp.signals.chapter.transaction.on_commit", side_effect=lambda f: f())
     @patch("apps.owasp.signals.chapter.publish_chapter_notification")
@@ -38,6 +39,7 @@ class TestChapterSignals:
         chapter_post_save(sender=None, instance=chapter, created=False)
         # No changes, so no notification should be published
         mock_publish.assert_not_called()
+        mock_on_commit.assert_not_called()
 
     @patch("apps.owasp.signals.chapter.transaction.on_commit", side_effect=lambda f: f())
     @patch("apps.owasp.signals.chapter.publish_chapter_notification")
@@ -67,3 +69,4 @@ class TestChapterSignals:
             }
         }
         mock_publish.assert_called_once_with(chapter, "updated", expected_changed_fields)
+        mock_on_commit.assert_called_once()

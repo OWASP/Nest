@@ -128,6 +128,7 @@ class Command(BaseCommand):
                                 self.style.WARNING(f"User {user_id} not found: {msg_id}")
                             )
                             error_count += 1
+                            redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                             continue
                     else:
                         # Fallback for old DLQ format
