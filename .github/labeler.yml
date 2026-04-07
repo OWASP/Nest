@@ -65,3 +65,8 @@ nginx:
   - changed-files:
       - any-glob-to-any-file:
           - nginx/**
+
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - infrastructure/**
