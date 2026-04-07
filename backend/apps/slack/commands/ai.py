@@ -1,23 +1,93 @@
 """Slack bot AI command."""
 
+import contextlib
+import hashlib
+import logging
+
+import django_rq
+from django.conf import settings
+from slack_sdk.errors import SlackApiError
+
 from apps.slack.commands.command import CommandBase
+from apps.slack.common.greeting import canned_greeting_reply
+
+logger = logging.getLogger(__name__)
 
 
 class Ai(CommandBase):
     """Slack bot /ai command."""
 
-    def render_blocks(self, command: dict):
-        """Get the rendered blocks.
+    def handler(self, ack, command, client):
+        """Handle the Slack /ai command."""
+        ack()
 
-        Args:
-            command (dict): The Slack command payload.
+        if not settings.SLACK_COMMANDS_ENABLED:
+            return
 
-        Returns:
-            list: A list of Slack blocks representing the AI response.
+        channel_id = command.get("channel_id")
+        user_id = command.get("user_id")
 
-        """
-        from apps.slack.common.handlers.ai import get_blocks
+        query = command.get("text", "").strip()
+        if not query:
+            try:
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    user=user_id,
+                    text=(
+                        "Usage: `/ai <your question>` - "
+                        "Ask NestBot a question to get an AI-powered response."
+                    ),
+                )
+            except SlackApiError:
+                logger.exception(
+                    "Failed to post ephemeral usage hint",
+                    extra={"channel_id": channel_id, "user_id": user_id},
+                )
+            return
 
-        return get_blocks(
-            query=command["text"].strip(),
-        )
+        if greeting_text := canned_greeting_reply(query):
+            try:
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    user=user_id,
+                    text=greeting_text,
+                )
+            except SlackApiError:
+                logger.exception(
+                    "Failed to post greeting reply for /ai",
+                    extra={"channel_id": channel_id, "user_id": user_id},
+                )
+            return
+
+        try:
+            from apps.slack.services.message_auto_reply import process_ai_query_async
+
+            django_rq.get_queue("ai").enqueue(
+                process_ai_query_async,
+                query=query,
+                channel_id=channel_id,
+                message_ts=None,
+                thread_ts=None,
+                is_app_mention=False,
+                user_id=user_id,
+            )
+        except Exception as e:
+            with contextlib.suppress(SlackApiError):
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    user=user_id,
+                    text=(
+                        "⚠️ An error occurred while processing your query. Please try again later."
+                    ),
+                )
+            query_hash = hashlib.sha256(query.encode()).hexdigest()[:16]
+            logger.exception(
+                "Failed to enqueue AI query processing for /ai command",
+                extra={
+                    "channel_id": channel_id,
+                    "user_id": user_id,
+                    "query_length": len(query),
+                    "query_hash": query_hash,
+                    "error": str(e),
+                },
+            )

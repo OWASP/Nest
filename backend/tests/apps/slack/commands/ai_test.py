@@ -1,11 +1,12 @@
 """Tests for AI command functionality."""
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from apps.slack.commands.ai import Ai
 from apps.slack.commands.command import CommandBase
+from apps.slack.services.message_auto_reply import process_ai_query_async
 
 
 class TestAiCommand:
@@ -16,170 +17,165 @@ class TestAiCommand:
         """Set up test data before each test method."""
         self.ai_command = Ai()
 
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_success(self, mock_get_blocks):
-        """Test successful rendering of AI response blocks."""
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_enqueues_job(self, mock_django_rq, mock_settings):
+        """Test /ai enqueues background processing."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+        mock_queue = Mock()
+        mock_django_rq.get_queue.return_value = mock_queue
+
+        ack = Mock()
+        client = Mock()
         command = {
             "text": "What is OWASP?",
             "user_id": "U123456",
             "channel_id": "C123456",
         }
-        expected_blocks = [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "OWASP is a security organization...",
-                },
-            }
-        ]
-        mock_get_blocks.return_value = expected_blocks
 
-        ai_command = Ai()
-        result = ai_command.render_blocks(command)
+        self.ai_command.handler(ack, command, client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
-        assert result == expected_blocks
+        ack.assert_called_once()
+        mock_django_rq.get_queue.assert_called_once_with("ai")
+        mock_queue.enqueue.assert_called_once()
+        args, kwargs = mock_queue.enqueue.call_args
+        assert args[0] is process_ai_query_async
+        assert kwargs == {
+            "query": "What is OWASP?",
+            "channel_id": "C123456",
+            "message_ts": None,
+            "thread_ts": None,
+            "is_app_mention": False,
+            "user_id": "U123456",
+        }
 
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_with_whitespace(self, mock_get_blocks):
-        """Test rendering blocks with text that has whitespace."""
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_strips_whitespace_query(self, mock_django_rq, mock_settings):
+        """Test query text is stripped before enqueue."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+        mock_queue = Mock()
+        mock_django_rq.get_queue.return_value = mock_queue
+
+        ack = Mock()
+        client = Mock()
         command = {
             "text": "  What is OWASP security?  ",
             "user_id": "U123456",
             "channel_id": "C123456",
         }
-        expected_blocks = [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "OWASP is a security organization...",
-                },
-            }
-        ]
-        mock_get_blocks.return_value = expected_blocks
 
-        ai_command = Ai()
-        result = ai_command.render_blocks(command)
+        self.ai_command.handler(ack, command, client)
 
-        mock_get_blocks.assert_called_once_with(query="What is OWASP security?")
-        assert result == expected_blocks
+        _, kwargs = mock_queue.enqueue.call_args
+        assert kwargs["query"] == "What is OWASP security?"
 
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_empty_text(self, mock_get_blocks):
-        """Test rendering blocks with empty text."""
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_simple_greeting_ephemeral_no_enqueue(self, mock_django_rq, mock_settings):
+        """Greeting-only /ai text gets a canned ephemeral and does not enqueue."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+
+        ack = Mock()
+        client = Mock()
+        command = {"text": "Thanks!", "user_id": "U1", "channel_id": "C1"}
+
+        self.ai_command.handler(ack, command, client)
+
+        mock_django_rq.get_queue.assert_not_called()
+        client.chat_postEphemeral.assert_called_once()
+        kwargs = client.chat_postEphemeral.call_args.kwargs
+        assert kwargs["user"] == "U1"
+        assert kwargs["channel"] == "C1"
+        assert "welcome" in kwargs["text"].lower()
+
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_empty_text_posts_usage_ephemeral(self, mock_django_rq, mock_settings):
+        """Test empty /ai text posts usage hint and does not enqueue."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+
+        ack = Mock()
+        client = Mock()
         command = {"text": "", "user_id": "U123456", "channel_id": "C123456"}
-        expected_blocks = [
-            {"type": "section", "text": {"type": "mrkdwn", "text": "Error message"}}
-        ]
-        mock_get_blocks.return_value = expected_blocks
 
-        ai_command = Ai()
-        result = ai_command.render_blocks(command)
+        self.ai_command.handler(ack, command, client)
 
-        mock_get_blocks.assert_called_once_with(query="")
-        assert result == expected_blocks
+        ack.assert_called_once()
+        mock_django_rq.get_queue.assert_not_called()
+        client.chat_postEphemeral.assert_called_once()
+        assert "Usage" in client.chat_postEphemeral.call_args.kwargs["text"]
 
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_only_whitespace(self, mock_get_blocks):
-        """Test rendering blocks with only whitespace in text."""
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_whitespace_only_posts_usage_ephemeral(self, mock_django_rq, mock_settings):
+        """Test whitespace-only text is treated as empty."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+
+        ack = Mock()
+        client = Mock()
         command = {"text": "   ", "user_id": "U123456", "channel_id": "C123456"}
-        expected_blocks = [
-            {"type": "section", "text": {"type": "mrkdwn", "text": "Error message"}}
-        ]
-        mock_get_blocks.return_value = expected_blocks
 
-        ai_command = Ai()
-        result = ai_command.render_blocks(command)
+        self.ai_command.handler(ack, command, client)
 
-        mock_get_blocks.assert_called_once_with(query="")
-        assert result == expected_blocks
+        mock_django_rq.get_queue.assert_not_called()
+        client.chat_postEphemeral.assert_called_once()
 
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_complex_query(self, mock_get_blocks):
-        """Test rendering blocks with complex query."""
-        command = {
-            "text": "What are the OWASP Top 10 vulnerabilities and how can I prevent them?",
-            "user_id": "U123456",
-            "channel_id": "C123456",
-        }
-        expected_blocks = [
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": "The OWASP Top 10 is a list..."},
-            },
-            {"type": "divider"},
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": "Prevention techniques..."},
-            },
-        ]
-        mock_get_blocks.return_value = expected_blocks
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_commands_disabled(self, mock_django_rq, mock_settings):
+        """Test SLACK_COMMANDS_ENABLED False skips enqueue and ephemeral."""
+        mock_settings.SLACK_COMMANDS_ENABLED = False
 
-        ai_command = Ai()
-        result = ai_command.render_blocks(command)
+        ack = Mock()
+        client = Mock()
+        command = {"text": "What is OWASP?", "user_id": "U1", "channel_id": "C1"}
 
-        mock_get_blocks.assert_called_once_with(
-            query="What are the OWASP Top 10 vulnerabilities and how can I prevent them?"
+        self.ai_command.handler(ack, command, client)
+
+        ack.assert_called_once()
+        mock_django_rq.get_queue.assert_not_called()
+        client.chat_postEphemeral.assert_not_called()
+
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_enqueue_failure_posts_error_ephemeral(self, mock_django_rq, mock_settings):
+        """Test enqueue failure posts error ephemeral and does not propagate."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+        mock_django_rq.get_queue.return_value.enqueue.side_effect = RuntimeError("queue down")
+
+        ack = Mock()
+        client = Mock()
+        command = {"text": "What is OWASP?", "user_id": "U1", "channel_id": "C1"}
+
+        self.ai_command.handler(ack, command, client)
+
+        ack.assert_called_once()
+        client.chat_postEphemeral.assert_called_once_with(
+            channel="C1",
+            user="U1",
+            text=("⚠️ An error occurred while processing your query. Please try again later."),
         )
-        assert result == expected_blocks
-
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_handles_exception(self, mock_get_blocks):
-        """Test that render_blocks handles exceptions gracefully."""
-        command = {
-            "text": "What is OWASP?",
-            "user_id": "U123456",
-            "channel_id": "C123456",
-        }
-        mock_get_blocks.side_effect = Exception("AI service error")
-
-        ai_command = Ai()
-        with pytest.raises(Exception, match="AI service error"):
-            ai_command.render_blocks(command)
-
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_returns_none(self, mock_get_blocks):
-        """Test handling when get_blocks returns None."""
-        command = {
-            "text": "What is OWASP?",
-            "user_id": "U123456",
-            "channel_id": "C123456",
-        }
-        mock_get_blocks.return_value = None
-
-        ai_command = Ai()
-        result = ai_command.render_blocks(command)
-
-        mock_get_blocks.assert_called_once_with(query="What is OWASP?")
-        assert result is None
 
     def test_ai_command_inheritance(self):
         """Test that Ai command inherits from CommandBase."""
         ai_command = Ai()
         assert isinstance(ai_command, CommandBase)
 
-    @patch("apps.slack.common.handlers.ai.get_blocks")
-    def test_render_blocks_special_characters(self, mock_get_blocks):
-        """Test rendering blocks with special characters in query."""
-        command = {
-            "text": "What is XSS & SQL injection? How to prevent <script> attacks?",
-            "user_id": "U123456",
-            "channel_id": "C123456",
-        }
-        expected_blocks = [
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": "XSS and SQL injection..."},
-            }
-        ]
-        mock_get_blocks.return_value = expected_blocks
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_preserves_special_characters_in_query(self, mock_django_rq, mock_settings):
+        """Test special characters in query are passed through."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+        mock_queue = Mock()
+        mock_django_rq.get_queue.return_value = mock_queue
 
-        ai_command = Ai()
-        result = ai_command.render_blocks(command)
+        ack = Mock()
+        client = Mock()
+        q = "What is XSS & SQL injection? How to prevent <script> attacks?"
+        command = {"text": q, "user_id": "U123456", "channel_id": "C123456"}
 
-        mock_get_blocks.assert_called_once_with(
-            query="What is XSS & SQL injection? How to prevent <script> attacks?"
-        )
-        assert result == expected_blocks
+        self.ai_command.handler(ack, command, client)
+
+        _, kwargs = mock_queue.enqueue.call_args
+        assert kwargs["query"] == q
