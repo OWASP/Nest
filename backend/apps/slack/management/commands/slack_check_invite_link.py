@@ -122,7 +122,8 @@ class Command(BaseCommand):
                 self.style.WARNING(
                     "Invite baseline not set; skipping threshold check. "
                     "Baseline is applied when a new invite-link commit is found on GitHub. "
-                    "If you published a new link, ensure the commit message matches, or set "
+                    "If you published a new link, ensure the commit message contains "
+                    "update, slack, and invite in that order (case-insensitive), or set "
                     "invite metadata and baseline in Django admin (after slack_sync_data for "
                     "current member counts)."
                 )
@@ -179,7 +180,8 @@ class Command(BaseCommand):
         if commit_date is None:
             self.stdout.write(
                 self.style.WARNING(
-                    "No commit found with the expected message for _includes/slack_invite.html; "
+                    "No commit found for _includes/slack_invite.html whose message contains "
+                    "update, slack, and invite in that order (case-insensitive); "
                     "invite metadata not updated."
                 )
             )
