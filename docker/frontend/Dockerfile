@@ -22,7 +22,7 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
     apk update && \
-    apk add --no-cache libc6-compat
+    apk add --no-cache libc6-compat wget
 
 WORKDIR /app
 
