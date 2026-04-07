@@ -69,7 +69,7 @@ class TestAppMention:
         kwargs = mock_client.chat_postMessage.call_args.kwargs
         assert kwargs["channel"] == "C123456"
         assert kwargs["thread_ts"] == "1234567890.123456"
-        assert "NestBot" in kwargs["text"] or "OWASP" in kwargs["text"]
+        assert "NestBot" in kwargs["text"]
 
     @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")

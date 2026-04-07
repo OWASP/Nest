@@ -1,12 +1,8 @@
-"""Tests for simple greeting detection (no agent)."""
+"""Tests for canned greeting replies (no agent)."""
 
 import pytest
 
-from apps.slack.common.greeting import (
-    canned_greeting_reply,
-    has_substantive_question,
-    is_simple_greeting,
-)
+from apps.slack.common.greeting import canned_greeting_reply
 
 
 @pytest.mark.parametrize(
@@ -21,8 +17,8 @@ from apps.slack.common.greeting import (
         "thx",
     ],
 )
-def test_is_simple_greeting_positive(text):
-    assert is_simple_greeting(text)
+def test_canned_greeting_positive(text):
+    assert canned_greeting_reply(text) is not None
 
 
 @pytest.mark.parametrize(
@@ -38,23 +34,20 @@ def test_is_simple_greeting_positive(text):
         "x" * 300,
     ],
 )
-def test_is_simple_greeting_negative(text):
-    assert not is_simple_greeting(text)
+def test_canned_greeting_negative(text):
+    assert canned_greeting_reply(text) is None
 
 
-def test_greeting_with_mention_stripped():
-    assert is_simple_greeting("<@U123> hi")
-    assert not is_simple_greeting("<@U123> what is OWASP")
+def test_greeting_with_user_mention_stripped():
+    assert canned_greeting_reply("<@U123> hi") is not None
+    assert canned_greeting_reply("<@U123> what is OWASP") is None
 
 
 def test_canned_greeting_reply_variants():
     assert "welcome" in (canned_greeting_reply("Thanks") or "").lower()
-    assert canned_greeting_reply("Hi") is not None
     assert canned_greeting_reply("Good afternoon") is not None
     assert canned_greeting_reply("What is XSS?") is None
 
 
-def test_has_substantive_question():
-    assert has_substantive_question("What is OWASP?")
-    assert has_substantive_question("Hi how does XSS work")
-    assert not has_substantive_question("Hello")
+def test_question_words_route_to_agent():
+    assert canned_greeting_reply("Hi how does XSS work") is None

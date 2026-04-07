@@ -116,7 +116,7 @@ class TestMessageAutoReply:
         mock_client.chat_postMessage.assert_called_once()
         kwargs = mock_client.chat_postMessage.call_args.kwargs
         assert kwargs["thread_ts"] == mock_message.slack_message_id
-        assert "NestBot" in kwargs["text"] or "OWASP" in kwargs["text"]
+        assert "NestBot" in kwargs["text"]
 
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     def test_generate_ai_reply_message_not_found(self, mock_message_get):
