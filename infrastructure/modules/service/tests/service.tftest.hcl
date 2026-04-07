@@ -1,5 +1,48 @@
 mock_provider "aws" {}
 
+ override_resource {
+    target          = aws_ecr_repository.main
+    values = {
+      repository_url = "123456789012.dkr.ecr.us-east-2.amazonaws.com/nest-test-service"
+    }
+  }
+
+  override_resource {
+    target = aws_iam_role.ecs_task_execution_role
+    values = {
+      arn = "arn:aws:iam::123456789012:role/nest-test-service-execution-role"
+    }
+  }
+
+  override_resource {
+    target = aws_iam_role.ecs_task_role
+    values = {
+      arn = "arn:aws:iam::123456789012:role/nest-test-service-task-role"
+    }
+  }
+
+  override_resource {
+    target = aws_iam_policy.ecs_task_execution_policy
+    values = {
+      arn = "arn:aws:iam::123456789012:policy/nest-test-service-execution-policy"
+    }
+  }
+
+  override_resource {
+    target = aws_iam_policy.ecs_task_execution_ssm_policy
+    values = {
+      arn = "arn:aws:iam::123456789012:policy/nest-test-service-ssm-policy"
+    }
+  }
+
+  override_resource {
+    target = aws_iam_policy.ecs_task_role_kms
+    values = {
+      arn = "arn:aws:iam::123456789012:policy/nest-test-service-task-kms-policy"
+    }
+  }
+
+
 variables {
   aws_region            = "us-east-2"
   common_tags           = { Environment = "test", Project = "nest" }
@@ -17,6 +60,58 @@ variables {
   service_name          = "service"
   subnet_ids            = ["subnet-1", "subnet-2"]
   target_group_arn      = "arn:aws:elasticloadbalancing:us-east-2:123456789012:targetgroup/nest-test-service-tg/1234567890123456"
+}
+
+run "test_health_check_null_by_default" {
+  command = apply
+
+  assert {
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck, null) == null
+    error_message = "Health check must be null by default."
+  }
+}
+
+run "test_health_check_included" {
+  command = apply
+  
+ 
+  variables {
+    health_check_command      = ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+    health_check_interval     = 30
+    health_check_retries      = 3
+    health_check_start_period = 60
+    health_check_timeout      = 5
+  }
+
+  assert {
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck, null) != null
+    error_message = "Health check command must be included when health check variables are set." 
+  }
+
+  assert {
+    condition     = jsonencode(try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.command, null)) == jsonencode(var.health_check_command)
+    error_message = "Health check command must be included when health check variables are set."
+  }
+
+  assert {
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.interval, null) == var.health_check_interval
+    error_message = "Health check interval must match variable."
+  }
+
+  assert {
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.retries, null) == var.health_check_retries
+    error_message = "Health check retries must match variable."
+  }
+
+  assert {
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.startPeriod, null) == var.health_check_start_period
+    error_message = "Health check start period must match variable."
+  }
+
+  assert {
+    condition     = try(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.timeout, null) == var.health_check_timeout
+    error_message = "Health check timeout must match variable."
+  }
 }
 
 run "test_cloudwatch_log_group_name_format" {
