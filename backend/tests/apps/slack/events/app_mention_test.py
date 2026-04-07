@@ -49,6 +49,30 @@ class TestAppMention:
 
     @patch("apps.slack.events.app_mention.django_rq")
     @patch("apps.slack.events.app_mention.Conversation")
+    def test_handle_event_simple_greeting_no_enqueue_no_eyes(
+        self, mock_conversation, mock_django_rq, handler, mock_client
+    ):
+        """Short hello/thanks posts a fixed reply and skips queue and reactions."""
+        mock_conversation.objects.filter.return_value.exists.return_value = True
+
+        event = {
+            "channel": "C123456",
+            "text": "Hello!",
+            "ts": "1234567890.123456",
+        }
+
+        handler.handle_event(event, mock_client)
+
+        mock_django_rq.get_queue.assert_not_called()
+        mock_client.reactions_add.assert_not_called()
+        mock_client.chat_postMessage.assert_called_once()
+        kwargs = mock_client.chat_postMessage.call_args.kwargs
+        assert kwargs["channel"] == "C123456"
+        assert kwargs["thread_ts"] == "1234567890.123456"
+        assert "NestBot" in kwargs["text"] or "OWASP" in kwargs["text"]
+
+    @patch("apps.slack.events.app_mention.django_rq")
+    @patch("apps.slack.events.app_mention.Conversation")
     def test_handle_event_ai_disabled(
         self, mock_conversation, mock_django_rq, handler, mock_client
     ):

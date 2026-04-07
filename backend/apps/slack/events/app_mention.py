@@ -6,6 +6,7 @@ import logging
 import django_rq
 from slack_sdk.errors import SlackApiError
 
+from apps.slack.common.greeting import canned_greeting_reply
 from apps.slack.events.event import EventBase
 from apps.slack.models import Conversation
 
@@ -52,6 +53,20 @@ class AppMention(EventBase):
 
         if not query:
             logger.warning("No query found in app mention")
+            return
+
+        if greeting_text := canned_greeting_reply(query):
+            try:
+                client.chat_postMessage(
+                    channel=channel_id,
+                    text=greeting_text,
+                    thread_ts=event.get("thread_ts") or event.get("ts"),
+                )
+            except SlackApiError:
+                logger.exception(
+                    "Failed to post greeting reply to app mention",
+                    extra={"channel_id": channel_id},
+                )
             return
 
         logger.info(

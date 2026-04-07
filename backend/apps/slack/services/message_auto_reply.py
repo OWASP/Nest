@@ -9,6 +9,7 @@ from slack_sdk.errors import SlackApiError
 
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import markdown_blocks
+from apps.slack.common.greeting import canned_greeting_reply
 from apps.slack.common.handlers.ai import process_ai_query
 from apps.slack.models import Message
 from apps.slack.utils import (
@@ -63,10 +64,10 @@ def _post_unable_to_generate_async(
                 name="man-shrugging",
             )
         except SlackApiError as e:
-            if e.response.get("error") != "already_reacted":
+            if (e.response or {}).get("error") != "already_reacted":
                 logger.warning(
                     "Failed to add no-answer reaction: %s",
-                    e.response.get("error"),
+                    (e.response or {}).get("error"),
                     extra={"channel_id": channel_id, "message_ts": message_ts},
                 )
 
@@ -164,10 +165,10 @@ def _post_unable_to_generate_deferred(client, channel_id: str, message_ts: str) 
             name="man-shrugging",
         )
     except SlackApiError as e:
-        if e.response.get("error") != "already_reacted":
+        if (e.response or {}).get("error") != "already_reacted":
             logger.warning(
                 "Failed to add no-answer reaction: %s",
-                e.response.get("error"),
+                (e.response or {}).get("error"),
                 extra={"channel_id": channel_id, "message_ts": message_ts},
             )
 
@@ -180,7 +181,7 @@ def _post_unable_to_generate_deferred(client, channel_id: str, message_ts: str) 
 
 
 @job("ai")
-def generate_ai_reply_if_unanswered(message_id: int):
+def generate_ai_reply_if_unanswered(message_id: int):  # noqa: PLR0911
     """Check if a message is still unanswered and generate AI reply."""
     try:
         message = Message.objects.get(pk=message_id)
@@ -209,6 +210,20 @@ def generate_ai_reply_if_unanswered(message_id: int):
 
     channel_id = message.conversation.slack_channel_id
     message_ts = message.slack_message_id
+
+    if greeting_text := canned_greeting_reply(message.text):
+        try:
+            client.chat_postMessage(
+                channel=channel_id,
+                text=greeting_text,
+                thread_ts=message_ts,
+            )
+        except SlackApiError:
+            logger.exception(
+                "Failed to post greeting reply on deferred path",
+                extra={"channel_id": channel_id, "message_ts": message_ts},
+            )
+        return
 
     try:
         client.reactions_add(

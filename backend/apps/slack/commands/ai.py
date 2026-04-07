@@ -9,6 +9,7 @@ from django.conf import settings
 from slack_sdk.errors import SlackApiError
 
 from apps.slack.commands.command import CommandBase
+from apps.slack.common.greeting import canned_greeting_reply
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,20 @@ class Ai(CommandBase):
             except SlackApiError:
                 logger.exception(
                     "Failed to post ephemeral usage hint",
+                    extra={"channel_id": channel_id, "user_id": user_id},
+                )
+            return
+
+        if greeting_text := canned_greeting_reply(query):
+            try:
+                client.chat_postEphemeral(
+                    channel=channel_id,
+                    user=user_id,
+                    text=greeting_text,
+                )
+            except SlackApiError:
+                logger.exception(
+                    "Failed to post greeting reply for /ai",
                     extra={"channel_id": channel_id, "user_id": user_id},
                 )
             return

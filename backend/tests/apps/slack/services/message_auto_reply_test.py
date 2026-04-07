@@ -98,6 +98,26 @@ class TestMessageAutoReply:
         assert block_posts[0].kwargs["text"] == truncate_for_slack_fallback(formatted)
         assert block_posts[0].kwargs["thread_ts"] == mock_message.slack_message_id
 
+    @patch.object(SlackConfig, "app")
+    @patch("apps.slack.services.message_auto_reply.Message.objects.get")
+    def test_generate_ai_reply_simple_greeting_no_eyes_no_ai(
+        self, mock_message_get, mock_app, mock_message
+    ):
+        """Deferred job answers pure greetings without eyes or process_ai_query."""
+        mock_message.text = "Hi there"
+        mock_message_get.return_value = mock_message
+        mock_client = Mock()
+        mock_app.client = mock_client
+        mock_client.conversations_replies.return_value = {"messages": [{"reply_count": 0}]}
+
+        generate_ai_reply_if_unanswered(mock_message.id)
+
+        mock_client.reactions_add.assert_not_called()
+        mock_client.chat_postMessage.assert_called_once()
+        kwargs = mock_client.chat_postMessage.call_args.kwargs
+        assert kwargs["thread_ts"] == mock_message.slack_message_id
+        assert "NestBot" in kwargs["text"] or "OWASP" in kwargs["text"]
+
     @patch("apps.slack.services.message_auto_reply.Message.objects.get")
     def test_generate_ai_reply_message_not_found(self, mock_message_get):
         """Test handling when message doesn't exist."""

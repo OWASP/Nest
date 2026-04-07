@@ -72,6 +72,25 @@ class TestAiCommand:
 
     @patch("apps.slack.commands.ai.settings")
     @patch("apps.slack.commands.ai.django_rq")
+    def test_handler_simple_greeting_ephemeral_no_enqueue(self, mock_django_rq, mock_settings):
+        """Greeting-only /ai text gets a canned ephemeral and does not enqueue."""
+        mock_settings.SLACK_COMMANDS_ENABLED = True
+
+        ack = Mock()
+        client = Mock()
+        command = {"text": "Thanks!", "user_id": "U1", "channel_id": "C1"}
+
+        self.ai_command.handler(ack, command, client)
+
+        mock_django_rq.get_queue.assert_not_called()
+        client.chat_postEphemeral.assert_called_once()
+        kwargs = client.chat_postEphemeral.call_args.kwargs
+        assert kwargs["user"] == "U1"
+        assert kwargs["channel"] == "C1"
+        assert "welcome" in kwargs["text"].lower()
+
+    @patch("apps.slack.commands.ai.settings")
+    @patch("apps.slack.commands.ai.django_rq")
     def test_handler_empty_text_posts_usage_ephemeral(self, mock_django_rq, mock_settings):
         """Test empty /ai text posts usage hint and does not enqueue."""
         mock_settings.SLACK_COMMANDS_ENABLED = True
