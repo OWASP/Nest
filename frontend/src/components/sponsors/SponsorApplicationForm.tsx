@@ -37,6 +37,21 @@ const initialTouchedState: TouchedState = {
   message: false,
 }
 
+function isProbablyEmail(value: string): boolean {
+  // Keep it linear-time to avoid regex backtracking warnings.
+  const email = value.trim()
+  if (!email || email.includes(' ') || email.length > 254) return false
+
+  const at = email.indexOf('@')
+  if (at <= 0 || at !== email.lastIndexOf('@') || at === email.length - 1) return false
+
+  const domain = email.slice(at + 1)
+  const dot = domain.indexOf('.')
+  if (dot <= 0 || dot === domain.length - 1) return false
+
+  return true
+}
+
 function validate(form: FormState) {
   const errors: Partial<Record<keyof FormState, string>> = {}
 
@@ -46,7 +61,7 @@ function validate(form: FormState) {
 
   if (!form.contactEmail.trim()) {
     errors.contactEmail = 'Contact email is required'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail)) {
+  } else if (!isProbablyEmail(form.contactEmail)) {
     errors.contactEmail = 'Enter a valid email address'
   }
 
