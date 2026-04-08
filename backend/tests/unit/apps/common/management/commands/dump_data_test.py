@@ -98,6 +98,8 @@ class TestDumpDataCommand:
             in executed_sql
         )
 
+        assert str(sql.SQL("UPDATE public.owasp_sponsors SET contact_email = '';")) in executed_sql
+
         assert mock_popen.call_count == 2
 
         first_popen_call = mock_popen.call_args_list[0]
@@ -248,7 +250,7 @@ class TestDumpDataCommand:
 
         # No UPDATE email queries should be in executed SQL.
         executed_sql = [str(c.args[0]) for c in mock_cursor.execute.call_args_list]
-        update_queries = [q for q in executed_sql if "UPDATE" in q and "email" in q]
+        update_queries = [q for q in executed_sql if "UPDATE" in q and " SET email " in q]
         assert not update_queries
 
     @override_settings(DATABASES=DATABASES)

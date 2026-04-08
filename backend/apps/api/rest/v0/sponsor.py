@@ -143,17 +143,23 @@ def apply_sponsor(
     payload: SponsorApplyRequest,
 ) -> tuple[int, SponsorApplyResponse | SponsorError]:
     """Create a draft sponsor application."""
-    key = slugify(payload.organization_name)
+    organization_name = payload.organization_name.strip()
+    key = slugify(organization_name)
+
+    if not key:
+        return HTTPStatus.BAD_REQUEST, SponsorError(
+            message=("Invalid organization name. Please include at least one letter or number.")
+        )
 
     if SponsorModel.objects.filter(key=key).exists():
         return HTTPStatus.BAD_REQUEST, SponsorError(
-            message=(f"An application for '{payload.organization_name}' already exists.")
+            message=(f"An application for '{organization_name}' already exists.")
         )
 
     SponsorModel.objects.create(
         key=key,
-        name=payload.organization_name,
-        sort_name=payload.organization_name,
+        name=organization_name,
+        sort_name=organization_name,
         contact_email=payload.contact_email,
         url=payload.website,
         description=payload.message,
