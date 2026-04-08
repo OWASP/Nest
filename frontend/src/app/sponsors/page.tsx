@@ -27,6 +27,12 @@ const SponsorsPage = () => {
       return [] as { tier: SponsorTier; sponsors: SponsorData[] }[]
     }
 
+    const normalizeTier = (raw: string | null | undefined): SponsorTier => {
+      const tier = String(raw || 'supporter').trim().toLowerCase()
+      if (tier === 'diamond' || tier === 'platinum' || tier === 'gold' || tier === 'silver') return tier
+      return 'supporter'
+    }
+
     const mapSponsor = (sponsor: (typeof data.sponsors)[number]): SponsorData => ({
       id: sponsor.id,
       imageUrl: sponsor.imageUrl,
@@ -35,16 +41,16 @@ const SponsorsPage = () => {
       url: sponsor.url,
     })
 
-    const grouped: Record<string, SponsorData[]> = {}
+    const grouped: Partial<Record<SponsorTier, SponsorData[]>> = {}
     for (const sponsor of data.sponsors) {
-      const tier = sponsor.sponsorType || 'Supporter'
+      const tier = normalizeTier(sponsor.sponsorType)
       if (!grouped[tier]) grouped[tier] = []
       grouped[tier].push(mapSponsor(sponsor))
     }
 
     return TIER_ORDER.filter((tier) => grouped[tier]?.length > 0).map((tier) => ({
       tier,
-      sponsors: grouped[tier],
+      sponsors: grouped[tier] ?? [],
     }))
   }, [data])
 
@@ -69,7 +75,7 @@ const SponsorsPage = () => {
 
         {sponsorsByTier.length > 0 ? (
           sponsorsByTier.map(({ tier, sponsors }) => (
-            <SponsorTierSection key={tier} tier={tier as SponsorTier} sponsors={sponsors} />
+            <SponsorTierSection key={tier} tier={tier} sponsors={sponsors} />
           ))
         ) : (
           <div className="py-16 text-center">

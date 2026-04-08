@@ -35,7 +35,7 @@ const sizeMap = {
 } as const
 
 export default function SponsorTierCard({ sponsor, size, tier }: SponsorTierCardProps) {
-  if (tier === 'Diamond') {
+  if (tier === 'diamond') {
     return <SponsorDiamondCard sponsor={sponsor} />
   }
 

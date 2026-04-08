@@ -1,4 +1,4 @@
-export type SponsorTier = 'Diamond' | 'Platinum' | 'Gold' | 'Silver' | 'Supporter'
+export type SponsorTier = 'diamond' | 'platinum' | 'gold' | 'silver' | 'supporter'
 
 export type SponsorData = {
   id: string
@@ -15,4 +15,12 @@ export type SponsorsByTier = {
   sponsors: SponsorData[]
 }
 
-export const TIER_ORDER: SponsorTier[] = ['Diamond', 'Platinum', 'Gold', 'Silver', 'Supporter']
+export const TIER_ORDER: SponsorTier[] = ['diamond', 'platinum', 'gold', 'silver', 'supporter']
+
+export const TIER_LABEL: Record<SponsorTier, string> = {
+  diamond: 'Diamond',
+  platinum: 'Platinum',
+  gold: 'Gold',
+  silver: 'Silver',
+  supporter: 'Supporter',
+}
