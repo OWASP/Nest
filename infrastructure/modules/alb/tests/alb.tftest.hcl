@@ -10,6 +10,7 @@ variables {
   log_retention_days         = 90
   project_name               = "nest"
   public_subnet_ids          = ["subnet-public-1", "subnet-public-2"]
+  static_s3_bucket_name      = "nest-test-static-bucket"
   vpc_id                     = "vpc-12345678"
 }
 
@@ -269,11 +270,51 @@ run "test_backend_target_group_deregistration_delay" {
   }
 }
 
+run "test_backend_health_check_enabled" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].enabled == true
+    error_message = "Backend health check must be enabled."
+  }
+}
+
 run "test_backend_health_check_path" {
   command = plan
   assert {
     condition     = aws_lb_target_group.backend.health_check[0].path == var.backend_health_check_path
     error_message = "Backend health check path must match the variable."
+  }
+}
+
+run "test_backend_health_check_healthy_threshold" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].healthy_threshold == 2
+    error_message = "Backend health check healthy threshold must be 2."
+  }
+}
+
+run "test_backend_health_check_unhealthy_threshold" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].unhealthy_threshold == 10
+    error_message = "Backend health check unhealthy threshold must be 10."
+  }
+}
+
+run "test_backend_health_check_timeout" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].timeout == 5
+    error_message = "Backend health check timeout must be 5 seconds."
+  }
+}
+
+run "test_backend_health_check_matcher" {
+  command = plan
+  assert {
+    condition     = aws_lb_target_group.backend.health_check[0].matcher == "200-299"
+    error_message = "Backend health check matcher must be '200-299'."
   }
 }
 
@@ -344,8 +385,8 @@ run "test_frontend_health_check_healthy_threshold" {
 run "test_frontend_health_check_unhealthy_threshold" {
   command = plan
   assert {
-    condition     = aws_lb_target_group.frontend.health_check[0].unhealthy_threshold == 3
-    error_message = "Frontend health check unhealthy threshold must be 3."
+    condition     = aws_lb_target_group.frontend.health_check[0].unhealthy_threshold == 10
+    error_message = "Frontend health check unhealthy threshold must be 10."
   }
 }
 
