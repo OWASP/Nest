@@ -125,7 +125,7 @@ describe('CardDetailsIssuesMilestones', () => {
 
   it('renders grid containers when component rendered', () => {
     const { container } = render(<CardDetailsIssuesMilestones type="project" />)
-    expect(container.querySelector('.lg\\:grid')).toBeInTheDocument()
+    expect(container.querySelector(String.raw`.lg\:grid`)).toBeInTheDocument()
   })
 
   it('renders all sections together for allowed types', () => {

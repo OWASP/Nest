@@ -140,11 +140,11 @@ const CardDetailsIssuesMilestones = ({
                         </div>
                         <div className="flex items-center">
                           <FaCircleCheck className="mr-2 h-4 w-4" />
-                          <span>{milestone.closedIssuesCount} closed</span>
+                          <span>{milestone.closedIssuesCount ?? 0} closed</span>
                         </div>
                         <div className="flex items-center">
                           <FaCircleExclamation className="mr-2 h-4 w-4" />
-                          <span>{milestone.openIssuesCount} open</span>
+                          <span>{milestone.openIssuesCount ?? 0} open</span>
                         </div>
                         {milestone?.repositoryName && milestone?.organizationName && (
                           <div className="flex min-w-0 flex-1 items-center overflow-hidden">

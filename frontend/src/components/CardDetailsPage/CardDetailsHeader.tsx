@@ -1,4 +1,5 @@
 import { useSession } from 'next-auth/react'
+import type { ComponentProps } from 'react'
 import type { ExtendedSession } from 'types/auth'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
@@ -12,7 +13,7 @@ interface CardDetailsHeaderProps {
   description?: string
   type: CardType
   status?: string
-  setStatus?: (status: string) => void
+  setStatus?: ComponentProps<typeof EntityActions>['setStatus']
   canUpdateStatus?: boolean
   programKey?: string
   entityKey?: string

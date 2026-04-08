@@ -15,7 +15,7 @@ jest.mock('components/ContributorsList', () => ({
     contributors: Contributor[]
     getUrl?: (login: string) => string
   }) => (
-    <div data-testid={`contributors-list-${title.toLowerCase().replace(/\s+/g, '-')}`}>
+    <div data-testid={`contributors-list-${title.toLowerCase().replaceAll(' ', '-')}`}>
       <h4>{title}</h4>
       <ul>
         {contributors.map((c) => (

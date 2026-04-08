@@ -18,7 +18,7 @@ jest.mock('components/ContributionStats', () => ({
 }))
 
 jest.mock('utils/contributionDataUtils', () => ({
-  shouldShowContributions: jest.fn((type: string) => type === 'project'),
+  shouldShowContributions: jest.fn((type: string) => ['project', 'chapter'].includes(type)),
 }))
 
 jest.mock('next/link', () => {
