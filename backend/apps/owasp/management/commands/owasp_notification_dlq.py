@@ -1,9 +1,7 @@
 """Management command to manage notification DLQ."""
 
-import sys
-
 from django.core.mail import send_mail
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django_redis import get_redis_connection
 
 from apps.nest.models import User
@@ -24,12 +22,13 @@ class Command(BaseCommand):
             choices=["list", "retry", "remove"],
             help="Action to perform: list, retry, or remove",
         )
-        parser.add_argument(
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument(
             "--id",
             type=str,
             help="Specific message ID to act on (required for retry/remove unless --all is used)",
         )
-        parser.add_argument(
+        group.add_argument(
             "--all",
             action="store_true",
             help="Apply action to all messages",
@@ -46,13 +45,11 @@ class Command(BaseCommand):
             self.list_dlq(redis_conn)
         elif action == "retry":
             if not message_id and not all_messages:
-                self.stdout.write(self.style.ERROR("Error: --id or --all is required for retry"))
-                sys.exit(1)
+                raise CommandError("Error: --id or --all is required for retry")
             self.retry_dlq(redis_conn, message_id, all_messages)
         elif action == "remove":
             if not message_id and not all_messages:
-                self.stdout.write(self.style.ERROR("Error: --id or --all is required for remove"))
-                sys.exit(1)
+                raise CommandError("Error: --id or --all is required for remove")
             self.remove_dlq(redis_conn, message_id, all_messages)
 
     def list_dlq(self, redis_conn):
@@ -93,8 +90,7 @@ class Command(BaseCommand):
             messages = result or []
 
         if not messages:
-            self.stdout.write(self.style.ERROR("Message(s) not found"))
-            return
+            raise CommandError("Message(s) not found")
 
         success_count = 0
         error_count = 0
@@ -128,7 +124,6 @@ class Command(BaseCommand):
                                 self.style.WARNING(f"User {user_id} not found: {msg_id}")
                             )
                             error_count += 1
-                            redis_conn.xdel(self.DLQ_STREAM_KEY, msg_id)
                             continue
                     else:
                         # Fallback for old DLQ format
@@ -147,7 +142,16 @@ class Command(BaseCommand):
                     success_count += 1
                     self.stdout.write(f"Retried: {msg_id} -> {user_email}")
                 else:
-                    self.stdout.write(self.style.WARNING(f"Skipped (missing data): {msg_id}"))
+                    msg_type = self._get_value(data, b"type")
+                    if msg_type in ["processing_failed", "recovery_failed"]:
+                        self.stdout.write(
+                            self.style.WARNING(
+                                f"Skipped: {msg_id} is a system processing failure. "
+                                "Requires manual admin review."
+                            )
+                        )
+                    else:
+                        self.stdout.write(self.style.WARNING(f"Skipped (missing data): {msg_id}"))
                     error_count += 1
 
             except Exception as e:  # noqa: BLE001
@@ -176,8 +180,7 @@ class Command(BaseCommand):
             messages = redis_conn.xrange(self.DLQ_STREAM_KEY, message_id, message_id)
 
         if not messages:
-            self.stdout.write(self.style.ERROR("No messages found"))
-            return
+            raise CommandError("No messages found")
 
         count = 0
         for msg_id, _ in messages:
