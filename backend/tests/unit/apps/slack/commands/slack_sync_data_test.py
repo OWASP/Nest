@@ -156,12 +156,14 @@ class TestSlackSyncDataCommand:
         output = stdout.getvalue()
         assert "No workspaces found in the database" in output
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
     @patch("apps.slack.management.commands.slack_sync_data.time.sleep")
     def test_handle_successful_sync(
         self,
         mock_sleep,
         mock_web_client,
+        mock_member_filter,
         command,
         mock_workspace,
         mock_slack_conversations_response,
@@ -170,6 +172,7 @@ class TestSlackSyncDataCommand:
         mock_slack_users_response_final,
     ):
         """Test successful synchronization of conversations and members."""
+        mock_member_filter.return_value.count.return_value = CONSTANT_3
         mock_workspaces = Mock()
         mock_workspaces.exists.return_value = True
         mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
@@ -291,15 +294,18 @@ class TestSlackSyncDataCommand:
         assert "Processing workspace: Workspace No Token" in output
         assert "No bot token found for Workspace No Token" in output
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
     def test_handle_users_api_error(
         self,
         mock_web_client,
+        mock_member_filter,
         command,
         mock_workspace,
         mock_slack_conversations_response_final,
     ):
         """Test handling Slack API error when fetching users."""
+        mock_member_filter.return_value.count.return_value = 0
         mock_workspaces = Mock()
         mock_workspaces.exists.return_value = True
         mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
@@ -332,9 +338,13 @@ class TestSlackSyncDataCommand:
         assert "Populated 1 channels" in output
         assert "Failed to fetch members: invalid_auth" in output
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
-    def test_handle_no_conversations_or_members(self, mock_web_client, command, mock_workspace):
+    def test_handle_no_conversations_or_members(
+        self, mock_web_client, mock_member_filter, command, mock_workspace
+    ):
         """Test handling when API returns empty results."""
+        mock_member_filter.return_value.count.return_value = 0
         mock_workspaces = Mock()
         mock_workspaces.exists.return_value = True
         mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
@@ -371,16 +381,19 @@ class TestSlackSyncDataCommand:
         output = stdout.getvalue()
         assert "Processing workspace: Test Workspace" in output
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
     def test_handle_update_data_returns_none(
         self,
         mock_web_client,
+        mock_member_filter,
         command,
         mock_workspace,
         mock_slack_conversations_response_final,
         mock_slack_users_response_final,
     ):
         """Test handling when update_data returns None."""
+        mock_member_filter.return_value.count.return_value = 0
         mock_workspaces = Mock()
         mock_workspaces.exists.return_value = True
         mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
@@ -448,18 +461,21 @@ class TestSlackSyncDataCommand:
             help="Delay between API requests in seconds",
         )
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
     @patch("apps.slack.management.commands.slack_sync_data.time.sleep")
     def test_handle_with_custom_options(
         self,
         mock_sleep,
         mock_web_client,
+        mock_member_filter,
         command,
         mock_workspace,
         mock_slack_conversations_response_final,
         mock_slack_users_response_final,
     ):
         """Test handle with custom batch_size and delay options."""
+        mock_member_filter.return_value.count.return_value = 0
         mock_workspaces = Mock()
         mock_workspaces.exists.return_value = True
         mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
@@ -509,15 +525,18 @@ class TestSlackSyncDataCommand:
 
         mock_print.assert_not_called()
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
     def test_handle_multiple_workspaces(
         self,
         mock_web_client,
+        mock_member_filter,
         command,
         mock_slack_conversations_response_final,
         mock_slack_users_response_final,
     ):
         """Test handling multiple workspaces."""
+        mock_member_filter.return_value.count.return_value = 0
         workspace1 = Mock(spec=Workspace)
         workspace1.__str__ = Mock(return_value="Workspace 1")
         workspace1.bot_token = TEST_TOKEN_1
@@ -567,12 +586,14 @@ class TestSlackSyncDataCommand:
         assert "Processing workspace: Workspace 1" in output
         assert "Processing workspace: Workspace 2" in output
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
     @patch("apps.slack.management.commands.slack_sync_data.time.sleep")
     def test_handle_delay_zero_skips_sleep(
         self,
         mock_sleep,
         mock_web_client,
+        mock_member_filter,
         command,
         mock_workspace,
         mock_slack_conversations_response,
@@ -580,6 +601,7 @@ class TestSlackSyncDataCommand:
         mock_slack_users_response_final,
     ):
         """Test that time.sleep is not called when delay=0."""
+        mock_member_filter.return_value.count.return_value = 0
         mock_workspaces = Mock()
         mock_workspaces.exists.return_value = True
         mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
@@ -610,15 +632,18 @@ class TestSlackSyncDataCommand:
 
         mock_sleep.assert_not_called()
 
+    @patch("apps.slack.management.commands.slack_sync_data.Member.objects.filter")
     @patch("apps.slack.management.commands.slack_sync_data.WebClient")
     def test_handle_conversations_api_error(
         self,
         mock_web_client,
+        mock_member_filter,
         command,
         mock_workspace,
         mock_slack_users_response_final,
     ):
         """Test handling Slack API error when fetching conversations."""
+        mock_member_filter.return_value.count.return_value = 0
         mock_workspaces = Mock()
         mock_workspaces.exists.return_value = True
         mock_workspaces.__iter__ = Mock(return_value=iter([mock_workspace]))
