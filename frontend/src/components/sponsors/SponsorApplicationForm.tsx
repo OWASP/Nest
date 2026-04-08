@@ -52,6 +52,18 @@ function isProbablyEmail(value: string): boolean {
   return true
 }
 
+function isHttpUrl(value: string): boolean {
+  const raw = value.trim()
+  if (!raw) return false
+
+  try {
+    const url = new URL(raw)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 function validate(form: FormState) {
   const errors: Partial<Record<keyof FormState, string>> = {}
 
@@ -65,9 +77,8 @@ function validate(form: FormState) {
     errors.contactEmail = 'Enter a valid email address'
   }
 
-  if (form.website && !/^https?:\/\/.+\..+/.test(form.website)) {
-    errors.website = 'Enter a valid URL (e.g., https://example.com)' else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      .test(form.contactEmail)
+  if (form.website && !isHttpUrl(form.website)) {
+    errors.website = 'Enter a valid URL (e.g., https://example.com)'
   }
 
   return errors
