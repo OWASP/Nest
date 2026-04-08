@@ -10,9 +10,8 @@ interface SponsorTierCardProps {
   tier: SponsorTier
 }
 
-/** Blender credits–style tile: logo-forward, minimal frame, name as caption. */
 const tileBase =
-  'group flex flex-col items-center rounded-xl border border-gray-200/70 bg-gray-50/90 text-center outline-none transition hover:border-amber-300/55 hover:bg-white focus-visible:ring-2 focus-visible:ring-amber-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:border-gray-600/50 dark:bg-[#2b2e32] dark:hover:border-amber-500/45 dark:hover:bg-[#32363c] dark:focus-visible:ring-amber-400/60 dark:focus-visible:ring-offset-[#212529]'
+  'group flex flex-col items-center rounded-lg bg-gray-200 text-center outline-none transition-all duration-300 hover:bg-blue-100 focus-visible:ring-2 focus-visible:ring-gray-900/25 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus-visible:ring-gray-300/35 dark:focus-visible:ring-offset-[#212529]'
 
 export default function SponsorTierCard({ sponsor, size, tier }: SponsorTierCardProps) {
   if (tier === 'Diamond') {

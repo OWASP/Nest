@@ -29,7 +29,6 @@ const SponsorsPage = () => {
 
     const mapSponsor = (sponsor: (typeof data.sponsors)[number]): SponsorData => ({
       id: sponsor.id,
-      description: sponsor.description?.trim() || undefined,
       imageUrl: sponsor.imageUrl,
       name: sponsor.name,
       sponsorType: sponsor.sponsorType,

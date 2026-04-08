@@ -179,6 +179,7 @@ const ModuleForm = ({
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
                   id="module-name"
+                  name="name"
                   label="Name"
                   placeholder="Enter module name"
                   value={formData.name}
@@ -194,6 +195,7 @@ const ModuleForm = ({
 
                 <FormTextarea
                   id="module-description"
+                  name="description"
                   label="Description"
                   placeholder="Enter module description"
                   value={formData.description}
@@ -273,6 +275,7 @@ const ModuleForm = ({
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
                   id="module-domains"
+                  name="domains"
                   label="Domains"
                   placeholder="AI, Web Development"
                   value={formData.domains}
@@ -280,6 +283,7 @@ const ModuleForm = ({
                 />
                 <FormTextInput
                   id="module-tags"
+                  name="tags"
                   label="Tags"
                   placeholder="javascript, react"
                   value={formData.tags}
@@ -287,6 +291,7 @@ const ModuleForm = ({
                 />
                 <FormTextInput
                   id="module-labels"
+                  name="labels"
                   label="Labels"
                   placeholder="good first issue, bug, enhancement"
                   value={formData.labels}
@@ -311,6 +316,7 @@ const ModuleForm = ({
                 {isEdit && (
                   <FormTextInput
                     id="module-mentor-logins"
+                    name="mentorLogins"
                     label="Mentor GitHub Usernames"
                     placeholder="johndoe, jane-doe"
                     value={formData.mentorLogins}

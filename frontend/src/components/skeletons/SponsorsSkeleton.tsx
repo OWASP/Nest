@@ -4,7 +4,7 @@ const SponsorsSkeleton = () => {
   return (
     <div className="min-h-screen w-full flex-1 px-8 pb-8 pt-0 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 text-center">
+        <div className="mb-8 pt-4 text-center">
           <Skeleton className="mx-auto mb-4 h-4 w-40" />
           <Skeleton className="mx-auto mb-4 h-12 w-full max-w-xl md:h-16" />
           <Skeleton className="mx-auto mb-2 h-5 w-full max-w-xl" />
@@ -28,7 +28,7 @@ const SponsorsSkeleton = () => {
               {Array.from({ length: tierIdx === 1 ? 2 : 3 }).map((_, i) => (
                 <div
                   key={`card-skeleton-${tierIdx}-${i}`}
-                  className="flex flex-col items-center rounded-xl border border-gray-200/70 bg-gray-50/90 px-4 py-7 dark:border-gray-600/50 dark:bg-[#2b2e32]"
+                  className="flex flex-col items-center rounded-lg bg-gray-200 px-4 py-7 dark:bg-gray-700"
                 >
                   <Skeleton className="mb-4 h-16 w-28 rounded-lg sm:h-20 sm:w-32 dark:bg-gray-600" />
                   <Skeleton className="h-4 w-3/4" />

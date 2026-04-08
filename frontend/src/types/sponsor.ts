@@ -6,9 +6,7 @@ export type SponsorData = {
   name: string
   sponsorType: string
   url: string
-  /** Shown on large-tier cards when API provides it (GraphQL may add later). */
-  description?: string
-  /** Diamond tier: short line shown in the editorial aside (GraphQL may add later). */
+  /** Diamond tier: short line when API provides it (GraphQL may add later). */
   motto?: string
 }
 

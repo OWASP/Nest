@@ -8,6 +8,9 @@ import type { Section } from 'types/section'
 export const OWASP_NEST_DONATE_URL =
   'https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest'
 
+/** OWASP Slack — #project-nest (sponsor follow-up). */
+export const OWASP_NEST_SLACK_CHANNEL_URL = 'https://owasp.slack.com/archives/project-nest'
+
 export const headerLinks: Link[] = [
   {
     text: 'Community',

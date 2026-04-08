@@ -3,7 +3,7 @@ import { OWASP_NEST_DONATE_URL } from 'utils/constants'
 
 export default function SponsorHero() {
   return (
-    <header className="mb-8 text-center">
+    <header className="mb-8 pt-4 text-center">
       <p className="mb-4 text-xs font-medium tracking-[0.2em] text-gray-500 uppercase sm:text-sm dark:text-gray-400">
         Community Support
       </p>

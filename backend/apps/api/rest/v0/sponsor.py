@@ -11,6 +11,7 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import ValidationErrorSchema
+from apps.common.utils import slugify
 from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
 router = RouterPaginated(tags=["Sponsors"])
@@ -64,9 +65,25 @@ class SponsorFilter(FilterSchema):
     )
 
 
+class SponsorApplyRequest(Schema):
+    """Request schema for sponsor application."""
+
+    organization_name: str = Field(..., min_length=1, description="Organization name")
+    website: str = Field("", description="Organization website URL")
+    contact_email: str = Field(..., min_length=1, description="Contact email address")
+    message: str = Field("", description="Sponsorship interest / message")
+
+
+class SponsorApplyResponse(Schema):
+    """Response schema for a successful sponsor application."""
+
+    key: str
+    message: str
+
+
 @router.get(
     "/",
-    description="Retrieve a paginated list of OWASP sponsors.",
+    description="Retrieve a paginated list of active OWASP sponsors.",
     operation_id="list_sponsors",
     response=list[Sponsor],
     summary="List sponsors",
@@ -80,13 +97,16 @@ def list_sponsors(
         description="Ordering field",
     ),
 ) -> list[Sponsor]:
-    """Get sponsors."""
-    return filters.filter(SponsorModel.objects.order_by(ordering or "name"))
+    """Get active sponsors."""
+    qs = SponsorModel.objects.filter(status=SponsorModel.Status.ACTIVE).order_by(
+        ordering or "name"
+    )
+    return filters.filter(qs)
 
 
 @router.get(
     "/{str:sponsor_id}",
-    description="Retrieve a sponsor details.",
+    description="Retrieve sponsor details.",
     operation_id="get_sponsor",
     response={
         HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
@@ -100,8 +120,50 @@ def get_sponsor(
     request: HttpRequest,
     sponsor_id: str = Path(..., example="adobe"),
 ) -> SponsorDetail | SponsorError:
-    """Get sponsor."""
-    if sponsor := SponsorModel.objects.filter(key__iexact=sponsor_id).first():
+    """Get a single active sponsor."""
+    sponsor = SponsorModel.objects.filter(
+        key__iexact=sponsor_id,
+        status=SponsorModel.Status.ACTIVE,
+    ).first()
+    if sponsor:
         return sponsor
 
     return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)
+
+
+@router.post(
+    "/apply",
+    description="Submit a sponsor application. Creates a draft record for admin review.",
+    operation_id="apply_sponsor",
+    response={
+        HTTPStatus.CREATED: SponsorApplyResponse,
+        HTTPStatus.BAD_REQUEST: SponsorError,
+    },
+    summary="Apply to become a sponsor",
+)
+def apply_sponsor(
+    request: HttpRequest,
+    payload: SponsorApplyRequest,
+) -> tuple[int, SponsorApplyResponse | SponsorError]:
+    """Create a draft sponsor application."""
+    key = slugify(payload.organization_name)
+
+    if SponsorModel.objects.filter(key=key).exists():
+        return HTTPStatus.BAD_REQUEST, SponsorError(
+            message=f"An application for '{payload.organization_name}' already exists."
+        )
+
+    SponsorModel.objects.create(
+        key=key,
+        name=payload.organization_name,
+        sort_name=payload.organization_name,
+        contact_email=payload.contact_email,
+        url=payload.website,
+        description=payload.message,
+        status=SponsorModel.Status.DRAFT,
+    )
+
+    return HTTPStatus.CREATED, SponsorApplyResponse(
+        key=key,
+        message="Application received. The Nest team will review and follow up.",
+    )

@@ -2,9 +2,10 @@
 
 import type React from 'react'
 import { useCallback, useState } from 'react'
+import Link from 'next/link'
 import { FaCheckCircle } from 'react-icons/fa'
+import { OWASP_NEST_SLACK_CHANNEL_URL } from 'utils/constants'
 import { FormButtons } from 'components/forms/shared/FormButtons'
-import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormTextInput } from 'components/forms/shared/FormTextInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
 
@@ -61,9 +62,9 @@ export default function SponsorApplicationForm() {
   const [touched, setTouched] = useState<TouchedState>(initialTouchedState)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
 
   const errors = validate(form)
-  const hasErrors = Object.keys(errors).length > 0
 
   const handleFieldChange = useCallback(
     (field: keyof FormState) => (value: string) => {
@@ -79,95 +80,177 @@ export default function SponsorApplicationForm() {
     []
   )
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    setTouched({
+    const touchedAll: TouchedState = {
       organizationName: true,
       website: true,
       contactEmail: true,
       message: true,
-    })
+    }
+    setTouched(touchedAll)
 
-    if (hasErrors) return
+    const fd = new FormData(e.currentTarget)
+    const current: FormState = {
+      organizationName: String(fd.get('organizationName') ?? ''),
+      website: String(fd.get('website') ?? ''),
+      contactEmail: String(fd.get('contactEmail') ?? ''),
+      message: String(fd.get('message') ?? ''),
+    }
+    setForm(current)
+
+    if (Object.keys(validate(current)).length > 0) {
+      return
+    }
 
     setLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-    setLoading(false)
-    setSubmitted(true)
+    setServerError(null)
+
+    try {
+      const res = await fetch('/api/v0/sponsors/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organization_name: current.organizationName.trim(),
+          website: current.website.trim(),
+          contact_email: current.contactEmail.trim(),
+          message: current.message.trim(),
+        }),
+      })
+
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        const data = (await res.json()) as { message?: string }
+        setServerError(data.message ?? 'Something went wrong. Please try again.')
+      }
+    } catch {
+      setServerError('Could not reach the server. Please try again later.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
     return (
-      <div className="rounded-lg bg-gray-100 p-12 text-center shadow-md dark:bg-gray-800">
-        <FaCheckCircle className="mx-auto mb-6 h-16 w-16 text-green-500" />
-        <h2 className="mb-3 text-2xl font-bold text-gray-800 dark:text-gray-200">
-          Application received
-        </h2>
-        <p className="text-gray-600 dark:text-gray-300">
-          Thank you for your interest in sponsoring OWASP Nest. Our team will review your
-          application and get in touch.
-        </p>
+      <div className="rounded-lg bg-gray-100 p-8 shadow-md sm:p-10 dark:bg-gray-800">
+        <div className="mx-auto max-w-xl text-center">
+          <FaCheckCircle className="mx-auto mb-5 h-14 w-14 text-green-600 dark:text-green-500" />
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-white">
+            Application received
+          </h2>
+          <p className="mb-6 text-gray-600 dark:text-gray-400">
+            Thanks for your interest in sponsoring OWASP Nest. The team will review your application
+            and follow up via the email you provided.
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Want to introduce yourself sooner? Reach out in{' '}
+            <a
+              href={OWASP_NEST_SLACK_CHANNEL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
+            >
+              #project-nest
+            </a>{' '}
+            on Slack.
+          </p>
+          <p className="mt-6">
+            <Link
+              href="/sponsors"
+              className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
+            >
+              &larr; Back to sponsors
+            </Link>
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <FormContainer title="Become a Sponsor" onSubmit={handleSubmit}>
-      <p className="-mt-4 mb-2 text-gray-600 dark:text-gray-300">
-        Fill out the form below and our team will review your application. We&apos;ll follow up
-        within a few business days.
+    <section
+      className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 sm:p-8"
+      aria-labelledby="sponsor-apply-form-heading"
+    >
+      <h2
+        id="sponsor-apply-form-heading"
+        className="mb-2 text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl"
+      >
+        Application details
+      </h2>
+      <p className="mb-8 text-sm text-gray-600 dark:text-gray-400">
+        Required fields are marked. The Nest team reviews applications via Django Admin and will
+        follow up by email.
       </p>
 
-      <FormTextInput
-        id="organizationName"
-        label="Organization name"
-        placeholder="Acme Security Corp"
-        value={form.organizationName}
-        onValueChange={handleFieldChange('organizationName')}
-        onBlur={handleBlur('organizationName')}
-        error={errors.organizationName}
-        touched={touched.organizationName}
-        required
-      />
+      {serverError && (
+        <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+          {serverError}
+        </p>
+      )}
 
-      <FormTextInput
-        id="website"
-        label="Website"
-        type="url"
-        placeholder="https://example.com"
-        value={form.website}
-        onValueChange={handleFieldChange('website')}
-        onBlur={handleBlur('website')}
-        error={errors.website}
-        touched={touched.website}
-      />
+      <form onSubmit={handleSubmit} noValidate>
+        <div className="flex flex-col gap-6 rounded-lg bg-gray-200 p-6 dark:bg-gray-700 sm:p-8">
+          <FormTextInput
+            id="organizationName"
+            name="organizationName"
+            label="Organization name"
+            placeholder="Acme Security Corp"
+            value={form.organizationName}
+            onValueChange={handleFieldChange('organizationName')}
+            onBlur={handleBlur('organizationName')}
+            error={errors.organizationName}
+            touched={touched.organizationName}
+            required
+            autoComplete="organization"
+          />
 
-      <FormTextInput
-        id="contactEmail"
-        label="Contact email"
-        type="email"
-        placeholder="sponsor@example.com"
-        value={form.contactEmail}
-        onValueChange={handleFieldChange('contactEmail')}
-        onBlur={handleBlur('contactEmail')}
-        error={errors.contactEmail}
-        touched={touched.contactEmail}
-        required
-      />
+          <FormTextInput
+            id="website"
+            name="website"
+            label="Website"
+            type="url"
+            placeholder="https://example.com"
+            value={form.website}
+            onValueChange={handleFieldChange('website')}
+            onBlur={handleBlur('website')}
+            error={errors.website}
+            touched={touched.website}
+            autoComplete="url"
+          />
 
-      <FormTextarea
-        id="message"
-        label="Sponsorship interest / message"
-        placeholder="Tell us about your organization and why you'd like to sponsor OWASP Nest..."
-        value={form.message}
-        onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
-        error={errors.message}
-        touched={touched.message}
-        rows={5}
-      />
+          <FormTextInput
+            id="contactEmail"
+            name="contactEmail"
+            label="Contact email"
+            type="email"
+            placeholder="sponsor@example.com"
+            value={form.contactEmail}
+            onValueChange={handleFieldChange('contactEmail')}
+            onBlur={handleBlur('contactEmail')}
+            error={errors.contactEmail}
+            touched={touched.contactEmail}
+            required
+            autoComplete="email"
+          />
 
-      <FormButtons loading={loading} submitText="Submit Application" />
-    </FormContainer>
+          <FormTextarea
+            id="message"
+            name="message"
+            label="Sponsorship interest / message"
+            placeholder="Tell us about your organization and why you'd like to sponsor OWASP Nest..."
+            value={form.message}
+            onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
+            error={errors.message}
+            touched={touched.message}
+            rows={5}
+          />
+
+          <FormButtons loading={loading} submitText="Submit application" />
+        </div>
+      </form>
+    </section>
   )
 }
