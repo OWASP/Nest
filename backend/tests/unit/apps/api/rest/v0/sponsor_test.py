@@ -108,6 +108,7 @@ class TestGetSponsor:
         """Test getting a sponsor when found."""
         mock_request = MagicMock()
         mock_sponsor = MagicMock()
+        mock_sponsor.status = mock_sponsor_model.Status.ACTIVE
         mock_sponsor_model.objects.filter.return_value.first.return_value = mock_sponsor
 
         result = get_sponsor(mock_request, "adobe")

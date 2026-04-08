@@ -28,8 +28,11 @@ const SponsorsPage = () => {
     }
 
     const normalizeTier = (raw: string | null | undefined): SponsorTier => {
-      const tier = String(raw || 'supporter').trim().toLowerCase()
-      if (tier === 'diamond' || tier === 'platinum' || tier === 'gold' || tier === 'silver') return tier
+      const tier = String(raw || 'supporter')
+        .trim()
+        .toLowerCase()
+      if (tier === 'diamond' || tier === 'platinum' || tier === 'gold' || tier === 'silver')
+        return tier
       return 'supporter'
     }
 
@@ -48,7 +51,7 @@ const SponsorsPage = () => {
       grouped[tier].push(mapSponsor(sponsor))
     }
 
-    return TIER_ORDER.filter((tier) => grouped[tier]?.length > 0).map((tier) => ({
+    return TIER_ORDER.filter((tier) => (grouped[tier]?.length ?? 0) > 0).map((tier) => ({
       tier,
       sponsors: grouped[tier] ?? [],
     }))

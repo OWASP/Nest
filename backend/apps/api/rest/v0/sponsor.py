@@ -60,7 +60,7 @@ class SponsorFilter(FilterSchema):
 
     sponsor_type: str | None = Field(
         None,
-        description="Filter by the type of sponsorship (e.g., Gold, Silver, Platinum).",
+        description=("Filter by the type of sponsorship (e.g., Gold, Silver, Platinum)."),
         example="Silver",
     )
 
@@ -98,8 +98,8 @@ def list_sponsors(
     ),
 ) -> list[Sponsor]:
     """Get active sponsors."""
-    qs = SponsorModel.objects.filter(status=SponsorModel.Status.ACTIVE).order_by(
-        ordering or "name"
+    qs = SponsorModel.objects.order_by(ordering or "name").filter(
+        status=SponsorModel.Status.ACTIVE
     )
     return filters.filter(qs)
 
@@ -121,11 +121,8 @@ def get_sponsor(
     sponsor_id: str = Path(..., example="adobe"),
 ) -> SponsorDetail | SponsorError:
     """Get a single active sponsor."""
-    sponsor = SponsorModel.objects.filter(
-        key__iexact=sponsor_id,
-        status=SponsorModel.Status.ACTIVE,
-    ).first()
-    if sponsor:
+    sponsor = SponsorModel.objects.filter(key__iexact=sponsor_id).first()
+    if sponsor and sponsor.status == SponsorModel.Status.ACTIVE:
         return sponsor
 
     return Response({"message": "Sponsor not found"}, status=HTTPStatus.NOT_FOUND)
@@ -133,7 +130,7 @@ def get_sponsor(
 
 @router.post(
     "/apply",
-    description="Submit a sponsor application. Creates a draft record for admin review.",
+    description=("Submit a sponsor application. Creates a draft record for admin review."),
     operation_id="apply_sponsor",
     response={
         HTTPStatus.CREATED: SponsorApplyResponse,
@@ -150,7 +147,7 @@ def apply_sponsor(
 
     if SponsorModel.objects.filter(key=key).exists():
         return HTTPStatus.BAD_REQUEST, SponsorError(
-            message=f"An application for '{payload.organization_name}' already exists."
+            message=(f"An application for '{payload.organization_name}' already exists.")
         )
 
     SponsorModel.objects.create(
@@ -165,5 +162,5 @@ def apply_sponsor(
 
     return HTTPStatus.CREATED, SponsorApplyResponse(
         key=key,
-        message="Application received. The Nest team will review and follow up.",
+        message=("Application received. The Nest team will review and follow up."),
     )

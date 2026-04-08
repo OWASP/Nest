@@ -83,9 +83,12 @@ export default function SponsorApplicationForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    setTouched(
-      (prev) => Object.fromEntries(Object.keys(prev).map((k) => [k, true])) as TouchedState
-    )
+    setTouched({
+      organizationName: true,
+      website: true,
+      contactEmail: true,
+      message: true,
+    })
 
     const fd = new FormData(e.currentTarget)
     const current: FormState = {
@@ -107,12 +110,14 @@ export default function SponsorApplicationForm() {
       const res = await fetch('/api/v0/sponsors/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organization_name: current.organizationName.trim(),
-          website: current.website.trim(),
-          contact_email: current.contactEmail.trim(),
-          message: current.message.trim(),
-        }),
+        body: JSON.stringify(
+          Object.fromEntries([
+            ['organization_name', current.organizationName.trim()],
+            ['website', current.website.trim()],
+            ['contact_email', current.contactEmail.trim()],
+            ['message', current.message.trim()],
+          ])
+        ),
       })
 
       if (res.ok) {

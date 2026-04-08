@@ -136,7 +136,8 @@ describe('FormDateInput Component', () => {
       // The outer div in the component
       const wrapper = container.firstChild as HTMLElement
       expect(wrapper).toHaveClass('w-full', 'min-w-0')
-      expect(wrapper).toHaveStyle({ maxWidth: '100%', overflow: 'hidden' })
+      // Sizing is applied via Tailwind utility classes (not inline styles in JSDOM)
+      expect(wrapper).toHaveClass('max-w-full', 'overflow-hidden')
     })
 
     it('passes common class names to Input', () => {

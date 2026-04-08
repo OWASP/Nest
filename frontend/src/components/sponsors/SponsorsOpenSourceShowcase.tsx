@@ -10,6 +10,7 @@ const SHOWCASE = [
       'Search and filter initiatives, follow contribution opportunities, and stay close to chapters and Slack, all in one place.',
     href: '/',
     cta: 'Explore Nest',
+    external: false,
     icon: FaRegHeart,
   },
   {
