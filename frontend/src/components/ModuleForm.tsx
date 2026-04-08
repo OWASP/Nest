@@ -174,7 +174,6 @@ const ModuleForm = ({
       <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
         <form onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-8 p-8">
-            {/* Basic Information */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
@@ -203,6 +202,7 @@ const ModuleForm = ({
                     handleInputChange('description', e.target.value)
                     setTouched((prev) => ({ ...prev, description: true }))
                   }}
+                  onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
                   error={errors.description}
                   touched={touched.description}
                   required
@@ -210,7 +210,6 @@ const ModuleForm = ({
               </div>
             </section>
 
-            {/* Configuration */}
             <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
               <div className="module-config-grid grid gap-6">
                 <FormDateInput
@@ -241,7 +240,7 @@ const ModuleForm = ({
                   min={formData.startedAt || minDate || undefined}
                   max={maxDate}
                 />
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                <div className="w-full max-w-full min-w-0 overflow-hidden">
                   <Select
                     id="experienceLevel"
                     label="Experience Level"
@@ -270,7 +269,6 @@ const ModuleForm = ({
               </div>
             </section>
 
-            {/* Additional Details */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
@@ -297,7 +295,7 @@ const ModuleForm = ({
                   value={formData.labels}
                   onValueChange={(value) => handleInputChange('labels', value)}
                 />
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                <div className="w-full max-w-full min-w-0 overflow-hidden">
                   <ProjectSelector
                     value={formData.projectId}
                     defaultName={formData.projectName}
@@ -418,7 +416,6 @@ export const ProjectSelector = ({
         onProjectChange(selectedProject.id, selectedProject.name)
       }
     } else if (!value) {
-      // Selection cleared
       setInputValue('')
       onProjectChange(null, '')
     }
@@ -435,7 +432,7 @@ export const ProjectSelector = ({
   const shouldShowInvalid = isTyping ? false : isInvalid
 
   return (
-    <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+    <div className="w-full max-w-full min-w-0 overflow-hidden">
       <Autocomplete
         id="projectSelector"
         label="Project Name"

@@ -2,7 +2,7 @@ import { Skeleton } from '@heroui/skeleton'
 
 const SponsorsSkeleton = () => {
   return (
-    <div className="min-h-screen w-full flex-1 px-8 pb-8 pt-0 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+    <div className="min-h-screen w-full flex-1 px-8 pt-0 pb-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 pt-4 text-center">
           <Skeleton className="mx-auto mb-4 h-4 w-40" />
@@ -48,7 +48,10 @@ const SponsorsSkeleton = () => {
           <Skeleton className="mx-auto mb-10 h-8 w-full max-w-lg md:h-9" />
           <div className="grid gap-6 md:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div key={`showcase-${i}`} className="rounded-2xl bg-gray-50 p-6 dark:bg-gray-800 sm:p-7">
+              <div
+                key={`showcase-${i}`}
+                className="rounded-2xl bg-gray-50 p-6 sm:p-7 dark:bg-gray-800"
+              >
                 <Skeleton className="mb-5 h-9 w-full rounded-lg dark:bg-gray-600" />
                 <Skeleton className="mb-3 h-6 w-5/6" />
                 <Skeleton className="mb-2 h-4 w-full" />
@@ -59,7 +62,7 @@ const SponsorsSkeleton = () => {
           </div>
         </div>
 
-        <div className="mt-16 rounded-lg bg-gray-100 p-8 shadow-md dark:bg-gray-800 md:mt-20 sm:p-10">
+        <div className="mt-16 rounded-lg bg-gray-100 p-8 shadow-md sm:p-10 md:mt-20 dark:bg-gray-800">
           <div className="grid gap-8 md:grid-cols-2 md:gap-12">
             <div>
               <Skeleton className="mb-2 h-6 w-48" />
@@ -77,10 +80,7 @@ const SponsorsSkeleton = () => {
         <div className="mx-auto mt-16 max-w-2xl md:mt-24">
           <Skeleton className="mx-auto mb-10 h-8 w-64 md:h-9" />
           {[1, 2, 3].map((i) => (
-            <div
-              key={`faq-${i}`}
-              className="border-b border-gray-200 py-4 dark:border-gray-700"
-            >
+            <div key={`faq-${i}`} className="border-b border-gray-200 py-4 dark:border-gray-700">
               <Skeleton className="h-5 w-full max-w-md" />
             </div>
           ))}

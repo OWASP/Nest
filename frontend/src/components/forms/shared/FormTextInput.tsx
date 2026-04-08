@@ -49,7 +49,7 @@ export const FormTextInput = ({
   autoComplete,
 }: FormTextInputProps) => {
   return (
-    <div className={className || 'w-full min-w-0'} style={{ maxWidth: '100%', overflow: 'hidden' }}>
+    <div className={className || 'w-full max-w-full min-w-0 overflow-hidden'}>
       <Input
         id={id}
         name={name}

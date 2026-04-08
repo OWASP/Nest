@@ -3,10 +3,10 @@ import { OWASP_NEST_DONATE_URL } from 'utils/constants'
 
 export default function BecomeSponsorCTA() {
   return (
-    <div className="mt-16 rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 md:mt-20 sm:p-8">
+    <div className="mt-16 rounded-lg bg-gray-100 p-6 shadow-md sm:p-8 md:mt-20 dark:bg-gray-800">
       <div className="grid gap-8 md:grid-cols-2 md:gap-10 md:divide-x md:divide-gray-300 dark:md:divide-gray-600">
         <div className="text-center md:pr-8 md:text-left">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white md:text-xl">
+          <h3 className="text-lg font-semibold text-gray-900 md:text-xl dark:text-white">
             Corporate sponsorship
           </h3>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -24,7 +24,7 @@ export default function BecomeSponsorCTA() {
         </div>
 
         <div className="text-center md:pl-8 md:text-left">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white md:text-xl">
+          <h3 className="text-lg font-semibold text-gray-900 md:text-xl dark:text-white">
             One-time donation
           </h3>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

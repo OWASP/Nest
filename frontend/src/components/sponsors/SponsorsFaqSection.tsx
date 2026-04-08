@@ -14,7 +14,8 @@ const FAQ = [
     q: 'Can I support Nest without a full sponsorship package?',
     a: (
       <>
-        Yes. One-time and recurring gifts to the OWASP Foundation can be directed to the Nest project via the{' '}
+        Yes. One-time and recurring gifts to the OWASP Foundation can be directed to the Nest
+        project via the{' '}
         <a
           href={OWASP_NEST_DONATE_URL}
           target="_blank"
@@ -23,7 +24,8 @@ const FAQ = [
         >
           official donate link
         </a>
-        . Tax treatment depends on your jurisdiction and OWASP Foundation policies—consult a tax professional if needed.
+        . Tax treatment depends on your jurisdiction and OWASP Foundation policies—consult a tax
+        professional if needed.
       </>
     ),
   },
@@ -34,17 +36,14 @@ export default function SponsorsFaqSection() {
     <section className="mt-16 md:mt-24" aria-labelledby="sponsors-faq-heading">
       <h2
         id="sponsors-faq-heading"
-        className="mx-auto max-w-xl text-center text-2xl font-semibold tracking-tight text-gray-900 dark:text-white md:text-3xl"
+        className="mx-auto max-w-xl text-center text-2xl font-semibold tracking-tight text-gray-900 md:text-3xl dark:text-white"
       >
         Frequently asked questions
       </h2>
 
       <div className="mx-auto mt-10 max-w-2xl divide-y divide-gray-200 dark:divide-gray-700">
         {FAQ.map(({ q, a }) => (
-          <details
-            key={q}
-            className="group py-4 [&_summary::-webkit-details-marker]:hidden"
-          >
+          <details key={q} className="group py-4 [&_summary::-webkit-details-marker]:hidden">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-left text-base font-medium text-gray-900 dark:text-gray-200">
               <span>{q}</span>
               <FaChevronDown

@@ -10,7 +10,7 @@ const SHOWCASE = [
       'Search and filter initiatives, follow contribution opportunities, and stay close to chapters and Slack, all in one place.',
     href: '/',
     cta: 'Explore Nest',
-    Icon: FaRegHeart,
+    icon: FaRegHeart,
   },
   {
     badge: 'ZAP',
@@ -20,7 +20,7 @@ const SHOWCASE = [
     href: 'https://owasp.org/www-project-zap/',
     cta: 'View OWASP ZAP',
     external: true,
-    Icon: FaShieldHalved,
+    icon: FaShieldHalved,
   },
   {
     badge: 'Juice Shop',
@@ -30,7 +30,7 @@ const SHOWCASE = [
     href: 'https://owasp.org/www-project-juice-shop/',
     cta: 'View Juice Shop',
     external: true,
-    Icon: FaFlask,
+    icon: FaFlask,
   },
 ] as const
 
@@ -39,13 +39,13 @@ export default function SponsorsOpenSourceShowcase() {
     <section className="mt-16 md:mt-20" aria-labelledby="sponsors-showcase-heading">
       <h2
         id="sponsors-showcase-heading"
-        className="mx-auto max-w-3xl text-center text-2xl font-semibold tracking-tight text-gray-900 dark:text-white md:text-3xl"
+        className="mx-auto max-w-3xl text-center text-2xl font-semibold tracking-tight text-gray-900 md:text-3xl dark:text-white"
       >
         The web depends on open source—OWASP helps secure it everywhere
       </h2>
 
       <div className="mt-10 grid gap-6 md:grid-cols-3 md:gap-8">
-        {SHOWCASE.map(({ badge, title, description, href, cta, external, Icon }) => {
+        {SHOWCASE.map(({ badge, title, description, href, cta, external, icon: Icon }) => {
           const inner = (
             <>
               <div className="mb-5 flex items-start justify-between gap-3">

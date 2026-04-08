@@ -146,7 +146,6 @@ const ProgramForm = ({
       onSubmit={handleSubmit}
       containerClassName="program-form-container"
     >
-      {/* Basic Information */}
       <section className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
           <FormTextInput
@@ -172,6 +171,7 @@ const ProgramForm = ({
             placeholder="Enter program description"
             value={formData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
+            onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
             error={errors.description}
             touched={touched.description}
             required
@@ -179,7 +179,6 @@ const ProgramForm = ({
         </div>
       </section>
 
-      {/* Configuration */}
       <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
         <div className="config-grid grid gap-6">
           <FormDateInput
@@ -222,7 +221,6 @@ const ProgramForm = ({
         </div>
       </section>
 
-      {/* Additional Details */}
       <section className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
           <FormTextInput

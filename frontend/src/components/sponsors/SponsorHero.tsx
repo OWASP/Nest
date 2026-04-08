@@ -19,7 +19,7 @@ export default function SponsorHero() {
       <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
         <Link
           href="/sponsors/apply"
-          className="inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 dark:bg-white dark:text-gray-900 sm:text-base"
+          className="inline-flex items-center gap-2 rounded-full bg-gray-900 px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 sm:text-base dark:bg-white dark:text-gray-900"
         >
           Become a sponsor
           <span aria-hidden className="opacity-70">
@@ -30,7 +30,7 @@ export default function SponsorHero() {
           href={OWASP_NEST_DONATE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-medium text-gray-600 underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-900 dark:text-gray-400 dark:decoration-white/20 dark:hover:text-white sm:text-base"
+          className="text-sm font-medium text-gray-600 underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-900 sm:text-base dark:text-gray-400 dark:decoration-white/20 dark:hover:text-white"
         >
           One-time donation
         </a>

@@ -1,13 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import type React from 'react'
 import { useCallback, useState } from 'react'
-import Link from 'next/link'
 import { FaCheckCircle } from 'react-icons/fa'
 import { OWASP_NEST_SLACK_CHANNEL_URL } from 'utils/constants'
 import { FormButtons } from 'components/forms/shared/FormButtons'
-import { FormTextInput } from 'components/forms/shared/FormTextInput'
 import { FormTextarea } from 'components/forms/shared/FormTextarea'
+import { FormTextInput } from 'components/forms/shared/FormTextInput'
 
 interface FormState {
   organizationName: string
@@ -83,13 +83,9 @@ export default function SponsorApplicationForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    const touchedAll: TouchedState = {
-      organizationName: true,
-      website: true,
-      contactEmail: true,
-      message: true,
-    }
-    setTouched(touchedAll)
+    setTouched(
+      (prev) => Object.fromEntries(Object.keys(prev).map((k) => [k, true])) as TouchedState
+    )
 
     const fd = new FormData(e.currentTarget)
     const current: FormState = {
@@ -171,12 +167,12 @@ export default function SponsorApplicationForm() {
 
   return (
     <section
-      className="rounded-lg bg-gray-100 p-6 shadow-md dark:bg-gray-800 sm:p-8"
+      className="rounded-lg bg-gray-100 p-6 shadow-md sm:p-8 dark:bg-gray-800"
       aria-labelledby="sponsor-apply-form-heading"
     >
       <h2
         id="sponsor-apply-form-heading"
-        className="mb-2 text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl"
+        className="mb-2 text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white"
       >
         Application details
       </h2>
@@ -192,7 +188,7 @@ export default function SponsorApplicationForm() {
       )}
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="flex flex-col gap-6 rounded-lg bg-gray-200 p-6 dark:bg-gray-700 sm:p-8">
+        <div className="flex flex-col gap-6 rounded-lg bg-gray-200 p-6 sm:p-8 dark:bg-gray-700">
           <FormTextInput
             id="organizationName"
             name="organizationName"
@@ -243,6 +239,7 @@ export default function SponsorApplicationForm() {
             placeholder="Tell us about your organization and why you'd like to sponsor OWASP Nest..."
             value={form.message}
             onChange={(e) => setForm((prev) => ({ ...prev, message: e.target.value }))}
+            onBlur={handleBlur('message')}
             error={errors.message}
             touched={touched.message}
             rows={5}

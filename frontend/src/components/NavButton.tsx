@@ -5,6 +5,9 @@ import { IconWrapper } from 'wrappers/IconWrapper'
 import type { NavButtonProps } from 'types/button'
 import { cn } from 'utils/utility'
 
+const NAV_BUTTON_CLASS =
+  'group focus-visible:ring-ring relative flex h-10 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md bg-[#87a1bc] p-4 text-sm font-medium whitespace-pre text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 md:flex dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]'
+
 const NavButton = ({
   href,
   defaultIcon,
@@ -21,10 +24,7 @@ const NavButton = ({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={cn(
-        'group focus-visible:ring-ring relative flex h-10 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md bg-[#87a1bc] p-4 text-sm font-medium whitespace-pre text-black hover:ring-1 hover:ring-[#b0c7de] hover:ring-offset-0 focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 md:flex dark:bg-slate-900 dark:text-white dark:hover:bg-slate-900/90 dark:hover:ring-[#46576b]',
-        className
-      )}
+      className={cn(NAV_BUTTON_CLASS, className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

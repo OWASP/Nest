@@ -1,6 +1,6 @@
 import type { SponsorData, SponsorTier } from 'types/sponsor'
 
-import SponsorTierCard from './SponsorTierCard'
+import SponsorTierCard from 'components/sponsors/SponsorTierCard'
 
 interface SponsorTierSectionProps {
   tier: SponsorTier
@@ -31,7 +31,7 @@ export default function SponsorTierSection({ tier, sponsors }: SponsorTierSectio
         </p>
         <h2
           id={tierHeadingId(tier)}
-          className="mt-1.5 text-xl font-semibold tracking-tight text-gray-900 dark:text-white md:text-2xl"
+          className="mt-1.5 text-xl font-semibold tracking-tight text-gray-900 md:text-2xl dark:text-white"
         >
           {tier} sponsors
         </h2>
