@@ -45,11 +45,13 @@ class Command(BaseCommand):
             self.list_dlq(redis_conn)
         elif action == "retry":
             if not message_id and not all_messages:
-                raise CommandError("Error: --id or --all is required for retry")
+                msg = "Error: --id or --all is required for retry"
+                raise CommandError(msg)
             self.retry_dlq(redis_conn, message_id, all_messages)
         elif action == "remove":
             if not message_id and not all_messages:
-                raise CommandError("Error: --id or --all is required for remove")
+                msg = "Error: --id or --all is required for remove"
+                raise CommandError(msg)
             self.remove_dlq(redis_conn, message_id, all_messages)
 
     def list_dlq(self, redis_conn):
@@ -90,7 +92,8 @@ class Command(BaseCommand):
             messages = result or []
 
         if not messages:
-            raise CommandError("Message(s) not found")
+            msg = "Message(s) not found"
+            raise CommandError(msg)
 
         success_count = 0
         error_count = 0
@@ -180,7 +183,8 @@ class Command(BaseCommand):
             messages = redis_conn.xrange(self.DLQ_STREAM_KEY, message_id, message_id)
 
         if not messages:
-            raise CommandError("No messages found")
+            msg = "No messages found"
+            raise CommandError(msg)
 
         count = 0
         for msg_id, _ in messages:
