@@ -140,7 +140,6 @@ resource "aws_ssm_parameter" "django_github_app_installation_id" {
 }
 
 resource "aws_ssm_parameter" "django_release_version" {
-  count       = var.enable_additional_parameters ? 1 : 0
   description = "Django Release version."
   name        = "/${var.project_name}/${var.environment}/DJANGO_RELEASE_VERSION"
   tags        = var.common_tags
