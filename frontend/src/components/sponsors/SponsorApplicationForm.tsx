@@ -66,7 +66,8 @@ function validate(form: FormState) {
   }
 
   if (form.website && !/^https?:\/\/.+\..+/.test(form.website)) {
-    errors.website = 'Enter a valid URL (e.g., https://example.com)'
+    errors.website = 'Enter a valid URL (e.g., https://example.com)' else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      .test(form.contactEmail)
   }
 
   return errors

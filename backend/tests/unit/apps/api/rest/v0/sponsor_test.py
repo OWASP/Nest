@@ -131,8 +131,8 @@ class TestApplySponsor:
     """Tests for apply_sponsor endpoint."""
 
     @patch("apps.api.rest.v0.sponsor.SponsorModel")
-    def test_apply_sponsor_rejects_unsluggable_name(self, mock_sponsor_model):
-        """Reject organization names that slugify to an empty key."""
+    def test_apply_sponsor_rejects_non_slugifiable_name(self, mock_sponsor_model):
+        """Reject organization names that are not slugifiable."""
         mock_request = MagicMock()
 
         payload = MagicMock()
