@@ -98,7 +98,15 @@ class TestDumpDataCommand:
             in executed_sql
         )
 
-        assert str(sql.SQL("UPDATE public.owasp_sponsors SET contact_email = '';")) in executed_sql
+        assert (
+            str(
+                sql.SQL(
+                    "UPDATE public.owasp_sponsors SET contact_email = '' "
+                    "WHERE contact_email IS NULL;"
+                )
+            )
+            in executed_sql
+        )
 
         assert mock_popen.call_count == 2
 

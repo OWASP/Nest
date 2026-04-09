@@ -16,7 +16,7 @@ class TestSponsorQuery:
         platinum = MagicMock()
         platinum.sponsor_type = Sponsor.SponsorType.PLATINUM
 
-        with patch.object(Sponsor.objects, "all", return_value=[silver, diamond, platinum]):
+        with patch.object(Sponsor.objects, "filter", return_value=[silver, diamond, platinum]):
             query = SponsorQuery()
             result = list(query.sponsors())
 
