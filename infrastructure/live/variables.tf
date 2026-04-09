@@ -252,6 +252,42 @@ variable "frontend_use_fargate_spot" {
   default     = true
 }
 
+variable "health_check_interval" {
+  description = "Time period between each container health check execution (seconds)."
+  type        = number
+  default     = 30
+}
+
+variable "health_check_retries" {
+  description = "Number of consecutive failed container health checks before marking unhealthy."
+  type        = number
+  default     = 3
+}
+
+variable "health_check_start_period" {
+  description = "Grace period (seconds) before container health checks start."
+  type        = number
+  default     = 60
+}
+
+variable "health_check_timeout" {
+  description = "Time to wait for a container health check response (seconds)."
+  type        = number
+  default     = 5
+}
+
+variable "health_check_endpoint_backend" {
+  description = "A health check command backend"
+  type        = list(string)
+  default = ["CMD-SHELL", "wget --spider http://localhost:8000/health/ || exit 1"]
+}
+
+variable "health_check_endpoint_frontend" {
+  description = "A health check command frontend"
+  type        = list(string)
+  default = ["CMD-SHELL", "wget --spider http://localhost:3000/api/health || exit 1"]
+}
+
 variable "private_subnet_cidrs" {
   description = "A list of CIDR blocks for the private subnets."
   type        = list(string)

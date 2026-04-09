@@ -59,11 +59,11 @@ module "backend" {
   target_group_arn          = module.alb.backend_target_group_arn
   task_role_policy_arns     = [module.storage.static_read_write_policy_arn]
   use_fargate_spot          = var.backend_use_fargate_spot
-  health_check_command      = ["CMD-SHELL", "curl -f http://localhost:8000/health/ || exit 1"]
-  health_check_interval     = 30
-  health_check_retries      = 3
-  health_check_start_period = 60
-  health_check_timeout      = 5
+  health_check_command      = var.health_check_endpoint_backend
+  health_check_interval     = var.health_check_interval
+  health_check_retries      = var.health_check_retries
+  health_check_start_period = var.health_check_start_period
+  health_check_timeout      = var.health_check_timeout
 }
 
 module "cache" {
@@ -126,11 +126,11 @@ module "frontend" {
   subnet_ids                = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn          = module.alb.frontend_target_group_arn
   use_fargate_spot          = var.frontend_use_fargate_spot
-  health_check_command      = ["CMD-SHELL", "wget --spider http://localhost:3000/ || exit 1"]
-  health_check_interval     = 30
-  health_check_retries      = 3
-  health_check_start_period = 60
-  health_check_timeout      = 5
+  health_check_command      = var.health_check_endpoint_frontend
+  health_check_interval     = var.health_check_interval
+  health_check_retries      = var.health_check_retries
+  health_check_start_period = var.health_check_start_period
+  health_check_timeout      = var.health_check_timeout
 }
 
 module "kms" {

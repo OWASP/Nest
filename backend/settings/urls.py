@@ -18,12 +18,14 @@ from apps.core.api.internal.status import get_status
 from apps.owasp.api.internal.views.urls import urlpatterns as owasp_urls
 from apps.slack.apps import SlackConfig
 from settings.graphql import schema
+from apps.health.views import health_view
 
 urlpatterns = [
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
     path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
     path("api/v0/", api_v0.urls),
+    path("health/", health_view),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),
     path("status/", get_status),
