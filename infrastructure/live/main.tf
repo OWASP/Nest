@@ -26,7 +26,6 @@ module "alb" {
   common_tags                = local.common_tags
   domain_name                = var.domain_name
   environment                = var.environment
-  frontend_health_check_path = "/api/health"
   frontend_port              = 3000
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
