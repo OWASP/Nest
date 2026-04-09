@@ -118,7 +118,12 @@ class Command(BaseCommand):
             )
             self._execute_sql(
                 temp_db,
-                [sql.SQL("UPDATE public.owasp_sponsors SET contact_email = '';")],
+                [
+                    sql.SQL(
+                        "UPDATE public.owasp_sponsors SET contact_email = '' "
+                        "WHERE contact_email IS NULL;"
+                    )
+                ],
             )
 
             dump_cmd = [

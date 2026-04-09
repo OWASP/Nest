@@ -77,7 +77,7 @@ function validate(form: FormState) {
     errors.contactEmail = 'Enter a valid email address'
   }
 
-  if (form.website && !isHttpUrl(form.website)) {
+  if (form.website?.trim() && !isHttpUrl(form.website)) {
     errors.website = 'Enter a valid URL (e.g., https://example.com)'
   }
 
@@ -214,7 +214,11 @@ export default function SponsorApplicationForm() {
       </p>
 
       {serverError && (
-        <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <p
+          role="alert"
+          aria-live="assertive"
+          className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+        >
           {serverError}
         </p>
       )}
