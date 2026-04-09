@@ -26,7 +26,7 @@ module "alb" {
   common_tags                = local.common_tags
   domain_name                = var.domain_name
   environment                = var.environment
-  frontend_health_check_path = "/status"
+  frontend_health_check_path = "/api/health"
   frontend_port              = 3000
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
@@ -108,7 +108,7 @@ module "frontend" {
   aws_region          = var.aws_region
   common_tags         = local.common_tags
   container_port      = 3000
-  health_check_path   = "/status"
+  health_check_path   = "/api/health"
   desired_count       = var.frontend_desired_count
   enable_auto_scaling = var.frontend_enable_auto_scaling
   environment         = var.environment
