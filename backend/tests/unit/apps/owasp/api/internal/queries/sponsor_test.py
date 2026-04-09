@@ -16,10 +16,13 @@ class TestSponsorQuery:
         platinum = MagicMock()
         platinum.sponsor_type = Sponsor.SponsorType.PLATINUM
 
-        with patch.object(Sponsor.objects, "filter", return_value=[silver, diamond, platinum]):
+        with patch.object(
+            Sponsor.objects, "filter", return_value=[silver, diamond, platinum]
+        ) as mock_filter:
             query = SponsorQuery()
             result = list(query.sponsors())
 
+        mock_filter.assert_called_once_with(status=Sponsor.Status.ACTIVE)
         assert result[0] == diamond
         assert result[1] == platinum
         assert result[2] == silver
