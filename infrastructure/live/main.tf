@@ -22,15 +22,15 @@ locals {
 module "alb" {
   source = "../modules/alb"
 
-  alb_sg_id                  = module.security.alb_sg_id
-  common_tags                = local.common_tags
-  domain_name                = var.domain_name
-  environment                = var.environment
-  frontend_port              = 3000
-  project_name               = var.project_name
-  public_subnet_ids          = module.networking.public_subnet_ids
-  static_s3_bucket_name      = module.storage.static_s3_bucket_name
-  vpc_id                     = module.networking.vpc_id
+  alb_sg_id             = module.security.alb_sg_id
+  common_tags           = local.common_tags
+  domain_name           = var.domain_name
+  environment           = var.environment
+  frontend_port         = 3000
+  project_name          = var.project_name
+  public_subnet_ids     = module.networking.public_subnet_ids
+  static_s3_bucket_name = module.storage.static_s3_bucket_name
+  vpc_id                = module.networking.vpc_id
 }
 
 module "backend" {
