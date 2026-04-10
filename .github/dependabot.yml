@@ -74,3 +74,17 @@ updates:
     schedule:
       interval: daily
     target-branch: main
+
+  - package-ecosystem: pre-commit   
+    cooldown:
+      default-days: 21
+    directories:
+      - /
+    groups:
+      version-updates:
+        applies-to: version-updates
+        patterns:
+          - '*'
+    schedule:
+      interval: daily
+    target-branch: main              
