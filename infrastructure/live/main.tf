@@ -26,7 +26,7 @@ module "alb" {
   common_tags                = local.common_tags
   domain_name                = var.domain_name
   environment                = var.environment
-  frontend_health_check_path = "/status"
+  frontend_health_check_path = "/api/health"
   frontend_port              = 3000
   project_name               = var.project_name
   public_subnet_ids          = module.networking.public_subnet_ids
@@ -57,7 +57,7 @@ module "backend" {
   service_name          = "backend"
   subnet_ids            = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   target_group_arn      = module.alb.backend_target_group_arn
-  health_check_command  = ["CMD-SHELL", "wget --spider -q http://localhost:8000/status/ || exit 1"]
+  health_check_endpoint = "/status/"
   task_role_policy_arns = [module.storage.static_read_write_policy_arn]
   use_fargate_spot      = var.backend_use_fargate_spot
 }
@@ -104,25 +104,25 @@ module "database" {
 module "frontend" {
   source = "../modules/service"
 
-  assign_public_ip     = local.assign_public_ip
-  aws_region           = var.aws_region
-  common_tags          = local.common_tags
-  container_port       = 3000
-  desired_count        = var.frontend_desired_count
-  enable_auto_scaling  = var.frontend_enable_auto_scaling
-  environment          = var.environment
-  image_tag            = var.frontend_image_tag
-  kms_key_arn          = module.kms.key_arn
-  max_count            = var.frontend_max_count
-  min_count            = var.frontend_min_count
-  parameters_arns      = module.parameters.frontend_ssm_parameter_arns
-  project_name         = var.project_name
-  security_group_id    = module.security.frontend_sg_id
-  service_name         = "frontend"
-  subnet_ids           = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
-  health_check_command = ["CMD-SHELL", "wget --spider -q http://localhost:3000/status || exit 1"]
-  target_group_arn     = module.alb.frontend_target_group_arn
-  use_fargate_spot     = var.frontend_use_fargate_spot
+  assign_public_ip      = local.assign_public_ip
+  aws_region            = var.aws_region
+  common_tags           = local.common_tags
+  container_port        = 3000
+  desired_count         = var.frontend_desired_count
+  enable_auto_scaling   = var.frontend_enable_auto_scaling
+  environment           = var.environment
+  image_tag             = var.frontend_image_tag
+  kms_key_arn           = module.kms.key_arn
+  max_count             = var.frontend_max_count
+  min_count             = var.frontend_min_count
+  parameters_arns       = module.parameters.frontend_ssm_parameter_arns
+  project_name          = var.project_name
+  security_group_id     = module.security.frontend_sg_id
+  service_name          = "frontend"
+  subnet_ids            = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
+  health_check_endpoint = "/api/health"
+  target_group_arn      = module.alb.frontend_target_group_arn
+  use_fargate_spot      = var.frontend_use_fargate_spot
 }
 
 module "kms" {

@@ -38,9 +38,9 @@ locals {
       }]
     },
     var.command != null ? { command = var.command } : {},
-    var.health_check_command != null ? {
+    var.health_check_endpoint != null ? {
       healthCheck = {
-        command     = var.health_check_command
+        command     = ["CMD-SHELL", "wget --spider -q http://$(hostname -i):${var.container_port}${var.health_check_endpoint} || exit 1"]
         interval    = 30
         retries     = 3
         startPeriod = 60

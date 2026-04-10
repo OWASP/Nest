@@ -27,6 +27,15 @@ jest.mock('@apollo/client/react', () => ({
   useApolloClient: jest.fn(),
 }))
 
+jest.mock('lodash', () => ({
+  ...jest.requireActual('lodash'),
+  debounce: jest.fn((fn: (...args: unknown[]) => unknown) => {
+    const debouncedFn = (...args: unknown[]) => fn(...args)
+    debouncedFn.cancel = jest.fn()
+    return debouncedFn
+  }),
+}))
+
 describe('CreateModulePage', () => {
   const mockPush = jest.fn()
   const mockReplace = jest.fn()

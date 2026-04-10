@@ -1,6 +1,6 @@
-variable "health_check_command" {
-  description = "Shell command for ECS container health check (e.g. [\"CMD-SHELL\", \"wget ...\"]). If null, no health check is defined."
-  type        = list(string)
+variable "health_check_endpoint" {
+  description = "HTTP endpoint path for ECS container health check (e.g. \"/api/health\"). If null, no health check is defined."
+  type        = string
   default     = null
 }
 variable "assign_public_ip" {

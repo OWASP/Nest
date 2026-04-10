@@ -283,7 +283,7 @@ run "test_no_health_check_by_default" {
 
   assert {
     condition     = !can(jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck)
-    error_message = "Container health check must not be defined when health_check_command is null."
+    error_message = "Container health check must not be defined when health_check_endpoint is null."
   }
 }
 
@@ -291,12 +291,12 @@ run "test_health_check_defined_when_command_provided" {
   command = plan
 
   variables {
-    health_check_command = ["CMD-SHELL", "wget --spider -q http://localhost:3000/status || exit 1"]
+    health_check_endpoint = "/api/health"
   }
 
   assert {
-    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.command == ["CMD-SHELL", "wget --spider -q http://localhost:3000/status || exit 1"]
-    error_message = "Container health check command must match health_check_command variable."
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.command == ["CMD-SHELL", "wget --spider -q http://$(hostname -i):3000/api/health || exit 1"]
+    error_message = "Container health check command must match health_check_endpoint variable."
   }
 
   assert {
@@ -328,7 +328,7 @@ run "test_health_check_with_backend_config" {
     container_cpu         = 1024
     container_memory      = 2048
     container_port        = 8000
-    health_check_command  = ["CMD-SHELL", "wget --spider -q http://localhost:8000/status/ || exit 1"]
+    health_check_endpoint  = "/status/"
     service_name          = "backend"
     parameters_arns = {
       "DJANGO_SECRET_KEY" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_SECRET_KEY"
@@ -336,7 +336,7 @@ run "test_health_check_with_backend_config" {
   }
 
   assert {
-    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.command == ["CMD-SHELL", "wget --spider -q http://localhost:8000/status/ || exit 1"]
+    condition     = jsondecode(aws_ecs_task_definition.main.container_definitions)[0].healthCheck.command == ["CMD-SHELL", "wget --spider -q http://$(hostname -i):8000/status/ || exit 1"]
     error_message = "Backend health check command must point to /status/."
   }
 }
