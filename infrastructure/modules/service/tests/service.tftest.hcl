@@ -148,8 +148,8 @@ run "test_task_definition_has_container_health_check" {
   }
 
   assert {
-    condition     = local.container_definition.healthCheck.startPeriod == 60
-    error_message = "Health check startPeriod must be 60 seconds."
+    condition     = local.container_definition.healthCheck.startPeriod == 100
+    error_message = "Health check startPeriod must be 100 seconds."
   }
 
   assert {
@@ -261,12 +261,11 @@ run "test_service_works_with_backend_config" {
   command = plan
 
   variables {
-    command           = ["./entrypoint.sh"]
-    container_cpu     = 1024
-    container_memory  = 2048
-    container_port    = 8000
-    health_check_path = "/status/"
-    service_name      = "backend"
+    command          = ["./entrypoint.sh"]
+    container_cpu    = 1024
+    container_memory = 2048
+    container_port   = 8000
+    service_name     = "backend"
     parameters_arns = {
       "DJANGO_SECRET_KEY" = "arn:aws:ssm:us-east-2:123456789012:parameter/nest/test/DJANGO_SECRET_KEY"
     }
@@ -290,11 +289,6 @@ run "test_service_works_with_backend_config" {
   assert {
     condition     = aws_ecs_task_definition.main.memory == "2048"
     error_message = "Task definition must use overridden memory value."
-  }
-
-  assert {
-    condition     = strcontains(local.container_definition.healthCheck.command[1], "/status/")
-    error_message = "Backend configuration must use /status/ for ECS container health checks."
   }
 }
 

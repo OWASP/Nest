@@ -62,7 +62,7 @@ variable "force_new_deployment" {
 }
 
 variable "health_check_path" {
-  description = "The path used by ECS container health checks."
+  description = "The path for the ECS container health checks."
   type        = string
   default     = "/"
 
