@@ -18,7 +18,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   const map = useMap()
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
   useEffect(() => {
-    if (!map) return
+    if (!map?.getContainer()) return
     if (isMapActive) {
       map.scrollWheelZoom.enable()
       map.dragging.enable()
@@ -42,10 +42,9 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
       }
     }
   }, [isMapActive, map])
-
   useEffect(() => {
     return () => {
-      if (!map) return
+      if (!map?.getContainer()) return
       map.scrollWheelZoom.disable()
       map.dragging.disable()
       map.touchZoom.disable()
@@ -72,8 +71,8 @@ const MapViewUpdater = ({
   const map = useMap()
 
   useEffect(() => {
-    if (!map) return
-    const container = map.getContainer()
+    const container = map?.getContainer()
+    if (!container) return
     const width = container.clientWidth
     const height = container.clientHeight
     const aspectRatio = height > 0 ? width / height : 1
