@@ -109,7 +109,7 @@ services:
       start_period: 20s
       test: >
         sh -c '
-          wget --spider http://$(hostname -i):3000/api/health
+          wget --spider http://127.0.0.1:3000/api/health
         '
       timeout: 5s
     networks:
