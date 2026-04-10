@@ -67,10 +67,15 @@ lint-frontend-code:
 	  || (printf "pnpm run lint"; for i in $$(seq 1 60); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" && pnpm run lint))
 
 generate-graphql-types:
-	@(cd frontend && pnpm run graphql-codegen >/dev/null 2>&1 \
-	&& (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[30;42mPassed\033[0m\n") \
-	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
-		&& pnpm run graphql-codegen))
+	@(cd frontend && output=$$(pnpm run graphql-codegen 2>&1); exit_code=$$?; \
+	if [ $$exit_code -eq 0 ]; then \
+		printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[30;42mPassed\033[0m\n"; \
+	elif echo "$$output" | grep -q "make sure the backend is running"; then \
+		printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[33mSkipped (backend not running)\033[0m\n"; \
+	else \
+		printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n"; \
+		echo "$$output"; exit 1; \
+	fi)
 
 FRONTEND_IMAGE_NAME ?= nest-frontend-local
 IMAGE_SCANNERS ?= misconfig,secret,vuln
