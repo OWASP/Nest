@@ -111,8 +111,11 @@ class Command(BaseCommand):
         workspace.refresh_from_db()
         current_members = workspace.total_members_count
 
-        if workspace.invite_link_member_count is None and (
-            invite_link_updated or workspace.invite_link_created_at is not None
+        # New invite commit from GitHub: always re-baseline (clears stale baseline from the
+        # previous link). If baseline is still unset, also set it when commit metadata exists.
+        if invite_link_updated or (
+            workspace.invite_link_member_count is None
+            and workspace.invite_link_created_at is not None
         ):
             self.set_baseline(workspace, current_members)
             workspace.refresh_from_db()
@@ -122,7 +125,8 @@ class Command(BaseCommand):
                 self.style.WARNING(
                     "Invite baseline not set; skipping threshold check. "
                     "Baseline is applied when a new invite-link commit is found on GitHub. "
-                    "If you published a new link, ensure the commit message matches, or set "
+                    "If you published a new link, ensure the commit message contains "
+                    "update, slack, and invite in that order (case-insensitive), or set "
                     "invite metadata and baseline in Django admin (after slack_sync_data for "
                     "current member counts)."
                 )
@@ -179,7 +183,8 @@ class Command(BaseCommand):
         if commit_date is None:
             self.stdout.write(
                 self.style.WARNING(
-                    "No commit found with the expected message for _includes/slack_invite.html; "
+                    "No commit found for _includes/slack_invite.html whose message contains "
+                    "update, slack, and invite in that order (case-insensitive); "
                     "invite metadata not updated."
                 )
             )
