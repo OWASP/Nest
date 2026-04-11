@@ -3,11 +3,18 @@
 import { useQuery } from '@apollo/client/react'
 import { Select, SelectItem } from '@heroui/select'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { useAccessControl } from 'hooks/useAccessControl'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetModuleIssuesDocument } from 'types/__generated__/moduleQueries.generated'
+import {
+  GetModuleIssuesDocument,
+  GetProgramAdminsAndModulesDocument,
+} from 'types/__generated__/moduleQueries.generated'
+import type { ExtendedSession } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import IssuesTable from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
 import Pagination from 'components/Pagination'
@@ -19,6 +26,12 @@ const IssuesPage = () => {
   const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
+  const currentUserLogin = session?.user?.login
+
   const [selectedLabel, setSelectedLabel] = useState<string>(searchParams.get('label') || LABEL_ALL)
   const [selectedDeadline, setSelectedDeadline] = useState<string>(
     searchParams.get('deadline') || DEADLINE_ALL
@@ -28,6 +41,22 @@ const IssuesPage = () => {
   const isDeadlineFilterActive = selectedDeadline !== DEADLINE_ALL
   const MAX_ISSUES_FOR_DEADLINE_FILTER = 1000
 
+  const {
+    data: accessData,
+    loading: accessLoading,
+    error: accessError,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
+    variables: { programKey, moduleKey },
+    skip: !programKey || !moduleKey,
+    fetchPolicy: 'network-only',
+  })
+
+  const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
+
+  useEffect(() => {
+    if (accessError) handleAppError(accessError)
+  }, [accessError])
+
   const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
     variables: {
       programKey,
@@ -36,7 +65,7 @@ const IssuesPage = () => {
       offset: isDeadlineFilterActive ? 0 : (currentPage - 1) * ITEMS_PER_PAGE,
       label: selectedLabel === LABEL_ALL ? null : selectedLabel,
     },
-    skip: !programKey || !moduleKey,
+    skip: !programKey || !moduleKey || !hasAccess,
     fetchPolicy: 'cache-and-network',
   })
 
@@ -126,7 +155,33 @@ const IssuesPage = () => {
     [router, programKey, moduleKey]
   )
 
-  if (loading) return <LoadingSpinner />
+  if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
+    return <LoadingSpinner />
+  }
+
+  if (accessError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error Loading Access Information"
+        message="Failed to verify access permissions. Please try again later."
+      />
+    )
+  }
+
+  if (!hasAccess) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Only program admins and module mentors can access this page."
+      />
+    )
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   if (!moduleData)
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 

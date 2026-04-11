@@ -1,6 +1,8 @@
 name: Set up Backend environment
 
-description: Sets up the Backend environment testing.
+description: >-
+  Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
+  Postgres, installs the PostgreSQL client, and builds the backend test image.
 
 inputs:
   db_username:
@@ -13,6 +15,27 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Install Poetry
+      run: pipx install poetry
+      shell: bash
+
+    - name: Set up Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      with:
+        cache: poetry
+        cache-dependency-path: backend/poetry.lock
+        python-version: '3.13'
+
+    - name: Install backend dependencies (fetch script)
+      run: |
+        cd backend
+        poetry install --no-root --without fuzz --without test --without video
+      shell: bash
+
+    - name: Fetch nest.dump from S3
+      run: cd backend && poetry run python -m scripts.fetch_nest_dump
+      shell: bash
+
     - name: Wait for database to be ready
       env:
         DB_USERNAME: ${{ inputs.db_username }}

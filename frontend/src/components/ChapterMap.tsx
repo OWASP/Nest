@@ -3,7 +3,7 @@ import { Button } from '@heroui/button'
 import { Tooltip } from '@heroui/tooltip'
 import L from 'leaflet'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useRef, useState, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { FaUnlock } from 'react-icons/fa'
 import { FaLocationDot } from 'react-icons/fa6'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
@@ -18,7 +18,7 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
   const map = useMap()
   const zoomControlRef = useRef<L.Control.Zoom | null>(null)
   useEffect(() => {
-    if (!map) return
+    if (!map?.getContainer()) return
     if (isMapActive) {
       map.scrollWheelZoom.enable()
       map.dragging.enable()
@@ -42,10 +42,9 @@ const MapZoomControl = ({ isMapActive }: { isMapActive: boolean }) => {
       }
     }
   }, [isMapActive, map])
-
   useEffect(() => {
     return () => {
-      if (!map) return
+      if (!map?.getContainer()) return
       map.scrollWheelZoom.disable()
       map.dragging.disable()
       map.touchZoom.disable()
@@ -72,8 +71,8 @@ const MapViewUpdater = ({
   const map = useMap()
 
   useEffect(() => {
-    if (!map) return
-    const container = map.getContainer()
+    const container = map?.getContainer()
+    if (!container) return
     const width = container.clientWidth
     const height = container.clientHeight
     const aspectRatio = height > 0 ? width / height : 1
@@ -141,6 +140,24 @@ const ChapterMap = ({
 }) => {
   const router = useRouter()
   const [isMapActive, setIsMapActive] = useState(false)
+
+  const handlePointerLeave = (e: React.PointerEvent<HTMLElement>) => {
+    if (!isMapActive) return
+
+    const host = e.currentTarget
+
+    // Leaflet overlays/popups can trigger a leave-like event without the pointer
+    // truly exiting the map container (e.g. `relatedTarget` becomes null during DOM updates).
+    const rect = host.getBoundingClientRect()
+    const withinX = e.clientX >= rect.left && e.clientX <= rect.right
+    const withinY = e.clientY >= rect.top && e.clientY <= rect.bottom
+    if (withinX && withinY) return
+
+    const next = e.relatedTarget
+    if (next instanceof Node && host.contains(next)) return
+
+    setIsMapActive(false)
+  }
   const validGeoLocData = useMemo(() => {
     return geoLocData.filter((chapter) => {
       const lat = chapter._geoloc?.lat ?? chapter.geoLocation?.lat
@@ -181,7 +198,7 @@ const ChapterMap = ({
       aria-label="Chapter Map"
       className="relative isolate z-0 overflow-hidden rounded-lg bg-slate-200 dark:bg-[#1a1a1a]"
       style={style}
-      onMouseLeave={() => setIsMapActive(false)}
+      onPointerLeave={handlePointerLeave}
     >
       <MapContainer
         center={[20, 0]}
@@ -271,7 +288,7 @@ const ChapterMap = ({
         </div>
       )}
       {isMapActive && (
-        <div className="absolute top-20 left-3 z-[999] w-fit">
+        <div className="absolute top-20 left-3 z-[999] flex gap-2">
           {onShareLocation && (
             <Tooltip
               showArrow
