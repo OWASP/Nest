@@ -220,7 +220,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 ❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
 ❗ **Always use a different workspace (create your own if needed).**
 
-To setup NestBot development environment, follow these steps:
+To set up the NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
 
@@ -262,20 +262,16 @@ To setup NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
-   ### Testing NestBot Locally
 
-Once your environment is running, verify NestBot is working:
+##### Testing NestBot Locally
 
-1. Send a direct message to your bot in your test Slack workspace.
-2. Mention the bot in a channel using @NestBot.
-3. Check Django logs for incoming events:
+With `make run` and `ngrok start NestBot` running, smoke-test the integration—for example DM the bot, `@`-mention it in a channel, or post a normal channel message when your app subscribes to the `message.channels` bot event.
 
-   make logs
+To confirm Slack is reaching your machine, check the backend container logs.
 
-Note: Ensure ngrok is running before testing, as Slack requires
-a publicly accessible URL to deliver events to your local server.
+> **Note:** Keep ngrok running while you test. Slack must use a publicly accessible URL to reach your local server.
 
 #### Local Access to Internal Dashboards
 
