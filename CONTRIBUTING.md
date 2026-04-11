@@ -267,7 +267,11 @@ To set up the NestBot development environment, follow these steps:
 
 ##### Testing NestBot Locally
 
-With `make run` and `ngrok start NestBot` running, smoke-test the integration—for example DM the bot, `@`-mention it in a channel, or post a normal channel message when your app subscribes to the `message.channels` bot event.
+With `make run` and `ngrok start NestBot` running, smoke-test the integration — for example:
+
+- Direct message: send a direct message to the bot in your Slack workspace.
+- Channel mention: Add the bot to a channel and `@`-mention it.
+- Or post a normal channel message when your app subscribes to the `message.channels` bot event.
 
 To confirm Slack is reaching your machine, check the backend container logs.
 
