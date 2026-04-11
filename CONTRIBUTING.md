@@ -220,7 +220,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 ❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
 ❗ **Always use a different workspace (create your own if needed).**
 
-To setup NestBot development environment, follow these steps:
+To set up the NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
 
@@ -262,26 +262,20 @@ To setup NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
 
-   ##### Testing NestBot Locally
+##### Testing NestBot Locally
 
-   To verify that your NestBot is configured correctly, test it using the following methods:
+With `make run` and `ngrok start NestBot` running, smoke-test the integration — for example:
 
-   1. **Ensure the application is running**:
-      Start the development environment using Docker:
+- Direct message: send a direct message to the bot in your Slack workspace.
+- Channel mention: Add the bot to a channel and `@`-mention it.
+- Or post a normal channel message when your app subscribes to the `message.channels` bot event.
 
-      ```bash
-      make run
-      ```
-   1. **Direct Message**: Send a direct message to the bot in your Slack workspace.
-   1. **Channel Mention**: Add the bot to a channel and mention it.
-   1. **Check Logs**: In a new terminal, run the following command to check Django logs for incoming Slack events:
+To confirm Slack is reaching your machine, check the backend container logs.
 
-      ```bash
-      make logs
-      ```
+> **Note:** Keep ngrok running while you test. Slack must use a publicly accessible URL to reach your local server.
 
 #### Local Access to Internal Dashboards
 
