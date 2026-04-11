@@ -8,7 +8,7 @@ repos:
         name: hadolint
 
   - repo: https://github.com/EbodShojaei/bake
-    rev: v1.4.5
+    rev: v1.4.6
     hooks:
       - id: mbake-format
         args:
@@ -77,7 +77,7 @@ repos:
         exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
+    rev: v1.20.0
     hooks:
       - id: mypy
         additional_dependencies:
@@ -123,6 +123,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.20.0
+    rev: v2.21.0
     hooks:
       - id: pyproject-fmt
