@@ -127,20 +127,18 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
 def get_latest_invite_link_commit(
     github: Github,
     *,
-    commit_message_substring: str = "Update Slack invite",
     file_path: str = "_includes/slack_invite.html",
     max_commits_to_scan: int = 500,
     repository_name: str | None = None,
 ) -> tuple[datetime.datetime | None, str | None]:
     """Return commit date and SHA of the newest matching change to the public Slack invite file.
 
-    Matches commits whose message contains ``commit_message_substring`` (case-insensitive).
+    Matches commits whose message contains the words ``update``, ``slack``, and ``invite`` in
+    that order (case-insensitive).
     Uses committer date (when the change landed).
 
     Args:
         github: Authenticated PyGithub client.
-        commit_message_substring: Substring that must appear in the commit message
-            (matched case-insensitively).
         file_path: Path within the repo to filter commits (default: Slack invite include).
         max_commits_to_scan: Stop after this many commits with no match.
         repository_name: Repository in ``owner/name`` form (default: ``owasp/owasp.github.io``).
@@ -158,7 +156,6 @@ def get_latest_invite_link_commit(
         raise
 
     commits = repository.get_commits(path=file_path)
-    substring_lower = commit_message_substring.lower()
     for index, data in enumerate(commits):
         if index >= max_commits_to_scan:
             logger.warning(
@@ -167,7 +164,15 @@ def get_latest_invite_link_commit(
                 file_path,
             )
             return None, None
-        if substring_lower not in data.commit.message.lower():
+        msg_lower = data.commit.message.lower()
+        rest = msg_lower
+        matched = True
+        for word in ("update", "slack", "invite"):
+            if word not in rest:
+                matched = False
+                break
+            rest = rest.split(word, 1)[1]
+        if not matched:
             continue
         dt = data.commit.committer.date
         if timezone.is_naive(dt):
