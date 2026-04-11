@@ -1,6 +1,6 @@
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
-import { FaCalendar } from 'react-icons/fa6'
+import { FaCalendar, FaCodePullRequest } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import type { CardProps } from 'types/card'
 import { ICONS } from 'utils/data'
@@ -20,6 +20,7 @@ const Card = ({
   level,
   projectLink,
   projectName,
+  pullRequestCount,
   social,
   summary,
   timeline,
@@ -135,6 +136,15 @@ const Card = ({
           {labels && labels.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <LabelList entityKey={`${cardKey}-labels`} labels={labels} maxVisible={5} />
+            </div>
+          )}
+          {/* PR Count Badge */}
+          {!!pullRequestCount && (
+            <div className="flex items-center">
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                <FaCodePullRequest className="h-3 w-3" />
+                  {pullRequestCount} open PR{pullRequestCount === 1 ? '' : 's'}
+              </span>
             </div>
           )}
           {/* Contributors section */}
