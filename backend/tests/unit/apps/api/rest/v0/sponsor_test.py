@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from apps.api.rest.v0.sponsor import SponsorDetail, get_sponsor, list_sponsors
+from apps.api.rest.v0.sponsor import SponsorDetail, apply_sponsor, get_sponsor, list_sponsors
 
 
 class TestSponsorSchema:
@@ -108,6 +108,7 @@ class TestGetSponsor:
         """Test getting a sponsor when found."""
         mock_request = MagicMock()
         mock_sponsor = MagicMock()
+        mock_sponsor.status = mock_sponsor_model.Status.ACTIVE
         mock_sponsor_model.objects.filter.return_value.first.return_value = mock_sponsor
 
         result = get_sponsor(mock_request, "adobe")
@@ -124,3 +125,46 @@ class TestGetSponsor:
         result = get_sponsor(mock_request, "nonexistent")
 
         assert result.status_code == HTTPStatus.NOT_FOUND
+
+
+class TestApplySponsor:
+    """Tests for apply_sponsor endpoint."""
+
+    @patch("apps.api.rest.v0.sponsor.SponsorModel")
+    def test_apply_sponsor_rejects_name_that_creates_empty_key(self, mock_sponsor_model):
+        """Reject organization names that would create an empty key."""
+        mock_request = MagicMock()
+
+        payload = MagicMock()
+        payload.organization_name = "   !!!   "
+        payload.contact_email = "contact@example.com"
+        payload.website = ""
+        payload.message = ""
+
+        status, body = apply_sponsor(mock_request, payload)
+
+        assert status == HTTPStatus.BAD_REQUEST
+        assert body.message
+        mock_sponsor_model.objects.create.assert_not_called()
+
+    @patch("apps.api.rest.v0.sponsor.SponsorModel")
+    def test_apply_sponsor_strips_name_before_slugify_and_persist(self, mock_sponsor_model):
+        """Strip whitespace so we persist the cleaned organization name."""
+        mock_request = MagicMock()
+
+        payload = MagicMock()
+        payload.organization_name = "  Acme, Inc.  "
+        payload.contact_email = "contact@acme.com"
+        payload.website = "https://acme.com"
+        payload.message = "Hello"
+
+        mock_sponsor_model.objects.filter.return_value.exists.return_value = False
+
+        status, body = apply_sponsor(mock_request, payload)
+
+        assert status == HTTPStatus.CREATED
+        assert body.key
+        mock_sponsor_model.objects.create.assert_called_once()
+        _, kwargs = mock_sponsor_model.objects.create.call_args
+        assert kwargs["name"] == "Acme, Inc."
+        assert kwargs["sort_name"] == "Acme, Inc."

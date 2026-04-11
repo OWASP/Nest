@@ -106,6 +106,21 @@ class Command(BaseCommand):
             self._execute_sql(temp_db, self._remove_emails([row[0] for row in table_list]))
             self.stdout.write(self.style.SUCCESS("Removed emails from temporary DB"))
 
+            # Ensure dumps stay compatible with current constraints.
+            # Some environments may contain legacy rows with NULL status values.
+            self._execute_sql(
+                temp_db,
+                [
+                    sql.SQL(
+                        "UPDATE public.owasp_sponsors SET status = 'active' WHERE status IS NULL;"
+                    )
+                ],
+            )
+            self._execute_sql(
+                temp_db,
+                [sql.SQL("UPDATE public.owasp_sponsors SET contact_email = '' ;")],
+            )
+
             dump_cmd = [
                 PG_DUMP,
                 "-h",

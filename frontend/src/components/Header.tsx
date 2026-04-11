@@ -25,6 +25,58 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
+  const filteredLinks = headerLinks.filter((link) =>
+    link.requiresGitHubAuth ? isGitHubAuthEnabled : true
+  )
+
+  const logo = (
+    <Link
+      href="/"
+      onClick={() => setMobileMenuOpen(false)}
+      className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+    >
+      <div className="flex h-full items-center">
+        <div className="flex h-16 w-16 items-center justify-center py-2">
+          <Image
+            width={64}
+            height={64}
+            priority={true}
+            src={'/img/logo_dark.png'}
+            className="h-full w-auto object-contain"
+            alt="OWASP Logo"
+          />
+        </div>
+        <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+          Nest
+        </div>
+      </div>
+    </Link>
+  )
+
+  const actionButtons = [
+    {
+      href: 'https://github.com/OWASP/Nest',
+      defaultIcon: FaRegStar,
+      hoverIcon: FaSolidStar,
+      defaultIconColor: '#FDCE2D',
+      hoverIconColor: '#FDCE2D',
+      textDesktop: 'Star',
+      textMobile: 'Star On Github',
+    },
+    {
+      href: '/sponsors',
+      defaultIcon: FaRegHeart,
+      hoverIcon: FaSolidHeart,
+      defaultIconColor: '#b55f95',
+      hoverIconColor: '#d9156c',
+      textDesktop: 'Sponsor',
+      textMobile: 'Sponsor Us',
+    },
+  ] as const
+
+  const mobileIconButtonClass =
+    'flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
+
   useEffect(() => {
     const handleResize = () => {
       if (globalThis.innerWidth >= desktopViewMinWidth) {
@@ -58,89 +110,48 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
       <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
-        {/* Logo */}
-        <Link
-          href="/"
-          onClick={() => setMobileMenuOpen(false)}
-          className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          <div className="flex h-full items-center">
-            <div className="flex h-16 w-16 items-center justify-center py-2">
-              <Image
-                width={64}
-                height={64}
-                priority={true}
-                src={'/img/logo_dark.png'}
-                className="h-full w-auto object-contain"
-                alt="OWASP Logo"
-              />
-            </div>
-            <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-              Nest
-            </div>
-          </div>
-        </Link>
-        {/* Desktop Header Links */}
+        {logo}
         <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
           <div className="flex justify-start pl-6">
-            {headerLinks
-              .filter((link) => {
-                if (link.requiresGitHubAuth) {
-                  return isGitHubAuthEnabled
-                }
-                return true
-              })
-              .map((link) => {
-                return link.submenu ? (
-                  <NavDropdown link={link} pathname={pathname} key={`${link.text}-${link.href}`} />
-                ) : (
-                  <Link
-                    key={link.text}
-                    href={link.href || '/'}
-                    className={cn(
-                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
-                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                    )}
-                    aria-current="page"
-                  >
-                    {link.text}
-                  </Link>
-                )
-              })}
+            {filteredLinks.map((link) =>
+              link.submenu ? (
+                <NavDropdown link={link} pathname={pathname} key={`${link.text}-${link.href}`} />
+              ) : (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  aria-current="page"
+                >
+                  {link.text}
+                </Link>
+              )
+            )}
           </div>
         </div>
         <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
           <GlobalSearch />
-          <div className="hidden md:flex">
-            <NavButton
-              href="https://github.com/OWASP/Nest"
-              defaultIcon={FaRegStar}
-              hoverIcon={FaSolidStar}
-              defaultIconColor="#FDCE2D"
-              hoverIconColor="#FDCE2D"
-              text="Star"
-            />
-          </div>
-
-          <div className="hidden md:flex">
-            <NavButton
-              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-              defaultIcon={FaRegHeart}
-              hoverIcon={FaSolidHeart}
-              defaultIconColor="#b55f95"
-              hoverIconColor="#d9156c"
-              text="Sponsor"
-            />
-          </div>
+          {actionButtons.map((btn) => (
+            <div key={btn.href} className="hidden md:flex">
+              <NavButton
+                href={btn.href}
+                defaultIcon={btn.defaultIcon}
+                hoverIcon={btn.hoverIcon}
+                defaultIconColor={btn.defaultIconColor}
+                hoverIconColor={btn.hoverIconColor}
+                text={btn.textDesktop}
+              />
+            </div>
+          ))}
           <div className="hidden md:flex">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
           </div>
           <ModeToggle />
           <div className="lg:hidden">
-            <Button
-              onPress={toggleMobileMenu}
-              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
+            <Button onPress={toggleMobileMenu} className={mobileIconButtonClass}>
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
             </Button>
@@ -154,93 +165,60 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         )}
       >
         <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
-          {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              <div className="flex h-full items-center">
-                <div className="flex h-16 w-16 items-center justify-center py-2">
-                  <Image
-                    width={64}
-                    height={64}
-                    priority={true}
-                    src={'/img/logo_dark.png'}
-                    className="h-full w-auto object-contain"
-                    alt="OWASP Logo"
-                  />
-                </div>
-                <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
-                  Nest
-                </div>
-              </div>
-            </Link>
-            {headerLinks
-              .filter((link) => {
-                if (link.requiresGitHubAuth) {
-                  return isGitHubAuthEnabled
-                }
-                return true
-              })
-              .map((link) =>
-                link.submenu ? (
-                  <div key={link.text} className="flex flex-col gap-2">
-                    <div className="block px-3 py-3 font-medium text-slate-700 dark:text-slate-300">
-                      {link.text}
-                    </div>
-                    <div className="ml-4">
-                      {link.submenu.map((sub) => (
-                        <Link
-                          key={`${sub.text}-${sub.href}`}
-                          href={sub.href || '/'}
-                          className={cn(
-                            'block w-full px-4 py-3 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
-                            pathname === sub.href &&
-                              'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
-                          )}
-                          onClick={toggleMobileMenu}
-                        >
-                          {sub.text}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={link.text}
-                    href={link.href || '/'}
-                    className={cn(
-                      'navlink block px-3 py-2 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
-                      pathname === link.href && 'font-bold text-blue-800 dark:text-white'
-                    )}
-                    onClick={toggleMobileMenu}
-                  >
+            {logo}
+            {filteredLinks.map((link) =>
+              link.submenu ? (
+                <div key={link.text} className="flex flex-col gap-2">
+                  <div className="block px-3 py-3 font-medium text-slate-700 dark:text-slate-300">
                     {link.text}
-                  </Link>
-                )
-              )}
+                  </div>
+                  <div className="ml-4">
+                    {link.submenu.map((sub) => (
+                      <Link
+                        key={`${sub.text}-${sub.href}`}
+                        href={sub.href || '/'}
+                        className={cn(
+                          'block w-full px-4 py-3 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                          pathname === sub.href &&
+                            'bg-blue-50 font-medium text-blue-600 dark:bg-blue-900/20 dark:text-blue-200'
+                        )}
+                        onClick={toggleMobileMenu}
+                      >
+                        {sub.text}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={link.text}
+                  href={link.href || '/'}
+                  className={cn(
+                    'navlink block px-3 py-2 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
+                    pathname === link.href && 'font-bold text-blue-800 dark:text-white'
+                  )}
+                  onClick={toggleMobileMenu}
+                >
+                  {link.text}
+                </Link>
+              )
+            )}
           </div>
 
           <div className="flex flex-col gap-y-2 md:hidden">
             <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
-            <NavButton
-              href="https://github.com/OWASP/Nest"
-              defaultIcon={FaRegStar}
-              hoverIcon={FaSolidStar}
-              defaultIconColor="#FDCE2D"
-              hoverIconColor="#FDCE2D"
-              text="Star On Github"
-            />
-            <NavButton
-              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-              defaultIcon={FaRegHeart}
-              hoverIcon={FaSolidHeart}
-              defaultIconColor="#b55f95"
-              hoverIconColor="#d9156c"
-              text="Sponsor Us"
-            />
+            {actionButtons.map((btn) => (
+              <NavButton
+                key={btn.href}
+                href={btn.href}
+                defaultIcon={btn.defaultIcon}
+                hoverIcon={btn.hoverIcon}
+                defaultIconColor={btn.defaultIconColor}
+                hoverIconColor={btn.hoverIconColor}
+                text={btn.textMobile}
+              />
+            ))}
           </div>
         </div>
       </div>

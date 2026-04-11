@@ -37,11 +37,21 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         GOLD = "Gold"
         SILVER = "Silver"
 
+    class Status(models.TextChoices):
+        """Sponsor application status."""
+
+        DRAFT = "draft", "Draft"
+        ACTIVE = "active", "Active"
+        ARCHIVED = "archived", "Archived"
+
     # Basic information
     description = models.TextField(verbose_name="Description", blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
     name = models.CharField(verbose_name="Name", max_length=255)
-    sort_name = models.CharField(verbose_name="Sort Name", max_length=255)
+    sort_name = models.CharField(verbose_name="Sort Name", max_length=255, blank=True)
+
+    # Contact
+    contact_email = models.EmailField(verbose_name="Contact Email", blank=True)
 
     # URLs and images
     url = models.URLField(verbose_name="Website URL", blank=True)
@@ -49,6 +59,13 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     image_url = models.CharField(verbose_name="Image Path", max_length=255, blank=True)
 
     # Status fields
+    status = models.CharField(
+        verbose_name="Status",
+        max_length=10,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+        db_index=True,
+    )
     is_member = models.BooleanField(verbose_name="Is Corporate Sponsor", default=False)
     member_type = models.CharField(
         verbose_name="Member Type",
@@ -62,6 +79,24 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         max_length=20,
         choices=SponsorType.choices,
         default=SponsorType.NOT_SPONSOR,
+    )
+
+    # Optional entity associations
+    chapter = models.ForeignKey(
+        "owasp.Chapter",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sponsors",
+        verbose_name="Chapter",
+    )
+    project = models.ForeignKey(
+        "owasp.Project",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sponsors",
+        verbose_name="Project",
     )
 
     def __str__(self) -> str:

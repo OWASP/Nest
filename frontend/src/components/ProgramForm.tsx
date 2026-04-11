@@ -146,11 +146,11 @@ const ProgramForm = ({
       onSubmit={handleSubmit}
       containerClassName="program-form-container"
     >
-      {/* Basic Information */}
       <section className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
           <FormTextInput
             id="program-name"
+            name="name"
             label="Name"
             placeholder="Enter program name"
             value={formData.name}
@@ -166,10 +166,12 @@ const ProgramForm = ({
 
           <FormTextarea
             id="program-description"
+            name="description"
             label="Description"
             placeholder="Enter program description"
             value={formData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
+            onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
             error={errors.description}
             touched={touched.description}
             required
@@ -177,7 +179,6 @@ const ProgramForm = ({
         </div>
       </section>
 
-      {/* Configuration */}
       <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
         <div className="config-grid grid gap-6">
           <FormDateInput
@@ -207,6 +208,7 @@ const ProgramForm = ({
           />
           <FormTextInput
             id="mentees-limit"
+            name="menteesLimit"
             type="number"
             label="Mentees Limit"
             placeholder="Enter mentees limit (0 for unlimited)"
@@ -219,11 +221,11 @@ const ProgramForm = ({
         </div>
       </section>
 
-      {/* Additional Details */}
       <section className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
           <FormTextInput
             id="program-tags"
+            name="tags"
             label="Tags"
             placeholder="javascript, react"
             value={formData.tags}
@@ -231,6 +233,7 @@ const ProgramForm = ({
           />
           <FormTextInput
             id="program-domains"
+            name="domains"
             label="Domains"
             placeholder="AI, Web Development"
             value={formData.domains}
@@ -239,6 +242,7 @@ const ProgramForm = ({
           {isEdit && (
             <FormTextInput
               id="admin-github-usernames"
+              name="adminLogins"
               label="Admin GitHub Usernames"
               placeholder="johndoe, jane-doe"
               value={formData.adminLogins || ''}

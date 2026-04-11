@@ -35,7 +35,7 @@ export const FormDateInput = ({
   max,
 }: FormDateInputProps) => {
   return (
-    <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+    <div className="w-full max-w-full min-w-0 overflow-hidden">
       <Input
         id={id}
         type="date"

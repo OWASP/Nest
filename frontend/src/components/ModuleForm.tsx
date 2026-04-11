@@ -174,11 +174,11 @@ const ModuleForm = ({
       <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#212529]">
         <form onSubmit={handleSubmit} noValidate>
           <div className="flex flex-col gap-8 p-8">
-            {/* Basic Information */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
                   id="module-name"
+                  name="name"
                   label="Name"
                   placeholder="Enter module name"
                   value={formData.name}
@@ -194,6 +194,7 @@ const ModuleForm = ({
 
                 <FormTextarea
                   id="module-description"
+                  name="description"
                   label="Description"
                   placeholder="Enter module description"
                   value={formData.description}
@@ -201,6 +202,7 @@ const ModuleForm = ({
                     handleInputChange('description', e.target.value)
                     setTouched((prev) => ({ ...prev, description: true }))
                   }}
+                  onBlur={() => setTouched((prev) => ({ ...prev, description: true }))}
                   error={errors.description}
                   touched={touched.description}
                   required
@@ -208,7 +210,6 @@ const ModuleForm = ({
               </div>
             </section>
 
-            {/* Configuration */}
             <section className="flex flex-col gap-6 text-gray-600 dark:text-gray-300">
               <div className="module-config-grid grid gap-6">
                 <FormDateInput
@@ -239,7 +240,7 @@ const ModuleForm = ({
                   min={formData.startedAt || minDate || undefined}
                   max={maxDate}
                 />
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                <div className="w-full max-w-full min-w-0 overflow-hidden">
                   <Select
                     id="experienceLevel"
                     label="Experience Level"
@@ -268,11 +269,11 @@ const ModuleForm = ({
               </div>
             </section>
 
-            {/* Additional Details */}
             <section className="flex flex-col gap-6">
               <div className="grid grid-cols-1 gap-6 text-gray-600 lg:grid-cols-2 dark:text-gray-300">
                 <FormTextInput
                   id="module-domains"
+                  name="domains"
                   label="Domains"
                   placeholder="AI, Web Development"
                   value={formData.domains}
@@ -280,6 +281,7 @@ const ModuleForm = ({
                 />
                 <FormTextInput
                   id="module-tags"
+                  name="tags"
                   label="Tags"
                   placeholder="javascript, react"
                   value={formData.tags}
@@ -287,12 +289,13 @@ const ModuleForm = ({
                 />
                 <FormTextInput
                   id="module-labels"
+                  name="labels"
                   label="Labels"
                   placeholder="good first issue, bug, enhancement"
                   value={formData.labels}
                   onValueChange={(value) => handleInputChange('labels', value)}
                 />
-                <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+                <div className="w-full max-w-full min-w-0 overflow-hidden">
                   <ProjectSelector
                     value={formData.projectId}
                     defaultName={formData.projectName}
@@ -311,6 +314,7 @@ const ModuleForm = ({
                 {isEdit && (
                   <FormTextInput
                     id="module-mentor-logins"
+                    name="mentorLogins"
                     label="Mentor GitHub Usernames"
                     placeholder="johndoe, jane-doe"
                     value={formData.mentorLogins}
@@ -412,7 +416,6 @@ export const ProjectSelector = ({
         onProjectChange(selectedProject.id, selectedProject.name)
       }
     } else if (!value) {
-      // Selection cleared
       setInputValue('')
       onProjectChange(null, '')
     }
@@ -429,7 +432,7 @@ export const ProjectSelector = ({
   const shouldShowInvalid = isTyping ? false : isInvalid
 
   return (
-    <div className="w-full min-w-0" style={{ maxWidth: '100%', overflow: 'hidden' }}>
+    <div className="w-full max-w-full min-w-0 overflow-hidden">
       <Autocomplete
         id="projectSelector"
         label="Project Name"

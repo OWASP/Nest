@@ -1,22 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Sponsor } from 'types/home'
+import { OWASP_NEST_DONATE_URL } from 'utils/constants'
 
 interface MovingLogosProps {
   readonly sponsors: Sponsor[]
 }
-/**
- * Corporate Supporters Carousel Component
- *
- * Renders an infinite scrolling marquee of corporate supporter logos.
- *
- * Key Features:
- * - **Infinite Loop**: Uses CSS keyframes to scroll continuously.
- * - **Dark Mode Support**: Wraps logos in white cards to ensure visibility.
- * - **Normalization**: Enforces consistent sizing for all logos.
- *
- * @returns {JSX.Element} The rendered logo carousel component.
- */
 export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
   const animationDuration = `${Math.max(sponsors.length, 1) * 3}s`
 
@@ -77,7 +66,7 @@ export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
         <p>
           If you're interested in sponsoring the OWASP Nest project ❤️{' '}
           <Link
-            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+            href={OWASP_NEST_DONATE_URL}
             className="text-primary font-medium hover:underline"
             target="_blank"
             rel="noopener noreferrer"
