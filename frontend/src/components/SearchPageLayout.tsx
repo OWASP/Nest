@@ -1,5 +1,5 @@
 import { Skeleton } from '@heroui/skeleton'
-import React, { useEffect, useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import Pagination from 'components/Pagination'
 import SearchBar from 'components/Search'
 import SkeletonBase from 'components/SkeletonsBase'
@@ -39,7 +39,7 @@ const SearchPageLayout = ({
   children,
 }: SearchPageLayoutProps) => {
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true)
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isLoaded && isFirstLoad) {
       setIsFirstLoad(false)
     }
@@ -47,42 +47,85 @@ const SearchPageLayout = ({
 
   let searchBarClassName = ''
   if (inlineSort && filterChildren) {
-    searchBarClassName = 'rounded-none'
+    // Square corners only on md+ (unified bar); keep rounded-lg on small screens
+    searchBarClassName = 'md:rounded-none'
   } else if (inlineSort) {
-    searchBarClassName = 'rounded-r-none'
+    searchBarClassName = 'md:rounded-r-none'
   }
 
   return (
     <div className="text-text flex min-h-screen w-full flex-col items-center justify-normal p-5">
-      <div className={`flex w-full items-center justify-center ${inlineSort ? 'gap-0' : 'gap-2'}`}>
+      <div
+        className={`flex w-full flex-col md:flex-row md:items-center md:justify-center ${
+          inlineSort ? 'md:gap-0' : 'md:gap-2'
+        }`}
+      >
         {filterChildren &&
           (isFirstLoad ? (
             <Skeleton
-              className={`h-12 w-60 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
+              className={`hidden h-12 w-60 shrink-0 md:block ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'rounded-lg'}`}
               aria-hidden="true"
             />
           ) : (
-            <div className={inlineSort ? '[&>div]:rounded-r-none' : ''}>{filterChildren}</div>
+            <div
+              className={`hidden shrink-0 md:block md:w-fit ${inlineSort ? '[&>div]:rounded-r-none md:[&>div]:border-r-0' : ''}`}
+            >
+              {filterChildren}
+            </div>
           ))}
-        <SearchBar
-          isLoaded={!isFirstLoad}
-          onSearch={onSearch}
-          placeholder={searchPlaceholder}
-          initialValue={searchQuery}
-          className={searchBarClassName}
-        />
+        <div className="flex w-full justify-center md:w-[28rem] md:shrink-0">
+          <SearchBar
+            isLoaded={!isFirstLoad}
+            onSearch={onSearch}
+            placeholder={searchPlaceholder}
+            initialValue={searchQuery}
+            className={searchBarClassName}
+          />
+        </div>
         {inlineSort &&
           sortChildren &&
           (isFirstLoad ? (
-            <div className="flex items-center">
+            <div className="hidden shrink-0 md:flex md:w-fit md:items-center">
               <Skeleton className="h-12 w-48 rounded-none" aria-hidden="true" />
             </div>
           ) : (
-            <div className="[&>div>div:first-child]:rounded-l-none" data-testid="sort-inline">
+            <div className="hidden shrink-0 md:flex md:w-fit [&>div>div:first-child]:rounded-l-none">
               {sortChildren}
             </div>
           ))}
       </div>
+
+      {/* Mobile layout — max-w-md matches SearchBar so stacked controls align with search */}
+      {(filterChildren || (inlineSort && sortChildren)) && (
+        <div
+          className={`mx-auto mt-2 mb-4 flex w-full max-w-md items-stretch md:hidden ${
+            inlineSort ? 'gap-0' : 'justify-between gap-4'
+          }`}
+        >
+          {filterChildren &&
+            (isFirstLoad ? (
+              <Skeleton
+                className={`h-12 min-w-0 flex-1 ${inlineSort ? 'rounded-l-lg rounded-r-none' : 'max-w-40 rounded-lg'}`}
+                aria-hidden="true"
+              />
+            ) : (
+              <div
+                className={`min-w-0 ${inlineSort && sortChildren ? 'flex-1' : 'max-w-40'} ${inlineSort ? '[&>div]:rounded-r-none' : ''}`}
+              >
+                {filterChildren}
+              </div>
+            ))}
+          {inlineSort &&
+            sortChildren &&
+            (isFirstLoad ? (
+              <Skeleton className="h-12 min-w-0 flex-1 rounded-none" aria-hidden="true" />
+            ) : (
+              <div className="min-w-0 flex-1 [&>div>div:first-child]:rounded-l-none">
+                {sortChildren}
+              </div>
+            ))}
+        </div>
+      )}
       {isLoaded ? (
         <>
           <div>

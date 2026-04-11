@@ -61,9 +61,20 @@ variable "django_redis_use_tls" {
   default     = true
 }
 
+variable "django_release_version" {
+  description = "The Django release version."
+  type        = string
+}
+
 variable "django_settings_module" {
   description = "The location of the Django settings module to use (e.g., settings.staging, settings.production)."
   type        = string
+}
+
+variable "enable_additional_parameters" {
+  description = "Whether to create additional parameters (e.g. for production)."
+  type        = bool
+  default     = false
 }
 
 variable "environment" {
@@ -95,4 +106,9 @@ variable "redis_password_arn" {
   description = "The SSM Parameter ARN of password of the Redis cache."
   type        = string
   sensitive   = true
+}
+
+variable "slack_bot_token_suffix" {
+  description = "The Suffix for the Slack bot token."
+  type        = string
 }

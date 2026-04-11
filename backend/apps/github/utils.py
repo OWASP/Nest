@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
+import datetime
 import logging
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 import requests
+from django.utils import timezone
+from github.GithubException import GithubException
 from requests.exceptions import RequestException
 
-from apps.github.constants import GITHUB_REPOSITORY_RE
+from apps.github.constants import GITHUB_REPOSITORY_RE, OWASP_GITHUB_IO, OWASP_LOGIN
+
+if TYPE_CHECKING:
+    from github import Github
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -115,3 +122,60 @@ def normalize_url(url: str, *, check_path: bool = False) -> str | None:
     )
 
     return normalized_url.split("#")[0].strip().rstrip("/")
+
+
+def get_latest_invite_link_commit(
+    github: Github,
+    *,
+    file_path: str = "_includes/slack_invite.html",
+    max_commits_to_scan: int = 500,
+    repository_name: str | None = None,
+) -> tuple[datetime.datetime | None, str | None]:
+    """Return commit date and SHA of the newest matching change to the public Slack invite file.
+
+    Matches commits whose message contains the words ``update``, ``slack``, and ``invite`` in
+    that order (case-insensitive).
+    Uses committer date (when the change landed).
+
+    Args:
+        github: Authenticated PyGithub client.
+        file_path: Path within the repo to filter commits (default: Slack invite include).
+        max_commits_to_scan: Stop after this many commits with no match.
+        repository_name: Repository in ``owner/name`` form (default: ``owasp/owasp.github.io``).
+
+    Returns:
+        ``(timezone-aware datetime, full commit SHA)`` for the first matching commit
+        (newest first), or ``(None, None)`` if none.
+
+    """
+    repository_name = repository_name or f"{OWASP_LOGIN}/{OWASP_GITHUB_IO}"
+    try:
+        repository = github.get_repo(repository_name)
+    except GithubException:
+        logger.exception("Failed to load repo %s", repository_name)
+        raise
+
+    commits = repository.get_commits(path=file_path)
+    for index, data in enumerate(commits):
+        if index >= max_commits_to_scan:
+            logger.warning(
+                "No commit matched within first %s commits for %s",
+                max_commits_to_scan,
+                file_path,
+            )
+            return None, None
+        msg_lower = data.commit.message.lower()
+        rest = msg_lower
+        matched = True
+        for word in ("update", "slack", "invite"):
+            if word not in rest:
+                matched = False
+                break
+            rest = rest.split(word, 1)[1]
+        if not matched:
+            continue
+        dt = data.commit.committer.date
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, datetime.UTC)
+        return dt, data.sha
+    return None, None

@@ -46,6 +46,7 @@ NOSONAR
 Nadu
 Nagori
 Nominatim
+OWHF
 Obmondo
 Oleksiuk
 PGPASSWORD
@@ -71,6 +72,7 @@ Wandji
 Whistleblower
 Wörld
 Xmark
+ZYXW
 a2eeef
 acodec
 agentic
@@ -110,6 +112,7 @@ dvo
 elevenlabs
 env
 envsubst
+ephemerals
 euo
 facebookexternalhit
 gamesec
@@ -198,6 +201,7 @@ repositorycontributor
 requirepass
 rqworker
 rsc
+rudransh
 saft
 sakanashi
 samm
@@ -205,6 +209,7 @@ sbom
 schemathesis
 semgrep
 seo
+shrivastava
 skillstruck
 slackbot
 slideshare
