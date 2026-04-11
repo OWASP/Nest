@@ -6,14 +6,14 @@
     "test:e2e:ui": "npx playwright test --ui-host=0.0.0.0 --ui-port=3800"
   },
   "dependencies": {
-    "@playwright/test": "^1.58.1",
+    "@playwright/test": "1.59.1",
     "millify": "^6.1.0",
-    "dayjs": "^1.11.19"
+    "dayjs": "^1.11.20"
   },
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@10.32.1",
+  "packageManager": "pnpm@10.33.0",
   "pnpm": {
     "overrides": {
       "glob": "^11.1.0",
