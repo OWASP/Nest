@@ -20,6 +20,13 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         db_table = "owasp_sponsors"
         verbose_name_plural = "Sponsors"
 
+    class SponsorStatus(models.TextChoices):
+        """Sponsor status choices."""
+
+        DRAFT = "draft", "Draft"
+        ACTIVE = "active", "Active"
+        ARCHIVED = "archived", "Archived"
+
     class SponsorType(models.TextChoices):
         """Sponsor type choices."""
 
@@ -47,8 +54,15 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     url = models.URLField(verbose_name="Website URL", blank=True)
     job_url = models.URLField(verbose_name="Job URL", blank=True)
     image_url = models.CharField(verbose_name="Image Path", max_length=255, blank=True)
+    contact_email = models.EmailField(verbose_name="Contact Email", blank=True, default="")
 
     # Status fields
+    status = models.CharField(
+        verbose_name="Status",
+        max_length=20,
+        choices=SponsorStatus.choices,
+        default=SponsorStatus.ACTIVE,
+    )
     is_member = models.BooleanField(verbose_name="Is Corporate Sponsor", default=False)
     member_type = models.CharField(
         verbose_name="Member Type",
@@ -62,6 +76,24 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         max_length=20,
         choices=SponsorType.choices,
         default=SponsorType.NOT_SPONSOR,
+    )
+
+    # Entity associations (optional)
+    chapter = models.ForeignKey(
+        "owasp.Chapter",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="sponsors",
+        verbose_name="Chapter",
+    )
+    project = models.ForeignKey(
+        "owasp.Project",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="sponsors",
+        verbose_name="Project",
     )
 
     def __str__(self) -> str:
