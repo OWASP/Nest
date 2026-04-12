@@ -9,6 +9,8 @@ import {
   FaFolderOpen,
   FaSignsPost,
   FaCodeBranch,
+  FaChevronDown,
+  FaChevronUp,
 } from 'react-icons/fa6'
 import type { Issue } from 'types/issue'
 import type { Milestone } from 'types/milestone'
@@ -33,6 +35,9 @@ interface CardDetailsIssuesMilestonesProps {
   pullRequests?: PullRequest[]
   recentReleases?: Release[]
   showAvatar?: boolean
+  onLoadMorePullRequests?: () => void
+  onResetPullRequests?: () => void
+  isFetchingMore?: boolean
 }
 
 const MILESTONE_LIMIT = 4
@@ -50,9 +55,14 @@ const CardDetailsIssuesMilestones = ({
   pullRequests,
   recentReleases,
   showAvatar = true,
+  onLoadMorePullRequests,
+  onResetPullRequests,
+  isFetchingMore = false,
 }: CardDetailsIssuesMilestonesProps) => {
   const [showAllMilestones, setShowAllMilestones] = useState(false)
   const [showAllPRs, setShowAllPRs] = useState(false)
+
+  const prDisplayLimit = onLoadMorePullRequests || onResetPullRequests || showAllPRs ? undefined : 4
 
   return (
     <>
@@ -73,10 +83,38 @@ const CardDetailsIssuesMilestones = ({
       {type === 'module' && pullRequests && pullRequests.length > 0 && (
         <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
           <div className="grid grid-cols-1 gap-3">
-            {pullRequests.slice(0, showAllPRs ? undefined : 4).map((pr) => (
+            {pullRequests.slice(0, prDisplayLimit).map((pr) => (
               <MentorshipPullRequest key={pr.id} pr={pr} />
             ))}
-            {pullRequests.length > 4 && (
+
+            {(onLoadMorePullRequests || onResetPullRequests) && (
+              <div className="mt-4 flex justify-start gap-4">
+                {onLoadMorePullRequests && (
+                  <button
+                    disabled={isFetchingMore}
+                    onClick={onLoadMorePullRequests}
+                    type="button"
+                    className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                  >
+                    {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
+                    <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                  </button>
+                )}
+
+                {onResetPullRequests && (
+                  <button
+                    disabled={isFetchingMore}
+                    onClick={onResetPullRequests}
+                    type="button"
+                    className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                  >
+                    Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {!onLoadMorePullRequests && !onResetPullRequests && pullRequests.length > 4 && (
               <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
             )}
           </div>
