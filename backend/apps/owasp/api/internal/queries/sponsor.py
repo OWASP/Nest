@@ -15,7 +15,7 @@ class SponsorQuery:
     def sponsors(self) -> list[SponsorNode]:
         """Resolve sponsors."""
         return sorted(
-            Sponsor.objects.all(),
+            Sponsor.objects.filter(status=Sponsor.Status.ACTIVE),
             key=lambda x: {
                 Sponsor.SponsorType.DIAMOND: 1,
                 Sponsor.SponsorType.PLATINUM: 2,

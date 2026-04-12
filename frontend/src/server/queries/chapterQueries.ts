@@ -30,6 +30,15 @@ export const GET_CHAPTER_DATA = gql`
       summary
       updatedAt
       url
+      sponsors {
+        description
+        imageUrl
+        key
+        name
+        sponsorType
+        status
+        url
+      }
     }
     topContributors(chapter: $key) {
       id

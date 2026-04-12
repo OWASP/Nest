@@ -37,6 +37,13 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         GOLD = "Gold"
         SILVER = "Silver"
 
+    class Status(models.TextChoices):
+        """Sponsorship status choices."""
+
+        DRAFT = "draft"
+        ACTIVE = "active"
+        ARCHIVED = "archived"
+
     # Basic information
     description = models.TextField(verbose_name="Description", blank=True)
     key = models.CharField(verbose_name="Key", max_length=100, unique=True)
@@ -63,6 +70,32 @@ class Sponsor(BulkSaveModel, TimestampedModel):
         choices=SponsorType.choices,
         default=SponsorType.NOT_SPONSOR,
     )
+    status = models.CharField(
+        verbose_name="Status",
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
+
+    contact_email = models.EmailField(verbose_name="Contact Email", blank=True)
+
+    # Entity associations (optional)
+    chapter = models.ForeignKey(
+        "owasp.Chapter",
+        verbose_name="Associated Chapter",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sponsors",
+    )
+    project = models.ForeignKey(
+        "owasp.Project",
+        verbose_name="Associated Project",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sponsors",
+    )
 
     def __str__(self) -> str:
         """Sponsor human readable representation."""
@@ -77,6 +110,11 @@ class Sponsor(BulkSaveModel, TimestampedModel):
     def readable_sponsor_type(self) -> str:
         """Get human-readable sponsor type."""
         return self.SponsorType(self.sponsor_type).label
+
+    @property
+    def readable_status(self) -> str:
+        """Get human-readable status."""
+        return self.Status(self.status).label
 
     @staticmethod
     def bulk_save(  # type: ignore[override]
