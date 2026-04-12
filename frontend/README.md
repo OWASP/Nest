@@ -22,6 +22,20 @@ The frontend code lives in this directory. Key directories include:
 - `public/` - Static assets.
 - `__tests__/` - Automated tests.
 
+## Frontend Features
+
+The OWASP Nest frontend provides an interface for exploring projects,
+contributors, and community activity across the OWASP ecosystem.
+
+Key capabilities include:
+
+- **Project Discovery** – Browse OWASP projects and explore available contribution opportunities.
+- **Contributor Insights** – View contributor activity, participation, and engagement across projects.
+- **Search and Filtering** – Discover projects and issues using advanced search and filtering.
+- **Interactive Maps** – Visualize OWASP chapters and community presence using Leaflet maps.
+- **GraphQL Integration** – Efficient data fetching using Apollo Client connected to the Nest backend.
+- **Responsive UI** – Built with TailwindCSS and HeroUI for a modern and accessible interface.
+
 ## Running Locally
 
 The project uses **Docker** for local development. From the project root:
