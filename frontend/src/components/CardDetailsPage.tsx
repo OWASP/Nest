@@ -47,6 +47,9 @@ const DetailsCard = ({
   isActive = true,
   isArchived = false,
   languages,
+  onLoadMorePullRequests,
+  onResetPullRequests,
+  isFetchingMore,
   programKey,
   projectName,
   pullRequests,
@@ -142,6 +145,9 @@ const DetailsCard = ({
           pullRequests={pullRequests}
           recentReleases={recentReleases}
           showAvatar={showAvatar}
+          onLoadMorePullRequests={onLoadMorePullRequests}
+          onResetPullRequests={onResetPullRequests}
+          isFetchingMore={isFetchingMore}
         />
 
         <CardDetailsRepositoriesModules
@@ -152,7 +158,6 @@ const DetailsCard = ({
           modules={modules}
           admins={admins}
         />
-
         {IS_PROJECT_HEALTH_ENABLED &&
           type === 'project' &&
           healthMetricsData &&

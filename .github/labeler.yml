@@ -46,6 +46,11 @@ frontend-tests:
       - any-glob-to-any-file:
           - frontend/__tests__/**
 
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - infrastructure/**
+
 makefile:
   - changed-files:
       - any-glob-to-any-file:
