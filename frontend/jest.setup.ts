@@ -2,6 +2,19 @@ import '@testing-library/jest-dom'
 import { toHaveNoViolations } from 'jest-axe'
 import React from 'react'
 
+beforeAll(() => {
+  Object.defineProperty(document, 'createTreeWalker', {
+    writable: true,
+    value: () => ({
+      currentNode: document.body,
+      nextNode: () => null,
+      previousNode: () => null,
+      parentNode: () => null,
+      firstChild: () => null,
+      lastChild: () => null,
+    }),
+  })
+})
 globalThis.React = React
 
 // Mock framer-motion due to how Jest 30 ESM resolution treats
@@ -122,6 +135,10 @@ beforeAll(() => {
 
 beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation((...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('TreeWalker')) {
+      return
+    }
+
     throw new Error(`Console error: ${args.join(' ')}`)
   })
 

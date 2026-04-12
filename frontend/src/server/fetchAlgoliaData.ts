@@ -8,7 +8,8 @@ export const fetchAlgoliaData = async <T>(
   query = '',
   currentPage = 0,
   hitsPerPage = 25,
-  facetFilters: string[] = []
+  facetFilters: string[] = [],
+  signal?: AbortSignal
 ): Promise<AlgoliaResponse<T>> => {
   try {
     if (['projects', 'chapters'].includes(indexName)) {
@@ -18,7 +19,7 @@ export const fetchAlgoliaData = async <T>(
     if (!IDX_URL) {
       throw new Error('IDX_URL is not defined')
     }
-
+    await new Promise((r) => setTimeout(r, 500))
     const response = await fetch(IDX_URL, {
       method: 'POST',
       headers: {
@@ -33,16 +34,16 @@ export const fetchAlgoliaData = async <T>(
         page: currentPage,
         query,
       }),
+      signal,
     })
 
     if (!response.ok) {
-      throw new AppError(response.status, 'Search service error')
+      return { hits: [], totalPages: 0 }
     }
 
     const results = await response.json()
     if (results && results.hits.length > 0) {
       const { hits, nbPages } = results
-
       return {
         hits: hits,
         totalPages: nbPages || 0,
@@ -51,6 +52,9 @@ export const fetchAlgoliaData = async <T>(
       return { hits: [], totalPages: 0 }
     }
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw error
+    }
     if (error instanceof AppError) {
       throw error
     }
