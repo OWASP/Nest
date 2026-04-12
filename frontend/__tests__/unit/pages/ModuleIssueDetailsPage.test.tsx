@@ -180,6 +180,26 @@ describe('ModuleIssueDetailsPage', () => {
     expect(screen.getAllByAltText('Loading indicator')[0]).toBeInTheDocument()
   })
 
+  it('does not show full-page spinner when loading with cached issue (e.g. fetchMore)', () => {
+    mockUseQuery.mockImplementation((query) => {
+      if (query === GetProgramAdminsAndModulesDocument) {
+        return { data: mockAccessData, loading: false, error: undefined }
+      }
+      if (query === GetModuleIssueViewDocument) {
+        return {
+          data: mockIssueData,
+          loading: true,
+          error: undefined,
+          fetchMore: jest.fn(),
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
+    })
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+    expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
+  })
+
   it('renders an error display on query error', () => {
     const error = new Error('Test error')
     setupQueryMockError(error)
@@ -513,21 +533,29 @@ describe('ModuleIssueDetailsPage', () => {
       },
     })
 
-    mockUseQuery.mockReturnValue({
-      data: {
-        getModule: {
-          issueByNumber: {
-            ...mockIssueData.getModule.issueByNumber,
-            pullRequests: Array.from({ length: 4 }, (_, i) => ({
-              ...mockIssueData.getModule.issueByNumber.pullRequests[0],
-              id: `pr-${i}`,
-            })),
+    mockUseQuery.mockImplementation((query) => {
+      if (query === GetProgramAdminsAndModulesDocument) {
+        return { data: mockAccessData, loading: false, error: undefined }
+      }
+      if (query === GetModuleIssueViewDocument) {
+        return {
+          data: {
+            getModule: {
+              issueByNumber: {
+                ...mockIssueData.getModule.issueByNumber,
+                pullRequests: Array.from({ length: 4 }, (_, i) => ({
+                  ...mockIssueData.getModule.issueByNumber.pullRequests[0],
+                  id: `pr-${i}`,
+                })),
+              },
+            },
           },
-        },
-      },
-      loading: false,
-      error: undefined,
-      fetchMore: fetchMoreMock,
+          loading: false,
+          error: undefined,
+          fetchMore: fetchMoreMock,
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
     })
 
     render(<ModuleIssueDetailsPage />)
@@ -601,11 +629,19 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    mockUseQuery.mockReturnValue({
-      data: manyPRsData,
-      loading: false,
-      error: undefined,
-      fetchMore: jest.fn().mockResolvedValue({ data: manyPRsData }),
+    mockUseQuery.mockImplementation((query) => {
+      if (query === GetProgramAdminsAndModulesDocument) {
+        return { data: mockAccessData, loading: false, error: undefined }
+      }
+      if (query === GetModuleIssueViewDocument) {
+        return {
+          data: manyPRsData,
+          loading: false,
+          error: undefined,
+          fetchMore: jest.fn().mockResolvedValue({ data: manyPRsData }),
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
     })
     render(<ModuleIssueDetailsPage />)
 

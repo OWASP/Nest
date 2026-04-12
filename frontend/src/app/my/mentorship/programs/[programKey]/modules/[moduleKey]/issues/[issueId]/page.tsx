@@ -173,7 +173,7 @@ const ModuleIssueDetailsPage = () => {
     )
   }
 
-  if (loading) {
+  if (loading && !issue) {
     return <LoadingSpinner />
   }
 
