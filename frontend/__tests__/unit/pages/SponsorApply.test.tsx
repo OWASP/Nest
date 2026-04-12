@@ -13,6 +13,12 @@ jest.mock('utils/env.client', () => ({
 
 const mockFetch = jest.fn()
 
+const submitForm = () => {
+  fireEvent.submit(
+    screen.getByRole('button', { name: /submit application/i }).closest('form') as HTMLFormElement
+  )
+}
+
 describe('SponsorApplyPage', () => {
   const mockAddToast = addToast as jest.MockedFunction<typeof addToast>
 
@@ -46,7 +52,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/contact email/i), {
       target: { name: 'contactEmail', value: 'test@example.com' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(screen.getByText('Organization name is required.')).toBeInTheDocument()
@@ -60,7 +66,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/organization name/i), {
       target: { name: 'organizationName', value: 'My Org' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(screen.getByText('Contact email is required.')).toBeInTheDocument()
@@ -77,7 +83,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/contact email/i), {
       target: { name: 'contactEmail', value: 'not-an-email' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(screen.getByText('Please enter a valid email address.')).toBeInTheDocument()
@@ -88,7 +94,7 @@ describe('SponsorApplyPage', () => {
   test('clears org name error when user types in the field', async () => {
     render(<SponsorApplyPage />)
 
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
     await waitFor(() => {
       expect(screen.getByText('Organization name is required.')).toBeInTheDocument()
     })
@@ -107,7 +113,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/organization name/i), {
       target: { name: 'organizationName', value: 'My Org' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
     await waitFor(() => {
       expect(screen.getByText('Contact email is required.')).toBeInTheDocument()
     })
@@ -131,7 +137,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/contact email/i), {
       target: { name: 'contactEmail', value: 'sponsor@example.com' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(screen.getByText('Thank You for Your Interest!')).toBeInTheDocument()
@@ -159,7 +165,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/contact email/i), {
       target: { name: 'contactEmail', value: 'sponsor@example.com' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(mockAddToast).toHaveBeenCalledWith(
@@ -184,7 +190,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/contact email/i), {
       target: { name: 'contactEmail', value: 'sponsor@example.com' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(mockAddToast).toHaveBeenCalledWith(
@@ -207,7 +213,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/contact email/i), {
       target: { name: 'contactEmail', value: 'sponsor@example.com' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(mockAddToast).toHaveBeenCalledWith(
@@ -245,7 +251,7 @@ describe('SponsorApplyPage', () => {
     fireEvent.change(screen.getByLabelText(/sponsorship interest/i), {
       target: { name: 'message', value: 'Interested in Gold tier' },
     })
-    fireEvent.submit(screen.getByRole('button', { name: /submit application/i }).closest('form')!)
+    submitForm()
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(

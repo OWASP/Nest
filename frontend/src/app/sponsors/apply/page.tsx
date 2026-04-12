@@ -70,7 +70,8 @@ export default function SponsorApplyPage() {
       payload['message'] = formData.message
       payload['organization_name'] = formData.organizationName
       payload['website'] = formData.website
-      const response = await fetch(new URL('/api/v0/sponsors/apply', API_URL).toString(), {
+      const baseUrl = (API_URL ?? '').replace(/\/$/, '')
+      const response = await fetch(`${baseUrl}/api/v0/sponsors/apply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
