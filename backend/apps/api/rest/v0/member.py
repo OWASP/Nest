@@ -73,6 +73,8 @@ def list_members(
     request: HttpRequest,
     filters: MemberFilter = Query(...),
     ordering: Literal[
+        "calculated_score",
+        "-calculated_score",
         "created_at",
         "-created_at",
         "updated_at",
@@ -88,7 +90,9 @@ def list_members(
     ),
 ) -> list[Member]:
     """Get all members."""
-    return filters.filter(UserModel.objects.order_by(ordering or "-created_at"))
+    return filters.filter(
+        UserModel.objects.order_by(ordering or "-calculated_score", "-created_at", "-id")
+    )
 
 
 @router.get(
