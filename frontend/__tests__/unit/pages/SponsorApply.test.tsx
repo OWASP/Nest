@@ -38,12 +38,16 @@ describe('SponsorApplyPage', () => {
 
   test('renders back to sponsors link', () => {
     render(<SponsorApplyPage />)
-    expect(screen.getByText('Back to Sponsors')).toBeInTheDocument()
+    const link = screen.getByRole('link', { name: /back to sponsors/i })
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('href', '/sponsors')
   })
 
   test('renders cancel link pointing to /sponsors', () => {
     render(<SponsorApplyPage />)
-    expect(screen.getByText('Cancel')).toBeInTheDocument()
+    const link = screen.getByRole('link', { name: /cancel/i })
+    expect(link).toBeInTheDocument()
+    expect(link).toHaveAttribute('href', '/sponsors')
   })
 
   test('shows validation error when org name is empty on submit', async () => {
