@@ -15,6 +15,7 @@ from apps.github.constants import OWASP_GITHUB_IO, OWASP_LOGIN
 from apps.slack.constants import OWASP_WORKSPACE_ID
 from apps.slack.management.commands.slack_check_invite_link import (
     ERR_INVITE_BASELINE_UNSET,
+    MSG_SKIP_NO_ALERT_CHANNEL,
 )
 from apps.slack.management.commands.slack_check_invite_link import (
     Command as SlackCheckInviteLinkCommand,
@@ -83,11 +84,48 @@ class TestSlackCheckInviteLinkCommand:
         mock_get_workspace.return_value = fake_workspace
         mock_commit_at.return_value = (datetime(2025, 1, 1, tzinfo=UTC), commit_sha)
         fake_workspace.total_members_count = 100
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
         call_command("slack_check_invite_link")
         assert fake_workspace.invite_link_created_at == datetime(2025, 1, 1, tzinfo=UTC)
         assert fake_workspace.invite_link_commit_sha == commit_sha
         assert fake_workspace.invite_link_member_count == 100
         assert fake_workspace.invite_link_alert_threshold == 450
+
+    @patch.object(Workspace, "get_default_workspace")
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
+    def test_resets_baseline_when_new_invite_commit_despite_existing_baseline(
+        self,
+        mock_gh_client,
+        mock_commit_at,
+        mock_web_client_class,
+        mock_get_workspace,
+        fake_workspace,
+    ):
+        """A new GitHub invite commit must replace the previous link's member baseline."""
+        old_time = datetime(2025, 1, 1, tzinfo=UTC)
+        old_sha = "b" * 40
+        new_time = datetime(2025, 6, 1, tzinfo=UTC)
+        new_sha = "c" * 40
+        mock_get_workspace.return_value = fake_workspace
+        mock_commit_at.return_value = (new_time, new_sha)
+        mock_web_client_class.return_value = MagicMock()
+
+        fake_workspace.invite_link_created_at = old_time
+        fake_workspace.invite_link_commit_sha = old_sha
+        fake_workspace.invite_link_member_count = 100
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
+        fake_workspace.total_members_count = 250
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+
+        call_command("slack_check_invite_link")
+
+        assert fake_workspace.invite_link_created_at == new_time
+        assert fake_workspace.invite_link_commit_sha == new_sha
+        assert fake_workspace.invite_link_member_count == 250
+        assert fake_workspace.invite_link_alert_threshold == 600
+        assert fake_workspace.invite_link_last_alert_sent_at is None
 
     @patch.object(Workspace, "get_default_workspace")
     @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
@@ -102,8 +140,11 @@ class TestSlackCheckInviteLinkCommand:
         mock_get_workspace.return_value = fake_workspace
         mock_commit_at.return_value = (None, None)
         fake_workspace.total_members_count = 100
-        call_command("slack_check_invite_link")
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+        out = StringIO()
+        call_command("slack_check_invite_link", stdout=out)
         assert fake_workspace.invite_link_member_count is None
+        assert "Invite baseline not set" in out.getvalue()
 
     @patch.object(Workspace, "get_default_workspace")
     @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
@@ -192,6 +233,7 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace.invite_link_created_at = commit_time
         fake_workspace.invite_link_commit_sha = "d" * 40
         fake_workspace.total_members_count = 1000
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
         mock_web_client_class.return_value = MagicMock()
 
         call_command("slack_check_invite_link")
@@ -217,6 +259,7 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace,
     ):
         mock_get_workspace.return_value = fake_workspace
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
         fake_workspace._bot_token = ""
         mock_commit_at.return_value = (None, None)
         with pytest.raises(CommandError, match="No SLACK_BOT_TOKEN_"):
@@ -249,6 +292,7 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace.invite_link_created_at = commit_time
         fake_workspace.invite_link_commit_sha = commit_sha
         fake_workspace.invite_link_member_count = 100
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
         mock_web_client_class.return_value = MagicMock()
 
         out = StringIO()
@@ -292,7 +336,7 @@ class TestSlackCheckInviteLinkCommand:
     @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
     @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
     @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
-    def test_alert_fails_gracefully_when_channel_id_empty(
+    def test_skips_all_checks_when_invite_link_alert_channel_id_empty(
         self,
         mock_gh_client,
         mock_commit_at,
@@ -316,8 +360,10 @@ class TestSlackCheckInviteLinkCommand:
         out = StringIO()
         call_command("slack_check_invite_link", stdout=out)
 
-        assert "invite_link_alert_channel_id is empty" in out.getvalue()
-        mock_web_client_class.return_value.chat_postMessage.assert_not_called()
+        assert MSG_SKIP_NO_ALERT_CHANNEL in out.getvalue()
+        mock_gh_client.assert_not_called()
+        mock_commit_at.assert_not_called()
+        mock_web_client_class.assert_not_called()
 
     @patch.object(Workspace, "get_default_workspace")
     @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
@@ -371,21 +417,37 @@ class TestSlackCheckInviteLinkCommand:
         fake_workspace.invite_link_commit_sha = "a" * 40
         fake_workspace.total_members_count = 100
         fake_workspace.invite_link_member_count = 50
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
 
         with pytest.raises(CommandError, match="GitHub API error"):
             call_command("slack_check_invite_link")
         mock_commit_at.assert_not_called()
 
+    def test_get_normalized_strips_whitespace_and_leading_hash(self, fake_workspace):
+        fake_workspace.invite_link_alert_channel_id = "  #C01234567  "
+        assert (
+            SlackCheckInviteLinkCommand.get_normalized_invite_link_alert_channel_id(fake_workspace)
+            == "C01234567"
+        )
 
-class TestInviteLinkAlertCcLine:
-    """Unit tests for invite_link_alert_cc_line helper."""
+    def test_get_normalized_empty_when_none_or_blank(self, fake_workspace):
+        fake_workspace.invite_link_alert_channel_id = None
+        assert (
+            SlackCheckInviteLinkCommand.get_normalized_invite_link_alert_channel_id(fake_workspace)
+            == ""
+        )
+        fake_workspace.invite_link_alert_channel_id = "   "
+        assert (
+            SlackCheckInviteLinkCommand.get_normalized_invite_link_alert_channel_id(fake_workspace)
+            == ""
+        )
 
-    def test_empty_when_not_a_list(self):
+    def test_invite_link_alert_cc_line_empty_when_not_a_list(self):
         cmd = SlackCheckInviteLinkCommand()
         assert cmd.invite_link_alert_cc_line(None) == ""
         assert cmd.invite_link_alert_cc_line("U123") == ""
         assert cmd.invite_link_alert_cc_line({}) == ""
 
-    def test_empty_when_list_has_only_blank_ids(self):
+    def test_invite_link_alert_cc_line_empty_when_list_has_only_blank_ids(self):
         cmd = SlackCheckInviteLinkCommand()
         assert cmd.invite_link_alert_cc_line(["", ""]) == ""

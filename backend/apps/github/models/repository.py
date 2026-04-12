@@ -264,11 +264,15 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
 
         # Languages.
         if languages is not None:
-            total_size = sum(languages.values())
-            self.languages = {
-                language: round(size * 100.0 / total_size, 1)
-                for language, size in languages.items()
-            }
+            self.languages = (
+                {
+                    language: round(size * 100.0 / total_size, 1)
+                    for language, size in languages.items()
+                    if isinstance(size, int)
+                }
+                if (total_size := sum(v for v in languages.values() if isinstance(v, int))) > 0
+                else {}
+            )
 
         # License.
         self.license = gh_repository.license.spdx_id if gh_repository.license else ""

@@ -7,15 +7,11 @@ on:
       - dev
       - feature/**
       - main
-    paths-ignore:
-      - backend/data/nest.dump
   push:
     branches:
       - dev
       - feature/**
       - main
-    paths-ignore:
-      - backend/data/nest.dump
   release:
     types:
       - published
