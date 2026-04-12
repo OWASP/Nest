@@ -76,7 +76,12 @@ export default function MovingLogos({ sponsors }: Readonly<MovingLogosProps>) {
         </p>
         <p>
           If you're interested in sponsoring the OWASP Nest project ❤️{' '}
-          <Link href="/sponsors/apply" className="text-primary font-medium hover:underline">
+          <Link
+            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+            className="text-primary font-medium hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             click here
           </Link>
           .

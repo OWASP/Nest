@@ -27,7 +27,7 @@ const validateForm = (data: FormData): FormErrors => {
   }
   if (!data.contactEmail.trim()) {
     errors.contactEmail = 'Contact email is required.'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail)) {
+  } else if (!/^[^\s@]+@[^\s@.]+\.[^\s@]+$/.test(data.contactEmail)) {
     errors.contactEmail = 'Please enter a valid email address.'
   }
   return errors
@@ -70,7 +70,7 @@ export default function SponsorApplyPage() {
       payload['message'] = formData.message
       payload['organization_name'] = formData.organizationName
       payload['website'] = formData.website
-      const response = await fetch(`${API_URL}api/v0/sponsors/apply`, {
+      const response = await fetch(new URL('/api/v0/sponsors/apply', API_URL).toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,9 +90,13 @@ export default function SponsorApplyPage() {
           variant: 'solid',
         })
       } else {
-        const data = await response.json()
+        const isJson = response.headers?.get('content-type')?.includes('application/json')
+        const errorMessage = isJson
+          ? (((await response.json()) as { message?: string }).message ??
+            'Failed to submit application. Please try again.')
+          : (await response.text()) || 'Failed to submit application. Please try again.'
         addToast({
-          description: data.message || 'Failed to submit application. Please try again.',
+          description: errorMessage,
           title: 'Submission Failed',
           timeout: 5000,
           shouldShowTimeoutProgress: true,

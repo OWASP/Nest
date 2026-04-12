@@ -3,6 +3,8 @@
 from http import HTTPStatus
 from typing import Literal
 
+from django.db import IntegrityError, transaction
+from django.db.models import Case, IntegerField, Value, When
 from django.http import HttpRequest
 from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
@@ -123,10 +125,19 @@ def list_nest_sponsors(
     request: HttpRequest,
 ) -> list[Sponsor]:
     """Get active Nest sponsors for external integrations (GitHub Actions, dashboards, etc.)."""
+    tier_order = Case(
+        When(sponsor_type=SponsorModel.SponsorType.DIAMOND, then=Value(1)),
+        When(sponsor_type=SponsorModel.SponsorType.PLATINUM, then=Value(2)),
+        When(sponsor_type=SponsorModel.SponsorType.GOLD, then=Value(3)),
+        When(sponsor_type=SponsorModel.SponsorType.SILVER, then=Value(4)),
+        When(sponsor_type=SponsorModel.SponsorType.SUPPORTER, then=Value(5)),
+        default=Value(6),
+        output_field=IntegerField(),
+    )
     return list(
-        SponsorModel.objects.filter(status=SponsorModel.SponsorStatus.ACTIVE).order_by(
-            "sponsor_type", "name"
-        )
+        SponsorModel.objects.filter(status=SponsorModel.SponsorStatus.ACTIVE)
+        .annotate(tier_order=tier_order)
+        .order_by("tier_order", "name")
     )
 
 
@@ -147,22 +158,30 @@ def apply_sponsor(
     """Submit a sponsor application."""
     key = slugify(payload.organization_name)
 
-    if SponsorModel.objects.filter(key=key).exists():
+    if not key:
         return Response(
-            {"message": "A sponsor application with this organization name already exists."},
+            {"message": "Organization name must produce a valid key."},
             status=HTTPStatus.BAD_REQUEST,
         )
 
-    sponsor = SponsorModel(
-        contact_email=payload.contact_email,
-        description=payload.message,
-        key=key,
-        name=payload.organization_name,
-        sort_name=payload.organization_name,
-        status=SponsorModel.SponsorStatus.DRAFT,
-        url=payload.website,
+    duplicate_response = Response(
+        {"message": "A sponsor application with this organization name already exists."},
+        status=HTTPStatus.BAD_REQUEST,
     )
-    sponsor.save()
+
+    try:
+        with transaction.atomic():
+            SponsorModel.objects.create(
+                contact_email=payload.contact_email,
+                description=payload.message,
+                key=key,
+                name=payload.organization_name,
+                sort_name=payload.organization_name,
+                status=SponsorModel.SponsorStatus.DRAFT,
+                url=payload.website,
+            )
+    except IntegrityError:
+        return duplicate_response
 
     return Response(
         {

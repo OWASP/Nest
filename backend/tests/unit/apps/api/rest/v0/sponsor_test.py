@@ -2,6 +2,7 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
+from django.db import IntegrityError
 
 from apps.api.rest.v0.sponsor import (
     SponsorDetail,
@@ -141,10 +142,12 @@ class TestListNestSponsors:
 
     @patch("apps.api.rest.v0.sponsor.SponsorModel")
     def test_list_nest_sponsors(self, mock_sponsor_model):
-        """Test listing Nest sponsors returns active sponsors ordered by type and name."""
+        """Test that active sponsors are ordered by tier precedence then name."""
         mock_request = MagicMock()
         mock_queryset = MagicMock()
-        mock_sponsor_model.objects.filter.return_value.order_by.return_value = mock_queryset
+        (
+            mock_sponsor_model.objects.filter.return_value.annotate.return_value.order_by
+        ).return_value = mock_queryset
         mock_queryset.__iter__ = MagicMock(return_value=iter([]))
 
         list_nest_sponsors(mock_request)
@@ -152,9 +155,9 @@ class TestListNestSponsors:
         mock_sponsor_model.objects.filter.assert_called_once_with(
             status=mock_sponsor_model.SponsorStatus.ACTIVE
         )
-        mock_sponsor_model.objects.filter.return_value.order_by.assert_called_once_with(
-            "sponsor_type", "name"
-        )
+        (
+            mock_sponsor_model.objects.filter.return_value.annotate.return_value.order_by
+        ).assert_called_once_with("tier_order", "name")
 
 
 class TestGetSponsor:
@@ -186,16 +189,16 @@ class TestGetSponsor:
 class TestApplySponsor:
     """Tests for apply_sponsor endpoint."""
 
+    @patch("apps.api.rest.v0.sponsor.transaction")
     @patch("apps.api.rest.v0.sponsor.SponsorModel")
     @patch("apps.api.rest.v0.sponsor.slugify")
-    def test_apply_sponsor_success(self, mock_slugify, mock_sponsor_model):
+    def test_apply_sponsor_success(self, mock_slugify, mock_sponsor_model, mock_transaction):
         """Test successful sponsor application."""
         mock_request = MagicMock()
         mock_slugify.return_value = "test-org"
-        mock_sponsor_model.objects.filter.return_value.exists.return_value = False
-        mock_sponsor_instance = MagicMock()
-        mock_sponsor_model.return_value = mock_sponsor_instance
         mock_sponsor_model.SponsorStatus.DRAFT = "draft"
+        mock_transaction.atomic.return_value.__enter__ = MagicMock(return_value=None)
+        mock_transaction.atomic.return_value.__exit__ = MagicMock(return_value=False)
 
         payload = MagicMock()
         payload.organization_name = "Test Org"
@@ -206,18 +209,46 @@ class TestApplySponsor:
         result = apply_sponsor(mock_request, payload)
 
         assert result.status_code == HTTPStatus.CREATED
-        mock_sponsor_instance.save.assert_called_once()
+        mock_sponsor_model.objects.create.assert_called_once_with(
+            contact_email=payload.contact_email,
+            description=payload.message,
+            key="test-org",
+            name=payload.organization_name,
+            sort_name=payload.organization_name,
+            status=mock_sponsor_model.SponsorStatus.DRAFT,
+            url=payload.website,
+        )
 
+    @patch("apps.api.rest.v0.sponsor.transaction")
     @patch("apps.api.rest.v0.sponsor.SponsorModel")
     @patch("apps.api.rest.v0.sponsor.slugify")
-    def test_apply_sponsor_duplicate(self, mock_slugify, mock_sponsor_model):
-        """Test sponsor application with duplicate organization name."""
+    def test_apply_sponsor_duplicate(self, mock_slugify, mock_sponsor_model, mock_transaction):
+        """Test sponsor application with duplicate organization name returns BAD_REQUEST."""
         mock_request = MagicMock()
         mock_slugify.return_value = "existing-org"
-        mock_sponsor_model.objects.filter.return_value.exists.return_value = True
+        mock_sponsor_model.SponsorStatus.DRAFT = "draft"
+        mock_transaction.atomic.return_value.__enter__ = MagicMock(return_value=None)
+        mock_transaction.atomic.return_value.__exit__ = MagicMock(return_value=False)
+        mock_sponsor_model.objects.create.side_effect = IntegrityError
 
         payload = MagicMock()
         payload.organization_name = "Existing Org"
+        payload.website = "https://existing.org"
+        payload.contact_email = "sponsor@existing.org"
+        payload.message = ""
+
+        result = apply_sponsor(mock_request, payload)
+
+        assert result.status_code == HTTPStatus.BAD_REQUEST
+
+    @patch("apps.api.rest.v0.sponsor.slugify")
+    def test_apply_sponsor_empty_key(self, mock_slugify):
+        """Test sponsor application with org name that produces an empty slug."""
+        mock_request = MagicMock()
+        mock_slugify.return_value = ""
+
+        payload = MagicMock()
+        payload.organization_name = "!!!"
 
         result = apply_sponsor(mock_request, payload)
 

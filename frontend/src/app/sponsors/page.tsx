@@ -121,6 +121,32 @@ export default function SponsorsPage() {
     return <LoadingSpinner />
   }
 
+  if (graphQLRequestError) {
+    return (
+      <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
+        <div className="mx-auto max-w-6xl">
+          <SecondaryCard className="text-center">
+            <div className="py-12">
+              <FaGem className="mx-auto mb-4 h-12 w-12 text-gray-300 dark:text-gray-600" />
+              <h3 className="mb-2 text-xl font-semibold text-gray-700 dark:text-gray-300">
+                Unable to load sponsors
+              </h3>
+              <p className="mb-6 text-gray-500 dark:text-gray-400">
+                Something went wrong while fetching sponsor data. Please try again later.
+              </p>
+              <Link
+                href="/sponsors"
+                className="inline-block rounded-lg bg-blue-500 px-8 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:bg-blue-600 hover:shadow-lg"
+              >
+                Retry
+              </Link>
+            </div>
+          </SecondaryCard>
+        </div>
+      </div>
+    )
+  }
+
   const sponsors = graphQLData?.sponsors ?? []
 
   const groupedSponsors = TIER_ORDER.reduce<Record<string, Sponsor[]>>((acc, tier) => {
