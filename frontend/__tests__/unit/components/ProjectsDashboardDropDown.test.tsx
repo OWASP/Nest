@@ -74,7 +74,7 @@ jest.mock('@heroui/react', () => ({
       {children}
     </div>
   ),
-  DropdownSection: ({ children, title }: { children: React.ReactNode; title: string }) => (
+  DropdownSection: ({ children, 'data-title': title }: { children: React.ReactNode; 'data-title': string }) => (
     <fieldset data-testid="dropdown-section" data-title={title}>
       <legend id={`section-${title}`} className="section-title">
         {title}
@@ -586,7 +586,7 @@ describe('ProjectsDashboardDropDown Component', () => {
       render(<ProjectsDashboardDropDown {...defaultProps} onAction={mockOnAction} />)
 
       const button = screen.getByTestId('dropdown-button')
-      expect(button).toHaveAttribute('data-variant', 'solid')
+      expect(button).toHaveAttribute('data-variant', 'primary')
     })
 
     it('renders proper flex layout structure', () => {

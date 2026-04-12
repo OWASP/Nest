@@ -71,7 +71,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    expect(screen.queryByLabelText('Name')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/^Name/)).not.toBeInTheDocument()
   })
 
   test('redirects with toast if not a project leader', async () => {
@@ -114,7 +114,7 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+    expect(await screen.findByLabelText(/^Name/)).toBeInTheDocument()
   })
 
   test('submits form and redirects on success', async () => {
@@ -138,22 +138,22 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    fireEvent.change(screen.getByLabelText('Name'), {
+    fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: 'Test Program' },
     })
     fireEvent.change(screen.getByLabelText(/^Description/), {
       target: { value: 'A description' },
     })
-    fireEvent.change(screen.getByLabelText('Start Date'), {
+    fireEvent.change(screen.getByLabelText(/Start Date/), {
       target: { value: '2025-01-01' },
     })
-    fireEvent.change(screen.getByLabelText('End Date'), {
+    fireEvent.change(screen.getByLabelText(/End Date/), {
       target: { value: '2025-12-31' },
     })
-    fireEvent.change(screen.getByLabelText('Tags'), {
+    fireEvent.change(screen.getByLabelText(/Tags/), {
       target: { value: 'tag1, tag2' },
     })
-    fireEvent.change(screen.getByLabelText('Domains'), {
+    fireEvent.change(screen.getByLabelText(/Domains/), {
       target: { value: 'domain1, domain2' },
     })
 
@@ -201,16 +201,16 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    fireEvent.change(screen.getByLabelText('Name'), {
+    fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: 'Test Program' },
     })
     fireEvent.change(screen.getByLabelText(/^Description/), {
       target: { value: 'A description' },
     })
-    fireEvent.change(screen.getByLabelText('Start Date'), {
+    fireEvent.change(screen.getByLabelText(/Start Date/), {
       target: { value: '2025-01-01' },
     })
-    fireEvent.change(screen.getByLabelText('End Date'), {
+    fireEvent.change(screen.getByLabelText(/End Date/), {
       target: { value: '2025-12-31' },
     })
 
@@ -241,16 +241,16 @@ describe('CreateProgramPage (comprehensive tests)', () => {
 
     render(<CreateProgramPage />)
 
-    fireEvent.change(screen.getByLabelText('Name'), {
+    fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: 'Test Program' },
     })
     fireEvent.change(screen.getByLabelText(/^Description/), {
       target: { value: 'A description' },
     })
-    fireEvent.change(screen.getByLabelText('Start Date'), {
+    fireEvent.change(screen.getByLabelText(/Start Date/), {
       target: { value: '2025-01-01' },
     })
-    fireEvent.change(screen.getByLabelText('End Date'), {
+    fireEvent.change(screen.getByLabelText(/End Date/), {
       target: { value: '2025-12-31' },
     })
 
