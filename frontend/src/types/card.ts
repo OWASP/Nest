@@ -38,7 +38,7 @@ export type CardProps = {
   url: string
 }
 
-type Stats = {
+export type Stats = {
   icon: IconType
   pluralizedName?: string
   unit?: string
