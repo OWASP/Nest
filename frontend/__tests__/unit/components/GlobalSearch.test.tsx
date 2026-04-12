@@ -80,9 +80,9 @@ describe('GlobalSearch', () => {
     })
   })
 
-  test('opens search overlay with Cmd+K keyboard shortcut', async () => {
+  test('opens search overlay with / keyboard shortcut', async () => {
     render(<GlobalSearch />)
-    fireEvent.keyDown(document, { key: 'k', metaKey: true })
+    fireEvent.keyDown(document.body, { key: '/' })
 
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -124,9 +124,7 @@ describe('GlobalSearch', () => {
     fireEvent.click(screen.getByLabelText('Open search'))
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Start typing to search across projects, chapters/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/Try searches like "OWASP", "London"/)).toBeInTheDocument()
     })
   })
 
@@ -308,9 +306,7 @@ describe('GlobalSearch', () => {
     await waitFor(() => {
       const newInput = screen.getByPlaceholderText('Search the OWASP community...')
       expect(newInput).toHaveValue('')
-      expect(
-        screen.getByText(/Start typing to search across projects, chapters/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/Try searches like "OWASP", "London"/)).toBeInTheDocument()
     })
   })
 

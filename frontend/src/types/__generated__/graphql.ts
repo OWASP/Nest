@@ -235,6 +235,7 @@ export type IssueNode = Node & {
   pullRequests: Array<PullRequestNode>;
   repositoryName?: Maybe<Scalars['String']['output']>;
   state: Scalars['String']['output'];
+  taskDeadline?: Maybe<Scalars['DateTime']['output']>;
   title: Scalars['String']['output'];
   url: Scalars['String']['output'];
 };
@@ -332,6 +333,7 @@ export type ModuleNode = {
   mentees: Array<UserNode>;
   mentors: Array<MentorNode>;
   name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
   program?: Maybe<ProgramNode>;
   projectId?: Maybe<Scalars['ID']['output']>;
   projectName?: Maybe<Scalars['String']['output']>;
@@ -395,6 +397,7 @@ export type Mutation = {
   deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
+  reorderModules: Array<ModuleNode>;
   revokeApiKey: RevokeApiKeyResult;
   setTaskDeadline: ModuleNode;
   unassignIssueFromUser: ModuleNode;
@@ -443,6 +446,11 @@ export type MutationDeleteModuleArgs = {
 
 export type MutationGithubAuthArgs = {
   accessToken: Scalars['String']['input'];
+};
+
+
+export type MutationReorderModulesArgs = {
+  inputData: ReorderModulesInput;
 };
 
 
@@ -718,6 +726,7 @@ export type Query = {
   getModule?: Maybe<ModuleNode>;
   getProgram?: Maybe<ProgramNode>;
   getProgramModules: Array<ModuleNode>;
+  getProjectModules: Array<ModuleNode>;
   isMentor: Scalars['Boolean']['output'];
   isProjectLeader: Scalars['Boolean']['output'];
   memberSnapshot?: Maybe<MemberSnapshotNode>;
@@ -799,6 +808,11 @@ export type QueryGetProgramArgs = {
 
 export type QueryGetProgramModulesArgs = {
   programKey: Scalars['String']['input'];
+};
+
+
+export type QueryGetProjectModulesArgs = {
+  projectKey: Scalars['String']['input'];
 };
 
 
@@ -969,6 +983,11 @@ export type ReleaseNode = Node & {
   repositoryName?: Maybe<Scalars['String']['output']>;
   tagName: Scalars['String']['output'];
   url: Scalars['String']['output'];
+};
+
+export type ReorderModulesInput = {
+  moduleKeys: Array<Scalars['String']['input']>;
+  programKey: Scalars['String']['input'];
 };
 
 export type RepositoryContributorNode = {

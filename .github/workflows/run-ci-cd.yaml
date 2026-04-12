@@ -7,15 +7,11 @@ on:
       - dev
       - feature/**
       - main
-    paths-ignore:
-      - backend/data/nest.dump
   push:
     branches:
       - dev
       - feature/**
       - main
-    paths-ignore:
-      - backend/data/nest.dump
   release:
     types:
       - published
@@ -49,7 +45,7 @@ jobs:
           python-version: '3.13'
 
       - name: Set up pre-commit cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -59,7 +55,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@dfcb455ed8d56b55edf6447a37379108181a6707
@@ -88,7 +84,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
         with:
           version: 10
           run_install: true
@@ -141,10 +137,6 @@ jobs:
 
   run-security-scan-code:
     name: Run code security scan
-    needs:
-      - check-frontend
-      - pre-commit
-      - spellcheck
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -156,7 +148,7 @@ jobs:
         run: make security-scan-code-semgrep
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -164,12 +156,15 @@ jobs:
 
       - name: Run Trivy security scan
         run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
-    timeout-minutes: 5
+    timeout-minutes: 15
 
   run-backend-tests:
     name: Run backend tests
     needs:
+      - check-frontend
+      - pre-commit
       - run-security-scan-code
+      - spellcheck
     permissions:
       contents: read
       id-token: write
@@ -208,7 +203,7 @@ jobs:
           exit $EXIT_CODE
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
         with:
           fail_ci_if_error: false
           files: backend/coverage.xml
@@ -219,7 +214,10 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
+      - check-frontend
+      - pre-commit
       - run-security-scan-code
+      - spellcheck
     permissions:
       contents: read
       id-token: write
@@ -257,18 +255,21 @@ jobs:
           exit $EXIT_CODE
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
         with:
           fail_ci_if_error: false
           files: frontend/coverage/lcov.info
           flags: frontend
           use_oidc: true
-    timeout-minutes: 5
+    timeout-minutes: 10
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
+      - check-frontend
+      - pre-commit
       - run-security-scan-code
+      - spellcheck
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -327,7 +328,7 @@ jobs:
         run: |
           timeout 5m bash -c '
             until wget --spider http://localhost:9000/a; do
-              echo "Waiting for backend..."
+              echo "Waiting for the backend..."
               sleep 5
             done
           '
@@ -339,12 +340,53 @@ jobs:
         run: |
           pg_restore -h localhost -U nest_user_e2e -d nest_db_e2e < backend/data/nest.dump
 
-      - name: Build frontend end-to-end testing image
+      - name: Build frontend image
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
+        with:
+          build-args: |
+            ENV_FILE=.env.e2e.example
+            NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
+          cache-from: |
+            type=gha
+            type=registry,ref=owasp/nest:frontend-e2e-cache
+          cache-to: |
+            type=gha,compression=zstd
+          context: frontend
+          file: docker/frontend/Dockerfile
+          load: true
+          platforms: linux/amd64
+          tags: owasp/nest:frontend-e2e-latest
+
+      - name: Run frontend in the background
+        run: |
+          docker run \
+            --env-file frontend/.env.e2e.example \
+            --name e2e-nest-frontend \
+            --network host \
+            -d \
+            -e NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
+            -e NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
+            -p 3000:3000 \
+            owasp/nest:frontend-e2e-latest
+
+      - name: Wait for frontend to be ready
+        run: |
+          timeout 5m bash -c '
+            until wget --spider http://localhost:3000/; do
+              echo "Waiting for the frontend..."
+              sleep 5
+            done
+          '
+          echo "Frontend is up!"
+
+      - name: Build e2e testing image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
           cache-from: |
             type=gha
-            type=registry,ref=owasp/nest:test-frontend-e2e-cache
+            type=registry,ref=owasp/nest:frontend-e2e-tests-cache
+          cache-to: |
+            type=gha,compression=zstd
           context: frontend
           file: docker/frontend/Dockerfile.e2e.test
           load: true
@@ -353,13 +395,19 @@ jobs:
 
       - name: Run frontend end-to-end tests
         run: |
-          docker run --env-file frontend/.env.e2e.example owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
-    timeout-minutes: 15
+          docker run \
+            --network host \
+            -e FRONTEND_URL=http://localhost:3000 \
+            owasp/nest:test-frontend-e2e-latest pnpm run test:e2e
+    timeout-minutes: 20
 
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
+      - check-frontend
+      - pre-commit
       - run-security-scan-code
+      - spellcheck
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -389,8 +437,68 @@ jobs:
           docker run --env-file frontend/.env.example owasp/nest:test-frontend-a11y-latest pnpm run test:a11y
     timeout-minutes: 5
 
+  run-graphql-fuzz-tests:
+    name: Run GraphQL fuzz tests
+    if: false
+    needs:
+      - check-frontend
+      - pre-commit
+      - run-security-scan-code
+      - spellcheck
+    uses: ./.github/workflows/run-fuzz-tests.yaml
+    with:
+      test-file: graphql_test.py
+
+  run-rest-fuzz-tests:
+    name: Run REST fuzz tests
+    needs:
+      - check-frontend
+      - pre-commit
+      - run-security-scan-code
+      - spellcheck
+    uses: ./.github/workflows/run-fuzz-tests.yaml
+    with:
+      test-file: rest_test.py
+      rest-url: http://localhost:9500/api/v0
+
+  run-infrastructure-tests:
+    name: Run Infrastructure tests
+    needs:
+      - check-frontend
+      - pre-commit
+      - run-security-scan-code
+      - spellcheck
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
+        with:
+          terraform_version: 1.14
+
+      - name: Run Infrastructure tests
+        run: make test-infrastructure
+
   set-release-version:
     name: Set release version
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      (
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'release' && github.event.action == 'published')
+      )
+    needs:
+      - run-backend-tests
+      - run-frontend-a11y-tests
+      - run-frontend-e2e-tests
+      - run-frontend-unit-tests
+      - run-infrastructure-tests
+      - run-rest-fuzz-tests
     outputs:
       release_version: ${{ steps.set.outputs.release_version }}
     permissions: {}
@@ -406,43 +514,6 @@ jobs:
           fi
     timeout-minutes: 5
 
-  run-graphql-fuzz-tests:
-    name: Run GraphQL fuzz tests
-    if: false
-    needs:
-      - run-security-scan-code
-    uses: ./.github/workflows/run-fuzz-tests.yaml
-    with:
-      test-file: graphql_test.py
-
-  run-rest-fuzz-tests:
-    name: Run REST fuzz tests
-    needs:
-      - run-security-scan-code
-    uses: ./.github/workflows/run-fuzz-tests.yaml
-    with:
-      test-file: rest_test.py
-      rest-url: http://localhost:9500/api/v0
-
-  run-infrastructure-tests:
-    name: Run Infrastructure tests
-    needs:
-      - run-security-scan-code
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
-        with:
-          terraform_version: 1.14.0
-
-      - name: Run Infrastructure tests
-        run: make test-infrastructure
-
   build-staging-images:
     name: Build Staging Images
     env:
@@ -452,11 +523,6 @@ jobs:
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
-      - run-backend-tests
-      - run-frontend-a11y-tests
-      - run-frontend-e2e-tests
-      - run-frontend-unit-tests
-      - run-infrastructure-tests
       - set-release-version
     permissions:
       contents: read
@@ -490,7 +556,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
@@ -510,7 +576,7 @@ jobs:
           push: true
           tags: |
             owasp/nest:backend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-backend:${{ env.RELEASE_VERSION }}
 
       - name: Prepare frontend public environment
         env:
@@ -563,11 +629,11 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
-            RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
+            RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
           tags: |
             owasp/nest:frontend-staging
-            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:latest
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-staging-frontend:${{ env.RELEASE_VERSION }}
 
       - name: Get frontend image size
         id: frontend-size
@@ -602,7 +668,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -630,15 +696,16 @@ jobs:
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
-  bootstrap-staging-nest:
-    name: Bootstrap Nest Staging
+  bootstrap-nest-staging-infrastructure:
+    name: Bootstrap Nest Staging Infrastructure
     env:
-      TF_INPUT: false
       TF_IN_AUTOMATION: true
+      TF_INPUT: false
     environment: staging
     if: |
-      github.repository == 'OWASP/Nest' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+      (github.repository == 'OWASP/Nest' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'))
+
     needs:
       - scan-staging-images
     permissions:
@@ -658,7 +725,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
@@ -709,119 +776,18 @@ jobs:
         run: terraform apply -auto-approve tfplan
     timeout-minutes: 10
 
-  plan-staging-nest:
-    name: Plan Nest Staging
-    env:
-      TF_INPUT: false
-      TF_IN_AUTOMATION: true
-    environment: staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    needs:
-      - bootstrap-staging-nest
-      - scan-staging-images
-      - set-release-version
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-StagingPlan
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
-        with:
-          terraform_version: 1.14.0
-
-      - name: Prepare terraform backend
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-          TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
-        run: |
-          umask 377
-          cat > infrastructure/staging/terraform.tfbackend <<-EOF
-          bucket="$TF_STATE_BUCKET_NAME"
-          region="$AWS_REGION"
-          EOF
-
-      - name: Prepare terraform variables
-        env:
-          AVAILABILITY_ZONES: ${{ vars.AWS_AVAILABILITY_ZONES }}
-          AWS_REGION: ${{ vars.AWS_REGION }}
-          BACKEND_USE_FARGATE_SPOT: true
-          CREATE_RDS_PROXY: false
-          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
-          ENVIRONMENT: staging
-          FRONTEND_USE_FARGATE_SPOT: true
-          PROJECT_NAME: nest
-          TASKS_USE_FARGATE_SPOT: true
-        run: |
-          umask 377
-          cat > infrastructure/staging/terraform.tfvars <<-EOF
-          availability_zones=$AVAILABILITY_ZONES
-          aws_region="$AWS_REGION"
-          backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
-          create_rds_proxy=$CREATE_RDS_PROXY
-          domain_name="$DOMAIN_NAME"
-          environment="$ENVIRONMENT"
-          frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
-          project_name="$PROJECT_NAME"
-          tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
-          EOF
-
-      - name: Terraform Init
-        working-directory: infrastructure/staging
-        run: terraform init -backend-config=terraform.tfbackend
-
-      - name: Terraform Validate
-        working-directory: infrastructure/staging
-        run: terraform validate
-
-      - name: Terraform Plan
-        working-directory: infrastructure/staging
-        run: |
-          terraform plan -out=tfplan
-
-      - name: Show plan in summary
-        working-directory: infrastructure/staging
-        run: |
-          echo "## Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload plan artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
-        with:
-          name: tfplan
-          path: infrastructure/staging/tfplan
-          retention-days: 3
-    timeout-minutes: 15
-
   deploy-staging-nest:
-    name: Deploy Nest Staging
+    name: Plan and Deploy Nest Staging
     env:
-      TF_INPUT: false
       TF_IN_AUTOMATION: true
+      TF_INPUT: false
     environment: staging
     if: |
       github.repository == 'OWASP/Nest' &&
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs:
-      - plan-staging-nest
+      - bootstrap-nest-staging-infrastructure
+      - set-release-version
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -844,58 +810,110 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
         with:
-          terraform_version: 1.14.0
+          terraform_version: 1.14
 
       - name: Prepare terraform backend
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
           TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_KEY: staging/terraform.tfstate
         run: |
           umask 377
-          cat > infrastructure/staging/terraform.tfbackend <<-EOF
+          cat > infrastructure/live/terraform.tfbackend <<-EOF
           bucket="$TF_STATE_BUCKET_NAME"
+          key="${TF_STATE_KEY}"
           region="$AWS_REGION"
           EOF
 
+      - name: Prepare terraform variables
+        env:
+          AVAILABILITY_ZONES: ${{ vars.AWS_AVAILABILITY_ZONES }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          BACKEND_USE_FARGATE_SPOT: true
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+          DJANGO_CONFIGURATION: Staging
+          DJANGO_SETTINGS_MODULE: settings.staging
+          ENABLE_CRON_TASKS: false
+          ENABLE_NAT_GATEWAY: false
+          ENABLE_RDS_PROXY: false
+          ENVIRONMENT: staging
+          FRONTEND_USE_FARGATE_SPOT: true
+          PROJECT_NAME: nest
+          RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
+          TASKS_USE_FARGATE_SPOT: true
+        run: |
+          umask 377
+          cat > infrastructure/live/terraform.tfvars <<-EOF
+          availability_zones=$AVAILABILITY_ZONES
+          aws_region="$AWS_REGION"
+          backend_image_tag="$RELEASE_VERSION"
+          backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
+          domain_name="$DOMAIN_NAME"
+          django_configuration="$DJANGO_CONFIGURATION"
+          django_release_version="$RELEASE_VERSION"
+          django_settings_module="$DJANGO_SETTINGS_MODULE"
+          enable_cron_tasks=$ENABLE_CRON_TASKS
+          enable_nat_gateway=$ENABLE_NAT_GATEWAY
+          enable_rds_proxy=$ENABLE_RDS_PROXY
+          environment="$ENVIRONMENT"
+          frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
+          frontend_image_tag="$RELEASE_VERSION"
+          project_name="$PROJECT_NAME"
+          tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
+          EOF
+
       - name: Terraform Init
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform init -backend-config=terraform.tfbackend
 
-      - name: Download plan artifact
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3
-        with:
-          name: tfplan
-          path: infrastructure/staging
+      - name: Terraform Validate
+        working-directory: infrastructure/live
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: infrastructure/live
+        run: terraform plan -out=tfplan
+
+      - name: Show plan in summary
+        working-directory: infrastructure/live
+        run: |
+          echo "## Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Terraform Apply
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: terraform apply -auto-approve tfplan
 
       - name: Capture terraform outputs
         id: tf-outputs
-        working-directory: infrastructure/staging
+        working-directory: infrastructure/live
         run: |
           echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
           echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
           echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
           echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
-          echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
+          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
           echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
           echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
+          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
 
       - name: Run ECS migrate task
         id: migrate-task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
           TASK_DEFINITION: nest-staging-migrate
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
             --query 'tasks[0].taskArn' \
             --output text)
           echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
@@ -927,36 +945,34 @@ jobs:
       - name: Run ECS index-data task
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
-          PRIVATE_SUBNET_IDS: ${{ steps.tf-outputs.outputs.private_subnet_ids }}
-          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
           TASK_DEFINITION: nest-staging-index-data
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
         run: |
-          aws ecs run-task \
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          RESPONSE=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
             --task-definition "$TASK_DEFINITION" \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=[$PRIVATE_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=DISABLED}"
-          echo "Index-data task started (runs async, ~30 min)"
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
 
-      - name: Force new backend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
+          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
+          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
 
-      - name: Force new frontend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
+          if [ "$FAILURE_COUNT" -gt 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
+            echo "$RESPONSE" | jq '.failures'
+            exit 1
+          fi
+
+          if [ "$TASK_COUNT" -eq 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Index-data task started successfully (runs async, ~30 min)"
 
       - name: Wait for backend service stability
         env:
@@ -975,6 +991,7 @@ jobs:
           aws ecs wait services-stable \
             --cluster "$CLUSTER_NAME" \
             --services "$SERVICE_NAME"
+    timeout-minutes: 60
 
   run-staging-lighthouse-ci:
     name: Run staging Lighthouse CI
@@ -988,7 +1005,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
         with:
           run_install: true
           version: 10
@@ -1042,13 +1059,10 @@ jobs:
       RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
     environment: production
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - run-backend-tests
-      - run-frontend-a11y-tests
-      - run-frontend-e2e-tests
-      - run-frontend-unit-tests
       - set-release-version
     permissions:
       contents: read
@@ -1069,6 +1083,21 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: GitHubActions-BuildProductionImages
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78
+
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
@@ -1083,7 +1112,9 @@ jobs:
           load: true
           platforms: linux/amd64
           push: true
-          tags: owasp/nest:backend-production
+          tags: |
+            owasp/nest:backend-production
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-backend:${{ env.RELEASE_VERSION }}
 
       - name: Get backend image size
         id: backend-size
@@ -1134,9 +1165,11 @@ jobs:
           platforms: linux/amd64
           push: true
           secrets: |
-            RELEASE_VERSION=${{ needs.set-release-version.outputs.release_version }}
+            RELEASE_VERSION=${{ env.RELEASE_VERSION }}
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
-          tags: owasp/nest:frontend-production
+          tags: |
+            owasp/nest:frontend-production
+            ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/nest-production-frontend:${{ env.RELEASE_VERSION }}
 
       - name: Get frontend image size
         id: frontend-size
@@ -1158,6 +1191,10 @@ jobs:
 
   scan-production-images:
     name: Scan Production Images
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.event_name == 'release' &&
+      github.event.action == 'published'
     needs:
       - build-production-images
       - set-release-version
@@ -1171,7 +1208,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Cache Trivy DB
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7
         with:
           path: .trivy-cache
           key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
@@ -1199,19 +1236,99 @@ jobs:
             frontend-sbom-${{ env.RELEASE_VERSION }}.cdx.json
     timeout-minutes: 5
 
-  deploy-production-nest:
-    name: Deploy Nest to Production
+  bootstrap-nest-production-infrastructure:
+    name: Bootstrap Nest Production Infrastructure
     env:
-      ANSIBLE_HOST_KEY_CHECKING: false
-      NEST_HOST_IP_ADDRESS: ${{ secrets.NEST_HOST_IP_ADDRESS }}
-      NEST_SSH_PRIVATE_KEY_PATH: ${{ vars.NEST_SSH_PRIVATE_KEY_PATH }}
-      RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
+      TF_IN_AUTOMATION: true
+      TF_INPUT: false
     environment: production
     if: |
+      github.repository == 'OWASP/Nest' &&
+      github.event_name == 'release' &&
+      github.event.action == 'published'
+
+    needs:
+      - scan-production-images
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
+        with:
+          aws-access-key-id: ${{ secrets.BOOTSTRAP_AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.BOOTSTRAP_AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
+        with:
+          terraform_version: 1.14
+
+      - name: Prepare terraform backend
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          TF_STATE_BUCKET_NAME: ${{ secrets.BOOTSTRAP_TF_STATE_BUCKET_NAME }}
+        run: |
+          umask 377
+          cat > infrastructure/bootstrap/terraform.tfbackend <<-EOF
+          bucket="$TF_STATE_BUCKET_NAME"
+          region="$AWS_REGION"
+          EOF
+
+      - name: Prepare terraform variables
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          PROJECT_NAME: nest
+          AWS_ROLE_EXTERNAL_ID: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+        run: |
+          umask 377
+          cat > infrastructure/bootstrap/terraform.tfvars <<-EOF
+          aws_region="$AWS_REGION"
+          project_name="$PROJECT_NAME"
+          aws_role_external_id="$AWS_ROLE_EXTERNAL_ID"
+          EOF
+
+      - name: Terraform Init
+        working-directory: infrastructure/bootstrap
+        run: terraform init -backend-config=terraform.tfbackend
+
+      - name: Terraform Validate
+        working-directory: infrastructure/bootstrap
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: infrastructure/bootstrap
+        run: terraform plan -out=tfplan
+
+      - name: Show plan in summary
+        working-directory: infrastructure/bootstrap
+        run: |
+          echo "## Bootstrap Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Terraform Apply
+        working-directory: infrastructure/bootstrap
+        run: terraform apply -auto-approve tfplan
+    timeout-minutes: 10
+
+  deploy-production-nest:
+    name: Plan and Deploy Nest Production
+    env:
+      TF_IN_AUTOMATION: true
+      TF_INPUT: false
+    environment: production
+    if: |
+      github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
-      - scan-production-images
+      - bootstrap-nest-production-infrastructure
       - set-release-version
     permissions:
       contents: read
@@ -1220,127 +1337,209 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Prepare SSH key
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+          role-session-name: GitHubActions-ProductionDeploy
+          role-skip-session-tagging: true
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
+        with:
+          terraform_version: 1.14
+
+      - name: Prepare terraform backend
         env:
-          NEST_SSH_PRIVATE_KEY: ${{ secrets.NEST_SSH_PRIVATE_KEY }}
-          NEST_SSH_PRIVATE_KEY_PATH: ${{ env.NEST_SSH_PRIVATE_KEY_PATH }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
+          TF_STATE_KEY: production/terraform.tfstate
         run: |
-          SSH_KEY_PATH="${NEST_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
-          mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
           umask 377
-          cat > "$SSH_KEY_PATH" <<EOF
-          $NEST_SSH_PRIVATE_KEY
+          cat > infrastructure/live/terraform.tfbackend <<-EOF
+          bucket="$TF_STATE_BUCKET_NAME"
+          key="${TF_STATE_KEY}"
+          region="$AWS_REGION"
           EOF
 
-      - name: Prepare secrets
+      - name: Prepare terraform variables
         env:
-          DJANGO_ALGOLIA_APPLICATION_ID: ${{ secrets.DJANGO_ALGOLIA_APPLICATION_ID }}
-          DJANGO_ALGOLIA_WRITE_API_KEY: ${{ secrets.DJANGO_ALGOLIA_WRITE_API_KEY }}
-          DJANGO_ALLOWED_HOSTS: ${{ secrets.DJANGO_ALLOWED_HOSTS }}
-          DJANGO_AWS_ACCESS_KEY_ID: ${{ secrets.DJANGO_AWS_ACCESS_KEY_ID }}
-          DJANGO_AWS_SECRET_ACCESS_KEY: ${{ secrets.DJANGO_AWS_SECRET_ACCESS_KEY }}
-          DJANGO_CONFIGURATION: ${{ secrets.DJANGO_CONFIGURATION }}
-          DJANGO_DB_HOST: ${{ secrets.DJANGO_DB_HOST }}
-          DJANGO_DB_NAME: ${{ secrets.DJANGO_DB_NAME }}
-          DJANGO_DB_PASSWORD: ${{ secrets.DJANGO_DB_PASSWORD }}
-          DJANGO_DB_PORT: ${{ secrets.DJANGO_DB_PORT }}
-          DJANGO_DB_USER: ${{ secrets.DJANGO_DB_USER }}
-          DJANGO_GITHUB_APP_ID: ${{ secrets.DJANGO_GITHUB_APP_ID }}
-          DJANGO_GITHUB_APP_INSTALLATION_ID: ${{ secrets.DJANGO_GITHUB_APP_INSTALLATION_ID }}
-          DJANGO_OPEN_AI_SECRET_KEY: ${{ secrets.DJANGO_OPEN_AI_SECRET_KEY }}
-          DJANGO_REDIS_HOST: ${{ secrets.DJANGO_REDIS_HOST }}
-          DJANGO_REDIS_PASSWORD: ${{ secrets.DJANGO_REDIS_PASSWORD }}
-          DJANGO_RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
-          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-          DJANGO_SENTRY_DSN: ${{ secrets.DJANGO_SENTRY_DSN }}
-          DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
-          DJANGO_SLACK_BOT_TOKEN: ${{ secrets.DJANGO_SLACK_BOT_TOKEN }}
-          DJANGO_SLACK_SIGNING_SECRET: ${{ secrets.DJANGO_SLACK_SIGNING_SECRET }}
-          NEST_GITHUB_APP_PRIVATE_KEY: ${{ secrets.NEST_GITHUB_APP_PRIVATE_KEY }}
-          NEXT_SERVER_CSRF_URL: ${{ secrets.NEXT_SERVER_CSRF_URL }}
-          NEXT_SERVER_GITHUB_CLIENT_ID: ${{ secrets.NEST_GITHUB_CLIENT_ID }}
-          NEXT_SERVER_GITHUB_CLIENT_SECRET: ${{ secrets.NEST_GITHUB_CLIENT_SECRET }}
-          NEXT_SERVER_GRAPHQL_URL: ${{ secrets.NEXT_SERVER_GRAPHQL_URL }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL: ${{ secrets.VITE_API_URL }}
-          SLACK_BOT_TOKEN_T04T40NHX: ${{ secrets.SLACK_BOT_TOKEN_T04T40NHX }}
+          AVAILABILITY_ZONES: ${{ vars.AWS_AVAILABILITY_ZONES }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          BACKEND_USE_FARGATE_SPOT: false
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+          DJANGO_CONFIGURATION: Production
+          DJANGO_SETTINGS_MODULE: settings.production
+          ENABLE_ADDITIONAL_PARAMETERS: true
+          ENABLE_CRON_TASKS: true
+          ENABLE_NAT_GATEWAY: true
+          ENABLE_RDS_PROXY: true
+          ENVIRONMENT: production
+          FRONTEND_USE_FARGATE_SPOT: false
+          PROJECT_NAME: nest
+          RELEASE_VERSION: ${{ needs.set-release-version.outputs.release_version }}
+          TASKS_USE_FARGATE_SPOT: false
         run: |
-          # Backend
           umask 377
-          cat > .env.backend <<EOF
-          DJANGO_ALGOLIA_APPLICATION_ID=$DJANGO_ALGOLIA_APPLICATION_ID
-          DJANGO_ALGOLIA_WRITE_API_KEY=$DJANGO_ALGOLIA_WRITE_API_KEY
-          DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS
-          DJANGO_AWS_ACCESS_KEY_ID=$DJANGO_AWS_ACCESS_KEY_ID
-          DJANGO_AWS_SECRET_ACCESS_KEY=$DJANGO_AWS_SECRET_ACCESS_KEY
-          DJANGO_CONFIGURATION=$DJANGO_CONFIGURATION
-          DJANGO_DB_HOST=$DJANGO_DB_HOST
-          DJANGO_DB_NAME=$DJANGO_DB_NAME
-          DJANGO_DB_PASSWORD=$DJANGO_DB_PASSWORD
-          DJANGO_DB_PORT=$DJANGO_DB_PORT
-          DJANGO_DB_USER=$DJANGO_DB_USER
-          DJANGO_GITHUB_APP_ID=$DJANGO_GITHUB_APP_ID
-          DJANGO_GITHUB_APP_INSTALLATION_ID=$DJANGO_GITHUB_APP_INSTALLATION_ID
-          DJANGO_OPEN_AI_SECRET_KEY=$DJANGO_OPEN_AI_SECRET_KEY
-          DJANGO_REDIS_HOST=$DJANGO_REDIS_HOST
-          DJANGO_REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
-          DJANGO_RELEASE_VERSION=$DJANGO_RELEASE_VERSION
-          DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY
-          DJANGO_SENTRY_DSN=$DJANGO_SENTRY_DSN
-          DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
-          DJANGO_SLACK_BOT_TOKEN=$DJANGO_SLACK_BOT_TOKEN
-          DJANGO_SLACK_SIGNING_SECRET=$DJANGO_SLACK_SIGNING_SECRET
-          SLACK_BOT_TOKEN_T04T40NHX=$SLACK_BOT_TOKEN_T04T40NHX
+          cat > infrastructure/live/terraform.tfvars <<-EOF
+          availability_zones=$AVAILABILITY_ZONES
+          aws_region="$AWS_REGION"
+          backend_image_tag="$RELEASE_VERSION"
+          backend_use_fargate_spot=$BACKEND_USE_FARGATE_SPOT
+          domain_name="$DOMAIN_NAME"
+          django_configuration="$DJANGO_CONFIGURATION"
+          django_release_version="$RELEASE_VERSION"
+          django_settings_module="$DJANGO_SETTINGS_MODULE"
+          enable_additional_parameters=$ENABLE_ADDITIONAL_PARAMETERS
+          enable_cron_tasks=$ENABLE_CRON_TASKS
+          enable_nat_gateway=$ENABLE_NAT_GATEWAY
+          enable_rds_proxy=$ENABLE_RDS_PROXY
+          environment="$ENVIRONMENT"
+          frontend_use_fargate_spot=$FRONTEND_USE_FARGATE_SPOT
+          frontend_image_tag="$RELEASE_VERSION"
+          project_name="$PROJECT_NAME"
+          tasks_use_fargate_spot=$TASKS_USE_FARGATE_SPOT
           EOF
 
-          # Cache
-          umask 377
-          cat > .env.cache <<EOF
-          REDIS_PASSWORD=$DJANGO_REDIS_PASSWORD
-          EOF
+      - name: Terraform Init
+        working-directory: infrastructure/live
+        run: terraform init -backend-config=terraform.tfbackend
 
-          # Database
-          umask 377
-          cat > .env.db <<EOF
-          POSTGRES_DB=$DJANGO_DB_NAME
-          POSTGRES_PASSWORD=$DJANGO_DB_PASSWORD
-          POSTGRES_USER=$DJANGO_DB_USER
-          EOF
+      - name: Terraform Validate
+        working-directory: infrastructure/live
+        run: terraform validate
 
-          # Frontend
-          umask 377
-          cat > .env.frontend <<EOF
-          NEXT_SERVER_CSRF_URL=$NEXT_SERVER_CSRF_URL
-          NEXT_SERVER_GITHUB_CLIENT_ID=$NEXT_SERVER_GITHUB_CLIENT_ID
-          NEXT_SERVER_GITHUB_CLIENT_SECRET=$NEXT_SERVER_GITHUB_CLIENT_SECRET
-          NEXT_SERVER_GRAPHQL_URL=$NEXT_SERVER_GRAPHQL_URL
-          NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-          NEXTAUTH_URL=$NEXTAUTH_URL
-          EOF
+      - name: Terraform Plan
+        working-directory: infrastructure/live
+        run: terraform plan -out=tfplan
 
-          # GitHub App private key
-          umask 377
-          cat > .github.pem <<EOF
-          "$NEST_GITHUB_APP_PRIVATE_KEY"
-          EOF
+      - name: Show plan in summary
+        working-directory: infrastructure/live
+        run: |
+          echo "## Terraform Plan Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
-      - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yml
-        working-directory: .github/ansible
+      - name: Terraform Apply
+        working-directory: infrastructure/live
+        run: terraform apply -auto-approve tfplan
 
-      - name: Run Nest deploy
-        run: ansible-playbook -i inventory.yaml production/nest.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-        working-directory: .github/ansible
-    timeout-minutes: 5
+      - name: Capture terraform outputs
+        id: tf-outputs
+        working-directory: infrastructure/live
+        run: |
+          echo "backend_cluster_name=$(terraform output -raw backend_cluster_name)" >> $GITHUB_OUTPUT
+          echo "backend_service_name=$(terraform output -raw backend_service_name)" >> $GITHUB_OUTPUT
+          echo "frontend_cluster_name=$(terraform output -raw frontend_cluster_name)" >> $GITHUB_OUTPUT
+          echo "frontend_service_name=$(terraform output -raw frontend_service_name)" >> $GITHUB_OUTPUT
+          echo "nat_gateway_enabled=$(terraform output -raw nat_gateway_enabled)" >> $GITHUB_OUTPUT
+          echo "tasks_cluster_name=$(terraform output -raw tasks_cluster_name)" >> $GITHUB_OUTPUT
+          echo "tasks_security_group_id=$(terraform output -raw tasks_security_group_id)" >> $GITHUB_OUTPUT
+          echo "tasks_subnet_ids=$(terraform output -json tasks_subnet_ids | jq -r 'join(",")')" >> $GITHUB_OUTPUT
 
-  deploy-production-nest-proxy:
-    name: Deploy Production Nest Proxy
-    env:
-      ANSIBLE_HOST_KEY_CHECKING: false
-      PROXY_HOST_IP_ADDRESS: ${{ secrets.PROXY_HOST_IP_ADDRESS }}
-      PROXY_SSH_PRIVATE_KEY_PATH: ${{ vars.PROXY_SSH_PRIVATE_KEY_PATH }}
-    environment: production
+      - name: Run ECS migrate task
+        id: migrate-task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASK_DEFINITION: nest-production-migrate
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
+        run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+          echo "task_arn=$TASK_ARN" >> $GITHUB_OUTPUT
+
+      - name: Wait for migrate task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+        run: |
+          aws ecs wait tasks-stopped \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}"
+
+      - name: Check migrate task exit code
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+        run: |
+          EXIT_CODE=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER_NAME" \
+            --tasks "${{ steps.migrate-task.outputs.task_arn }}" \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "::error::Migrate task failed with exit code $EXIT_CODE"
+            exit 1
+          fi
+          echo "Migrate task completed successfully"
+
+      - name: Run ECS index-data task
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.tasks_cluster_name }}
+          NAT_GATEWAY_ENABLED: ${{ steps.tf-outputs.outputs.nat_gateway_enabled }}
+          TASK_DEFINITION: nest-production-index-data
+          TASKS_SECURITY_GROUP_ID: ${{ steps.tf-outputs.outputs.tasks_security_group_id }}
+          TASKS_SUBNET_IDS: ${{ steps.tf-outputs.outputs.tasks_subnet_ids }}
+        run: |
+          ASSIGN_PUBLIC_IP=$([ "$NAT_GATEWAY_ENABLED" = "true" ] && echo "DISABLED" || echo "ENABLED")
+          RESPONSE=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$TASKS_SUBNET_IDS],securityGroups=[$TASKS_SECURITY_GROUP_ID],assignPublicIp=$ASSIGN_PUBLIC_IP}")
+
+          FAILURE_COUNT=$(echo "$RESPONSE" | jq '.failures | length')
+          TASK_COUNT=$(echo "$RESPONSE" | jq '.tasks | length')
+
+          if [ "$FAILURE_COUNT" -gt 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned failures:"
+            echo "$RESPONSE" | jq '.failures'
+            exit 1
+          fi
+
+          if [ "$TASK_COUNT" -eq 0 ]; then
+            echo "Error: ECS run-task for $TASK_DEFINITION on cluster $CLUSTER_NAME returned no tasks"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Index-data task started successfully (runs async, ~30 min)"
+
+      - name: Wait for backend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+
+      - name: Wait for frontend service stability
+        env:
+          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
+          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
+
+  run-production-lighthouse-ci:
+    name: Run production Lighthouse CI
     if: |
+      github.repository == 'OWASP/Nest' &&
       github.event_name == 'release' &&
       github.event.action == 'published'
     needs:
@@ -1352,40 +1551,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      - name: Prepare SSH key
-        env:
-          PROXY_SSH_PRIVATE_KEY: ${{ secrets.PROXY_SSH_PRIVATE_KEY }}
-          PROXY_SSH_PRIVATE_KEY_PATH: ${{ env.PROXY_SSH_PRIVATE_KEY_PATH }}
-        run: |
-          SSH_KEY_PATH="${PROXY_SSH_PRIVATE_KEY_PATH/#\~/$HOME}"
-          mkdir -p -m 700 "$(dirname "$SSH_KEY_PATH")"
-          umask 377
-          cat > "$SSH_KEY_PATH" <<EOF
-          $PROXY_SSH_PRIVATE_KEY
-          EOF
-
-      - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yml
-        working-directory: .github/ansible
-
-      - name: Run proxy deploy
-        run: ansible-playbook -i inventory.yaml production/proxy.yaml -e "github_workspace=$GITHUB_WORKSPACE"
-        working-directory: .github/ansible
-    timeout-minutes: 5
-
-  run-production-lighthouse-ci:
-    name: Run production Lighthouse CI
-    needs:
-      - deploy-production-nest-proxy
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
       - name: Install pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
         with:
           run_install: true
           version: 10
@@ -1407,8 +1574,12 @@ jobs:
 
   run-production-zap-baseline-scan:
     name: Run production ZAP baseline scan
+    if: |
+      github.repository == 'OWASP/Nest' &&
+      github.event_name == 'release' &&
+      github.event.action == 'published'
     needs:
-      - deploy-production-nest-proxy
+      - deploy-production-nest
     permissions:
       contents: read
     runs-on: ubuntu-latest

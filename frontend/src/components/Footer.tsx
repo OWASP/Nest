@@ -29,25 +29,23 @@ export default function Footer() {
   return (
     <footer className="mt-auto w-full border-t-1 border-t-slate-300 bg-slate-200 xl:max-w-full dark:border-t-slate-600 dark:bg-slate-800">
       <div className="grid w-full place-content-center gap-6 px-4 py-4 text-slate-800 md:py-8 dark:text-slate-200">
-        <div className="grid w-full sm:grid-cols-2 sm:gap-20 md:grid-cols-4">
+        <div className="grid w-full sm:grid-cols-2 sm:gap-x-10 sm:gap-y-6 md:grid-cols-4 md:gap-x-14 lg:gap-x-20">
           {footerSections.map((section: Section) => (
             <div key={section.title} className="flex flex-col gap-4">
               {/*link*/}
               <Button
                 disableAnimation
                 onPress={() => toggleSection(section.title)}
-                className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 lg:cursor-default"
+                className="flex w-full items-center justify-between rounded-md bg-transparent pl-0 text-left text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 md:justify-start md:gap-2 lg:cursor-default"
                 aria-expanded={openSection === section.title}
                 aria-controls={`footer-section-${section.title}`}
               >
                 <h3>{section.title}</h3>
-                <div className="transition-transform duration-200 lg:hidden">
-                  {openSection === section.title ? (
-                    <FaChevronUp className="h-4 w-4" />
-                  ) : (
-                    <FaChevronDown className="h-4 w-4" />
-                  )}
-                </div>
+                {openSection === section.title ? (
+                  <FaChevronUp className="h-4 w-4 transition-transform duration-200 lg:hidden" />
+                ) : (
+                  <FaChevronDown className="h-4 w-4 transition-transform duration-200 lg:hidden" />
+                )}
               </Button>
               <div
                 id={`footer-section-${section.title}`}
@@ -126,6 +124,7 @@ export default function Footer() {
             href="/"
             className="flex items-center gap-2 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
             aria-label="Nest home"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
             <Image
               src={nestLogoSrc}

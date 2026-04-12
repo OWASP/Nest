@@ -1,9 +1,8 @@
 'use client'
 
-import { useApolloClient } from '@apollo/client/react'
 import type React from 'react'
-import { useState, useCallback } from 'react'
-import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
+import { useState } from 'react'
+import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { FormButtons } from 'components/forms/shared/FormButtons'
 import { FormContainer } from 'components/forms/shared/FormContainer'
 import { FormDateInput } from 'components/forms/shared/FormDateInput'
@@ -43,12 +42,11 @@ interface ProgramFormProps {
       status?: string
     }>
   >
-  onSubmit: (e: React.FormEvent) => void
+  onSubmit: (e: React.FormEvent) => Promise<void>
   loading: boolean
   title: string
   submitText?: string
   isEdit?: boolean
-  currentProgramKey?: string
 }
 
 const ProgramForm = ({
@@ -59,28 +57,23 @@ const ProgramForm = ({
   title,
   isEdit,
   submitText = 'Save',
-  currentProgramKey,
 }: ProgramFormProps) => {
   const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const [nameUniquenessError, setNameUniquenessError] = useState<string | undefined>(undefined)
-  const client = useApolloClient()
+  const [backendErrors, setBackendErrors] = useState<Record<string, string>>({})
 
   const handleInputChange = (name: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
-    if (name === 'name') {
-      setNameUniquenessError(undefined)
+    if (backendErrors[name]) {
+      setBackendErrors((prev) => {
+        const next = { ...prev }
+        delete next[name]
+        return next
+      })
     }
   }
 
   const validateNameLocal = (value: string): string | undefined => {
-    return validateName(value, nameUniquenessError)
-  }
-
-  const validateNameWithUniqueness = (
-    value: string,
-    uniquenessError?: string | undefined
-  ): string | undefined => {
-    return validateName(value, uniquenessError)
+    return validateName(value, backendErrors.name)
   }
 
   const validateEndDateLocal = (value: string): string | undefined => {
@@ -107,34 +100,7 @@ const ProgramForm = ({
         validator: () => validateMenteesLimit(formData.menteesLimit),
       },
     ],
-    [formData, touched, nameUniquenessError]
-  )
-
-  const checkNameUniquenessSync = useCallback(
-    async (name: string): Promise<string | undefined> => {
-      try {
-        const { data } = await client.query({
-          query: GetMyProgramsDocument,
-          variables: { search: name.trim(), page: 1, limit: 100 },
-        })
-
-        const programs = data?.myPrograms?.programs || []
-        const duplicateProgram = programs.find(
-          (program: { name: string; key: string }) =>
-            program.name.toLowerCase() === name.trim().toLowerCase() &&
-            (!isEdit || program.key !== currentProgramKey)
-        )
-
-        if (duplicateProgram) {
-          return 'A program with this name already exists'
-        }
-        return undefined
-      } catch {
-        // Silently fail uniqueness check - backend will catch it
-        return undefined
-      }
-    },
-    [client, isEdit, currentProgramKey]
+    [formData, touched, backendErrors]
   )
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,17 +116,7 @@ const ProgramForm = ({
     }
     setTouched(newTouched)
 
-    // Check name uniqueness and capture result before validation
-    let uniquenessError: string | undefined
-    if (formData.name.trim()) {
-      uniquenessError = await checkNameUniquenessSync(formData.name)
-      setNameUniquenessError(uniquenessError)
-    } else {
-      setNameUniquenessError(undefined)
-    }
-
-    // Validate all required fields, using the captured uniquenessError
-    const nameError = validateNameWithUniqueness(formData.name, uniquenessError)
+    const nameError = validateName(formData.name, backendErrors.name)
     const descriptionError = validateDescription(formData.description)
     const startDateError = validateStartDate(formData.startedAt)
     const endDateError = validateEndDate(formData.endedAt, formData.startedAt)
@@ -174,7 +130,14 @@ const ProgramForm = ({
       return
     }
 
-    onSubmit(e)
+    try {
+      await onSubmit(e)
+    } catch (error) {
+      const { validationErrors, hasValidationErrors } = extractGraphQLErrors(error)
+      if (hasValidationErrors) {
+        setBackendErrors(validationErrors)
+      }
+    }
   }
 
   return (

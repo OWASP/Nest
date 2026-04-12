@@ -1,15 +1,10 @@
-import { useApolloClient } from '@apollo/client/react'
 import userEvent from '@testing-library/user-event'
 import { render, screen, waitFor } from 'wrappers/testUtil'
 import ProgramForm from 'components/ProgramForm'
 
-jest.mock('@apollo/client/react', () => ({
-  useApolloClient: jest.fn(),
-}))
-
 describe('ProgramForm Component', () => {
   const mockSetFormData = jest.fn()
-  const mockOnSubmit = jest.fn()
+  const mockOnSubmit = jest.fn().mockResolvedValue(undefined)
 
   const defaultFormData = {
     name: '',
@@ -37,13 +32,7 @@ describe('ProgramForm Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useApolloClient as jest.Mock).mockReturnValue({
-      query: jest.fn().mockResolvedValue({
-        data: {
-          myPrograms: { programs: [] },
-        },
-      }),
-    })
+    mockOnSubmit.mockResolvedValue(undefined)
   })
 
   describe('Component Rendering', () => {
@@ -117,7 +106,6 @@ describe('ProgramForm Component', () => {
           loading={false}
           title="Edit"
           isEdit={true}
-          currentProgramKey="test-key"
         />
       )
 
@@ -344,55 +332,16 @@ describe('ProgramForm Component', () => {
     })
   })
 
-  describe('Name Uniqueness Validation', () => {
-    test('queries Apollo when submitting with a name', async () => {
+  describe('GraphQL Validation Error Handling', () => {
+    test('displays field-level validation error from backend', async () => {
       const user = userEvent.setup()
-      const mockQuery = jest.fn().mockResolvedValue({
-        data: {
-          myPrograms: { programs: [] },
-        },
-      })
-
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: mockQuery,
-      })
-
-      render(
-        <ProgramForm
-          formData={filledFormData}
-          setFormData={mockSetFormData}
-          onSubmit={mockOnSubmit}
-          loading={false}
-          title="Test"
-        />
-      )
-
-      const buttons = screen.getAllByRole('button')
-      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
-      if (submitButton) {
-        await user.click(submitButton)
-      }
-
-      await waitFor(() => {
-        expect(mockQuery).toHaveBeenCalled()
-      })
-    })
-
-    test('allows submission when program name is unique', async () => {
-      const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: {
-              programs: [
-                {
-                  name: 'Different Name',
-                  key: 'different-key',
-                },
-              ],
-            },
+      mockOnSubmit.mockRejectedValue({
+        graphQLErrors: [
+          {
+            message: 'A program with this name already exists.',
+            extensions: { code: 'VALIDATION_ERROR', field: 'name' },
           },
-        }),
+        ],
       })
 
       render(
@@ -414,23 +363,21 @@ describe('ProgramForm Component', () => {
       await waitFor(() => {
         expect(mockOnSubmit).toHaveBeenCalled()
       })
+
+      await waitFor(() => {
+        expect(screen.getByText('A program with this name already exists.')).toBeInTheDocument()
+      })
     })
 
-    test('prevents submission when program name already exists (create mode)', async () => {
+    test('does not display validation errors for non-validation GraphQL errors', async () => {
       const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: {
-              programs: [
-                {
-                  name: 'Test Program',
-                  key: 'other-key',
-                },
-              ],
-            },
+      mockOnSubmit.mockRejectedValue({
+        graphQLErrors: [
+          {
+            message: 'Internal server error',
+            extensions: { code: 'INTERNAL_ERROR' },
           },
-        }),
+        ],
       })
 
       render(
@@ -440,50 +387,6 @@ describe('ProgramForm Component', () => {
           onSubmit={mockOnSubmit}
           loading={false}
           title="Test"
-          isEdit={false}
-        />
-      )
-
-      const buttons = screen.getAllByRole('button')
-      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
-      if (submitButton) {
-        await user.click(submitButton)
-      }
-
-      await waitFor(
-        () => {
-          expect(mockOnSubmit).not.toHaveBeenCalled()
-        },
-        { timeout: 2000 }
-      )
-    })
-
-    test('allows same name in edit mode when editing same program', async () => {
-      const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: {
-              programs: [
-                {
-                  name: 'Test Program',
-                  key: 'test-key',
-                },
-              ],
-            },
-          },
-        }),
-      })
-
-      render(
-        <ProgramForm
-          formData={filledFormData}
-          setFormData={mockSetFormData}
-          onSubmit={mockOnSubmit}
-          loading={false}
-          title="Test"
-          isEdit={true}
-          currentProgramKey="test-key"
         />
       )
 
@@ -496,13 +399,12 @@ describe('ProgramForm Component', () => {
       await waitFor(() => {
         expect(mockOnSubmit).toHaveBeenCalled()
       })
+
+      expect(screen.queryByText('Internal server error')).not.toBeInTheDocument()
     })
 
-    test('handles Apollo query errors gracefully', async () => {
+    test('submits form successfully when no errors', async () => {
       const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockRejectedValue(new Error('Network error')),
-      })
 
       render(
         <ProgramForm
@@ -520,7 +422,6 @@ describe('ProgramForm Component', () => {
         await user.click(submitButton)
       }
 
-      // Should still allow submission if query fails
       await waitFor(() => {
         expect(mockOnSubmit).toHaveBeenCalled()
       })
@@ -690,7 +591,6 @@ describe('ProgramForm Component', () => {
           loading={false}
           title="Edit"
           isEdit={true}
-          currentProgramKey="test-key"
         />
       )
 
@@ -707,7 +607,6 @@ describe('ProgramForm Component', () => {
           loading={false}
           title="Edit"
           isEdit={true}
-          currentProgramKey="test-key"
         />
       )
 
@@ -719,16 +618,15 @@ describe('ProgramForm Component', () => {
   })
 
   describe('Additional Coverage Tests', () => {
-    test('clears name error when field is changed', async () => {
+    test('clears backend error when field is changed', async () => {
       const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: {
-              programs: [{ name: 'Test Program', key: 'other' }],
-            },
+      mockOnSubmit.mockRejectedValueOnce({
+        graphQLErrors: [
+          {
+            message: 'A program with this name already exists.',
+            extensions: { code: 'VALIDATION_ERROR', field: 'name' },
           },
-        }),
+        ],
       })
 
       render(
@@ -741,6 +639,16 @@ describe('ProgramForm Component', () => {
         />
       )
 
+      const buttons = screen.getAllByRole('button')
+      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
+      if (submitButton) {
+        await user.click(submitButton)
+      }
+
+      await waitFor(() => {
+        expect(screen.getByText('A program with this name already exists.')).toBeInTheDocument()
+      })
+
       const nameInput = screen.getByPlaceholderText('Enter program name')
       await user.clear(nameInput)
       await user.type(nameInput, 'Different Name')
@@ -748,15 +656,8 @@ describe('ProgramForm Component', () => {
       expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    test('handles empty name in uniqueness check', async () => {
+    test('handles empty name validation', async () => {
       const user = userEvent.setup()
-      const mockQuery = jest.fn().mockResolvedValue({
-        data: { myPrograms: { programs: [] } },
-      })
-
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: mockQuery,
-      })
 
       const emptyFormData = { ...defaultFormData, name: '' }
 
@@ -776,7 +677,7 @@ describe('ProgramForm Component', () => {
         await user.click(submitButton)
       }
 
-      // Should not call query with empty name
+      // Should not submit with empty name
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
@@ -881,71 +782,6 @@ describe('ProgramForm Component', () => {
       expect(mockSetFormData).toHaveBeenCalled()
     })
 
-    test('handles case insensitive name uniqueness check', async () => {
-      const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: {
-              programs: [
-                {
-                  name: 'test program',
-                  key: 'other-key',
-                },
-              ],
-            },
-          },
-        }),
-      })
-
-      render(
-        <ProgramForm
-          formData={{ ...filledFormData, name: 'Test Program' }}
-          setFormData={mockSetFormData}
-          onSubmit={mockOnSubmit}
-          loading={false}
-          title="Test"
-        />
-      )
-
-      const buttons = screen.getAllByRole('button')
-      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
-      if (submitButton) {
-        await user.click(submitButton)
-      }
-
-      // Should prevent submission because 'Test Program' === 'test program' (case-insensitive)
-      expect(mockOnSubmit).not.toHaveBeenCalled()
-    })
-
-    test('handles Apollo query error in uniqueness check gracefully and allows submission', async () => {
-      const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockRejectedValue(new Error('Apollo error')),
-      })
-
-      render(
-        <ProgramForm
-          formData={filledFormData}
-          setFormData={mockSetFormData}
-          onSubmit={mockOnSubmit}
-          loading={false}
-          title="Test"
-        />
-      )
-
-      const buttons = screen.getAllByRole('button')
-      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
-      if (submitButton) {
-        await user.click(submitButton)
-      }
-
-      // Should allow submission even if Apollo query fails (silently handled)
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalled()
-      })
-    })
-
     test('properly marks all form fields as touched on submit attempt', async () => {
       const user = userEvent.setup()
       render(
@@ -968,17 +804,9 @@ describe('ProgramForm Component', () => {
       expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
-    test('skips uniqueness check when name is only whitespace', async () => {
+    test('handles whitespace-only name validation', async () => {
       const user = userEvent.setup()
-      const mockQuery = jest.fn().mockResolvedValue({
-        data: { myPrograms: { programs: [] } },
-      })
 
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: mockQuery,
-      })
-
-      // Form with whitespace-only name - should trigger early return in checkNameUniquenessSync (line 116)
       const whitespaceNameFormData = {
         ...filledFormData,
         name: '   ',
@@ -1000,21 +828,12 @@ describe('ProgramForm Component', () => {
         await user.click(submitButton)
       }
 
-      // The query should NOT be called because name.trim() is empty - this covers line 116
-      expect(mockQuery).not.toHaveBeenCalled()
+      expect(mockOnSubmit).not.toHaveBeenCalled()
     })
 
-    test('clears nameUniquenessError when form name is empty on submit', async () => {
+    test('handles empty name on submit', async () => {
       const user = userEvent.setup()
-      const mockQuery = jest.fn().mockResolvedValue({
-        data: { myPrograms: { programs: [] } },
-      })
 
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: mockQuery,
-      })
-
-      // Form with completely empty name - covers the else branch at line 162-163
       const emptyNameFormData = {
         ...filledFormData,
         name: '',
@@ -1036,67 +855,12 @@ describe('ProgramForm Component', () => {
         await user.click(submitButton)
       }
 
-      // Query should NOT be called for empty name - this exercises the else branch
-      expect(mockQuery).not.toHaveBeenCalled()
-      // onSubmit should not be called because name is required
       expect(mockOnSubmit).not.toHaveBeenCalled()
-    })
-
-    test('prevents submission in edit mode when name matches different program', async () => {
-      const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: {
-              programs: [
-                {
-                  name: 'Test Program',
-                  key: 'different-program-key',
-                },
-              ],
-            },
-          },
-        }),
-      })
-
-      // In edit mode with currentProgramKey, but the found program has a different key
-      // This covers the branch: isEdit is true AND program.key !== currentProgramKey
-      render(
-        <ProgramForm
-          formData={filledFormData}
-          setFormData={mockSetFormData}
-          onSubmit={mockOnSubmit}
-          loading={false}
-          title="Edit"
-          isEdit={true}
-          currentProgramKey="my-program-key"
-        />
-      )
-
-      const buttons = screen.getAllByRole('button')
-      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
-      if (submitButton) {
-        await user.click(submitButton)
-      }
-
-      // Should NOT submit because name matches a different program
-      await waitFor(
-        () => {
-          expect(mockOnSubmit).not.toHaveBeenCalled()
-        },
-        { timeout: 2000 }
-      )
     })
 
     test('handles menteesLimit touched state set to true for validation', async () => {
       const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: { myPrograms: { programs: [] } },
-        }),
-      })
 
-      // Render with a valid form
       render(
         <ProgramForm
           formData={filledFormData}
@@ -1124,49 +888,9 @@ describe('ProgramForm Component', () => {
       })
     })
 
-    test('handles null programs array in uniqueness check', async () => {
-      const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: {
-            myPrograms: {
-              programs: null, // Tests the || [] fallback
-            },
-          },
-        }),
-      })
-
-      render(
-        <ProgramForm
-          formData={filledFormData}
-          setFormData={mockSetFormData}
-          onSubmit={mockOnSubmit}
-          loading={false}
-          title="Test"
-        />
-      )
-
-      const buttons = screen.getAllByRole('button')
-      const submitButton = buttons.find((btn) => btn.textContent?.includes('Save'))
-      if (submitButton) {
-        await user.click(submitButton)
-      }
-
-      // Should allow submission when programs is null (fallback to empty array)
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalled()
-      })
-    })
-
     test('validates menteesLimit with touched state and valid value', async () => {
       const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: { myPrograms: { programs: [] } },
-        }),
-      })
 
-      // Render form with specific menteesLimit
       const formDataWithLimit = { ...filledFormData, menteesLimit: 100 }
 
       render(
@@ -1221,11 +945,6 @@ describe('ProgramForm Component', () => {
 
     test('handles undefined menteesLimit in submission', async () => {
       const user = userEvent.setup()
-      ;(useApolloClient as jest.Mock).mockReturnValue({
-        query: jest.fn().mockResolvedValue({
-          data: { myPrograms: { programs: [] } },
-        }),
-      })
 
       const undefinedLimitFormData = {
         ...filledFormData,

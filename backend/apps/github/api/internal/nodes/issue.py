@@ -1,8 +1,11 @@
 """GitHub issue GraphQL node."""
 
+from datetime import datetime
+
 import strawberry
 import strawberry_django
 from django.db.models import Prefetch
+from strawberry.types import Info
 
 from apps.common.utils import normalize_limit
 from apps.github.api.internal.nodes.pull_request import PullRequestNode
@@ -10,6 +13,7 @@ from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
 from apps.mentorship.models.issue_user_interest import IssueUserInterest
+from apps.mentorship.models.task import Task
 
 MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
     "pull_requests",
@@ -89,3 +93,20 @@ class IssueNode(strawberry.relay.Node):
     def interested_users(self, root: Issue) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
         return [interest.user for interest in getattr(root, "interests_users", [])]
+
+    @strawberry.field
+    def task_deadline(self, root: Issue, info: Info) -> datetime | None:
+        """Return the deadline for the latest assigned task linked to this issue."""
+        mapping = getattr(info.context, "task_deadlines_by_issue", None)
+        if mapping is not None:
+            return mapping.get(root.number)
+
+        return (
+            Task.objects.filter(
+                issue=root,
+                deadline_at__isnull=False,
+            )
+            .order_by("-assigned_at")
+            .values_list("deadline_at", flat=True)
+            .first()
+        )

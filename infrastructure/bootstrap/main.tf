@@ -1,10 +1,10 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
   }
 }
@@ -43,6 +43,9 @@ data "aws_iam_policy_document" "part_one" {
       "kms:DescribeKey",
       "logs:DescribeLogGroups",
       "rds:DescribeDBInstances",
+      "rds:DescribeDBProxies",
+      "rds:DescribeDBProxyTargetGroups",
+      "rds:DescribeDBProxyTargets",
       "rds:DescribeDBSubnetGroups",
       "secretsmanager:DescribeSecret",
       "ssm:DescribeParameters",
@@ -85,6 +88,7 @@ data "aws_iam_policy_document" "part_one" {
     sid    = "CloudWatchLogsManagement"
     effect = "Allow"
     actions = [
+      "logs:AssociateKmsKey",
       "logs:CreateLogGroup",
       "logs:DeleteLogGroup",
       "logs:DescribeLogStreams",
@@ -214,6 +218,7 @@ data "aws_iam_policy_document" "part_one" {
       "ecr:ListTagsForResource",
       "ecr:PutImage",
       "ecr:PutImageScanningConfiguration",
+      "ecr:PutImageTagMutability",
       "ecr:PutLifecyclePolicy",
       "ecr:SetRepositoryPolicy",
       "ecr:TagResource",
@@ -356,10 +361,12 @@ data "aws_iam_policy_document" "part_two" {
       "iam:DeletePolicy",
       "iam:DeletePolicyVersion",
       "iam:DeleteRole",
+      "iam:DeleteRolePolicy",
       "iam:DetachRolePolicy",
       "iam:GetPolicy",
       "iam:GetPolicyVersion",
       "iam:GetRole",
+      "iam:GetRolePolicy",
       "iam:ListAttachedRolePolicies",
       "iam:ListInstanceProfilesForRole",
       "iam:ListPolicyVersions",
@@ -463,17 +470,27 @@ data "aws_iam_policy_document" "part_two" {
     actions = [
       "rds:AddTagsToResource",
       "rds:CreateDBInstance",
+      "rds:CreateDBProxy",
+      "rds:CreateDBProxyTargetGroup",
       "rds:CreateDBSubnetGroup",
       "rds:DeleteDBInstance",
+      "rds:DeleteDBProxy",
+      "rds:DeleteDBProxyTargetGroup",
       "rds:DeleteDBSubnetGroup",
+      "rds:DeregisterDBProxyTargets",
       "rds:ListTagsForResource",
       "rds:ModifyDBInstance",
+      "rds:ModifyDBProxy",
+      "rds:ModifyDBProxyTargetGroup",
       "rds:ModifyDBSubnetGroup",
+      "rds:RegisterDBProxyTargets",
       "rds:RemoveTagsFromResource",
     ]
     resources = [
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db-proxy:*",
       "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:db:${var.project_name}-${each.key}-*",
-      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*"
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:subgrp:${var.project_name}-${each.key}-*",
+      "arn:aws:rds:${var.aws_region}:${data.aws_caller_identity.current.account_id}:target-group:*",
     ]
   }
 
@@ -518,6 +535,8 @@ data "aws_iam_policy_document" "part_two" {
     resources = [
       "arn:aws:s3:::${var.project_name}-${each.key}-*",
       "arn:aws:s3:::${var.project_name}-${each.key}-*/*",
+      "arn:aws:s3:::${var.shared_data_bucket_name}",
+      "arn:aws:s3:::${var.shared_data_bucket_name}/*",
     ]
   }
 

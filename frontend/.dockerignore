@@ -1,0 +1,17 @@
+.ash_history
+.bash_history
+.cache
+.dockerignore
+.git
+.gitignore
+.local
+.next
+.pnpm-store
+.vscode
+*.log
+*.pem
+**/node_modules
+build
+dist
+node_modules
+npm-debug.log

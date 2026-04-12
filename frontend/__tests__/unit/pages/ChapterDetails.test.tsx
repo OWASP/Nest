@@ -9,13 +9,6 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: jest.fn(),
 }))
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => ({
-    chapterKey: 'test-chapter',
-  }),
-}))
-
 const mockRouter = {
   push: jest.fn(),
 }

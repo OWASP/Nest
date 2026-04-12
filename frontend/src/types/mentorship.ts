@@ -48,7 +48,8 @@ export type Module = {
   mentees?: Contributor[]
   mentors: Contributor[]
   name: string
-  startedAt: string
+  order?: number
+  startedAt: string | number
   status?: ProgramStatusEnum
   tags?: string[] | null
   recentPullRequests?: PullRequest[]

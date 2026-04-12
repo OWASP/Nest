@@ -9,7 +9,7 @@ include infrastructure/Makefile
 .PHONY: build clean check help pre-commit prune run scan-images security-scan security-scan-code \
 	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
 	security-scan-backend-image security-scan-frontend-image security-scan-zap \
-	test update clean-trivy-cache
+	test test-nest-app test-infrastructure update clean-trivy-cache
 
 MAKEFLAGS += --no-print-directory
 
@@ -62,9 +62,10 @@ test: ## Run all tests
 test: \
 	test-nest-app
 
-test-nest-app: \
-	test-backend \
-	test-frontend
+test-nest-app:
+	$(MAKE) test-backend
+	$(MAKE) test-frontend
+	$(MAKE) test-infrastructure
 
 ##@ Security
 
@@ -130,11 +131,11 @@ security-scan-code-trivy:
 		--rm \
 		-e TRIVY_SCANNERS="$(SCANNERS)" \
 		-v $(CURDIR):/src \
-		-v $(CURDIR)/trivyignore.yaml:/trivyignore.yaml:ro \
-		-v $(CURDIR)/trivy.yaml:/trivy.yaml:ro \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
 		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
 		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
-		fs --config /trivy.yaml /src
+		fs --config /.trivy.yaml /src
 
 ZAP_TARGET ?= https://nest.owasp.dev
 

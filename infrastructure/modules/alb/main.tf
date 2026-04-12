@@ -1,14 +1,14 @@
 terraform {
-  required_version = "1.14.0"
+  required_version = "~> 1.14.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.22.0"
+      version = "~> 6.36.0"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.7.2"
+      version = "~> 3.8.0"
     }
   }
 }
@@ -35,16 +35,16 @@ locals {
   backend_path_chunks = chunklist(local.backend_paths, 5)
   content_security_policy = join("; ", [
     "base-uri 'self'",
-    "connect-src 'self' https://github-contributions-api.jogruber.de https://*.google-analytics.com https://*.i.posthog.com https://*.sentry.io https://*.tile.openstreetmap.org",
+    "connect-src 'self' https://*.google-analytics.com https://*.i.posthog.com https://*.sentry.io https://*.tile.openstreetmap.org",
     "default-src 'self'",
     "font-src 'self' https://cdn.jsdelivr.net",
     "form-action 'self'",
     "frame-ancestors 'none'",
     "frame-src 'self'",
-    "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://owasp.org https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://raw.githubusercontent.com",
+    "img-src 'self' data: https://${var.static_s3_bucket_name}.s3.amazonaws.com https://*.googletagmanager.com https://*.tile.openstreetmap.org https://authjs.dev https://avatars.githubusercontent.com https://owasp.org https://raw.githubusercontent.com https://ssl.gstatic.com https://www.gstatic.com",
     "object-src 'none'",
-    "script-src 'self' 'unsafe-inline' https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org",
-    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://owasp-nest.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com",
+    "script-src 'self' 'unsafe-inline' https://${var.static_s3_bucket_name}.s3.amazonaws.com https://*.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org",
+    "style-src 'self' 'unsafe-inline' https://${var.static_s3_bucket_name}.s3.amazonaws.com https://cdn.jsdelivr.net",
   ])
 }
 
@@ -165,7 +165,7 @@ resource "aws_lb_target_group" "backend" {
     path                = var.backend_health_check_path
     protocol            = "HTTP"
     timeout             = 5
-    unhealthy_threshold = 3
+    unhealthy_threshold = 10
   }
 }
 
@@ -188,7 +188,7 @@ resource "aws_lb_target_group" "frontend" {
     path                = var.frontend_health_check_path
     protocol            = "HTTP"
     timeout             = 5
-    unhealthy_threshold = 3
+    unhealthy_threshold = 10
   }
 }
 

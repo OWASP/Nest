@@ -77,8 +77,8 @@ const ModuleDetailsPage = () => {
 
   const moduleDetails = [
     { label: 'Experience Level', value: capitalize(programModule.experienceLevel) },
-    { label: 'Start Date', value: formatDate(programModule.startedAt) },
-    { label: 'End Date', value: formatDate(programModule.endedAt) },
+    { label: 'Start Date', value: formatDate(String(programModule.startedAt)) },
+    { label: 'End Date', value: formatDate(String(programModule.endedAt)) },
     {
       label: 'Duration',
       value: getSimpleDuration(programModule.startedAt, programModule.endedAt),

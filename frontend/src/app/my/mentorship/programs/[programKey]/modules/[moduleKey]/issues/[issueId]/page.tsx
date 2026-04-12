@@ -2,23 +2,28 @@
 
 import { useQuery } from '@apollo/client/react'
 import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { useAccessControl } from 'hooks/useAccessControl'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 import {
   FaCodeBranch,
+  FaChevronDown,
+  FaChevronUp,
   FaLink,
   FaPlus,
   FaTags,
   FaXmark,
-  FaChevronDown,
-  FaChevronUp,
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import type { ExtendedSession } from 'types/auth'
+import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
 import { LabelList } from 'components/LabelList'
@@ -29,27 +34,50 @@ import SecondaryCard from 'components/SecondaryCard'
 
 const ModuleIssueDetailsPage = () => {
   const params = useParams<{ programKey: string; moduleKey: string; issueId: string }>()
+  const { data: session, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
   const [hasMorePRs, setHasMorePRs] = useState(true)
   const [visibleCount, setVisibleCount] = useState(4)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
   const limit = 4
   const { programKey, moduleKey, issueId } = params
+  const currentUserLogin = session?.user?.login
+
+  const {
+    data: accessData,
+    loading: accessLoading,
+    error: accessError,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
+    variables: { programKey, moduleKey },
+    skip: !programKey || !moduleKey,
+    fetchPolicy: 'network-only',
+  })
+
+  const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
+
+  useEffect(() => {
+    if (accessError) handleAppError(accessError)
+  }, [accessError])
 
   const formatDeadline = (deadline: string | null) => {
     if (!deadline) return { text: 'No deadline set', color: 'text-gray-600 dark:text-gray-300' }
 
-    const deadlineDate = new Date(deadline)
-    const today = new Date()
+    const now = new Date()
 
-    const deadlineUTC = new Date(
+    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+
+    const deadlineDate = new Date(deadline)
+
+    const deadlineUTC = Date.UTC(
       deadlineDate.getUTCFullYear(),
       deadlineDate.getUTCMonth(),
       deadlineDate.getUTCDate()
     )
-    const todayUTC = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
 
-    const isOverdue = deadlineUTC < todayUTC
-    const daysLeft = Math.ceil((deadlineUTC.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24))
+    const daysLeft = Math.ceil((deadlineUTC - todayUTC) / (1000 * 60 * 60 * 24))
+    const isOverdue = daysLeft < 0
 
     let statusText: string
     if (isOverdue) {
@@ -84,7 +112,8 @@ const ModuleIssueDetailsPage = () => {
       limit,
       offset: 0,
     },
-    skip: !issueId,
+    skip: !issueId || !hasAccess,
+    fetchPolicy: 'cache-first',
     nextFetchPolicy: 'cache-and-network',
   })
 
@@ -121,10 +150,36 @@ const ModuleIssueDetailsPage = () => {
         : 'border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800'
     }`
 
+  if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
+    return <LoadingSpinner />
+  }
+
+  if (accessError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error Loading Access Information"
+        message="Failed to verify access permissions. Please try again later."
+      />
+    )
+  }
+
+  if (!hasAccess) {
+    return (
+      <AccessDeniedDisplay
+        title="Access Denied"
+        message="Only program admins and module mentors can access this page."
+      />
+    )
+  }
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   if (error) {
     return <ErrorDisplay statusCode={500} title="Error Loading Issue" message={error.message} />
   }
-  if (loading && !data) return <LoadingSpinner />
   if (!issue)
     return <ErrorDisplay statusCode={404} title="Issue Not Found" message="Issue not found" />
 

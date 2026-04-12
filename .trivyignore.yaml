@@ -1,0 +1,38 @@
+misconfigurations:
+  - id: DS-0002  # Specify at least 1 USER command in Dockerfile with non-root user as argument.
+    paths:
+      - docker/semgrep/Dockerfile
+      - docker/trivy/Dockerfile
+      - docker/zap/Dockerfile
+  - id: AVD-AWS-0053  # Public ALB intentional for nest.owasp.dev
+    paths:
+      - infrastructure/modules/alb/main.tf
+  - id: AVD-AWS-0087  # Public bucket policy (static: allow_public_read; shared data: public read object)
+    paths:
+      - infrastructure/modules/storage/modules/s3-bucket/main.tf
+      - infrastructure/modules/storage/modules/shared-data-bucket/main.tf
+  - id: AVD-AWS-0093  # Public buckets (static: allow_public_read; shared data: public read object)
+    paths:
+      - infrastructure/modules/storage/modules/s3-bucket/main.tf
+      - infrastructure/modules/storage/modules/shared-data-bucket/main.tf
+  - id: AVD-AWS-0102  # Public NACL egress allows all ports; required for NAT gateway traffic forwarding
+    paths:
+      - infrastructure/modules/networking/modules/nacl/main.tf
+  - id: AVD-AWS-0104  # HTTPS egress to 0.0.0.0/0 for external API calls (backend, tasks, frontend)
+    paths:
+      - infrastructure/modules/security/main.tf
+  - id: AVD-AWS-0132  # SSE-S3 (AES256) instead of CMK
+    paths:
+      - infrastructure/modules/alb/main.tf
+      - infrastructure/modules/storage/modules/shared-data-bucket/main.tf
+      - infrastructure/state/main.tf
+
+vulnerabilities:
+  # TODO(arkid15r): Remove when v5.9.3 is no longer current.
+  - id: CVE-2025-64756  # glob: Command Injection Vulnerability via Malicious Filenames.
+  # minimatch ReDoS: Dev-only (eslint-plugin-import, graphql-codegen). Can't upgrade to 10.x;
+  # eslint-plugin-import expects CommonJS default export, which minimatch v10 no longer provides.
+  - id: CVE-2026-26996  # minimatch: ReDoS via repeated wildcards with non-matching literal.
+  # setuptools vendored deps; setuptools doesn't use affected tarball(). Tracking pypa/setuptools#5138
+  - id: CVE-2026-23949  # jaraco.context: Path traversal via malicious tar (setuptools vendor)
+  - id: CVE-2026-24049  # wheel: Privilege escalation via malicious wheel (setuptools vendor)
