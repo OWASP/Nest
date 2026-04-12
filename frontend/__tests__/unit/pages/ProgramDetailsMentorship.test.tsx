@@ -319,7 +319,7 @@ describe('ProgramDetailsPage', () => {
     })
 
     if (capturedSetStatus) {
-      await capturedSetStatus(ProgramStatusEnum.Published)
+      capturedSetStatus(ProgramStatusEnum.Published)
     }
 
     await waitFor(() => {
@@ -358,7 +358,7 @@ describe('ProgramDetailsPage', () => {
     })
 
     if (capturedSetStatus) {
-      await capturedSetStatus(ProgramStatusEnum.Published)
+      capturedSetStatus(ProgramStatusEnum.Published)
     }
 
     await waitFor(() => {
