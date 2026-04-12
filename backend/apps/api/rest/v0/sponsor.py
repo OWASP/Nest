@@ -11,6 +11,7 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import ValidationErrorSchema
+from apps.common.utils import slugify
 from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
 router = RouterPaginated(tags=["Sponsors"])
@@ -19,6 +20,7 @@ router = RouterPaginated(tags=["Sponsors"])
 class SponsorBase(Schema):
     """Base schema for Sponsor (used in list endpoints)."""
 
+    description: str
     image_url: str
     key: str
     name: str
@@ -33,16 +35,32 @@ class Sponsor(SponsorBase):
 class SponsorDetail(SponsorBase):
     """Detail schema for Sponsor (used in single item endpoints)."""
 
-    description: str
     is_member: bool
     job_url: str
     member_type: str
+    status: str
 
 
 class SponsorError(Schema):
     """Sponsor error schema."""
 
     message: str
+
+
+class SponsorApplication(Schema):
+    """Schema for sponsor application form submission."""
+
+    organization_name: str = Field(..., description="Name of the sponsoring organization")
+    website: str = Field("", description="Organization website URL")
+    contact_email: str = Field(..., description="Contact email address")
+    message: str = Field("", description="Sponsorship interest or message")
+
+
+class SponsorApplicationResponse(Schema):
+    """Response schema for sponsor application."""
+
+    message: str
+    key: str
 
 
 class SponsorFilter(FilterSchema):
@@ -63,6 +81,11 @@ class SponsorFilter(FilterSchema):
         example="Silver",
     )
 
+    status: str | None = Field(
+        None,
+        description="Filter by sponsor status (draft, active, archived). Defaults to active.",
+    )
+
 
 @router.get(
     "/",
@@ -81,7 +104,74 @@ def list_sponsors(
     ),
 ) -> list[Sponsor]:
     """Get sponsors."""
-    return filters.filter(SponsorModel.objects.order_by(ordering or "name"))
+    qs = SponsorModel.objects.order_by(ordering or "name")
+    if filters.status is None:
+        qs = qs.filter(status=SponsorModel.SponsorStatus.ACTIVE)
+
+    return filters.filter(qs)
+
+
+@router.get(
+    "/nest",
+    description="Retrieve active OWASP Nest sponsors for external integrations.",
+    operation_id="list_nest_sponsors",
+    response=list[Sponsor],
+    summary="List Nest sponsors",
+)
+@decorate_view(cache_response())
+def list_nest_sponsors(
+    request: HttpRequest,
+) -> list[Sponsor]:
+    """Get active Nest sponsors for external integrations (GitHub Actions, dashboards, etc.)."""
+    return list(
+        SponsorModel.objects.filter(status=SponsorModel.SponsorStatus.ACTIVE).order_by(
+            "sponsor_type", "name"
+        )
+    )
+
+
+@router.post(
+    "/apply",
+    description="Submit a sponsor application. Creates a new sponsor record with draft status.",
+    operation_id="apply_sponsor",
+    response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
+        HTTPStatus.CREATED: SponsorApplicationResponse,
+    },
+    summary="Apply to become a sponsor",
+)
+def apply_sponsor(
+    request: HttpRequest,
+    payload: SponsorApplication,
+) -> Response:
+    """Submit a sponsor application."""
+    key = slugify(payload.organization_name)
+
+    if SponsorModel.objects.filter(key=key).exists():
+        return Response(
+            {"message": "A sponsor application with this organization name already exists."},
+            status=HTTPStatus.BAD_REQUEST,
+        )
+
+    sponsor = SponsorModel(
+        contact_email=payload.contact_email,
+        description=payload.message,
+        key=key,
+        name=payload.organization_name,
+        sort_name=payload.organization_name,
+        status=SponsorModel.SponsorStatus.DRAFT,
+        url=payload.website,
+    )
+    sponsor.save()
+
+    return Response(
+        {
+            "message": "Sponsor application submitted successfully. "
+            "It will be reviewed by the OWASP team.",
+            "key": key,
+        },
+        status=HTTPStatus.CREATED,
+    )
 
 
 @router.get(
