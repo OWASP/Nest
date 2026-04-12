@@ -56,14 +56,12 @@ describe('UsersPage Component', () => {
     window.scrollTo = jest.fn()
     render(<UsersPage />)
 
-    // Check loading state
     const skeletonLoaders = screen.getAllByRole('status')
     await waitFor(() => {
       expect(skeletonLoaders.length).toBeGreaterThan(0)
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
 
-    // Check loaded state
     await waitFor(() => {
       const searchInputs = screen.getAllByPlaceholderText('Search for members...')
       const visibleInput = searchInputs.find((input) => {
@@ -78,6 +76,43 @@ describe('UsersPage Component', () => {
     })
 
     expect(screen.queryByTestId('status')).not.toBeInTheDocument()
+  })
+
+  test('renders SortBy component inline after data is loaded', async () => {
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      const sortInlines = screen.getAllByTestId('sort-inline')
+      expect(sortInlines.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('renders the MembersFilter wrapper after data is loaded', async () => {
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      const filters = screen.getAllByTestId('members-filter')
+      expect(filters.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('MembersFilter contains the filter trigger', async () => {
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      const triggers = screen.getAllByRole('button', { name: 'All Filters' })
+      expect(triggers.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('does not render a standalone sidebar — filters are inline', async () => {
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      const filters = screen.getAllByTestId('members-filter')
+      expect(filters.length).toBeGreaterThan(0)
+    })
+    expect(screen.queryByTestId('members-sidebar')).not.toBeInTheDocument()
   })
 
   test('renders user cards correctly', async () => {
