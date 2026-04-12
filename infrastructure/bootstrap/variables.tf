@@ -13,11 +13,17 @@ variable "aws_role_external_id" {
 variable "environments" {
   description = "The environments to create Terraform roles for."
   type        = list(string)
-  default     = ["staging"]
+  default     = ["staging", "production"]
 }
 
 variable "project_name" {
   description = "The name of the project."
   type        = string
   default     = "nest"
+}
+
+variable "shared_data_bucket_name" {
+  description = "Global S3 bucket for shared public data (e.g. nest.dump)"
+  type        = string
+  default     = "owasp-nest-shared-data"
 }

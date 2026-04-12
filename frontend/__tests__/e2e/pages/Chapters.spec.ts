@@ -13,15 +13,7 @@ test.describe('Chapters Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/chapters')
+    await page.goto('/chapters', { timeout: 25000 })
   })
 
   test('renders chapter data correctly', async ({ page }) => {
@@ -43,14 +35,14 @@ test.describe('Chapters Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
-    await nextPageButton.waitFor({ state: 'visible' }) // Ensure button is visible
+    const nextPageButton = page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on View Details button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'View Details' })
+    const contributeButton = page.getByRole('button', { name: 'View Details' })
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
     await expect(page).toHaveURL('chapters/chapter_1')

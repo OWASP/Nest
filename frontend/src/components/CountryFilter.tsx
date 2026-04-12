@@ -21,7 +21,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
   )
 
   return (
-    <div className="relative inline-flex h-12 items-center rounded-lg border border-r-0 border-gray-300 bg-white shadow-none transition-all duration-200 dark:border-gray-600 dark:bg-gray-800">
+    <div className="relative flex h-12 w-full min-w-0 items-center rounded-lg border border-gray-300 bg-white shadow-none transition-all duration-200 md:inline-flex md:w-auto dark:border-gray-600 dark:bg-gray-800">
       <Autocomplete
         aria-label="Country"
         labelPlacement="outside-left"
@@ -30,7 +30,11 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         defaultItems={options}
         selectedKey={selectedCountry}
         onSelectionChange={(key) => {
-          onCountryChange((key as string) ?? '')
+          if (key == null) {
+            return
+          }
+          const countryKey = key as string
+          onCountryChange(countryKey === '__all__' ? '' : countryKey)
         }}
         allowsCustomValue={false}
         scrollShadowProps={{
@@ -38,11 +42,11 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
         }}
         clearButtonProps={{ 'aria-label': 'Clear country selection' }}
         classNames={{
-          base: 'w-52',
+          base: 'w-full min-w-0 md:w-52',
           clearButton: 'p-0',
           listbox: 'p-0 focus:outline-none',
           popoverContent:
-            'z-[1000] mt-1 !w-52 !min-w-52 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-72 p-1 focus:outline-none',
+            'z-[1000] mt-1 min-w-0 bg-white dark:bg-[#2a2a2a] border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-72 p-1 focus:outline-none',
           selectorButton: 'text-gray-500 dark:text-gray-400 transition-transform duration-200',
         }}
         inputProps={{
@@ -52,7 +56,7 @@ const CountryFilter: React.FC<CountryFilterProps> = ({
             inputWrapper:
               'bg-transparent data-[hover=true]:bg-transparent focus-within:!bg-transparent border-none shadow-none outline-none ring-0 min-h-8 h-8',
             input:
-              'text-sm font-medium text-gray-800 dark:text-gray-200 placeholder:text-gray-400 !outline-none !ring-0 focus:!outline-none focus:!ring-0',
+              'text-sm font-medium text-gray-800 dark:text-gray-200 placeholder:text-gray-400 !outline-none !ring-0 focus:!outline-none focus:!ring-0 data-[has-end-content=true]:!pe-0',
           },
         }}
       >

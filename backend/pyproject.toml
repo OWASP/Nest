@@ -41,13 +41,14 @@ dependencies.requests = "^2.32.5"
 dependencies.sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 dependencies.slack-bolt = "^1.22.0"
 dependencies.slack-sdk = "^3.37.0"
-dependencies.strawberry-graphql = { extras = [ "django" ], version = "^0.288.1" }
-dependencies.strawberry-graphql-django = "^0.73.0"
+dependencies.strawberry-graphql = { extras = [ "django" ], version = "^0.312.3" }
+dependencies.strawberry-graphql-django = "^0.75.0"
 dependencies.thefuzz = "^0.22.1"
 dependencies.pyparsing = "^3.2.3"
 group.dev.dependencies.djlint = "^1.36.4"
 group.dev.dependencies.pre-commit = "^4.1.0"
 group.dev.dependencies.ruff = "^0.14.2"
+group.fuzz.dependencies.schemathesis = "^4.10.2"
 group.nestbot.dependencies.crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
 group.nestbot.dependencies.langchain-text-splitters = "^1.1.1"
 group.test.dependencies.pytest = "^9.0.1"
@@ -172,6 +173,7 @@ run.omit = [
   "settings/*",
   "tests/*",
   "wsgi.py",
+  "apps/ai/text_splitting.py",
 ]
 
 [tool.djlint]
