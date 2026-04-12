@@ -169,11 +169,11 @@ run.branch = true
 run.omit = [
   "**/migrations/*",
   "__init__.py",
+  "apps/ai/text_splitting.py",
   "manage.py",
   "settings/*",
   "tests/*",
   "wsgi.py",
-  "apps/ai/text_splitting.py",
 ]
 
 [tool.djlint]
