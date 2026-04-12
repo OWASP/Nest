@@ -8,6 +8,7 @@ variables {
   container_port        = 3000
   desired_count         = 2
   environment           = "test"
+  health_check_path     = "/"
   image_tag             = "test-tag"
   kms_key_arn           = "arn:aws:kms:us-east-2:123456789012:key/12345678-1234-1234-1234-123456789012"
   log_retention_in_days = 7
@@ -115,6 +116,45 @@ run "test_task_definition_memory" {
   assert {
     condition     = aws_ecs_task_definition.main.memory == tostring(var.container_memory)
     error_message = "Task definition memory must match container_memory variable."
+  }
+}
+
+run "test_task_definition_has_container_health_check" {
+  command = plan
+
+  assert {
+    condition     = can(local.container_definition.healthCheck)
+    error_message = "Task definition container must include ECS healthCheck configuration."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.command[0] == "CMD-SHELL"
+    error_message = "Health check command must use CMD-SHELL."
+  }
+
+  assert {
+    condition     = strcontains(local.container_definition.healthCheck.command[1], ":${var.container_port}${var.health_check_path}")
+    error_message = "Health check command must target the configured container_port and health_check_path."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.interval == 30
+    error_message = "Health check interval must be 30 seconds."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.retries == 3
+    error_message = "Health check retries must be 3."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.startPeriod == 100
+    error_message = "Health check startPeriod must be 100 seconds."
+  }
+
+  assert {
+    condition     = local.container_definition.healthCheck.timeout == 5
+    error_message = "Health check timeout must be 5 seconds."
   }
 }
 
