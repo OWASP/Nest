@@ -17,3 +17,5 @@ build
 coverage
 dist
 venv
+# Local-only NestBot benchmark; exclude from image so coverage matches CI
+apps/ai/management/commands/test_ai_assistant.py

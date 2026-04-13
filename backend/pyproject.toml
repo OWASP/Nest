@@ -45,7 +45,7 @@ dependencies.strawberry-graphql-django = "^0.75.0"
 dependencies.thefuzz = "^0.22.1"
 dependencies.pyparsing = "^3.2.3"
 group.fuzz.dependencies.schemathesis = "^4.10.2"
-group.nestbot.dependencies.crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
+group.nestbot.dependencies.crewai = { version = "^1.7.2", python = ">=3.10,<3.14", extras = [ "google-genai" ] }
 group.nestbot.dependencies.langchain-text-splitters = "^1.1.1"
 group.test.dependencies.pytest = "^9.0.1"
 group.test.dependencies.pytest-cov = "^7.0"
