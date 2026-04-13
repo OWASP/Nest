@@ -111,8 +111,11 @@ class Command(BaseCommand):
         workspace.refresh_from_db()
         current_members = workspace.total_members_count
 
-        if workspace.invite_link_member_count is None and (
-            invite_link_updated or workspace.invite_link_created_at is not None
+        # New invite commit from GitHub: always re-baseline (clears stale baseline from the
+        # previous link). If baseline is still unset, also set it when commit metadata exists.
+        if invite_link_updated or (
+            workspace.invite_link_member_count is None
+            and workspace.invite_link_created_at is not None
         ):
             self.set_baseline(workspace, current_members)
             workspace.refresh_from_db()
