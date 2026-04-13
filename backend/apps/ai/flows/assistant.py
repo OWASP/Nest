@@ -14,6 +14,7 @@ from apps.ai.common.utils import get_fallback_response, get_intent_to_agent_map
 from apps.ai.flows.collaborative import handle_collaborative_query
 from apps.ai.query_analyzer import analyze_query
 from apps.ai.router import route
+from apps.ai.semantic_cache import get_cached_response, store_cached_response
 from apps.common.open_ai import OpenAi
 from apps.slack.constants import (
     OWASP_COMMUNITY_CHANNEL_ID,
@@ -76,6 +77,13 @@ def process_query(  # noqa: PLR0911
             )
             if image_context:
                 query = f"{query}{DELIMITER}Image context: {image_context}"
+
+        # Step 0: Check semantic cache
+        try:
+            if (cached := get_cached_response(query)) is not None:
+                return cached
+        except Exception:
+            logger.exception("Semantic cache lookup failed, proceeding without cache")
 
         # Step 1: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
@@ -258,12 +266,21 @@ def process_query(  # noqa: PLR0911
                     extra={"query": query[:200]},
                 )
                 channel_agent = create_channel_agent()
-                return execute_task(
+                response = execute_task(
                     channel_agent,
                     query,
                     channel_id=channel_id,
                     is_channel_suggestion=True,
                 )
+                if response:
+                    try:
+                        store_cached_response(
+                            query=query,
+                            response=response,
+                        )
+                    except Exception:
+                        logger.exception("Failed to store semantic cache entry")
+                return response
 
         # Step 2: Analyze query complexity before routing
         try:
@@ -283,7 +300,17 @@ def process_query(  # noqa: PLR0911
         # Step 3: Use collaborative flow for complex query
         if not query_analysis["is_simple"] and len(query_analysis["sub_queries"]) > 1:
             try:
-                return handle_collaborative_query(query, query_analysis["sub_queries"])
+                response = handle_collaborative_query(query, query_analysis["sub_queries"])
+                if response:
+                    try:
+                        store_cached_response(
+                            query=query,
+                            response=response,
+                        )
+                    except Exception:
+                        logger.exception("Failed to store semantic cache entry")
+                    else:
+                        return response
             except Exception:
                 logger.exception(
                     "Collaborative flow failed, falling back to single agent: %s", query
@@ -383,11 +410,25 @@ def process_query(  # noqa: PLR0911
         agent = agent_factory()
 
         # Step 8: Execute task with agent
-        return execute_task(agent, query)
+        response = execute_task(agent, query)
+
+        # Step 9: Store in semantic cache
+        if response:
+            try:
+                store_cached_response(
+                    query=query,
+                    response=response,
+                    intent=intent,
+                    confidence=confidence,
+                )
+            except Exception:
+                logger.exception("Failed to store semantic cache entry")
 
     except Exception:
         logger.exception("Failed to process query: %s", query)
         return get_fallback_response()
+    else:
+        return response
 
 
 def execute_task(
