@@ -64,6 +64,6 @@
 | Name | Description |
 |------|-------------|
 | <a name="output_db_password_arn"></a> [db\_password\_arn](#output\_db\_password\_arn) | The SSM Parameter ARN of password of the RDS database. |
-| <a name="output_db_proxy_endpoint"></a> [db\_proxy\_endpoint](#output\_db\_proxy\_endpoint) | The endpoint of the RDS proxy. |
+| <a name="output_db_proxy_endpoint"></a> [db\_proxy\_endpoint](#output\_db\_proxy\_endpoint) | The RDS proxy endpoint when proxying is enabled, otherwise the DB instance endpoint. |
 <!-- END_TF_DOCS -->
 

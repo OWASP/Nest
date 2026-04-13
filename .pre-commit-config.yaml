@@ -46,7 +46,7 @@ repos:
         name: terraform-docs
         entry: python infrastructure/scripts/terraform_docs.py
         language: system
-        files: ^infrastructure/.*\.tf$
+        files: ^(infrastructure/.*\.tf|infrastructure/\.terraform-docs\.yml|infrastructure/scripts/terraform_docs\.py)$
         pass_filenames: false
 
   - repo: https://github.com/astral-sh/ruff-pre-commit

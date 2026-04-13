@@ -53,6 +53,6 @@
 
 | Name | Description |
 |------|-------------|
-| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | Security group ID for VPC endpoints. |
+| <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | Security group ID for VPC interface endpoints, or null when no interface endpoints are enabled. |
 <!-- END_TF_DOCS -->
 
