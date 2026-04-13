@@ -4,6 +4,6 @@ output "db_password_arn" {
 }
 
 output "db_proxy_endpoint" {
-  description = "The endpoint of the RDS proxy."
+  description = "The RDS proxy endpoint when proxying is enabled, otherwise the DB instance endpoint."
   value       = var.enable_rds_proxy ? aws_db_proxy.main[0].endpoint : aws_db_instance.main.address
 }
