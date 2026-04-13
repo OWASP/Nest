@@ -11,22 +11,21 @@ readme = "README.md"
 packages = [ { include = "apps" } ]
 dependencies.algoliasearch = "^4.13.2"
 dependencies.algoliasearch-django = "^4.0.0"
-dependencies.crewai = { version = "^1.7.2", python = ">=3.10,<3.14", extras = [ "google-genai" ] }
 dependencies.django = "^6.0"
 dependencies.django-configurations = "^2.5.1"
 dependencies.django-cors-headers = "^4.7.0"
-dependencies.django-ninja = "^1.4.3"
+dependencies.django-ninja = "^1.5.3"
 dependencies.django-redis = "^6.0.0"
 dependencies.django-rq = "^3.1"
 dependencies.django-storages = { extras = [ "s3" ], version = "^1.14.4" }
 dependencies.emoji = "^2.14.1"
 dependencies.geopy = "^2.4.1"
-dependencies.gunicorn = "^23.0.0"
+dependencies.gunicorn = "^25.0.0"
 dependencies.humanize = "^4.11.0"
 dependencies.jinja2 = "^3.1.6"
 dependencies.lxml = "^6.0.0"
 dependencies.markdown = "^3.7"
-dependencies.openai = "~=1.83.0"
+dependencies.openai = "^2.0.1"
 dependencies.owasp-schema = "^0.1.46"
 dependencies.pgvector = "^0.4.1"
 dependencies.psycopg2-binary = "^2.9.9"
@@ -49,7 +48,7 @@ group.dev.dependencies.djlint = "^1.36.4"
 group.dev.dependencies.pre-commit = "^4.1.0"
 group.dev.dependencies.ruff = "^0.14.2"
 group.fuzz.dependencies.schemathesis = "^4.10.2"
-group.nestbot.dependencies.crewai = { version = "^1.7.2", python = ">=3.10,<3.14" }
+group.nestbot.dependencies.crewai = { version = "^1.7.2", python = ">=3.10,<3.14", extras = [ "google-genai" ] }
 group.nestbot.dependencies.langchain-text-splitters = "^1.1.1"
 group.test.dependencies.pytest = "^9.0.1"
 group.test.dependencies.pytest-cov = "^7.0"
@@ -60,8 +59,8 @@ group.test.dependencies.python-dotenv = "^1.0.1"
 group.video.dependencies.elevenlabs = "^2.27.0"
 group.video.dependencies.ffmpeg-python = "^0.2.0"
 group.video.dependencies.pillow = "^12.1.0"
-group.video.dependencies.pypdfium2 = "^5.2.0"
-group.video.dependencies.weasyprint = "^67.0"
+group.video.dependencies.pypdfium2 = "^5.4.0"
+group.video.dependencies.weasyprint = "^68.0"
 
 [tool.ruff]
 target-version = "py313"
@@ -169,7 +168,6 @@ run.branch = true
 run.omit = [
   "**/migrations/*",
   "__init__.py",
-  "apps/ai/text_splitting.py",
   "manage.py",
   "settings/*",
   "tests/*",
