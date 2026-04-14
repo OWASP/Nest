@@ -988,6 +988,46 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
     })
 
+    it('renders Show More button when onLoadMorePullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show more/i })).toBeInTheDocument()
+    })
+
+    it('renders Show Less button when onResetPullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onResetPullRequests={jest.fn()}
+          onLoadMorePullRequests={undefined}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeInTheDocument()
+    })
+
+    it('shows Loading on Show more and disables both controls when isFetchingMore is true', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+          onResetPullRequests={jest.fn()}
+          isFetchingMore={true}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Loading/i })).toBeDisabled()
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeDisabled()
+    })
+
     it('calls scrollToAnchor when MetricsScoreCircle is clicked', () => {
       const { scrollToAnchor } = jest.requireMock('utils/scrollToAnchor')
 

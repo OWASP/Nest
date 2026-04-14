@@ -41,10 +41,10 @@ locals {
     "form-action 'self'",
     "frame-ancestors 'none'",
     "frame-src 'self'",
-    "img-src 'self' data: https://authjs.dev https://avatars.githubusercontent.com https://*.tile.openstreetmap.org https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://owasp.org https://raw.githubusercontent.com",
+    "img-src 'self' data: https://${var.static_s3_bucket_name}.s3.amazonaws.com https://*.googletagmanager.com https://*.tile.openstreetmap.org https://authjs.dev https://avatars.githubusercontent.com https://owasp.org https://raw.githubusercontent.com https://ssl.gstatic.com https://www.gstatic.com",
     "object-src 'none'",
-    "script-src 'self' 'unsafe-inline' https://*.i.posthog.com https://*.tile.openstreetmap.org https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com https://www.googletagmanager.com",
-    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://nest-staging-static-24d01951.s3.amazonaws.com https://owasp-nest-production.s3.amazonaws.com",
+    "script-src 'self' 'unsafe-inline' https://${var.static_s3_bucket_name}.s3.amazonaws.com https://*.googletagmanager.com https://*.i.posthog.com https://*.tile.openstreetmap.org",
+    "style-src 'self' 'unsafe-inline' https://${var.static_s3_bucket_name}.s3.amazonaws.com https://cdn.jsdelivr.net",
   ])
 }
 
@@ -165,7 +165,7 @@ resource "aws_lb_target_group" "backend" {
     path                = var.backend_health_check_path
     protocol            = "HTTP"
     timeout             = 5
-    unhealthy_threshold = 3
+    unhealthy_threshold = 10
   }
 }
 
@@ -188,7 +188,7 @@ resource "aws_lb_target_group" "frontend" {
     path                = var.frontend_health_check_path
     protocol            = "HTTP"
     timeout             = 5
-    unhealthy_threshold = 3
+    unhealthy_threshold = 10
   }
 }
 

@@ -84,6 +84,9 @@ class ModuleNode:
         self, info: Info, limit: int = 20, offset: int = 0, label: str | None = None
     ) -> list[IssueNode]:
         """Return paginated issues linked to this module, optionally filtered by label."""
+        if not self.program or not self.program.user_has_access(info.context.request.user):
+            return []
+
         info.context.current_module = self
 
         # BULK load data
@@ -150,6 +153,9 @@ class ModuleNode:
     @strawberry.field
     def issue_by_number(self, info: Info, number: int) -> IssueNode | None:
         """Return a single issue by its GitHub number within this module's linked issues."""
+        if not self.program or not self.program.user_has_access(info.context.request.user):
+            return None
+
         info.context.current_module = self
 
         return (
@@ -214,17 +220,19 @@ class ModuleNode:
         )
 
     @strawberry.field
-    def recent_pull_requests(self, limit: int = 5) -> list[PullRequestNode]:
+    def recent_pull_requests(self, limit: int = 4, offset: int = 0) -> list[PullRequestNode]:
         """Return recent pull requests linked to issues in this module."""
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             return []
+
+        offset = max(0, offset)
 
         issue_ids = self.issues.values_list("id", flat=True)
         return list(
             PullRequest.objects.filter(related_issues__id__in=issue_ids)
             .select_related("author")
             .distinct()
-            .order_by("-created_at")[:normalized_limit]
+            .order_by("-created_at")[offset : offset + normalized_limit]
         )
 
 

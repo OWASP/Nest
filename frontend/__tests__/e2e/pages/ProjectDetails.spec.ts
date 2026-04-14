@@ -16,7 +16,7 @@ test.describe('Project Details Page', () => {
 
   test('should have project details block', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Project Details' })).toBeVisible()
-    await expect(page.getByText('Level: Lab')).toBeVisible()
+    await expect(page.getByText('Level: Production')).toBeVisible()
     await expect(page.getByText('Type: Code')).toBeVisible()
     await expect(
       page.getByText('Leaders: Arkadii Yakovets, Kate Golovanova, Starr Brown')

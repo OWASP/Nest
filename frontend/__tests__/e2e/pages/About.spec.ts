@@ -81,7 +81,7 @@ test.describe('About Page', () => {
   test('renders project history timeline section', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Project Timeline' })).toBeVisible()
 
-    await expect(page.getByText('OWASP Nest Logo Introduction')).toBeVisible()
+    await expect(page.getByText('Logo Introduction')).toBeVisible()
 
     const timelineSection = page
       .locator('div')
