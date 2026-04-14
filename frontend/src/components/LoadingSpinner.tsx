@@ -12,10 +12,11 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ imageUrl }) => {
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <div
-        className="animate-custom-spin relative h-16 w-16 rounded-full border-4 border-[#98AFC7] dark:border-white"
-        style={{ borderTopColor: 'transparent' }}
-      >
+      <div className="relative h-16 w-16">
+        <div
+          className="animate-custom-spin absolute inset-0 rounded-full border-4 border-[#98AFC7] dark:border-white"
+          style={{ borderTopColor: 'transparent' }}
+        />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="animate-fade-in-out">
             <Image
