@@ -36,6 +36,7 @@ const CardDetailsHeader = ({
   canUpdateStatus,
   programKey,
   moduleKey,
+  entityKey: _entityKey,
   accessLevel,
   admins,
   mentors,

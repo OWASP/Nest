@@ -66,13 +66,19 @@ jest.mock('components/SecondaryCard', () => ({
   ),
 }))
 
+const getSocialPlatformName = (url: string): string => {
+  if (url.includes('github')) {
+    return 'GitHub'
+  }
+  if (url.includes('twitter')) {
+    return 'Twitter'
+  }
+  return 'Link'
+}
+
 jest.mock('utils/urlIconMappings', () => ({
   getSocialIcon: (url: string) => {
-    return () => (
-      <span data-testid={`social-icon-${url}`}>
-        {url.includes('github') ? 'GitHub' : url.includes('twitter') ? 'Twitter' : 'Link'}
-      </span>
-    )
+    return () => <span data-testid={`social-icon-${url}`}>{getSocialPlatformName(url)}</span>
   },
 }))
 

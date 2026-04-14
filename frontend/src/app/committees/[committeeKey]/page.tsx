@@ -95,6 +95,8 @@ export default function CommitteeDetailsPage() {
       <CardDetailsMetadata
         details={details}
         stats={committeeStats}
+        socialLinks={committee.relatedUrls}
+        showSocialLinks={true}
         detailsTitle="Committee Details"
       />
 

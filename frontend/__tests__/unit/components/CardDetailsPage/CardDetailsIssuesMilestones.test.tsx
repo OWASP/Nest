@@ -682,7 +682,7 @@ describe('CardDetailsIssuesMilestones', () => {
       />
     )
 
-    const loadMoreBtn = screen.getByText('Show more')
+    const loadMoreBtn = screen.getByRole('button', { name: /Show more/ })
     expect(loadMoreBtn).not.toBeDisabled()
 
     rerender(
@@ -753,7 +753,7 @@ describe('CardDetailsIssuesMilestones', () => {
       />
     )
 
-    let loadMoreBtn = screen.getByText('Show more')
+    let loadMoreBtn = screen.getByRole('button', { name: /Show more/ })
     expect(loadMoreBtn.className).not.toContain('cursor-not-allowed')
 
     rerender(

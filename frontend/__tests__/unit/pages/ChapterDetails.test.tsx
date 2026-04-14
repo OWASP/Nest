@@ -228,6 +228,7 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
+    expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
   })
 
   test('does not render contributions section when contributionStats total is 0 and contributionData is empty', async () => {
@@ -254,6 +255,7 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
+    expect(screen.queryByText('Chapter Contribution Activity')).not.toBeInTheDocument()
   })
 
   test('renders contributions section when contributionData is non-empty', async () => {
@@ -277,5 +279,6 @@ describe('chapterDetailsPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Test Chapter')).toBeInTheDocument()
     })
+    expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
   })
 })

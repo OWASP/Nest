@@ -19,7 +19,6 @@ jest.mock('components/ToggleableList', () => {
     entityKey: string
     label: React.ReactNode
     items: string[]
-    icon?: React.ComponentType<unknown>
     isDisabled?: boolean
   }) {
     return (
@@ -49,21 +48,21 @@ describe('CardDetailsTags', () => {
 
       expect(screen.getByTestId('toggleable-list-test-languages')).toBeInTheDocument()
       expect(screen.getByTestId('toggleable-list-test-topics')).toBeInTheDocument()
-      expect(container.querySelector('.md\\:grid-cols-2')).toBeInTheDocument()
+      expect(container.querySelector(String.raw`.md\:grid-cols-2`)).toBeInTheDocument()
     })
 
     it('should render languages only with md:col-span-1', () => {
       const { container } = render(<CardDetailsTags entityKey="test" languages={['JavaScript']} />)
 
       expect(screen.getByTestId('toggleable-list-test-languages')).toBeInTheDocument()
-      expect(container.querySelector('.md\\:col-span-1')).toBeInTheDocument()
+      expect(container.querySelector(String.raw`.md\:col-span-1`)).toBeInTheDocument()
     })
 
     it('should render topics only with md:col-span-1', () => {
       const { container } = render(<CardDetailsTags entityKey="test" topics={['Web']} />)
 
       expect(screen.getByTestId('toggleable-list-test-topics')).toBeInTheDocument()
-      expect(container.querySelector('.md\\:col-span-1')).toBeInTheDocument()
+      expect(container.querySelector(String.raw`.md\:col-span-1`)).toBeInTheDocument()
     })
   })
 
@@ -75,21 +74,21 @@ describe('CardDetailsTags', () => {
 
       expect(screen.getByTestId('toggleable-list-test-tags')).toBeInTheDocument()
       expect(screen.getByTestId('toggleable-list-test-domains')).toBeInTheDocument()
-      expect(container.querySelector('.md\\:grid-cols-2')).toBeInTheDocument()
+      expect(container.querySelector(String.raw`.md\:grid-cols-2`)).toBeInTheDocument()
     })
 
     it('should render tags only with md:col-span-1', () => {
       const { container } = render(<CardDetailsTags entityKey="test" tags={['Bug']} />)
 
       expect(screen.getByTestId('toggleable-list-test-tags')).toBeInTheDocument()
-      expect(container.querySelector('.md\\:col-span-1')).toBeInTheDocument()
+      expect(container.querySelector(String.raw`.md\:col-span-1`)).toBeInTheDocument()
     })
 
     it('should render domains only with md:col-span-1', () => {
       const { container } = render(<CardDetailsTags entityKey="test" domains={['Security']} />)
 
       expect(screen.getByTestId('toggleable-list-test-domains')).toBeInTheDocument()
-      expect(container.querySelector('.md\\:col-span-1')).toBeInTheDocument()
+      expect(container.querySelector(String.raw`.md\:col-span-1`)).toBeInTheDocument()
     })
 
     it('should render labels with isDisabled={true}', () => {

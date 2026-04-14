@@ -94,6 +94,8 @@ export default function ChapterDetailsPage() {
         details={details}
         showGeolocation={true}
         geolocationData={[chapter as unknown as Chapter]}
+        showSocialLinks={true}
+        socialLinks={chapter.relatedUrls}
         detailsTitle="Chapter Details"
       />
 

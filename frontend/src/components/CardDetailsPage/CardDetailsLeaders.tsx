@@ -5,7 +5,7 @@ interface CardDetailsLeadersProps {
   entityLeaders?: Leader[] | null
 }
 
-export default function CardDetailsLeaders({ entityLeaders }: CardDetailsLeadersProps) {
+export default function CardDetailsLeaders({ entityLeaders }: Readonly<CardDetailsLeadersProps>) {
   if (!entityLeaders || entityLeaders.length === 0) {
     return null
   }

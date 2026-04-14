@@ -79,7 +79,7 @@ const ProgramDetailsPage = () => {
           admins={program.admins ?? undefined}
           isActive={true}
           isArchived={false}
-          showProgramActions={true}
+          showProgramActions={false}
         />
 
         <CardDetailsSummary summary={program.description} />
