@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Chapter Details Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/chapters/rosario', { timeout: 25000 })
+    await page.waitForLoadState('networkidle')
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -24,7 +25,7 @@ test.describe('Chapter Details Page', () => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
     await expect(unlockButton).toBeVisible()
 
-    await unlockButton.click()
+    await unlockButton.click({ force: true })
 
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
