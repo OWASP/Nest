@@ -2,12 +2,14 @@ import { test, expect, Page, Route } from '@playwright/test'
 
 const MOCK_SNAPSHOTS = [
   {
+    id : 1,
     key: 'snapshot-q1-2024',
     title: 'Community Snapshot Q1 2024',
     startAt: '2024-01-01T00:00:00Z',
     endAt: '2024-03-31T00:00:00Z',
   },
   {
+    id : 2,
     key: 'snapshot-q2-2024',
     title: 'Community Snapshot Q2 2024',
     startAt: '2024-04-01T00:00:00Z',
