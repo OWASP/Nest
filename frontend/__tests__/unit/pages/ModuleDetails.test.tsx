@@ -2,6 +2,7 @@ import { useQuery } from '@apollo/client/react'
 import { mockModuleData } from '@mockData/mockModuleData'
 import { screen, waitFor } from '@testing-library/react'
 import { useParams } from 'next/navigation'
+import React from 'react'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
 import ModuleDetailsPage from 'app/mentorship/programs/[programKey]/modules/[moduleKey]/page'
@@ -22,12 +23,47 @@ jest.mock('app/global-error', () => ({
 
 jest.mock('components/LoadingSpinner', () => () => <div>LoadingSpinner</div>)
 
-jest.mock('components/CardDetailsPage', () => (props) => (
-  <div data-testid="details-card">
-    <div>{props.title}</div>
-    <div>{props.summary}</div>
-  </div>
-))
+jest.mock('components/CardDetailsPage/CardDetailsHeader', () => {
+  return function MockHeader(props: { title: string }) {
+    return <div data-testid="header">{props.title}</div>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsSummary', () => {
+  return function MockSummary(props: { summary: string }) {
+    return <div data-testid="summary">{props.summary}</div>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsPageWrapper', () => {
+  return function MockWrapper({ children }: { children: React.ReactNode }) {
+    return <>{children}</>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsMetadata', () => {
+  return function MockMetadata() {
+    return <div />
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsTags', () => {
+  return function MockTags() {
+    return <div />
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsContributors', () => {
+  return function MockContributors() {
+    return <div />
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsIssuesMilestones', () => {
+  return function MockIssuesMilestones() {
+    return <div />
+  }
+})
 
 describe('ModuleDetailsPage', () => {
   const mockUseParams = useParams as jest.Mock
@@ -114,8 +150,8 @@ describe('ModuleDetailsPage', () => {
 
     render(<ModuleDetailsPage />)
 
-    expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
-    expect(screen.getByTestId('details-card')).toHaveTextContent('A beginner friendly module.')
+    expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
+    expect(screen.getByTestId('summary')).toHaveTextContent('A beginner friendly module.')
   })
 
   it('renders module without admins (uses undefined fallback)', async () => {
@@ -131,7 +167,7 @@ describe('ModuleDetailsPage', () => {
 
     render(<ModuleDetailsPage />)
 
-    expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
+    expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
   })
 
   it('renders module without domains (uses undefined fallback)', async () => {
@@ -147,7 +183,7 @@ describe('ModuleDetailsPage', () => {
 
     render(<ModuleDetailsPage />)
 
-    expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
+    expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
   })
 
   it('renders module without tags (uses undefined fallback)', async () => {
@@ -163,6 +199,6 @@ describe('ModuleDetailsPage', () => {
 
     render(<ModuleDetailsPage />)
 
-    expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
+    expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
   })
 })

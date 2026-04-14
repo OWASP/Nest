@@ -3,19 +3,18 @@ import type { ComponentProps } from 'react'
 import type { ExtendedSession } from 'types/auth'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
-import type { CardType } from 'components/CardDetailsPage'
 import EntityActions from 'components/EntityActions'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import StatusBadge from 'components/StatusBadge'
 
-interface CardDetailsHeaderProps {
+export interface CardDetailsHeaderProps {
   title?: string
   description?: string
-  type: CardType
   status?: string
   setStatus?: ComponentProps<typeof EntityActions>['setStatus']
   canUpdateStatus?: boolean
   programKey?: string
+  moduleKey?: string
   entityKey?: string
   accessLevel?: string
   admins?: Array<{ login: string }>
@@ -23,23 +22,30 @@ interface CardDetailsHeaderProps {
   isActive?: boolean
   isArchived?: boolean
   healthMetricsData?: Array<{ score?: number }>
+  showProgramActions?: boolean
+  showModuleActions?: boolean
+  showArchivedBadge?: boolean
+  showHealthMetrics?: boolean
 }
 
 const CardDetailsHeader = ({
   title,
   description,
-  type,
   status,
   setStatus,
   canUpdateStatus,
   programKey,
-  entityKey,
+  moduleKey,
   accessLevel,
   admins,
   mentors,
   isActive = true,
   isArchived = false,
   healthMetricsData,
+  showProgramActions,
+  showModuleActions,
+  showArchivedBadge,
+  showHealthMetrics,
 }: CardDetailsHeaderProps) => {
   const { data: session } = useSession() as { data: ExtendedSession | null }
 
@@ -47,9 +53,9 @@ const CardDetailsHeader = ({
     <>
       <div className="mt-4 flex flex-row items-center">
         <div className="flex w-full items-center justify-between">
-          <h1 className="text-4xl font-bold">{title || ''}</h1>
+          <h1 className="mb-5 text-4xl font-bold">{title || ''}</h1>
           <div className="flex items-center gap-3">
-            {type === 'program' && accessLevel === 'admin' && canUpdateStatus && programKey && (
+            {showProgramActions && canUpdateStatus && programKey && (
               <EntityActions
                 type="program"
                 programKey={programKey}
@@ -57,9 +63,9 @@ const CardDetailsHeader = ({
                 setStatus={setStatus}
               />
             )}
-            {type === 'module' &&
+            {showModuleActions &&
               (() => {
-                if (!programKey || !entityKey) return null
+                if (!programKey || !moduleKey) return null
                 const currentUserLogin = session?.user?.login
                 const isAdmin =
                   accessLevel === 'admin' &&
@@ -69,16 +75,16 @@ const CardDetailsHeader = ({
                   <EntityActions
                     type="module"
                     programKey={programKey}
-                    moduleKey={entityKey}
+                    moduleKey={moduleKey}
                     isAdmin={isAdmin ? true : undefined}
                     isMentor={isMentor ? true : undefined}
                   />
                 ) : null
               })()}
             {!isActive && <StatusBadge status="inactive" size="md" />}
-            {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
-            {IS_PROJECT_HEALTH_ENABLED &&
-              type === 'project' &&
+            {showArchivedBadge && isArchived && <StatusBadge status="archived" size="md" />}
+            {showHealthMetrics &&
+              IS_PROJECT_HEALTH_ENABLED &&
               healthMetricsData &&
               healthMetricsData.length > 0 &&
               healthMetricsData[0].score !== undefined && (

@@ -18,7 +18,6 @@ import type { PullRequest } from 'types/pullRequest'
 import type { Release } from 'types/release'
 import { formatDate } from 'utils/dateFormatter'
 import AnchorTitle from 'components/AnchorTitle'
-import type { CardType } from 'components/CardDetailsPage'
 import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import Milestones from 'components/Milestones'
 import RecentIssues from 'components/RecentIssues'
@@ -29,7 +28,6 @@ import ShowMoreButton from 'components/ShowMoreButton'
 import { TruncatedText } from 'components/TruncatedText'
 
 interface CardDetailsIssuesMilestonesProps {
-  type: CardType
   recentIssues?: Issue[]
   recentMilestones?: Milestone[]
   pullRequests?: PullRequest[]
@@ -38,18 +36,13 @@ interface CardDetailsIssuesMilestonesProps {
   onLoadMorePullRequests?: () => void
   onResetPullRequests?: () => void
   isFetchingMore?: boolean
+  isMilestoneOnly?: boolean
+  isPullRequestOnly?: boolean
 }
 
 const MILESTONE_LIMIT = 4
 
-const showIssuesAndMilestones = (type: CardType): boolean =>
-  ['organization', 'project', 'repository', 'user'].includes(type)
-
-const showPullRequestsAndReleases = (type: CardType): boolean =>
-  ['organization', 'project', 'repository', 'user'].includes(type)
-
 const CardDetailsIssuesMilestones = ({
-  type,
   recentIssues,
   recentMilestones,
   pullRequests,
@@ -58,6 +51,8 @@ const CardDetailsIssuesMilestones = ({
   onLoadMorePullRequests,
   onResetPullRequests,
   isFetchingMore = false,
+  isMilestoneOnly = false,
+  isPullRequestOnly = false,
 }: CardDetailsIssuesMilestonesProps) => {
   const [showAllMilestones, setShowAllMilestones] = useState(false)
   const [showAllPRs, setShowAllPRs] = useState(false)
@@ -66,13 +61,13 @@ const CardDetailsIssuesMilestones = ({
 
   return (
     <>
-      {showIssuesAndMilestones(type) && (
+      {!isMilestoneOnly && !isPullRequestOnly && (
         <div className="grid-cols-2 gap-4 lg:grid">
           {recentIssues && <RecentIssues data={recentIssues} showAvatar={showAvatar} />}
           {recentMilestones && <Milestones data={recentMilestones} showAvatar={showAvatar} />}
         </div>
       )}
-      {showPullRequestsAndReleases(type) && (
+      {!isMilestoneOnly && !isPullRequestOnly && (
         <div className="grid-cols-2 gap-4 lg:grid">
           {pullRequests && <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />}
           {recentReleases && (
@@ -80,7 +75,7 @@ const CardDetailsIssuesMilestones = ({
           )}
         </div>
       )}
-      {type === 'module' && pullRequests && pullRequests.length > 0 && (
+      {isPullRequestOnly && pullRequests && pullRequests.length > 0 && (
         <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
           <div className="grid grid-cols-1 gap-3">
             {pullRequests.slice(0, prDisplayLimit).map((pr) => (
@@ -120,7 +115,7 @@ const CardDetailsIssuesMilestones = ({
           </div>
         </SecondaryCard>
       )}
-      {type === 'program' && recentMilestones && recentMilestones.length > 0 && (
+      {isMilestoneOnly && recentMilestones && recentMilestones.length > 0 && (
         <SecondaryCard icon={FaSignsPost} title={<AnchorTitle title="Recent Milestones" />}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
             {recentMilestones

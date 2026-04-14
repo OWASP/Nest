@@ -1,11 +1,9 @@
 import { HiUserGroup } from 'react-icons/hi'
 import type { Contributor } from 'types/contributor'
 import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
-import type { CardType } from 'components/CardDetailsPage'
 import ContributorsList from 'components/ContributorsList'
 
 interface CardDetailsContributorsProps {
-  type: CardType
   entityKey?: string
   programKey?: string
   topContributors?: Contributor[]
@@ -15,7 +13,6 @@ interface CardDetailsContributorsProps {
 }
 
 const CardDetailsContributors = ({
-  type,
   entityKey,
   programKey,
   topContributors,
@@ -34,7 +31,7 @@ const CardDetailsContributors = ({
           getUrl={getMemberUrl}
         />
       )}
-      {admins && admins.length > 0 && type === 'program' && (
+      {admins && admins.length > 0 && (
         <ContributorsList
           icon={HiUserGroup}
           contributors={admins}

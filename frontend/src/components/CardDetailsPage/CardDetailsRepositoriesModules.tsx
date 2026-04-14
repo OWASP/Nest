@@ -2,13 +2,11 @@ import { FaFolderOpen } from 'react-icons/fa6'
 import type { Module } from 'types/mentorship'
 import type { RepositoryCardProps } from 'types/project'
 import AnchorTitle from 'components/AnchorTitle'
-import type { CardType } from 'components/CardDetailsPage'
 import ModuleCard from 'components/ModuleCard'
 import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
 
 interface CardDetailsRepositoriesModulesProps {
-  type: CardType
   programKey?: string
   accessLevel?: string
   repositories?: RepositoryCardProps[]
@@ -17,7 +15,6 @@ interface CardDetailsRepositoriesModulesProps {
 }
 
 const CardDetailsRepositoriesModules = ({
-  type,
   programKey,
   accessLevel,
   repositories = [],
@@ -26,14 +23,12 @@ const CardDetailsRepositoriesModules = ({
 }: CardDetailsRepositoriesModulesProps) => {
   return (
     <>
-      {(type === 'project' || type === 'user' || type === 'organization') &&
-        repositories.length > 0 && (
-          <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
-            <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
-          </SecondaryCard>
-        )}
-      {type === 'program' &&
-        modules &&
+      {repositories.length > 0 && (
+        <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
+          <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
+        </SecondaryCard>
+      )}
+      {modules &&
         modules.length > 0 &&
         (() => {
           const modulesList = modules

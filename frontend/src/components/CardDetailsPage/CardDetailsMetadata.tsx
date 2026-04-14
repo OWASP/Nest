@@ -1,55 +1,43 @@
-import upperFirst from 'lodash/upperFirst'
 import type { JSX } from 'react'
 import { FaChartPie, FaRectangleList } from 'react-icons/fa6'
 import type { Stats } from 'types/card'
 import type { Chapter } from 'types/chapter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
-import type { CardType } from 'components/CardDetailsPage'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
 import InfoBlock from 'components/InfoBlock'
 import LeadersList from 'components/LeadersList'
 import SecondaryCard from 'components/SecondaryCard'
 
 interface CardDetailsMetadataProps {
-  type: CardType
   details?: Array<{ label: string; value: string | JSX.Element }>
   entityKey?: string
   stats?: Stats[]
   geolocationData?: Chapter[]
   socialLinks?: string[]
+  showStatistics?: boolean
+  showGeolocation?: boolean
+  showSocialLinks?: boolean
+  detailsTitle?: string
 }
 
-const showStatistics = (type: CardType): boolean =>
-  ['committee', 'organization', 'project', 'repository', 'user'].includes(type)
-
 const CardDetailsMetadata = ({
-  type,
   details,
   entityKey,
   stats,
   geolocationData = [],
   socialLinks,
+  showStatistics = !!stats,
+  showGeolocation = false,
+  showSocialLinks = false,
+  detailsTitle = 'Details',
 }: CardDetailsMetadataProps) => {
-  const secondaryCardStyles: Record<CardType, string> = {
-    chapter: 'gap-2 md:col-span-3',
-    committee: 'gap-2 md:col-span-5',
-    module: 'gap-2 md:col-span-7',
-    organization: 'gap-2 md:col-span-5',
-    program: 'gap-2 md:col-span-7',
-    project: 'gap-2 md:col-span-5',
-    repository: 'gap-2 md:col-span-5',
-    user: 'gap-2 md:col-span-5',
-  }
-
-  const typeStyles = secondaryCardStyles[type] ?? 'gap-2 md:col-span-5'
-
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
       <SecondaryCard
         icon={FaRectangleList}
-        title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
-        className={typeStyles}
+        title={<AnchorTitle title={detailsTitle} />}
+        className="gap-2 md:col-span-5"
       >
         {details?.map((detail) =>
           detail?.label === 'Leaders' ? (
@@ -66,11 +54,9 @@ const CardDetailsMetadata = ({
             </div>
           )
         )}
-        {socialLinks && (type === 'chapter' || type === 'committee') && (
-          <SocialLinks urls={socialLinks} />
-        )}
+        {showSocialLinks && socialLinks && <SocialLinks urls={socialLinks} />}
       </SecondaryCard>
-      {showStatistics(type) && stats && (
+      {showStatistics && stats && (
         <SecondaryCard
           icon={FaChartPie}
           title={<AnchorTitle title="Statistics" />}
@@ -89,7 +75,7 @@ const CardDetailsMetadata = ({
           ))}
         </SecondaryCard>
       )}
-      {type === 'chapter' && geolocationData && geolocationData.length > 0 && (
+      {showGeolocation && geolocationData && geolocationData.length > 0 && (
         <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
           <ChapterMapWrapper
             geoLocData={geolocationData}

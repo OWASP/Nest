@@ -10,7 +10,13 @@ import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQu
 import { Module } from 'types/mentorship'
 import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
+import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
+import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
+import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
+import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
+import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
@@ -87,64 +93,83 @@ const ModuleDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <DetailsCard
-        admins={admins ?? undefined}
-        details={moduleDetails}
-        domains={programModule.domains ?? undefined}
-        mentors={programModule.mentors}
-        isFetchingMore={isFetchingMore}
-        pullRequests={((programModule.recentPullRequests as unknown as PullRequest[]) || []).slice(
-          0,
-          visibleCount
-        )}
-        summary={programModule.description}
-        tags={programModule.tags ?? undefined}
-        title={programModule.name}
-        type="module"
-        onLoadMorePullRequests={
-          hasMorePRs || (programModule.recentPullRequests || []).length > visibleCount
-            ? () => {
-                if (isFetchingMore) return
-                const currentLength = programModule.recentPullRequests?.length || 0
-                if (hasMorePRs && currentLength < visibleCount + limit) {
-                  setIsFetchingMore(true)
-                  fetchMore({
-                    variables: {
-                      programKey,
-                      moduleKey,
-                      offset: currentLength,
-                      limit,
-                    },
-                    updateQuery: (prevResult, { fetchMoreResult }) => {
-                      if (!fetchMoreResult) return prevResult
-                      const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
-                      if (newPRs.length < limit) setHasMorePRs(false)
-                      if (newPRs.length === 0) return prevResult
-                      return {
-                        ...prevResult,
-                        getModule: {
-                          ...prevResult.getModule!,
-                          recentPullRequests: [
-                            ...(prevResult.getModule?.recentPullRequests || []),
-                            ...newPRs,
-                          ],
-                        },
-                      }
-                    },
-                  })
-                    .catch((error) => handleAppError(error))
-                    .finally(() => setIsFetchingMore(false))
+      <CardDetailsPageWrapper>
+        <CardDetailsHeader
+          title={programModule.name}
+          admins={admins ?? undefined}
+          mentors={programModule.mentors ?? undefined}
+          isActive={true}
+          isArchived={false}
+          showModuleActions={true}
+        />
+
+        <CardDetailsSummary summary={programModule.description} />
+
+        <CardDetailsMetadata details={moduleDetails} detailsTitle="Module Details" />
+
+        <CardDetailsTags
+          tags={programModule.tags ?? undefined}
+          domains={programModule.domains ?? undefined}
+        />
+
+        <CardDetailsContributors
+          admins={admins ?? undefined}
+          mentors={programModule.mentors ?? undefined}
+          mentees={programModule.mentees ?? undefined}
+        />
+
+        <CardDetailsIssuesMilestones
+          pullRequests={(
+            (programModule.recentPullRequests as unknown as PullRequest[]) || []
+          ).slice(0, visibleCount)}
+          showAvatar={true}
+          isPullRequestOnly={true}
+          onLoadMorePullRequests={
+            hasMorePRs || (programModule.recentPullRequests || []).length > visibleCount
+              ? () => {
+                  if (isFetchingMore) return
+                  const currentLength = programModule.recentPullRequests?.length || 0
+                  if (hasMorePRs && currentLength < visibleCount + limit) {
+                    setIsFetchingMore(true)
+                    fetchMore({
+                      variables: {
+                        programKey,
+                        moduleKey,
+                        offset: currentLength,
+                        limit,
+                      },
+                      updateQuery: (prevResult, { fetchMoreResult }) => {
+                        if (!fetchMoreResult) return prevResult
+                        const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
+                        if (newPRs.length < limit) setHasMorePRs(false)
+                        if (newPRs.length === 0) return prevResult
+                        return {
+                          ...prevResult,
+                          getModule: {
+                            ...prevResult.getModule!,
+                            recentPullRequests: [
+                              ...(prevResult.getModule?.recentPullRequests || []),
+                              ...newPRs,
+                            ],
+                          },
+                        }
+                      },
+                    })
+                      .catch((error) => handleAppError(error))
+                      .finally(() => setIsFetchingMore(false))
+                  }
+                  setVisibleCount((prev) => prev + limit)
                 }
-                setVisibleCount((prev) => prev + limit)
-              }
-            : undefined
-        }
-        onResetPullRequests={
-          visibleCount > limit && (programModule.recentPullRequests || []).length > limit
-            ? () => setVisibleCount(limit)
-            : undefined
-        }
-      />
+              : undefined
+          }
+          onResetPullRequests={
+            visibleCount > limit && (programModule.recentPullRequests || []).length > limit
+              ? () => setVisibleCount(limit)
+              : undefined
+          }
+          isFetchingMore={isFetchingMore}
+        />
+      </CardDetailsPageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

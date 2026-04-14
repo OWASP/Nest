@@ -1,12 +1,13 @@
-import { mockChapterData } from '@mockData/mockChapterData'
 import { render } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
 import React from 'react'
 import { FaCode, FaTags } from 'react-icons/fa6'
-import { ExperienceLevelEnum } from 'types/__generated__/graphql'
-import { DetailsCardProps } from 'types/card'
-import DetailsCard from 'components/CardDetailsPage'
+import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
+import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
+import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
+import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
 
 jest.mock('next/link', () => {
   return function MockLink({
@@ -74,49 +75,17 @@ jest.mock('@apollo/client/react', () => ({
   useMutation: jest.fn(() => [jest.fn()]),
 }))
 
-const mockHealthMetricsData = [
-  {
-    ageDays: 365,
-    ageDaysRequirement: 365,
-    id: 'test-id',
-    createdAt: '2023-01-01',
-    contributorsCount: 10,
-    forksCount: 5,
-    isFundingRequirementsCompliant: true,
-    isLeaderRequirementsCompliant: true,
-    lastCommitDays: 1,
-    lastCommitDaysRequirement: 30,
-    lastPullRequestDays: 2,
-    lastPullRequestDaysRequirement: 30,
-    lastReleaseDays: 10,
-    lastReleaseDaysRequirement: 90,
-    openIssuesCount: 5,
-    openPullRequestsCount: 3,
-    owaspPageLastUpdateDays: 30,
-    owaspPageLastUpdateDaysRequirement: 90,
-    projectName: 'Test Project',
-    projectKey: 'test-project',
-    recentReleasesCount: 2,
-    score: 85,
-    starsCount: 100,
-    totalIssuesCount: 20,
-    totalReleasesCount: 5,
-    unassignedIssuesCount: 2,
-    unansweredIssuesCount: 1,
-  },
-]
-
 const mockStats = [
   {
     icon: FaCode,
     pluralizedName: 'repositories',
-    unit: '',
+    unit: 'Repository',
     value: 10,
   },
   {
     icon: FaTags,
-    pluralizedName: 'stars',
-    unit: '',
+    pluralizedName: 'Stars',
+    unit: 'Star',
     value: 100,
   },
 ]
@@ -127,26 +96,6 @@ const mockDetails = [
   { label: 'Status', value: 'Active' },
 ]
 
-const defaultProps: DetailsCardProps = {
-  title: 'Test Project',
-  description: 'A test project for demonstration',
-  type: 'project',
-  details: mockDetails,
-  stats: mockStats,
-  isActive: true,
-  showAvatar: true,
-  languages: ['JavaScript', 'TypeScript'],
-  topics: ['web', 'frontend'],
-  repositories: [],
-  recentIssues: [],
-  recentMilestones: [],
-  recentReleases: [],
-  pullRequests: [],
-  topContributors: [],
-  healthMetricsData: mockHealthMetricsData,
-  socialLinks: [],
-}
-
 describe.each([
   { theme: 'light', name: 'light' },
   { theme: 'dark', name: 'dark' },
@@ -155,69 +104,56 @@ describe.each([
     ;(useTheme as jest.Mock).mockReturnValue({ theme, setTheme: jest.fn() })
     document.documentElement.classList.toggle('dark', theme === 'dark')
   })
-  it('should have no accessibility violations', async () => {
-    const { container } = render(<DetailsCard {...defaultProps} />)
-    const results = await axe(container)
-    expect(results).toHaveNoViolations()
-  })
 
-  it('should have no violations for chapter type', async () => {
+  it('should have no accessibility violations in header', async () => {
     const { container } = render(
-      <DetailsCard
-        {...defaultProps}
-        type="chapter"
-        geolocationData={[{ ...mockChapterData.chapters[0], suggestedLocation: 'Sample location' }]}
-      />
-    )
-
-    const results = await axe(container)
-
-    expect(results).toHaveNoViolations()
-  })
-
-  it('should have no violations for program type', async () => {
-    const { container } = render(
-      <DetailsCard
-        {...defaultProps}
-        type="program"
-        accessLevel="admin"
-        modules={[
-          {
-            id: 'module1',
-            key: 'mod-001',
-            name: 'Intro to Web',
-            description: 'A beginner friendly module.',
-            experienceLevel: ExperienceLevelEnum.Beginner,
-            startedAt: 1735689600, // 2025-01-01
-            endedAt: 1740787200, // 2025-03-01
-            mentors: [
-              {
-                id: 'mentor-mentor1',
-                login: 'mentor1',
-                avatarUrl: 'https://avatars.githubusercontent.com/u/12345',
-                name: 'Mentor One',
-              },
-            ],
-            tags: ['tag1'],
-            domains: ['domain1'],
-          },
-        ]}
-      />
+      <CardDetailsPageWrapper>
+        <CardDetailsHeader title="Test Project" isActive={true} isArchived={false} />
+      </CardDetailsPageWrapper>
     )
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })
 
-  it('should have no violations in archived state', async () => {
-    let container: HTMLElement
+  it('should have no violations in summary', async () => {
+    const { container } = render(
+      <CardDetailsPageWrapper>
+        <CardDetailsSummary summary="A test project for demonstration" />
+      </CardDetailsPageWrapper>
+    )
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
+  })
 
-    await React.act(async () => {
-      const renderResult = render(
-        <DetailsCard {...defaultProps} isActive={false} isArchived={true} />
-      )
-      container = renderResult.container
-    })
+  it('should have no violations in metadata', async () => {
+    const { container } = render(
+      <CardDetailsPageWrapper>
+        <CardDetailsMetadata details={mockDetails} stats={mockStats} detailsTitle="Details" />
+      </CardDetailsPageWrapper>
+    )
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
+  })
 
+  it('should have no violations in tags', async () => {
+    const { container } = render(
+      <CardDetailsPageWrapper>
+        <CardDetailsTags languages={['JavaScript', 'TypeScript']} topics={['web', 'frontend']} />
+      </CardDetailsPageWrapper>
+    )
+    const results = await axe(container)
+    expect(results).toHaveNoViolations()
+  })
+
+  it('should have no violations for complete page layout', async () => {
+    const { container } = render(
+      <CardDetailsPageWrapper>
+        <CardDetailsHeader title="Test Project" isActive={true} isArchived={false} />
+        <CardDetailsSummary summary="A test project for demonstration" />
+        <CardDetailsMetadata details={mockDetails} stats={mockStats} detailsTitle="Details" />
+        <CardDetailsTags languages={['JavaScript']} topics={['web']} />
+      </CardDetailsPageWrapper>
+    )
     const results = await axe(container)
     expect(results).toHaveNoViolations()
   })

@@ -70,35 +70,37 @@ describe('CardDetailsRepositoriesModules', () => {
   }
 
   it('renders nothing when no repositories or modules provided', () => {
-    const { container } = render(<CardDetailsRepositoriesModules type="project" />)
+    const { container } = render(<CardDetailsRepositoriesModules />)
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders repositories for project type', () => {
-    render(<CardDetailsRepositoriesModules type="project" repositories={[mockRepository]} />)
+  it('renders repositories when provided', () => {
+    render(<CardDetailsRepositoriesModules repositories={[mockRepository]} />)
 
     expect(screen.getByTestId('repository-card')).toBeInTheDocument()
     expect(screen.getByText('test-repo')).toBeInTheDocument()
   })
 
-  it('renders modules for program type', () => {
-    render(
-      <CardDetailsRepositoriesModules
-        type="program"
-        modules={[mockModule]}
-        programKey="test-program"
-      />
-    )
+  it('renders modules when provided', () => {
+    render(<CardDetailsRepositoriesModules modules={[mockModule]} programKey="test-program" />)
 
     expect(screen.getByTestId('module-card')).toBeInTheDocument()
     expect(screen.getByText('auth-module')).toBeInTheDocument()
   })
 
   it('renders both repositories and modules when provided', () => {
-    render(<CardDetailsRepositoriesModules type="project" repositories={[mockRepository]} />)
+    render(
+      <CardDetailsRepositoriesModules
+        repositories={[mockRepository]}
+        modules={[mockModule]}
+        programKey="test-program"
+      />
+    )
 
     expect(screen.getByTestId('repository-card')).toBeInTheDocument()
     expect(screen.getByText('test-repo')).toBeInTheDocument()
+    expect(screen.getByTestId('module-card')).toBeInTheDocument()
+    expect(screen.getByText('auth-module')).toBeInTheDocument()
   })
 
   it('renders multiple repositories in one card', () => {
@@ -108,7 +110,7 @@ describe('CardDetailsRepositoriesModules', () => {
       { ...mockRepository, id: '3', name: 'third-repo' },
     ]
 
-    render(<CardDetailsRepositoriesModules type="project" repositories={repos} />)
+    render(<CardDetailsRepositoriesModules repositories={repos} />)
 
     expect(screen.getByText('test-repo, another-repo, third-repo')).toBeInTheDocument()
   })
@@ -120,55 +122,28 @@ describe('CardDetailsRepositoriesModules', () => {
       { ...mockModule, id: '3', name: 'logging-module' },
     ]
 
-    render(
-      <CardDetailsRepositoriesModules type="program" modules={modules} programKey="test-program" />
-    )
+    render(<CardDetailsRepositoriesModules modules={modules} programKey="test-program" />)
 
     expect(screen.getByText('auth-module, payment-module, logging-module')).toBeInTheDocument()
   })
 
   it('does not render repositories when empty', () => {
-    const { container } = render(
-      <CardDetailsRepositoriesModules type="project" repositories={[]} />
-    )
+    const { container } = render(<CardDetailsRepositoriesModules repositories={[]} />)
     expect(container.firstChild).toBeNull()
   })
 
   it('does not render modules when empty', () => {
-    const { container } = render(<CardDetailsRepositoriesModules type="program" modules={[]} />)
+    const { container } = render(<CardDetailsRepositoriesModules modules={[]} />)
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders for user type with repositories', () => {
-    render(<CardDetailsRepositoriesModules type="user" repositories={[mockRepository]} />)
-
+  it('renders a single repository when provided', () => {
+    render(<CardDetailsRepositoriesModules repositories={[mockRepository]} />)
     expect(screen.getByTestId('repository-card')).toBeInTheDocument()
   })
 
-  it('renders for organization type with repositories', () => {
-    render(<CardDetailsRepositoriesModules type="organization" repositories={[mockRepository]} />)
-
-    expect(screen.getByTestId('repository-card')).toBeInTheDocument()
-  })
-
-  it('does not render repositories for non-allowed types', () => {
-    const { container } = render(
-      <CardDetailsRepositoriesModules type="chapter" repositories={[mockRepository]} />
-    )
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('does not render repositories for program type', () => {
-    const { container } = render(
-      <CardDetailsRepositoriesModules type="program" repositories={[mockRepository]} />
-    )
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('does not render modules for non-program types', () => {
-    const { container } = render(
-      <CardDetailsRepositoriesModules type="project" modules={[mockModule]} />
-    )
-    expect(container.firstChild).toBeNull()
+  it('renders a single module when provided', () => {
+    render(<CardDetailsRepositoriesModules modules={[mockModule]} programKey="test-program" />)
+    expect(screen.getByTestId('module-card')).toBeInTheDocument()
   })
 })

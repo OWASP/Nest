@@ -1,12 +1,11 @@
 import { render, screen } from '@testing-library/react'
-import React from 'react'
 import '@testing-library/jest-dom'
 import CardDetailsContributions from 'components/CardDetailsPage/CardDetailsContributions'
 
 jest.mock('components/ContributionHeatmap', () => ({
   __esModule: true,
-  default: ({ stats }: { stats: object }) => (
-    <div data-testid="contribution-heatmap">Heatmap: {JSON.stringify(stats)}</div>
+  default: ({ contributionData }: { contributionData: object }) => (
+    <div data-testid="contribution-heatmap">Heatmap: {JSON.stringify(contributionData)}</div>
   ),
 }))
 
@@ -17,51 +16,23 @@ jest.mock('components/ContributionStats', () => ({
   ),
 }))
 
-jest.mock('utils/contributionDataUtils', () => ({
-  shouldShowContributions: jest.fn((type: string) => ['project', 'chapter'].includes(type)),
-}))
-
-jest.mock('next/link', () => {
-  return ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
-  )
-})
-
 describe('CardDetailsContributions', () => {
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  it('renders nothing when no contribution stats provided', () => {
-    const { container } = render(
-      <CardDetailsContributions type="project" hasContributions={false} />
-    )
+  it('renders nothing when hasContributions is false', () => {
+    const { container } = render(<CardDetailsContributions hasContributions={false} />)
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders nothing when shouldShowContributions returns false', () => {
-    const { container } = render(
-      <CardDetailsContributions
-        type="repository"
-        hasContributions={true}
-        contributionStats={{
-          totalContributions: 100,
-          heatmapData: [],
-        }}
-      />
-    )
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('renders contribution stats when stats provided for project type', () => {
+  it('renders contribution stats when stats provided and hasContributions is true', () => {
     const stats = {
-      totalContributions: 150,
-      heatmapData: [1, 2, 3, 4, 5],
+      total: 150,
+      average: 10,
     }
 
-    render(
-      <CardDetailsContributions type="project" hasContributions={true} contributionStats={stats} />
-    )
+    render(<CardDetailsContributions hasContributions={true} contributionStats={stats} />)
 
     expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
   })
@@ -69,7 +40,6 @@ describe('CardDetailsContributions', () => {
   it('renders contribution heatmap with required props', () => {
     render(
       <CardDetailsContributions
-        type="project"
         hasContributions={true}
         contributionData={{ '2024-01-01': 5 }}
         startDate="2024-01-01"
@@ -82,14 +52,12 @@ describe('CardDetailsContributions', () => {
 
   it('renders both stats and heatmap components together', () => {
     const stats = {
-      totalContributions: 100,
-      averageContribution: 50,
-      heatmapData: [],
+      total: 100,
+      average: 50,
     }
 
     render(
       <CardDetailsContributions
-        type="project"
         hasContributions={true}
         contributionStats={stats}
         contributionData={{ '2024-01-01': 5 }}
@@ -102,49 +70,60 @@ describe('CardDetailsContributions', () => {
     expect(screen.getByTestId('contribution-heatmap')).toBeInTheDocument()
   })
 
-  it('does not render when hasContributions is false', () => {
-    const { container } = render(
-      <CardDetailsContributions
-        type="project"
-        hasContributions={false}
-        contributionStats={{ totalContributions: 100 }}
-      />
-    )
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('does not render for repository type even with contributions', () => {
-    const { container } = render(
-      <CardDetailsContributions
-        type="repository"
-        hasContributions={true}
-        contributionStats={{ totalContributions: 100 }}
-      />
-    )
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('does not render for program type even with contributions', () => {
-    const { container } = render(
-      <CardDetailsContributions
-        type="program"
-        hasContributions={true}
-        contributionStats={{ totalContributions: 100 }}
-      />
-    )
-    expect(container.firstChild).toBeNull()
-  })
-
-  it('renders for chapter type with contributions', () => {
+  it('does not render heatmap when contributionData is empty', () => {
     const stats = {
-      totalContributions: 50,
-      heatmapData: [],
+      total: 100,
     }
 
-    render(
-      <CardDetailsContributions type="chapter" hasContributions={true} contributionStats={stats} />
+    const { queryByTestId } = render(
+      <CardDetailsContributions
+        hasContributions={true}
+        contributionStats={stats}
+        contributionData={{}}
+      />
     )
 
     expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
+    expect(queryByTestId('contribution-heatmap')).not.toBeInTheDocument()
+  })
+
+  it('does not render heatmap without startDate and endDate', () => {
+    const stats = {
+      total: 100,
+    }
+
+    const { queryByTestId } = render(
+      <CardDetailsContributions
+        hasContributions={true}
+        contributionStats={stats}
+        contributionData={{ '2024-01-01': 5 }}
+      />
+    )
+
+    expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
+    expect(queryByTestId('contribution-heatmap')).not.toBeInTheDocument()
+  })
+
+  it('renders with custom title', () => {
+    const stats = {
+      total: 50,
+    }
+
+    render(
+      <CardDetailsContributions
+        hasContributions={true}
+        contributionStats={stats}
+        title="Custom Activity Title"
+      />
+    )
+
+    expect(screen.getByTestId('contribution-stats')).toBeInTheDocument()
+  })
+
+  it('renders nothing when hasContributions is false even with stats', () => {
+    const { container } = render(
+      <CardDetailsContributions hasContributions={false} contributionStats={{ total: 100 }} />
+    )
+    expect(container.firstChild).toBeNull()
   })
 })

@@ -1,10 +1,8 @@
 import { FaCode, FaTags, FaChartPie } from 'react-icons/fa6'
 import AnchorTitle from 'components/AnchorTitle'
-import type { CardType } from 'components/CardDetailsPage'
 import ToggleableList from 'components/ToggleableList'
 
 interface CardDetailsTagsProps {
-  type: CardType
   entityKey?: string
   languages?: string[]
   topics?: string[]
@@ -14,7 +12,6 @@ interface CardDetailsTagsProps {
 }
 
 const CardDetailsTags = ({
-  type,
   entityKey,
   languages,
   topics,
@@ -22,8 +19,12 @@ const CardDetailsTags = ({
   domains,
   labels,
 }: CardDetailsTagsProps) => {
-  // Languages and Topics section (for projects and repositories)
-  if ((type === 'project' || type === 'repository') && (languages || topics)) {
+  const hasLanguagesOrTopics = (languages?.length || 0) > 0 || (topics?.length || 0) > 0
+  const hasTagsDomainsOrLabels =
+    (tags?.length || 0) > 0 || (domains?.length || 0) > 0 || (labels?.length || 0) > 0
+
+  // Languages and Topics section
+  if (hasLanguagesOrTopics) {
     return (
       <div
         className={`mb-8 grid grid-cols-1 gap-6 ${(topics?.length ?? 0) === 0 || (languages?.length ?? 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
@@ -48,8 +49,8 @@ const CardDetailsTags = ({
     )
   }
 
-  // Tags, Domains, and Labels section (for programs and modules)
-  if (type === 'program' || type === 'module') {
+  // Tags, Domains, and Labels section
+  if (hasTagsDomainsOrLabels) {
     return (
       <>
         {((tags?.length || 0) > 0 || (domains?.length || 0) > 0) && (

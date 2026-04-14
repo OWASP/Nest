@@ -56,44 +56,39 @@ describe('CardDetailsContributors', () => {
   }
 
   it('renders nothing when no contributors provided', () => {
-    const { container } = render(<CardDetailsContributors type="project" />)
+    const { container } = render(<CardDetailsContributors />)
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders top contributors when provided for project type', () => {
-    render(
-      <CardDetailsContributors
-        type="project"
-        topContributors={[mockContributor, mockContributor2]}
-      />
-    )
+  it('renders top contributors when provided', () => {
+    render(<CardDetailsContributors topContributors={[mockContributor, mockContributor2]} />)
 
     expect(screen.getByText('John Doe')).toBeInTheDocument()
     expect(screen.getByText('Jane Smith')).toBeInTheDocument()
   })
 
-  it('renders admins list for program type', () => {
-    render(<CardDetailsContributors type="program" admins={[mockContributor]} />)
+  it('renders admins list when provided', () => {
+    render(<CardDetailsContributors admins={[mockContributor]} />)
 
     expect(screen.getByText('Admins')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
   })
 
-  it('does not render admins list for non-program types', () => {
-    render(<CardDetailsContributors type="project" admins={[mockContributor]} />)
+  it('does not render admins list when empty', () => {
+    render(<CardDetailsContributors admins={[]} />)
 
     expect(screen.queryByText('Admins')).not.toBeInTheDocument()
   })
 
   it('renders mentors list when provided', () => {
-    render(<CardDetailsContributors type="project" mentors={[mockContributor]} />)
+    render(<CardDetailsContributors mentors={[mockContributor]} />)
 
     expect(screen.getByText('Mentors')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
   })
 
   it('renders mentees list when provided', () => {
-    render(<CardDetailsContributors type="project" mentees={[mockContributor]} />)
+    render(<CardDetailsContributors mentees={[mockContributor]} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -102,7 +97,6 @@ describe('CardDetailsContributors', () => {
   it('renders multiple contributor sections simultaneously', () => {
     render(
       <CardDetailsContributors
-        type="project"
         topContributors={[mockContributor]}
         mentors={[mockContributor2]}
         mentees={[
@@ -120,10 +114,9 @@ describe('CardDetailsContributors', () => {
     expect(screen.getByText('Mentees')).toBeInTheDocument()
   })
 
-  it('renders program admins when program type', () => {
+  it('renders program admins and top contributors', () => {
     render(
       <CardDetailsContributors
-        type="program"
         admins={[mockContributor, mockContributor2]}
         topContributors={[mockContributor]}
       />
@@ -133,52 +126,47 @@ describe('CardDetailsContributors', () => {
     expect(screen.getByText('Top Contributors')).toBeInTheDocument()
   })
 
-  it('handles repository type correctly', () => {
-    render(
-      <CardDetailsContributors
-        type="repository"
-        topContributors={[mockContributor]}
-        admins={[mockContributor2]}
-      />
-    )
+  it('handles multiple contributor types correctly', () => {
+    render(<CardDetailsContributors topContributors={[mockContributor]} />)
 
     expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-    expect(screen.queryByText('Admins')).not.toBeInTheDocument()
   })
 
-  it('renders empty contributor list when all arrays are empty', () => {
+  it('renders empty when all arrays are empty', () => {
     const { container } = render(
-      <CardDetailsContributors type="project" topContributors={[]} mentors={[]} mentees={[]} />
+      <CardDetailsContributors
+        topContributors={undefined}
+        mentors={undefined}
+        mentees={undefined}
+      />
     )
-    const ul = container.querySelector('ul')
-    expect(ul).toBeEmptyDOMElement()
+    expect(container.firstChild).toBeNull()
   })
 
-  it('handles chapter type correctly', () => {
-    render(<CardDetailsContributors type="chapter" topContributors={[mockContributor]} />)
+  it('handles all contributor types', () => {
+    render(<CardDetailsContributors topContributors={[mockContributor]} />)
 
     expect(screen.getByText('Top Contributors')).toBeInTheDocument()
   })
 
   it('does not render mentors when array is empty', () => {
-    render(<CardDetailsContributors type="project" mentors={[]} />)
+    render(<CardDetailsContributors mentors={[]} />)
     expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
   })
 
   it('does not render mentees when array is empty', () => {
-    render(<CardDetailsContributors type="project" mentees={[]} />)
+    render(<CardDetailsContributors mentees={[]} />)
     expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
   })
 
-  it('does not render admins when array is empty even for program type', () => {
-    render(<CardDetailsContributors type="program" admins={[]} />)
+  it('does not render admins when array is empty', () => {
+    render(<CardDetailsContributors admins={[]} />)
     expect(screen.queryByText('Admins')).not.toBeInTheDocument()
   })
 
-  it('renders all contributor types for program type', () => {
+  it('renders all contributor types together', () => {
     render(
       <CardDetailsContributors
-        type="program"
         topContributors={[mockContributor]}
         admins={[mockContributor2]}
         mentors={[
@@ -205,29 +193,28 @@ describe('CardDetailsContributors', () => {
   })
 
   it('does not render topContributors when undefined', () => {
-    render(<CardDetailsContributors type="project" topContributors={undefined} />)
+    render(<CardDetailsContributors topContributors={undefined} />)
     expect(screen.queryByText('Top Contributors')).not.toBeInTheDocument()
   })
 
   it('does not render mentors when undefined', () => {
-    render(<CardDetailsContributors type="project" mentors={undefined} />)
+    render(<CardDetailsContributors mentors={undefined} />)
     expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
   })
 
   it('does not render mentees when undefined', () => {
-    render(<CardDetailsContributors type="project" mentees={undefined} />)
+    render(<CardDetailsContributors mentees={undefined} />)
     expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
   })
 
-  it('rendersAdmins with empty array when type is program', () => {
-    render(<CardDetailsContributors type="program" admins={[]} />)
+  it('does not render admins with empty array', () => {
+    render(<CardDetailsContributors admins={[]} />)
     expect(screen.queryByText('Admins')).not.toBeInTheDocument()
   })
 
   it('renders only topContributors when other arrays are undefined', () => {
     render(
       <CardDetailsContributors
-        type="project"
         topContributors={[mockContributor]}
         admins={undefined}
         mentors={undefined}
@@ -241,26 +228,8 @@ describe('CardDetailsContributors', () => {
     expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
   })
 
-  it('handles user type correctly', () => {
-    render(<CardDetailsContributors type="user" topContributors={[mockContributor]} />)
-
-    expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-  })
-
-  it('handles organization type correctly', () => {
-    render(<CardDetailsContributors type="organization" topContributors={[mockContributor]} />)
-
-    expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-  })
-
-  it('handles committee type correctly', () => {
-    render(<CardDetailsContributors type="committee" topContributors={[mockContributor]} />)
-
-    expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-  })
-
-  it('handles module type correctly', () => {
-    render(<CardDetailsContributors type="module" topContributors={[mockContributor]} />)
+  it('handles different entity types with topContributors', () => {
+    render(<CardDetailsContributors topContributors={[mockContributor]} />)
 
     expect(screen.getByText('Top Contributors')).toBeInTheDocument()
   })
@@ -268,7 +237,6 @@ describe('CardDetailsContributors', () => {
   it('renders mentees with programKey and entityKey', () => {
     render(
       <CardDetailsContributors
-        type="project"
         programKey="test-program"
         entityKey="test-entity"
         mentees={[mockContributor]}
@@ -281,14 +249,7 @@ describe('CardDetailsContributors', () => {
   })
 
   it('renders mentees with empty programKey and entityKey', () => {
-    render(
-      <CardDetailsContributors
-        type="project"
-        programKey=""
-        entityKey=""
-        mentees={[mockContributor]}
-      />
-    )
+    render(<CardDetailsContributors programKey="" entityKey="" mentees={[mockContributor]} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     const menteeLink = screen.getByText('John Doe').closest('li')?.querySelector('a')
@@ -296,16 +257,16 @@ describe('CardDetailsContributors', () => {
   })
 
   it('renders mentees without programKey and entityKey props', () => {
-    render(<CardDetailsContributors type="project" mentees={[mockContributor]} />)
+    render(<CardDetailsContributors mentees={[mockContributor]} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     const menteeLink = screen.getByText('John Doe').closest('li')?.querySelector('a')
     expect(menteeLink?.href).toContain('/programs//mentees/')
   })
 
-  it('renders multiple admins for program type', () => {
+  it('renders multiple admins', () => {
     const mockAdmins = [mockContributor, mockContributor2]
-    render(<CardDetailsContributors type="program" admins={mockAdmins} />)
+    render(<CardDetailsContributors admins={mockAdmins} />)
 
     expect(screen.getByText('Admins')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -314,7 +275,7 @@ describe('CardDetailsContributors', () => {
 
   it('renders multiple mentors', () => {
     const mockMentors = [mockContributor, mockContributor2]
-    render(<CardDetailsContributors type="project" mentors={mockMentors} />)
+    render(<CardDetailsContributors mentors={mockMentors} />)
 
     expect(screen.getByText('Mentors')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -323,7 +284,7 @@ describe('CardDetailsContributors', () => {
 
   it('renders multiple mentees', () => {
     const mockMentees = [mockContributor, mockContributor2]
-    render(<CardDetailsContributors type="project" mentees={mockMentees} />)
+    render(<CardDetailsContributors mentees={mockMentees} />)
 
     expect(screen.getByText('Mentees')).toBeInTheDocument()
     expect(screen.getByText('John Doe')).toBeInTheDocument()

@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client/react'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { useParams } from 'next/navigation'
+import React from 'react'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
 import PublicMentorshipModulePage from 'app/mentorship/programs/[programKey]/modules/[moduleKey]/page'
@@ -26,19 +27,49 @@ jest.mock('app/global-error', () => ({
 
 jest.mock('components/LoadingSpinner', () => () => <div>LoadingSpinner</div>)
 
-jest.mock('components/CardDetailsPage', () => ({
-  __esModule: true,
-  default: function MockDetailsCard(props: {
-    title?: string
-    summary?: string
+jest.mock('components/CardDetailsPage/CardDetailsHeader', () => {
+  return function MockHeader(props: { title: string }) {
+    return <div data-testid="header">{props.title}</div>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsSummary', () => {
+  return function MockSummary(props: { summary: string }) {
+    return <div data-testid="summary">{props.summary}</div>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsPageWrapper', () => {
+  return function MockWrapper({ children }: { children: React.ReactNode }) {
+    return <div data-testid="wrapper">{children}</div>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsMetadata', () => {
+  return function MockMetadata() {
+    return <div data-testid="metadata" />
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsTags', () => {
+  return function MockTags() {
+    return <div data-testid="tags" />
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsContributors', () => {
+  return function MockContributors() {
+    return <div data-testid="contributors" />
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsIssuesMilestones', () => {
+  return function MockIssuesMilestones(props: {
     onLoadMorePullRequests?: () => void
     onResetPullRequests?: () => void
-    isFetchingMore?: boolean
   }) {
     return (
-      <div data-testid="details-card">
-        <span>{props.title}</span>
-        <span>{props.summary}</span>
+      <div data-testid="issues-milestones">
         {props.onLoadMorePullRequests && (
           <button type="button" data-testid="pr-show-more" onClick={props.onLoadMorePullRequests}>
             Show more
@@ -52,8 +83,8 @@ jest.mock('components/CardDetailsPage', () => ({
         {props.isFetchingMore && <span data-testid="is-fetching">fetching</span>}
       </div>
     )
-  },
-}))
+  }
+})
 
 const createPullRequest = (index: number) => ({
   id: `pr-${index}`,
@@ -151,8 +182,8 @@ describe('PublicMentorshipModulePage', () => {
     })
 
     render(<PublicMentorshipModulePage />)
-    expect(screen.getByTestId('details-card')).toHaveTextContent('Intro to Web')
-    expect(screen.getByTestId('details-card')).toHaveTextContent('A public module.')
+    expect(screen.getByTestId('wrapper')).toHaveTextContent('Intro to Web')
+    expect(screen.getByTestId('wrapper')).toHaveTextContent('A public module.')
   })
 
   it('omits load-more handler when there are no extra pull requests to page', async () => {
@@ -439,6 +470,217 @@ describe('PublicMentorshipModulePage', () => {
 
     await waitFor(() => {
       expect(mockFetchMore).toHaveBeenCalled()
+    })
+  })
+
+  it('renders with null mentors, mentees, tags, and domains (covers ?? undefined fallbacks)', () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: {
+          ...buildModuleData(2),
+          mentors: null,
+          mentees: null,
+          tags: null,
+          domains: null,
+        },
+        getProgram: { admins: null },
+      },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+    expect(screen.getByTestId('wrapper')).toBeInTheDocument()
+  })
+
+  it('shows load-more button when local PRs exceed visibleCount even when hasMorePRs is false', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: buildModuleData(4),
+        getProgram: { admins: [] },
+      },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pr-show-more')).toBeInTheDocument()
+    })
+  })
+
+  it('only increments visibleCount (no fetchMore) when hasMorePRs is false but local PRs exceed visibleCount', async () => {
+    const initial = { ...buildModuleData(5) }
+    mockFetchMore.mockImplementation(
+      ({ updateQuery }: { updateQuery: (p: unknown, o: unknown) => unknown }) => {
+        updateQuery(
+          { getModule: initial, getProgram: { admins: [] } },
+          { fetchMoreResult: { getModule: { recentPullRequests: [] } } }
+        )
+        return Promise.resolve()
+      }
+    )
+
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: { getModule: initial, getProgram: { admins: [] } },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+    fireEvent.click(screen.getByTestId('pr-show-more'))
+
+    await waitFor(() => expect(mockFetchMore).toHaveBeenCalledTimes(1))
+    await waitFor(() => {
+      expect(screen.queryByTestId('pr-show-more')).not.toBeInTheDocument()
+    })
+  })
+
+  it('merges fetchMore results when prevResult has no existing pull requests', async () => {
+    const initial = buildModuleData(5)
+    mockFetchMore.mockImplementation(
+      ({ updateQuery }: { updateQuery: (p: unknown, o: unknown) => unknown }) => {
+        const merged = updateQuery(
+          {
+            getModule: { ...initial, recentPullRequests: null },
+            getProgram: { admins: [] },
+          },
+          {
+            fetchMoreResult: {
+              getModule: {
+                recentPullRequests: [createPullRequest(10), createPullRequest(11)],
+              },
+            },
+          }
+        )
+        return Promise.resolve(merged)
+      }
+    )
+
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: { getModule: initial, getProgram: { admins: [] } },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+    fireEvent.click(screen.getByTestId('pr-show-more'))
+
+    await waitFor(() => {
+      expect(mockFetchMore).toHaveBeenCalled()
+    })
+  })
+
+  it('shows no load-more button when hasMorePRs is false and local PRs do not exceed visibleCount', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: buildModuleData(2),
+        getProgram: { admins: [] },
+      },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('pr-show-more')).not.toBeInTheDocument()
+    })
+  })
+
+  it('uses || [] fallback on lines 120 and 163 when recentPullRequests is null', async () => {
+    mockFetchMore.mockResolvedValue({})
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: { ...buildModuleData(0), recentPullRequests: null },
+        getProgram: { admins: [] },
+      },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('pr-show-more')).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByTestId('pr-show-more'))
+
+    await waitFor(() => {
+      expect(mockFetchMore).toHaveBeenCalled()
+    })
+  })
+
+  it('increments visibleCount without calling fetchMore when hasMorePRs is false and handler is clicked', async () => {
+    const initial = buildModuleData(8)
+
+    mockFetchMore.mockImplementation(
+      ({ updateQuery }: { updateQuery: (p: unknown, o: unknown) => unknown }) => {
+        updateQuery(
+          { getModule: initial, getProgram: { admins: [] } },
+          { fetchMoreResult: { getModule: { recentPullRequests: [] } } }
+        )
+        return Promise.resolve()
+      }
+    )
+
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: { getModule: initial, getProgram: { admins: [] } },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+
+    fireEvent.click(screen.getByTestId('pr-show-more'))
+
+    await waitFor(() => {
+      expect(mockFetchMore).not.toHaveBeenCalled()
+    })
+  })
+
+  it('sets hasMorePRs to false when newPRs returned is less than limit (line 141)', async () => {
+    const initial = buildModuleData(5)
+    mockFetchMore.mockImplementation(
+      ({ updateQuery }: { updateQuery: (p: unknown, o: unknown) => unknown }) => {
+        updateQuery(
+          { getModule: initial, getProgram: { admins: [] } },
+          {
+            fetchMoreResult: {
+              getModule: {
+                recentPullRequests: [createPullRequest(20), createPullRequest(21)],
+              },
+            },
+          }
+        )
+        return Promise.resolve()
+      }
+    )
+
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: { getModule: initial, getProgram: { admins: [] } },
+      error: undefined,
+      fetchMore: mockFetchMore,
+    })
+
+    render(<PublicMentorshipModulePage />)
+    fireEvent.click(screen.getByTestId('pr-show-more'))
+
+    await waitFor(() => {
+      expect(mockFetchMore).toHaveBeenCalled()
+    })
+    await waitFor(() => {
+      expect(screen.queryByTestId('pr-show-more')).not.toBeInTheDocument()
     })
   })
 })

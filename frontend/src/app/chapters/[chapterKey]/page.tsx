@@ -8,8 +8,16 @@ import { GetChapterDataDocument } from 'types/__generated__/chapterQueries.gener
 import type { Chapter } from 'types/chapter'
 import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import CardDetailsContributions from 'components/CardDetailsPage/CardDetailsContributions'
+import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
+import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
+import CardDetailsLeaders from 'components/CardDetailsPage/CardDetailsLeaders'
+import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
+import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
+import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
 import LoadingSpinner from 'components/LoadingSpinner'
+import SponsorCard from 'components/SponsorCard'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
@@ -77,21 +85,41 @@ export default function ChapterDetailsPage() {
   )
 
   return (
-    <DetailsCard
-      contributionData={chapter.contributionData}
-      contributionStats={contributionStats}
-      details={details}
-      endDate={endDate}
-      entityKey={chapter.key}
-      entityLeaders={chapter.entityLeaders}
-      geolocationData={[chapter as unknown as Chapter]}
-      isActive={chapter.isActive}
-      socialLinks={chapter.relatedUrls}
-      startDate={startDate}
-      summary={chapter.summary}
-      title={chapter.name}
-      topContributors={topContributors}
-      type="chapter"
-    />
+    <CardDetailsPageWrapper>
+      <CardDetailsHeader title={chapter.name} isActive={chapter.isActive} isArchived={false} />
+
+      <CardDetailsSummary summary={chapter.summary} />
+
+      <CardDetailsMetadata
+        details={details}
+        showGeolocation={true}
+        geolocationData={[chapter as unknown as Chapter]}
+        detailsTitle="Chapter Details"
+      />
+
+      <CardDetailsTags entityKey={chapter.key} />
+
+      <CardDetailsLeaders entityLeaders={chapter.entityLeaders} />
+
+      <CardDetailsContributions
+        hasContributions={
+          !!(
+            (contributionStats && contributionStats.total > 0) ||
+            (chapter.contributionData && Object.keys(chapter.contributionData).length > 0)
+          )
+        }
+        contributionStats={contributionStats}
+        contributionData={chapter.contributionData}
+        startDate={startDate}
+        endDate={endDate}
+        title="Chapter Contribution Activity"
+      />
+
+      <CardDetailsContributors entityKey={chapter.key} topContributors={topContributors} />
+
+      {chapter.key && chapter.name && (
+        <SponsorCard target={chapter.key} title={chapter.name} type="chapter" />
+      )}
+    </CardDetailsPageWrapper>
   )
 }

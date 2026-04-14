@@ -71,7 +71,6 @@ jest.mock('components/MetricsScoreCircle', () => ({
 describe('CardDetailsHeader', () => {
   const defaultProps: CardDetailsHeaderProps = {
     title: 'Test Title',
-    type: 'project',
   }
 
   it('renders title correctly', () => {
@@ -89,20 +88,24 @@ describe('CardDetailsHeader', () => {
     expect(screen.getByTestId('status-badge-inactive')).toBeInTheDocument()
   })
 
-  it('renders archived badge when isArchived is true for repository type', () => {
-    render(<CardDetailsHeader {...defaultProps} type="repository" isArchived={true} />)
+  it('renders archived badge when isArchived is true', () => {
+    render(<CardDetailsHeader {...defaultProps} isArchived={true} showArchivedBadge={true} />)
     expect(screen.getByTestId('status-badge-archived')).toBeInTheDocument()
   })
 
-  it('does not render archived badge when type is not repository', () => {
-    render(<CardDetailsHeader {...defaultProps} type="project" isArchived={true} />)
+  it('does not render archived badge when showArchivedBadge is false', () => {
+    render(<CardDetailsHeader {...defaultProps} isArchived={true} showArchivedBadge={false} />)
     expect(screen.queryByTestId('status-badge-archived')).not.toBeInTheDocument()
   })
 
   it('renders health metrics when conditions are met', () => {
     const healthMetricsData = [{ score: 85 }]
     render(
-      <CardDetailsHeader {...defaultProps} type="project" healthMetricsData={healthMetricsData} />
+      <CardDetailsHeader
+        {...defaultProps}
+        healthMetricsData={healthMetricsData}
+        showHealthMetrics={true}
+      />
     )
     expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
   })
@@ -110,7 +113,11 @@ describe('CardDetailsHeader', () => {
   it('does not render health metrics when score is undefined', () => {
     const healthMetricsData = [{ score: undefined }]
     render(
-      <CardDetailsHeader {...defaultProps} type="project" healthMetricsData={healthMetricsData} />
+      <CardDetailsHeader
+        {...defaultProps}
+        healthMetricsData={healthMetricsData}
+        showHealthMetrics={true}
+      />
     )
     expect(screen.queryByTestId('metrics-score-circle')).not.toBeInTheDocument()
   })
@@ -120,7 +127,11 @@ describe('CardDetailsHeader', () => {
     const healthMetricsData = [{ score: 85 }]
 
     render(
-      <CardDetailsHeader {...defaultProps} type="project" healthMetricsData={healthMetricsData} />
+      <CardDetailsHeader
+        {...defaultProps}
+        healthMetricsData={healthMetricsData}
+        showHealthMetrics={true}
+      />
     )
 
     const button = screen.getByTestId('metrics-score-circle')
@@ -129,7 +140,7 @@ describe('CardDetailsHeader', () => {
     expect(scrollToAnchor).toHaveBeenCalledWith('issues-trend')
   })
 
-  describe('Module type with admin and mentor logic', () => {
+  describe('Module actions with admin and mentor logic', () => {
     afterEach(() => {
       mockUseSession.mockReturnValue({
         data: null,
@@ -137,7 +148,7 @@ describe('CardDetailsHeader', () => {
       } as { data: Session | null; status: string })
     })
 
-    it('renders entity actions when type is module and user is admin', () => {
+    it('renders entity actions when showModuleActions is true and user is admin', () => {
       mockUseSession.mockReturnValueOnce({
         data: {
           user: {
@@ -152,11 +163,11 @@ describe('CardDetailsHeader', () => {
       render(
         <CardDetailsHeader
           {...defaultProps}
-          type="module"
           programKey="test-program"
-          entityKey="test-entity"
+          moduleKey="test-module"
           accessLevel="admin"
           admins={admins}
+          showModuleActions={true}
         />
       )
 
@@ -164,7 +175,7 @@ describe('CardDetailsHeader', () => {
       expect(screen.getByText(/EntityActions.*type=module/)).toBeInTheDocument()
     })
 
-    it('renders entity actions when type is module and user is mentor', () => {
+    it('renders entity actions when showModuleActions is true and user is mentor', () => {
       mockUseSession.mockReturnValueOnce({
         data: {
           user: {
@@ -179,17 +190,17 @@ describe('CardDetailsHeader', () => {
       render(
         <CardDetailsHeader
           {...defaultProps}
-          type="module"
           programKey="test-program"
-          entityKey="test-entity"
+          moduleKey="test-module"
           mentors={mentors}
+          showModuleActions={true}
         />
       )
 
       expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
     })
 
-    it('does not render entity actions when type is module but user is neither admin nor mentor', () => {
+    it('does not render entity actions when showModuleActions is true but user is neither admin nor mentor', () => {
       mockUseSession.mockReturnValueOnce({
         data: {
           user: {
@@ -205,19 +216,19 @@ describe('CardDetailsHeader', () => {
       render(
         <CardDetailsHeader
           {...defaultProps}
-          type="module"
           programKey="test-program"
-          entityKey="test-entity"
+          moduleKey="test-module"
           accessLevel="viewer"
           admins={admins}
           mentors={mentors}
+          showModuleActions={true}
         />
       )
 
       expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
     })
 
-    it('does not render entity actions when type is module but programKey is missing', () => {
+    it('does not render entity actions when showModuleActions is true but programKey is missing', () => {
       mockUseSession.mockReturnValueOnce({
         data: {
           user: {
@@ -232,17 +243,17 @@ describe('CardDetailsHeader', () => {
       render(
         <CardDetailsHeader
           {...defaultProps}
-          type="module"
-          entityKey="test-entity"
+          moduleKey="test-module"
           accessLevel="admin"
           admins={admins}
+          showModuleActions={true}
         />
       )
 
       expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
     })
 
-    it('does not render entity actions when type is module but entityKey is missing', () => {
+    it('does not render entity actions when showModuleActions is true but moduleKey is missing', () => {
       mockUseSession.mockReturnValueOnce({
         data: {
           user: {
@@ -257,10 +268,11 @@ describe('CardDetailsHeader', () => {
       render(
         <CardDetailsHeader
           {...defaultProps}
-          type="module"
           programKey="test-program"
+          moduleKey={undefined}
           accessLevel="admin"
           admins={admins}
+          showModuleActions={true}
         />
       )
 
@@ -283,16 +295,120 @@ describe('CardDetailsHeader', () => {
       render(
         <CardDetailsHeader
           {...defaultProps}
-          type="module"
           programKey="test-program"
-          entityKey="test-entity"
+          moduleKey="test-module"
           accessLevel="admin"
           admins={admins}
           mentors={mentors}
+          showModuleActions={true}
         />
       )
 
       expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
+    })
+  })
+
+  describe('Program actions', () => {
+    it('renders program EntityActions when showProgramActions, canUpdateStatus, and programKey are all set', () => {
+      render(
+        <CardDetailsHeader
+          {...defaultProps}
+          showProgramActions={true}
+          canUpdateStatus={true}
+          programKey="my-program"
+          status="active"
+        />
+      )
+      const actions = screen.getByTestId('entity-actions')
+      expect(actions).toBeInTheDocument()
+      expect(actions).toHaveTextContent('type=program')
+      expect(actions).toHaveTextContent('programKey=my-program')
+    })
+
+    it('does not render program EntityActions when canUpdateStatus is false', () => {
+      render(
+        <CardDetailsHeader
+          {...defaultProps}
+          showProgramActions={true}
+          canUpdateStatus={false}
+          programKey="my-program"
+        />
+      )
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+
+    it('does not render program EntityActions when programKey is missing', () => {
+      render(
+        <CardDetailsHeader {...defaultProps} showProgramActions={true} canUpdateStatus={true} />
+      )
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+
+    it('does not render program EntityActions when showProgramActions is false', () => {
+      render(
+        <CardDetailsHeader
+          {...defaultProps}
+          showProgramActions={false}
+          canUpdateStatus={true}
+          programKey="my-program"
+        />
+      )
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Edge cases', () => {
+    it('renders empty title when title prop is not provided', () => {
+      render(<CardDetailsHeader />)
+      expect(document.querySelector('h1')).toBeInTheDocument()
+      expect(document.querySelector('h1')?.textContent).toBe('')
+    })
+
+    it('does not render description paragraph when description is not provided', () => {
+      render(<CardDetailsHeader {...defaultProps} />)
+      expect(screen.queryByText('Test description')).not.toBeInTheDocument()
+    })
+
+    it('does not render health metrics when healthMetricsData is an empty array', () => {
+      render(
+        <CardDetailsHeader {...defaultProps} showHealthMetrics={true} healthMetricsData={[]} />
+      )
+      expect(screen.queryByTestId('metrics-score-circle')).not.toBeInTheDocument()
+    })
+
+    it('does not render health metrics when showHealthMetrics is false', () => {
+      render(
+        <CardDetailsHeader
+          {...defaultProps}
+          showHealthMetrics={false}
+          healthMetricsData={[{ score: 90 }]}
+        />
+      )
+      expect(screen.queryByTestId('metrics-score-circle')).not.toBeInTheDocument()
+    })
+
+    it('does not render module EntityActions when showModuleActions is false', () => {
+      render(
+        <CardDetailsHeader
+          {...defaultProps}
+          showModuleActions={false}
+          programKey="test-program"
+          moduleKey="test-module"
+          accessLevel="admin"
+          admins={[{ login: 'admin_user' }]}
+        />
+      )
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+
+    it('renders active component without inactive badge when isActive is true (default)', () => {
+      render(<CardDetailsHeader {...defaultProps} isActive={true} />)
+      expect(screen.queryByTestId('status-badge-inactive')).not.toBeInTheDocument()
+    })
+
+    it('does not render archived badge when isArchived is false (default)', () => {
+      render(<CardDetailsHeader {...defaultProps} showArchivedBadge={true} isArchived={false} />)
+      expect(screen.queryByTestId('status-badge-archived')).not.toBeInTheDocument()
     })
   })
 })
