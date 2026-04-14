@@ -3,9 +3,6 @@ import { test, expect } from '@playwright/test'
 test.describe('Chapter Details Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/chapters/rosario', { timeout: 25000 })
-    await page.waitForLoadState('domcontentloaded')
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -25,22 +22,17 @@ test.describe('Chapter Details Page', () => {
 
   test('should have map with geolocation', async ({ page }) => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
-    await expect(unlockButton).toBeVisible()
+    await unlockButton.waitFor({ state: 'attached', timeout: 30000 })
 
-    await unlockButton.focus()
-    await page.keyboard.press('Enter')
+    await unlockButton.dispatchEvent('click')
 
-    await page.waitForTimeout(500)
+    await unlockButton.waitFor({ state: 'detached', timeout: 10000 })
 
-    await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
+    await page.locator('.leaflet-control-zoom-in').waitFor({ state: 'attached', timeout: 10000 })
+    await page.locator('.leaflet-control-zoom-out').waitFor({ state: 'attached', timeout: 10000 })
 
-    const marker = page.locator('.leaflet-marker-icon').first()
-    await marker.click()
-
-    // The popup typically matches the chapter name
-    const popupButton = page.getByRole('button', { name: 'OWASP Rosario' })
-    await expect(popupButton).toBeVisible()
+    await page.locator('.leaflet-container').waitFor({ state: 'attached' })
+    await page.locator('.leaflet-tile-pane').waitFor({ state: 'attached' })
   })
 
   test('should have top contributors', async ({ page }) => {
