@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test'
-import { Page, Route } from '@playwright/test'
+import { test, expect, Page, Route } from '@playwright/test'
 
 const MOCK_SNAPSHOTS = [
   {
