@@ -27,11 +27,9 @@ test.describe('Chapter Details Page', () => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
     await expect(unlockButton).toBeVisible()
 
-    // Use keyboard navigation to activate the button (bypasses pointer interception issues)
     await unlockButton.focus()
     await page.keyboard.press('Enter')
 
-    // Wait for map to activate and controls to appear
     await page.waitForTimeout(500)
 
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
