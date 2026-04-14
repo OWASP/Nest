@@ -119,6 +119,8 @@ ephemerals
 euo
 facebookexternalhit
 gamesec
+genai
+generativeai
 geocoders
 geoloc
 geopy

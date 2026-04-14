@@ -1,8 +1,6 @@
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, call, patch
 
-import openai
-
 from apps.ai.common.intent import Intent
 from apps.ai.common.utils import (
     create_chunks_and_embeddings,
@@ -13,31 +11,23 @@ from apps.ai.common.utils import (
 )
 
 
-class MockEmbeddingData:
-    def __init__(self, embedding):
-        self.embedding = embedding
-
-
 class TestUtils:
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
+    @patch("apps.ai.common.utils.get_embedder")
     def test_create_chunks_and_embeddings_success(
-        self, mock_datetime, mock_sleep, mock_update_data
+        self, mock_get_embedder, mock_datetime, mock_sleep, mock_update_data
     ):
-        """Tests the successful path where the OpenAI API returns embeddings."""
+        """Tests the successful path where the embedder returns embeddings."""
         base_time = datetime.now(UTC)
         mock_datetime.now.return_value = base_time
         mock_datetime.UTC = UTC
         mock_datetime.timedelta = timedelta
 
-        mock_openai_client = MagicMock()
-        mock_api_response = MagicMock()
-        mock_api_response.data = [
-            MockEmbeddingData([0.1, 0.2]),
-            MockEmbeddingData([0.3, 0.4]),
-        ]
-        mock_openai_client.embeddings.create.return_value = mock_api_response
+        mock_embedder = MagicMock()
+        mock_embedder.embed_documents.return_value = [[0.1, 0.2], [0.3, 0.4]]
+        mock_get_embedder.return_value = mock_embedder
 
         mock_chunk1 = MagicMock()
         mock_chunk2 = MagicMock()
@@ -49,13 +39,9 @@ class TestUtils:
         result = create_chunks_and_embeddings(
             all_chunk_texts,
             mock_content_object,
-            mock_openai_client,
         )
 
-        mock_openai_client.embeddings.create.assert_called_once_with(
-            input=all_chunk_texts,
-            model="text-embedding-3-small",
-        )
+        mock_embedder.embed_documents.assert_called_once_with(all_chunk_texts)
 
         mock_update_data.assert_has_calls(
             [
@@ -79,40 +65,38 @@ class TestUtils:
         mock_sleep.assert_not_called()
 
     @patch("apps.ai.common.utils.logger")
-    def test_create_chunks_and_embeddings_api_error(self, mock_logger):
-        """Tests the failure path where the OpenAI API raises an exception."""
-        mock_openai_client = MagicMock()
-
-        mock_openai_client.embeddings.create.side_effect = openai.OpenAIError(
-            "API connection failed"
-        )
+    @patch("apps.ai.common.utils.get_embedder")
+    def test_create_chunks_and_embeddings_error(self, mock_get_embedder, mock_logger):
+        """Tests the failure path where the embedder raises an exception."""
+        mock_embedder = MagicMock()
+        mock_embedder.embed_documents.side_effect = TypeError("Type error")
+        mock_get_embedder.return_value = mock_embedder
 
         result = create_chunks_and_embeddings(
             chunk_texts=["some text"],
             context=MagicMock(),
-            openai_client=mock_openai_client,
         )
 
-        mock_logger.exception.assert_called_once_with("Failed to create chunks and embeddings")
+        mock_logger.exception.assert_called_once_with("Failed to generate embeddings")
 
         assert result == []
 
     @patch("apps.ai.common.utils.logger")
     @patch("apps.ai.common.utils.Chunk.update_data")
-    def test_create_chunks_and_embeddings_none_context(self, mock_update_data, mock_logger):
+    @patch("apps.ai.common.utils.get_embedder")
+    def test_create_chunks_and_embeddings_none_context(
+        self, mock_get_embedder, mock_update_data, mock_logger
+    ):
         """Tests the failure path when context is None."""
-        mock_openai_client = MagicMock()
-
-        mock_response = MagicMock()
-        mock_response.data = [MagicMock(embedding=[0.1, 0.2, 0.3])]
-        mock_openai_client.embeddings.create.return_value = mock_response
+        mock_embedder = MagicMock()
+        mock_embedder.embed_documents.return_value = [[0.1, 0.2, 0.3]]
+        mock_get_embedder.return_value = mock_embedder
 
         mock_update_data.side_effect = AttributeError("Context is required")
 
         result = create_chunks_and_embeddings(
             chunk_texts=["some text"],
             context=None,
-            openai_client=mock_openai_client,
         )
 
         mock_logger.exception.assert_called_once_with("Failed to create chunks and embeddings")
@@ -121,8 +105,9 @@ class TestUtils:
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
+    @patch("apps.ai.common.utils.get_embedder")
     def test_create_chunks_and_embeddings_sleep_called(
-        self, mock_datetime, mock_sleep, mock_update_data
+        self, mock_get_embedder, mock_datetime, mock_sleep, mock_update_data
     ):
         """Tests that sleep is called when needed."""
         base_time = datetime.now(UTC)
@@ -130,10 +115,9 @@ class TestUtils:
         mock_datetime.UTC = UTC
         mock_datetime.timedelta = timedelta
 
-        mock_openai_client = MagicMock()
-        mock_api_response = MagicMock()
-        mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
-        mock_openai_client.embeddings.create.return_value = mock_api_response
+        mock_embedder = MagicMock()
+        mock_embedder.embed_documents.return_value = [[0.1, 0.2]]
+        mock_get_embedder.return_value = mock_embedder
 
         mock_chunk_instance = MagicMock()
         mock_update_data.return_value = mock_chunk_instance
@@ -143,7 +127,6 @@ class TestUtils:
         result = create_chunks_and_embeddings(
             ["test chunk"],
             mock_content_object,
-            mock_openai_client,
         )
 
         mock_sleep.assert_not_called()
@@ -152,8 +135,9 @@ class TestUtils:
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
+    @patch("apps.ai.common.utils.get_embedder")
     def test_create_chunks_and_embeddings_no_sleep_with_current_settings(
-        self, mock_datetime, mock_sleep, mock_update_data
+        self, mock_get_embedder, mock_datetime, mock_sleep, mock_update_data
     ):
         """Tests that sleep is not called with current offset settings."""
         base_time = datetime.now(UTC)
@@ -161,10 +145,9 @@ class TestUtils:
         mock_datetime.UTC = UTC
         mock_datetime.timedelta = timedelta
 
-        mock_openai_client = MagicMock()
-        mock_api_response = MagicMock()
-        mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
-        mock_openai_client.embeddings.create.return_value = mock_api_response
+        mock_embedder = MagicMock()
+        mock_embedder.embed_documents.return_value = [[0.1, 0.2]]
+        mock_get_embedder.return_value = mock_embedder
 
         mock_chunk_instance = MagicMock()
         mock_update_data.return_value = mock_chunk_instance
@@ -173,7 +156,6 @@ class TestUtils:
         result = create_chunks_and_embeddings(
             ["test chunk"],
             mock_context_obj,
-            mock_openai_client,
         )
 
         mock_sleep.assert_not_called()
@@ -185,8 +167,9 @@ class TestUtils:
     @patch("apps.ai.common.utils.Chunk.update_data")
     @patch("apps.ai.common.utils.time.sleep")
     @patch("apps.ai.common.utils.datetime")
+    @patch("apps.ai.common.utils.get_embedder")
     def test_create_chunks_and_embeddings_sleep_when_rate_limited(
-        self, mock_datetime, mock_sleep, mock_update_data
+        self, mock_get_embedder, mock_datetime, mock_sleep, mock_update_data
     ):
         """Tests that sleep is called when rate limiting is needed."""
         base_time = datetime.now(UTC)
@@ -198,10 +181,9 @@ class TestUtils:
         mock_datetime.UTC = UTC
         mock_datetime.timedelta = timedelta
 
-        mock_openai_client = MagicMock()
-        mock_api_response = MagicMock()
-        mock_api_response.data = [MockEmbeddingData([0.1, 0.2])]
-        mock_openai_client.embeddings.create.return_value = mock_api_response
+        mock_embedder = MagicMock()
+        mock_embedder.embed_documents.return_value = [[0.1, 0.2]]
+        mock_get_embedder.return_value = mock_embedder
 
         mock_chunk_instance = MagicMock()
         mock_update_data.return_value = mock_chunk_instance
@@ -215,22 +197,20 @@ class TestUtils:
             result = create_chunks_and_embeddings(
                 ["test chunk"],
                 mock_context_obj,
-                mock_openai_client,
             )
 
         mock_sleep.assert_called_once()
         assert result == [mock_chunk_instance]
 
     @patch("apps.ai.common.utils.Chunk.update_data")
-    def test_create_chunks_and_embeddings_filter_none_chunks(self, mock_update_data):
+    @patch("apps.ai.common.utils.get_embedder")
+    def test_create_chunks_and_embeddings_filter_none_chunks(
+        self, mock_get_embedder, mock_update_data
+    ):
         """Tests that None chunks are filtered out from results."""
-        mock_openai_client = MagicMock()
-        mock_api_response = MagicMock()
-        mock_api_response.data = [
-            MockEmbeddingData([0.1, 0.2]),
-            MockEmbeddingData([0.3, 0.4]),
-        ]
-        mock_openai_client.embeddings.create.return_value = mock_api_response
+        mock_embedder = MagicMock()
+        mock_embedder.embed_documents.return_value = [[0.1, 0.2], [0.3, 0.4]]
+        mock_get_embedder.return_value = mock_embedder
 
         mock_chunk_instance = MagicMock()
         mock_update_data.side_effect = [mock_chunk_instance, None]
@@ -240,7 +220,6 @@ class TestUtils:
         result = create_chunks_and_embeddings(
             ["first chunk", "second chunk"],
             mock_context_obj,
-            mock_openai_client,
         )
 
         assert len(result) == 1
@@ -251,11 +230,10 @@ class TestRegenerateChunksForContext:
     """Test cases for regenerate_chunks_for_context function."""
 
     @patch("apps.ai.common.utils.logger")
-    @patch("apps.ai.common.utils.OpenAI")
     @patch("apps.ai.common.utils.create_chunks_and_embeddings")
     @patch("apps.ai.common.utils.Chunk.split_text")
     def test_regenerate_chunks_for_context_success(
-        self, mock_split_text, mock_create_chunks, mock_openai_class, mock_logger
+        self, mock_split_text, mock_create_chunks, mock_logger
     ):
         """Test successful regeneration of chunks for context."""
         context = MagicMock()
@@ -267,9 +245,6 @@ class TestRegenerateChunksForContext:
         new_chunk_texts = ["chunk1", "chunk2"]
         mock_split_text.return_value = new_chunk_texts
 
-        mock_openai_client = MagicMock()
-        mock_openai_class.return_value = mock_openai_client
-
         regenerate_chunks_for_context(context)
 
         mock_existing_chunks.all.assert_called_once()
@@ -277,12 +252,9 @@ class TestRegenerateChunksForContext:
 
         mock_split_text.assert_called_once_with(context.content)
 
-        mock_openai_class.assert_called_once()
-
         mock_create_chunks.assert_called_once_with(
             chunk_texts=new_chunk_texts,
             context=context,
-            openai_client=mock_openai_client,
             save=True,
         )
 
@@ -316,11 +288,10 @@ class TestRegenerateChunksForContext:
         mock_logger.info.assert_not_called()
 
     @patch("apps.ai.common.utils.logger")
-    @patch("apps.ai.common.utils.OpenAI")
     @patch("apps.ai.common.utils.create_chunks_and_embeddings")
     @patch("apps.ai.common.utils.Chunk.split_text")
     def test_regenerate_chunks_for_context_no_existing_chunks(
-        self, mock_split_text, mock_create_chunks, mock_openai_class, mock_logger
+        self, mock_split_text, mock_create_chunks, mock_logger
     ):
         """Test regeneration when there are no existing chunks."""
         context = MagicMock()
@@ -332,9 +303,6 @@ class TestRegenerateChunksForContext:
         new_chunk_texts = ["chunk1", "chunk2"]
         mock_split_text.return_value = new_chunk_texts
 
-        mock_openai_client = MagicMock()
-        mock_openai_class.return_value = mock_openai_client
-
         regenerate_chunks_for_context(context)
 
         mock_existing_chunks.all.assert_called_once()
@@ -345,7 +313,6 @@ class TestRegenerateChunksForContext:
         mock_create_chunks.assert_called_once_with(
             chunk_texts=new_chunk_texts,
             context=context,
-            openai_client=mock_openai_client,
             save=True,
         )
 
