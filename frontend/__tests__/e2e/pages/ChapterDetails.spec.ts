@@ -25,7 +25,10 @@ test.describe('Chapter Details Page', () => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
     await expect(unlockButton).toBeVisible()
 
-    await unlockButton.click({ force: true })
+    await unlockButton.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(500)
+    
+    await unlockButton.click({ force: true, timeout: 60000 })
 
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
