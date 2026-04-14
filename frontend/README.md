@@ -79,7 +79,7 @@ cd frontend && pnpm update
 
 ## Key Features
 
-The OWASP Nest frontend provides an interface for exploring the OWASP ecosystem—chapters,
+The OWASP Nest frontend provides an interface for exploring the OWASP ecosystem: chapters,
 projects, members, organizations, contribution opportunities, and community snapshots.
 
 Key capabilities include:
