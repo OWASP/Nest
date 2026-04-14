@@ -247,6 +247,10 @@ describe('CardDetailsIssuesMilestones', () => {
     expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
     expect(screen.getByText('PR 1')).toBeInTheDocument()
     expect(screen.getByText('PR 4')).toBeInTheDocument()
+
+    const showMoreButton = screen.getByRole('button', { name: /show more/i })
+    fireEvent.click(showMoreButton)
+    expect(onLoadMore).toHaveBeenCalledTimes(1)
   })
 
   it('renders pull requests with toggle functionality', () => {
@@ -441,6 +445,17 @@ describe('CardDetailsIssuesMilestones', () => {
     )
 
     expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
+
+    const showMoreButton = screen.getByRole('button', { name: /show more/i })
+    const showLessButton = screen.getByRole('button', { name: /show less/i })
+    expect(showMoreButton).toBeInTheDocument()
+    expect(showLessButton).toBeInTheDocument()
+
+    fireEvent.click(showMoreButton)
+    expect(onLoadMore).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(showLessButton)
+    expect(onReset).toHaveBeenCalledTimes(1)
   })
 
   it('renders milestone with url as clickable link', () => {
@@ -642,6 +657,10 @@ describe('CardDetailsIssuesMilestones', () => {
     )
 
     expect(screen.getByTestId('secondary-card')).toBeInTheDocument()
+
+    const showLessButton = screen.getByRole('button', { name: /show less/i })
+    fireEvent.click(showLessButton)
+    expect(onReset).toHaveBeenCalledTimes(1)
   })
 
   it('renders multiple milestones and toggles show more correctly', () => {

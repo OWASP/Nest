@@ -88,7 +88,7 @@ export default function CommitteeDetailsPage() {
 
   return (
     <CardDetailsPageWrapper>
-      <CardDetailsHeader title={committee.name} isActive={true} isArchived={false} />
+      <CardDetailsHeader title={committee.name} />
 
       <CardDetailsSummary summary={committee.summary} />
 
