@@ -3,7 +3,9 @@ import { test, expect } from '@playwright/test'
 test.describe('Chapter Details Page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/chapters/rosario', { timeout: 25000 })
+    await page.waitForLoadState('domcontentloaded')
     await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1000)
   })
 
   test('should have a heading and summary', async ({ page }) => {
@@ -25,10 +27,12 @@ test.describe('Chapter Details Page', () => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
     await expect(unlockButton).toBeVisible()
 
-    await unlockButton.scrollIntoViewIfNeeded()
+    // Use keyboard navigation to activate the button (bypasses pointer interception issues)
+    await unlockButton.focus()
+    await page.keyboard.press('Enter')
+
+    // Wait for map to activate and controls to appear
     await page.waitForTimeout(500)
-    
-    await unlockButton.click({ force: true, timeout: 60000 })
 
     await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
