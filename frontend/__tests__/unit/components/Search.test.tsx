@@ -1,5 +1,6 @@
 import { sendGTMEvent } from '@next/third-parties/google'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { useShouldAutoFocusSearch } from 'hooks/useShouldAutoFocusSearch'
 import SearchBar from 'components/Search'
 
 jest.mock('@next/third-parties/google', () => ({
@@ -18,6 +19,10 @@ jest.mock('lodash/debounce', () => {
   }
 })
 
+jest.mock('hooks/useShouldAutoFocusSearch', () => ({
+  useShouldAutoFocusSearch: jest.fn(() => true),
+}))
+
 describe('SearchBar Component', () => {
   const mockOnSearch = jest.fn()
   const defaultProps = {
@@ -28,6 +33,7 @@ describe('SearchBar Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
     jest.useFakeTimers()
   })
 
@@ -110,13 +116,22 @@ describe('SearchBar Component', () => {
   })
 
   describe('Auto-focus functionality', () => {
-    it('should auto-focus on initial render', () => {
+    it('should auto-focus on initial render when shouldAutoFocus is true', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
     })
 
-    it('should not lose focus on re-renders', () => {
+    it('should NOT auto-focus on mobile/touch devices', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).not.toHaveFocus()
+    })
+
+    it('should not lose focus on re-renders when shouldAutoFocus is true', () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(true)
       const { rerender } = render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveFocus()
@@ -141,13 +156,30 @@ describe('SearchBar Component', () => {
     })
 
     it('clears input when clear button is clicked', async () => {
-      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       fireEvent.change(input, { target: { value: 'test' } })
       expect(input).toHaveValue('test')
-      const clearButton = container.querySelector('button.absolute.rounded-md[class*="right-2"]')
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
+      input.blur()
+      // NOSONAR: Verifies input lost focus before testing refocus behavior
+      expect(input).not.toHaveFocus()
       fireEvent.click(clearButton)
       expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is refocused after clear when shouldAutoFocus is true
+      expect(input).toHaveFocus()
+    })
+
+    it('does not refocus input after clear when on mobile', async () => {
+      ;(useShouldAutoFocusSearch as jest.Mock).mockReturnValue(false)
+      render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      fireEvent.change(input, { target: { value: 'test' } })
+      const clearButton = screen.getByRole('button', { name: 'Clear search' })
+      fireEvent.click(clearButton)
+      expect(input).toHaveValue('')
+      // NOSONAR: Verifies input is not refocused on mobile when shouldAutoFocus is false
+      expect(input).not.toHaveFocus()
     })
 
     it('calls onSearch when input value changes', async () => {
@@ -408,7 +440,7 @@ describe('SearchBar Component', () => {
       render(<SearchBar {...defaultProps} isLoaded={true} />)
       const input = screen.getByPlaceholderText('Search projects...')
       expect(input).toHaveClass(
-        'h-12 w-full rounded-lg border-1 border-gray-300 bg-white pr-10 pl-10 text-lg text-black focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-300'
+        'box-border h-12 w-full rounded-lg border-1 border-gray-300 bg-white py-0 pr-10 pl-10 text-sm leading-12 text-black placeholder:leading-12 placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 focus:outline-hidden dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400 dark:focus:ring-blue-300'
       )
     })
 
@@ -443,6 +475,32 @@ describe('SearchBar Component', () => {
 
       expect(input).toBeInTheDocument()
       expect(searchIcon).toBeInTheDocument()
+    })
+
+    it('applies className prop to the input element', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} className="rounded-none" />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveClass('rounded-none')
+    })
+
+    it('keeps rounded-lg for md:rounded-none (mobile radius, desktop flat bar)', () => {
+      render(<SearchBar {...defaultProps} isLoaded={true} className="md:rounded-none" />)
+      const input = screen.getByPlaceholderText('Search projects...')
+      expect(input).toHaveClass('rounded-lg', 'md:rounded-none')
+    })
+
+    it('applies className prop to the skeleton when not loaded', () => {
+      const { container } = render(
+        <SearchBar {...defaultProps} isLoaded={false} className="rounded-none" />
+      )
+      const skeleton = container.querySelector('.h-12')
+      expect(skeleton).toHaveClass('rounded-none')
+    })
+
+    it('renders wrapper with md:py-4 class', () => {
+      const { container } = render(<SearchBar {...defaultProps} isLoaded={true} />)
+      const wrapper = container.firstChild as HTMLElement
+      expect(wrapper).toHaveClass('md:py-4')
     })
   })
 })

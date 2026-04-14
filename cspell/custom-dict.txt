@@ -1,5 +1,6 @@
 ARUN
 AVD
+Abhay
 Agentic
 Agsoc
 Aichi
@@ -7,6 +8,8 @@ Aissue
 Atqc
 Aupdated
 BOTTOMPADDING
+Balbin
+Balbin's
 Birda
 CCSP
 CISSP
@@ -43,6 +46,7 @@ NOSONAR
 Nadu
 Nagori
 Nominatim
+OWHF
 Obmondo
 Oleksiuk
 PGPASSWORD
@@ -57,15 +61,18 @@ Sivagangai
 Sonarqube
 Stegen
 T04T40NHX
+Tarandach
 Truncator
 Turbopack
 Twitterbot
 VCALENDAR
 VEVENT
 WSL
+Wandji
 Whistleblower
 Wörld
 Xmark
+ZYXW
 a2eeef
 acodec
 agentic
@@ -105,6 +112,7 @@ dvo
 elevenlabs
 env
 envsubst
+ephemerals
 euo
 facebookexternalhit
 gamesec
@@ -112,6 +120,7 @@ geocoders
 geoloc
 geopy
 gha
+glueup
 graphiql
 graphqler
 gunicorn
@@ -192,6 +201,7 @@ repositorycontributor
 requirepass
 rqworker
 rsc
+rudransh
 saft
 sakanashi
 samm
@@ -199,6 +209,7 @@ sbom
 schemathesis
 semgrep
 seo
+shrivastava
 skillstruck
 slackbot
 slideshare

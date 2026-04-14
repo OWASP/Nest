@@ -40,7 +40,6 @@ import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Milestones from 'components/Milestones'
 import DialogComp from 'components/Modal'
-import MultiSearchBar from 'components/MultiSearch'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
@@ -138,21 +137,13 @@ export default function Home() {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="pt-5 text-center sm:mb-10">
-          <div className="flex flex-col items-center py-10">
+          <div className="flex flex-col items-center py-5">
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
             </h1>
             <p className="text-muted-foreground max-w-[700px] pt-6 md:text-xl">
               Your gateway to OWASP. Discover, engage, and help shape the future!
             </p>
-          </div>
-          <div className="mx-auto mb-8 flex max-w-2xl justify-center">
-            <MultiSearchBar
-              eventData={data?.upcomingEvents ?? []}
-              isLoaded={true}
-              placeholder="Search the OWASP community"
-              indexes={['chapters', 'organizations', 'projects', 'users']}
-            />
           </div>
         </div>
         <SecondaryCard
@@ -387,7 +378,7 @@ export default function Home() {
             ))}
           </div>
         </SecondaryCard>
-        <div className="grid gap-6 lg:grid-cols-5">
+        <div className="grid lg:grid-cols-5 lg:gap-6">
           {counterData.map((stat) => (
             <div key={stat.label}>
               <SecondaryCard className="text-center">
@@ -400,7 +391,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-8 mb-20">
+        <div className="mb-20">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">

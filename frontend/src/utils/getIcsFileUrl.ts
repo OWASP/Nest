@@ -7,20 +7,16 @@ export default function getIcsFileUrl(event: CalendarEvent): Promise<string> {
       reject(new Error('Window not defined (server-side generation not supported)'))
       return
     }
-    const parseDate = (date: string | Date): DateArray => {
-      if (typeof date === 'string') {
-        const [year, month, day] = date.split('-').map(Number)
-        if (!year || !month || !day) throw new Error(`Invalid date string: ${date}`)
-        return [year, month, day]
-      }
-      return [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+    const parseDate = (date: string): DateArray => {
+      const d = new Date(date)
+      return [d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()]
     }
 
     const getEndDate = (start: DateArray, end: DateArray): DateArray => {
       if (start.join('-') === end.join('-')) {
         const [y, m, d] = end
-        const nextDay = new Date(y, m - 1, d + 1)
-        return [nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate()]
+        const nextDay = new Date(Date.UTC(y, m - 1, d + 1))
+        return [nextDay.getUTCFullYear(), nextDay.getUTCMonth() + 1, nextDay.getUTCDate()]
       }
       return end
     }

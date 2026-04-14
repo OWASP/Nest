@@ -95,7 +95,7 @@ export const projectTimeline: ProjectTimeline[] = [
     year: 'January 2025',
   },
   {
-    title: 'First Official Release and Production Launch',
+    title: 'First Official Release and Public Launch',
     description:
       'We officially launched OWASP Nest to the public, inviting the community to explore and contribute.',
     year: 'February 2025',
@@ -106,13 +106,13 @@ export const projectTimeline: ProjectTimeline[] = [
     year: 'May 2025',
   },
   {
-    title: 'OWASP Nest Sponsorship Program Launch',
+    title: 'Sponsorship Program Launch',
     description:
       'We started sponsoring some interesting projects that have not made it to the GSoC 2025.',
     year: 'June 2025',
   },
   {
-    title: 'OWASP Nest Sponsorship Program Expansion',
+    title: 'Sponsorship Program Expansion',
     description:
       'OWASP Nest expanded its Sponsorship Program to support ongoing project maintenance and new initiatives.',
     year: 'October 2025',
@@ -130,10 +130,34 @@ export const projectTimeline: ProjectTimeline[] = [
     year: 'November 2025',
   },
   {
-    title: 'OWASP Nest Logo Introduction',
+    title: 'Logo Introduction',
     description:
       "Introduced the official OWASP Nest logo as part of the project's branding and visual identity.",
     year: 'December 2025',
+  },
+  {
+    title: 'Production Level Promotion',
+    description:
+      'OWASP Nest promoted to Production level, marking its recognition as a mature and fully supported platform within the OWASP ecosystem.',
+    year: 'February 2026',
+  },
+  {
+    title: 'Cloud-Native Architecture and IaC',
+    description:
+      'OWASP Nest migrated to a cloud-native architecture with infrastructure as code, enabling consistent and scalable deployments.',
+    year: 'March 2026',
+  },
+  {
+    title: 'OWASP Impact Report',
+    description:
+      "OWASP Nest was highlighted in the OWASP Impact Report 2025, recognizing its role in the foundation's community and project ecosystem.",
+    year: 'March 2026',
+  },
+  {
+    title: 'Sponsorship Program First Batch Graduation',
+    description:
+      'The first cohort of OWASP Nest Sponsorship Program contributors completed their program, marking a milestone for sustained project support.',
+    year: 'March 2026',
   },
 ]
 

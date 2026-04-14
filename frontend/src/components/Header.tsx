@@ -14,6 +14,7 @@ import {
 } from 'react-icons/fa'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
+import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
@@ -74,7 +75,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 alt="OWASP Logo"
               />
             </div>
-            <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+            <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
               Nest
             </div>
           </div>
@@ -97,10 +98,10 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     key={link.text}
                     href={link.href || '/'}
                     className={cn(
-                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                      'navlink px-3 py-2 text-slate-700 transition-colors duration-200 hover:text-white dark:text-slate-300 dark:hover:text-blue-400',
                       pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                     )}
-                    aria-current="page"
+                    aria-current={pathname === link.href ? 'page' : undefined}
                   >
                     {link.text}
                   </Link>
@@ -108,7 +109,8 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="flex items-center justify-normal gap-4">
+        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+          <GlobalSearch />
           <div className="hidden md:flex">
             <NavButton
               href="https://github.com/OWASP/Nest"
@@ -170,7 +172,7 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                     alt="OWASP Logo"
                   />
                 </div>
-                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
                   Nest
                 </div>
               </div>

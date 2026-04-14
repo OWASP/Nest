@@ -16,12 +16,12 @@ run "test_security_group_not_created_when_no_endpoint" {
   command = plan
 
   variables {
-    create_cloudwatch_logs = false
-    create_ecr_api         = false
-    create_ecr_dkr         = false
-    create_s3              = false
-    create_secretsmanager  = false
-    create_ssm             = false
+    enable_cloudwatch_logs = false
+    enable_ecr_api         = false
+    enable_ecr_dkr         = false
+    enable_s3              = false
+    enable_secretsmanager  = false
+    enable_ssm             = false
   }
 
   assert {
@@ -34,12 +34,12 @@ run "test_security_group_created_with_interface_endpoint" {
   command = plan
 
   variables {
-    create_cloudwatch_logs = true
-    create_ecr_api         = false
-    create_ecr_dkr         = false
-    create_s3              = false
-    create_secretsmanager  = false
-    create_ssm             = false
+    enable_cloudwatch_logs = true
+    enable_ecr_api         = false
+    enable_ecr_dkr         = false
+    enable_s3              = false
+    enable_secretsmanager  = false
+    enable_ssm             = false
   }
   assert {
     condition     = length(aws_security_group.vpc_endpoints) == 1
@@ -51,8 +51,8 @@ run "test_security_group_allows_https_from_vpc" {
   command = plan
 
   variables {
-    create_cloudwatch_logs = true
-    create_s3              = false
+    enable_cloudwatch_logs = true
+    enable_s3              = false
   }
   assert {
     condition     = aws_security_group_rule.vpc_endpoints_ingress_https[0].from_port == 443
@@ -72,8 +72,8 @@ run "test_security_group_name_format" {
   command = plan
 
   variables {
-    create_cloudwatch_logs = true
-    create_s3              = false
+    enable_cloudwatch_logs = true
+    enable_s3              = false
   }
   assert {
     condition     = aws_security_group.vpc_endpoints[0].tags["Name"] == "nest-test-vpc-endpoints-sg"
@@ -94,12 +94,12 @@ run "test_cloudwatch_logs_created_when_enabled" {
   command = plan
 
   variables {
-    create_cloudwatch_logs = true
+    enable_cloudwatch_logs = true
   }
 
   assert {
     condition     = length(aws_vpc_endpoint.cloudwatch_logs) == 1
-    error_message = "CloudWatch Logs endpoint should be created when create_cloudwatch_logs is true."
+    error_message = "CloudWatch Logs endpoint should be created when enable_cloudwatch_logs is true."
   }
   assert {
     condition     = aws_vpc_endpoint.cloudwatch_logs[0].vpc_endpoint_type == "Interface"
@@ -115,7 +115,7 @@ run "test_cloudwatch_logs_name_format" {
   command = plan
 
   variables {
-    create_cloudwatch_logs = true
+    enable_cloudwatch_logs = true
   }
   assert {
     condition     = aws_vpc_endpoint.cloudwatch_logs[0].tags["Name"] == "nest-test-cloudwatch-logs-endpoint"
@@ -136,11 +136,11 @@ run "test_ecr_api_created_when_enabled" {
   command = plan
 
   variables {
-    create_ecr_api = true
+    enable_ecr_api = true
   }
   assert {
     condition     = length(aws_vpc_endpoint.ecr_api) == 1
-    error_message = "ECR API endpoint should be created when create_ecr_api is true."
+    error_message = "ECR API endpoint should be created when enable_ecr_api is true."
   }
   assert {
     condition     = aws_vpc_endpoint.ecr_api[0].vpc_endpoint_type == "Interface"
@@ -156,7 +156,7 @@ run "test_ecr_api_name_format" {
   command = plan
 
   variables {
-    create_ecr_api = true
+    enable_ecr_api = true
   }
   assert {
     condition     = aws_vpc_endpoint.ecr_api[0].tags["Name"] == "nest-test-ecr-api-endpoint"
@@ -177,11 +177,11 @@ run "test_ecr_dkr_created_when_enabled" {
   command = plan
 
   variables {
-    create_ecr_dkr = true
+    enable_ecr_dkr = true
   }
   assert {
     condition     = length(aws_vpc_endpoint.ecr_dkr) == 1
-    error_message = "ECR DKR endpoint should be created when create_ecr_dkr is true."
+    error_message = "ECR DKR endpoint should be created when enable_ecr_dkr is true."
   }
   assert {
     condition     = aws_vpc_endpoint.ecr_dkr[0].vpc_endpoint_type == "Interface"
@@ -197,7 +197,7 @@ run "test_ecr_dkr_name_format" {
   command = plan
 
   variables {
-    create_ecr_dkr = true
+    enable_ecr_dkr = true
   }
   assert {
     condition     = aws_vpc_endpoint.ecr_dkr[0].tags["Name"] == "nest-test-ecr-dkr-endpoint"
@@ -258,11 +258,11 @@ run "test_secretsmanager_created_when_enabled" {
   command = plan
 
   variables {
-    create_secretsmanager = true
+    enable_secretsmanager = true
   }
   assert {
     condition     = length(aws_vpc_endpoint.secretsmanager) == 1
-    error_message = "Secrets Manager endpoint should be created when create_secretsmanager is true."
+    error_message = "Secrets Manager endpoint should be created when enable_secretsmanager is true."
   }
   assert {
     condition     = aws_vpc_endpoint.secretsmanager[0].vpc_endpoint_type == "Interface"
@@ -278,7 +278,7 @@ run "test_secretsmanager_name_format" {
   command = plan
 
   variables {
-    create_secretsmanager = true
+    enable_secretsmanager = true
   }
 
   assert {
@@ -300,11 +300,11 @@ run "test_ssm_created_when_enabled" {
   command = plan
 
   variables {
-    create_ssm = true
+    enable_ssm = true
   }
   assert {
     condition     = length(aws_vpc_endpoint.ssm) == 1
-    error_message = "SSM endpoint should be created when create_ssm is true."
+    error_message = "SSM endpoint should be created when enable_ssm is true."
   }
   assert {
     condition     = aws_vpc_endpoint.ssm[0].vpc_endpoint_type == "Interface"
@@ -320,7 +320,7 @@ run "test_ssm_name_format" {
   command = plan
 
   variables {
-    create_ssm = true
+    enable_ssm = true
   }
   assert {
     condition     = aws_vpc_endpoint.ssm[0].tags["Name"] == "nest-test-ssm-endpoint"

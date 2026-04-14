@@ -94,6 +94,12 @@ jest.mock('components/UserMenu', () => {
   }
 })
 
+jest.mock('components/GlobalSearch', () => {
+  return function MockGlobalSearch() {
+    return <div data-testid="global-search">Global Search</div>
+  }
+})
+
 // Mock constants
 jest.mock('utils/constants', () => {
   const actual = jest.requireActual('utils/constants')
@@ -1097,19 +1103,13 @@ describe('Header Component', () => {
 
       expect(isMobileMenuOpen()).toBe(true)
 
-      // Find and click a navigation link in the mobile menu
-      const aboutLinks = screen.getAllByRole('link', { name: 'About' })
-      const mobileAboutLink = aboutLinks.find((link) => {
-        // Find the one in the mobile menu (has the transition class)
-        return link.className.includes('transition')
-      })
+      const mobileMenu = findMobileMenu() as HTMLElement
+      expect(mobileMenu).not.toBeNull()
+      const mobileAboutLink = within(mobileMenu).getByRole('link', { name: 'About' })
 
-      expect(mobileAboutLink).toBeDefined()
-      if (mobileAboutLink) {
-        await act(async () => {
-          fireEvent.click(mobileAboutLink)
-        })
-      }
+      await act(async () => {
+        fireEvent.click(mobileAboutLink)
+      })
 
       // Menu should close after clicking a link
       expect(isMobileMenuClosed()).toBe(true)

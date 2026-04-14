@@ -36,181 +36,17 @@ Optional steps for Windows:
 
 [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
+## External Documentation
+
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest)
+- [OWASP Nest ReadTheDocs](https://owasp-nest.readthedocs.io/latest/)
+
 ## Environment Variables
 
-### Frontend
+For detailed descriptions of all environment variables, see:
 
-#### `NEXT_PUBLIC_API_URL`
-
-- **Description**: The base URL for the application's internal API.
-- **Example Value**: `https://nest.owasp.org/`
-- **Usage**: Used by frontend components to make API calls.
-
-#### `NEXT_PUBLIC_CSRF_URL`
-
-- **Description**: The endpoint used to fetch CSRF tokens for secure API requests.
-- **Example Value**: `https://nest.owasp.org/csrf/`
-- **Usage**: Required for protecting POST/PUT/DELETE requests from CSRF attacks.
-
-#### `NEXT_PUBLIC_ENVIRONMENT`
-
-- **Description**: Specifies the current environment in which the application is running.
-- **Example Value**: `production`
-- **Usage**: Used for toggling features or logging based on environment (`development`, `production`, etc).
-
-#### `NEXT_PUBLIC_GRAPHQL_URL`
-
-- **Description**: The endpoint for the GraphQL API.
-- **Example Value**: `https://nest.owasp.org/graphql/`
-- **Usage**: Used to send GraphQL queries and mutations from the frontend.
-
-#### `NEXT_PUBLIC_GTM_AUTH`
-
-- **Description**: Authentication token for Google Tag Manager (GTM).
-- **Example Value**: `XYZabc123`
-- **Usage**: Optional; used when previewing or testing GTM in different environments.
-
-#### `NEXT_PUBLIC_GTM_ID`
-
-- **Description**: The unique ID for the Google Tag Manager container.
-- **Example Value**: `GTM-XXXXXXX`
-- **Usage**: Required for integrating Google Tag Manager on the frontend.
-
-#### `NEXT_PUBLIC_GTM_PREVIEW`
-
-- **Description**: Used for previewing GTM configurations.
-- **Usage**: Optional, used during GTM debugging or testing.
-
-#### `NEXT_PUBLIC_IDX_URL`
-
-- **Description**: The base URL for IDX (Indexing Service).
-- **Example Value**: `https://nest.owasp.org/idx/`
-- **Usage**: Used for services interacting with indexing/search features.
-
-#### `NEXT_PUBLIC_RELEASE_VERSION`
-
-- **Description**: The current release version of the application.
-- **Example Value**: `1.0.5`
-- **Usage**: Displayed in the app UI or logs for tracking deployments.
-
-#### `NEXT_PUBLIC_SENTRY_DSN`
-
-- **Description**: The Data Source Name (DSN) for Sentry error tracking.
-- **Example Value**: `https://xyz@sentry.io/123456`
-- **Usage**: Enables real-time error tracking and reporting in the frontend.
-
----
-
-### Backend
-
-#### `DJANGO_ALGOLIA_APPLICATION_ID`
-
-- **Description**: The application ID for Algolia.
-- **Example Value**: `APPID123`
-- **Usage**: Used by Django to initialize Algolia client for indexing/search.
-
-#### `DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES`
-
-- **Description**: Index names to exclude locally (if any).
-- **Usage**: Prevents specific indices from being created in local environments.
-
-#### `DJANGO_ALGOLIA_WRITE_API_KEY`
-
-- **Description**: The write API key for Algolia.
-- **Usage**: Required for Django backend to write data into Algolia indices.
-
-#### `DJANGO_ALLOWED_HOSTS`
-
-- **Description**: A comma-separated list of allowed hosts for the application.
-- **Example Value**: `localhost,127.0.0.1`
-- **Usage**: Restricts HTTP Host header to prevent host header attacks.
-
-#### `DJANGO_AWS_ACCESS_KEY_ID`
-
-- **Description**: AWS access key ID.
-- **Usage**: Used for authenticating with AWS services (e.g., S3).
-
-#### `DJANGO_AWS_SECRET_ACCESS_KEY`
-
-- **Description**: AWS secret access key.
-- **Usage**: Used along with access key ID to authenticate AWS API requests.
-
-#### `DJANGO_CONFIGURATION`
-
-- **Description**: Specifies the Django configuration to use.
-- **Example Value**: `Production`
-- **Usage**: Determines which Django settings class to load.
-
-#### `DJANGO_DB_HOST`
-
-- **Description**: The hostname of the database server.
-- **Example Value**: `db`
-- **Usage**: Used to connect Django to the correct PostgreSQL server.
-
-#### `DJANGO_DB_NAME`
-
-- **Description**: The name of the database.
-- **Example Value**: `nest`
-- **Usage**: Specifies the name of the PostgreSQL database used by Django.
-
-#### `DJANGO_DB_PASSWORD`
-
-- **Description**: The password for the database user.
-- **Usage**: Authenticates the Django DB user.
-
-#### `DJANGO_DB_PORT`
-
-- **Description**: The port number for the database server.
-- **Example Value**: `5432`
-- **Usage**: Specifies the port for connecting to PostgreSQL.
-
-#### `DJANGO_DB_USER`
-
-- **Description**: The username for the database.
-- **Example Value**: `postgres`
-- **Usage**: Authenticates with the database.
-
-#### `DJANGO_OPEN_AI_SECRET_KEY`
-
-- **Description**: The secret key for OpenAI API.
-- **Usage**: Used for OpenAI integration.
-
-#### `DJANGO_PUBLIC_IP_ADDRESS`
-
-- **Description**: The IP address to use locally.
-- **Usage**: Geographic location related functionality.
-
-#### `DJANGO_RELEASE_VERSION`
-
-- **Description**: The release version of the application.
-- **Example Value**: `1.0.5`
-- **Usage**: Identifies the current backend deployment version.
-
-#### `DJANGO_SECRET_KEY`
-
-- **Description**: The secret key for Django (used for cryptographic signing).
-- **Usage**: Required for session management, tokens, etc.
-
-#### `DJANGO_SENTRY_DSN`
-
-- **Description**: The DSN for Sentry (used for error tracking).
-- **Example Value**: `https://xyz@sentry.io/654321`
-- **Usage**: Enables backend error tracking through Sentry.
-
-#### `DJANGO_SLACK_BOT_TOKEN`
-
-- **Description**: The token for the Slack bot.
-- **Usage**: Authenticates the bot to send messages to Slack channels.
-
-#### `DJANGO_SLACK_SIGNING_SECRET`
-
-- **Description**: The signing secret for Slack.
-- **Usage**: Used to verify Slack requests to webhooks.
-
-#### `GITHUB_TOKEN`
-
-- **Description**: The token for accessing GitHub APIs.
-- **Usage**: Used for making authenticated requests to GitHub (e.g., issues, releases).
+- **Backend**: [backend/README.md](backend/README.md#environment-variables)
+- **Frontend**: [frontend/README.md](frontend/README.md#environment-variables)
 
 ## Setting up the Project
 
@@ -265,6 +101,16 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    - Note: The default write API key should have index write permissions (addObject permission). If you do not use the default write API key, ensure that your API key has this permission.
    - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
 
+1. **Getting Started**:
+
+   - To see all available commands and their descriptions, run:
+
+     ```bash
+     make help
+     ```
+
+   - This will print a list of all make targets you can use during development.
+
 1. **Run the Application**:
 
    - In your terminal, navigate to the project root directory (not `backend` and not `frontend` subdirectories -- you need the project root directory) Nest has backend and frontend related Makefiles in corresponding directories and all of them are included in the main [Makefile](https://github.com/OWASP/Nest/blob/main/Makefile) in the project root directory. Run the following command to start the application:
@@ -300,6 +146,41 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      - [GraphQL](http://localhost:8000/graphql/)
 
 ### Optional Steps
+
+#### GitHub OAuth Setup
+
+If you want to use the "Sign in with GitHub" feature locally, you need to register a GitHub OAuth App and update your `frontend/.env` with real credentials. Without this, clicking "Sign in with GitHub" will result in a GitHub 404 error because the placeholder `client_id=your-github-client-id` is invalid.
+
+1. Go to [GitHub Developer Settings → OAuth Apps](https://github.com/settings/developers) and click **"New OAuth App"**.
+1. Fill in the form with the following values:
+
+   | Field | Value |
+   | --- | --- |
+   | Application name | `OWASP Nest Local` (or any name you prefer) |
+   | Homepage URL | `http://localhost:3000` |
+   | Authorization callback URL | `http://localhost:3000/api/auth/callback/github` |
+
+1. Click **"Register application"**.
+1. On the next page, copy the **Client ID** and click **"Generate a new client secret"** to obtain a **Client Secret**.
+1. Generate a secure `NEXTAUTH_SECRET` by running:
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+1. Open your `frontend/.env` file and update the following values with the credentials you just obtained:
+
+   ```plaintext
+   NEXTAUTH_SECRET=<output-from-openssl-command>
+   NEXT_SERVER_GITHUB_CLIENT_ID=<your-github-client-id>
+   NEXT_SERVER_GITHUB_CLIENT_SECRET=<your-github-client-secret>
+   ```
+
+1. Restart the application to apply the changes:
+
+   ```bash
+   make run
+   ```
 
 #### GitHub Data Fetch
 
@@ -339,7 +220,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 ❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
 ❗ **Always use a different workspace (create your own if needed).**
 
-To setup NestBot development environment, follow these steps:
+To set up the NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
 
@@ -381,8 +262,20 @@ To setup NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+
+##### Testing NestBot Locally
+
+With `make run` and `ngrok start NestBot` running, smoke-test the integration — for example:
+
+- Direct message: send a direct message to the bot in your Slack workspace.
+- Channel mention: Add the bot to a channel and `@`-mention it.
+- Or post a normal channel message when your app subscribes to the `message.channels` bot event.
+
+To confirm Slack is reaching your machine, check the backend container logs.
+
+> **Note:** Keep ngrok running while you test. Slack must use a publicly accessible URL to reach your local server.
 
 #### Local Access to Internal Dashboards
 
@@ -519,6 +412,12 @@ This command automatically:
 - Executes the e2e tests
 - Cleans up containers when done
 
+To run e2e tests without initializing the database, use the following command:
+
+```bash
+make test-frontend-e2e-no-init
+```
+
 For debugging, you can run the e2e backend separately:
 
 ```bash
@@ -530,6 +429,20 @@ Then load data manually in another terminal:
 ```bash
 make load-data-e2e
 ```
+
+For debugging the frontend e2e tests UI mode, run:
+
+```bash
+make test-frontend-e2e-ui
+```
+
+To run the frontend e2e tests UI mode without the database initialized, use the following command:
+
+```bash
+make test-frontend-e2e-ui-no-db-init
+```
+
+You can access the UI at [http://localhost:3800](http://localhost:3800).
 
 ### Running Fuzz Tests
 

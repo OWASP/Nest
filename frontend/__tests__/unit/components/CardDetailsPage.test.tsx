@@ -526,11 +526,13 @@ jest.mock('components/ModuleCard', () => ({
     modules,
     accessLevel: _accessLevel,
     admins: _admins,
+    programKey: _programKey,
     ...props
   }: {
     modules: unknown[]
     accessLevel: string
     admins?: unknown[]
+    programKey?: string
     [key: string]: unknown
   }) => (
     <div data-testid="module-card" {...props}>
@@ -729,7 +731,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       body: 'Milestone description',
       closedIssuesCount: 5,
-      createdAt: new Date(Date.now() - 2592000000).toISOString(),
+      createdAt: '2023-01-01T00:00:00.000Z',
       openIssuesCount: 2,
       repositoryName: 'test-repo',
       state: 'open',
@@ -984,6 +986,46 @@ describe('CardDetailsPage', () => {
       const healthButton = screen.getByRole('button')
       expect(healthButton).toBeInTheDocument()
       expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
+    })
+
+    it('renders Show More button when onLoadMorePullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show more/i })).toBeInTheDocument()
+    })
+
+    it('renders Show Less button when onResetPullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onResetPullRequests={jest.fn()}
+          onLoadMorePullRequests={undefined}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeInTheDocument()
+    })
+
+    it('shows Loading on Show more and disables both controls when isFetchingMore is true', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+          onResetPullRequests={jest.fn()}
+          isFetchingMore={true}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Loading/i })).toBeDisabled()
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeDisabled()
     })
 
     it('calls scrollToAnchor when MetricsScoreCircle is clicked', () => {
@@ -1953,7 +1995,7 @@ describe('CardDetailsPage', () => {
           author: mockUser,
           body: `Milestone description ${i + 1}`,
           closedIssuesCount: 5,
-          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          createdAt: Math.floor((Date.now() - 10000000) / 1000),
           openIssuesCount: 2,
           repositoryName: `test-repo-${i}`,
           organizationName: 'test-org',
