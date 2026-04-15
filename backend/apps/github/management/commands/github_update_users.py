@@ -52,7 +52,7 @@ class Command(BaseCommand):
             user.calculated_score = user.calculate_score()
             users.append(user)
 
-            if len( users ) % BATCH_SIZE == 0:
-                User.bulk_save( users, fields=("contributions_count","calculated_score") )
+        if len( users ) % BATCH_SIZE == 0:
+            User.bulk_save( users, fields=("contributions_count", "calculated_score") )
 
-        User.bulk_save(users, fields=("contributions_count","calculated_score"))
+        User.bulk_save( users, fields=("contributions_count", "calculated_score") )
