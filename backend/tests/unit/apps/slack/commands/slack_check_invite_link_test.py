@@ -92,6 +92,42 @@ class TestSlackCheckInviteLinkCommand:
         assert fake_workspace.invite_link_alert_threshold == 450
 
     @patch.object(Workspace, "get_default_workspace")
+    @patch("apps.slack.management.commands.slack_check_invite_link.WebClient")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
+    @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
+    def test_resets_baseline_when_new_invite_commit_despite_existing_baseline(
+        self,
+        mock_gh_client,
+        mock_commit_at,
+        mock_web_client_class,
+        mock_get_workspace,
+        fake_workspace,
+    ):
+        """A new GitHub invite commit must replace the previous link's member baseline."""
+        old_time = datetime(2025, 1, 1, tzinfo=UTC)
+        old_sha = "b" * 40
+        new_time = datetime(2025, 6, 1, tzinfo=UTC)
+        new_sha = "c" * 40
+        mock_get_workspace.return_value = fake_workspace
+        mock_commit_at.return_value = (new_time, new_sha)
+        mock_web_client_class.return_value = MagicMock()
+
+        fake_workspace.invite_link_created_at = old_time
+        fake_workspace.invite_link_commit_sha = old_sha
+        fake_workspace.invite_link_member_count = 100
+        fake_workspace.invite_link_last_alert_sent_at = timezone.now()
+        fake_workspace.total_members_count = 250
+        fake_workspace.invite_link_alert_channel_id = "C01234567"
+
+        call_command("slack_check_invite_link")
+
+        assert fake_workspace.invite_link_created_at == new_time
+        assert fake_workspace.invite_link_commit_sha == new_sha
+        assert fake_workspace.invite_link_member_count == 250
+        assert fake_workspace.invite_link_alert_threshold == 600
+        assert fake_workspace.invite_link_last_alert_sent_at is None
+
+    @patch.object(Workspace, "get_default_workspace")
     @patch("apps.slack.management.commands.slack_check_invite_link.get_latest_invite_link_commit")
     @patch("apps.slack.management.commands.slack_check_invite_link.get_github_client")
     def test_baseline_not_set_without_github_commit_or_metadata(
