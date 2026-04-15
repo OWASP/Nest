@@ -1,10 +1,8 @@
 """A command to update GitHub users."""
 
 import logging
-
 from django.core.management.base import BaseCommand
 from django.db.models import Q, Sum
-
 from apps.common.models import BATCH_SIZE
 from apps.github.models.repository_contributor import RepositoryContributor
 from apps.github.models.user import User
@@ -50,10 +48,11 @@ class Command(BaseCommand):
             prefix = f"{idx + offset + 1} of {active_users_count - offset}"
             self.stdout.write(f"{prefix:<10} {user.title}\n")
 
-            user.contributions_count = user_contributions.get(user.id, 0)
+            user.contributions_count = user_contributions.get( user.id, 0 )
+            user.calculated_score = user.calculate_score()
             users.append(user)
 
-            if not len(users) % BATCH_SIZE:
-                User.bulk_save(users, fields=("contributions_count",))
+            if len( users ) % BATCH_SIZE == 0:
+                User.bulk_save( users, fields=("contributions_count","calculated_score") )
 
-        User.bulk_save(users, fields=("contributions_count",))
+        User.bulk_save(users, fields=("contributions_count","calculated_score"))
