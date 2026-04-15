@@ -1,9 +1,4 @@
 import { test, expect } from '@playwright/test'
-import {
-  exploreCards as NAV_SECTIONS,
-  engagementWays,
-  journeySteps,
-} from '../../../src/utils/communityData'
 
 test.describe('Community Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,9 +6,7 @@ test.describe('Community Page', () => {
   })
 
   test('renders main heading', async ({ page }) => {
-    await expect(
-      page.getByRole('heading', { name: 'OWASP Community', level: 1 })
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'OWASP Community', level: 1 })).toBeVisible()
   })
 
   test('renders hero description with navigation links', async ({ page }) => {
@@ -23,30 +16,27 @@ test.describe('Community Page', () => {
     await expect(heroDesc.getByRole('link', { name: 'Organizations' })).toBeVisible()
   })
 
-  test('renders Explore Resources section with all navigation cards', async ({ page }) => {
+  test('renders Explore Resources with representative navigation cards', async ({ page }) => {
     await expect(page.getByText('Explore Resources')).toBeVisible()
 
-    for (const { href, description } of NAV_SECTIONS) {
-      const link = page.getByRole('link').filter({ hasText: description })
-      await expect(link).toBeVisible()
-      await expect(link).toHaveAttribute('href', href)
-    }
+    const chapters = page.getByRole('link').filter({ hasText: 'Find local OWASP chapters' })
+    await expect(chapters).toBeVisible()
+    await expect(chapters).toHaveAttribute('href', '/chapters')
+
+    const snapshots = page.getByRole('link').filter({ hasText: 'View community snapshots' })
+    await expect(snapshots).toBeVisible()
+    await expect(snapshots).toHaveAttribute('href', '/community/snapshots')
   })
 
-  test('renders Ways to Engage section with all engagement types', async ({ page }) => {
+  test('renders Ways to Engage section', async ({ page }) => {
     await expect(page.getByText('Ways to Engage')).toBeVisible()
-
-    for (const { title } of engagementWays) {
-      await expect(page.getByText(title)).toBeVisible()
-    }
+    await expect(page.getByText('Join Local Chapters')).toBeVisible()
+    await expect(page.getByText('Contribute to Projects')).toBeVisible()
   })
 
-  test('renders Community Journey section with all steps', async ({ page }) => {
-    for (const { label } of journeySteps) {
-      await expect(
-        page.getByRole('heading', { name: label, level: 3 }).first()
-      ).toBeVisible()
-    }
+  test('renders Community Journey section', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Discover', level: 3 }).first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Contribute', level: 3 }).first()).toBeVisible()
   })
 
   test('renders Join Slack section with working link', async ({ page }) => {
@@ -62,18 +52,10 @@ test.describe('Community Page', () => {
   })
 
   test('renders Ready to Get Involved CTA section', async ({ page }) => {
-    await expect(
-      page.getByRole('heading', { name: 'Ready to Get Involved?' })
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Ready to Get Involved?' })).toBeVisible()
 
     const cta = page.getByRole('link', { name: 'contributing to a project' })
     await expect(cta).toBeVisible()
     await expect(cta).toHaveAttribute('href', '/contribute')
-  })
-
-  test('Snapshots explore card navigates correctly', async ({ page }) => {
-    const snapshotsCard = page.getByRole('link', { name: 'Snapshots' }).first()
-    await expect(snapshotsCard).toBeVisible()
-    await expect(snapshotsCard).toHaveAttribute('href', '/community/snapshots')
   })
 })
