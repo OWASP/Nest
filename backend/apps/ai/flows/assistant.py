@@ -309,8 +309,7 @@ def process_query(  # noqa: PLR0911
                         )
                     except Exception:
                         logger.exception("Failed to store semantic cache entry")
-                    else:
-                        return response
+                    return response
             except Exception:
                 logger.exception(
                     "Collaborative flow failed, falling back to single agent: %s", query

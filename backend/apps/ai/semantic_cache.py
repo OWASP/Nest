@@ -32,7 +32,7 @@ def store_cached_response(
     response: str,
     intent: str = "",
     confidence: float = 0.0,
-) -> SemanticCache:
+) -> SemanticCache | None:
     """Store query-response pair in semantic cache.
 
     Args:
@@ -45,6 +45,9 @@ def store_cached_response(
         Created SemanticCache instance.
 
     """
+    if not _config.semantic_cache_enabled:
+        return None
+
     return SemanticCache.store_response(
         query=query,
         response=response,
