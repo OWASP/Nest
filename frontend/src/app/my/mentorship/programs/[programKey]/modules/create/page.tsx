@@ -1,50 +1,68 @@
 'use client'
-
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
-import { CREATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMIN_DETAILS } from 'server/queries/programsQueries'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import { CreateModuleDocument } from 'types/__generated__/moduleMutations.generated'
+import {
+  GetProgramAdminDetailsDocument,
+  GetProgramAndModulesDocument,
+} from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS } from 'types/mentorship'
+import { formatDateForInput } from 'utils/dateFormatter'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
 
 const CreateModulePage = () => {
   const router = useRouter()
-  const { programKey } = useParams() as { programKey: string }
+  const { programKey } = useParams<{ programKey: string }>()
   const { data: sessionData, status: sessionStatus } = useSession()
 
-  const [createModule, { loading: mutationLoading }] = useMutation(CREATE_MODULE)
+  const [createModule, { loading: mutationLoading }] = useMutation(CreateModuleDocument)
 
   const {
     data: programData,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GET_PROGRAM_ADMIN_DETAILS, {
+  } = useQuery(GetProgramAdminDetailsDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'network-only',
   })
 
-  const [formData, setFormData] = useState({
-    name: '',
+  const [formData, setFormData] = useState<{
+    description: string
+    domains: string
+    endedAt: string
+    experienceLevel: string
+    labels: string
+    mentorLogins: string
+    name: string
+    projectId: string
+    projectName: string
+    startedAt: string
+    tags: string
+  }>({
     description: '',
-    experienceLevel: EXPERIENCE_LEVELS.BEGINNER,
-    startedAt: '',
-    endedAt: '',
     domains: '',
-    tags: '',
+    endedAt: '',
+    experienceLevel: ExperienceLevelEnum.Beginner,
+    labels: '',
+    mentorLogins: '',
+    name: '',
     projectId: '',
     projectName: '',
-    mentorLogins: '',
+    startedAt: '',
+    tags: '',
   })
 
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
@@ -78,23 +96,29 @@ const CreateModulePage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setValidationErrors({})
 
     try {
       const input = {
-        name: formData.name,
         description: formData.description,
-        experienceLevel: formData.experienceLevel,
-        startedAt: formData.startedAt || null,
-        endedAt: formData.endedAt || null,
         domains: parseCommaSeparated(formData.domains),
-        tags: parseCommaSeparated(formData.tags),
+        endedAt: formData.endedAt,
+        experienceLevel: formData.experienceLevel as ExperienceLevelEnum,
+        labels: parseCommaSeparated(formData.labels),
+        mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        name: formData.name,
         programKey: programKey,
         projectId: formData.projectId,
         projectName: formData.projectName,
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        startedAt: formData.startedAt,
+        tags: parseCommaSeparated(formData.tags),
       }
 
-      await createModule({ variables: { input } })
+      await createModule({
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        variables: { input },
+      })
 
       addToast({
         title: 'Module Created',
@@ -104,15 +128,20 @@ const CreateModulePage = () => {
         timeout: 3000,
       })
 
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
-    } catch (err) {
-      addToast({
-        title: 'Creation Failed',
-        description: err.message || 'Something went wrong while creating the module.',
-        color: 'danger',
-        variant: 'solid',
-        timeout: 4000,
-      })
+      router.push(`/my/mentorship/programs/${programKey}`)
+    } catch (error) {
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(error)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
+      } else if (unmappedErrors.length > 0) {
+        setValidationErrors({ name: unmappedErrors[0] })
+      } else {
+        handleAppError(error)
+      }
     }
   }
 
@@ -139,6 +168,17 @@ const CreateModulePage = () => {
       onSubmit={handleSubmit}
       loading={mutationLoading}
       isEdit={false}
+      validationErrors={validationErrors}
+      minDate={
+        programData?.getProgram?.startedAt
+          ? formatDateForInput(programData.getProgram.startedAt)
+          : undefined
+      }
+      maxDate={
+        programData?.getProgram?.endedAt
+          ? formatDateForInput(programData.getProgram.endedAt)
+          : undefined
+      }
     />
   )
 }

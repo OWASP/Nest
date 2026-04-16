@@ -11,7 +11,7 @@ class IssueIndexMixin:
         """Issues to index."""
         return (
             self.id
-            and self.state == self.State.OPEN
+            and self.state == self.IssueState.OPEN
             and not self.is_locked
             and self.repository.is_indexable
             and self.repository.track_issues
@@ -35,9 +35,9 @@ class IssueIndexMixin:
         return self.comments_count
 
     @property
-    def idx_created_at(self) -> float:
+    def idx_created_at(self) -> str:
         """Return created at for indexing."""
-        return self.created_at.timestamp()
+        return self.created_at.isoformat()
 
     @property
     def idx_hint(self) -> str:
@@ -130,9 +130,9 @@ class IssueIndexMixin:
         return self.repository.idx_topics
 
     @property
-    def idx_updated_at(self) -> float:
+    def idx_updated_at(self) -> str:
         """Return updated at for indexing."""
-        return self.updated_at.timestamp()
+        return self.updated_at.isoformat()
 
     @property
     def idx_url(self) -> str:

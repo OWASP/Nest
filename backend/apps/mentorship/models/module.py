@@ -11,13 +11,20 @@ from apps.mentorship.models.common import (
     MatchingAttributes,
     StartEndRange,
 )
+from apps.mentorship.models.managers import PublishedModuleManager
 
 
 class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedModel):
     """Module model representing a program unit."""
 
+    objects = models.Manager()
+    published_modules = PublishedModuleManager()
+
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_modules"
+        ordering = ["order", "started_at"]
         verbose_name_plural = "Modules"
         constraints = [
             models.UniqueConstraint(
@@ -31,40 +38,48 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         blank=True,
         default="",
     )
-
     key = models.CharField(
         verbose_name="Key",
         max_length=200,
     )
-
     name = models.CharField(
         max_length=200,
         verbose_name="Name",
         blank=True,
         default="",
     )
+    order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name="Order",
+        help_text="Display order of the module within its program.",
+    )
 
     # FKs.
+    labels = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="Labels",
+    )
     program = models.ForeignKey(
         "mentorship.Program",
         related_name="modules",
         on_delete=models.CASCADE,
         verbose_name="Program",
     )
-
     project = models.ForeignKey(
         "owasp.Project",
         on_delete=models.CASCADE,
         verbose_name="Project",
     )
 
-    labels = models.JSONField(
-        blank=True,
-        default=list,
-        verbose_name="Labels",
-    )
-
     # M2Ms.
+    issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Linked Issues",
+        related_name="mentorship_modules",
+        blank=True,
+        help_text="Issues linked to this module via label matching.",
+    )
     mentors = models.ManyToManyField(
         "mentorship.Mentor",
         verbose_name="Mentors",
@@ -87,6 +102,14 @@ class Module(ExperienceLevel, MatchingAttributes, StartEndRange, TimestampedMode
         if self.program:
             self.started_at = self.started_at or self.program.started_at
             self.ended_at = self.ended_at or self.program.ended_at
+
+        if not self.pk and self.program:
+            max_order = (
+                Module.objects.filter(program=self.program)
+                .aggregate(max_order=models.Max("order"))
+                .get("max_order")
+            )
+            self.order = (max_order or 0) + 1
 
         self.key = slugify(self.name)
         super().save(*args, **kwargs)

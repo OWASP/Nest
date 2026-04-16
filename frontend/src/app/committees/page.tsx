@@ -1,7 +1,7 @@
 'use client'
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaRightToBracket } from 'react-icons/fa6'
 import type { Committee } from 'types/committee'
 import { getFilteredIcons, handleSocialUrls } from 'utils/utility'
 import Card from 'components/Card'
@@ -31,21 +31,22 @@ const CommitteesPage = () => {
 
     const submitButton = {
       label: 'View Details',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: handleButtonClick,
     }
 
     return (
       <Card
-        key={committee.objectID}
-        title={committee.name}
-        url={`/committees/${committee.key}`}
-        summary={committee.summary}
-        icons={filteredIcons}
-        topContributors={committee.topContributors}
         button={submitButton}
+        cardKey={committee.key}
+        icons={filteredIcons}
+        key={committee.key}
         social={formattedUrls}
+        summary={committee.summary ?? ''}
+        title={committee.name}
         tooltipLabel={`Learn more about ${committee.name}`}
+        topContributors={committee.topContributors}
+        url={`/committees/${committee.key}`}
       />
     )
   }
@@ -62,7 +63,7 @@ const CommitteesPage = () => {
       searchQuery={searchQuery}
       totalPages={totalPages}
     >
-      {committees && committees.map(renderCommitteeCard)}
+      {committees?.map(renderCommitteeCard)}
     </SearchPageLayout>
   )
 }

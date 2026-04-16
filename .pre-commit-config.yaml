@@ -1,24 +1,55 @@
 repos:
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: 458cb25edf664682e3e856a53a2f9af33e068297  # v2.14.0
+    hooks:
+      - id: hadolint
+        args:
+          - --failure-threshold=warning
+        name: hadolint
+
+  - repo: https://github.com/EbodShojaei/bake
+    rev: a39df91c8e2c8ee584f81ff8d7d00f137a5fc160  # v1.4.6
+    hooks:
+      - id: mbake-format
+        args:
+          - --config
+          - .bake.toml
+      - id: mbake-validate
+        args:
+          - --config
+          - .bake.toml
+        exclude: ^backend/
+
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.1
+    rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # v1.38.0
     hooks:
       - id: yamllint
         args:
           - --format
           - parsable
           - --strict
-        exclude: (.github|pnpm-lock.yaml)
+        exclude: pnpm-lock.yaml
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: d0e12caebb2ab0ee8bf98181c8bfe9702bca103d  # v1.105.0
+    hooks:
+      - id: terraform_fmt
+        files: ^infrastructure/.*\.(tf|tftest\.hcl)$
+      - id: terraform_tflint
+        files: ^infrastructure/.*\.tf$
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
+    rev: aca6d4c8045a504e2812ea4bedff1d0a09e437bc  # v0.15.8
     hooks:
-      - id: ruff
+      - id: ruff-check
         args:
           - --fix
       - id: ruff-format
 
   - repo: https://github.com/djlint/djLint
-    rev: v1.36.4
+    rev: 9112cb64851c95a7802358af285d21ad8b7f6437  # v1.36.4
     hooks:
       - id: djlint-reformat-django
         files: templates/.*.html
@@ -26,8 +57,16 @@ repos:
         types:
           - html
 
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: e72a3ca1632f0b11a07d171449fe447a7ff6795e  # v0.48.0
+    hooks:
+      - id: markdownlint
+        args:
+          - --fix
+        files: \.md$
+
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.2.3
+    rev: 8d1b9cadaf854cb25bb0b0f5870e1cc66a083d6b  # 0.2.3
     hooks:
       - id: yamlfmt
         args:
@@ -35,10 +74,10 @@ repos:
           - --mapping=2
           - --offset=2
           - --sequence=4
-        exclude: (.github|pnpm-lock.yaml)
+        exclude: (pnpm-lock.yaml|\.yamllint)
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.1
+    rev: 8e5c80792e2ec0c87804d8ef915bf35e2caea6da  # v1.20.0
     hooks:
       - id: mypy
         additional_dependencies:
@@ -52,10 +91,11 @@ repos:
           - backend/pyproject.toml
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # v6.0.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
+      - id: fix-byte-order-marker
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: check-json
@@ -70,7 +110,7 @@ repos:
       - id: file-contents-sorter
         args:
           - --unique
-        files: cspell/custom-dict.txt
+        files: (.github/workflows/check-pr-issue-skip-usernames.txt|cspell/custom-dict.txt)
       - id: mixed-line-ending
         args:
           - --fix=lf
@@ -83,6 +123,6 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.6.0
+    rev: 6e10264313f53d6247a8b1b984f5b5ccf50ba539  # v2.21.0
     hooks:
       - id: pyproject-fmt

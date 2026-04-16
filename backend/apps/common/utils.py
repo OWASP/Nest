@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -11,6 +13,9 @@ from django.template.defaultfilters import pluralize
 from django.utils.text import Truncator
 from django.utils.text import slugify as django_slugify
 from humanize import intword, naturaltime
+
+if TYPE_CHECKING:
+    from django.http import HttpRequest
 
 
 def convert_to_camel_case(text: str) -> str:
@@ -46,11 +51,11 @@ def convert_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
-def clean_url(url: str) -> str | None:
+def clean_url(url: str | None) -> str | None:
     """Clean a URL by removing whitespace and trailing punctuation.
 
     Args:
-        url (str): Raw URL string.
+        url (str, optional): Raw URL string.
 
     Returns:
         str | None: Cleaned URL string or None if empty.
@@ -78,14 +83,14 @@ def get_absolute_url(path: str) -> str:
 def get_nest_user_agent() -> str:
     """Return the user agent string for the Nest application.
 
-    Returns
+    Returns:
         str: The user agent string.
 
     """
     return settings.APP_NAME.replace(" ", "-").lower()
 
 
-def get_user_ip_address(request) -> str:
+def get_user_ip_address(request: HttpRequest) -> str:
     """Retrieve the user's IP address from the request.
 
     Args:
@@ -95,11 +100,28 @@ def get_user_ip_address(request) -> str:
         str: The user's IP address.
 
     """
-    if settings.IS_LOCAL_ENVIRONMENT:
+    if settings.IS_LOCAL_ENVIRONMENT or settings.IS_E2E_ENVIRONMENT:
         return settings.PUBLIC_IP_ADDRESS
 
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     return x_forwarded_for.split(",")[0] if x_forwarded_for else request.META.get("REMOTE_ADDR")
+
+
+def is_valid_json(content: str) -> bool:
+    """Check if content is JSON format.
+
+    Args:
+        content: The content to check
+
+    Returns:
+        bool: True if content is valid JSON, False otherwise
+
+    """
+    try:
+        json.loads(content)
+    except (TypeError, ValueError):
+        return False
+    return True
 
 
 def join_values(fields: list, delimiter: str = " ") -> str:
@@ -116,11 +138,11 @@ def join_values(fields: list, delimiter: str = " ") -> str:
     return delimiter.join(field for field in fields if field)
 
 
-def natural_date(value: int | str) -> str:
+def natural_date(value: int | str | datetime) -> str:
     """Convert a date or timestamp into a human-readable format.
 
     Args:
-        value (str or int or datetime): The date or timestamp to convert.
+        value (int or str or datetime): The date or timestamp to convert.
 
     Returns:
         str: The humanized date string.
@@ -136,7 +158,7 @@ def natural_date(value: int | str) -> str:
     return naturaltime(dt)
 
 
-def natural_number(value: int, unit=None) -> str:
+def natural_number(value: int, unit: str | None = None) -> str:
     """Convert a number into a human-readable format.
 
     Args:
@@ -155,8 +177,8 @@ def round_down(value: int, base: int) -> int:
     """Round down the stats to the nearest base.
 
     Args:
-        value: The value to round down.
-        base: The base to round down to.
+        value (int): The value to round down.
+        base (int): The base to round down to.
 
     Returns:
         int: The rounded down value.
@@ -193,22 +215,63 @@ def truncate(text: str, limit: int, truncate: str = "...") -> str:
     return Truncator(text).chars(limit, truncate=truncate)
 
 
-def validate_url(url: str) -> bool:
+def normalize_limit(limit: int, max_limit: int = 1000) -> int | None:
+    """Normalize and validate a limit parameter.
+
+    Args:
+        limit (int): The requested limit.
+        max_limit (int): The maximum allowed limit. Defaults to 1000.
+
+    Returns:
+        int | None: The normalized limit capped at max_limit, or None if invalid.
+
+    """
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        return None
+
+    if limit <= 0:
+        return None
+
+    return min(limit, max_limit)
+
+
+def validate_url(url: str | None) -> bool:
     """Validate that a URL has proper scheme and netloc.
 
     Args:
-        url (str): URL string to validate.
+        url (str, optional): URL string to validate.
 
     Returns:
         bool: True if URL is valid, False otherwise.
 
     """
-    if not url:
+    max_url_length = 2048
+    if (
+        not url
+        or len(url) > max_url_length
+        # ASCII control characters.
+        or re.search(r"[\x00-\x1f\x7f]", url)
+    ):
         return False
 
     try:
         parsed = urlparse(url)
+
+        min_port = 1
+        max_port = 65535
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.netloc
+            or not re.search(r"[a-zA-Z0-9]", parsed.netloc)
+            or not (hostname := parsed.hostname)
+            or hostname.startswith((".", "-"))
+            or hostname.endswith("-")
+            or (parsed.port is not None and not (min_port <= parsed.port <= max_port))
+        ):
+            return False
     except ValueError:
         return False
 
-    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    return True

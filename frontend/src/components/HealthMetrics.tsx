@@ -1,22 +1,19 @@
-import {
-  faExclamationCircle,
-  faCodeCommit,
-  faCodeFork,
-  faCodePullRequest,
-  faStar,
-} from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeCommit, FaCodeFork, FaCodePullRequest, FaStar } from 'react-icons/fa6'
 import type { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
 import LineChart from 'components/LineChart'
 
 const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
-  const openIssuesCountArray = data.map((item) => item.openIssuesCount)
+  const openIssuesCountArray = data.map((item) => item.openIssuesCount ?? 0)
   const labels = data.map((item) => {
-    return new Date(item.createdAt).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    })
+    return item.createdAt
+      ? new Date(item.createdAt).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        })
+      : ''
   })
   const length = data.length
   return (
@@ -32,15 +29,15 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
             },
             {
               name: 'Unassigned Issues',
-              data: data.map((item) => item.unassignedIssuesCount),
+              data: data.map((item) => item.unassignedIssuesCount ?? 0),
             },
             {
               name: 'Unanswered Issues',
-              data: data.map((item) => item.unansweredIssuesCount),
+              data: data.map((item) => item.unansweredIssuesCount ?? 0),
             },
           ]}
           labels={labels}
-          icon={faExclamationCircle}
+          icon={FaExclamationCircle}
         />
         <LineChart
           title="Pull Requests Trend"
@@ -48,11 +45,11 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
           series={[
             {
               name: 'Open Pull Requests',
-              data: data.map((item) => item.openPullRequestsCount),
+              data: data.map((item) => item.openPullRequestsCount ?? 0),
             },
           ]}
           labels={labels}
-          icon={faCodePullRequest}
+          icon={FaCodePullRequest}
         />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -62,11 +59,11 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
           series={[
             {
               name: 'Stars',
-              data: data.map((item) => item.starsCount),
+              data: data.map((item) => item.starsCount ?? 0),
             },
           ]}
           labels={labels}
-          icon={faStar}
+          icon={FaStar}
         />
         <LineChart
           title="Forks Trend"
@@ -74,17 +71,17 @@ const HealthMetrics: React.FC<{ data: HealthMetricsProps[] }> = ({ data }) => {
           series={[
             {
               name: 'Forks',
-              data: data.map((item) => item.forksCount),
+              data: data.map((item) => item.forksCount ?? 0),
             },
           ]}
           labels={labels}
-          icon={faCodeFork}
+          icon={FaCodeFork}
         />
       </div>
 
       <BarChart
         title="Days Since Last Commit and Release"
-        icon={faCodeCommit}
+        icon={FaCodeCommit}
         labels={['Days Since Last Commit', 'Days Since Last Release']}
         days={[data[length - 1]?.lastCommitDays ?? 0, data[length - 1]?.lastReleaseDays ?? 0]}
         requirements={[

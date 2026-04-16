@@ -1,4 +1,3 @@
-import { mockHomeData } from '@e2e/data/mockHomeData'
 import { test, expect, devices } from '@playwright/test'
 
 // Desktop tests
@@ -9,20 +8,6 @@ test.describe('Footer - Desktop (Chrome)', () => {
   })
 
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: mockHomeData,
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
     await page.goto('/')
   })
   test('should have buttons', async ({ page }) => {
@@ -45,20 +30,6 @@ test.use({
 
 test.describe('Footer - Mobile (iPhone 13)', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/graphql/', async (route) => {
-      await route.fulfill({
-        status: 200,
-        json: mockHomeData,
-      })
-    })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
     await page.goto('/')
   })
   test('should have buttons', async ({ page }) => {
@@ -69,7 +40,7 @@ test.describe('Footer - Mobile (iPhone 13)', () => {
   test('should show sub-menu when menu clicked', async ({ page }) => {
     await page.getByRole('button', { name: 'OWASP Nest' }).click()
     // only check if the sub-menu is visible
-    await expect(page.getByRole('link', { name: 'GSoC 2025' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'GSoC 2026' })).toBeVisible()
   })
   test('should have links', async ({ page }) => {
     await expect(page.getByRole('link', { name: 'OWASP Nest Bluesky' })).toBeVisible()

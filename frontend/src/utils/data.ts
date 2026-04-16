@@ -1,88 +1,58 @@
-import { library } from '@fortawesome/fontawesome-svg-core'
+import type { IconType } from 'react-icons'
 import {
-  faDiscord,
-  faFacebook,
-  faGoogle,
-  faLinkedin,
-  faMeetup,
-  faSlack,
-  faYoutube,
-  faXTwitter,
-} from '@fortawesome/free-brands-svg-icons'
-import {
-  faClock,
-  faComment,
-  faLightbulb,
-  faStar,
-  faUser,
-} from '@fortawesome/free-regular-svg-icons'
-import {
-  faArrowsRotate,
-  faCity,
-  faCode,
-  faCodeFork,
-  faEgg,
-  faFlag,
-  faFlask,
-  faGlobe,
-  faMoon,
-  faRightToBracket,
-  faWandMagicSparkles,
-  faX,
-  faPeopleGroup,
-  faSun,
-} from '@fortawesome/free-solid-svg-icons'
+  FaDiscord,
+  FaFacebook,
+  FaGoogle,
+  FaLinkedin,
+  FaMeetup,
+  FaSlack,
+  FaXTwitter,
+  FaYoutube,
+  FaRegClock,
+  FaRegComment,
+  FaRegStar,
+  FaRegUser,
+  FaAward,
+  FaBug,
+  FaCertificate,
+  FaCity,
+  FaCodeFork,
+  FaEgg,
+  FaFlag,
+  FaFlask,
+  FaMedal,
+  FaRibbon,
+} from 'react-icons/fa6'
 
-library.add(
-  faArrowsRotate,
-  faCodeFork,
-  faStar,
-  faUser,
-  faClock,
-  faComment,
-  faEgg,
-  faFlask,
-  faCity,
-  faFlag,
-  faCode,
-  faMoon,
-  faLightbulb,
-  faWandMagicSparkles,
-  faGlobe,
-  faRightToBracket,
-  faYoutube,
-  faX,
-  faGoogle,
-  faMeetup,
-  faLinkedin,
-  faFacebook,
-  faDiscord,
-  faSlack,
-  faPeopleGroup,
-  faXTwitter,
-  faSun
-)
+export const BADGE_CLASS_MAP: Record<string, IconType> = {
+  award: FaAward,
+  bugSlash: FaBug,
+  certificate: FaCertificate,
+  medal: FaMedal,
+  ribbon: FaRibbon,
+  star: FaRegStar,
+} as const
 
 export const ICONS = {
   starsCount: {
     label: 'GitHub stars',
-    icon: 'fa-regular fa-star',
+    icon: FaRegStar,
   },
   forksCount: {
     label: 'GitHub forks',
-    icon: 'fa-solid fa-code-fork',
+    icon: FaCodeFork,
   },
   contributorsCount: {
     label: 'GitHub contributors',
-    icon: 'fa-regular fa-user',
+    icon: FaRegUser,
   },
   createdAt: {
     label: 'Creation date',
-    icon: 'fa-regular fa-clock',
+    icon: FaRegClock,
   },
   commentsCount: {
     label: 'Comments count',
-    icon: 'fa-regular fa-comment',
+    icon: FaRegComment,
   },
 } as const
 
@@ -91,37 +61,33 @@ export type IconKeys = keyof typeof ICONS
 export const level = {
   incubator: {
     color: '#53AAE5',
-    icon: ' text-white fa-solid fa-egg ',
+    icon: FaEgg,
     level: 'Incubator',
   },
   lab: {
     color: '#FFA500',
-    icon: ' text-white fa-solid fa-flask',
+    icon: FaFlask,
     level: 'Lab',
   },
   production: {
     color: '#800080',
-    icon: ' text-white fa-solid fa-city',
+    icon: FaCity,
     level: 'Production',
   },
   flagship: {
     color: '#38a047',
-    icon: ' text-white fa-solid fa-flag',
+    icon: FaFlag,
     level: 'Flagship',
   },
 }
 
 export const urlMappings = [
-  { key: 'youtube.com', title: 'YouTube', icon: 'fa-brands fa-youtube' },
-  {
-    key: 'x.com',
-    title: 'X (formerly Twitter)',
-    icon: 'fa-brands fa-x-twitter',
-  },
-  { key: 'google.com', title: 'Google', icon: 'fa-brands fa-google' },
-  { key: 'meetup.com', title: 'Meetup', icon: 'fa-brands fa-meetup' },
-  { key: 'linkedin.com', title: 'LinkedIn', icon: 'fa-brands fa-linkedin' },
-  { key: 'facebook.com', title: 'Facebook', icon: 'fa-brands fa-facebook' },
-  { key: 'discord.com', title: 'Discord', icon: 'fa-brands fa-discord' },
-  { key: 'slack.com', title: 'Slack', icon: 'fa-brands fa-slack' },
+  { key: 'youtube.com', title: 'YouTube', icon: FaYoutube },
+  { key: 'x.com', title: 'X (formerly Twitter)', icon: FaXTwitter },
+  { key: 'google.com', title: 'Google', icon: FaGoogle },
+  { key: 'meetup.com', title: 'Meetup', icon: FaMeetup },
+  { key: 'linkedin.com', title: 'LinkedIn', icon: FaLinkedin },
+  { key: 'facebook.com', title: 'Facebook', icon: FaFacebook },
+  { key: 'discord.com', title: 'Discord', icon: FaDiscord },
+  { key: 'slack.com', title: 'Slack', icon: FaSlack },
 ]

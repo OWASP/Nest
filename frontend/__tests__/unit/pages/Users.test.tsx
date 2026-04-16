@@ -1,5 +1,5 @@
+import { mockUserData } from '@mockData/mockUserData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockUserData } from '@unit/data/mockUserData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import UsersPage from 'app/members/page'
@@ -27,11 +27,6 @@ jest.mock('components/Pagination', () =>
     </div>
   ))
 )
-
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
 
 describe('UsersPage Component', () => {
   let mockRouter: { push: jest.Mock }
@@ -70,7 +65,14 @@ describe('UsersPage Component', () => {
 
     // Check loaded state
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for members...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for members...')
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
       expect(screen.getByText('John Doe')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -88,7 +90,7 @@ describe('UsersPage Component', () => {
       expect(screen.getByText('Security Co')).toBeInTheDocument()
     })
 
-    const viewButtons = screen.getAllByText('View Profile')
+    const viewButtons = screen.getAllByText('View Details')
     expect(viewButtons).toHaveLength(2)
   })
 
@@ -121,11 +123,11 @@ describe('UsersPage Component', () => {
     })
   })
 
-  test('navigates to user details on View Profile button click', async () => {
+  test('navigates to user details on View Details button click', async () => {
     render(<UsersPage />)
 
     await waitFor(() => {
-      const viewDetailsButtons = screen.getAllByText('View Profile')
+      const viewDetailsButtons = screen.getAllByText('View Details')
       expect(viewDetailsButtons[0]).toBeInTheDocument()
       fireEvent.click(viewDetailsButtons[0])
     })
@@ -150,6 +152,27 @@ describe('UsersPage Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('@fallback_login')).toBeInTheDocument()
+    })
+  })
+
+  test('handles missing company field', async () => {
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [
+        {
+          key: 'user_4',
+          login: 'user_no_company',
+          name: 'User Without Company',
+          avatarUrl: 'https://example.com/avatar.jpg',
+          company: null,
+        },
+      ],
+      totalPages: 1,
+    })
+
+    render(<UsersPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('User Without Company')).toBeInTheDocument()
     })
   })
 })

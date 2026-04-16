@@ -15,6 +15,8 @@ class PullRequest(GenericIssueModel):
     open_pull_requests = OpenPullRequestManager()
 
     class Meta:
+        """Model options."""
+
         db_table = "github_pull_requests"
         indexes = [
             models.Index(fields=["-created_at"]),
@@ -59,6 +61,12 @@ class PullRequest(GenericIssueModel):
         "github.Label",
         verbose_name="Labels",
         related_name="pull_request_labels",
+        blank=True,
+    )
+    related_issues = models.ManyToManyField(
+        "github.Issue",
+        verbose_name="Issues",
+        related_name="pull_requests",
         blank=True,
     )
 

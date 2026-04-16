@@ -1,0 +1,67 @@
+name: Set up Backend environment
+
+description: >-
+  Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
+  Postgres, installs the PostgreSQL client, and builds the backend test image.
+
+inputs:
+  db_username:
+    description: Database username
+    required: true
+  db_name:
+    description: Database name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Poetry
+      run: pipx install poetry
+      shell: bash
+
+    - name: Set up Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      with:
+        cache: poetry
+        cache-dependency-path: backend/poetry.lock
+        python-version: '3.13'
+
+    - name: Install backend dependencies (fetch script)
+      run: |
+        cd backend
+        poetry install --no-root --without fuzz --without test --without video
+      shell: bash
+
+    - name: Fetch nest.dump from S3
+      run: cd backend && poetry run python -m scripts.fetch_nest_dump
+      shell: bash
+
+    - name: Wait for database to be ready
+      env:
+        DB_USERNAME: ${{ inputs.db_username }}
+        DB_NAME: ${{ inputs.db_name }}
+      run: |
+        timeout 5m bash -c '
+          until docker exec ${{ job.services.db.id }} pg_isready -U $DB_USERNAME -d $DB_NAME; do
+            echo "Waiting for database..."
+            sleep 5
+          done
+        '
+      shell: bash
+
+    - name: Install PostgreSQL client
+      run: sudo apt-get install -y postgresql-client
+      shell: bash
+
+    - name: Build backend image
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
+      with:
+        cache-from: |
+          type=gha
+        cache-to: |
+          type=gha,compression=zstd
+        context: backend
+        file: docker/backend/Dockerfile
+        load: true
+        platforms: linux/amd64
+        tags: owasp/nest:test-backend-latest

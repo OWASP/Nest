@@ -1,0 +1,127 @@
+FROM node:24.14-alpine3.23 AS base
+
+# Install dependencies and build the project.
+FROM base AS builder
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine
+# to understand why libc6-compat might be needed.
+ENV APK_CACHE_DIR="/app/.cache/apk" \
+    APK_SYMLINK_DIR="/etc/apk/cache" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    FORCE_COLOR=1 \
+    NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_HOME="/pnpm"
+
+ARG ENV_FILE=.env
+ARG NEXT_PUBLIC_E2E_BACKEND_BASE_URL
+
+ENV PATH="$PNPM_HOME:$PATH" \
+    NEXT_PUBLIC_E2E_BACKEND_BASE_URL=${NEXT_PUBLIC_E2E_BACKEND_BASE_URL}
+
+RUN mkdir -p ${APK_CACHE_DIR} && \
+    ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
+
+RUN --mount=type=cache,target=${APK_CACHE_DIR} \
+    apk update && \
+    apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+COPY --chmod=444 package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    corepack install && corepack enable pnpm && \
+    pnpm install --frozen-lockfile --ignore-scripts
+
+COPY --chmod=444 .pnpmrc next.config.ts postcss.config.js tailwind.config.mjs tsconfig.json ./
+COPY --chmod=444 ${ENV_FILE} ./.env
+COPY --chmod=555 public public
+COPY --chmod=555 src src
+
+ARG FORCE_STANDALONE
+ENV FORCE_STANDALONE=$FORCE_STANDALONE
+
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN --mount=type=secret,id=RELEASE_VERSION \
+    --mount=type=secret,id=SENTRY_AUTH_TOKEN \
+    NEXT_SENTRY_AUTH_TOKEN="$(cat /run/secrets/SENTRY_AUTH_TOKEN 2>/dev/null || true)" && \
+    export NEXT_SENTRY_AUTH_TOKEN && \
+    RELEASE_VERSION="$(cat /run/secrets/RELEASE_VERSION 2>/dev/null || true)" && \
+    export RELEASE_VERSION && \
+    pnpm run build
+
+# Production image, copy all the files and run next.
+FROM base AS runner
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+
+RUN apk update && apk upgrade --no-cache
+
+WORKDIR /tmp
+
+# Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786, CVE-2026-31802: Update npm's bundled tar to 7.5.11
+# Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
+# Fix CVE-2026-27903, CVE-2026-27904: Update npm's bundled minimatch to 10.2.3
+# Fix CVE-2026-33671: Update npm's bundled picomatch (under tinyglobby) to 4.0.4
+# Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
+RUN npm pack tar@7.5.11 && \
+    tar -xzf tar-7.5.11.tgz && \
+    TAR_DIR="/usr/local/lib/node_modules/npm/node_modules/tar" && \
+    rm -rf "${TAR_DIR}" && \
+    cp -r package "${TAR_DIR}" && \
+    chmod -R 755 "${TAR_DIR}" && \
+    rm -rf package tar-7.5.11.tgz && \
+    grep -q 'version.*7.5.11' "${TAR_DIR}/package.json" && \
+    npm pack @isaacs/brace-expansion@5.0.1 && \
+    tar -xzf isaacs-brace-expansion-5.0.1.tgz && \
+    BRACE_DIR="/usr/local/lib/node_modules/npm/node_modules/@isaacs/brace-expansion" && \
+    rm -rf "${BRACE_DIR}" && \
+    mkdir -p /usr/local/lib/node_modules/npm/node_modules/@isaacs && \
+    cp -r package "${BRACE_DIR}" && \
+    chmod -R 755 "${BRACE_DIR}" && \
+    rm -rf package isaacs-brace-expansion-5.0.1.tgz && \
+    grep -q '"version": "5.0.1"' "${BRACE_DIR}/package.json" && \
+    npm pack minimatch@10.2.3 && \
+    tar -xzf minimatch-10.2.3.tgz && \
+    MINIMATCH_DIR="/usr/local/lib/node_modules/npm/node_modules/minimatch" && \
+    rm -rf "${MINIMATCH_DIR}" && \
+    cp -r package "${MINIMATCH_DIR}" && \
+    chmod -R 755 "${MINIMATCH_DIR}" && \
+    rm -rf package minimatch-10.2.3.tgz && \
+    grep -q '"version": "10.2.3"' "${MINIMATCH_DIR}/package.json" && \
+    npm pack picomatch@4.0.4 && \
+    tar -xzf picomatch-4.0.4.tgz && \
+    PICOMATCH_DIR="/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch" && \
+    rm -rf "${PICOMATCH_DIR}" && \
+    mkdir -p "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules" && \
+    cp -r package "${PICOMATCH_DIR}" && \
+    chmod -R 755 "${PICOMATCH_DIR}" && \
+    rm -rf package picomatch-4.0.4.tgz && \
+    grep -q '"version": "4.0.4"' "${PICOMATCH_DIR}/package.json" && \
+    addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 -G nodejs nextjs
+
+WORKDIR /app
+
+# Copying files with root as owner, so that executing user cannot change the container.
+COPY --from=builder --chown=root:root --chmod=555 /app/public public
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+COPY --from=builder --chown=root:root --chmod=555  /app/.next/standalone .
+
+# Create cache directory and assign ownership to nextjs user with write permission, so that cache can be stored.
+RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next/cache && chmod -R 755 /app/.next/cache && rm .env
+COPY --from=builder --chown=root:root --chmod=555 /app/.next/static .next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
+CMD ["node", "server.js"]

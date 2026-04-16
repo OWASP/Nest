@@ -1,11 +1,8 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
-import path from 'path'
+import path, { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import js from '@eslint/js'
-import typescriptEslint from '@typescript-eslint/eslint-plugin'
-import typescriptParser from '@typescript-eslint/parser'
+import tseslint from 'typescript-eslint'
 import prettierConfig from 'eslint-config-prettier'
 import importPlugin from 'eslint-plugin-import'
 import jest from 'eslint-plugin-jest'
@@ -15,16 +12,17 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import nextPlugin from '@next/eslint-plugin-next'
 import globals from 'globals'
+import noGlobalIsFiniteRule from './eslint-rules/no-global-isfinite.mjs'
+import noGlobalIsNaNRule from './eslint-rules/no-global-isnan.mjs'
+import noGlobalNaNRule from './eslint-rules/no-global-nan.mjs'
+import noGlobalParseFloatRule from './eslint-rules/no-global-parsefloat.mjs'
+import noGlobalParseIntRule from './eslint-rules/no-global-parseint.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
-
 const eslintConfig = [
-  ...compat.extends('next/typescript'),
+  ...tseslint.configs.recommended,
   react.configs.flat['jsx-runtime'],
   {
     ignores: [
@@ -42,7 +40,6 @@ const eslintConfig = [
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-      parser: typescriptParser,
       ecmaVersion: 2023,
       sourceType: 'module',
       globals: {
@@ -53,7 +50,6 @@ const eslintConfig = [
       },
     },
     plugins: {
-      '@typescript-eslint': typescriptEslint,
       'react-hooks': reactHooks,
       import: importPlugin,
       jest,
@@ -61,6 +57,15 @@ const eslintConfig = [
       react,
       'jsx-a11y': jsxA11y,
       '@next/next': nextPlugin,
+      nest: {
+        rules: {
+          'no-global-isfinite': noGlobalIsFiniteRule,
+          'no-global-isnan': noGlobalIsNaNRule,
+          'no-global-nan': noGlobalNaNRule,
+          'no-global-parsefloat': noGlobalParseFloatRule,
+          'no-global-parseint': noGlobalParseIntRule,
+        },
+      },
     },
     settings: {
       'import/resolver': {
@@ -118,6 +123,7 @@ const eslintConfig = [
       'react-hooks/rules-of-hooks': 'error',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
+      'import/no-duplicates': ['error', { considerQueryString: true }],
       'import/order': [
         'warn',
         {
@@ -149,12 +155,25 @@ const eslintConfig = [
       'jsx-a11y/no-distracting-elements': 'warn',
       'jsx-a11y/label-has-associated-control': 'error',
       'jsx-a11y/click-events-have-key-events': 'warn',
+      'nest/no-global-isfinite': 'error',
+      'nest/no-global-isnan': 'error',
+      'nest/no-global-nan': 'error',
+      'nest/no-global-parsefloat': 'error',
+      'nest/no-global-parseint': 'error',
+      'react/no-array-index-key': 'error',
+      quotes: ['error', 'single', { avoidEscape: true }],
     },
   },
   {
     files: ['src/utils/logger.ts'],
     rules: {
       'no-console': 'off',
+    },
+  },
+  {
+    files: ['**/skeletons/**/*.{ts,tsx,js,jsx}', '**/*.skeleton.{ts,tsx,js,jsx}'],
+    rules: {
+      'react/no-array-index-key': 'off',
     },
   },
 ]

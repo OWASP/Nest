@@ -79,6 +79,7 @@ export const GET_ORGANIZATION_DATA = gql`
       id
       contributorsCount
       forksCount
+      isArchived
       key
       name
       openIssuesCount

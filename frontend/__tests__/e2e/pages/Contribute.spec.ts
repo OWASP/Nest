@@ -1,6 +1,6 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { mockContributeData } from '@mockData/mockContributeData'
 import { test, expect } from '@playwright/test'
-import { mockContributeData } from '@unit/data/mockContributeData'
 
 test.describe('Contribute Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,19 +13,11 @@ test.describe('Contribute Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/contribute')
+    await page.goto('/contribute', { timeout: 25000 })
   })
 
   test('renders issue data correctly', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'Contribution 1' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Contribution 1' })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('4 months ago')).toBeVisible()
     await expect(page.getByRole('link', { name: 'Owasp Nest', exact: true })).toBeVisible()
     await expect(page.getByText('This is a summary of Contribution 1')).toBeVisible()
@@ -64,14 +56,13 @@ test.describe('Contribute Page', () => {
   })
 
   test('closes dialog on close button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'Read More' })
-    await expect(contributeButton).toBeVisible()
+    const contributeButton = await page.getByRole('button', { name: 'Read More' }).first()
     await contributeButton.click()
     const closeButton = await page.getByRole('button', { name: 'close-modal' })
     await expect(closeButton).toBeVisible()
     await closeButton.click()
-    await expect(contributeButton).toBeVisible()
   })
+
   test('breadcrumb renders correct segments on /contribute', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Contribute'])
   })

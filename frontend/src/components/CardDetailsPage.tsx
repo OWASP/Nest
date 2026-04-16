@@ -1,60 +1,109 @@
-import {
-  faCircleInfo,
-  faChartPie,
-  faFolderOpen,
-  faCode,
-  faTags,
-  faUsers,
-  faRectangleList,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
-import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import type { JSX } from 'react'
-import { useCallback } from 'react'
+import { useState } from 'react'
+import {
+  FaCircleInfo,
+  FaChartPie,
+  FaFolderOpen,
+  FaCode,
+  FaTags,
+  FaRectangleList,
+  FaCalendar,
+  FaCircleCheck,
+  FaCircleExclamation,
+  FaSignsPost,
+  FaCodeBranch,
+  FaChevronDown,
+  FaChevronUp,
+} from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import type { ExtendedSession } from 'types/auth'
 import type { DetailsCardProps } from 'types/card'
+import { formatDate } from 'utils/dateFormatter'
 import { IS_PROJECT_HEALTH_ENABLED } from 'utils/env.client'
 import { scrollToAnchor } from 'utils/scrollToAnchor'
+import { getMemberUrl, getMenteeUrl } from 'utils/urlFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import AnchorTitle from 'components/AnchorTitle'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ContributionHeatmap from 'components/ContributionHeatmap'
+import ContributionStats from 'components/ContributionStats'
+import ContributorsList from 'components/ContributorsList'
+import EntityActions from 'components/EntityActions'
 import HealthMetrics from 'components/HealthMetrics'
 import InfoBlock from 'components/InfoBlock'
+import Leaders from 'components/Leaders'
 import LeadersList from 'components/LeadersList'
+import Markdown from 'components/MarkdownWrapper'
+import MentorshipPullRequest from 'components/MentorshipPullRequest'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 import Milestones from 'components/Milestones'
 import ModuleCard from 'components/ModuleCard'
-import ProgramActions from 'components/ProgramActions'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
-import RepositoriesCard from 'components/RepositoriesCard'
+import RepositoryCard from 'components/RepositoryCard'
 import SecondaryCard from 'components/SecondaryCard'
+import ShowMoreButton from 'components/ShowMoreButton'
 import SponsorCard from 'components/SponsorCard'
+import StatusBadge from 'components/StatusBadge'
 import ToggleableList from 'components/ToggleableList'
-import TopContributorsList from 'components/TopContributorsList'
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
-const sanitizeForUrl = (str: string) => encodeURIComponent(str.trim())
+
+import { TruncatedText } from 'components/TruncatedText'
+
+export type CardType =
+  | 'chapter'
+  | 'committee'
+  | 'module'
+  | 'organization'
+  | 'program'
+  | 'project'
+  | 'repository'
+  | 'user'
+
+const showStatistics = (type: CardType): boolean =>
+  ['committee', 'organization', 'project', 'repository', 'user'].includes(type)
+
+const showIssuesAndMilestones = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
+
+const showPullRequestsAndReleases = (type: CardType): boolean =>
+  ['organization', 'project', 'repository', 'user'].includes(type)
+
+const MILESTONE_LIMIT = 4
 
 const DetailsCard = ({
   description,
   details,
   accessLevel,
+  contributionData,
+  contributionStats,
+  endDate,
+  startDate,
   status,
   setStatus,
   canUpdateStatus,
   tags,
   domains,
+  entityLeaders,
+  labels,
   modules,
   mentors,
+  mentees,
   admins,
   entityKey,
-  geolocationData = null,
+  geolocationData = [],
   healthMetricsData,
   isActive = true,
+  isArchived = false,
   languages,
+  onLoadMorePullRequests,
+  onResetPullRequests,
+  isFetchingMore,
+  programKey,
   projectName,
   pullRequests,
   recentIssues,
@@ -71,128 +120,101 @@ const DetailsCard = ({
   type,
   userSummary,
 }: DetailsCardProps) => {
-  const renderDetailValue = useCallback(
-    (detail: { label: string; value: string | JSX.Element }) => {
-      const { label, value } = detail
+  const { data: session } = useSession() as { data: ExtendedSession | null }
+  const [showAllPRs, setShowAllPRs] = useState(false)
+  const [showAllMilestones, setShowAllMilestones] = useState(false)
 
-      if (
-        value == null ||
-        value === '' ||
-        value === 'N/A' ||
-        value === 'Not available' ||
-        value === 'Unknown'
-      ) {
-        return 'N/A'
-      }
+  // compute styles based on type prop
+  const typeStylesMap: Record<CardType, string> = {
+    chapter: 'gap-2 md:col-span-3',
+    committee: 'gap-2 md:col-span-5',
+    module: 'gap-2 md:col-span-7',
+    organization: 'gap-2 md:col-span-5',
+    program: 'gap-2 md:col-span-7',
+    project: 'gap-2 md:col-span-5',
+    repository: 'gap-2 md:col-span-5',
+    user: 'gap-2 md:col-span-5',
+  }
 
-      if (typeof value !== 'string') {
-        return value
-      }
+  const hasContributions =
+    (contributionStats && contributionStats.total > 0) ||
+    (contributionData && Object.keys(contributionData).length > 0)
 
-      switch (label) {
-        case 'Email':
-          if (!EMAIL_REGEX.test(value)) {
-            return value
-          }
-          return (
-            <a
-              href={`mailto:${sanitizeForUrl(value)}`}
-              className="text-blue-400 hover:underline"
-              aria-label={`Send email to ${value}`}
-            >
-              {value}
-            </a>
-          )
+  const secondaryCardStyles = typeStylesMap[type] ?? 'gap-2 md:col-span-5'
 
-        case 'Company':
-          if (value.startsWith('@')) {
-            const companyName = sanitizeForUrl(value.slice(1))
-            return (
-              <a
-                href={`https://github.com/${companyName}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:underline"
-                aria-label={`Visit ${value} on GitHub`}
-              >
-                {value}
-              </a>
-            )
-          }
-          return value
+  const prDisplayLimit = onLoadMorePullRequests || onResetPullRequests || showAllPRs ? undefined : 4
 
-        default:
-          return value
-      }
-    },
-    []
-  )
-
-  const { data } = useSession()
-  const router = useRouter()
   return (
     <div className="min-h-screen bg-white p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="mt-4 flex flex-row items-center">
           <div className="flex w-full items-center justify-between">
             <h1 className="text-4xl font-bold">{title}</h1>
-            {type === 'program' && accessLevel === 'admin' && canUpdateStatus && (
-              <ProgramActions status={status} setStatus={setStatus} />
-            )}
-            {type === 'module' &&
-              accessLevel === 'admin' &&
-              admins?.some(
-                (admin) => admin.login === ((data as ExtendedSession)?.user?.login as string)
-              ) && (
-                <button
-                  type="button"
-                  className="flex items-center justify-center gap-2 rounded-md border border-[#0D6EFD] bg-transparent px-2 py-2 text-nowrap text-[#0D6EFD] transition-all hover:bg-[#0D6EFD] hover:text-white dark:border-sky-600 dark:text-sky-600 dark:hover:bg-sky-100"
-                  onClick={() => {
-                    router.push(`${window.location.pathname}/edit`)
-                  }}
-                >
-                  Edit Module
-                </button>
+            <div className="flex items-center gap-3">
+              {type === 'program' && accessLevel === 'admin' && canUpdateStatus && programKey && (
+                <EntityActions
+                  type="program"
+                  programKey={programKey}
+                  status={status}
+                  setStatus={setStatus}
+                />
               )}
-            {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-              <MetricsScoreCircle
-                score={healthMetricsData[0].score}
-                clickable={true}
-                onClick={() => scrollToAnchor('issues-trend')}
-              />
-            )}
+              {type === 'module' &&
+                (() => {
+                  if (!programKey || !entityKey) return null
+                  const currentUserLogin = session?.user?.login
+                  const isAdmin =
+                    accessLevel === 'admin' &&
+                    admins?.some((admin) => admin.login === currentUserLogin)
+                  const isMentor = mentors?.some((mentor) => mentor.login === currentUserLogin)
+                  return isAdmin || isMentor ? (
+                    <EntityActions
+                      type="module"
+                      programKey={programKey}
+                      moduleKey={entityKey}
+                      isAdmin={isAdmin ? true : undefined}
+                      isMentor={isMentor ? true : undefined}
+                    />
+                  ) : null
+                })()}
+              {!isActive && <StatusBadge status="inactive" size="md" />}
+              {isArchived && type === 'repository' && <StatusBadge status="archived" size="md" />}
+              {IS_PROJECT_HEALTH_ENABLED &&
+                type === 'project' &&
+                healthMetricsData &&
+                healthMetricsData.length > 0 &&
+                healthMetricsData[0].score !== undefined && (
+                  <MetricsScoreCircle
+                    score={healthMetricsData[0]?.score}
+                    clickable={true}
+                    onClick={() => scrollToAnchor('issues-trend')}
+                  />
+                )}
+            </div>
           </div>
-          {!isActive && (
-            <span className="ml-4 justify-center rounded bg-red-200 px-2 py-1 text-sm text-red-800">
-              Inactive
-            </span>
-          )}
         </div>
         <p className="mb-6 text-xl">{description}</p>
         {summary && (
-          <SecondaryCard icon={faCircleInfo} title={<AnchorTitle title="Summary" />}>
-            <p>{summary}</p>
+          <SecondaryCard icon={FaCircleInfo} title={<AnchorTitle title="Summary" />}>
+            <Markdown content={summary} />
           </SecondaryCard>
         )}
 
         {userSummary && <SecondaryCard>{userSummary}</SecondaryCard>}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
           <SecondaryCard
-            icon={faRectangleList}
+            icon={FaRectangleList}
             title={<AnchorTitle title={`${upperFirst(type)} Details`} />}
-            className={
-              type === 'program' || type === 'module'
-                ? 'gap-2 md:col-span-7'
-                : type !== 'chapter'
-                  ? 'gap-2 md:col-span-5'
-                  : 'gap-2 md:col-span-3'
-            }
+            className={secondaryCardStyles}
           >
             {details?.map((detail) =>
               detail?.label === 'Leaders' ? (
                 <div key={detail.label} className="flex flex-row gap-1 pb-1">
                   <strong>{detail.label}:</strong>{' '}
-                  <LeadersList leaders={detail?.value != null ? String(detail.value) : 'Unknown'} />
+                  <LeadersList
+                    entityKey={`${entityKey}-${detail.label}`}
+                    leaders={String(detail?.value ?? 'Unknown')}
+                  />
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
@@ -201,21 +223,17 @@ const DetailsCard = ({
               )
             )}
             {socialLinks && (type === 'chapter' || type === 'committee') && (
-              <SocialLinks urls={socialLinks || []} />
+              <SocialLinks urls={socialLinks} />
             )}
           </SecondaryCard>
-          {(type === 'project' ||
-            type === 'repository' ||
-            type === 'committee' ||
-            type === 'user' ||
-            type === 'organization') && (
+          {showStatistics(type) && stats && (
             <SecondaryCard
-              icon={faChartPie}
+              icon={FaChartPie}
               title={<AnchorTitle title="Statistics" />}
               className="md:col-span-2"
             >
-              {stats.map((stat, index) => (
-                <div key={index}>
+              {stats.map((stat) => (
+                <div key={`${stat.unit}-${stat.value}`}>
                   <InfoBlock
                     className="pb-1"
                     icon={stat.icon}
@@ -227,11 +245,12 @@ const DetailsCard = ({
               ))}
             </SecondaryCard>
           )}
-          {type === 'chapter' && geolocationData && (
+          {type === 'chapter' && geolocationData && geolocationData.length > 0 && (
             <div className="mb-8 h-[250px] md:col-span-4 md:h-auto">
               <ChapterMapWrapper
                 geoLocData={geolocationData}
                 showLocal={true}
+                showLocationSharing={true}
                 style={{
                   borderRadius: '0.5rem',
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -243,79 +262,141 @@ const DetailsCard = ({
             </div>
           )}
         </div>
-        {(type === 'project' || type === 'repository') && (
+        {(type === 'project' || type === 'repository') && (languages || topics) && (
           <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${topics.length === 0 || languages.length === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+            className={`mb-8 grid grid-cols-1 gap-6 ${(topics?.length ?? 0) === 0 || (languages?.length ?? 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
           >
-            {languages.length !== 0 && (
+            {languages && languages.length !== 0 && (
               <ToggleableList
+                entityKey={`${entityKey}-languages`}
                 items={languages}
-                icon={faCode}
+                icon={FaCode}
                 label={<AnchorTitle title="Languages" />}
               />
             )}
-            {topics.length !== 0 && (
-              <ToggleableList items={topics} icon={faTags} label={<AnchorTitle title="Topics" />} />
+            {topics && topics.length !== 0 && (
+              <ToggleableList
+                entityKey={`${entityKey}-topics`}
+                items={topics}
+                icon={FaTags}
+                label={<AnchorTitle title="Topics" />}
+              />
             )}
           </div>
         )}
         {(type === 'program' || type === 'module') && (
-          <div
-            className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
-          >
-            {tags?.length > 0 && (
-              <ToggleableList
-                items={tags}
-                icon={faTags}
-                label={<AnchorTitle title="Tags" />}
-                isDisabled={true}
-              />
+          <>
+            {((tags?.length || 0) > 0 || (domains?.length || 0) > 0) && (
+              <div
+                className={`mb-8 grid grid-cols-1 gap-6 ${(tags?.length || 0) === 0 || (domains?.length || 0) === 0 ? 'md:col-span-1' : 'md:grid-cols-2'}`}
+              >
+                {tags && tags.length > 0 && (
+                  <ToggleableList
+                    entityKey={`${entityKey}-tags`}
+                    items={tags}
+                    icon={FaTags}
+                    label={<AnchorTitle title="Tags" />}
+                    isDisabled={true}
+                  />
+                )}
+                {domains && domains.length > 0 && (
+                  <ToggleableList
+                    entityKey={`${entityKey}-domains`}
+                    items={domains}
+                    icon={FaChartPie}
+                    label={<AnchorTitle title="Domains" />}
+                    isDisabled={true}
+                  />
+                )}
+              </div>
             )}
-            {domains?.length > 0 && (
-              <ToggleableList
-                items={domains}
-                icon={faChartPie}
-                label={<AnchorTitle title="Domains" />}
-                isDisabled={true}
-              />
+            {labels && labels.length > 0 && (
+              <div className="mb-8">
+                <ToggleableList
+                  entityKey={`${entityKey}-labels`}
+                  items={labels}
+                  icon={FaTags}
+                  label={<AnchorTitle title="Labels" />}
+                  isDisabled={true}
+                />
+              </div>
             )}
+          </>
+        )}
+        {entityLeaders && entityLeaders.length > 0 && <Leaders users={entityLeaders} />}
+        {(type === 'project' || type === 'chapter') && hasContributions && (
+          <div className="mb-8">
+            <div className="rounded-lg bg-gray-100 px-4 pt-6 shadow-md sm:px-6 lg:px-10 dark:bg-gray-800">
+              {contributionStats && (
+                <ContributionStats
+                  title={`${type === 'project' ? 'Project' : 'Chapter'} Contribution Activity`}
+                  stats={contributionStats}
+                />
+              )}
+              {contributionData &&
+                Object.keys(contributionData).length > 0 &&
+                startDate &&
+                endDate && (
+                  <div className="flex w-full items-center justify-center">
+                    <div className="w-full">
+                      <ContributionHeatmap
+                        contributionData={contributionData}
+                        startDate={startDate}
+                        endDate={endDate}
+                        unit="contribution"
+                      />
+                    </div>
+                  </div>
+                )}
+            </div>
           </div>
         )}
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
-            icon={faUsers}
+            icon={HiUserGroup}
             maxInitialDisplay={12}
+            title="Top Contributors"
+            getUrl={getMemberUrl}
           />
         )}
         {admins && admins.length > 0 && type === 'program' && (
-          <TopContributorsList
-            icon={faUsers}
+          <ContributorsList
+            icon={HiUserGroup}
             contributors={admins}
             maxInitialDisplay={6}
-            label="Admins"
+            title="Admins"
+            getUrl={getMemberUrl}
           />
         )}
         {mentors && mentors.length > 0 && (
-          <TopContributorsList
-            icon={faUsers}
+          <ContributorsList
+            icon={HiUserGroup}
             contributors={mentors}
             maxInitialDisplay={6}
-            label="Mentors"
+            title="Mentors"
+            getUrl={getMemberUrl}
           />
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'user' ||
-          type === 'organization') && (
+        {mentees && mentees.length > 0 && (
+          <ContributorsList
+            icon={HiUserGroup}
+            contributors={mentees}
+            maxInitialDisplay={6}
+            title="Mentees"
+            getUrl={(login) => getMenteeUrl(programKey || '', entityKey || '', login)}
+          />
+        )}
+        {showIssuesAndMilestones(type) && (
           <div className="grid-cols-2 gap-4 lg:grid">
-            <RecentIssues data={recentIssues} showAvatar={showAvatar} />
-            {type === 'user' ||
-            type === 'organization' ||
-            type === 'repository' ||
-            type === 'project' ? (
-              <Milestones data={recentMilestones} showAvatar={showAvatar} />
-            ) : (
+            {recentIssues && <RecentIssues data={recentIssues} showAvatar={showAvatar} />}
+            {recentMilestones && <Milestones data={recentMilestones} showAvatar={showAvatar} />}
+          </div>
+        )}
+        {showPullRequestsAndReleases(type) && (
+          <div className="grid-cols-2 gap-4 lg:grid">
+            {pullRequests && <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />}
+            {recentReleases && (
               <RecentReleases
                 data={recentReleases}
                 showAvatar={showAvatar}
@@ -324,39 +405,184 @@ const DetailsCard = ({
             )}
           </div>
         )}
-        {(type === 'project' ||
-          type === 'repository' ||
-          type === 'organization' ||
-          type === 'user') && (
-          <div className="grid-cols-2 gap-4 lg:grid">
-            <RecentPullRequests data={pullRequests} showAvatar={showAvatar} />
-            <RecentReleases data={recentReleases} showAvatar={showAvatar} showSingleColumn={true} />
-          </div>
+
+        {type === 'module' && pullRequests && pullRequests.length > 0 && (
+          <SecondaryCard icon={FaCodeBranch} title={<AnchorTitle title="Recent Pull Requests" />}>
+            <div className="grid grid-cols-1 gap-3">
+              {pullRequests.slice(0, prDisplayLimit).map((pr) => (
+                <MentorshipPullRequest key={pr.id} pr={pr} />
+              ))}
+
+              {(onLoadMorePullRequests || onResetPullRequests) && (
+                <div className="mt-4 flex justify-start gap-4">
+                  {onLoadMorePullRequests && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={onLoadMorePullRequests}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      {isFetchingMore ? 'Loading...' : 'Show more'}{' '}
+                      <FaChevronDown aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+
+                  {onResetPullRequests && (
+                    <button
+                      disabled={isFetchingMore}
+                      onClick={onResetPullRequests}
+                      type="button"
+                      className={`flex items-center bg-transparent px-2 py-1 text-blue-400 hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 ${isFetchingMore ? 'cursor-not-allowed opacity-50' : ''}`}
+                    >
+                      Show less <FaChevronUp aria-hidden="true" className="ml-2 text-sm" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {!onLoadMorePullRequests && !onResetPullRequests && pullRequests.length > 4 && (
+                <ShowMoreButton onToggle={() => setShowAllPRs(!showAllPRs)} />
+              )}
+            </div>
+          </SecondaryCard>
         )}
         {(type === 'project' || type === 'user' || type === 'organization') &&
           repositories.length > 0 && (
-            <SecondaryCard icon={faFolderOpen} title={<AnchorTitle title="Repositories" />}>
-              <RepositoriesCard maxInitialDisplay={4} repositories={repositories} />
+            <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Repositories" />}>
+              <RepositoryCard maxInitialDisplay={4} repositories={repositories} />
             </SecondaryCard>
           )}
-        {type === 'program' && modules.length > 0 && (
-          <SecondaryCard
-            icon={faFolderOpen}
-            title={<AnchorTitle title={modules.length === 1 ? 'Module' : 'Modules'} />}
-          >
-            <ModuleCard modules={modules} accessLevel={accessLevel} admins={admins} />
+        {type === 'program' &&
+          modules &&
+          modules.length > 0 &&
+          (() => {
+            const modulesList = modules
+            return (
+              <>
+                {modulesList.length === 1 ? (
+                  <div className="mb-8">
+                    <ModuleCard
+                      modules={modulesList}
+                      accessLevel={accessLevel}
+                      admins={admins}
+                      programKey={programKey}
+                    />
+                  </div>
+                ) : (
+                  <SecondaryCard icon={FaFolderOpen} title={<AnchorTitle title="Modules" />}>
+                    <ModuleCard
+                      modules={modulesList}
+                      accessLevel={accessLevel}
+                      admins={admins}
+                      programKey={programKey}
+                    />
+                  </SecondaryCard>
+                )}
+              </>
+            )
+          })()}
+        {type === 'program' && recentMilestones && recentMilestones.length > 0 && (
+          <SecondaryCard icon={FaSignsPost} title={<AnchorTitle title="Recent Milestones" />}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2">
+              {recentMilestones
+                .slice(0, showAllMilestones ? recentMilestones.length : MILESTONE_LIMIT)
+                .map((milestone, index) => (
+                  <div
+                    key={milestone.url || `${milestone.title}-${index}`}
+                    className="mb-4 w-full rounded-lg bg-gray-200 p-4 dark:bg-gray-700"
+                  >
+                    <div className="flex w-full flex-col justify-between">
+                      <div className="flex w-full items-center">
+                        {showAvatar && milestone?.author?.login && milestone?.author?.avatarUrl && (
+                          <Tooltip
+                            closeDelay={100}
+                            content={milestone?.author?.name || milestone?.author?.login}
+                            id={`avatar-tooltip-${index}`}
+                            delay={100}
+                            placement="bottom"
+                            showArrow
+                          >
+                            <Link
+                              className="shrink-0 text-blue-400 hover:underline"
+                              href={`/members/${milestone?.author?.login}`}
+                            >
+                              <Image
+                                height={24}
+                                width={24}
+                                src={milestone?.author?.avatarUrl}
+                                alt={`${milestone.author?.name || milestone.author?.login}'s avatar`}
+                                className="mr-2 rounded-full"
+                              />
+                            </Link>
+                          </Tooltip>
+                        )}
+                        <h3 className="min-w-0 flex-1 overflow-hidden font-semibold text-ellipsis whitespace-nowrap">
+                          {milestone?.url ? (
+                            <Link
+                              className="text-blue-400 hover:underline"
+                              href={milestone?.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <TruncatedText text={milestone.title} />
+                            </Link>
+                          ) : (
+                            <TruncatedText text={milestone.title} />
+                          )}
+                        </h3>
+                      </div>
+                      <div className="ml-0.5 w-full">
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center">
+                            <FaCalendar className="mr-2 h-4 w-4" />
+                            {milestone.createdAt && <span>{formatDate(milestone.createdAt)}</span>}
+                          </div>
+                          <div className="flex items-center">
+                            <FaCircleCheck className="mr-2 h-4 w-4" />
+                            <span>{milestone.closedIssuesCount} closed</span>
+                          </div>
+                          <div className="flex items-center">
+                            <FaCircleExclamation className="mr-2 h-4 w-4" />
+                            <span>{milestone.openIssuesCount} open</span>
+                          </div>
+                          {milestone?.repositoryName && milestone?.organizationName && (
+                            <div className="flex min-w-0 flex-1 items-center overflow-hidden">
+                              <FaFolderOpen className="mr-2 h-5 w-4 shrink-0" />
+                              <Link
+                                href={`/organizations/${milestone.organizationName}/repositories/${milestone.repositoryName}`}
+                                className="cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-gray-600 hover:underline dark:text-gray-400"
+                              >
+                                <TruncatedText text={milestone.repositoryName} />
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            {recentMilestones.length > MILESTONE_LIMIT && (
+              <ShowMoreButton onToggle={() => setShowAllMilestones(!showAllMilestones)} />
+            )}
           </SecondaryCard>
         )}
-        {IS_PROJECT_HEALTH_ENABLED && type === 'project' && healthMetricsData.length > 0 && (
-          <HealthMetrics data={healthMetricsData} />
-        )}
-        {entityKey && ['chapter', 'project', 'repository'].includes(type) && (
-          <SponsorCard
-            target={entityKey}
-            title={projectName || title}
-            type={type === 'chapter' ? 'chapter' : 'project'}
-          />
-        )}
+        {IS_PROJECT_HEALTH_ENABLED &&
+          type === 'project' &&
+          healthMetricsData &&
+          healthMetricsData.length > 0 && <HealthMetrics data={healthMetricsData} />}
+        {entityKey &&
+          ['chapter', 'project', 'repository'].includes(type) &&
+          (projectName || title) &&
+          (() => {
+            return (
+              <SponsorCard
+                target={entityKey}
+                title={(projectName || title) as string}
+                type={type === 'chapter' ? 'chapter' : 'project'}
+              />
+            )
+          })()}
       </div>
     </div>
   )
@@ -364,23 +590,27 @@ const DetailsCard = ({
 
 export default DetailsCard
 
-export const SocialLinks = ({ urls }) => {
+const SocialLinks = ({ urls }: { urls: string[] }) => {
   if (!urls || urls.length === 0) return null
   return (
     <div>
       <strong>Social Links</strong>
       <div className="mt-2 flex flex-wrap gap-3">
-        {urls.map((url, index) => (
-          <a
-            key={index}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
-          >
-            <FontAwesomeIcon icon={getSocialIcon(url)} className="h-5 w-5" />
-          </a>
-        ))}
+        {urls.map((url: string) => {
+          const SocialIcon = getSocialIcon(url)
+          return (
+            <a
+              key={url}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 transition-colors hover:text-gray-800 dark:hover:text-gray-200"
+              aria-label={`Link to ${url}`}
+            >
+              <SocialIcon className="h-5 w-5" />
+            </a>
+          )
+        })}
       </div>
     </div>
   )

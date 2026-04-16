@@ -1,8 +1,8 @@
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState } from 'react'
-import { SYNC_DJANGO_SESSION_MUTATION } from 'server/queries/authQueries'
+import { SyncDjangoSessionDocument } from 'types/__generated__/authQueries.generated'
 import { ExtendedSession } from 'types/auth'
 
 const SYNC_STATUS_KEY = 'django_session_synced'
@@ -13,7 +13,7 @@ export const useDjangoSession: () => {
   status: string
 } = () => {
   const { data: session, status, update } = useSession()
-  const [syncSession, { loading }] = useMutation(SYNC_DJANGO_SESSION_MUTATION)
+  const [syncSession, { loading }] = useMutation(SyncDjangoSessionDocument)
   const [isSyncing, setIsSyncing] = useState(false)
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export const useDjangoSession: () => {
       // The cookie name is set in SESSION_COOKIE_NAME of backend/settings/base.py.
       syncSession({
         variables: {
-          accessToken: (session as ExtendedSession).accessToken,
+          accessToken: (session as ExtendedSession).accessToken ?? '',
         },
       })
         .then((response) => {

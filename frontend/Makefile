@@ -1,5 +1,18 @@
 SHELL := /bin/bash
 
+.PHONY: sbom-frontend-image
+
+##@ Frontend
+
+build-frontend-local-image:
+	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
+	    --build-arg FORCE_STANDALONE=yes \
+	    --no-cache \
+	    -f docker/frontend/Dockerfile \
+	    -t nest-frontend-local \
+	    frontend
+
+check-frontend: ## Run frontend code quality checks
 check-frontend: \
 	format-frontend-code \
 	lint-frontend-code \
@@ -31,6 +44,16 @@ format-frontend-code:
 graphql-codegen:
 	@cd frontend && pnpm run graphql-codegen
 
+init-e2e-db: fetch-nest-dump
+	@docker container rm -f e2e-nest-db >/dev/null 2>&1 || true
+	@docker volume rm -f nest-e2e_e2e-db-data >/dev/null 2>&1 || true
+	@DOCKER_BUILDKIT=1 docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml up \
+		--abort-on-container-exit backend cache db data-loader \
+		--build \
+		--remove-orphans
+
 lighthouse-ci:
 	@cd frontend && pnpm run lighthouse-ci
 
@@ -49,24 +72,86 @@ generate-graphql-types:
 	|| (printf "pnpm run graphql-codegen"; for i in $$(seq 1 49); do printf "."; done; printf "\033[37;41mFailed\033[0m\n" \
 		&& pnpm run graphql-codegen))
 
+FRONTEND_IMAGE_NAME ?= nest-frontend-local
+IMAGE_SCANNERS ?= misconfig,secret,vuln
+
+security-scan-frontend-image:
+	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
+		$(MAKE) build-frontend-local-image; \
+	fi
+	@echo "Scanning image: $(FRONTEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image --config /.trivy.yaml $(FRONTEND_IMAGE_NAME)
+
+SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
+
+sbom-frontend-image:
+	@if [ "$(FRONTEND_IMAGE_NAME)" = "nest-frontend-local" ]; then \
+		$(MAKE) build-frontend-local-image; \
+	fi
+	@echo "Generating SBOM for image: $(FRONTEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR):/work \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--format cyclonedx \
+		--output /work/frontend-sbom-$(SBOM_VERSION).cdx.json \
+		$(FRONTEND_IMAGE_NAME)
+
 shell-frontend:
 	@CMD="/bin/sh" $(MAKE) exec-frontend-command-it
 
+test-frontend: ## Run all frontend tests
 test-frontend: \
 	test-frontend-unit \
+	test-frontend-a11y \
 	test-frontend-e2e
 
-test-frontend-e2e:
+test-frontend-a11y:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
-		--cache-from nest-test-frontend-e2e \
-		-f frontend/docker/Dockerfile.e2e.test frontend \
-		-t nest-test-frontend-e2e
-	@docker run --env-file frontend/.env.example --rm nest-test-frontend-e2e pnpm run test:e2e
+		--cache-from nest-test-frontend-a11y \
+		-f docker/frontend/Dockerfile.a11y.test frontend \
+		-t nest-test-frontend-a11y
+	@docker run --env-file frontend/.env.example --rm nest-test-frontend-a11y pnpm run test:a11y
+
+test-frontend-e2e-no-db-init:
+	@DOCKER_BUILDKIT=1 docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml up \
+		--abort-on-container-exit backend cache db frontend e2e-tests \
+		--build \
+		--remove-orphans
+
+test-frontend-e2e: ## Run frontend e2e tests
+	@$(MAKE) init-e2e-db
+	@$(MAKE) test-frontend-e2e-no-db-init
+
+test-frontend-e2e-ui-no-db-init:
+	@DOCKER_BUILDKIT=1 E2E_TEST_COMMAND="pnpm run test:e2e:ui" docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml up \
+		--abort-on-container-exit backend cache db frontend e2e-tests \
+		--build \
+		--remove-orphans
+
+test-frontend-e2e-ui:
+	@$(MAKE) init-e2e-db
+	@$(MAKE) test-frontend-e2e-ui-no-db-init
 
 test-frontend-unit:
 	@DOCKER_BUILDKIT=1 NEXT_PUBLIC_ENVIRONMENT=local docker build \
 		--cache-from nest-test-frontend-unit \
-		-f frontend/docker/Dockerfile.unit.test frontend \
+		-f docker/frontend/Dockerfile.unit.test frontend \
 		-t nest-test-frontend-unit
 	@docker run --env-file frontend/.env.example --rm nest-test-frontend-unit pnpm run test:unit
 

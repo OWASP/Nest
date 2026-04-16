@@ -1,21 +1,20 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
-import {
-  faPeopleGroup,
-  faCodeFork,
-  faDollar,
-  faCodePullRequest,
-  faChartArea,
-  faExclamationCircle,
-  faHandshake,
-  faStar,
-  faTags,
-} from '@fortawesome/free-solid-svg-icons'
+import { useQuery } from '@apollo/client/react'
 import { useParams } from 'next/navigation'
 import { FC, useState, useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import {
+  FaPeopleGroup,
+  FaCodeFork,
+  FaDollarSign,
+  FaCodePullRequest,
+  FaChartArea,
+  FaHandshake,
+  FaStar,
+  FaTags,
+} from 'react-icons/fa6'
 import { handleAppError } from 'app/global-error'
-import { GET_PROJECT_HEALTH_METRICS_DETAILS } from 'server/queries/projectsHealthDashboardQueries'
+import { GetProjectHealthMetricsDetailsDocument } from 'types/__generated__/projectsHealthDashboardQueries.generated'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import BarChart from 'components/BarChart'
 import GeneralCompliantComponent from 'components/GeneralCompliantComponent'
@@ -25,14 +24,14 @@ import MetricsPDFButton from 'components/MetricsPDFButton'
 import MetricsScoreCircle from 'components/MetricsScoreCircle'
 
 const ProjectHealthMetricsDetails: FC = () => {
-  const { projectKey } = useParams()
+  const { projectKey } = useParams<{ projectKey: string }>()
   const [metricsList, setMetricsList] = useState<HealthMetricsProps[]>()
   const [metricsLatest, setMetricsLatest] = useState<HealthMetricsProps>()
   const {
     loading,
     error: graphqlError,
     data,
-  } = useQuery(GET_PROJECT_HEALTH_METRICS_DETAILS, {
+  } = useQuery(GetProjectHealthMetricsDetailsDocument, {
     variables: { projectKey },
   })
 
@@ -41,7 +40,7 @@ const ProjectHealthMetricsDetails: FC = () => {
       handleAppError(graphqlError)
     }
     if (data?.project?.healthMetricsLatest) {
-      setMetricsLatest(data.project.healthMetricsLatest)
+      setMetricsLatest(data.project.healthMetricsLatest as unknown as HealthMetricsProps)
     }
     if (data?.project?.healthMetricsList) {
       setMetricsList(data.project.healthMetricsList)
@@ -54,33 +53,35 @@ const ProjectHealthMetricsDetails: FC = () => {
 
   const labels =
     metricsList?.map((m) =>
-      new Date(m.createdAt).toLocaleString('default', {
-        month: 'short',
-        day: 'numeric',
-      })
+      m.createdAt
+        ? new Date(m.createdAt).toLocaleString('default', {
+            month: 'short',
+            day: 'numeric',
+          })
+        : ''
     ) || []
   return (
     <div className="flex flex-col gap-4">
       {metricsList && metricsLatest ? (
         <>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex justify-start">
-              <h1 className="text-2xl font-bold">{metricsLatest.projectName}</h1>
+              <h1 className="text-lg font-bold sm:text-2xl">{metricsLatest.projectName}</h1>
               <MetricsPDFButton
                 path={`${projectKey}/pdf`}
                 fileName={`${projectKey}-health-metrics`}
               />
             </div>
             <div className="flex items-center gap-2">
-              <MetricsScoreCircle score={metricsLatest.score} clickable={false} />
+              <MetricsScoreCircle score={metricsLatest.score ?? 0} clickable={false} />
               <GeneralCompliantComponent
                 title={
                   metricsLatest.isFundingRequirementsCompliant
                     ? 'Funding Requirements Compliant'
                     : 'Funding Requirements Not Compliant'
                 }
-                icon={faDollar}
-                compliant={metricsLatest.isFundingRequirementsCompliant}
+                icon={FaDollarSign}
+                compliant={metricsLatest.isFundingRequirementsCompliant ?? false}
               />
               <GeneralCompliantComponent
                 title={
@@ -88,19 +89,19 @@ const ProjectHealthMetricsDetails: FC = () => {
                     ? 'Leader Requirements Compliant'
                     : 'Leader Requirements Not Compliant'
                 }
-                icon={faHandshake}
-                compliant={metricsLatest.isLeaderRequirementsCompliant}
+                icon={FaHandshake}
+                compliant={metricsLatest.isLeaderRequirementsCompliant ?? false}
               />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <LineChart
               title="Stars"
-              icon={faStar}
+              icon={FaStar}
               series={[
                 {
                   name: 'Stars',
-                  data: metricsList.map((m) => m.starsCount),
+                  data: metricsList.map((m) => m.starsCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -108,11 +109,11 @@ const ProjectHealthMetricsDetails: FC = () => {
             />
             <LineChart
               title="Forks"
-              icon={faCodeFork}
+              icon={FaCodeFork}
               series={[
                 {
                   name: 'Forks',
-                  data: metricsList.map((m) => m.forksCount),
+                  data: metricsList.map((m) => m.forksCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -122,23 +123,23 @@ const ProjectHealthMetricsDetails: FC = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <LineChart
               title="Issues"
-              icon={faExclamationCircle}
+              icon={FaExclamationCircle}
               series={[
                 {
                   name: 'Open Issues',
-                  data: metricsList.map((m) => m.openIssuesCount),
+                  data: metricsList.map((m) => m.openIssuesCount ?? 0),
                 },
                 {
                   name: 'Unassigned Issues',
-                  data: metricsList.map((m) => m.unassignedIssuesCount),
+                  data: metricsList.map((m) => m.unassignedIssuesCount ?? 0),
                 },
                 {
                   name: 'Unanswered Issues',
-                  data: metricsList.map((m) => m.unansweredIssuesCount),
+                  data: metricsList.map((m) => m.unansweredIssuesCount ?? 0),
                 },
                 {
                   name: 'Total Issues',
-                  data: metricsList.map((m) => m.totalIssuesCount),
+                  data: metricsList.map((m) => m.totalIssuesCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -146,11 +147,11 @@ const ProjectHealthMetricsDetails: FC = () => {
             />
             <LineChart
               title="Open Pull Requests"
-              icon={faCodePullRequest}
+              icon={FaCodePullRequest}
               series={[
                 {
                   name: 'Open Pull Requests',
-                  data: metricsList.map((m) => m.openPullRequestsCount),
+                  data: metricsList.map((m) => m.openPullRequestsCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -160,15 +161,15 @@ const ProjectHealthMetricsDetails: FC = () => {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <LineChart
               title="Releases"
-              icon={faTags}
+              icon={FaTags}
               series={[
                 {
                   name: 'Recent Releases',
-                  data: metricsList.map((m) => m.recentReleasesCount),
+                  data: metricsList.map((m) => m.recentReleasesCount ?? 0),
                 },
                 {
                   name: 'Total Releases',
-                  data: metricsList.map((m) => m.totalReleasesCount),
+                  data: metricsList.map((m) => m.totalReleasesCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -176,11 +177,11 @@ const ProjectHealthMetricsDetails: FC = () => {
             />
             <LineChart
               title="Contributors"
-              icon={faPeopleGroup}
+              icon={FaPeopleGroup}
               series={[
                 {
                   name: 'Contributors',
-                  data: metricsList.map((m) => m.contributorsCount),
+                  data: metricsList.map((m) => m.contributorsCount ?? 0),
                 },
               ]}
               labels={labels}
@@ -189,7 +190,7 @@ const ProjectHealthMetricsDetails: FC = () => {
           </div>
           <BarChart
             title="Days Metrics"
-            icon={faChartArea}
+            icon={FaChartArea}
             labels={[
               'Project Age',
               'Days Since Last Commit',
@@ -198,18 +199,18 @@ const ProjectHealthMetricsDetails: FC = () => {
               'Days Since OWASP Page Last Update',
             ]}
             days={[
-              metricsLatest.ageDays,
-              metricsLatest.lastCommitDays,
-              metricsLatest.lastReleaseDays,
-              metricsLatest.lastPullRequestDays,
-              metricsLatest.owaspPageLastUpdateDays,
+              metricsLatest.ageDays ?? 0,
+              metricsLatest.lastCommitDays ?? 0,
+              metricsLatest.lastReleaseDays ?? 0,
+              metricsLatest.lastPullRequestDays ?? 0,
+              metricsLatest.owaspPageLastUpdateDays ?? 0,
             ]}
             requirements={[
-              metricsLatest.ageDaysRequirement,
-              metricsLatest.lastCommitDaysRequirement,
-              metricsLatest.lastReleaseDaysRequirement,
-              metricsLatest.lastPullRequestDaysRequirement,
-              metricsLatest.owaspPageLastUpdateDaysRequirement,
+              metricsLatest.ageDaysRequirement ?? 0,
+              metricsLatest.lastCommitDaysRequirement ?? 0,
+              metricsLatest.lastReleaseDaysRequirement ?? 0,
+              metricsLatest.lastPullRequestDaysRequirement ?? 0,
+              metricsLatest.owaspPageLastUpdateDaysRequirement ?? 0,
             ]}
             reverseColors={[true, false, false, false, false]}
           />

@@ -1,27 +1,29 @@
+import DOMPurify from 'isomorphic-dompurify'
 import { Metadata } from 'next'
 import Script from 'next/script'
 import React from 'react'
 import { apolloClient } from 'server/apolloClient'
 import {
-  GET_ORGANIZATION_METADATA,
-  GET_ORGANIZATION_DATA,
-} from 'server/queries/organizationQueries'
+  GetOrganizationDataDocument,
+  GetOrganizationMetadataDocument,
+} from 'types/__generated__/organizationQueries.generated'
 import { generateSeoMetadata } from 'utils/metaconfig'
+import PageLayout from 'components/PageLayout'
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ organizationKey: string }>
-}): Promise<Metadata> {
+}): Promise<Metadata | undefined> {
   const { organizationKey } = await params
   const { data } = await apolloClient.query({
-    query: GET_ORGANIZATION_METADATA,
+    query: GetOrganizationMetadataDocument,
     variables: {
       login: organizationKey,
     },
   })
   const organization = data?.organization
-  const title = organization?.name ?? organization?.login
+  const title = organization?.name ?? organization?.login ?? ''
 
   return organization
     ? generateSeoMetadata({
@@ -29,14 +31,14 @@ export async function generateMetadata({
         description: organization?.description ?? `${title} organization details`,
         title: title,
       })
-    : null
+    : undefined
 }
 
 async function generateOrganizationStructuredData(organizationKey: string) {
   // https://developers.google.com/search/docs/appearance/structured-data/organization#structured-data-type-definitions
 
   const { data } = await apolloClient.query({
-    query: GET_ORGANIZATION_DATA,
+    query: GetOrganizationDataDocument,
     variables: {
       login: organizationKey,
     },
@@ -97,20 +99,39 @@ export default async function OrganizationDetailsLayout({
   params: Promise<{ organizationKey: string }>
 }>) {
   const { organizationKey } = await params
+
+  if (!/^[a-zA-Z0-9._-]+$/.test(organizationKey)) {
+    return (
+      <PageLayout title="Invalid Organization" path="/organizations">
+        <div>Invalid Organization Key</div>
+      </PageLayout>
+    )
+  }
   const structuredData = await generateOrganizationStructuredData(organizationKey)
 
+  const jsonLdString = structuredData
+    ? DOMPurify.sanitize(JSON.stringify(structuredData, null, 2))
+    : null
+
+  // Fetch organization name for breadcrumb
+  const { data } = await apolloClient.query({
+    query: GetOrganizationMetadataDocument,
+    variables: { login: organizationKey },
+  })
+  const orgName = data?.organization?.name || data?.organization?.login || organizationKey
+
   return (
-    <>
-      {structuredData && (
+    <PageLayout title={orgName} path={`/organizations/${organizationKey}`}>
+      {jsonLdString && (
         <Script
           id="organization-structured-data"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData, null, 2),
+            __html: jsonLdString,
           }}
         />
       )}
       {children}
-    </>
+    </PageLayout>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
+
 import { useSearchPage } from 'hooks/useSearchPage'
 import { useRouter } from 'next/navigation'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { FaRightToBracket } from 'react-icons/fa6'
 import type { Organization } from 'types/organization'
 import SearchPageLayout from 'components/SearchPageLayout'
 import UserCard from 'components/UserCard'
@@ -30,13 +31,13 @@ const OrganizationPage = () => {
 
     const submitButton = {
       label: 'View Profile',
-      icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
+      icon: <FaRightToBracket className="h-4 w-4" />,
       onclick: handleButtonClick,
     }
 
     return (
       <UserCard
-        avatar={organization.avatarUrl}
+        avatar={organization.avatarUrl ?? ''}
         button={submitButton}
         className="h-64 w-80 bg-white p-6 text-left shadow-lg transition-transform duration-500 hover:scale-105 hover:shadow-xl dark:bg-gray-800 dark:shadow-gray-900/30"
         company={organization.company || ''}
@@ -63,7 +64,7 @@ const OrganizationPage = () => {
       totalPages={totalPages}
     >
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {organizations && organizations.map(renderOrganizationCard)}
+        {organizations?.map(renderOrganizationCard)}
       </div>
     </SearchPageLayout>
   )

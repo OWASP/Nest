@@ -1,64 +1,65 @@
 'use client'
-import { useQuery } from '@apollo/client'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import {
-  faBook,
-  faCalendar,
-  faCalendarAlt,
-  faCode,
-  faFileCode,
-  faFolder,
-  faGlobe,
-  faMapMarkerAlt,
-  faNewspaper,
-  faTag,
-  faUser,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import upperFirst from 'lodash/upperFirst'
+import millify from 'millify'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import type { IconType } from 'react-icons'
+import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa'
+import {
+  FaBook,
+  FaCalendar,
+  FaCode,
+  FaFileCode,
+  FaFolder,
+  FaGlobe,
+  FaNewspaper,
+  FaTag,
+  FaUser,
+} from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
-import { GET_MAIN_PAGE_DATA } from 'server/queries/homeQueries'
+import { GetMainPageDataDocument } from 'types/__generated__/homeQueries.generated'
 import type { AlgoliaResponse } from 'types/algolia'
 import type { Chapter } from 'types/chapter'
 import type { Event } from 'types/event'
-import type { MainPageData } from 'types/home'
-
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
 import { formatDate, formatDateRange } from 'utils/dateFormatter'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
-import AnimatedCounter from 'components/AnimatedCounter'
+import CalendarButton from 'components/CalendarButton'
 import ChapterMapWrapper from 'components/ChapterMapWrapper'
+import ContributorsList from 'components/ContributorsList'
 import LeadersList from 'components/LeadersList'
 import LoadingSpinner from 'components/LoadingSpinner'
 import MovingLogos from 'components/LogoCarousel'
 import Milestones from 'components/Milestones'
 import DialogComp from 'components/Modal'
-import MultiSearchBar from 'components/MultiSearch'
 import RecentIssues from 'components/RecentIssues'
 import RecentPullRequests from 'components/RecentPullRequests'
 import RecentReleases from 'components/RecentReleases'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributorsList from 'components/TopContributorsList'
 import { TruncatedText } from 'components/TruncatedText'
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [data, setData] = useState<MainPageData>(null)
-  const { data: graphQLData, error: graphQLRequestError } = useQuery(GET_MAIN_PAGE_DATA, {
+  const {
+    data: graphQLData,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetMainPageDataDocument, {
     variables: { distinct: true },
   })
 
+  const data = graphQLData
   const [geoLocData, setGeoLocData] = useState<Chapter[]>([])
   const [modalOpenIndex, setModalOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    if (graphQLData) {
-      setData(graphQLData)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       addToast({
         description: 'Unable to complete the requested operation.',
@@ -68,9 +69,8 @@ export default function Home() {
         color: 'danger',
         variant: 'solid',
       })
-      setIsLoading(false)
     }
-  }, [graphQLData, graphQLRequestError])
+  }, [graphQLRequestError])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,41 +95,41 @@ export default function Home() {
     return <LoadingSpinner />
   }
 
-  const getProjectIcon = (projectType: string) => {
+  const getProjectIcon = (projectType: string): IconType => {
     switch (projectType.toLowerCase()) {
       case 'code':
-        return faCode
+        return FaCode
       case 'documentation':
-        return faBook
+        return FaBook
       case 'other':
-        return faFileCode
+        return FaFileCode
       case 'tool':
-        return faTag
+        return FaTag
       default:
-        return faFileCode
+        return FaFileCode
     }
   }
 
   const counterData = [
     {
       label: 'Active Projects',
-      value: data.statsOverview.activeProjectsStats,
+      value: data?.statsOverview.activeProjectsStats,
     },
     {
       label: 'Contributors',
-      value: data.statsOverview.contributorsStats,
+      value: data?.statsOverview.contributorsStats,
     },
     {
       label: 'Local Chapters',
-      value: data.statsOverview.activeChaptersStats,
+      value: data?.statsOverview.activeChaptersStats,
     },
     {
       label: 'Countries',
-      value: data.statsOverview.countriesStats,
+      value: data?.statsOverview.countriesStats,
     },
     {
       label: 'Slack Community',
-      value: data.statsOverview.slackWorkspaceStats,
+      value: data?.statsOverview.slackWorkspaceStats,
     },
   ]
 
@@ -137,7 +137,7 @@ export default function Home() {
     <div className="mt-16 min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <div className="pt-5 text-center sm:mb-10">
-          <div className="flex flex-col items-center py-10">
+          <div className="flex flex-col items-center py-5">
             <h1 className="text-3xl font-medium tracking-tighter sm:text-5xl md:text-6xl">
               Welcome to OWASP Nest
             </h1>
@@ -145,42 +145,49 @@ export default function Home() {
               Your gateway to OWASP. Discover, engage, and help shape the future!
             </p>
           </div>
-          <div className="mx-auto mb-8 flex max-w-2xl justify-center">
-            <MultiSearchBar
-              eventData={data.upcomingEvents}
-              isLoaded={true}
-              placeholder="Search the OWASP community"
-              indexes={['chapters', 'organizations', 'projects', 'users']}
-            />
-          </div>
         </div>
         <SecondaryCard
-          icon={faCalendarAlt}
+          icon={FaCalendarAlt}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle title="Upcoming Events" className="flex items-center leading-none" />
+              <AnchorTitle title="Upcoming Events" />
             </div>
           }
           className="overflow-hidden"
         >
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {data.upcomingEvents.map((event: Event, index: number) => (
-              <div key={`card-${event.name}`} className="overflow-hidden">
+            {data?.upcomingEvents?.map((event: Event, index: number) => (
+              <div key={`card-${event.id}`} className="overflow-hidden">
                 <div className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
-                  <button
-                    className="mb-2 w-full cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
-                    onClick={() => setModalOpenIndex(index)}
-                  >
-                    <TruncatedText text={event.name} />
-                  </button>
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <button
+                      className="min-w-0 flex-1 cursor-pointer text-left text-lg font-semibold text-blue-400 hover:underline"
+                      type="button"
+                      onClick={() => setModalOpenIndex(index)}
+                    >
+                      <TruncatedText text={event.name} />
+                    </button>
+                  </div>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-2 flex items-center">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
-                      <span>{formatDateRange(event.startDate, event.endDate)}</span>
+                      <CalendarButton
+                        className="cursor-pointer text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                        event={{
+                          title: event.name,
+                          description: event.summary || '',
+                          location: event.suggestedLocation || '',
+                          startDate: event.startDate,
+                          endDate: event.endDate,
+                          url: event.url,
+                        }}
+                        iconClassName="h-4 w-4 mr-2"
+                        label={formatDateRange(event.startDate, event.endDate ?? event.startDate)}
+                        showLabel
+                      />
                     </div>
                     {event.suggestedLocation && (
                       <div className="flex flex-1 items-center overflow-hidden">
-                        <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 h-4 w-4" />
+                        <FaMapMarkerAlt className="mr-2 h-4 w-4 shrink-0" />
                         <TruncatedText text={event.suggestedLocation} />
                       </div>
                     )}
@@ -191,7 +198,7 @@ export default function Home() {
                   isOpen={modalOpenIndex === index}
                   onClose={() => setModalOpenIndex(null)}
                   title={event.name}
-                  summary={event.summary}
+                  summary={event.summary ?? ''}
                   button={{ label: 'View Event', url: event.url }}
                   description="The event summary has been generated by AI"
                 ></DialogComp>
@@ -201,16 +208,16 @@ export default function Home() {
         </SecondaryCard>
         <div className="grid gap-4 md:grid-cols-2">
           <SecondaryCard
-            icon={faMapMarkerAlt}
+            icon={FaMapMarkerAlt}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle title="New Chapters" className="flex items-center leading-none" />
+                <AnchorTitle title="New Chapters" />
               </div>
             }
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-4">
-              {data.recentChapters?.map((chapter) => (
+              {data?.recentChapters?.map((chapter) => (
                 <div key={chapter.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <h3 className="mb-2 text-lg font-semibold">
                     <Link
@@ -222,20 +229,24 @@ export default function Home() {
                   </h3>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <FaCalendar className="mr-2 h-4 w-4" />
                       <span>{formatDate(chapter.createdAt)}</span>
                     </div>
-                    <div className="flex flex-1 items-center overflow-hidden">
-                      <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-4 w-4" />
-                      <TruncatedText text={chapter.suggestedLocation} />
-                    </div>
+                    {chapter.suggestedLocation && (
+                      <div className="flex flex-1 items-center overflow-hidden">
+                        <FaMapMarkerAlt className="mr-2 h-4 w-4 shrink-0" />
+                        <TruncatedText text={chapter.suggestedLocation} />
+                      </div>
+                    )}
                   </div>
 
                   {chapter.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      {' '}
-                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
-                      <LeadersList leaders={String(chapter.leaders)} />
+                      <HiUserGroup className="h-4 w-4 shrink-0" />
+                      <LeadersList
+                        entityKey={`${chapter.key}-leaders`}
+                        leaders={String(chapter.leaders)}
+                      />
                     </div>
                   )}
                 </div>
@@ -243,16 +254,16 @@ export default function Home() {
             </div>
           </SecondaryCard>
           <SecondaryCard
-            icon={faFolder}
+            icon={FaFolder}
             title={
               <div className="flex items-center gap-2">
-                <AnchorTitle title="New Projects" className="flex items-center leading-none" />
+                <AnchorTitle title="New Projects" />
               </div>
             }
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-4">
-              {data.recentProjects?.map((project) => (
+              {data?.recentProjects?.map((project) => (
                 <div key={project.key} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
                   <Link href={`/projects/${project.key}`} className="text-blue-400 hover:underline">
                     <h3 className="mb-2 truncate text-lg font-semibold text-wrap md:text-nowrap">
@@ -261,21 +272,24 @@ export default function Home() {
                   </Link>
                   <div className="flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                     <div className="mr-4 flex items-center">
-                      <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                      <FaCalendar className="mr-2 h-4 w-4" />
                       <span>{formatDate(project.createdAt)}</span>
                     </div>
                     <div className="mr-4 flex flex-1 items-center overflow-hidden">
-                      <FontAwesomeIcon
-                        icon={getProjectIcon(project.type) as IconProp}
-                        className="mr-2 h-4 w-4"
+                      <IconWrapper
+                        icon={getProjectIcon(project.type)}
+                        className="mr-2 h-4 w-4 shrink-0"
                       />
                       <TruncatedText text={upperFirst(project.type)} />
                     </div>
                   </div>
                   {project.leaders.length > 0 && (
                     <div className="mt-1 flex items-center gap-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
-                      <LeadersList leaders={String(project.leaders)} />
+                      <HiUserGroup className="h-4 w-4 shrink-0" />
+                      <LeadersList
+                        entityKey={`${project.key}-leaders`}
+                        leaders={String(project.leaders)}
+                      />
                     </div>
                   )}
                 </div>
@@ -285,16 +299,13 @@ export default function Home() {
         </div>
         <div className="mb-20">
           <div className="mb-4 flex items-center gap-2">
-            <FontAwesomeIcon
-              icon={faGlobe}
-              className="h-5 w-5"
-              style={{ verticalAlign: 'middle' }}
-            />
-            <AnchorTitle title="Chapters Worldwide" className="flex items-center leading-none" />
+            <FaGlobe className="h-4 w-4" style={{ verticalAlign: 'middle' }} />
+            <AnchorTitle title="Chapters Worldwide" />
           </div>
           <ChapterMapWrapper
             geoLocData={geoLocData}
             showLocal={false}
+            showLocationSharing={true}
             style={{
               height: '400px',
               width: '100%',
@@ -304,24 +315,35 @@ export default function Home() {
             }}
           />
         </div>
-        <TopContributorsList
-          contributors={data?.topContributors}
-          icon={faUsers}
+        <ContributorsList
+          contributors={data?.topContributors ?? []}
+          icon={HiUserGroup}
           maxInitialDisplay={20}
+          title="Top Contributors"
+          getUrl={getMemberUrl}
         />
         <div className="grid-cols-2 gap-4 lg:grid">
-          <RecentIssues data={data?.recentIssues} />
-          <Milestones data={data?.recentMilestones} />
+          {data?.recentIssues && <RecentIssues data={data.recentIssues as unknown as Issue[]} />}
+          {data?.recentMilestones && (
+            <Milestones data={data.recentMilestones as unknown as Milestone[]} />
+          )}
         </div>
         <div className="grid-cols-2 gap-4 lg:grid">
-          <RecentPullRequests data={data?.recentPullRequests} />
-          <RecentReleases data={data?.recentReleases} showSingleColumn={true} />
+          {data?.recentPullRequests && (
+            <RecentPullRequests data={data.recentPullRequests as unknown as PullRequest[]} />
+          )}
+          {data?.recentReleases && (
+            <RecentReleases
+              data={data.recentReleases as unknown as Release[]}
+              showSingleColumn={true}
+            />
+          )}
         </div>
         <SecondaryCard
-          icon={faNewspaper}
+          icon={FaNewspaper}
           title={
             <div className="flex items-center gap-2">
-              <AnchorTitle title="News & Opinions" className="flex items-center leading-none" />
+              <AnchorTitle title="News & Opinions" />
             </div>
           }
           className="overflow-hidden"
@@ -344,24 +366,24 @@ export default function Home() {
                 </h3>
                 <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400">
                   <div className="mr-4 flex items-center">
-                    <FontAwesomeIcon icon={faCalendar} className="mr-2 h-4 w-4" />
+                    <FaCalendar className="mr-2 h-4 w-4" />
                     <span>{formatDate(post.publishedAt)}</span>
                   </div>
                   <div className="flex flex-1 items-center overflow-hidden">
-                    <FontAwesomeIcon icon={faUser} className="mr-2 h-4 w-4" />
-                    <LeadersList leaders={post.authorName} />
+                    <FaUser className="mr-2 h-4 w-4 shrink-0" />
+                    <LeadersList entityKey={`${post.title}-leaders`} leaders={post.authorName} />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </SecondaryCard>
-        <div className="grid gap-6 lg:grid-cols-5">
-          {counterData.map((stat, index) => (
-            <div key={index}>
+        <div className="grid lg:grid-cols-5 lg:gap-6">
+          {counterData.map((stat) => (
+            <div key={stat.label}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={stat.value} duration={2} />+
+                  {millify(stat.value ?? 0)}+
                 </div>
                 <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
               </SecondaryCard>
@@ -369,7 +391,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-8 mb-20">
+        <div className="mb-20">
           <SecondaryCard className="text-center">
             <h3 className="mb-4 text-2xl font-semibold">Ready to Make a Difference?</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-400">
@@ -384,9 +406,11 @@ export default function Home() {
               Join OWASP
             </Link>
           </SecondaryCard>
-          <SecondaryCard>
-            <MovingLogos sponsors={data?.sponsors} />
-          </SecondaryCard>
+          {data?.sponsors && (
+            <SecondaryCard>
+              <MovingLogos sponsors={data.sponsors} />
+            </SecondaryCard>
+          )}
         </div>
       </div>
     </div>

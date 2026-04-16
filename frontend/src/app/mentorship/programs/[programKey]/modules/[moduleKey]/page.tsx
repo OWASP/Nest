@@ -1,44 +1,71 @@
 'use client'
 
-import { useQuery } from '@apollo/client'
-import upperFirst from 'lodash/upperFirst'
+import { useQuery } from '@apollo/client/react'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import capitalize from 'lodash/capitalize'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
-import type { Module } from 'types/mentorship'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { Module } from 'types/mentorship'
+import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
-  const { programKey, moduleKey } = useParams()
-  const [module, setModule] = useState<Module | null>(null)
-  const [admins, setAdmins] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
+  const [hasMorePRs, setHasMorePRs] = useState(true)
+  const [visibleCount, setVisibleCount] = useState(4)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
+  const limit = 4
 
-  const { data, error } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+  const {
+    data,
+    error,
+    loading: isLoading,
+    fetchMore,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
+    fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
       moduleKey,
+      limit,
+      offset: 0,
     },
   })
 
   useEffect(() => {
-    if (data?.getModule) {
-      setModule(data.getModule)
-      setAdmins(data.getProgram.admins)
-      setIsLoading(false)
-    } else if (error) {
-      handleAppError(error)
-      setIsLoading(false)
+    const prCount = data?.getModule?.recentPullRequests?.length
+    if (prCount == null) return
+    if (prCount <= limit) {
+      setHasMorePRs(prCount >= limit)
     }
-  }, [data, error])
+  }, [data, limit])
 
-  if (isLoading) return <LoadingSpinner />
+  const programModule = data?.getModule as Module
+  const admins = data?.getProgram?.admins
 
-  if (!module) {
+  useEffect(() => {
+    if (error) {
+      handleAppError(error)
+    }
+  }, [error])
+
+  if (isLoading && !data) return <LoadingSpinner />
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading module"
+        message="An error occurred while loading the module data"
+      />
+    )
+  }
+
+  if (!data || !programModule) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -49,26 +76,76 @@ const ModuleDetailsPage = () => {
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
-    { label: 'Start Date', value: formatDate(module.startedAt) },
-    { label: 'End Date', value: formatDate(module.endedAt) },
+    { label: 'Experience Level', value: capitalize(programModule.experienceLevel) },
+    { label: 'Start Date', value: formatDate(String(programModule.startedAt)) },
+    { label: 'End Date', value: formatDate(String(programModule.endedAt)) },
     {
       label: 'Duration',
-      value: getSimpleDuration(module.startedAt, module.endedAt),
+      value: getSimpleDuration(programModule.startedAt, programModule.endedAt),
     },
   ]
 
   return (
-    <DetailsCard
-      details={moduleDetails}
-      title={module.name}
-      admins={admins}
-      tags={module.tags}
-      domains={module.domains}
-      summary={module.description}
-      mentors={module.mentors}
-      type="module"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        admins={admins ?? undefined}
+        details={moduleDetails}
+        domains={programModule.domains ?? undefined}
+        mentors={programModule.mentors}
+        isFetchingMore={isFetchingMore}
+        pullRequests={((programModule.recentPullRequests as unknown as PullRequest[]) || []).slice(
+          0,
+          visibleCount
+        )}
+        summary={programModule.description}
+        tags={programModule.tags ?? undefined}
+        title={programModule.name}
+        type="module"
+        onLoadMorePullRequests={
+          hasMorePRs || (programModule.recentPullRequests || []).length > visibleCount
+            ? () => {
+                if (isFetchingMore) return
+                const currentLength = programModule.recentPullRequests?.length || 0
+                if (hasMorePRs && currentLength < visibleCount + limit) {
+                  setIsFetchingMore(true)
+                  fetchMore({
+                    variables: {
+                      programKey,
+                      moduleKey,
+                      offset: currentLength,
+                      limit,
+                    },
+                    updateQuery: (prevResult, { fetchMoreResult }) => {
+                      if (!fetchMoreResult) return prevResult
+                      const newPRs = fetchMoreResult.getModule?.recentPullRequests || []
+                      if (newPRs.length < limit) setHasMorePRs(false)
+                      if (newPRs.length === 0) return prevResult
+                      return {
+                        ...prevResult,
+                        getModule: {
+                          ...prevResult.getModule!,
+                          recentPullRequests: [
+                            ...(prevResult.getModule?.recentPullRequests || []),
+                            ...newPRs,
+                          ],
+                        },
+                      }
+                    },
+                  })
+                    .catch((error) => handleAppError(error))
+                    .finally(() => setIsFetchingMore(false))
+                }
+                setVisibleCount((prev) => prev + limit)
+              }
+            : undefined
+        }
+        onResetPullRequests={
+          visibleCount > limit && (programModule.recentPullRequests || []).length > limit
+            ? () => setVisibleCount(limit)
+            : undefined
+        }
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

@@ -1,10 +1,10 @@
 """AI app chunk model."""
 
 from django.db import models
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pgvector.django import VectorField
 
 from apps.ai.models.context import Context
+from apps.ai.text_splitting import split_recursive_character_text
 from apps.common.models import BulkSaveModel, TimestampedModel
 from apps.common.utils import truncate
 
@@ -13,6 +13,8 @@ class Chunk(TimestampedModel):
     """AI Chunk model for storing text chunks with embeddings."""
 
     class Meta:
+        """Model options."""
+
         db_table = "ai_chunks"
         verbose_name = "Chunk"
         unique_together = ("context", "text")
@@ -34,12 +36,13 @@ class Chunk(TimestampedModel):
     @staticmethod
     def split_text(text: str) -> list[str]:
         """Split text into chunks."""
-        return RecursiveCharacterTextSplitter(
-            chunk_size=300,
-            chunk_overlap=40,
+        return split_recursive_character_text(
+            text,
+            chunk_size=200,
+            chunk_overlap=20,
             length_function=len,
             separators=["\n\n", "\n", " ", ""],
-        ).split_text(text)
+        )
 
     @staticmethod
     def update_data(
@@ -61,11 +64,7 @@ class Chunk(TimestampedModel):
           Chunk: The created chunk instance.
 
         """
-        if Chunk.objects.filter(
-            context__entity_type=context.entity_type,
-            context__entity_id=context.entity_id,
-            text=text,
-        ).exists():
+        if Chunk.objects.filter(context=context, text=text).exists():
             return None
 
         chunk = Chunk(text=text, embedding=embedding, context=context)

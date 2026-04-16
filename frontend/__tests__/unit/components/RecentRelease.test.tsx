@@ -67,6 +67,7 @@ jest.mock('next/image', () => ({
 const now = Date.now()
 const mockReleases: Release[] = [
   {
+    id: 'release-recent-1',
     name: 'v1.0 The First Release',
     publishedAt: now,
     repositoryName: 'our-awesome-project',
@@ -79,7 +80,7 @@ const mockReleases: Release[] = [
       avatarUrl: 'https://example.com/avatar.png',
       key: 'testuser',
       contributionsCount: 0,
-      createdAt: 0,
+      createdAt: '1970-01-01T00:00:00.000Z',
       followersCount: 0,
       followingCount: 0,
       publicRepositoriesCount: 0,
@@ -87,6 +88,7 @@ const mockReleases: Release[] = [
     },
   },
   {
+    id: 'release-recent-2',
     name: 'v2.0 The Second Release',
     publishedAt: now,
     repositoryName: 'another-cool-project',
@@ -99,7 +101,7 @@ const mockReleases: Release[] = [
       avatarUrl: 'https://example.com/avatar2.png',
       key: 'jane-doe',
       contributionsCount: 0,
-      createdAt: 0,
+      createdAt: '1970-01-01T00:00:00.000Z',
       followersCount: 0,
       followingCount: 0,
       publicRepositoriesCount: 0,
@@ -209,7 +211,29 @@ describe('RecentReleases Component', () => {
     // Should still render the release name
     expect(screen.getByText('v1.0 The First Release')).toBeInTheDocument()
     // Should handle missing author gracefully
-    expect(screen.getByAltText('testuser')).toBeInTheDocument()
+    expect(screen.getByAltText("testuser's avatar")).toBeInTheDocument()
+  })
+
+  it('should handle releases with author object but missing name and login', () => {
+    const releasesWithEmptyAuthor = [
+      {
+        ...mockReleases[0],
+        author: {
+          ...mockReleases[0].author,
+          name: '',
+          login: '',
+        },
+      },
+    ]
+
+    act(() => {
+      render(<RecentReleases data={releasesWithEmptyAuthor} />)
+    })
+
+    // Should still render the release name
+    expect(screen.getByText('v1.0 The First Release')).toBeInTheDocument()
+    // Should render fallback alt text because both name and login are missing
+    expect(screen.getByAltText('Release author avatar')).toBeInTheDocument()
   })
 
   it('should handle releases with missing repository information', () => {
@@ -278,7 +302,7 @@ describe('RecentReleases Component', () => {
     })
 
     // Check for proper alt text on images
-    const authorImage = screen.getByAltText('Test User')
+    const authorImage = screen.getByAltText("Test User's avatar")
     expect(authorImage).toBeInTheDocument()
 
     // Check for proper link roles
@@ -359,7 +383,7 @@ describe('RecentReleases Component', () => {
 
     // Check for main card structure - look for the card wrapper
     const cardElement = container.querySelector(
-      '.mb-4.w-full.rounded-lg.bg-gray-200.p-4.dark\\:bg-gray-700'
+      String.raw`.mb-4.w-full.rounded-lg.bg-gray-200.p-4.dark\:bg-gray-700`
     )
     expect(cardElement).toBeInTheDocument()
 

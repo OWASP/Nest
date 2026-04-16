@@ -17,7 +17,7 @@ export function generateSeoMetadata({
   title,
   description,
   canonicalPath,
-  ogImage = 'https://nest.owasp.org/img/owasp_icon_white_background.png',
+  ogImage = 'https://nest.owasp.org/img/nest_1200x630_light.png',
   keywords = [],
   type = 'website',
   locale = 'en_US',
@@ -65,7 +65,10 @@ export function generateSeoMetadata({
   }
 }
 
-export function getStaticMetadata(pageKey, canonicalPath?: string): Metadata {
+export function getStaticMetadata(
+  pageKey: keyof typeof METADATA_CONFIG,
+  canonicalPath?: string
+): Metadata {
   if (!METADATA_CONFIG[pageKey]) {
     throw new Error(`No metadata configuration found for key: ${pageKey}`)
   }
@@ -76,6 +79,6 @@ export function getStaticMetadata(pageKey, canonicalPath?: string): Metadata {
     description: config.description,
     keywords: config.keywords,
     title: config.pageTitle,
-    type: config.type,
+    type: config.type as 'website' | 'article' | 'profile',
   })
 }

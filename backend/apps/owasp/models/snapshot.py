@@ -8,10 +8,19 @@ class Snapshot(models.Model):
     """Model representing a snapshot of data processing."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_snapshots"
         verbose_name_plural = "Snapshots"
 
+        indexes = [
+            models.Index(fields=["-created_at"], name="owasp_snapshot_created_at_idx"),
+            models.Index(fields=["key", "status"], name="owasp_snapshot_key_status_idx"),
+        ]
+
     class Status(models.TextChoices):
+        """Snapshot processing status choices."""
+
         PENDING = "pending", "Pending"
         PROCESSING = "processing", "Processing"
         COMPLETED = "completed", "Completed"
@@ -38,6 +47,31 @@ class Snapshot(models.Model):
     def __str__(self):
         """Return a string representation of the snapshot."""
         return self.title
+
+    @property
+    def new_chapters_count(self) -> int:
+        """Return the count of new chapters."""
+        return self.new_chapters.count()
+
+    @property
+    def new_issues_count(self) -> int:
+        """Return the count of new issues."""
+        return self.new_issues.count()
+
+    @property
+    def new_projects_count(self) -> int:
+        """Return the count of new projects."""
+        return self.new_projects.count()
+
+    @property
+    def new_releases_count(self) -> int:
+        """Return the count of new releases."""
+        return self.new_releases.count()
+
+    @property
+    def new_users_count(self) -> int:
+        """Return the count of new users."""
+        return self.new_users.count()
 
     def save(self, *args, **kwargs) -> None:
         """Save the snapshot instance."""

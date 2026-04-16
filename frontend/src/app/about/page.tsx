@@ -1,96 +1,184 @@
 'use client'
-import { useQuery } from '@apollo/client'
-import {
-  faCircleCheck,
-  faClock,
-  faUserGear,
-  faMapSigns,
-  faScroll,
-  faUsers,
-  faTools,
-  faArrowUpRightFromSquare,
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+import { useQuery } from '@apollo/client/react'
 import { Tooltip } from '@heroui/tooltip'
 import upperFirst from 'lodash/upperFirst'
+import millify from 'millify'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FaMapSigns, FaTools } from 'react-icons/fa'
+import { FaCircleCheck, FaClock, FaScroll, FaBullseye, FaUser, FaUsersGear } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_METADATA, GET_TOP_CONTRIBUTORS } from 'server/queries/projectQueries'
-import { GET_LEADER_DATA } from 'server/queries/userQueries'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
-import type { User } from 'types/user'
-import { aboutText, technologies } from 'utils/aboutData'
+import { GetAboutPageDataDocument } from 'types/__generated__/aboutQueries.generated'
+import type { ProjectTimeline } from 'types/about'
+import type { Leader } from 'types/leader'
+import {
+  technologies,
+  missionContent,
+  keyFeatures,
+  getInvolvedContent,
+  projectTimeline,
+  projectStory,
+} from 'utils/aboutData'
+import { getMemberUrl } from 'utils/urlFormatter'
 import AnchorTitle from 'components/AnchorTitle'
-import AnimatedCounter from 'components/AnimatedCounter'
-import LoadingSpinner from 'components/LoadingSpinner'
+import ContributorsList from 'components/ContributorsList'
+import Leaders from 'components/Leaders'
 import Markdown from 'components/MarkdownWrapper'
 import SecondaryCard from 'components/SecondaryCard'
-import TopContributorsList from 'components/TopContributorsList'
-import UserCard from 'components/UserCard'
+import ShowMoreButton from 'components/ShowMoreButton'
+import AboutSkeleton from 'components/skeletons/AboutSkeleton'
 
 const leaders = {
   arkid15r: 'CCSP, CISSP, CSSLP',
   kasya: 'CC',
   mamicidal: 'CISSP',
 }
+
+const MILESTONE_LIMIT = 3
+
 const projectKey = 'nest'
 
+const getMilestoneStatus = (progress: number): string => {
+  if (progress === 100) {
+    return 'Completed'
+  }
+  if (progress > 0) {
+    return 'In Progress'
+  }
+  return 'Not Started'
+}
+
+const getMilestoneIcon = (progress: number) => {
+  if (progress === 100) {
+    return FaCircleCheck
+  }
+  if (progress > 0) {
+    return FaUsersGear
+  }
+  return FaClock
+}
+
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
+const INITIAL_YEAR_COUNT = 2
+
+const getMonthShortName = (yearStr: string) => {
+  return yearStr.split(' ')[0].substring(0, 3)
+}
+
+const getTimelineYear = (yearStr: string) => yearStr.split(' ').pop() || ''
+
+const getMonthIndex = (yearStr: string) => {
+  const month = yearStr.split(' ')[0]
+  const idx = MONTHS.indexOf(month)
+  return idx === -1 ? 0 : idx
+}
+
+type YearGroup = {
+  year: string
+  milestones: ProjectTimeline[]
+}
+
+const groupByYear = (milestones: ProjectTimeline[]): YearGroup[] => {
+  const groups: Record<string, { milestone: ProjectTimeline; idx: number }[]> = {}
+
+  milestones.forEach((m, idx) => {
+    const year = getTimelineYear(m.year)
+    if (!groups[year]) groups[year] = []
+    groups[year].push({ milestone: m, idx })
+  })
+
+  return Object.entries(groups)
+    .sort(([a], [b]) => Number(b) - Number(a))
+    .map(([year, items]) => ({
+      year,
+      milestones: [...items]
+        .sort(
+          (a, b) =>
+            getMonthIndex(b.milestone.year) - getMonthIndex(a.milestone.year) || b.idx - a.idx
+        )
+        .map(({ milestone }) => milestone),
+    }))
+}
+
 const About = () => {
-  const { data: projectMetadataResponse, error: projectMetadataRequestError } = useQuery(
-    GET_PROJECT_METADATA,
-    {
-      variables: { key: projectKey },
-    }
-  )
+  const { data, loading, error } = useQuery(GetAboutPageDataDocument, {
+    variables: {
+      projectKey,
+      excludedUsernames: Object.keys(leaders),
+      hasFullName: true,
+      limit: 24,
+      leader1: 'arkid15r',
+      leader2: 'kasya',
+      leader3: 'mamicidal',
+    },
+  })
 
-  const { data: topContributorsResponse, error: topContributorsRequestError } = useQuery(
-    GET_TOP_CONTRIBUTORS,
-    {
-      variables: {
-        excludedUsernames: Object.keys(leaders),
-        hasFullName: true,
-        key: projectKey,
-        limit: 24,
-      },
-    }
-  )
+  // Derive data directly from response to prevent race conditions.
+  const projectMetadata = data?.project
+  const topContributors = data?.topContributors
 
-  const [projectMetadata, setProjectMetadata] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
+  const leadersData = [data?.leader1, data?.leader2, data?.leader3]
+    .filter(Boolean)
+    .map((user) => ({
+      description: user?.login ? leaders[user.login as keyof typeof leaders] : '',
+      memberName: user?.name || user?.login,
+      member: user,
+    }))
+    .filter((leader) => leader.memberName) as Leader[]
+
+  const [showAllRoadmap, setShowAllRoadmap] = useState(false)
+  const [showAllTimeline, setShowAllTimeline] = useState(false)
+  const [fillPercent, setFillPercent] = useState(0)
+  const timelineRef = useRef<HTMLDivElement>(null)
+  const yearGroups = useMemo(() => groupByYear(projectTimeline), [])
+  const visibleYearGroups = showAllTimeline ? yearGroups : yearGroups.slice(0, INITIAL_YEAR_COUNT)
+
+  const updateProgress = useCallback(() => {
+    const el = timelineRef.current
+    if (!el) return
+
+    const rect = el.getBoundingClientRect()
+    const viewportH = window.innerHeight
+    const start = viewportH * 0.8
+    const end = viewportH * 0.5
+    const progress = (start - rect.top) / (start - end + rect.height)
+    setFillPercent(Math.min(1, Math.max(0, progress)))
+  }, [])
 
   useEffect(() => {
-    if (projectMetadataResponse?.project) {
-      setProjectMetadata(projectMetadataResponse.project)
-    }
-
-    if (projectMetadataRequestError) {
-      handleAppError(projectMetadataRequestError)
-    }
-  }, [projectMetadataResponse, projectMetadataRequestError])
+    updateProgress()
+    window.addEventListener('scroll', updateProgress, { passive: true })
+    return () => window.removeEventListener('scroll', updateProgress)
+  }, [updateProgress, visibleYearGroups.length])
 
   useEffect(() => {
-    if (topContributorsResponse?.topContributors) {
-      setTopContributors(topContributorsResponse.topContributors)
+    if (error) {
+      handleAppError(error)
     }
+  }, [error])
 
-    if (topContributorsRequestError) {
-      handleAppError(topContributorsRequestError)
-    }
-  }, [topContributorsResponse, topContributorsRequestError])
-
-  const isLoading =
-    !projectMetadataResponse ||
-    !topContributorsResponse ||
-    (projectMetadataRequestError && !projectMetadata) ||
-    (topContributorsRequestError && !topContributors)
+  const isLoading = loading
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <AboutSkeleton />
   }
 
   if (!projectMetadata || !topContributors) {
@@ -107,35 +195,40 @@ const About = () => {
     <div className="min-h-screen p-8 text-gray-600 dark:bg-[#212529] dark:text-gray-300">
       <div className="mx-auto max-w-6xl">
         <h1 className="mt-4 mb-6 text-4xl font-bold">About</h1>
-        <SecondaryCard icon={faScroll} title={<AnchorTitle title="History" />}>
-          {aboutText.map((text) => (
-            <div key={text} className="mb-4">
-              <div key={text}>
-                <Markdown content={text} />
-              </div>
-            </div>
-          ))}
-        </SecondaryCard>
+        <div className="grid gap-0 md:grid-cols-2 md:gap-6">
+          <SecondaryCard icon={FaBullseye} title={<AnchorTitle title="Our Mission" />}>
+            <p className="text-gray-600 dark:text-gray-300">{missionContent.mission}</p>
+          </SecondaryCard>
 
-        <SecondaryCard icon={faArrowUpRightFromSquare} title={<AnchorTitle title="Leaders" />}>
-          <div className="flex w-full flex-col items-center justify-around overflow-hidden md:flex-row">
-            {Object.keys(leaders).map((username) => (
-              <div key={username}>
-                <LeaderData username={username} />
+          <SecondaryCard icon={FaUser} title={<AnchorTitle title="Who It's For" />}>
+            <p className="text-gray-600 dark:text-gray-300">{missionContent.whoItsFor}</p>
+          </SecondaryCard>
+        </div>
+
+        <SecondaryCard icon={FaCircleCheck} title={<AnchorTitle title="Key Features" />}>
+          <div className="grid gap-4 md:grid-cols-2">
+            {keyFeatures.map((feature) => (
+              <div key={feature.title} className="rounded-lg bg-gray-200 p-4 dark:bg-gray-700">
+                <h3 className="mb-2 text-lg font-semibold text-blue-400">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
               </div>
             ))}
           </div>
         </SecondaryCard>
 
+        <Leaders users={leadersData} />
+
         {topContributors && (
-          <TopContributorsList
+          <ContributorsList
             contributors={topContributors}
-            icon={faUsers}
+            icon={HiUserGroup}
+            title="Wall of Fame"
             maxInitialDisplay={12}
+            getUrl={getMemberUrl}
           />
         )}
 
-        <SecondaryCard icon={faTools} title={<AnchorTitle title="Technologies & Tools" />}>
+        <SecondaryCard icon={FaTools} title={<AnchorTitle title="Technologies & Tools" />}>
           <div className="w-full">
             <div className="grid w-full grid-cols-1 justify-center sm:grid-cols-2 lg:grid-cols-4 lg:pl-8">
               {technologies.map((tech) => (
@@ -168,73 +261,151 @@ const About = () => {
           </div>
         </SecondaryCard>
 
+        <SecondaryCard icon={FaUsersGear} title={<AnchorTitle title="Get Involved" />}>
+          <p className="mb-2 text-gray-600 dark:text-gray-300">{getInvolvedContent.description}</p>
+          <ul className="mb-6 list-inside list-disc space-y-2 pl-4">
+            {getInvolvedContent.ways.map((way) => (
+              <li key={way} className="pb-1 text-gray-600 dark:text-gray-300">
+                {way}
+              </li>
+            ))}
+          </ul>
+          <Markdown content={getInvolvedContent.callToAction} />
+        </SecondaryCard>
+
         {projectMetadata.recentMilestones.length > 0 && (
-          <SecondaryCard icon={faMapSigns} title={<AnchorTitle title="Roadmap" />}>
-            <div className="grid gap-4">
-              {[...projectMetadata.recentMilestones]
+          <SecondaryCard icon={FaMapSigns} title={<AnchorTitle title="Roadmap" />}>
+            {(() => {
+              const filteredMilestones = [...projectMetadata.recentMilestones]
                 .filter((milestone) => milestone.state !== 'closed')
                 .sort((a, b) => (a.title > b.title ? 1 : -1))
-                .map((milestone, index) => (
-                  <div
-                    key={milestone.url || milestone.title || index}
-                    className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
-                  >
-                    <div className="flex-1">
-                      <Link
-                        href={milestone.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block"
-                      >
-                        <h3 className="mb-2 text-xl font-semibold text-blue-400">
-                          {milestone.title}
-                          <Tooltip
-                            closeDelay={100}
-                            content={
-                              milestone.progress === 100
-                                ? 'Completed'
-                                : milestone.progress > 0
-                                  ? 'In Progress'
-                                  : 'Not Started'
-                            }
-                            id={`tooltip-state-${index}`}
-                            delay={100}
-                            placement="top"
-                            showArrow
-                          >
-                            <span className="ml-4 inline-block text-gray-400">
-                              <FontAwesomeIcon
-                                icon={
-                                  milestone.progress === 100
-                                    ? faCircleCheck
-                                    : milestone.progress > 0
-                                      ? faUserGear
-                                      : faClock
-                                }
-                              />
-                            </span>
-                          </Tooltip>
-                        </h3>
-                      </Link>
-                      <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
-                    </div>
+              return (
+                <>
+                  <div className="grid gap-4">
+                    {filteredMilestones
+                      .slice(0, showAllRoadmap ? filteredMilestones.length : MILESTONE_LIMIT)
+                      .map((milestone, index) => (
+                        <div
+                          key={milestone.url || milestone.title || index}
+                          className="flex items-center gap-4 overflow-hidden rounded-lg bg-gray-200 p-6 dark:bg-gray-700"
+                        >
+                          <div className="flex-1">
+                            <div className="relative">
+                              <Link
+                                href={milestone.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
+                                <h3 className="mb-2 pr-8 text-xl font-semibold text-blue-400">
+                                  {milestone.title}
+                                </h3>
+                              </Link>
+                              <Tooltip
+                                closeDelay={100}
+                                content={getMilestoneStatus(milestone.progress)}
+                                id={`tooltip-state-${index}`}
+                                delay={100}
+                                placement="top"
+                                showArrow
+                              >
+                                <span className="absolute top-0 right-0 text-xl text-gray-400">
+                                  <IconWrapper icon={getMilestoneIcon(milestone.progress)} />
+                                </span>
+                              </Tooltip>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-300">{milestone.body}</p>
+                          </div>
+                        </div>
+                      ))}
                   </div>
-                ))}
-            </div>
+                  {filteredMilestones.length > MILESTONE_LIMIT && (
+                    <ShowMoreButton onToggle={() => setShowAllRoadmap(!showAllRoadmap)} />
+                  )}
+                </>
+              )
+            })()}
           </SecondaryCard>
         )}
+        <SecondaryCard icon={FaScroll} title={<AnchorTitle title="Our Story" />}>
+          {projectStory.map((text) => (
+            <div key={`story-${text.substring(0, 50).replaceAll(' ', '-')}`} className="mb-4">
+              <div>
+                <Markdown content={text} />
+              </div>
+            </div>
+          ))}
+        </SecondaryCard>
+        <SecondaryCard icon={FaClock} title={<AnchorTitle title="Project Timeline" />}>
+          <div ref={timelineRef} className="relative ml-3 md:ml-5">
+            <div
+              aria-hidden="true"
+              className="absolute top-0 bottom-0 left-0 w-0.5 bg-gray-300 dark:bg-gray-500"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute top-0 left-0 w-0.5 origin-top bg-blue-400"
+              style={{ height: `${fillPercent * 100}%` }}
+            />
 
-        <div className="grid gap-6 md:grid-cols-4">
+            {visibleYearGroups.map((group, groupIdx) => (
+              <div
+                key={group.year}
+                className={groupIdx === visibleYearGroups.length - 1 ? '' : 'mb-8'}
+              >
+                <div className="relative flex items-center">
+                  <div
+                    aria-hidden="true"
+                    className="absolute left-0 z-10 h-3.5 w-3.5 -translate-x-[6px] rounded-full border-2 border-blue-400 bg-blue-100 dark:bg-blue-300"
+                  />
+                </div>
+
+                <div className="ml-5 rounded-lg bg-gray-200 p-4 md:p-6 dark:bg-gray-700">
+                  <span className="mb-3 inline-block rounded-full border border-blue-200 bg-blue-50 px-3 py-0.5 text-sm font-semibold text-blue-400 dark:border-blue-400/30 dark:bg-blue-400/10">
+                    {group.year}
+                  </span>
+
+                  <div className="space-y-2">
+                    {group.milestones.map((milestone) => (
+                      <div
+                        key={`${milestone.year}-${milestone.title}`}
+                        className="flex cursor-default items-start gap-4 rounded-md px-3 py-1.5 transition-all hover:bg-gray-300/50 dark:hover:bg-gray-600/50"
+                      >
+                        <span className="w-10 shrink-0 pt-0.5 text-sm font-semibold text-blue-400">
+                          {getMonthShortName(milestone.year)}
+                        </span>
+                        <div className="min-w-0">
+                          <span className="font-semibold text-gray-700 dark:text-gray-200">
+                            {milestone.title}
+                          </span>
+                          <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-300">
+                            {milestone.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {yearGroups.length > INITIAL_YEAR_COUNT && (
+            <ShowMoreButton onToggle={() => setShowAllTimeline(!showAllTimeline)} />
+          )}
+        </SecondaryCard>
+
+        <div className="grid gap-0 md:grid-cols-4 md:gap-6">
           {[
             { label: 'Forks', value: projectMetadata.forksCount },
             { label: 'Stars', value: projectMetadata.starsCount },
             { label: 'Contributors', value: projectMetadata.contributorsCount },
             { label: 'Open Issues', value: projectMetadata.issuesCount },
-          ].map((stat, index) => (
-            <div key={index}>
+          ].map((stat) => (
+            <div key={stat.label}>
               <SecondaryCard className="text-center">
                 <div className="mb-2 text-3xl font-bold text-blue-400">
-                  <AnimatedCounter end={Math.floor(stat.value / 10) * 10} duration={2} />+
+                  {millify(Math.floor(stat.value / 10 || 0) * 10)}+
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">{stat.label}</div>
               </SecondaryCard>
@@ -243,42 +414,6 @@ const About = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-const LeaderData = ({ username }: { username: string }) => {
-  const { data, loading, error } = useQuery(GET_LEADER_DATA, {
-    variables: { key: username },
-  })
-  const router = useRouter()
-
-  if (loading) return <p>Loading {username}...</p>
-  if (error) return <p>Error loading {username}'s data</p>
-
-  const user = data?.user
-
-  if (!user) {
-    return <p>No data available for {username}</p>
-  }
-
-  const handleButtonClick = (user: User) => {
-    router.push(`/members/${user.login}`)
-  }
-
-  return (
-    <UserCard
-      avatar={user.avatarUrl}
-      button={{
-        icon: <FontAwesomeIconWrapper icon="fa-solid fa-right-to-bracket" />,
-        label: 'View Profile',
-        onclick: () => handleButtonClick(user),
-      }}
-      className="h-64 w-40 bg-inherit"
-      company={user.company}
-      description={leaders[user.login]}
-      location={user.location}
-      name={user.name || username}
-    />
   )
 }
 

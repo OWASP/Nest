@@ -1,48 +1,59 @@
 'use client'
-import { useQuery } from '@apollo/client'
-import {
-  faCodeFork,
-  faExclamationCircle,
-  faFolderOpen,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
+import { useQuery } from '@apollo/client/react'
 import upperFirst from 'lodash/upperFirst'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeFork, FaFolderOpen, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROJECT_DATA } from 'server/queries/projectQueries'
-import type { Contributor } from 'types/contributor'
-import type { Project } from 'types/project'
-import { formatDate } from 'utils/dateFormatter'
+import { GetProjectDocument } from 'types/__generated__/projectQueries.generated'
+import type { HealthMetricsProps } from 'types/healthMetrics'
+import type { Issue } from 'types/issue'
+import type { Milestone } from 'types/milestone'
+import type { RepositoryCardProps } from 'types/project'
+import type { PullRequest } from 'types/pullRequest'
+import type { Release } from 'types/release'
+import { getContributionStats } from 'utils/contributionDataUtils'
+import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+
 const ProjectDetailsPage = () => {
-  const { projectKey } = useParams()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [project, setProject] = useState<Project | null>(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const { data, error: graphQLRequestError } = useQuery(GET_PROJECT_DATA, {
+  const { projectKey } = useParams<{ projectKey: string }>()
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetProjectDocument, {
     variables: { key: projectKey },
   })
+
+  const project = data?.project
+  const topContributors = data?.topContributors || []
+
   useEffect(() => {
-    if (data) {
-      setProject(data.project)
-      setTopContributors(data.topContributors)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [data, graphQLRequestError, projectKey])
+  }, [graphQLRequestError])
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  if (!project)
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading project"
+        message="An error occurred while loading the project data"
+      />
+    )
+  }
+
+  if (!data || !project) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -50,6 +61,7 @@ const ProjectDetailsPage = () => {
         message="Sorry, the project you're looking for doesn't exist"
       />
     )
+  }
   const projectDetails = [
     { label: 'Last Updated', value: formatDate(project.updatedAt) },
     { label: 'Leaders', value: project.leaders.join(', ') },
@@ -68,38 +80,50 @@ const ProjectDetailsPage = () => {
     },
   ]
   const projectStats = [
-    { icon: faStar, value: project.starsCount, unit: 'Star' },
-    { icon: faCodeFork, value: project.forksCount, unit: 'Fork' },
+    { icon: FaStar, value: project.starsCount, unit: 'Star' },
+    { icon: FaCodeFork, value: project.forksCount, unit: 'Fork' },
     {
-      icon: faUsers,
+      icon: HiUserGroup,
       value: project.contributorsCount,
       unit: 'Contributor',
     },
     {
-      icon: faExclamationCircle,
+      icon: FaExclamationCircle,
       value: project.issuesCount,
       unit: 'Issue',
     },
     {
-      icon: faFolderOpen,
+      icon: FaFolderOpen,
       value: project.repositoriesCount,
       unit: 'Repository',
       pluralizedName: 'Repositories',
     },
   ]
 
+  const { startDate, endDate } = getDateRange({ years: 1 })
+
+  const contributionStats = getContributionStats(
+    project.contributionStats,
+    project.contributionData
+  )
+
   return (
     <DetailsCard
+      contributionData={project.contributionData}
+      contributionStats={contributionStats}
       details={projectDetails}
+      endDate={endDate}
       entityKey={project.key}
-      healthMetricsData={project.healthMetricsList}
+      entityLeaders={project.entityLeaders}
+      healthMetricsData={project.healthMetricsList as unknown as HealthMetricsProps[]}
       isActive={project.isActive}
       languages={project.languages}
-      pullRequests={project.recentPullRequests}
-      recentIssues={project.recentIssues}
-      recentMilestones={project.recentMilestones}
-      recentReleases={project.recentReleases}
-      repositories={project.repositories}
+      pullRequests={project.recentPullRequests as unknown as PullRequest[]}
+      recentIssues={project.recentIssues as unknown as Issue[]}
+      recentMilestones={project.recentMilestones as unknown as Milestone[]}
+      recentReleases={project.recentReleases as unknown as Release[]}
+      repositories={project.repositories as unknown as RepositoryCardProps[]}
+      startDate={startDate}
       stats={projectStats}
       summary={project.summary}
       title={project.name}

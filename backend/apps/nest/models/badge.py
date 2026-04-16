@@ -10,7 +10,19 @@ from apps.common.models import BulkSaveModel, TimestampedModel
 class Badge(BulkSaveModel, TimestampedModel):
     """Represents a user badge for roles or achievements."""
 
+    class BadgeCssClass(models.TextChoices):
+        """Badge icon CSS class choices."""
+
+        AWARD = "award", "Award"
+        BUG_SLASH = "bug_slash", "Bug Slash"
+        CERTIFICATE = "certificate", "Certificate"
+        MEDAL = "medal", "Medal"
+        RIBBON = "ribbon", "Ribbon"
+        STAR = "star", "Star"
+
     class Meta:
+        """Model options."""
+
         db_table = "nest_badges"
         ordering = ["weight", "name"]
         verbose_name_plural = "Badges"
@@ -18,7 +30,8 @@ class Badge(BulkSaveModel, TimestampedModel):
     css_class = models.CharField(
         verbose_name="CSS Class",
         max_length=255,
-        default="",
+        choices=BadgeCssClass.choices,
+        default=BadgeCssClass.MEDAL,
     )
     description = models.CharField(
         verbose_name="Description",

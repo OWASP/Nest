@@ -7,28 +7,6 @@ jest.mock('@heroui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
-jest.mock('next/link', () => {
-  return ({
-    children,
-    href,
-    onClick,
-  }: {
-    children: React.ReactNode
-    href: string
-    onClick?: () => void
-  }) => (
-    <a
-      href={href}
-      onClick={(e) => {
-        e.preventDefault()
-        onClick?.()
-      }}
-    >
-      {children}
-    </a>
-  )
-})
-
 describe('ActionButton', () => {
   afterEach(() => {
     cleanup()
@@ -118,7 +96,7 @@ describe('ActionButton', () => {
     }).not.toThrow()
   })
 
-  it(`changes background and text color on hover`, async () => {
+  it('changes background and text color on hover', async () => {
     const user = userEvent.setup()
     render(<ActionButton>Test Button</ActionButton>)
     const button = screen.getByRole('button')

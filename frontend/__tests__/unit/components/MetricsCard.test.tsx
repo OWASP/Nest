@@ -39,12 +39,12 @@ describe('MetricsCard component', () => {
     const metric = makeMetric()
     render(<MetricsCard metric={metric} />)
 
-    expect(screen.getByText('Test Project')).toBeInTheDocument()
-    expect(screen.getByText('42')).toBeInTheDocument()
-    expect(screen.getByText('13')).toBeInTheDocument()
-    expect(screen.getByText('5')).toBeInTheDocument()
-    expect(screen.getByText('Mar 25, 2023')).toBeInTheDocument()
-    expect(screen.getByText('80')).toBeInTheDocument()
+    expect(screen.getAllByText('Test Project')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('42')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('13')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('5')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('Mar 25, 2023')[0]).toBeInTheDocument()
+    expect(screen.getByText(/Score:/)).toBeInTheDocument()
 
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', '/projects/dashboard/metrics/test-project')
@@ -53,31 +53,35 @@ describe('MetricsCard component', () => {
   it('renders "No name" placeholder when projectName is empty', () => {
     const metric = makeMetric({ projectName: '' })
     render(<MetricsCard metric={metric} />)
-    expect(screen.getByText('No name')).toBeInTheDocument()
+    expect(screen.getAllByText('No name')[0]).toBeInTheDocument()
   })
 
   it('applies correct styling class depending on score thresholds', () => {
     const cases: Array<[number, string]> = [
-      [90, 'text-green-900'],
-      [75, 'text-green-900'],
-      [60, 'text-orange-900'],
-      [50, 'text-orange-900'],
-      [30, 'text-red-900'],
+      [90, 'bg-green-500'],
+      [75, 'bg-green-500'],
+      [60, 'bg-orange-500'],
+      [50, 'bg-orange-500'],
+      [74, 'bg-orange-500'],
+      [30, 'bg-red-500'],
     ]
 
-    cases.forEach(([score, expectedClass]) => {
+    for (const [score, expectedClass] of cases) {
       const metric = makeMetric({ score })
-      render(<MetricsCard metric={metric} />)
-      const scoreEl = screen.getByText(score.toString()).closest('div')
+      const { unmount } = render(<MetricsCard metric={metric} />)
+      const scoreText = screen.getByText(/Score:/)
+      const scoreEl = scoreText.closest('div')
       expect(scoreEl).toHaveClass(expectedClass)
-    })
+      unmount()
+    }
   })
 
   it('updates displayed values and link when metric props change via rerender', () => {
     const { rerender } = render(<MetricsCard metric={makeMetric()} />)
-    expect(screen.getByText('Test Project')).toBeInTheDocument()
-    expect(screen.getByText('80')).toBeInTheDocument()
+    expect(screen.getAllByText('Test Project')[0]).toBeInTheDocument()
+    expect(screen.getByText(/Score:/).textContent).toContain('80')
 
+    // Use midday UTC so the formatted date is in 2024 in all timezones
     const updated = makeMetric({
       projectKey: 'another',
       projectName: 'Another Project',
@@ -85,16 +89,31 @@ describe('MetricsCard component', () => {
       forksCount: 20,
       contributorsCount: 7,
       score: 55,
-      createdAt: '2024-01-01T00:00:00Z',
+      createdAt: '2024-06-15T12:00:00Z',
     })
     rerender(<MetricsCard metric={updated} />)
 
-    expect(screen.getByText('Another Project')).toBeInTheDocument()
-    expect(screen.getByText('99')).toBeInTheDocument()
-    expect(screen.getByText('20')).toBeInTheDocument()
-    expect(screen.getByText('7')).toBeInTheDocument()
-    expect(screen.getByText('Jan 1, 2024')).toBeInTheDocument()
-    expect(screen.getByText('55')).toBeInTheDocument()
+    expect(screen.getAllByText('Another Project')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('99')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('20')[0]).toBeInTheDocument()
+    expect(screen.getAllByText('7')[0]).toBeInTheDocument()
+    // Date format is locale-dependent; assert the year is shown
+    expect(screen.getByText('Health Checked').closest('div')).toHaveTextContent(/2024/)
+    expect(screen.getByText(/Score:/).textContent).toContain('55')
     expect(screen.getByRole('link')).toHaveAttribute('href', '/projects/dashboard/metrics/another')
+  })
+
+  it('handles undefined optional props using defaults', () => {
+    const metric = makeMetric({
+      score: undefined,
+      createdAt: undefined,
+    })
+    render(<MetricsCard metric={metric} />)
+
+    const scoreText = screen.getByText(/Score: 0/)
+    expect(scoreText).toBeInTheDocument()
+    expect(scoreText.closest('div')).toHaveClass('bg-red-500')
+
+    expect(screen.getByText('N/A')).toBeInTheDocument()
   })
 })

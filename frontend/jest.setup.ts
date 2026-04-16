@@ -1,69 +1,122 @@
 import '@testing-library/jest-dom'
-import { TextEncoder } from 'util'
+import { toHaveNoViolations } from 'jest-axe'
 import React from 'react'
-import 'core-js/actual/structured-clone'
 
-global.React = React
-global.TextEncoder = TextEncoder
+globalThis.React = React
 
-// Add fetch polyfill for jsdom test environment
-// Node.js 18+ has native fetch, but jsdom doesn't include it
-if (typeof global.fetch === 'undefined') {
-  // Use a simple mock fetch for testing
-  global.fetch = jest.fn().mockResolvedValue({
-    ok: true,
-    status: 200,
-    statusText: 'OK',
-    headers: new Headers(),
-    url: '',
-    redirected: false,
-    type: 'basic' as const,
-    json: () => Promise.resolve({}),
-    text: () => Promise.resolve(''),
-    blob: () => Promise.resolve(new Blob()),
-    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-    formData: () => Promise.resolve(new FormData()),
-    clone: () => ({}) as Response,
-    body: null,
-    bodyUsed: false,
-  } as Response)
-}
+// Mock framer-motion due to how Jest 30 ESM resolution treats
+// motion-dom's internal .mjs imports as "outside test scope".
+jest.mock('framer-motion', () => {
+  return {
+    ...jest.requireActual('framer-motion'),
+    LazyMotion: ({ children }) => children,
+  }
+})
 
 jest.mock('next-auth/react', () => {
   return {
     ...jest.requireActual('next-auth/react'),
     useSession: () => ({
       data: {
-        user: { name: 'Test User', email: 'test@example.com', login: 'testuser', isLeader: true },
         expires: '2099-01-01T00:00:00.000Z',
+        user: { name: 'Test User', email: 'test@example.com', login: 'testuser', isLeader: true },
       },
-      status: 'authenticated',
       loading: false,
+      status: 'authenticated',
     }),
   }
 })
 
-if (!global.structuredClone) {
-  global.structuredClone = (val) => JSON.parse(JSON.stringify(val))
-}
+jest.mock('next/navigation', () => {
+  const actual = jest.requireActual('next/navigation')
+  const back = jest.fn()
+  const forward = jest.fn()
+  const prefetch = jest.fn()
+  const push = jest.fn()
+  const replace = jest.fn()
+
+  const mockRouter = { push, replace, prefetch, back, forward }
+
+  return {
+    ...actual,
+    useParams: jest.fn(() => ({})),
+    usePathname: jest.fn(() => '/'),
+    useRouter: jest.fn(() => mockRouter),
+    useSearchParams: jest.fn(() => new URLSearchParams()),
+  }
+})
+
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: function MockedLink({
+    children,
+    href,
+    className,
+    onClick,
+    ...props
+  }: {
+    children: React.ReactNode
+    href?: string
+    className?: string
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void
+    [key: string]: unknown
+  }) {
+    return React.createElement(
+      'a',
+      {
+        href,
+        className,
+        ...props,
+        onClick: (e) => {
+          e.preventDefault()
+          onClick?.(e as React.MouseEvent<HTMLAnchorElement>)
+        },
+      },
+      children
+    )
+  },
+}))
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({
+    src,
+    alt,
+    fill,
+    objectFit,
+    ...props
+  }: {
+    src: string
+    alt: string
+    fill?: boolean
+    objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
+    [key: string]: unknown
+  }) =>
+    React.createElement('img', {
+      src,
+      alt,
+      style: fill ? { objectFit: objectFit as React.CSSProperties['objectFit'] } : undefined,
+      ...props,
+    }),
+}))
 
 beforeAll(() => {
-  if (typeof window !== 'undefined') {
-    jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+  if (globalThis !== undefined) {
+    jest.spyOn(globalThis, 'requestAnimationFrame').mockImplementation((cb) => {
       return setTimeout(cb, 0)
     })
 
-    Object.defineProperty(window, 'runAnimationFrameCallbacks', {
+    Object.defineProperty(globalThis, 'runAnimationFrameCallbacks', {
       value: () => {},
       configurable: true,
       writable: true,
     })
   }
 
-  global.ResizeObserver = class {
-    disconnect() {}
-    observe() {}
-    unobserve() {}
+  globalThis.ResizeObserver = class {
+    disconnect = jest.fn()
+    observe = jest.fn()
+    unobserve = jest.fn()
   }
 })
 
@@ -72,7 +125,7 @@ beforeEach(() => {
     throw new Error(`Console error: ${args.join(' ')}`)
   })
 
-  jest.spyOn(global.console, 'warn').mockImplementation((message) => {
+  jest.spyOn(globalThis.console, 'warn').mockImplementation((message) => {
     if (
       typeof message === 'string' &&
       message.includes('[@zag-js/dismissable] node is `null` or `undefined`')
@@ -81,20 +134,48 @@ beforeEach(() => {
     }
   })
 
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(globalThis, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
       addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
+      addListener: jest.fn(),
       dispatchEvent: jest.fn(),
+      removeEventListener: jest.fn(),
+      removeListener: jest.fn(),
     })),
   })
 
-  global.runAnimationFrameCallbacks = jest.fn()
-  global.removeAnimationFrameCallbacks = jest.fn()
+  globalThis.removeAnimationFrameCallbacks = jest.fn()
+  globalThis.runAnimationFrameCallbacks = jest.fn()
 })
+
+jest.mock('next-themes', () => ({
+  useTheme: jest.fn(() => ({ theme: 'light', setTheme: jest.fn() })),
+  ThemeProvider: ({ children }: { children: React.ReactNode }) =>
+    React.createElement('div', null, children),
+}))
+
+jest.mock('ics', () => {
+  return {
+    __esModule: true,
+    createEvent: jest.fn(),
+  }
+})
+
+jest.mock('@apollo/client/react', () => {
+  const actual = jest.requireActual('@apollo/client/react')
+  const mockUseMutation = jest.fn(() => [
+    jest.fn().mockResolvedValue({ data: {} }),
+    { data: null, loading: false, error: null, called: false },
+  ])
+
+  return {
+    ...actual,
+    useMutation: mockUseMutation,
+  }
+})
+
+expect.extend(toHaveNoViolations)

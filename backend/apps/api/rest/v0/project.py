@@ -4,66 +4,120 @@ from datetime import datetime
 from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Path, Query, Router, Schema
+from ninja import Field, FilterSchema, Path, Query, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import RouterPaginated
 from ninja.responses import Response
 
-from apps.owasp.models.enums.project import ProjectLevel
-from apps.owasp.models.project import Project
+from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import Leader, ValidationErrorSchema
+from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
+from apps.owasp.models.enums.project import ProjectLevel, ProjectType
+from apps.owasp.models.project import Project as ProjectModel
 
-router = Router()
+PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
+    "name": {
+        "type": "string",
+        "lookup": "icontains",
+    },
+    "stars": {
+        "type": "number",
+        "field": "stars_count",
+    },
+}
+
+router = RouterPaginated(tags=["Projects"])
 
 
-class ProjectErrorResponse(Schema):
-    """Project error response schema."""
+class ProjectBase(Schema):
+    """Base schema for Project (used in list endpoints)."""
+
+    created_at: datetime
+    key: str
+    level: ProjectLevel
+    name: str
+    type: ProjectType
+    updated_at: datetime
+
+    @staticmethod
+    def resolve_key(obj: ProjectModel) -> str:
+        """Resolve key."""
+        return obj.nest_key
+
+
+class Project(ProjectBase):
+    """Schema for Project (minimal fields for list display)."""
+
+
+class ProjectDetail(ProjectBase):
+    """Detail schema for Project (used in single item endpoints)."""
+
+    description: str
+    leaders: list[Leader]
+
+    @staticmethod
+    def resolve_leaders(obj):
+        """Resolve leaders."""
+        return [
+            Leader(key=leader.member.login if leader.member else None, name=leader.member_name)
+            for leader in obj.entity_leaders
+        ]
+
+
+class ProjectError(Schema):
+    """Project error schema."""
 
     message: str
 
 
-class ProjectFilterSchema(FilterSchema):
-    """Filter schema for Project."""
+class ProjectFilter(FilterSchema):
+    """Filter for Project."""
 
     level: ProjectLevel | None = Field(
         None,
         description="Level of the project",
     )
-
-
-class ProjectSchema(Schema):
-    """Schema for Project."""
-
-    created_at: datetime
-    description: str
-    level: ProjectLevel
-    name: str
-    updated_at: datetime
+    q: str | None = Field(
+        None,
+        description="Structured search query (e.g. 'name:security stars:>100')",
+    )
+    type: list[ProjectType] | None = Field(
+        None,
+        description="Type of the project",
+    )
 
 
 @router.get(
     "/",
     description="Retrieve a paginated list of OWASP projects.",
     operation_id="list_projects",
-    response={200: list[ProjectSchema]},
+    response=list[Project],
     summary="List projects",
-    tags=["Projects"],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+@decorate_view(cache_response())
 def list_projects(
     request: HttpRequest,
-    filters: ProjectFilterSchema = Query(...),
+    filters: ProjectFilter = Query(...),
     ordering: Literal["created_at", "-created_at", "updated_at", "-updated_at"] | None = Query(
         None,
         description="Ordering field",
-        example="-created_at",
     ),
-) -> list[ProjectSchema]:
+) -> list[Project]:
     """Get projects."""
-    return filters.filter(Project.active_projects.order_by(ordering or "-created_at"))
+    queryset = apply_structured_search(
+        queryset=ProjectModel.active_projects,
+        query=filters.q,
+        field_schema=PROJECT_SEARCH_FIELDS,
+    )
+
+    if filters.level is not None:
+        queryset = queryset.filter(level=filters.level)
+
+    if filters.type is not None:
+        queryset = queryset.filter(type__in=filters.type)
+
+    return queryset.order_by(ordering or "-level_raw", "-stars_count", "-forks_count")
 
 
 @router.get(
@@ -71,18 +125,19 @@ def list_projects(
     description="Retrieve project details.",
     operation_id="get_project",
     response={
-        HTTPStatus.NOT_FOUND: ProjectErrorResponse,
-        HTTPStatus.OK: ProjectSchema,
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
+        HTTPStatus.NOT_FOUND: ProjectError,
+        HTTPStatus.OK: ProjectDetail,
     },
     summary="Get project",
-    tags=["Projects"],
 )
+@decorate_view(cache_response())
 def get_project(
     request: HttpRequest,
     project_id: str = Path(example="Nest"),
-) -> ProjectSchema | ProjectErrorResponse:
+) -> ProjectDetail | ProjectError:
     """Get project."""
-    if project := Project.active_projects.filter(
+    if project := ProjectModel.active_projects.filter(
         key__iexact=(
             project_id if project_id.startswith("www-project-") else f"www-project-{project_id}"
         )

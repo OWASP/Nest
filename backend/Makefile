@@ -1,8 +1,26 @@
 include backend/apps/ai/Makefile
 include backend/apps/github/Makefile
+include backend/apps/mentorship/Makefile
 include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
+
+##@ Backend
+
+ifeq ($(EXEC_MODE),direct)
+SHELL := /bin/sh
+else
+SHELL := /bin/bash
+endif
+
+.PHONY: sbom-backend-image fetch-nest-dump upload-nest-dump
+
+build-backend-local-image:
+	@DOCKER_BUILDKIT=1 docker build \
+		--no-cache \
+		-f docker/backend/Dockerfile \
+		-t nest-backend-local \
+		backend
 
 clean-backend-dependencies:
 	@rm -rf backend/.cache
@@ -15,20 +33,59 @@ clean-backend-docker:
 	@docker container rm -f nest-backend >/dev/null 2>&1 || true
 	@docker container rm -f nest-cache >/dev/null 2>&1 || true
 	@docker container rm -f nest-db >/dev/null 2>&1 || true
+	@docker container rm -f nest-worker >/dev/null 2>&1 || true
+	@docker image rm -f nest-backend:base >/dev/null 2>&1 || true
 	@docker image rm -f nest-local-backend >/dev/null 2>&1 || true
+	@docker image rm -f nest-snapshot-video >/dev/null 2>&1 || true
 	@docker volume rm -f nest-local_backend-venv >/dev/null 2>&1 || true
+	@docker volume rm -f nest-local_cache-data >/dev/null 2>&1 || true
 
-create-superuser:
+create-superuser: ## Create Django admin superuser
 	@CMD="python manage.py createsuperuser" $(MAKE) exec-backend-command-it
 
 exec-backend-command:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -i nest-backend $(CMD)
+endif
 
 exec-backend-command-it:
+ifeq ($(EXEC_MODE),direct)
+	@$(CMD)
+else
 	@docker exec -it nest-backend $(CMD) 2>/dev/null
+endif
+
+exec-backend-command-e2e:
+	@docker exec -i e2e-nest-backend $(CMD)
+
+exec-backend-command-e2e-it:
+	@docker exec -it e2e-nest-backend $(CMD)
+
+exec-backend-command-fuzz:
+	@docker exec -i fuzz-nest-backend $(CMD)
+
+exec-backend-command-fuzz-it:
+	@docker exec -it fuzz-nest-backend $(CMD)
+
+exec-db-command:
+	@docker exec -i nest-db $(CMD)
 
 exec-db-command-it:
 	@docker exec -it nest-db $(CMD)
+
+exec-db-command-e2e:
+	@docker exec -i e2e-nest-db $(CMD)
+
+exec-db-command-e2e-it:
+	@docker exec -it e2e-nest-db $(CMD)
+
+exec-db-command-fuzz:
+	@docker exec -i fuzz-nest-db $(CMD)
+
+exec-db-command-fuzz-it:
+	@docker exec -it fuzz-nest-db $(CMD)
 
 clear-cache:
 	@CMD="python manage.py clear_cache" $(MAKE) exec-backend-command
@@ -36,23 +93,17 @@ clear-cache:
 collect-static:
 	@CMD="python manage.py collectstatic --noinput" $(MAKE) exec-backend-command
 
-django-shell:
+django-shell: ## Open Django interactive shell
 	@CMD="python manage.py shell" $(MAKE) exec-backend-command-it
 
-dump-data:
+dump-data: ## Write masked database dump to backend/data/nest.dump (no S3 upload)
 	@echo "Dumping Nest data"
-	@CMD="python manage.py dumpdata \
-		github \
-		owasp \
-		slack.Conversation \
-		slack.Member \
-		slack.Workspace \
-		--indent=4 \
-		--natural-foreign \
-		--natural-primary -o data/nest.json" $(MAKE) exec-backend-command
-	@CMD="sed -E -i 's/\"email\": *\"([^\"]|\\\")*\"/\"email\": \"\"/g' data/nest.json" $(MAKE) exec-backend-command
-	@CMD="gzip -f data/nest.json" $(MAKE) exec-backend-command
+	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
+upload-nest-dump: ## Upload backend/data/nest.dump to shared S3 (host AWS creds; poetry run)
+	@cd backend && poetry run python -m scripts.upload_nest_dump
+
+enrich-data: ## Enrich data from external sources
 enrich-data: \
 	github-enrich-issues \
 	owasp-enrich-chapters \
@@ -63,48 +114,117 @@ enrich-data: \
 generate-sitemap:
 	@CMD="python manage.py generate_sitemap" $(MAKE) exec-backend-command
 
-index-data:
+index-data: ## Index data for Algolia search
 	@echo "Indexing Nest data"
 	@CMD="python manage.py algolia_reindex" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_replicas" $(MAKE) exec-backend-command
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
-load-data:
+fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
+	@cd backend && poetry run python -m scripts.fetch_nest_dump
+
+load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
-	@CMD="python manage.py load_data" $(MAKE) exec-backend-command
+	@CMD="pg_restore -U nest_user_dev -d nest_db_dev < ./backend/data/nest.dump" $(MAKE) exec-db-command
+
+load-data-e2e: fetch-nest-dump
+	@echo "Loading Nest e2e data"
+	@CMD="pg_restore -U nest_user_e2e -d nest_db_e2e < ./backend/data/nest.dump" $(MAKE) exec-db-command-e2e
+
+load-data-fuzz: fetch-nest-dump
+	@echo "Loading Nest fuzz data"
+	@CMD="pg_restore -U nest_user_fuzz -d nest_db_fuzz < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
+
+load-data-staging: fetch-nest-dump
+	@echo "Loading Nest staging data"
+	@CMD="pg_restore -U nest_user_staging -d nest_db_staging < ./backend/data/nest.dump" $(MAKE) exec-db-command-fuzz
 
 merge-migrations:
 	@CMD="python manage.py makemigrations --merge" $(MAKE) exec-backend-command
 
-migrate:
+migrate: ## Run database migrations
 	@CMD="python manage.py migrate" $(MAKE) exec-backend-command
 
-migrations:
+migrations: ## Generate new migrations
 	@CMD="python manage.py makemigrations" $(MAKE) exec-backend-command
 
-purge-data:
+migrations-empty:
+	@CMD="python manage.py makemigrations --empty $(APP_NAME)" $(MAKE) exec-backend-command
+
+purge-data: ## Purge database data
 	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command
+
+purge-data-e2e:
+	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-e2e
+
+purge-data-fuzz:
+	@CMD="python manage.py purge_data" $(MAKE) exec-backend-command-fuzz
 
 recreate-schema:
 	@echo "Recreating Nest schema"
 	@CMD="psql -U nest_user_dev -d nest_db_dev -c \
 		'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nest_user_dev'" \
-	  	$(MAKE) exec-db-command-it 2>/dev/null
+		$(MAKE) exec-db-command-it 2>/dev/null
 	@$(MAKE) migrate
 
 restore-backup:
 	@echo "Restoring Nest backup"
 	@CMD="python manage.py restore_backup" $(MAKE) exec-backend-command
 
+run-backend-e2e:
+	@DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-e2e -f docker-compose/e2e/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
+
+run-backend-fuzz:
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit backend db cache
+
 save-backup:
 	@echo "Saving Nest backup"
 	@CMD="python manage.py dumpdata --natural-primary --natural-foreign --indent=2" $(MAKE) exec-backend-command > backend/data/backup.json
 	@gzip backend/data/backup.json
 
-shell-backend:
+# vars (defaults for local dev)
+BACKEND_IMAGE_NAME ?= nest-backend-local
+IMAGE_SCANNERS ?= misconfig,secret,vuln
+
+security-scan-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
+	@echo "Scanning image: $(BACKEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-e TRIVY_SCANNERS="$(IMAGE_SCANNERS)" \
+		-v $(CURDIR)/.trivyignore.yaml:/.trivyignore.yaml:ro \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy.yaml:/.trivy.yaml:ro \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image --config /.trivy.yaml $(BACKEND_IMAGE_NAME)
+
+SBOM_VERSION := $(if $(RELEASE_VERSION),$(RELEASE_VERSION),local)
+
+sbom-backend-image:
+	@if [ "$(BACKEND_IMAGE_NAME)" = "nest-backend-local" ]; then \
+		$(MAKE) build-backend-local-image; \
+	fi
+	@echo "Generating SBOM for image: $(BACKEND_IMAGE_NAME)..."
+	@docker run \
+		--rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(CURDIR)/.trivy-cache:/root/.cache/trivy \
+		-v $(CURDIR):/work \
+		$$(grep -E '^FROM aquasec/trivy:' docker/trivy/Dockerfile | sed 's/^FROM //') \
+		image \
+		--format cyclonedx \
+		--output /work/backend-sbom-$(SBOM_VERSION).cdx.json \
+		$(BACKEND_IMAGE_NAME)
+
+shell-backend: ## Open backend container shell
 	@CMD="/bin/sh" $(MAKE) exec-backend-command-it
 
-shell-db:
+shell-db: ## Open database container shell
 	@CMD="/bin/sh" $(MAKE) exec-db-command-it
 
 sync-data: \
@@ -112,15 +232,28 @@ sync-data: \
 	enrich-data \
 	index-data
 
+test-backend: ## Run backend tests
 test-backend:
 	@DOCKER_BUILDKIT=1 docker build \
 		--cache-from nest-test-backend \
-		-f backend/docker/Dockerfile.test backend \
+		-f docker/backend/Dockerfile.test backend \
 		-t nest-test-backend
 	@docker run \
 		-e DJANGO_SETTINGS_MODULE=settings.test \
 		--env-file backend/.env.example \
 		--rm nest-test-backend pytest
+
+test-fuzz: ## Run fuzz tests (REST API and GraphQL)
+	@docker container rm -f fuzz-nest-db >/dev/null 2>&1 || true
+	@docker volume rm -f nest-fuzz_fuzz-db-data >/dev/null 2>&1 || true
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend data-loader
+	@echo "Running REST API fuzz tests..."
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db backend rest
+	@echo "Running GraphQL fuzz tests..."
+	@COMPOSE_BAKE=true DOCKER_BUILDKIT=1 \
+	docker compose --project-name nest-fuzz -f docker-compose/fuzz/compose.yaml up --build --remove-orphans --abort-on-container-exit db cache backend graphql
 
 update-backend-dependencies:
 	@cd backend && poetry update
@@ -134,6 +267,8 @@ update-data: \
 	github-update-related-organizations \
 	github-update-users \
 	owasp-aggregate-projects \
+	owasp-aggregate-entity-contributions \
+	owasp-aggregate-member-contributions \
 	owasp-update-events \
 	owasp-sync-posts \
 	owasp-update-sponsors \

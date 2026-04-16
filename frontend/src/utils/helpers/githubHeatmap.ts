@@ -52,7 +52,8 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
       }
     }
     heatmapData.contributions = heatmapData.contributions.filter(
-      (item) => new Date(item.date) <= endDate && new Date(item.date) >= startDate
+      (item: HeatmapContribution) =>
+        new Date(item.date) <= endDate && new Date(item.date) >= startDate
     )
 
     const allDates: string[] = []
@@ -61,7 +62,9 @@ export const fetchHeatmapData = async (username: string): Promise<HeatmapRespons
     }
 
     const transformedContributions: HeatmapContribution[] = allDates.map((date) => {
-      const contribution = heatmapData.contributions.find((c) => c.date === date)
+      const contribution = heatmapData.contributions.find(
+        (c: HeatmapContribution) => c.date === date
+      )
       return contribution
         ? {
             date: contribution.date,
@@ -168,10 +171,10 @@ interface Theme {
 }
 
 function getPixelRatio() {
-  if (typeof window === 'undefined') {
+  if (typeof globalThis === 'undefined') {
     return 1
   }
-  return window.devicePixelRatio || 1
+  return globalThis.devicePixelRatio || 1
 }
 
 const DATE_FORMAT = 'yyyy-MM-dd'
@@ -315,8 +318,10 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
     })
   }
 
-  data.years.forEach((year, i) => {
-    const offsetY = yearHeight * i + canvasMargin + headerOffset + 10
+  let index = 0
+
+  for (const year of data.years) {
+    const offsetY = yearHeight * index + canvasMargin + headerOffset + 10
     const offsetX = canvasMargin
     drawYear(ctx, {
       ...opts,
@@ -326,5 +331,7 @@ export function drawContributions(canvas: HTMLCanvasElement, opts: Options) {
       data,
       themeName,
     })
-  })
+
+    index++
+  }
 }

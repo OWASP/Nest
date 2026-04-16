@@ -1,0 +1,58 @@
+codecov:
+  require_ci_to_pass: true
+
+comment:
+  layout: reach, diff, flags, files, footer
+  behavior: default
+  require_changes: false
+
+coverage:
+  status:
+    project:
+      default:
+        target: 95%
+        threshold: 0%
+        base: auto
+      backend:
+        flags:
+          - backend
+        target: 95%
+        threshold: 0%
+        base: auto
+      frontend:
+        flags:
+          - frontend
+        target: 95%
+        threshold: 0%
+        base: auto
+    patch:
+      default:
+        informational: true
+        target: auto
+        threshold: 0%
+      backend:
+        informational: true
+        flags:
+          - backend
+        target: auto
+        threshold: 0%
+      frontend:
+        informational: true
+        flags:
+          - frontend
+        target: auto
+        threshold: 0%
+
+fixes:
+  - /app/::frontend/
+  - /home/owasp/::backend/
+
+flags:
+  backend:
+    paths:
+      - backend/
+    carryforward: true
+  frontend:
+    paths:
+      - frontend/
+    carryforward: true

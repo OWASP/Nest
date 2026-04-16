@@ -7,7 +7,7 @@ import strawberry
 class ProjectHealthStatsNode:
     """Node representing overall health stats of OWASP projects."""
 
-    average_score: float
+    average_score: float | None
     monthly_overall_scores: list[float]
     monthly_overall_scores_months: list[int]
     projects_count_healthy: int

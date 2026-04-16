@@ -9,6 +9,7 @@ export const GET_MY_PROGRAMS = gql`
         id
         key
         name
+        status
         description
         startedAt
         endedAt
@@ -61,6 +62,23 @@ export const GET_PROGRAM_AND_MODULES = gql`
         name
         avatarUrl
       }
+      recentMilestones {
+        id
+        title
+        state
+        openIssuesCount
+        closedIssuesCount
+        createdAt
+        repositoryName
+        organizationName
+        url
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
     }
     getProgramModules(programKey: $programKey) {
       id
@@ -68,9 +86,19 @@ export const GET_PROGRAM_AND_MODULES = gql`
       name
       description
       experienceLevel
+      order
       startedAt
       endedAt
+      domains
+      tags
+      labels
       mentors {
+        id
+        login
+        name
+        avatarUrl
+      }
+      mentees {
         id
         login
         name
@@ -86,6 +114,8 @@ export const GET_PROGRAM_ADMIN_DETAILS = gql`
       id
       key
       name
+      startedAt
+      endedAt
       admins {
         id
         login

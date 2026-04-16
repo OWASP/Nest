@@ -1,16 +1,5 @@
 import { gql } from '@apollo/client'
 
-export const GET_LEADER_DATA = gql`
-  query GetLeaderData($key: String!) {
-    user(login: $key) {
-      id
-      avatarUrl
-      login
-      name
-    }
-  }
-`
-
 export const GET_USER_DATA = gql`
   query GetUserData($key: String!) {
     recentIssues(limit: 5, login: $key) {
@@ -53,6 +42,7 @@ export const GET_USER_DATA = gql`
       id
       contributorsCount
       forksCount
+      isArchived
       key
       name
       openIssuesCount
@@ -65,15 +55,23 @@ export const GET_USER_DATA = gql`
       url
     }
     user(login: $key) {
-      id
       avatarUrl
+      badges {
+        cssClass
+        description
+        id
+        name
+        weight
+      }
       bio
       company
+      contributionData
       contributionsCount
       createdAt
       email
       followersCount
       followingCount
+      id
       issuesCount
       location
       login
@@ -88,8 +86,8 @@ export const GET_USER_DATA = gql`
 export const GET_USER_METADATA = gql`
   query GetUserMetadata($key: String!) {
     user(login: $key) {
-      id
       bio
+      id
       login
       name
     }

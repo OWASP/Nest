@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import itertools
 import logging
 import re
+from functools import cached_property
 from urllib.parse import urlparse
 
 import yaml
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
@@ -18,7 +19,6 @@ from apps.github.constants import (
     GITHUB_REPOSITORY_RE,
     GITHUB_USER_RE,
 )
-from apps.github.models.user import User
 from apps.github.utils import get_repository_file_content
 from apps.owasp.models.entity_member import EntityMember
 from apps.owasp.models.enums.project import AudienceChoices
@@ -30,6 +30,8 @@ class RepositoryBasedEntityModel(models.Model):
     """Repository based entity model."""
 
     class Meta:
+        """Model options."""
+
         abstract = True
 
     name = models.CharField(verbose_name="Name", max_length=100)
@@ -90,6 +92,19 @@ class RepositoryBasedEntityModel(models.Model):
         blank=True,
     )
 
+    # GRs.
+    entity_members = GenericRelation(
+        EntityMember,
+        content_type_field="entity_type",
+        object_id_field="entity_id",
+        related_query_name="entity_member",
+    )
+
+    @cached_property
+    def entity_leaders(self) -> list[EntityMember]:
+        """Return entity's leaders."""
+        return self.entity_members.filter(role=EntityMember.Role.LEADER).order_by("order")
+
     @property
     def github_url(self) -> str:
         """Get GitHub URL."""
@@ -113,15 +128,6 @@ class RepositoryBasedEntityModel(models.Model):
             f"{self.owasp_repository.key}/{self.owasp_repository.default_branch}/info.md"
             if self.owasp_repository
             else None
-        )
-
-    @property
-    def entity_leaders(self) -> models.QuerySet[User]:
-        """Return entity's leaders."""
-        return User.objects.filter(
-            pk__in=self.members.filter(role=EntityMember.Role.LEADER).values_list(
-                "member_id", flat=True
-            )
         )
 
     @property
@@ -196,18 +202,26 @@ class RepositoryBasedEntityModel(models.Model):
             return []
 
         leaders = []
+        # Compile regex patterns once per method call (before loop).
+        re_bracketed_pattern = re.compile(
+            r"[-*]\s{0,3}\[\s{0,3}([^\]\(]{1,200})(?:\s{0,3}\([^)]{0,100}\))?\s{0,3}\]"
+        )
+        re_plain_pattern = re.compile(r"\*\s{0,3}([\w\s]{1,200})")
+        re_parenthetical_cleanup_pattern = re.compile(r"\s{0,3}\([^)]{0,100}\)\s{0,3}$")
         for line in content.split("\n"):
-            leaders.extend(
-                [
-                    name
-                    for name in itertools.chain(
-                        *re.findall(
-                            r"[-*]\s*\[\s*([^(]+?)\s*(?:\([^)]*\))?\]|\*\s*([\w\s]+)", line.strip()
-                        )
-                    )
-                    if name.strip()
-                ]
-            )
+            stripped_line = line.strip()
+            names = []
+
+            names.extend(re_bracketed_pattern.findall(stripped_line))
+            names.extend(re_plain_pattern.findall(stripped_line))
+
+            cleaned_names = []
+            for raw_name in names:
+                if raw_name.strip():
+                    cleaned = re_parenthetical_cleanup_pattern.sub("", raw_name).strip()
+                    cleaned_names.append(cleaned)
+
+            leaders.extend(cleaned_names)
 
         return leaders
 
@@ -220,22 +234,19 @@ class RepositoryBasedEntityModel(models.Model):
         leaders = {}
         for line in content.split("\n"):
             matches = re.findall(
-                r"^[-*]\s*\[([^\]]+)\]\(mailto:([^)]+)(\)|([^[<\n]))", line.strip()
+                r"^[-*]\s*\[([^\]]+)\]\((?:mailto:)?([^)]+)(\)|([^[<\n]))", line.strip()
             )
 
             for match in matches:
-                if match[0] and match[1]:  # Name with email
-                    leaders[match[0].strip()] = match[1].strip()
-                elif match[2]:  # Name without email
-                    leaders[match[2].strip()] = None
-
+                name, value = match[0].strip(), match[1].strip()
+                leaders[name] = value if "@" in value else None
         return leaders
 
     def get_metadata(self):
         """Get entity metadata."""
         try:
             yaml_content = re.search(
-                r"^---\s*([\s\S]*?)\s*---",
+                r"^---\s*(.*?)\s*---",
                 get_repository_file_content(self.index_md_url),
                 re.DOTALL,
             )

@@ -1,7 +1,7 @@
 """GitHub app Issue model admin."""
 
 from django.contrib import admin
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from apps.github.models.issue import Issue
 
@@ -19,6 +19,7 @@ class IssueAdmin(admin.ModelAdmin):
         "repository",
         "created_at",
         "title",
+        "level",
         "custom_field_github_url",
     )
     list_filter = (
@@ -37,7 +38,7 @@ class IssueAdmin(admin.ModelAdmin):
             str: A safe HTML link to the issue on GitHub.
 
         """
-        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
+        return format_html("<a href='{}' target='_blank'>↗️</a>", obj.url)
 
     custom_field_github_url.short_description = "GitHub 🔗"
 

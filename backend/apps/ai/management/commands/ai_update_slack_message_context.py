@@ -10,26 +10,6 @@ class Command(BaseContextCommand):
     key_field_name = "slack_message_id"
     model_class = Message
 
-    def add_arguments(self, parser):
-        """Override to use different default batch size for messages."""
-        super().add_arguments(parser)
-        parser.add_argument(
-            "--message-key",
-            type=str,
-            help="Process only the message with this key",
-        )
-        parser.add_argument(
-            "--all",
-            action="store_true",
-            help="Process all the messages",
-        )
-        parser.add_argument(
-            "--batch-size",
-            type=int,
-            default=100,
-            help="Number of messages to process in each batch",
-        )
-
     def extract_content(self, entity: Message) -> tuple[str, str]:
         """Extract content from the message."""
         return entity.cleaned_text or "", ""

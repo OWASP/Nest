@@ -1,61 +1,62 @@
-import { faUsers } from '@fortawesome/free-solid-svg-icons'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { useRouter } from 'next/navigation'
+/* eslint-disable @next/next/no-img-element */
+import { screen, fireEvent } from '@testing-library/react'
+import { usePathname, useRouter } from 'next/navigation'
+import type { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
-import type { ExtendedSession } from 'types/auth'
+import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/__generated__/graphql'
 import type { Module } from 'types/mentorship'
-import { ExperienceLevelEnum, ProgramStatusEnum } from 'types/mentorship'
 import SingleModuleCard from 'components/SingleModuleCard'
-
-// Mock dependencies
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-}))
-
-jest.mock('next-auth/react', () => ({
-  useSession: jest.fn(),
-}))
 
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({
     children,
     href,
-    target,
-    rel,
     className,
     ...props
   }: {
     children: React.ReactNode
     href: string
-    target?: string
-    rel?: string
     className?: string
     [key: string]: unknown
   }) => (
-    <a
-      href={href}
-      target={target}
-      rel={rel}
-      className={className}
-      {...props}
-      data-testid="module-link"
-    >
+    <a href={href} className={className} {...props} data-testid="module-link">
       {children}
     </a>
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: { icon: unknown; className?: string }) => (
-    <span data-testid={`icon-${icon === faUsers ? 'users' : 'ellipsis'}`} className={className} />
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, ...props }: { src: string; alt: string; [key: string]: unknown }) => (
+    <img src={src} alt={alt} {...props} data-testid="contributor-avatar" />
+  ),
+}))
+
+// Mock dependencies
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+  usePathname: jest.fn(),
+}))
+
+jest.mock('next-auth/react', () => ({
+  useSession: jest.fn(),
+}))
+
+jest.mock('react-icons/hi', () => ({
+  HiUserGroup: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="icon-users" {...props} />
   ),
 }))
 
 jest.mock('utils/dateFormatter', () => ({
   formatDate: jest.fn((date: string) => new Date(date).toLocaleDateString()),
+}))
+
+jest.mock('utils/urlFormatter', () => ({
+  getMemberUrl: jest.fn((login: string) => `/members/${login}`),
 }))
 
 jest.mock('components/ModuleCard', () => ({
@@ -68,19 +69,23 @@ jest.mock('components/ModuleCard', () => ({
   }),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ShowMoreButton', () => ({
   __esModule: true,
-  default: ({ contributors, label }: { contributors: unknown[]; label: string }) => (
-    <div data-testid="top-contributors-list">
-      <span>
-        {label}: {contributors.length} contributors
-      </span>
-    </div>
+  default: ({ onToggle }: { onToggle: () => void }) => (
+    <button data-testid="show-more-button" onClick={onToggle}>
+      Show more
+    </button>
   ),
+}))
+
+jest.mock('components/EntityActions', () => ({
+  __esModule: true,
+  default: () => <div data-testid="entity-actions" />,
 }))
 
 const mockPush = jest.fn()
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
+const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>
 const mockUseSession = useSession as jest.MockedFunction<typeof useSession>
 
 // Test data
@@ -89,37 +94,40 @@ const mockModule: Module = {
   key: 'test-module',
   name: 'Test Module',
   description: 'This is a test module description',
-  status: ProgramStatusEnum.PUBLISHED,
-  experienceLevel: ExperienceLevelEnum.INTERMEDIATE,
+  status: ProgramStatusEnum.Published,
+  experienceLevel: ExperienceLevelEnum.Intermediate,
   mentors: [
     {
+      id: 'mentor-user1',
       name: 'user1',
       login: 'user1',
       avatarUrl: 'https://example.com/avatar1.jpg',
     },
     {
+      id: 'mentor-user2',
       name: 'user2',
       login: 'user2',
       avatarUrl: 'https://example.com/avatar2.jpg',
     },
   ],
-  startedAt: '2024-01-01T00:00:00Z',
-  endedAt: '2024-12-31T23:59:59Z',
+  startedAt: 1704067200,
+  endedAt: 1735689599,
   domains: ['frontend', 'backend'],
   tags: ['react', 'nodejs'],
+  labels: ['good first issue', 'bug'],
+}
+
+const mockModuleWithManyMentors: Module = {
+  ...mockModule,
+  mentors: Array.from({ length: 10 }, (_, i) => ({
+    id: `mentor-${i + 1}`,
+    name: `mentor${i + 1}`,
+    login: `mentor${i + 1}`,
+    avatarUrl: `https://example.com/avatar${i + 1}.jpg`,
+  })),
 }
 
 const mockAdmins = [{ login: 'admin1' }, { login: 'admin2' }]
-
-const mockSessionData: ExtendedSession = {
-  user: {
-    login: 'admin1',
-    isLeader: true,
-    email: 'admin@example.com',
-    image: 'https://example.com/admin-avatar.jpg',
-  },
-  expires: '2024-12-31T23:59:59Z',
-}
 
 describe('SingleModuleCard', () => {
   beforeEach(() => {
@@ -132,6 +140,7 @@ describe('SingleModuleCard', () => {
       replace: jest.fn(),
       prefetch: jest.fn(),
     })
+    mockUsePathname.mockReturnValue('/my/mentorship/programs/test-program')
     mockUseSession.mockReturnValue({
       data: null,
       status: 'unauthenticated',
@@ -145,8 +154,7 @@ describe('SingleModuleCard', () => {
 
       expect(screen.getByText('Test Module')).toBeInTheDocument()
       expect(screen.getByText('This is a test module description')).toBeInTheDocument()
-      expect(screen.getByTestId('icon-users')).toBeInTheDocument()
-      expect(screen.getByTestId('icon-ellipsis')).toBeInTheDocument()
+      expect(screen.getAllByTestId('icon-users').length).toBeGreaterThan(0)
     })
 
     it('renders module details correctly', () => {
@@ -159,168 +167,132 @@ describe('SingleModuleCard', () => {
       expect(screen.getByText('Duration:')).toBeInTheDocument()
     })
 
-    it('renders mentors list when mentors exist', () => {
+    it('renders mentors section with inline contributors when mentors exist', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
-      expect(screen.getByText('Mentors: 2 contributors')).toBeInTheDocument()
+      expect(screen.getByText('Mentors')).toBeInTheDocument()
+      expect(screen.getByText('User1')).toBeInTheDocument()
+      expect(screen.getByText('User2')).toBeInTheDocument()
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(2)
     })
 
-    it('does not render mentors list when no mentors', () => {
+    it('does not render mentors section when no mentors', () => {
       const moduleWithoutMentors = { ...mockModule, mentors: [] }
       render(<SingleModuleCard module={moduleWithoutMentors} />)
 
-      expect(screen.queryByTestId('top-contributors-list')).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
     })
 
     it('renders module link with correct href', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const moduleLink = screen.getByTestId('module-link')
-      expect(moduleLink).toHaveAttribute('href', '//modules/test-module')
-      expect(moduleLink).toHaveAttribute('target', '_blank')
-      expect(moduleLink).toHaveAttribute('rel', 'noopener noreferrer')
+      const moduleLinks = screen.getAllByTestId('module-link')
+      const titleLink = moduleLinks.find((link) =>
+        link.getAttribute('href')?.includes('/modules/test-module')
+      )
+      expect(titleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
     })
   })
 
-  describe('Dropdown Menu', () => {
-    it('opens dropdown when ellipsis button is clicked', () => {
+  describe('Inline Contributors Rendering', () => {
+    it('renders contributor avatars inline without nested shadows', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
+      const avatars = screen.getAllByTestId('contributor-avatar')
+      expect(avatars.length).toBeGreaterThan(0)
     })
 
-    it('closes dropdown when clicking outside', async () => {
+    it('renders show more button when more than 6 mentors', () => {
+      render(<SingleModuleCard module={mockModuleWithManyMentors} />)
+
+      expect(screen.getByTestId('show-more-button')).toBeInTheDocument()
+    })
+
+    it('does not render show more button when 6 or fewer mentors', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-
-      // Click outside the dropdown
-      fireEvent.mouseDown(document.body)
-
-      await waitFor(() => {
-        expect(screen.queryByText('View Module')).not.toBeInTheDocument()
-      })
+      expect(screen.queryByTestId('show-more-button')).not.toBeInTheDocument()
     })
 
-    it('navigates to view module when View Module is clicked', () => {
-      render(<SingleModuleCard module={mockModule} />)
+    it('toggles show all mentors when show more button is clicked', () => {
+      render(<SingleModuleCard module={mockModuleWithManyMentors} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
+      // Initially shows only 6
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(6)
 
-      const viewButton = screen.getByText('View Module')
-      fireEvent.click(viewButton)
+      // Click show more
+      fireEvent.click(screen.getByTestId('show-more-button'))
 
-      expect(mockPush).toHaveBeenCalledWith('//modules/test-module')
-    })
-
-    it('shows only View Module option for non-admin users', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="user"
-          admins={mockAdmins}
-        />
-      )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
-      expect(screen.queryByText('Create Module')).not.toBeInTheDocument()
+      // Should now show all 10
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(10)
     })
   })
 
-  describe('Admin Functionality', () => {
-    beforeEach(() => {
-      mockUseSession.mockReturnValue({
-        data: mockSessionData,
-        status: 'authenticated',
-        update: jest.fn(),
-      })
+  describe('Mentee URL Handling', () => {
+    it('uses private mentee URL in private view', () => {
+      const moduleWithMentees: Module = {
+        ...mockModule,
+        mentees: [
+          {
+            id: 'mentee-1',
+            name: 'mentee1',
+            login: 'mentee1',
+            avatarUrl: 'https://example.com/mentee1.jpg',
+          },
+        ],
+      }
+      mockUsePathname.mockReturnValue('/my/mentorship/programs/test-program')
+
+      render(<SingleModuleCard module={moduleWithMentees} />)
+
+      const menteeLinks = screen.getAllByTestId('module-link')
+      const menteeLink = menteeLinks.find((link) =>
+        link.getAttribute('href')?.includes('/mentees/')
+      )
+      expect(menteeLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module/mentees/mentee1'
+      )
     })
 
-    it('shows Edit Module option for admin users when showEdit is true', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
+    it('uses public member URL in public view', () => {
+      const moduleWithMentees: Module = {
+        ...mockModule,
+        mentors: [],
+        mentees: [
+          {
+            id: 'mentee-1',
+            name: 'mentee1',
+            login: 'mentee1',
+            avatarUrl: 'https://example.com/mentee1.jpg',
+          },
+        ],
+      }
+      mockUsePathname.mockReturnValue('/programs/test-program')
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
+      render(<SingleModuleCard module={moduleWithMentees} />)
 
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.getByText('Edit Module')).toBeInTheDocument()
-      expect(screen.getByText('Create Module')).toBeInTheDocument()
+      const allLinks = screen.getAllByRole('link')
+      const menteeLink = allLinks.find((link) => link.getAttribute('href') === '/members/mentee1')
+      expect(menteeLink).toBeInTheDocument()
+    })
+  })
+
+  describe('Props Handling', () => {
+    it('renders correctly with minimal props', () => {
+      render(<SingleModuleCard module={mockModule} />)
+
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.getByText('This is a test module description')).toBeInTheDocument()
     })
 
-    it('does not show Edit Module option when showEdit is false', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={false}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
+    it('handles admin props correctly', () => {
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
-      expect(screen.getByText('Create Module')).toBeInTheDocument()
-    })
-
-    it('navigates to edit module when Edit Module is clicked', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      const editButton = screen.getByText('Edit Module')
-      fireEvent.click(editButton)
-
-      expect(mockPush).toHaveBeenCalledWith('//modules/test-module/edit')
-    })
-
-    it('navigates to create module when Create Module is clicked', () => {
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
-
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      const createButton = screen.getByText('Create Module')
-      fireEvent.click(createButton)
-
-      expect(mockPush).toHaveBeenCalledWith('//modules/create')
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
     })
   })
 
@@ -335,79 +307,245 @@ describe('SingleModuleCard', () => {
       render(<SingleModuleCard module={incompleteModule} />)
 
       expect(screen.getByText('Test Module')).toBeInTheDocument()
-      expect(screen.queryByTestId('top-contributors-list')).not.toBeInTheDocument()
+      expect(screen.queryByText('Mentors')).not.toBeInTheDocument()
     })
 
-    it('handles undefined admins array', () => {
-      render(<SingleModuleCard module={mockModule} showEdit={true} accessLevel="admin" />)
+    it('handles undefined admins array gracefully', () => {
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" />)
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
+      // Should render without errors even with admin props
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
     })
 
-    it('handles null session data', () => {
-      mockUseSession.mockReturnValue({
-        data: null,
-        status: 'unauthenticated',
-        update: jest.fn(),
-      })
+    it('renders no description available when description is empty', () => {
+      const moduleWithoutDescription = { ...mockModule, description: '' }
+      render(<SingleModuleCard module={moduleWithoutDescription} />)
 
-      render(
-        <SingleModuleCard
-          module={mockModule}
-          showEdit={true}
-          accessLevel="admin"
-          admins={mockAdmins}
-        />
-      )
+      expect(screen.getByText('No description available.')).toBeInTheDocument()
+    })
 
-      const ellipsisButton = screen.getByRole('button')
-      fireEvent.click(ellipsisButton)
+    it('renders contributor fallback details when name is missing', () => {
+      const moduleWithoutNames: Module = {
+        ...mockModule,
+        mentors: [
+          {
+            id: 'mentor-1',
+            name: '', // Empty name
+            login: 'mentor1',
+            avatarUrl: 'https://example.com/avatar.jpg',
+          },
+        ],
+      }
+      render(<SingleModuleCard module={moduleWithoutNames} />)
 
-      expect(screen.getByText('View Module')).toBeInTheDocument()
-      expect(screen.queryByText('Edit Module')).not.toBeInTheDocument()
+      const avatar = screen.getByTestId('contributor-avatar')
+      expect(avatar).toHaveAttribute('alt', 'Mentors avatar')
+
+      expect(screen.getByText('Mentor1')).toBeInTheDocument() // upperFirst('mentor1')
+      const links = screen.getAllByRole('link')
+      const link = links.find((l) => l.getAttribute('href')?.includes('/members/mentor1'))
+      expect(link).toHaveAttribute('title', 'mentor1')
+    })
+
+    it('handles pathname without program key gracefully', () => {
+      mockUsePathname.mockReturnValue('/')
+      render(<SingleModuleCard module={mockModule} />)
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
+    })
+
+    it('renders Unknown for missing detail values', () => {
+      const moduleWithEmptyDetails = {
+        ...mockModule,
+        experienceLevel: '' as unknown as ExperienceLevelEnum,
+      }
+      render(<SingleModuleCard module={moduleWithEmptyDetails} />)
+      expect(screen.getAllByText('Unknown').length).toBeGreaterThan(0)
     })
   })
 
   describe('Accessibility', () => {
-    it('has proper button roles and interactions', () => {
+    it('has accessible link for module navigation', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const ellipsisButton = screen.getByRole('button')
-      expect(ellipsisButton).toBeInTheDocument()
-
-      fireEvent.click(ellipsisButton)
-
-      const viewButton = screen.getByText('View Module')
-      expect(viewButton.closest('button')).toBeInTheDocument()
+      const moduleLinks = screen.getAllByTestId('module-link')
+      const titleLink = moduleLinks.find((link) =>
+        link.getAttribute('href')?.includes('/modules/test-module')
+      )
+      expect(titleLink).toBeInTheDocument()
+      expect(titleLink).toHaveAttribute(
+        'href',
+        '/my/mentorship/programs/test-program/modules/test-module'
+      )
     })
 
-    it('supports keyboard navigation', () => {
+    it('has proper heading structure with h2', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const ellipsisButton = screen.getByRole('button')
+      const moduleTitle = screen.getByRole('heading', { level: 2 })
+      expect(moduleTitle).toBeInTheDocument()
+      expect(moduleTitle).toHaveTextContent('Test Module')
+    })
 
-      // Focus the button
-      ellipsisButton.focus()
-      expect(ellipsisButton).toHaveFocus()
+    it('has proper heading structure with h3 for contributors sections', () => {
+      render(<SingleModuleCard module={mockModule} />)
 
-      // Press Enter to open dropdown
-      fireEvent.keyDown(ellipsisButton, { key: 'Enter', code: 'Enter' })
-      fireEvent.click(ellipsisButton) // Simulate the click that would happen
-
-      expect(screen.getByText('View Module')).toBeInTheDocument()
+      const mentorsHeading = screen.getByRole('heading', { level: 3, name: 'Mentors' })
+      expect(mentorsHeading).toBeInTheDocument()
     })
   })
 
-  describe('Responsive Design', () => {
-    it('applies responsive classes correctly', () => {
+  describe('Styling', () => {
+    it('renders without shadow or border classes in module wrapper', () => {
       render(<SingleModuleCard module={mockModule} />)
 
-      const moduleTitle = screen.getByText('Test Module')
-      expect(moduleTitle).toHaveClass('sm:break-normal', 'sm:text-lg', 'lg:text-2xl')
+      // The component should render successfully with the section styling
+      expect(screen.getByText('Test Module')).toBeInTheDocument()
+      expect(screen.getByText('Mentors')).toBeInTheDocument()
+    })
+
+    it('renders contributor items with proper styling', () => {
+      render(<SingleModuleCard module={mockModule} />)
+
+      // Contributors should be rendered inline
+      const avatars = screen.getAllByTestId('contributor-avatar')
+      expect(avatars.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Mentees Display and Show More Functionality', () => {
+    it('renders mentees section when mentees exist', () => {
+      const moduleWithMentees: Module = {
+        ...mockModule,
+        mentees: [
+          {
+            id: 'mentee-1',
+            name: 'mentee1',
+            login: 'mentee1',
+            avatarUrl: 'https://example.com/mentee1.jpg',
+          },
+          {
+            id: 'mentee-2',
+            name: 'mentee2',
+            login: 'mentee2',
+            avatarUrl: 'https://example.com/mentee2.jpg',
+          },
+        ],
+      }
+      render(<SingleModuleCard module={moduleWithMentees} />)
+
+      expect(screen.getByText('Mentees')).toBeInTheDocument()
+    })
+
+    it('renders show more button when more than 6 mentees', () => {
+      const moduleWithManyMentees: Module = {
+        ...mockModule,
+        mentors: [],
+        mentees: Array.from({ length: 10 }, (_, i) => ({
+          id: `mentee-${i + 1}`,
+          name: `mentee${i + 1}`,
+          login: `mentee${i + 1}`,
+          avatarUrl: `https://example.com/mentee${i + 1}.jpg`,
+        })),
+      }
+      render(<SingleModuleCard module={moduleWithManyMentees} />)
+
+      const showMoreButtons = screen.getAllByTestId('show-more-button')
+      expect(showMoreButtons.length).toBeGreaterThan(0)
+    })
+
+    it('toggles show all mentees when show more button is clicked', () => {
+      const moduleWithManyMentees: Module = {
+        ...mockModule,
+        mentors: [],
+        mentees: Array.from({ length: 10 }, (_, i) => ({
+          id: `mentee-${i + 1}`,
+          name: `mentee${i + 1}`,
+          login: `mentee${i + 1}`,
+          avatarUrl: `https://example.com/mentee${i + 1}.jpg`,
+        })),
+      }
+      render(<SingleModuleCard module={moduleWithManyMentees} />)
+
+      // Initially shows only 6
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(6)
+
+      // Click show more
+      fireEvent.click(screen.getByTestId('show-more-button'))
+
+      // Should now show all 10
+      expect(screen.getAllByTestId('contributor-avatar')).toHaveLength(10)
+    })
+
+    it('does not render mentees section when no mentees', () => {
+      const moduleWithoutMentees = { ...mockModule, mentees: [] }
+      render(<SingleModuleCard module={moduleWithoutMentees} />)
+
+      expect(screen.queryByText('Mentees')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Admin Access and EntityActions', () => {
+    it('renders EntityActions when user is admin and logged in', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'admin1',
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        } as Session,
+        status: 'authenticated',
+        update: jest.fn(),
+      })
+
+      render(<SingleModuleCard module={mockModule} accessLevel="admin" admins={mockAdmins} />)
+
+      expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
+    })
+
+    it('does not render EntityActions when user is not admin', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'regular-user',
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        } as Session,
+        status: 'authenticated',
+        update: jest.fn(),
+      })
+
+      render(<SingleModuleCard module={mockModule} accessLevel="user" admins={mockAdmins} />)
+
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+
+    it('does not render EntityActions when accessLevel is not admin', () => {
+      mockUseSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'admin1',
+          },
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        } as Session,
+        status: 'authenticated',
+        update: jest.fn(),
+      })
+
+      render(<SingleModuleCard module={mockModule} accessLevel="viewer" admins={mockAdmins} />)
+
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Mentor URL Handling', () => {
+    it('uses public member URL for mentors in public view', () => {
+      mockUsePathname.mockReturnValue('/programs/test-program')
+
+      render(<SingleModuleCard module={mockModule} />)
+
+      const allLinks = screen.getAllByRole('link')
+      const mentorLink = allLinks.find((link) => link.getAttribute('href') === '/members/user1')
+      expect(mentorLink).toBeInTheDocument()
     })
   })
 })

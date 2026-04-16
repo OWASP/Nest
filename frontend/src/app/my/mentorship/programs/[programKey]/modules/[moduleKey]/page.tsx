@@ -1,24 +1,26 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
-import upperFirst from 'lodash/upperFirst'
+import { useQuery } from '@apollo/client/react'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
-import type { Module } from 'types/mentorship'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
 const ModuleDetailsPage = () => {
-  const { programKey, moduleKey } = useParams()
-  const [module, setModule] = useState<Module | null>(null)
-  const [admins, setAdmins] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
 
-  const { data, error } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+  const {
+    data,
+    error,
+    loading: isLoading,
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
+    fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
       moduleKey,
@@ -26,19 +28,17 @@ const ModuleDetailsPage = () => {
   })
 
   useEffect(() => {
-    if (data?.getModule) {
-      setModule(data.getModule)
-      setAdmins(data.getProgram.admins)
-      setIsLoading(false)
-    } else if (error) {
+    if (error) {
       handleAppError(error)
-      setIsLoading(false)
     }
-  }, [data, error])
+  }, [error])
 
-  if (isLoading) return <LoadingSpinner />
+  const mentorshipModule: Module | null | undefined = data?.getModule
+  const admins = data?.getProgram?.admins
 
-  if (!module) {
+  if (isLoading && !mentorshipModule) return <LoadingSpinner />
+
+  if (!mentorshipModule) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -49,27 +49,36 @@ const ModuleDetailsPage = () => {
   }
 
   const moduleDetails = [
-    { label: 'Experience Level', value: upperFirst(module.experienceLevel) },
-    { label: 'Start Date', value: formatDate(module.startedAt) },
-    { label: 'End Date', value: formatDate(module.endedAt) },
+    { label: 'Experience Level', value: capitalize(mentorshipModule.experienceLevel) },
+    { label: 'Start Date', value: formatDate(String(mentorshipModule.startedAt)) },
+    { label: 'End Date', value: formatDate(String(mentorshipModule.endedAt)) },
     {
       label: 'Duration',
-      value: getSimpleDuration(module.startedAt, module.endedAt),
+      value: getSimpleDuration(
+        String(mentorshipModule.startedAt),
+        String(mentorshipModule.endedAt)
+      ),
     },
   ]
 
   return (
-    <DetailsCard
-      details={moduleDetails}
-      title={module.name}
-      admins={admins}
-      tags={module.tags}
-      domains={module.domains}
-      summary={module.description}
-      mentors={module.mentors}
-      type="module"
-      accessLevel="admin"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        accessLevel="admin"
+        admins={admins ?? undefined}
+        details={moduleDetails}
+        domains={mentorshipModule.domains ?? undefined}
+        entityKey={moduleKey}
+        labels={mentorshipModule.labels ?? undefined}
+        mentees={mentorshipModule.mentees}
+        mentors={mentorshipModule.mentors}
+        programKey={programKey}
+        summary={mentorshipModule.description}
+        tags={mentorshipModule.tags ?? undefined}
+        title={mentorshipModule.name}
+        type="module"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

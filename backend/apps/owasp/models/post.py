@@ -3,6 +3,7 @@
 from datetime import UTC, datetime
 
 from django.db import models
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
 from apps.common.models import BulkSaveModel, TimestampedModel
@@ -12,6 +13,8 @@ class Post(BulkSaveModel, TimestampedModel):
     """Post model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "owasp_posts"
         indexes = [
             models.Index(fields=["-published_at"], name="post_published_at_desc_idx"),
@@ -36,7 +39,11 @@ class Post(BulkSaveModel, TimestampedModel):
     @staticmethod
     def recent_posts():
         """Get recent posts."""
-        return Post.objects.order_by("-published_at")
+        return Post.objects.filter(
+            published_at__lte=timezone.now(),
+        ).order_by(
+            "-published_at",
+        )
 
     @staticmethod
     def update_data(data, *, save: bool = True) -> "Post":

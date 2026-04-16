@@ -1,6 +1,6 @@
-ai-run-rag-tool:
-	@echo "Running RAG tool"
-	@CMD="python manage.py ai_run_rag_tool" $(MAKE) exec-backend-command
+ai-run-agentic-rag:
+	@echo "Running agentic RAG"
+	@CMD="python manage.py ai_run_agentic_rag" $(MAKE) exec-backend-command
 
 ai-update-chapter-chunks:
 	@echo "Updating chapter chunks"
@@ -33,6 +33,14 @@ ai-update-project-chunks:
 ai-update-project-context:
 	@echo "Updating project context"
 	@CMD="python manage.py ai_update_project_context" $(MAKE) exec-backend-command
+
+ai-update-repository-chunks:
+	@echo "Updating repository chunks"
+	@CMD="python manage.py ai_update_repository_chunks" $(MAKE) exec-backend-command
+
+ai-update-repository-context:
+	@echo "Updating repository context"
+	@CMD="python manage.py ai_update_repository_context" $(MAKE) exec-backend-command
 
 ai-update-slack-message-chunks:
 	@echo "Updating Slack message chunks"

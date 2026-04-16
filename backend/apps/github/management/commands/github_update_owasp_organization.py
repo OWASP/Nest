@@ -73,10 +73,10 @@ class Command(BaseCommand):
                 prefix = f"{idx + offset + 1} of {gh_repositories_count}"
                 entity_key = gh_repository.name.lower()
                 repository_url = f"https://github.com/OWASP/{entity_key}"
-                print(f"{prefix:<12} {repository_url}")
+                self.stdout.write(f"{prefix:<12} {repository_url}\n")
 
                 try:
-                    owasp_organization, repository = sync_repository(
+                    owasp_organization, owasp_repository = sync_repository(
                         gh_repository,
                         organization=owasp_organization,
                         user=owasp_user,
@@ -84,16 +84,20 @@ class Command(BaseCommand):
 
                     # OWASP chapters.
                     if entity_key.startswith("www-chapter-"):
-                        chapters.append(Chapter.update_data(gh_repository, repository, save=False))
+                        chapters.append(
+                            Chapter.update_data(gh_repository, owasp_repository, save=False)
+                        )
 
                     # OWASP projects.
                     elif entity_key.startswith("www-project-"):
-                        projects.append(Project.update_data(gh_repository, repository, save=False))
+                        projects.append(
+                            Project.update_data(gh_repository, owasp_repository, save=False)
+                        )
 
                     # OWASP committees.
                     elif entity_key.startswith("www-committee-"):
                         committees.append(
-                            Committee.update_data(gh_repository, repository, save=False)
+                            Committee.update_data(gh_repository, owasp_repository, save=False)
                         )
                 except Exception:
                     logger.exception("Error syncing repository %s", repository_url)
@@ -103,7 +107,7 @@ class Command(BaseCommand):
             Committee.bulk_save(committees)
             Project.bulk_save(projects)
 
-            if repository is None:  # The entire organization is being synced.
+            if not repository:  # The entire organization is being synced.
                 # Check repository counts.
                 local_owasp_repositories_count = Repository.objects.filter(
                     is_owasp_repository=True,
@@ -113,7 +117,7 @@ class Command(BaseCommand):
                     local_owasp_repositories_count == remote_owasp_repositories_count
                 )
                 result = "==" if has_same_repositories_count else "!="
-                print(
+                self.stdout.write(
                     "\n"
                     f"OWASP GitHub repositories count {result} synced repositories count: "
                     f"{remote_owasp_repositories_count} {result} {local_owasp_repositories_count}"

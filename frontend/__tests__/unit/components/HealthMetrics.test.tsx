@@ -1,8 +1,7 @@
-import { faCodeCommit } from '@fortawesome/free-solid-svg-icons'
 import { render, screen } from '@testing-library/react'
+import { IconType } from 'react-icons'
 import { HealthMetricsProps } from 'types/healthMetrics'
 import HealthMetrics from 'components/HealthMetrics'
-
 const getMockHealthMetric = (): HealthMetricsProps[] => [
   {
     createdAt: '2025-07-23T00:00:00Z',
@@ -52,8 +51,14 @@ const getMockIncompleteHealthMetric = (): any[] => [
   },
 ]
 
-jest.mock('components/BarChart', () => (props: { title: string }) => (
-  <div data-testid="BarChart" data-props={JSON.stringify(props)}>
+jest.mock('components/BarChart', () => (props: { title: string; icon?: IconType }) => (
+  <div
+    data-testid="BarChart"
+    data-props={JSON.stringify({
+      ...props,
+      icon: props.icon?.name || null,
+    })}
+  >
     {props.title}
   </div>
 ))
@@ -79,8 +84,8 @@ describe('HealthMetrics', () => {
     it('renders correct icon and labels for BarChart', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const barChart = screen.getByTestId('BarChart')
-      const props = JSON.parse(barChart.getAttribute('data-props') || '{}')
-      expect(props.icon).toEqual(faCodeCommit)
+      const props = JSON.parse(barChart.dataset.props || '{}')
+      expect(props.icon).toEqual('FaCodeCommit')
       expect(props.labels).toEqual(['Days Since Last Commit', 'Days Since Last Release'])
       expect(props.days).toEqual([1, 7])
       expect(props.requirements).toEqual([10, 14])
@@ -89,7 +94,7 @@ describe('HealthMetrics', () => {
     it('renders formatted date labels correctly', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const lineCharts = screen.getAllByTestId('LineChart')
-      const labels = JSON.parse(lineCharts[0].getAttribute('data-props') || '{}').labels
+      const labels = JSON.parse(lineCharts[0].dataset.props || '{}').labels
       expect(typeof labels[0]).toBe('string')
       expect(labels[0]).toBeTruthy()
     })
@@ -97,7 +102,7 @@ describe('HealthMetrics', () => {
     it('includes all required series in LineChart', () => {
       render(<HealthMetrics data={getMockHealthMetric()} />)
       const issuesTrend = screen.getByText('Issues Trend')
-      const props = JSON.parse(issuesTrend.getAttribute('data-props') || '{}')
+      const props = JSON.parse(issuesTrend.dataset.props || '{}')
       const seriesNames = props.series.map((s: { name: string }) => s.name)
       expect(seriesNames).toEqual(['Open Issues', 'Unassigned Issues', 'Unanswered Issues'])
     })
@@ -126,9 +131,47 @@ describe('HealthMetrics', () => {
     it('handles missing last data point fields with fallback values', () => {
       render(<HealthMetrics data={getMockIncompleteHealthMetric()} />)
       const barChart = screen.getByTestId('BarChart')
-      const props = JSON.parse(barChart.getAttribute('data-props') || '{}')
+      const props = JSON.parse(barChart.dataset.props || '{}')
       expect(props.days).toEqual([0, 0])
       expect(props.requirements).toEqual([0, 0])
+    })
+
+    it('handles completely null/undefined optional fields', () => {
+      const nullData = [
+        {
+          createdAt: null,
+          openIssuesCount: null,
+          unassignedIssuesCount: undefined,
+          unansweredIssuesCount: null,
+          openPullRequestsCount: undefined,
+          starsCount: null,
+          forksCount: undefined,
+          id: 'null-test',
+          projectKey: 'null-project',
+        },
+      ]
+      // @ts-expect-error - testing specific edge case with mocked data
+      render(<HealthMetrics data={nullData} />)
+
+      const lineCharts = screen.getAllByTestId('LineChart')
+
+      const issuesProps = JSON.parse(lineCharts[0].dataset.props || '{}')
+      expect(issuesProps.series[0].data).toEqual([0]) // openIssuesCount
+      expect(issuesProps.series[1].data).toEqual([0]) // unassignedIssuesCount
+      expect(issuesProps.series[2].data).toEqual([0]) // unansweredIssuesCount
+      expect(issuesProps.labels).toEqual(['']) // createdAt
+
+      // Pull Requests Trend
+      const prProps = JSON.parse(lineCharts[1].dataset.props || '{}')
+      expect(prProps.series[0].data).toEqual([0])
+
+      // Stars Trend
+      const starsProps = JSON.parse(lineCharts[2].dataset.props || '{}')
+      expect(starsProps.series[0].data).toEqual([0])
+
+      // Forks Trend
+      const forksProps = JSON.parse(lineCharts[3].dataset.props || '{}')
+      expect(forksProps.series[0].data).toEqual([0])
     })
   })
 })

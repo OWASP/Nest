@@ -8,6 +8,7 @@ export const GET_MODULES_BY_PROGRAM = gql`
       name
       description
       experienceLevel
+      order
       startedAt
       endedAt
       projectId
@@ -15,6 +16,12 @@ export const GET_MODULES_BY_PROGRAM = gql`
       mentors {
         id
         login
+        avatarUrl
+      }
+      mentees {
+        id
+        login
+        name
         avatarUrl
       }
     }
@@ -39,14 +46,27 @@ export const GET_MODULE_BY_ID = gql`
         name
         avatarUrl
       }
+      mentees {
+        id
+        login
+        name
+        avatarUrl
+      }
     }
   }
 `
 
 export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
-  query GetProgramAdminsAndModules($programKey: String!, $moduleKey: String!) {
+  query GetProgramAdminsAndModules(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 4
+    $offset: Int = 0
+  ) {
     getProgram(programKey: $programKey) {
       id
+      startedAt
+      endedAt
       admins {
         id
         login
@@ -60,6 +80,7 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
       name
       description
       tags
+      labels
       projectId
       projectName
       domains
@@ -71,6 +92,58 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
         login
         name
         avatarUrl
+      }
+      mentees {
+        id
+        login
+        name
+        avatarUrl
+      }
+      recentPullRequests(limit: $limit, offset: $offset) {
+        id
+        title
+        url
+        state
+        createdAt
+        mergedAt
+        organizationName
+        repositoryName
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
+    }
+  }
+`
+
+export const GET_MODULE_ISSUES = gql`
+  query GetModuleIssues(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 20
+    $offset: Int = 0
+    $label: String
+  ) {
+    getModule(moduleKey: $moduleKey, programKey: $programKey) {
+      name
+      issuesCount(label: $label)
+      availableLabels
+      issues(limit: $limit, offset: $offset, label: $label) {
+        id
+        number
+        title
+        state
+        isMerged
+        labels
+        taskDeadline
+        assignees {
+          avatarUrl
+          login
+          name
+        }
       }
     }
   }

@@ -1,6 +1,6 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { mockUserData } from '@mockData/mockUserData'
 import { test, expect } from '@playwright/test'
-import { mockUserData } from '@unit/data/mockUserData'
 
 test.describe('Users Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,14 +13,6 @@ test.describe('Users Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
     await page.goto('/members')
   })
 
@@ -41,7 +33,7 @@ test.describe('Users Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2', exact: true })
+    const nextPageButton = await page.getByRole('button', { name: 'Go to page 2' })
     await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
@@ -60,6 +52,7 @@ test.describe('Users Page', () => {
     await expect(page.getByText('1k')).toBeVisible()
     await expect(page.getByText('2k')).toBeVisible()
   })
+
   test('breadcrumb renders correct segments on /members', async ({ page }) => {
     await expectBreadCrumbsToBeVisible(page, ['Home', 'Members'])
   })

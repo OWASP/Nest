@@ -26,7 +26,7 @@ class Command(BaseCommand):
         projects = []
         for idx, project in enumerate(active_projects[offset:]):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
-            print(f"{prefix:<10} {project.owasp_url}")
+            self.stdout.write(f"{prefix:<10} {project.owasp_url}\n")
 
             # Deactivate project with archived repositories.
             if project.owasp_repository.is_archived:
@@ -52,7 +52,11 @@ class Command(BaseCommand):
 
             project.organizations.clear()
             project.owners.clear()
-            for repository in project.repositories.all():
+            for repository in project.repositories.filter(
+                is_empty=False,
+                is_fork=False,
+                is_template=False,
+            ):
                 # Update organizations/owners.
                 if repository.organization:
                     project.organizations.add(repository.organization)
@@ -67,11 +71,11 @@ class Command(BaseCommand):
 
                 # Counters.
                 commits_count += repository.commits_count
-                contributors_count += repository.contributors_count
-                forks_count += repository.forks_count
+                contributors_count = max(contributors_count, repository.contributors_count)
+                forks_count = max(forks_count, repository.forks_count)
                 open_issues_count += repository.open_issues_count
                 releases_count += repository.releases.count()
-                stars_count += repository.stars_count
+                stars_count = max(stars_count, repository.stars_count)
                 subscribers_count += repository.subscribers_count
                 watchers_count += repository.watchers_count
 
@@ -100,7 +104,10 @@ class Command(BaseCommand):
             project.topics = sorted(topics)
 
             project.has_active_repositories = project.repositories.filter(
-                is_archived=False, is_empty=False
+                is_archived=False,
+                is_empty=False,
+                is_fork=False,
+                is_template=False,
             ).exists()
 
             projects.append(project)

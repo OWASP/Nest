@@ -1,5 +1,5 @@
 {
-  "allowCompoundWords": false,
+  "allowCompoundWords": true,
   "caseSensitive": false,
   "language": "en",
   "minWordLength": 3,
@@ -34,14 +34,17 @@
     "python",
     "rust",
     "software-terms",
+    "terraform",
     "win32"
   ],
   "enabled": true,
-  "files": ["**/*"],
+  "files": ["**/*", ".github/**/*"],
   "ignorePaths": [
+    ".github/workflows/check-pr-issue-skip-usernames.txt",
     "backend/**/migrations/*.py",
     "backend/data/project-custom-tags/*.json",
     "backend/static/**",
+    "design/**",
     "pnpm-lock.yaml"
   ],
   "ignoreRegExpList": [
@@ -58,6 +61,7 @@
     "@cspell/dict-k8s/cspell-ext.json",
     "@cspell/dict-people-names/cspell-ext.json",
     "@cspell/dict-software-terms/cspell-ext.json",
+    "@cspell/dict-terraform/cspell-ext.json",
     "@cspell/dict-win32/cspell-ext.json"
   ],
   "useGitignore": true

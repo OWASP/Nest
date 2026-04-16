@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { handleAppError } from 'app/global-error'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 interface UseSearchPageOptions {
@@ -10,6 +10,7 @@ interface UseSearchPageOptions {
   defaultSortBy?: string
   defaultOrder?: string
   hitsPerPage?: number
+  facetFilters?: string[]
 }
 
 interface UseSearchPageReturn<T> {
@@ -32,17 +33,28 @@ export function useSearchPage<T>({
   defaultSortBy = '',
   defaultOrder = '',
   hitsPerPage,
+  facetFilters = [],
 }: UseSearchPageOptions): UseSearchPageReturn<T> {
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const [items, setItems] = useState<T[]>([])
-  const [currentPage, setCurrentPage] = useState<number>(parseInt(searchParams.get('page') || '1'))
+  const [currentPage, setCurrentPage] = useState<number>(
+    Number.parseInt(searchParams.get('page') || '1')
+  )
   const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('q') || '')
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || defaultSortBy)
   const [order, setOrder] = useState<string>(searchParams.get('order') || defaultOrder)
   const [totalPages, setTotalPages] = useState<number>(0)
   const [isLoaded, setIsLoaded] = useState<boolean>(false)
+
+  const facetFiltersKey = JSON.stringify(facetFilters)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableFacetFilters = useMemo(() => facetFilters, [facetFiltersKey])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [stableFacetFilters])
 
   // Sync state with URL changes
   useEffect(() => {
@@ -50,12 +62,15 @@ export function useSearchPage<T>({
       const searchQueryParam = searchParams.get('q') || ''
       const sortByParam = searchParams.get('sortBy') || 'default'
       const orderParam = searchParams.get('order') || 'desc'
+
+      const searchQueryChanged = searchQuery !== searchQueryParam
+      const sortOrOrderChanged = sortBy !== sortByParam || order !== orderParam
+
+      // Reset page if search query changes (all indices) or if sort/order changes (projects/chapters)
       if (
-        indexName === 'projects' &&
-        (searchQuery !== searchQueryParam || sortBy !== sortByParam || order !== orderParam)
+        searchQueryChanged ||
+        (['projects', 'chapters'].includes(indexName) && sortOrOrderChanged)
       ) {
-        setCurrentPage(1)
-      } else if (searchQuery !== searchQueryParam) {
         setCurrentPage(1)
       }
     }
@@ -66,11 +81,11 @@ export function useSearchPage<T>({
     if (searchQuery) params.set('q', searchQuery)
     if (currentPage > 1) params.set('page', currentPage.toString())
 
-    if (sortBy && sortBy !== 'default' && sortBy[0] !== 'default' && sortBy !== '') {
+    if (sortBy && sortBy !== 'default' && sortBy !== '') {
       params.set('sortBy', sortBy)
     }
 
-    if (sortBy !== 'default' && sortBy[0] !== 'default' && order && order !== '') {
+    if (sortBy !== 'default' && order && order !== '') {
       params.set('order', order)
     }
 
@@ -82,18 +97,28 @@ export function useSearchPage<T>({
 
     const fetchData = async () => {
       try {
+        let computedIndexName = indexName
+
+        // Check if valid sort option is selected
+        const hasValidSort = sortBy && sortBy !== 'default'
+
+        if (hasValidSort) {
+          // if sorting is active then appends the sort field and order to the base index name.
+          const orderSuffix = order && order !== '' ? `_${order}` : ''
+          computedIndexName = `${indexName}_${sortBy}${orderSuffix}`
+        }
+
         const response = await fetchAlgoliaData<T>(
-          sortBy && sortBy !== 'default' && sortBy[0] !== 'default'
-            ? `${indexName}_${sortBy}${order && order !== '' ? `_${order}` : ''}`
-            : indexName,
+          computedIndexName,
           searchQuery,
           currentPage,
-          hitsPerPage
+          hitsPerPage,
+          [...stableFacetFilters]
         )
 
         if ('hits' in response) {
           setItems(response.hits)
-          setTotalPages(response.totalPages as number)
+          setTotalPages(response.totalPages ?? 0)
         } else {
           handleAppError(response)
         }
@@ -104,7 +129,16 @@ export function useSearchPage<T>({
     }
 
     fetchData()
-  }, [currentPage, searchQuery, order, sortBy, hitsPerPage, indexName, pageTitle])
+  }, [
+    currentPage,
+    searchQuery,
+    order,
+    sortBy,
+    hitsPerPage,
+    indexName,
+    pageTitle,
+    stableFacetFilters,
+  ])
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)

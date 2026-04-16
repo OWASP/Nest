@@ -6,7 +6,7 @@ from django.db import models
 class OpenPullRequestManager(models.Manager):
     """Open pull requests."""
 
-    def get_queryset(self):
+    def get_queryset(self) -> models.QuerySet:
         """Get queryset."""
         return (
             super()

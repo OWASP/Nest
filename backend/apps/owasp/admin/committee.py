@@ -2,16 +2,23 @@
 
 from django.contrib import admin
 
+from apps.owasp.admin.mixins import (
+    EntityChannelInline,
+    EntityMemberInline,
+    GenericEntityAdminMixin,
+)
 from apps.owasp.models.committee import Committee
-
-from .mixins import EntityMemberInline, GenericEntityAdminMixin
 
 
 class CommitteeAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     """Admin for Committee model."""
 
     autocomplete_fields = ("owasp_repository",)
-    inlines = (EntityMemberInline,)
+    exclude = (
+        "leaders",
+        "suggested_leaders",
+    )
+    inlines = (EntityMemberInline, EntityChannelInline)
     search_fields = ("name",)
 
 

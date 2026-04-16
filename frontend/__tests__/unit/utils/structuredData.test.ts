@@ -1,8 +1,8 @@
-import type { UserDetails } from 'types/user'
+import type { User } from 'types/user'
 import { generateProfilePageStructuredData } from 'utils/structuredData'
 
 describe('generateProfilePageStructuredData', () => {
-  const mockUser: UserDetails = {
+  const mockUser: User = {
     avatarUrl: 'https://example.com/avatar.jpg',
     bio: 'Security researcher and OWASP contributor',
     company: 'Security Corp',
@@ -26,8 +26,8 @@ describe('generateProfilePageStructuredData', () => {
     expect(result).toEqual({
       '@context': 'https://schema.org',
       '@type': 'ProfilePage',
-      dateCreated: '1970-01-01T00:33:40.000Z',
-      dateModified: '1970-01-01T00:33:41.000Z',
+      dateCreated: '2020-01-01T00:00:00.000Z',
+      dateModified: '2021-02-03T00:00:00.000Z',
       mainEntity: {
         '@type': 'Person',
         address: 'San Francisco, CA, USA',
@@ -58,7 +58,7 @@ describe('generateProfilePageStructuredData', () => {
   })
 
   it('should handle user without optional fields', () => {
-    const minimalUser: UserDetails = {
+    const minimalUser: User = {
       avatarUrl: 'https://example.com/avatar.jpg',
       contributionsCount: 0,
       createdAt: '2020-01-01T00:00:00Z',

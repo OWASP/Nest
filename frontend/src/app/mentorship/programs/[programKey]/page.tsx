@@ -1,65 +1,51 @@
 'use client'
 
-import { useQuery } from '@apollo/client'
-import upperFirst from 'lodash/upperFirst'
-import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { ErrorDisplay } from 'app/global-error'
-import { GET_PROGRAM_AND_MODULES } from 'server/queries/programsQueries'
-import type { Module, Program } from 'types/mentorship'
+import { useQuery } from '@apollo/client/react'
+import { BreadcrumbStyleProvider } from 'contexts/BreadcrumbContext'
+import { useParams } from 'next/navigation'
+import { useEffect } from 'react'
+import { ErrorDisplay, handleAppError } from 'app/global-error'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+
+import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
-  const { programKey } = useParams() as { programKey: string }
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const shouldRefresh = searchParams.get('refresh') === 'true'
+  const { programKey } = useParams<{ programKey: string }>()
   const {
     data,
-    refetch,
-    loading: isQueryLoading,
-  } = useQuery(GET_PROGRAM_AND_MODULES, {
-    variables: { programKey },
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetProgramAndModulesDocument, {
+    fetchPolicy: 'cache-and-network',
     skip: !programKey,
-    notifyOnNetworkStatusChange: true,
+    variables: { programKey },
   })
 
-  const [program, setProgram] = useState<Program | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
-  const [isRefetching, setIsRefetching] = useState(false)
-
-  const isLoading = isQueryLoading || isRefetching
+  const program = data?.getProgram
+  const modules = data?.getProgramModules || []
 
   useEffect(() => {
-    const processResult = async () => {
-      if (shouldRefresh) {
-        setIsRefetching(true)
-        try {
-          await refetch()
-        } finally {
-          setIsRefetching(false)
-
-          const params = new URLSearchParams(searchParams.toString())
-          params.delete('refresh')
-          const cleaned = params.toString()
-          router.replace(cleaned ? `?${cleaned}` : window.location.pathname, { scroll: false })
-        }
-      }
-
-      if (data?.getProgram) {
-        setProgram(data.getProgram)
-        setModules(data.getProgramModules || [])
-      }
+    if (graphQLRequestError) {
+      handleAppError(graphQLRequestError)
     }
+  }, [graphQLRequestError])
 
-    processResult()
-  }, [shouldRefresh, data, refetch, router, searchParams])
+  if (isLoading && !data) return <LoadingSpinner />
 
-  if (isLoading) return <LoadingSpinner />
+  if (graphQLRequestError) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Error loading program"
+        message="An error occurred while loading the program data"
+      />
+    )
+  }
 
-  if (!program && !isLoading) {
+  if (!data || !program) {
     return (
       <ErrorDisplay
         statusCode={404}
@@ -70,26 +56,33 @@ const ProgramDetailsPage = () => {
   }
 
   const programDetails = [
-    { label: 'Status', value: upperFirst(program.status) },
+    { label: 'Status', value: titleCaseWord(program.status) },
     { label: 'Start Date', value: formatDate(program.startedAt) },
     { label: 'End Date', value: formatDate(program.endedAt) },
     { label: 'Mentees Limit', value: String(program.menteesLimit) },
     {
       label: 'Experience Levels',
-      value: program.experienceLevels?.join(', ') || 'N/A',
+      value: program.experienceLevels?.map((level) => titleCaseWord(level)).join(', ') || 'N/A',
     },
   ]
 
   return (
-    <DetailsCard
-      modules={modules}
-      details={programDetails}
-      tags={program.tags}
-      domains={program.domains}
-      summary={program.description}
-      title={program.name}
-      type="program"
-    />
+    <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
+      <DetailsCard
+        admins={program.admins ?? undefined}
+        details={programDetails}
+        domains={program.domains ?? undefined}
+        modules={modules}
+        recentMilestones={
+          (program.recentMilestones as unknown as import('types/milestone').Milestone[]) ??
+          undefined
+        }
+        summary={program.description}
+        tags={program.tags ?? undefined}
+        title={program.name}
+        type="program"
+      />
+    </BreadcrumbStyleProvider>
   )
 }
 

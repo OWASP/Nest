@@ -2,9 +2,12 @@
 
 from django.contrib import admin
 
+from apps.owasp.admin.mixins import (
+    EntityChannelInline,
+    EntityMemberInline,
+    GenericEntityAdminMixin,
+)
 from apps.owasp.models.project import Project
-
-from .mixins import EntityMemberInline, GenericEntityAdminMixin
 
 
 class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
@@ -16,7 +19,11 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
         "owners",
         "repositories",
     )
-    inlines = (EntityMemberInline,)
+    exclude = (
+        "leaders",
+        "suggested_leaders",
+    )
+    inlines = (EntityMemberInline, EntityChannelInline)
     list_display = (
         "custom_field_name",
         "created_at",
@@ -47,7 +54,18 @@ class ProjectAdmin(admin.ModelAdmin, GenericEntityAdminMixin):
     )
 
     def custom_field_name(self, obj) -> str:
-        """Project custom name."""
+        """Display project name or key in admin list view.
+
+        Uses the project name as the primary display, falling back to the key
+        if the name is not available.
+
+        Args:
+            obj: The Project instance.
+
+        Returns:
+            str: The project name or key.
+
+        """
         return f"{obj.name or obj.key}"
 
     custom_field_name.short_description = "Name"

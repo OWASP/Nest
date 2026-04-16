@@ -1,50 +1,49 @@
 'use client'
-
-import { useQuery } from '@apollo/client'
-import {
-  faCodeCommit,
-  faCodeFork,
-  faExclamationCircle,
-  faStar,
-  faUsers,
-} from '@fortawesome/free-solid-svg-icons'
+import { useQuery } from '@apollo/client/react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { FaExclamationCircle } from 'react-icons/fa'
+import { FaCodeCommit, FaCodeFork, FaStar } from 'react-icons/fa6'
+import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
-import { GET_REPOSITORY_DATA } from 'server/queries/repositoryQueries'
-import type { Contributor } from 'types/contributor'
+import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const RepositoryDetailsPage = () => {
-  const { repositoryKey, organizationKey } = useParams()
-  const [repository, setRepository] = useState(null)
-  const [topContributors, setTopContributors] = useState<Contributor[]>([])
-  const [recentPullRequests, setRecentPullRequests] = useState(null)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const { data, error: graphQLRequestError } = useQuery(GET_REPOSITORY_DATA, {
+  const { repositoryKey, organizationKey } = useParams<{
+    repositoryKey: string
+    organizationKey: string
+  }>()
+  const {
+    data,
+    error: graphQLRequestError,
+    loading: isLoading,
+  } = useQuery(GetRepositoryDataDocument, {
     variables: { repositoryKey: repositoryKey, organizationKey: organizationKey },
   })
+
+  const repository = data?.repository
+  const topContributors = data?.topContributors ?? []
+  const recentPullRequests = data?.recentPullRequests
+  const recentIssues = repository?.issues?.map((issue) => ({
+    ...issue,
+    author: issue.author ?? undefined,
+  }))
+
   useEffect(() => {
-    if (data) {
-      setRepository(data.repository)
-      setTopContributors(data.topContributors)
-      setRecentPullRequests(data.recentPullRequests)
-      setIsLoading(false)
-    }
     if (graphQLRequestError) {
       handleAppError(graphQLRequestError)
-      setIsLoading(false)
     }
-  }, [data, graphQLRequestError, repositoryKey])
+  }, [graphQLRequestError])
 
   if (isLoading) {
     return <LoadingSpinner />
   }
 
-  if (!isLoading && !repository) {
+  if (!repository) {
     return (
       <ErrorDisplay
         message="Sorry, the Repository you're looking for doesn't exist"
@@ -79,28 +78,27 @@ const RepositoryDetailsPage = () => {
 
   const RepositoryStats = [
     {
-      icon: faStar,
+      icon: FaStar,
       value: repository.starsCount,
       unit: 'Star',
     },
     {
-      icon: faCodeFork,
+      icon: FaCodeFork,
       value: repository.forksCount,
       unit: 'Fork',
     },
     {
-      icon: faUsers,
+      icon: HiUserGroup,
       value: repository.contributorsCount,
       unit: 'Contributor',
     },
-
     {
-      icon: faExclamationCircle,
+      icon: FaExclamationCircle,
       value: repository.openIssuesCount,
       unit: 'Issue',
     },
     {
-      icon: faCodeCommit,
+      icon: FaCodeCommit,
       value: repository.commitsCount,
       unit: 'Commit',
     },
@@ -109,12 +107,13 @@ const RepositoryDetailsPage = () => {
     <DetailsCard
       details={repositoryDetails}
       entityKey={repository.project?.key}
+      isArchived={repository.isArchived}
       languages={repository.languages}
       projectName={repository.project?.name}
-      pullRequests={recentPullRequests}
-      recentIssues={repository.issues}
-      recentMilestones={repository.recentMilestones}
-      recentReleases={repository.releases}
+      pullRequests={recentPullRequests ?? []}
+      recentIssues={recentIssues ?? []}
+      recentMilestones={repository.recentMilestones ?? []}
+      recentReleases={repository.releases ?? []}
       stats={RepositoryStats}
       summary={repository.description}
       title={repository.name}

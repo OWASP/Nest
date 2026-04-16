@@ -21,7 +21,7 @@ describe('<LoadingSpinner />', () => {
     expect(images.length).toBe(2)
     // Should fallback to default images when no valid input is provided
     expect(images[0].getAttribute('src')).toContain('white')
-    expect(images[1].getAttribute('src')).toContain('black')
+    expect(images[1].getAttribute('src')).toContain('blue')
   })
   it('has appropriate alt text for accessibility', () => {
     render(<LoadingSpinner />)
@@ -43,7 +43,7 @@ describe('<LoadingSpinner />', () => {
     render(<LoadingSpinner />)
     const images = screen.getAllByAltText('Loading indicator')
     expect(images[0].getAttribute('src')).toContain('white') // dark image
-    expect(images[1].getAttribute('src')).toContain('black') // light image
+    expect(images[1].getAttribute('src')).toContain('blue') // light image
   })
 
   it('renders custom image when imageUrl is provided', () => {
@@ -51,7 +51,7 @@ describe('<LoadingSpinner />', () => {
     render(<LoadingSpinner imageUrl={customUrl} />)
     const images = screen.getAllByAltText('Loading indicator')
     expect(images[0].getAttribute('src')).toBe(customUrl) // Should use the exact custom URL
-    expect(images[1].getAttribute('src')).toBe('/img/spinner_black.png') // Should transform white to black
+    expect(images[1].getAttribute('src')).toBe('/img/spinner_blue.png') // Should transform white to blue
   })
 
   it('renders spinner container with correct styles', () => {
@@ -61,6 +61,18 @@ describe('<LoadingSpinner />', () => {
     expect(fadeContainer?.className).toContain('animate-fade-in-out')
   })
 
+  it('keeps logo static while spinner ring rotates', () => {
+    render(<LoadingSpinner />)
+
+    const rotatingRing = document.querySelector('.animate-custom-spin')
+    expect(rotatingRing).toBeInTheDocument()
+
+    const images = screen.getAllByAltText('Loading indicator')
+    images.forEach((image) => {
+      expect(image.closest('.animate-custom-spin')).toBeNull()
+    })
+  })
+
   it('has appropriate alt text and accessibility image role', () => {
     render(<LoadingSpinner />)
     const images = screen.getAllByAltText('Loading indicator')
@@ -68,5 +80,39 @@ describe('<LoadingSpinner />', () => {
     expect(images[0].tagName.toLowerCase()).toBe('img')
     expect(images[1]).toBeInTheDocument()
     expect(images[1].tagName.toLowerCase()).toBe('img')
+  })
+
+  describe('Theme-specific image loading', () => {
+    it('renders spinner_white.png for dark theme', () => {
+      render(<LoadingSpinner />)
+      const images = screen.getAllByAltText('Loading indicator')
+
+      const darkThemeImage = images[0]
+      expect(darkThemeImage).toHaveAttribute('src', '/img/spinner_white.png')
+      expect(darkThemeImage).toHaveClass('hidden', 'rounded-full', 'dark:block')
+    })
+
+    it('renders spinner_blue.png for light theme', () => {
+      render(<LoadingSpinner />)
+      const images = screen.getAllByAltText('Loading indicator')
+
+      const lightThemeImage = images[1]
+      expect(lightThemeImage).toHaveAttribute('src', '/img/spinner_blue.png')
+      expect(lightThemeImage).toHaveClass('rounded-full', 'dark:hidden')
+    })
+
+    it('uses correct theme images when custom imageUrl is provided', () => {
+      const customUrl = '/img/spinner_white.png'
+      render(<LoadingSpinner imageUrl={customUrl} />)
+      const images = screen.getAllByAltText('Loading indicator')
+
+      const darkThemeImage = images[0]
+      expect(darkThemeImage).toHaveAttribute('src', customUrl)
+      expect(darkThemeImage).toHaveClass('hidden', 'rounded-full', 'dark:block')
+
+      const lightThemeImage = images[1]
+      expect(lightThemeImage).toHaveAttribute('src', '/img/spinner_blue.png')
+      expect(lightThemeImage).toHaveClass('rounded-full', 'dark:hidden')
+    })
   })
 })

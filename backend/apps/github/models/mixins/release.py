@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from django.utils.text import Truncator
+from apps.common.utils import truncate
+
+DESCRIPTION_MAX_LENGTH = 1000
 
 
 class ReleaseIndexMixin:
@@ -30,14 +32,14 @@ class ReleaseIndexMixin:
         )
 
     @property
-    def idx_created_at(self) -> float:
-        """Return created at timestamp for indexing."""
-        return self.created_at.timestamp()
+    def idx_created_at(self) -> str:
+        """Return created at for indexing."""
+        return self.created_at.isoformat()
 
     @property
     def idx_description(self) -> str:
         """Return description for indexing."""
-        return Truncator(self.description).chars(1000, truncate="...")
+        return truncate(self.description, limit=DESCRIPTION_MAX_LENGTH)
 
     @property
     def idx_is_pre_release(self) -> bool:
@@ -55,9 +57,9 @@ class ReleaseIndexMixin:
         return self.repository.project.nest_key if self.repository.project else ""
 
     @property
-    def idx_published_at(self) -> float | None:
-        """Return published at timestamp for indexing."""
-        return self.published_at.timestamp() if self.published_at else None
+    def idx_published_at(self) -> str | None:
+        """Return published at for indexing."""
+        return self.published_at.isoformat() if self.published_at else None
 
     @property
     def idx_repository(self) -> str:

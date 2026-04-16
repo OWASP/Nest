@@ -1,30 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 import '@testing-library/jest-dom'
 import type { Link as LinkType } from 'types/link'
 import NavDropdown from 'components/NavDropDown'
 
-// Mock Next.js Link component
-jest.mock('next/link', () => {
-  return ({ href, children, ...props }) => {
-    return (
-      <a
-        href={href}
-        {...props}
-        onClick={(e) => {
-          e.preventDefault()
-          props.onClick?.(e)
-        }}
-      >
-        {children}
-      </a>
-    )
-  }
-})
-
-// Mock FontAwesome icons
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ className }) => <span data-testid="chevron-icon" className={className} />,
+jest.mock('react-icons/fa', () => ({
+  FaChevronDown: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-icon" className={props.className} {...props} />
+  ),
 }))
 
 // Mock utility function
@@ -310,6 +294,38 @@ describe('NavDropdown Component', () => {
       })
     })
 
+    it('closes dropdown when Escape is pressed on submenu item', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard('{Escape}')
+      await waitFor(() => {
+        expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+      })
+    })
+
+    it('closes dropdown when Space is pressed on submenu item', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard(' ')
+      await waitFor(() => {
+        expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+      })
+    })
+
     it('handles space key to toggle dropdown', async () => {
       const user = userEvent.setup()
       render(<NavDropdown {...defaultProps} />)
@@ -537,7 +553,13 @@ describe('NavDropdown Component', () => {
       render(<NavDropdown {...defaultProps} />)
 
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('flex', 'items-center', 'gap-2', 'whitespace-nowrap')
+      expect(button).toHaveClass(
+        'flex',
+        'items-center',
+        'gap-2',
+        'whitespace-nowrap',
+        'cursor-pointer'
+      )
     })
 
     it('applies correct classes to dropdown menu when open', async () => {
@@ -616,6 +638,41 @@ describe('NavDropdown Component', () => {
 
       addEventListenerSpy.mockRestore()
       removeEventListenerSpy.mockRestore()
+    })
+  })
+  describe('Coverage Improvements', () => {
+    it('does nothing when Escape is pressed on dropdown button while closed (line 50)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+      const button = screen.getByRole('button')
+      button.focus()
+
+      await user.keyboard('{Escape}')
+      expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+    })
+
+    it('does nothing when random key is pressed on dropdown button (line 50)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+      const button = screen.getByRole('button')
+      button.focus()
+
+      await user.keyboard('a')
+      expect(screen.queryByText('Getting Started')).not.toBeInTheDocument()
+    })
+
+    it('does nothing when random key is pressed on submenu item (line 84)', async () => {
+      const user = userEvent.setup()
+      render(<NavDropdown {...defaultProps} />)
+
+      const button = screen.getByRole('button')
+      await user.click(button) // Open it
+
+      const submenuItem = screen.getByText('Getting Started')
+      submenuItem.focus()
+
+      await user.keyboard('a')
+      expect(screen.getByText('Getting Started')).toBeInTheDocument()
     })
   })
 })

@@ -9,6 +9,7 @@ export const GET_REPOSITORY_DATA = gql`
       createdAt
       description
       forksCount
+      isArchived
       key
       issues {
         id
@@ -22,6 +23,7 @@ export const GET_REPOSITORY_DATA = gql`
         repositoryName
         createdAt
         title
+        url
       }
       languages
       license
@@ -30,6 +32,7 @@ export const GET_REPOSITORY_DATA = gql`
       organization {
         id
         login
+        name
       }
       project {
         id

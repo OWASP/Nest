@@ -61,14 +61,14 @@ const baseIssue = {
     login: 'user1',
     name: 'User One',
     contributionsCount: 10,
-    createdAt: 1234567890,
+    createdAt: '2009-02-13T23:31:30.000Z',
     followersCount: 5,
     followingCount: 2,
     key: 'user1',
     publicRepositoriesCount: 3,
     url: 'https://github.com/user1',
   },
-  createdAt: 1710000000,
+  createdAt: '2024-03-09T16:00:00Z',
   hint: 'Hint',
   labels: ['bug'],
   organizationName: 'org',
@@ -76,7 +76,7 @@ const baseIssue = {
   projectUrl: 'https://github.com/org/proj',
   summary: 'Summary',
   title: 'Issue Title',
-  updatedAt: 1710000100,
+  updatedAt: '2024-03-09T16:01:40Z',
   url: 'https://github.com/org/proj/issues/1',
   objectID: 'id1',
   repositoryName: 'repo',
@@ -96,12 +96,12 @@ describe('<RecentIssues />', () => {
 
   it('shows avatar when showAvatar is true', () => {
     render(<RecentIssues data={[baseIssue]} showAvatar={true} />)
-    expect(screen.getByAltText('User One')).toBeInTheDocument()
+    expect(screen.getByAltText("User One's avatar")).toBeInTheDocument()
   })
 
   it('hides avatar when showAvatar is false', () => {
     render(<RecentIssues data={[baseIssue]} showAvatar={false} />)
-    expect(screen.queryByAltText('User One')).not.toBeInTheDocument()
+    expect(screen.queryByAltText("User One's avatar")).not.toBeInTheDocument()
   })
 
   it('renders repositoryName and navigates on click', () => {
@@ -140,7 +140,7 @@ describe('<RecentIssues />', () => {
     render(<RecentIssues data={[issue]} />)
     expect(screen.getByText('Recent Issues')).toBeInTheDocument()
     expect(screen.getByText('repo')).toBeInTheDocument()
-    expect(screen.getByAltText('User One')).toBeInTheDocument()
+    expect(screen.getByAltText("User One's avatar")).toBeInTheDocument()
   })
 
   it('has accessible roles and labels', () => {
@@ -174,7 +174,16 @@ describe('<RecentIssues />', () => {
   })
 
   it('renders with missing props gracefully', () => {
-    render(<RecentIssues data={[{} as Issue]} showAvatar={false} />)
+    const minimalIssue: Issue = {
+      createdAt: '2024-01-01T00:00:00Z',
+      title: '',
+      url: '',
+      objectID: 'minimal-issue',
+      projectName: '',
+      projectUrl: '',
+      updatedAt: '2024-01-01T00:00:00Z',
+    }
+    render(<RecentIssues data={[minimalIssue]} showAvatar={false} />)
     expect(screen.getByText('Recent Issues')).toBeInTheDocument()
   })
 
@@ -185,6 +194,20 @@ describe('<RecentIssues />', () => {
 
   it('defaults to showing avatar when showAvatar is not provided', () => {
     render(<RecentIssues data={[baseIssue]} />)
-    expect(screen.getByAltText('User One')).toBeInTheDocument()
+    expect(screen.getByAltText("User One's avatar")).toBeInTheDocument()
+  })
+
+  it('shows fallback icon when author name and login are missing', () => {
+    const issueWithEmptyAuthor = {
+      ...baseIssue,
+      author: {
+        ...baseIssue.author,
+        name: '',
+        login: '',
+      },
+    }
+    render(<RecentIssues data={[issueWithEmptyAuthor]} />)
+    const avatarImage = screen.queryByAltText("Author's avatar")
+    expect(avatarImage).not.toBeInTheDocument()
   })
 })

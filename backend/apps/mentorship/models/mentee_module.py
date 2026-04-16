@@ -12,9 +12,17 @@ class MenteeModule(StartEndRange, TimestampedModel):
     """Mentee module enrollment."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_mentee_modules"
         verbose_name_plural = "Mentee modules"
         unique_together = ("mentee", "module")
+
+    ended_at = models.DateTimeField(
+        verbose_name="End date and time",
+        blank=True,
+        null=True,
+    )
 
     # FKs.
     mentee = models.ForeignKey(

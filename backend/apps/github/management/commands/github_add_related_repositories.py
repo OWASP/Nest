@@ -43,7 +43,7 @@ class Command(BaseCommand):
         projects = []
         for idx, project in enumerate(active_projects[offset:]):
             prefix = f"{idx + offset + 1} of {active_projects_count}"
-            print(f"{prefix:<10} {project.owasp_url}")
+            self.stdout.write(f"{prefix:<10} {project.owasp_url}\n")
 
             repository_urls = project.related_urls.copy()
             for repository_url in repository_urls:
@@ -59,7 +59,9 @@ class Command(BaseCommand):
                         project.invalid_urls.add(repository_url)
                         project.related_urls.remove(repository_url)
                         project.save(update_fields=("invalid_urls", "related_urls"))
-                        continue
+                    else:
+                        logger.exception("Unexpected error fetching repository %s", repository_url)
+                    continue
 
                 try:
                     organization, repository = sync_repository(gh_repository)

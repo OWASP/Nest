@@ -1,0 +1,26 @@
+FROM node:24.14-alpine3.23
+
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    FORCE_COLOR=1 \
+    NPM_CONFIG_CACHE="/app/.npm" \
+    PNPM_HOME="/pnpm"
+
+ENV NPM_CONFIG_RETRY=5 \
+    NPM_CONFIG_TIMEOUT=30000 \
+    PATH="$PNPM_HOME:$PATH"
+
+WORKDIR /app
+
+COPY --chmod=444 --chown=root:root package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    corepack install && corepack enable pnpm && \
+    pnpm install --frozen-lockfile --ignore-scripts && \
+    chown node:node /app
+
+COPY __tests__/a11y __tests__/a11y
+COPY __tests__/mockData __tests__/mockData
+COPY .pnpmrc jest.config.ts jest.setup.ts tsconfig.json ./
+COPY public public
+COPY src src
+
+USER node

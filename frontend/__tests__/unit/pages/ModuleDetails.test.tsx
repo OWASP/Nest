@@ -1,6 +1,6 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
+import { mockModuleData } from '@mockData/mockModuleData'
 import { screen, waitFor } from '@testing-library/react'
-import { mockModuleData } from '@unit/data/mockModuleData'
 import { useParams } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
@@ -10,10 +10,9 @@ jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
 }))
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
-  useMutation: jest.fn(),
 }))
 
 jest.mock('app/global-error', () => ({
@@ -32,7 +31,7 @@ jest.mock('components/CardDetailsPage', () => (props) => (
 
 describe('ModuleDetailsPage', () => {
   const mockUseParams = useParams as jest.Mock
-  const mockUseQuery = useQuery as jest.Mock
+  const mockUseQuery = useQuery as unknown as jest.Mock
 
   const admins = [{ login: 'admin1' }]
 
@@ -54,14 +53,51 @@ describe('ModuleDetailsPage', () => {
     expect(container.innerHTML).toContain('LoadingSpinner')
   })
 
-  it('calls error handler on GraphQL error', async () => {
+  it('calls error handler and displays error message on GraphQL error', async () => {
     const error = new Error('Query failed')
-    mockUseQuery.mockReturnValue({ error, loading: false })
+    mockUseQuery.mockReturnValue({ error, loading: false, data: null })
 
     render(<ModuleDetailsPage />)
 
     await waitFor(() => {
+      expect(screen.getByText('Error loading module')).toBeInTheDocument()
+    })
+
+    await waitFor(() => {
       expect(handleAppError).toHaveBeenCalledWith(error)
+    })
+  })
+
+  it('displays "Module Not Found" when data is null without error', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      error: null,
+      data: null,
+    })
+
+    render(<ModuleDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Module Not Found')).toBeInTheDocument()
+    })
+  })
+
+  it('displays "Module Not Found" when data exists but getModule is null', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      error: null,
+      data: {
+        getModule: null,
+        getProgram: {
+          admins: [],
+        },
+      },
+    })
+
+    render(<ModuleDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Module Not Found')).toBeInTheDocument()
     })
   })
 
@@ -80,5 +116,53 @@ describe('ModuleDetailsPage', () => {
 
     expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
     expect(screen.getByTestId('details-card')).toHaveTextContent('A beginner friendly module.')
+  })
+
+  it('renders module without admins (uses undefined fallback)', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: mockModuleData,
+        getProgram: {
+          admins: null,
+        },
+      },
+    })
+
+    render(<ModuleDetailsPage />)
+
+    expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
+  })
+
+  it('renders module without domains (uses undefined fallback)', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: { ...mockModuleData, domains: null },
+        getProgram: {
+          admins,
+        },
+      },
+    })
+
+    render(<ModuleDetailsPage />)
+
+    expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
+  })
+
+  it('renders module without tags (uses undefined fallback)', async () => {
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      data: {
+        getModule: { ...mockModuleData, tags: null },
+        getProgram: {
+          admins,
+        },
+      },
+    })
+
+    render(<ModuleDetailsPage />)
+
+    expect(await screen.findByTestId('details-card')).toHaveTextContent('Intro to Web')
   })
 })

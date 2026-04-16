@@ -1,28 +1,67 @@
 """Event API."""
 
-from datetime import datetime
+from http import HTTPStatus
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
-from ninja import Query, Router, Schema
+from ninja import Field, Path, Query, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import RouterPaginated
+from ninja.responses import Response
 
-from apps.owasp.models.event import Event
+from apps.api.decorators.cache import cache_response
+from apps.api.rest.v0.common import LocationFilter, ValidationErrorSchema
+from apps.owasp.models.event import Event as EventModel
 
-router = Router()
+router = RouterPaginated(tags=["Events"])
 
 
-class EventSchema(Schema):
-    """Schema for Event."""
+class EventBase(Schema):
+    """Base schema for Event (used in list endpoints)."""
 
-    description: str
+    end_date: str | None = None
+    key: str
+    latitude: float | None = None
+    longitude: float | None = None
     name: str
-    end_date: datetime
-    start_date: datetime
-    url: str
+    start_date: str
+    url: str | None = None
+
+    @staticmethod
+    def resolve_end_date(event: EventModel) -> str | None:
+        """Resolve end date."""
+        return event.end_date.isoformat() if event.end_date else None
+
+    @staticmethod
+    def resolve_start_date(event: EventModel) -> str:
+        """Resolve start date."""
+        return event.start_date.isoformat()
+
+
+class Event(EventBase):
+    """Schema for Event (minimal fields for list display)."""
+
+
+class EventDetail(EventBase):
+    """Detail schema for Event (used in single item endpoints)."""
+
+    description: str | None = None
+
+
+class EventError(Schema):
+    """Event error schema."""
+
+    message: str
+
+
+class EventFilter(LocationFilter):
+    """Filter for Event."""
+
+    category: list[EventModel.Category] | None = Field(
+        None,
+        description="Filter events by category",
+        q="category__in",
+    )
 
 
 @router.get(
@@ -30,17 +69,58 @@ class EventSchema(Schema):
     description="Retrieve a paginated list of OWASP events.",
     operation_id="list_events",
     summary="List events",
-    tags=["Events"],
-    response={200: list[EventSchema]},
+    response=list[Event],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+@decorate_view(cache_response())
 def list_events(
     request: HttpRequest,
-    ordering: Literal["start_date", "-start_date", "end_date", "-end_date"] | None = Query(
+    filters: EventFilter = Query(...),
+    ordering: Literal[
+        "start_date",
+        "-start_date",
+        "end_date",
+        "-end_date",
+        "latitude",
+        "-latitude",
+        "longitude",
+        "-longitude",
+    ]
+    | None = Query(
         None,
         description="Ordering field",
     ),
-) -> list[EventSchema]:
-    """Get all events."""
-    return Event.objects.order_by(ordering or "-start_date")
+    *,
+    is_upcoming: bool | None = Query(
+        None,
+        description="Filter for upcoming events",
+    ),
+) -> list[Event]:
+    """Get list of events."""
+    return filters.filter(
+        EventModel.upcoming_events().order_by(ordering or "start_date", "end_date")
+        if is_upcoming
+        else EventModel.objects.order_by(ordering or "-start_date", "-end_date")
+    )
+
+
+@router.get(
+    "/{str:event_id}",
+    description="Retrieve an event details.",
+    operation_id="get_event",
+    response={
+        HTTPStatus.BAD_REQUEST: ValidationErrorSchema,
+        HTTPStatus.NOT_FOUND: EventError,
+        HTTPStatus.OK: EventDetail,
+    },
+    summary="Get event",
+)
+@decorate_view(cache_response())
+def get_event(
+    request: HttpRequest,
+    event_id: str = Path(..., example="owasp-global-appsec-usa-2025-washington-dc"),
+) -> EventDetail | EventError:
+    """Get event."""
+    if event := EventModel.objects.filter(key__iexact=event_id).first():
+        return event
+
+    return Response({"message": "Event not found"}, status=HTTPStatus.NOT_FOUND)

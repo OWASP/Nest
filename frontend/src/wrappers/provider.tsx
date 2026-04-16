@@ -1,6 +1,5 @@
 'use client'
-
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { HeroUIProvider, ToastProvider } from '@heroui/react'
 import { useDjangoSession } from 'hooks/useDjangoSession'
 import { SessionProvider } from 'next-auth/react'
@@ -18,7 +17,19 @@ function AppInitializer() {
   return null
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  if (!apolloClient) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-red-500">
+        Configuration Error: GraphQL Client failed to initialize
+      </div>
+    )
+  }
+
   return (
     <Suspense>
       <SessionProvider>

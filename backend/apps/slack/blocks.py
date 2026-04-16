@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from apps.slack.utils import format_links_for_slack
+
 DIVIDER = "{{ DIVIDER }}"
 SECTION_BREAK = "{{ SECTION_BREAK }}"
 
@@ -30,7 +32,7 @@ def markdown(text: str) -> dict:
     """
     return {
         "type": "section",
-        "text": {"type": "mrkdwn", "text": text},
+        "text": {"type": "mrkdwn", "text": format_links_for_slack(text)},
     }
 
 

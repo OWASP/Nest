@@ -14,6 +14,7 @@ class UserIndex(IndexBase):
 
     fields = (
         "idx_avatar_url",
+        "idx_badge_count",
         "idx_bio",
         "idx_company",
         "idx_contributions",

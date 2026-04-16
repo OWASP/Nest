@@ -1,25 +1,20 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
+import { mockAlgoliaData, mockGraphQLData } from '@mockData/mockHomeData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockAlgoliaData, mockGraphQLData } from '@unit/data/mockHomeData'
 import millify from 'millify'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import Home from 'app/page'
 import { fetchAlgoliaData } from 'server/fetchAlgoliaData'
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }))
 
 jest.mock('server/fetchAlgoliaData', () => ({
   fetchAlgoliaData: jest.fn(),
-}))
-
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
 }))
 
 jest.mock('@heroui/toast', () => ({
@@ -48,7 +43,7 @@ jest.mock('components/Modal', () => {
   const ModalMock = jest.fn(({ isOpen, onClose, title, summary, button, description }) => {
     if (!isOpen) return null
     return (
-      <div role="dialog">
+      <dialog open>
         <h2>{title}</h2>
         <p>{summary}</p>
         <p>{description}</p>
@@ -56,21 +51,17 @@ jest.mock('components/Modal', () => {
           Close
         </button>
         <a href={button.url}>{button.label}</a>
-      </div>
+      </dialog>
     )
   })
   return ModalMock
-})
-
-jest.mock('next/link', () => {
-  return ({ children }) => children
 })
 
 describe('Home', () => {
   let mockRouter: { push: jest.Mock }
 
   beforeEach(() => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       loading: false,
       error: null,
@@ -85,7 +76,7 @@ describe('Home', () => {
   })
 
   test('renders loading state', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       loading: true,
       error: null,
@@ -110,7 +101,7 @@ describe('Home', () => {
   })
 
   test('renders error message when GraphQL request fails', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: null,
       error: { message: 'GraphQL error' },
     })
@@ -135,14 +126,6 @@ describe('Home', () => {
     await waitFor(() => {
       expect(screen.getByText('OWASP Sivagangai')).toBeInTheDocument()
       expect(screen.getByText('OWASP Foundation')).toBeInTheDocument()
-    })
-  })
-
-  test('renders MultiSearchBar component', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search the OWASP community')).toBeInTheDocument()
     })
   })
 
@@ -181,19 +164,8 @@ describe('Home', () => {
     })
   })
 
-  test('renders AnimatedCounter components', async () => {
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Active Projects')).toBeInTheDocument()
-      expect(screen.getByText('Contributors')).toBeInTheDocument()
-      expect(screen.getByText('Local Chapters')).toBeInTheDocument()
-      expect(screen.getByText('Countries')).toBeInTheDocument()
-    })
-  })
-
   test('handles missing data gracefully', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: mockGraphQLData,
       error: null,
     })
@@ -212,10 +184,10 @@ describe('Home', () => {
     render(<Home />)
     await waitFor(() => {
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument()
-      mockGraphQLData.upcomingEvents.forEach((event) => {
+      for (const event of mockGraphQLData.upcomingEvents) {
         expect(screen.getByText(event.name)).toBeInTheDocument()
         expect(screen.getByText('Feb 27 — 28, 2025')).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -224,10 +196,11 @@ describe('Home', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
-      mockGraphQLData.recentPullRequests.forEach((pullRequest) => {
+
+      for (const pullRequest of mockGraphQLData.recentPullRequests) {
         expect(screen.getByText(pullRequest.title)).toBeInTheDocument()
         expect(screen.getByText(pullRequest.repositoryName)).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -236,16 +209,16 @@ describe('Home', () => {
     await waitFor(() => {
       const recentMilestones = mockGraphQLData.recentMilestones
 
-      recentMilestones.forEach((milestone) => {
+      for (const milestone of recentMilestones) {
         expect(screen.getByText(milestone.title)).toBeInTheDocument()
         expect(screen.getByText(milestone.repositoryName)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.openIssuesCount} open`)).toBeInTheDocument()
         expect(screen.getByText(`${milestone.closedIssuesCount} closed`)).toBeInTheDocument()
-      })
+      }
     })
   })
   test('renders when no recent releases', async () => {
-    ;(useQuery as jest.Mock).mockReturnValue({
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
       data: {
         ...mockGraphQLData,
         recentReleases: [],
@@ -270,15 +243,25 @@ describe('Home', () => {
     ]
     const stats = mockGraphQLData.statsOverview
 
-    await waitFor(() => {
-      headers.forEach((header) => expect(screen.getByText(header)).toBeInTheDocument())
-      // Wait for 2 seconds
-      setTimeout(() => {
-        Object.values(stats).forEach((value) =>
-          expect(screen.getByText(`${millify(value)}+`)).toBeInTheDocument()
-        )
-      }, 2000)
-    })
+    const statTexts = [
+      millify(stats.activeProjectsStats) + '+',
+      millify(stats.activeChaptersStats) + '+',
+      millify(stats.contributorsStats) + '+',
+      millify(stats.countriesStats) + '+',
+      millify(stats.slackWorkspaceStats) + '+',
+    ]
+
+    await waitFor(
+      () => {
+        for (const stat of statTexts) {
+          expect(screen.getByText(stat)).toBeInTheDocument()
+        }
+        for (const header of headers) {
+          expect(screen.getByText(header)).toBeInTheDocument()
+        }
+      },
+      { timeout: 3000 }
+    )
   })
 
   test('renders event details including date range and location', async () => {
@@ -346,6 +329,110 @@ describe('Home', () => {
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+  })
+
+  test('renders project icons correctly for different types', async () => {
+    const mockProjectsData = {
+      ...mockGraphQLData,
+      recentProjects: [
+        { ...mockGraphQLData.recentProjects[0], key: 'p1', type: 'code', name: 'Code Project' },
+        {
+          ...mockGraphQLData.recentProjects[0],
+          key: 'p2',
+          type: 'documentation',
+          name: 'Doc Project',
+        },
+        { ...mockGraphQLData.recentProjects[0], key: 'p3', type: 'tool', name: 'Tool Project' },
+        { ...mockGraphQLData.recentProjects[0], key: 'p4', type: 'other', name: 'Other Project' },
+        {
+          ...mockGraphQLData.recentProjects[0],
+          key: 'p5',
+          type: 'unknown',
+          name: 'Unknown Project',
+        },
+      ],
+    }
+
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockProjectsData,
+      loading: false,
+      error: null,
+    })
+
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Code Project')).toBeInTheDocument()
+      expect(screen.getByText('Doc Project')).toBeInTheDocument()
+      expect(screen.getByText('Tool Project')).toBeInTheDocument()
+      expect(screen.getByText('Other Project')).toBeInTheDocument()
+      expect(screen.getByText('Unknown Project')).toBeInTheDocument()
+    })
+  })
+
+  test('handles null or undefined values in data gracefully', async () => {
+    const mockNullData = {
+      ...mockGraphQLData,
+      upcomingEvents: null,
+      topContributors: null,
+      sponsors: null,
+      statsOverview: {
+        activeProjectsStats: null,
+        activeChaptersStats: null,
+        contributorsStats: null,
+        countriesStats: null,
+        slackWorkspaceStats: null,
+      },
+    }
+
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockNullData,
+      loading: false,
+      error: null,
+    })
+
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.queryByText('Top Contributors')).not.toBeInTheDocument()
+
+      const zeroStats = screen.getAllByText('Active Projects')
+      expect(zeroStats.length).toBeGreaterThan(0)
+    })
+  })
+
+  test('handles event with missing summary', async () => {
+    const mockEventData = {
+      ...mockGraphQLData,
+      upcomingEvents: [
+        {
+          ...mockGraphQLData.upcomingEvents[0],
+          summary: null,
+          suggestedLocation: null,
+          endDate: null,
+          name: 'Event No Summary',
+        },
+      ],
+    }
+
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockEventData,
+      loading: false,
+      error: null,
+    })
+
+    render(<Home />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Event No Summary')).toBeInTheDocument()
+    })
+
+    const eventButton = screen.getByText('Event No Summary')
+    fireEvent.click(eventButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('The event summary has been generated by AI')).toBeInTheDocument()
     })
   })
 })

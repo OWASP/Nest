@@ -1,6 +1,6 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import mockProjectData from '@mockData/mockProjectData'
 import { test, expect } from '@playwright/test'
-import mockProjectData from '@unit/data/mockProjectData'
 
 test.describe('Projects Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,14 +13,6 @@ test.describe('Projects Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
     await page.goto('/projects')
   })
 

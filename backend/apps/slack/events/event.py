@@ -10,11 +10,11 @@ from jinja2 import Template
 from slack_sdk.errors import SlackApiError
 
 from apps.common.constants import NL, TAB
+from apps.common.template_loader import slack_env as env
 from apps.common.utils import convert_to_snake_case
 from apps.slack.apps import SlackConfig
 from apps.slack.blocks import DIVIDER, SECTION_BREAK, markdown
 from apps.slack.constants import FEEDBACK_SHARING_INVITE, NEST_BOT_NAME
-from apps.slack.template_loader import env
 from apps.slack.utils import get_text
 
 logger = logging.getLogger(__name__)
@@ -179,29 +179,39 @@ class EventBase:
         user_id = self.get_user_id(event)
 
         # Send direct message.
-        if (
-            direct_message := self.render_blocks(
-                self.direct_message_template,
-                self.get_context(event),
-            )
-        ) and (conversation := self.open_conversation(client, user_id)):
-            client.chat_postMessage(
-                blocks=direct_message,
-                channel=conversation["channel"]["id"],
-                text=get_text(direct_message),
-            )
+        try:
+            if (
+                direct_message := self.render_blocks(
+                    self.direct_message_template,
+                    self.get_context(event),
+                )
+            ) and (conversation := self.open_conversation(client, user_id)):
+                response = client.chat_postMessage(
+                    blocks=direct_message,
+                    channel=conversation["channel"]["id"],
+                    text=get_text(direct_message),
+                )
+                if not response["ok"]:
+                    logger.error("Failed to send direct message: %s", response["error"])
+        except Exception:
+            logger.exception("Error sending direct message")
 
         # Send ephemeral message.
-        if ephemeral_message := self.render_blocks(
-            self.ephemeral_message_template,
-            self.get_context(event),
-        ):
-            client.chat_postEphemeral(
-                blocks=ephemeral_message,
-                channel=event["channel"],
-                text=get_text(ephemeral_message),
-                user=user_id,
-            )
+        try:
+            if ephemeral_message := self.render_blocks(
+                self.ephemeral_message_template,
+                self.get_context(event),
+            ):
+                response = client.chat_postEphemeral(
+                    blocks=ephemeral_message,
+                    channel=event["channel"],
+                    text=get_text(ephemeral_message),
+                    user=user_id,
+                )
+                if not response["ok"]:
+                    logger.error("Failed to send ephemeral message: %s", response["error"])
+        except Exception:
+            logger.exception("Error sending ephemeral message")
 
     def open_conversation(self, client, user_id):
         """Open a DM conversation with a user.

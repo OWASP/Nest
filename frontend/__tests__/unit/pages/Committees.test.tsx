@@ -1,5 +1,5 @@
+import { mockCommitteeData } from '@mockData/mockCommitteeData'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { mockCommitteeData } from '@unit/data/mockCommitteeData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import CommitteesPage from 'app/committees/page'
@@ -72,7 +72,14 @@ describe('Committees Component', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for committees...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for committees...')
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
       expect(screen.getByText('Committee 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -142,5 +149,23 @@ describe('Committees Component', () => {
     })
     //suppose index_key is committee_1
     expect(mockRouter.push).toHaveBeenCalledWith('/committees/committee_1')
+  })
+
+  test('renders committee card without summary (uses empty string fallback)', async () => {
+    const committeeWithoutSummary = {
+      ...mockCommitteeData.committees[0],
+      summary: undefined,
+      key: 'committee_no_summary',
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [committeeWithoutSummary],
+      totalPages: 1,
+    })
+
+    render(<CommitteesPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Committee 1')).toBeInTheDocument()
+    })
   })
 })

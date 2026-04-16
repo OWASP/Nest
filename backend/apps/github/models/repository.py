@@ -11,7 +11,6 @@ from github.GithubException import GithubException
 from apps.common.models import TimestampedModel
 from apps.github.constants import OWASP_LOGIN
 from apps.github.models.common import NodeModel
-from apps.github.models.milestone import Milestone
 from apps.github.models.mixins import RepositoryIndexMixin
 from apps.github.utils import (
     check_funding_policy_compliance,
@@ -26,10 +25,15 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     """Repository model."""
 
     class Meta:
+        """Model options."""
+
         constraints = [
             models.UniqueConstraint(fields=("key", "owner"), name="unique_key_owner"),
         ]
         db_table = "github_repositories"
+        indexes = [
+            models.Index(fields=["name"], name="repository_name_idx"),
+        ]
         verbose_name_plural = "Repositories"
 
     name = models.CharField(verbose_name="Name", max_length=100)
@@ -172,9 +176,7 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
     @property
     def recent_milestones(self):
         """Repository recent milestones."""
-        return Milestone.objects.filter(
-            repository=self,
-        ).order_by("-created_at")
+        return self.milestones.order_by("-created_at") if self.pk else []
 
     @property
     def top_languages(self) -> list[str]:
@@ -262,11 +264,15 @@ class Repository(NodeModel, RepositoryIndexMixin, TimestampedModel):
 
         # Languages.
         if languages is not None:
-            total_size = sum(languages.values())
-            self.languages = {
-                language: round(size * 100.0 / total_size, 1)
-                for language, size in languages.items()
-            }
+            self.languages = (
+                {
+                    language: round(size * 100.0 / total_size, 1)
+                    for language, size in languages.items()
+                    if isinstance(size, int)
+                }
+                if (total_size := sum(v for v in languages.values() if isinstance(v, int))) > 0
+                else {}
+            )
 
         # License.
         self.license = gh_repository.license.spdx_id if gh_repository.license else ""

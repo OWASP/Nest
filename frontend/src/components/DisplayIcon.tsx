@@ -1,6 +1,6 @@
 import { Tooltip } from '@heroui/tooltip'
 import { millify } from 'millify'
-import FontAwesomeIconWrapper from 'wrappers/FontAwesomeIconWrapper'
+import { IconWrapper } from 'wrappers/IconWrapper'
 import type { Icon } from 'types/icon'
 import { IconKeys, ICONS } from 'utils/data'
 
@@ -19,7 +19,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
     .filter(Boolean)
     .join(' ')
 
-  // className for the FontAwesome icon
+  // className for the icon
   const iconClassName = [
     'text-gray-600 dark:text-gray-300',
     item === 'stars_count' || item === 'starsCount' ? 'icon-rotate' : '',
@@ -35,7 +35,7 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
 
   return icons[item] ? (
     <Tooltip
-      content={`${ICONS[item as keyof typeof ICONS]?.label}`}
+      content={`${ICONS[item as IconKeys]?.label}`}
       delay={150}
       closeDelay={100}
       showArrow
@@ -44,15 +44,10 @@ export default function DisplayIcon({ item, icons }: { item: string; icons: Icon
       <div className={containerClassName}>
         {/* Display formatted number if the value is a number */}
         <span className="text-gray-600 dark:text-gray-300">
-          {typeof icons[item] === 'number'
-            ? millify(icons[item], { precision: 1 }) // Format large numbers using 'millify' library
-            : icons[item]}
+          {typeof icons[item] === 'number' ? millify(icons[item], { precision: 1 }) : icons[item]}
         </span>
         <span>
-          <FontAwesomeIconWrapper
-            className={iconClassName}
-            icon={ICONS[item as IconKeys]?.icon} // Display corresponding icon
-          />
+          <IconWrapper className={iconClassName} icon={ICONS[item as IconKeys]?.icon} />
         </span>
       </div>
     </Tooltip>

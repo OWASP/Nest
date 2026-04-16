@@ -16,14 +16,17 @@ The project uses a **containerized approach** for both development and productio
 
 Before contributing, ensure you have the following installed:
 
-1. **Docker**: Required for running the Nest instance - [Docker Documentation](https://docs.docker.com/).
-1. **pre-commit**: Required to automate code checks and apply fixes, ensuring consistent and high-quality code. Install it using virtual environment with `pip install pre-commit` command, as OS package with `apt install pre-commit` / `brew install pre-commit` or any other method depending on your configuration.
+1. [Docker](https://docs.docker.com/engine/install/) for running the Nest containers.
+1. [pre-commit](https://pre-commit.com/#install) for automated code checks.
+1. [terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform) and [tflint](https://github.com/terraform-linters/tflint?tab=readme-ov-file#installation) for IaC.
 
-1. **WSL (Windows Subsystem for Linux)**: Required for Windows users to enable Linux compatibility - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/).
+Optional steps for Windows:
+
+1. [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows Subsystem for Linux) for Windows users to enable Linux compatibility
    1. The `make run` command requires WSL to function properly. Make sure WSL is installed and configured on your system.
-      If you haven't installed WSL yet, follow [Microsoft's official guide](https://learn.microsoft.com/en-us/windows/wsl/install).
-   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
+   1. You must use WSL terminal (not Windows PowerShell) otherwise there is no guarantee that Nest development environment will be set up as intended. You can enter the Linux environment by running `wsl`. Please do not report any issues if you use PowerShell for running the commands -- it's not the intended way to run Nest locally so the errors will not be accepted as bugs.
    1. Ensure WSL integration is enabled in Docker Desktop settings by checking `Resources -- WSL integration` in Docker application settings.
+   1. Cloning or running the project under `/mnt/c` (the Windows C: drive) can lead to significant performance degradation and Docker permission issues.
 
 ## Starring the Project
 
@@ -33,181 +36,17 @@ Before contributing, ensure you have the following installed:
 
 [![GitHub forks](https://img.shields.io/github/forks/OWASP/Nest?style=social)](https://github.com/OWASP/Nest/fork)
 
+## External Documentation
+
+- [OWASP Nest DeepWiki](https://deepwiki.com/OWASP/Nest)
+- [OWASP Nest ReadTheDocs](https://owasp-nest.readthedocs.io/latest/)
+
 ## Environment Variables
 
-### Frontend
+For detailed descriptions of all environment variables, see:
 
-#### `NEXT_PUBLIC_API_URL`
-
-- **Description**: The base URL for the application's internal API.
-- **Example Value**: `https://nest.owasp.org/`
-- **Usage**: Used by frontend components to make API calls.
-
-#### `NEXT_PUBLIC_CSRF_URL`
-
-- **Description**: The endpoint used to fetch CSRF tokens for secure API requests.
-- **Example Value**: `https://nest.owasp.org/csrf/`
-- **Usage**: Required for protecting POST/PUT/DELETE requests from CSRF attacks.
-
-#### `NEXT_PUBLIC_ENVIRONMENT`
-
-- **Description**: Specifies the current environment in which the application is running.
-- **Example Value**: `production`
-- **Usage**: Used for toggling features or logging based on environment (`development`, `production`, etc).
-
-#### `NEXT_PUBLIC_GRAPHQL_URL`
-
-- **Description**: The endpoint for the GraphQL API.
-- **Example Value**: `https://nest.owasp.org/graphql/`
-- **Usage**: Used to send GraphQL queries and mutations from the frontend.
-
-#### `NEXT_PUBLIC_GTM_AUTH`
-
-- **Description**: Authentication token for Google Tag Manager (GTM).
-- **Example Value**: `XYZabc123`
-- **Usage**: Optional; used when previewing or testing GTM in different environments.
-
-#### `NEXT_PUBLIC_GTM_ID`
-
-- **Description**: The unique ID for the Google Tag Manager container.
-- **Example Value**: `GTM-XXXXXXX`
-- **Usage**: Required for integrating Google Tag Manager on the frontend.
-
-#### `NEXT_PUBLIC_GTM_PREVIEW`
-
-- **Description**: Used for previewing GTM configurations.
-- **Usage**: Optional, used during GTM debugging or testing.
-
-#### `NEXT_PUBLIC_IDX_URL`
-
-- **Description**: The base URL for IDX (Indexing Service).
-- **Example Value**: `https://nest.owasp.org/idx/`
-- **Usage**: Used for services interacting with indexing/search features.
-
-#### `NEXT_PUBLIC_RELEASE_VERSION`
-
-- **Description**: The current release version of the application.
-- **Example Value**: `1.0.5`
-- **Usage**: Displayed in the app UI or logs for tracking deployments.
-
-#### `NEXT_PUBLIC_SENTRY_DSN`
-
-- **Description**: The Data Source Name (DSN) for Sentry error tracking.
-- **Example Value**: `https://xyz@sentry.io/123456`
-- **Usage**: Enables real-time error tracking and reporting in the frontend.
-
----
-
-### Backend
-
-#### `DJANGO_ALGOLIA_APPLICATION_ID`
-
-- **Description**: The application ID for Algolia.
-- **Example Value**: `APPID123`
-- **Usage**: Used by Django to initialize Algolia client for indexing/search.
-
-#### `DJANGO_ALGOLIA_EXCLUDED_LOCAL_INDEX_NAMES`
-
-- **Description**: Index names to exclude locally (if any).
-- **Usage**: Prevents specific indices from being created in local environments.
-
-#### `DJANGO_ALGOLIA_WRITE_API_KEY`
-
-- **Description**: The write API key for Algolia.
-- **Usage**: Required for Django backend to write data into Algolia indices.
-
-#### `DJANGO_ALLOWED_HOSTS`
-
-- **Description**: A comma-separated list of allowed hosts for the application.
-- **Example Value**: `localhost,127.0.0.1`
-- **Usage**: Restricts HTTP Host header to prevent host header attacks.
-
-#### `DJANGO_AWS_ACCESS_KEY_ID`
-
-- **Description**: AWS access key ID.
-- **Usage**: Used for authenticating with AWS services (e.g., S3).
-
-#### `DJANGO_AWS_SECRET_ACCESS_KEY`
-
-- **Description**: AWS secret access key.
-- **Usage**: Used along with access key ID to authenticate AWS API requests.
-
-#### `DJANGO_CONFIGURATION`
-
-- **Description**: Specifies the Django configuration to use.
-- **Example Value**: `Production`
-- **Usage**: Determines which Django settings class to load.
-
-#### `DJANGO_DB_HOST`
-
-- **Description**: The hostname of the database server.
-- **Example Value**: `db`
-- **Usage**: Used to connect Django to the correct PostgreSQL server.
-
-#### `DJANGO_DB_NAME`
-
-- **Description**: The name of the database.
-- **Example Value**: `nest`
-- **Usage**: Specifies the name of the PostgreSQL database used by Django.
-
-#### `DJANGO_DB_PASSWORD`
-
-- **Description**: The password for the database user.
-- **Usage**: Authenticates the Django DB user.
-
-#### `DJANGO_DB_PORT`
-
-- **Description**: The port number for the database server.
-- **Example Value**: `5432`
-- **Usage**: Specifies the port for connecting to PostgreSQL.
-
-#### `DJANGO_DB_USER`
-
-- **Description**: The username for the database.
-- **Example Value**: `postgres`
-- **Usage**: Authenticates with the database.
-
-#### `DJANGO_OPEN_AI_SECRET_KEY`
-
-- **Description**: The secret key for OpenAI API.
-- **Usage**: Used for OpenAI integration.
-
-#### `DJANGO_PUBLIC_IP_ADDRESS`
-
-- **Description**: The IP address to use locally.
-- **Usage**: Geographic location related functionality.
-
-#### `DJANGO_RELEASE_VERSION`
-
-- **Description**: The release version of the application.
-- **Example Value**: `1.0.5`
-- **Usage**: Identifies the current backend deployment version.
-
-#### `DJANGO_SECRET_KEY`
-
-- **Description**: The secret key for Django (used for cryptographic signing).
-- **Usage**: Required for session management, tokens, etc.
-
-#### `DJANGO_SENTRY_DSN`
-
-- **Description**: The DSN for Sentry (used for error tracking).
-- **Example Value**: `https://xyz@sentry.io/654321`
-- **Usage**: Enables backend error tracking through Sentry.
-
-#### `DJANGO_SLACK_BOT_TOKEN`
-
-- **Description**: The token for the Slack bot.
-- **Usage**: Authenticates the bot to send messages to Slack channels.
-
-#### `DJANGO_SLACK_SIGNING_SECRET`
-
-- **Description**: The signing secret for Slack.
-- **Usage**: Used to verify Slack requests to webhooks.
-
-#### `GITHUB_TOKEN`
-
-- **Description**: The token for accessing GitHub APIs.
-- **Usage**: Used for making authenticated requests to GitHub (e.g., issues, releases).
+- **Backend**: [backend/README.md](backend/README.md#environment-variables)
+- **Frontend**: [frontend/README.md](frontend/README.md#environment-variables)
 
 ## Setting up the Project
 
@@ -223,28 +62,16 @@ Follow these steps to set up the OWASP Nest application:
 
 1. **Create Environment Files**:
 
-   - Create a local environment file in the `backend` directory:
+   - Copy the contents from the template file into your new backend local environment file:
 
      ```bash
-     touch backend/.env
+     cp backend/.env.example backend/.env
      ```
 
-   - Copy the contents from the template file into your new local environment file:
+   - Copy the contents from the template file into your new frontend local environment file:
 
      ```bash
-     cat backend/.env.example > backend/.env
-     ```
-
-   - Create a local environment file in the `frontend` directory:
-
-     ```bash
-     touch frontend/.env
-     ```
-
-   - Copy the contents from the template file into your new local environment file:
-
-     ```bash
-     cat frontend/.env.example > frontend/.env
+     cp frontend/.env.example frontend/.env
      ```
 
 Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order Mark)**. This is crucial to prevent "Unexpected character" errors during application execution or Docker image building.
@@ -262,7 +89,8 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 1. **Set Up Algolia**:
 
    - Go to [Algolia](https://www.algolia.com/) and create a free account.
-   - After creating an account, create an Algolia app.
+   - An Algolia app is automatically created for you when you sign up.
+   - During the sign up process, you may be asked to import data. You can skip this step.
    - Update your `backend/.env` file with the following keys from your Algolia app (use **write** API key for backend):
 
    ```plaintext
@@ -270,8 +98,18 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
    DJANGO_ALGOLIA_WRITE_API_KEY=<your-algolia-write-api-key>
    ```
 
-   - Ensure that your API key has index write permissions. You can ignore any onboarding wizard instructions provided by Algolia.
+   - Note: The default write API key should have index write permissions (addObject permission). If you do not use the default write API key, ensure that your API key has this permission.
    - If you encounter any issues, you can refer directly to Algolia's [documentation](https://www.algolia.com/doc/guides/getting-started/quick-start/)
+
+1. **Getting Started**:
+
+   - To see all available commands and their descriptions, run:
+
+     ```bash
+     make help
+     ```
+
+   - This will print a list of all make targets you can use during development.
 
 1. **Run the Application**:
 
@@ -281,10 +119,12 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
      make run
      ```
 
-   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v1) is responding.
+   - Leave this terminal session running and wait until you see that [Nest local](http://localhost:8000/api/v0) is responding.
    - Please note as we use containerized approach this command must be run in parallel to other Nest commands you may want to use. You need to keep it running in the current terminal and use another terminal session for your work.
 
 1. **Load Initial Data**:
+
+   - Make sure you have `gzip` installed on your machine.
 
    - Open a new terminal session and run the following command to populate the database with initial data from fixtures:
 
@@ -302,10 +142,45 @@ Ensure that all `.env` files are saved in **UTF-8 format without BOM (Byte Order
 
 1. **Verify API Endpoints**:
    - Check the following endpoints availability:
-     - [API](http://localhost:8000/api/v1/)
+     - [API](http://localhost:8000/api/v0/)
      - [GraphQL](http://localhost:8000/graphql/)
 
 ### Optional Steps
+
+#### GitHub OAuth Setup
+
+If you want to use the "Sign in with GitHub" feature locally, you need to register a GitHub OAuth App and update your `frontend/.env` with real credentials. Without this, clicking "Sign in with GitHub" will result in a GitHub 404 error because the placeholder `client_id=your-github-client-id` is invalid.
+
+1. Go to [GitHub Developer Settings → OAuth Apps](https://github.com/settings/developers) and click **"New OAuth App"**.
+1. Fill in the form with the following values:
+
+   | Field | Value |
+   | --- | --- |
+   | Application name | `OWASP Nest Local` (or any name you prefer) |
+   | Homepage URL | `http://localhost:3000` |
+   | Authorization callback URL | `http://localhost:3000/api/auth/callback/github` |
+
+1. Click **"Register application"**.
+1. On the next page, copy the **Client ID** and click **"Generate a new client secret"** to obtain a **Client Secret**.
+1. Generate a secure `NEXTAUTH_SECRET` by running:
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+1. Open your `frontend/.env` file and update the following values with the credentials you just obtained:
+
+   ```plaintext
+   NEXTAUTH_SECRET=<output-from-openssl-command>
+   NEXT_SERVER_GITHUB_CLIENT_ID=<your-github-client-id>
+   NEXT_SERVER_GITHUB_CLIENT_SECRET=<your-github-client-secret>
+   ```
+
+1. Restart the application to apply the changes:
+
+   ```bash
+   make run
+   ```
 
 #### GitHub Data Fetch
 
@@ -345,7 +220,7 @@ If you plan to fetch GitHub OWASP data locally, follow these additional steps:
 ❗ **Doing so will interfere with OWASP Nest functionality and trigger unnecessary notifications to Slack admins.**
 ❗ **Always use a different workspace (create your own if needed).**
 
-To setup NestBot development environment, follow these steps:
+To set up the NestBot development environment, follow these steps:
 
 1. **Set Up ngrok**:
 
@@ -387,8 +262,80 @@ To setup NestBot development environment, follow these steps:
      ```
 
 1. **Set up Slack application**:
-   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). You'll need to replace slash commands endpoint with your ngrok static domain path.
+   - Configure your Slack application using [NestBot manifest file](https://github.com/OWASP/Nest/blob/main/backend/apps/slack/MANIFEST.yaml) (copy its contents and save it into `Features -- App Manifest`). Replace production URLs with your ngrok base URL for slash commands, event subscriptions, and interactivity sections (`request_url`) so Slack can deliver events and actions to your machine.
    - Reinstall your Slack application after making the changes using `Settings -- Install App` section.
+
+##### Testing NestBot Locally
+
+With `make run` and `ngrok start NestBot` running, smoke-test the integration — for example:
+
+- Direct message: send a direct message to the bot in your Slack workspace.
+- Channel mention: Add the bot to a channel and `@`-mention it.
+- Or post a normal channel message when your app subscribes to the `message.channels` bot event.
+
+To confirm Slack is reaching your machine, check the backend container logs.
+
+> **Note:** Keep ngrok running while you test. Slack must use a publicly accessible URL to reach your local server.
+
+#### Local Access to Internal Dashboards
+
+When running the project locally, some UI sections are visible only if your user has the required backend roles configured via Django Admin. Follow the steps below to enable access during development.
+
+##### Project Health Dashboard (Staff Access)
+
+The Project Health Dashboard is visible only to users marked as staff.
+
+###### Steps
+
+1. **Start the backend server and open the Django Admin panel**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Log in using your superuser credentials.
+
+2. **Navigate to GitHub Users** and open your user record.
+
+3. **In the Permissions section, enable the custom `is_owasp_staff` field**:
+   - Locate the `is_owasp_staff` checkbox and tick it.
+   - Save the changes.
+
+4. **Clear authentication cookies**:
+   - Open [http://localhost:3000](http://localhost:3000)
+   - Open browser DevTools → Application / Storage
+   - Clear Cookies for the site
+   - Refresh the page and sign in again with GitHub.
+
+After logging in, the Project Health Dashboard will appear in the user menu, or you can navigate directly to:
+[http://localhost:3000/projects/dashboard](http://localhost:3000/projects/dashboard)
+
+##### Mentorship Portal ("My Mentorship")
+
+The "My Mentorship" menu item is shown only if the user is a Project Leader or a Mentor.
+
+###### Option 1: Grant access as a Project Leader (recommended)
+
+1. **Open Django Admin**:
+   - [http://localhost:8000/a](http://localhost:8000/a)
+   - Navigate to **OWASP** → **Projects**.
+2. **Open an existing project or create a test project**.
+3. **In the `leaders_raw` field, add your exact GitHub username**.
+4. **Save the project**.
+
+###### Option 2: Grant access as a Mentor
+
+1. Ensure you have logged into the frontend at least once (so your GitHub user exists in the database).
+2. **Open Django Admin** → **Mentorship** → **Mentors**.
+3. Click **Add Mentor**.
+4. Select your GitHub user in the `github_user` field.
+5. Fill in any required fields and save.
+
+###### Refresh session
+
+Role-based access is cached in the authentication cookie.
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Clear Cookies for the site
+3. Refresh and sign in again with GitHub
+
+The "My Mentorship" option will now be visible in the user menu.
 
 ## Code Quality Checks
 
@@ -400,7 +347,7 @@ make check
 
 This command runs linters and other static analysis tools for both the frontend and backend.
 
-We utilize third-party tools such as CodeRabbit and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address or mark as resolved all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project leaders or mentors you're working with for further guidance.
+We utilize third-party tools such as CodeRabbit, GitHub Advanced Security, and SonarQube for code review, static analysis, and quality checks. As a contributor, it's your responsibility to address (mark as resolved) all issues and suggestions reported by these tools during your pull request review. If a suggestion is valid, please implement it; if not, you may mark it as resolved with a brief explanation. If you're uncertain about a particular suggestion, feel free to leave a comment optionally tagging project maintainer(s) you're working with for further guidance.
 
 **Please note that your pull request will not be reviewed until all code quality checks pass and all automated suggestions have been addressed or resolved.**
 
@@ -415,6 +362,115 @@ make test
 This command runs tests and checks that coverage threshold requirements are satisfied for both backend and frontend.
 **Please note your PR won't be merged if it fails the code tests checks.**
 
+### Running Security Scan
+
+Run the security scans for vulnerabilities and anti-patterns with the following command:
+
+```bash
+make security-scan
+```
+
+This command automatically:
+
+- Performs local Semgrep and Trivy scans
+- Outputs findings to the terminal for immediate review
+
+For addressing findings:
+
+- Review the output for specific file paths and line numbers
+- Follow the documentation links provided in the output for remediation guidance
+- Use # NOSEMGREP to suppress confirmed false positives while adding a short comment explaining each suppression
+
+#### Running Code Scans Only
+
+You can run code scan part separately via
+
+```bash
+make security-scan-code
+```
+
+#### Running Image Scans Only
+
+You can run image scan part separately via
+
+```bash
+make security-scan-images
+```
+
+### Running e2e Tests
+
+Run the frontend e2e tests with the following command:
+
+```bash
+make test-frontend-e2e
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the e2e tests
+- Cleans up containers when done
+
+To run e2e tests without initializing the database, use the following command:
+
+```bash
+make test-frontend-e2e-no-init
+```
+
+For debugging, you can run the e2e backend separately:
+
+```bash
+make run-backend-e2e
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-e2e
+```
+
+For debugging the frontend e2e tests UI mode, run:
+
+```bash
+make test-frontend-e2e-ui
+```
+
+To run the frontend e2e tests UI mode without the database initialized, use the following command:
+
+```bash
+make test-frontend-e2e-ui-no-db-init
+```
+
+You can access the UI at [http://localhost:3800](http://localhost:3800).
+
+### Running Fuzz Tests
+
+Run the fuzz tests with the following command:
+
+```bash
+make test-fuzz
+```
+
+This command automatically:
+
+- Starts the database and backend containers
+- Runs migrations and loads test data
+- Executes the fuzz tests
+- Cleans up containers when done
+
+For debugging, you can run the fuzz backend separately:
+
+```bash
+make run-backend-fuzz
+```
+
+Then load data manually in another terminal:
+
+```bash
+make load-data-fuzz
+```
+
 ### Test Coverage
 
 - There is a **minimum test coverage requirement** for the **backend** code -- see [pyproject.toml](https://github.com/OWASP/Nest/blob/main/backend/pyproject.toml).
@@ -427,9 +483,116 @@ If you are adding new functionality, include relevant test cases.
 
 ## Contributing Workflow
 
+The following diagram illustrates the complete contribution workflow:
+
+```mermaid
+flowchart TD
+    Start([Start]) --> CreateIssue[Create New Issue]
+    Start --> FindIssue[Find Existing Issue]
+    CreateIssue --> GetAssigned["**Get Assigned to Issue**<br/>PRs will be automatically<br/>closed if you're not assigned"]
+    FindIssue --> GetAssigned
+    GetAssigned --> ResolveIssue[**Resolve Issue**<br/>work on code/docs/tests updates]
+
+    ResolveIssue --> RunChecks{**Run `make check-test`**<br/>locally! This is a required step -- you will not be assigned to new issues if you ignore this}
+    RunChecks -->|Fails| WP1[ ]
+    RunChecks -->|Passes| PushChanges[**Push Changes to<br/>GitHub Fork Branch**]
+    WP1 -.-> ResolveIssue
+
+    PushChanges --> HasPR{PR Exists?}
+    HasPR -->|No| CreateDraftPR[Create Draft PR]
+    HasPR -->|Yes| WaitAutoChecks[**Wait for Automated<br/>Checks to Finish**]
+    CreateDraftPR --> WaitAutoChecks
+
+    WaitAutoChecks --> CheckAutoTools{All **CodeRabbit and <br/>SonarQube** Comments<br/>Resolved?}
+    CheckAutoTools -->|No| MarkDraft[Make Sure PR Is **Marked as a Draft**]
+    CheckAutoTools -->|Yes| MarkReady[Mark PR as Ready<br/>for Review]
+    MarkDraft --> WP2[ ]
+    WP2 -.-> ResolveIssue
+
+    MarkReady --> RequestReview[Request Review from<br/>Project Maintainers]
+    RequestReview --> WaitMaintainer[Wait for Maintainers'<br/>Comments]
+
+    WaitMaintainer --> HasMaintainerComments{**Maintainers' Comments<br/>Resolved**?}
+    HasMaintainerComments -->|No| MarkDraft
+    HasMaintainerComments -->|Yes| CheckCI{**CI/CD<br/>Passing?**}
+
+    CheckCI -->|Yes| ReadyMerge([PR Ready for Merge])
+    CheckCI -->|No| MarkDraft
+
+    style Start fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style ReadyMerge fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style ResolveIssue fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style RunChecks fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style CheckAutoTools fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style HasMaintainerComments fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style CheckCI fill:#2196f3,stroke:#1565c0,stroke-width:2px,color:#ffffff
+    style MarkDraft fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style MarkReady fill:#4caf50,stroke:#2e7d32,stroke-width:2px,color:#ffffff
+    style CreateDraftPR fill:#ff9800,stroke:#f57c00,stroke-width:2px,color:#000000
+    style WP1 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
+    style WP2 fill:transparent,stroke:transparent,color:transparent,width:0px,height:0px
+
+    linkStyle 0 stroke:#4caf50,stroke-width:2px
+    linkStyle 1 stroke:#4caf50,stroke-width:2px
+    linkStyle 2 stroke:#4caf50,stroke-width:2px
+    linkStyle 3 stroke:#4caf50,stroke-width:2px
+    linkStyle 4 stroke:#4caf50,stroke-width:2px
+    linkStyle 5 stroke:#4caf50,stroke-width:2px
+    linkStyle 6 stroke:#f44336,stroke-width:2px
+    linkStyle 7 stroke:#4caf50,stroke-width:2px
+    linkStyle 8 stroke:#f44336,stroke-width:2px
+    linkStyle 9 stroke:#4caf50,stroke-width:2px
+    linkStyle 10 stroke:#9e9e9e,stroke-width:2px
+    linkStyle 11 stroke:#4caf50,stroke-width:2px
+    linkStyle 12 stroke:#4caf50,stroke-width:2px
+    linkStyle 13 stroke:#4caf50,stroke-width:2px
+    linkStyle 14 stroke:#f44336,stroke-width:2px
+    linkStyle 15 stroke:#4caf50,stroke-width:2px
+    linkStyle 16 stroke:#f44336,stroke-width:2px
+    linkStyle 17 stroke:#f44336,stroke-width:2px
+    linkStyle 18 stroke:#4caf50,stroke-width:2px
+    linkStyle 19 stroke:#4caf50,stroke-width:2px
+    linkStyle 20 stroke:#4caf50,stroke-width:2px
+    linkStyle 21 stroke:#f44336,stroke-width:2px
+    linkStyle 22 stroke:#4caf50,stroke-width:2px
+    linkStyle 23 stroke:#4caf50,stroke-width:2px
+    linkStyle 24 stroke:#f44336,stroke-width:2px
+```
+
+### Keep Your Fork in Sync with Upstream
+
+To avoid working on an outdated copy of Nest (and to reduce merge conflicts), contributors may find it helpful to keep their fork synchronized with the main OWASP Nest repository.
+
+<details>
+<summary>Setting up the upstream remote</summary>
+
+If you haven't added the upstream remote yet, add it using:
+
+```bash
+git remote add upstream https://github.com/OWASP/Nest.git
+```
+
+Verify that the upstream remote has been added by running:
+
+```bash
+git remote -v
+```
+
+This should show both `origin` (your fork) and `upstream` (the main repository) remotes.
+
+</details>
+
+Before working on a **new** feature or issue, update your local `main` branch from `upstream/main`:
+
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main
+```
+
 ### 1. Find Something to Work On
 
-- Check the **Issues** tab for open issues: [https://github.com/owasp/nest/issues](https://github.com/owasp/nest/issues)
+- Check the **Issues** tab for open issues: [https://github.com/OWASP/Nest/issues](https://github.com/OWASP/Nest/issues)
 - Found a bug or have a feature request? Open a new issue.
 - Want to work on an existing issue? Ask the maintainers to assign it to you before submitting a pull request.
 - New to the project? Start with issues labeled `good first issue` for an easier onboarding experience.

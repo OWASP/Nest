@@ -3,6 +3,8 @@ name: Label Pull Requests
 on:
   - pull_request_target
 
+permissions: {}
+
 jobs:
   labeler:
     permissions:
@@ -14,3 +16,4 @@ jobs:
         with:
           configuration-path: .github/labeler.yml
           sync-labels: true
+    timeout-minutes: 5

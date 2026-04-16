@@ -1,35 +1,43 @@
 'use client'
 
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { UPDATE_MODULE } from 'server/mutations/moduleMutations'
-import { GET_PROGRAM_ADMINS_AND_MODULES } from 'server/queries/moduleQueries'
+import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import type { UpdateModuleInput } from 'types/__generated__/graphql'
+import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
+import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { EXPERIENCE_LEVELS, type ModuleFormData } from 'types/mentorship'
+import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
+import { type ValidationErrors, extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ModuleForm from 'components/ModuleForm'
 
 const EditModulePage = () => {
-  const { programKey, moduleKey } = useParams() as { programKey: string; moduleKey: string }
+  const { programKey, moduleKey } = useParams<{ programKey: string; moduleKey: string }>()
   const router = useRouter()
-  const { data: sessionData, status: sessionStatus } = useSession()
+  const { data: sessionData, status: sessionStatus } = useSession() as {
+    data: ExtendedSession | null
+    status: string
+  }
 
   const [formData, setFormData] = useState<ModuleFormData | null>(null)
   const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
-  const [updateModule, { loading: mutationLoading }] = useMutation(UPDATE_MODULE)
+  const [updateModule, { loading: mutationLoading }] = useMutation(UpdateModuleDocument)
 
   const {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GET_PROGRAM_ADMINS_AND_MODULES, {
+  } = useQuery(GetProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
@@ -50,18 +58,22 @@ const EditModulePage = () => {
       return
     }
 
-    const currentUserLogin = (sessionData as ExtendedSession)?.user?.login
+    const currentUserLogin = sessionData?.user?.login
     const isAdmin = data.getProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
-    if (isAdmin) {
+    const isMentor = data.getModule.mentors?.some(
+      (mentor: { login: string }) => mentor.login === currentUserLogin
+    )
+
+    if (isAdmin || isMentor) {
       setAccessStatus('allowed')
     } else {
       setAccessStatus('denied')
       addToast({
         title: 'Access Denied',
-        description: 'Only program admins can edit modules.',
+        description: 'Only program admins and module mentors can edit this module.',
         color: 'danger',
         variant: 'solid',
         timeout: 4000,
@@ -74,16 +86,17 @@ const EditModulePage = () => {
     if (accessStatus === 'allowed' && data?.getModule) {
       const m = data.getModule
       setFormData({
-        name: m.name || '',
         description: m.description || '',
-        experienceLevel: m.experienceLevel || EXPERIENCE_LEVELS.BEGINNER,
-        startedAt: formatDateForInput(m.startedAt),
-        endedAt: formatDateForInput(m.endedAt),
         domains: (m.domains || []).join(', '),
-        projectName: m.projectName,
-        tags: (m.tags || []).join(', '),
-        projectId: m.projectId || '',
+        endedAt: formatDateForInput(m.endedAt),
+        experienceLevel: m.experienceLevel || ExperienceLevelEnum.Beginner,
+        labels: (m.labels || []).join(', '),
         mentorLogins: (m.mentors || []).map((mentor: { login: string }) => mentor.login).join(', '),
+        name: m.name || '',
+        projectId: m.projectId || '',
+        projectName: m.projectName || '',
+        startedAt: formatDateForInput(m.startedAt),
+        tags: (m.tags || []).join(', '),
       })
     }
   }, [accessStatus, data])
@@ -91,24 +104,39 @@ const EditModulePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData) return
+    setValidationErrors({})
 
     try {
-      const input = {
+      const currentUserLogin = sessionData?.user?.login
+      const isAdmin = data?.getProgram?.admins?.some(
+        (admin: { login: string }) => admin.login === currentUserLogin
+      )
+
+      const input: UpdateModuleInput = {
+        description: formData!.description,
+        domains: parseCommaSeparated(formData!.domains),
+        endedAt: formData!.endedAt || '',
+        experienceLevel: formData!.experienceLevel as ExperienceLevelEnum,
         key: moduleKey,
+        labels: parseCommaSeparated(formData!.labels),
+        name: formData!.name,
         programKey: programKey,
-        name: formData.name,
-        description: formData.description,
-        experienceLevel: formData.experienceLevel,
-        startedAt: formData.startedAt || null,
-        endedAt: formData.endedAt || null,
-        domains: parseCommaSeparated(formData.domains),
-        tags: parseCommaSeparated(formData.tags),
-        projectName: formData.projectName,
-        projectId: formData.projectId,
-        mentorLogins: parseCommaSeparated(formData.mentorLogins),
+        projectId: formData!.projectId,
+        projectName: formData!.projectName,
+        startedAt: formData!.startedAt || '',
+        tags: parseCommaSeparated(formData!.tags),
       }
 
-      await updateModule({ variables: { input } })
+      if (isAdmin) {
+        input.mentorLogins = parseCommaSeparated(formData!.mentorLogins)
+      }
+
+      const result = await updateModule({
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        variables: { input },
+      })
+      const updatedModuleKey = result.data?.updateModule?.key || moduleKey
 
       addToast({
         title: 'Module Updated',
@@ -117,14 +145,21 @@ const EditModulePage = () => {
         variant: 'solid',
         timeout: 3000,
       })
-      router.push(`/my/mentorship/programs/${programKey}?refresh=true`)
+      router.push(`/my/mentorship/programs/${programKey}/modules/${updatedModuleKey}`)
     } catch (err) {
-      handleAppError(err)
+      const {
+        validationErrors: errors,
+        hasValidationErrors,
+        unmappedErrors,
+      } = extractGraphQLErrors(err)
+      if (hasValidationErrors) {
+        setValidationErrors(errors)
+      } else if (unmappedErrors.length > 0) {
+        setValidationErrors({ name: unmappedErrors[0] })
+      } else {
+        handleAppError(err)
+      }
     }
-  }
-
-  if (accessStatus === 'checking' || !formData) {
-    return <LoadingSpinner />
   }
 
   if (accessStatus === 'denied') {
@@ -137,15 +172,24 @@ const EditModulePage = () => {
     )
   }
 
+  if (accessStatus === 'checking' || !formData) {
+    return <LoadingSpinner />
+  }
+
   return (
     <ModuleForm
       title="Edit Module"
       formData={formData}
-      setFormData={setFormData}
+      setFormData={setFormData as React.Dispatch<React.SetStateAction<ModuleFormData>>}
       onSubmit={handleSubmit}
       loading={mutationLoading}
       submitText="Save"
       isEdit
+      validationErrors={validationErrors}
+      minDate={
+        data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
+      }
+      maxDate={data?.getProgram?.endedAt ? formatDateForInput(data.getProgram.endedAt) : undefined}
     />
   )
 }

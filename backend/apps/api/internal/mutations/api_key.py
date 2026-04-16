@@ -77,7 +77,10 @@ class ApiKeyMutations:
                 message="API key created successfully.",
             )
         except IntegrityError as err:
-            logger.warning("Error creating API key: %s", err)
+            # Logging the error message string only, not the sensitive API key credential itself. # noqa: E501
+            logger.warning(  # NOSEMGREP: python.lang.security.audit.logging.logger-credential-leak.python-logger-credential-disclosure  # noqa: E501
+                "Error creating API key: %s", err
+            )
             return CreateApiKeyResult(
                 ok=False,
                 code="ERROR",

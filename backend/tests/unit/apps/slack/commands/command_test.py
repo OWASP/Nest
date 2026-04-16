@@ -1,0 +1,176 @@
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from apps.slack.blocks import DIVIDER, SECTION_BREAK
+from apps.slack.commands.command import CommandBase
+
+
+class Command(CommandBase):
+    pass
+
+
+class TestCommandBase:
+    @pytest.fixture
+    def command_instance(self):
+        return Command()
+
+    @pytest.fixture
+    def mock_command_payload(self):
+        return {"user_id": "U123ABC"}
+
+    @patch("apps.slack.commands.command.logger")
+    @patch("apps.slack.commands.command.SlackConfig")
+    def test_configure_commands_when_app_is_none(self, mock_slack_config, mock_logger):
+        """Tests that a warning is logged if the Slack app is not configured."""
+        mock_slack_config.app = None
+        CommandBase.configure_commands()
+        mock_logger.warning.assert_called_once()
+        assert "SlackConfig.app is None" in mock_logger.warning.call_args[0][0]
+
+    @patch("apps.slack.commands.command.SlackConfig")
+    def test_configure_commands_returns_early_when_app_is_none(self, mock_slack_config):
+        """Tests that configure_commands returns early when app is None."""
+        mock_slack_config.app = None
+
+        with patch.object(CommandBase, "get_commands", return_value=[]):
+            result = CommandBase.configure_commands()
+            assert result is None
+
+    @patch("apps.slack.commands.command.SlackConfig")
+    def test_configure_commands_registers_commands(self, mock_slack_config):
+        """Tests that configure_commands iterates and registers all subclasses."""
+        mock_slack_config.app = MagicMock()
+        mock_command_class = MagicMock()
+
+        with patch.object(CommandBase, "get_commands", return_value=[mock_command_class]):
+            CommandBase.configure_commands()
+            mock_command_class.return_value.register.assert_called_once()
+
+    def test_command_name_property(self, command_instance):
+        """Tests that the command_name is derived correctly from the class name."""
+        assert command_instance.command_name == "/command"
+
+    def test_template_path_property(self, command_instance):
+        """Tests that the template_path is derived correctly."""
+        assert command_instance.template_path == Path("commands/command.jinja")
+
+    @patch("apps.slack.commands.command.env")
+    def test_template_property(self, mock_jinja_env, command_instance):
+        """Tests that the correct template is requested from the jinja environment."""
+        _ = command_instance.template
+
+        mock_jinja_env.get_template.assert_called_once_with("commands/command.jinja")
+
+    def test_render_blocks(self, command_instance):
+        """Tests that the render_blocks method correctly parses rendered text into blocks."""
+        test_string = f"Hello World{SECTION_BREAK}{DIVIDER}{SECTION_BREAK}Welcome to Nest"
+
+        with patch.object(command_instance, "render_text", return_value=test_string):
+            blocks = command_instance.render_blocks(command={})
+
+        assert len(blocks) == 3
+        assert blocks[0]["text"]["text"] == "Hello World"
+        assert blocks[1]["type"] == "divider"
+        assert blocks[2]["text"]["text"] == "Welcome to Nest"
+
+    def test_handler_success(self, settings, command_instance, mock_command_payload):
+        """Tests the successful path of the command handler."""
+        settings.SLACK_COMMANDS_ENABLED = True
+        ack = MagicMock()
+        mock_client = MagicMock()
+        mock_client.conversations_open.return_value = {"channel": {"id": "D123XYZ"}}
+
+        with patch.object(command_instance, "render_blocks", return_value=[{"type": "section"}]):
+            command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
+
+        ack.assert_called_once()
+        mock_client.conversations_open.assert_called_once_with(users="U123ABC")
+        mock_client.chat_postMessage.assert_called_once()
+        assert mock_client.chat_postMessage.call_args[1]["channel"] == "D123XYZ"
+
+    def test_handler_api_error(self, mocker, settings, command_instance, mock_command_payload):
+        """Tests that an exception during API calls is caught and logged."""
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_logger = mocker.patch("apps.slack.commands.command.logger")
+        ack = MagicMock()
+        mock_client = MagicMock()
+        mock_client.conversations_open.return_value = {"channel": {"id": "D123XYZ"}}
+        mock_client.chat_postMessage.side_effect = [Exception("API Error"), {"ok": True}]
+        mocker.patch.object(command_instance, "render_blocks", return_value=[{"type": "section"}])
+
+        command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
+
+        ack.assert_called_once()
+        mock_logger.exception.assert_called_once()
+        assert mock_client.chat_postMessage.call_count == 2
+        mock_logger.exception.assert_called_with(
+            "Failed to handle command '%s'", command_instance.command_name
+        )
+
+        assert mock_client.conversations_open.call_count == 2
+
+    def test_handler_render_blocks_exception(
+        self, mocker, settings, command_instance, mock_command_payload
+    ):
+        """Tests exception handling when render_blocks fails."""
+        settings.SLACK_COMMANDS_ENABLED = True
+        mock_logger = mocker.patch("apps.slack.commands.command.logger")
+        ack = MagicMock()
+        mock_client = MagicMock()
+        mock_client.conversations_open.return_value = {"channel": {"id": "D123XYZ"}}
+        mock_client.chat_postMessage.return_value = {"ok": True}
+
+        mocker.patch.object(
+            command_instance, "render_blocks", side_effect=Exception("Render error")
+        )
+
+        command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
+
+        ack.assert_called_once()
+        mock_logger.exception.assert_called_once()
+        mock_client.chat_postMessage.assert_called_once()
+        call_kwargs = mock_client.chat_postMessage.call_args[1]
+        assert ":warning:" in call_kwargs["blocks"][0]["text"]["text"]
+
+    def test_handler_when_commands_disabled(
+        self, settings, command_instance, mock_command_payload
+    ):
+        """Tests that no message is sent when commands are disabled."""
+        settings.SLACK_COMMANDS_ENABLED = False
+        ack = MagicMock()
+        mock_client = MagicMock()
+        command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
+        ack.assert_called_once()
+        mock_client.chat_postMessage.assert_not_called()
+
+    def test_get_commands_yields_subclasses(self):
+        """Tests that get_commands yields all subclasses of CommandBase."""
+        commands = list(CommandBase.get_commands())
+        assert Command in commands
+
+    def test_handler_empty_blocks_no_message(
+        self, settings, command_instance, mock_command_payload
+    ):
+        """Tests that no message is sent when render_blocks returns empty list."""
+        settings.SLACK_COMMANDS_ENABLED = True
+        ack = MagicMock()
+        mock_client = MagicMock()
+
+        with patch.object(command_instance, "render_blocks", return_value=[]):
+            command_instance.handler(ack=ack, command=mock_command_payload, client=mock_client)
+
+        ack.assert_called_once()
+        mock_client.chat_postMessage.assert_not_called()
+
+    @patch("apps.slack.commands.command.SlackConfig")
+    def test_register_method(self, mock_slack_config, command_instance):
+        """Tests that register correctly registers the handler with SlackConfig."""
+        mock_app = MagicMock()
+        mock_slack_config.app = mock_app
+
+        command_instance.register()
+
+        mock_app.command.assert_called_once_with(command_instance.command_name)
+        mock_app.command.return_value.assert_called_once_with(command_instance.handler)

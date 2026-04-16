@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from django.conf import settings
-from django.utils.text import Truncator
 
 from apps.common.constants import NL
-from apps.common.utils import get_absolute_url
+from apps.common.utils import get_absolute_url, truncate
 from apps.slack.blocks import get_pagination_buttons, markdown
-from apps.slack.common.constants import TRUNCATION_INDICATOR
 from apps.slack.common.presentation import EntityPresentation
 from apps.slack.constants import FEEDBACK_SHARING_INVITE
 from apps.slack.utils import escape
@@ -62,14 +60,10 @@ def get_blocks(
 
     blocks = []
     for idx, issue in enumerate(issues):
-        title = Truncator(escape(issue["idx_title"])).chars(
-            presentation.name_truncation, truncate=TRUNCATION_INDICATOR
-        )
         project_name = escape(issue["idx_project_name"])
         project_url = escape(issue["idx_project_url"])
-        summary = Truncator(escape(issue["idx_summary"])).chars(
-            presentation.summary_truncation, truncate=TRUNCATION_INDICATOR
-        )
+        summary = truncate(escape(issue["idx_summary"]), presentation.summary_truncation)
+        title = truncate(escape(issue["idx_title"]), presentation.name_truncation)
 
         blocks.append(
             markdown(

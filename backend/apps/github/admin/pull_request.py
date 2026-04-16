@@ -1,7 +1,7 @@
 """GitHub app PullRequest model admin."""
 
 from django.contrib import admin
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from apps.github.models.pull_request import PullRequest
 
@@ -13,6 +13,7 @@ class PullRequestAdmin(admin.ModelAdmin):
         "assignees",
         "author",
         "labels",
+        "related_issues",
         "repository",
     )
     list_display = (
@@ -43,7 +44,7 @@ class PullRequestAdmin(admin.ModelAdmin):
             str: A safe HTML link to the pull request on GitHub.
 
         """
-        return mark_safe(f"<a href='{obj.url}' target='_blank'>↗️</a>")  # noqa: S308
+        return format_html("<a href='{}' target='_blank'>↗️</a>", obj.url)
 
     custom_field_github_url.short_description = "GitHub 🔗"
 

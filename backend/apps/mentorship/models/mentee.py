@@ -12,6 +12,8 @@ class Mentee(ExperienceLevel, MatchingAttributes, TimestampedModel):
     """Mentee model."""
 
     class Meta:
+        """Model options."""
+
         db_table = "mentorship_mentees"
         verbose_name_plural = "Mentees"
 

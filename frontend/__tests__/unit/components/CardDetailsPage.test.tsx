@@ -1,27 +1,19 @@
-import { faCode, faTags } from '@fortawesome/free-solid-svg-icons'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import React from 'react'
 import '@testing-library/jest-dom'
+import { FaCode, FaTags } from 'react-icons/fa6'
+import type { MenteeNode } from 'types/__generated__/graphql'
 import type { DetailsCardProps } from 'types/card'
-import CardDetailsPage from 'components/CardDetailsPage'
+import type { PullRequest } from 'types/pullRequest'
+import CardDetailsPage, { type CardType } from 'components/CardDetailsPage'
 
-jest.mock('next/link', () => {
-  const MockLink = ({
-    children,
-    href,
-    ...props
-  }: {
-    children: React.ReactNode
-    href: string
-    [key: string]: unknown
-  }) => (
-    <a href={href} {...props}>
+jest.mock('@heroui/tooltip', () => ({
+  Tooltip: ({ children, content }: { children: React.ReactNode; content: string }) => (
+    <div data-testid="mock-tooltip" title={content}>
       {children}
-    </a>
-  )
-  MockLink.displayName = 'MockLink'
-  return MockLink
-})
+    </div>
+  ),
+}))
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -56,31 +48,43 @@ jest.mock('next/image', () => ({
   ),
 }))
 
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({
-    icon,
-    className,
-    ...props
-  }: {
-    icon: { iconName: string }
-    className?: string
-    [key: string]: unknown
-  }) => <span data-testid={`icon-${icon.iconName}`} className={className} {...props} />,
-}))
-
 jest.mock('utils/env.client', () => ({
   IS_PROJECT_HEALTH_ENABLED: true,
 }))
 
+jest.mock('next-auth/react', () => {
+  return {
+    useSession: jest.fn(() => ({
+      data: null,
+      status: 'unauthenticated',
+    })),
+    SessionProvider: ({ children }: { children: React.ReactNode }) => children,
+  }
+})
+
+jest.mock('utils/scrollToAnchor', () => ({
+  scrollToAnchor: jest.fn(),
+}))
+
+jest.mock('utils/dateFormatter', () => ({
+  formatDate: (date: string | number) => {
+    if (typeof date === 'string') return date
+    return new Date(date).toISOString().split('T')[0]
+  },
+}))
+
+jest.mock('utils/urlFormatter', () => ({
+  getMemberUrl: (login: string) => `/members/${login}`,
+  getMenteeUrl: (programKey: string, entityKey: string, login: string) =>
+    `/programs/${programKey}/mentees/${login}`,
+}))
+
 jest.mock('utils/urlIconMappings', () => ({
   getSocialIcon: (url: string) => {
-    if (url?.includes('github')) {
-      return { iconName: 'github' }
+    const safe = encodeURIComponent(url)
+    return function MockSocialIcon(props: { className?: string }) {
+      return <span data-testid={`mock-social-icon-${safe}`} className={props.className} />
     }
-    if (url?.includes('twitter')) {
-      return { iconName: 'twitter' }
-    }
-    return { iconName: 'link' }
   },
 }))
 
@@ -107,11 +111,13 @@ jest.mock('components/ChapterMapWrapper', () => ({
     geoLocData: _geoLocData,
     showLocal,
     style,
+    showLocationSharing: _showLocationSharing,
     ...otherProps
   }: {
     geoLocData?: unknown
     showLocal: boolean
     style: React.CSSProperties
+    showLocationSharing?: boolean
     [key: string]: unknown
   }) => {
     return (
@@ -131,9 +137,54 @@ jest.mock('components/HealthMetrics', () => ({
   ),
 }))
 
+jest.mock('components/ContributionHeatmap', () => ({
+  __esModule: true,
+  default: ({
+    contributionData,
+    startDate,
+    endDate,
+    ...props
+  }: {
+    contributionData: Record<string, number>
+    startDate: string
+    endDate: string
+    [key: string]: unknown
+  }) => (
+    <div data-testid="mock-heatmap-chart" {...props}>
+      Heatmap: {Object.keys(contributionData).length} days from {startDate} to {endDate}
+    </div>
+  ),
+}))
+
+jest.mock('components/ContributionStats', () => ({
+  __esModule: true,
+  default: ({
+    title,
+    stats,
+    ...props
+  }: {
+    title: string
+    stats?: { commits: number; pullRequests: number; issues: number; total: number }
+    [key: string]: unknown
+  }) => (
+    <div data-testid="contribution-stats" {...props}>
+      <h2>{title}</h2>
+      {stats && (
+        <>
+          <p>{stats.commits}</p>
+          <p>{stats.pullRequests}</p>
+          <p>{stats.issues}</p>
+          <p>{stats.total}</p>
+        </>
+      )}
+    </div>
+  ),
+}))
+
 jest.mock('components/InfoBlock', () => ({
   __esModule: true,
   default: ({
+    icon: _icon,
     pluralizedName,
     unit,
     value,
@@ -155,7 +206,15 @@ jest.mock('components/InfoBlock', () => ({
 
 jest.mock('components/LeadersList', () => ({
   __esModule: true,
-  default: ({ leaders, ...props }: { leaders: string; [key: string]: unknown }) => (
+  default: ({
+    leaders,
+    entityKey: _entityKey,
+    ...props
+  }: {
+    leaders: string
+    entityKey: string
+    [key: string]: unknown
+  }) => (
     <span data-testid="leaders-list" {...props}>
       {leaders}
     </span>
@@ -174,11 +233,16 @@ jest.mock('components/MetricsScoreCircle', () => ({
     clickable?: boolean
     onClick?: () => void
     [key: string]: unknown
-  }) => (
-    <div data-testid="metrics-score-circle" role={clickable ? 'button' : undefined} {...props}>
-      Score: {score}
-    </div>
-  ),
+  }) =>
+    clickable ? (
+      <button data-testid="metrics-score-circle" onClick={_onClick} {...props}>
+        Score: {score}
+      </button>
+    ) : (
+      <div data-testid="metrics-score-circle" {...props}>
+        Score: {score}
+      </div>
+    ),
 }))
 
 jest.mock('components/Milestones', () => ({
@@ -232,6 +296,15 @@ jest.mock('components/RecentPullRequests', () => ({
   ),
 }))
 
+jest.mock('components/MentorshipPullRequest', () => ({
+  __esModule: true,
+  default: ({ pr, ...props }: { pr: PullRequest; [key: string]: unknown }) => (
+    <div data-testid="pull-request-item" {...props}>
+      MentorshipPullRequest: {pr.title}
+    </div>
+  ),
+}))
+
 jest.mock('components/RecentReleases', () => ({
   __esModule: true,
   default: ({
@@ -252,7 +325,7 @@ jest.mock('components/RecentReleases', () => ({
   ),
 }))
 
-jest.mock('components/RepositoriesCard', () => ({
+jest.mock('components/RepositoryCard', () => ({
   __esModule: true,
   default: ({
     repositories,
@@ -276,9 +349,10 @@ jest.mock('components/SecondaryCard', () => ({
     title,
     children,
     className,
+    icon: _icon,
     ...props
   }: {
-    _icon: unknown
+    _icon?: unknown
     title: React.ReactNode
     children: React.ReactNode
     className?: string
@@ -314,12 +388,17 @@ jest.mock('components/ToggleableList', () => ({
   __esModule: true,
   default: ({
     items,
+    icon: _icon,
     label,
+    entityKey: _entityKey,
+    isDisabled: _isDisabled,
     ...props
   }: {
     items: string[]
     _icon: unknown
     label: React.ReactNode
+    entityKey: string
+    isDisabled?: boolean
     [key: string]: unknown
   }) => (
     <div data-testid="toggleable-list" {...props}>
@@ -328,27 +407,170 @@ jest.mock('components/ToggleableList', () => ({
   ),
 }))
 
-jest.mock('components/TopContributorsList', () => ({
+jest.mock('components/ContributorsList', () => ({
   __esModule: true,
   default: ({
     contributors,
     maxInitialDisplay,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     icon,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    label,
+    title = 'Contributors',
+
+    getUrl,
     ...props
   }: {
-    contributors: unknown[]
+    contributors: (Partial<MenteeNode> & { tag?: string; login?: string; name?: string })[]
     icon?: unknown
-    label?: string
+    title?: string
     maxInitialDisplay: number
+    getUrl: (login: string) => string
     [key: string]: unknown
   }) => (
-    <div data-testid="top-contributors-list" {...props}>
-      Top Contributors ({contributors.length} items, max display: {maxInitialDisplay})
+    <div data-testid="contributors-list" {...props}>
+      {title} ({contributors.length} items, max display: {maxInitialDisplay})
+      {contributors.map((c) => (
+        <a key={c.tag || c.login || 'unknown'} href={getUrl && getUrl(c.login || 'unknown')}>
+          {c.name || c.login || 'Unknown'}
+        </a>
+      ))}
     </div>
   ),
+}))
+
+jest.mock('components/EntityActions', () => ({
+  __esModule: true,
+  default: ({
+    type,
+    programKey,
+    moduleKey,
+    status: _status,
+    setStatus: _setStatus,
+    isAdmin,
+    isMentor: _isMentor,
+    ...props
+  }: {
+    type: string
+    programKey?: string
+    moduleKey?: string
+    status?: string
+    setStatus?: (status: string) => void
+    isAdmin?: boolean
+    isMentor?: boolean
+    [key: string]: unknown
+  }) => (
+    <div data-testid="entity-actions" {...props} data-isadmin={isAdmin}>
+      EntityActions: type={type}, programKey={programKey}, moduleKey={moduleKey}
+    </div>
+  ),
+}))
+
+jest.mock('components/Leaders', () => {
+  return {
+    __esModule: true,
+    default: ({ users, ...props }: { users: unknown[]; [key: string]: unknown }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const usersList = users as any[]
+      return (
+        <div data-testid="leaders" {...props}>
+          <h3>Leaders</h3>
+          {Array.isArray(usersList) &&
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            usersList.map((user: any, index: number) => {
+              const uniqueKey = `leader-${index}-${user.login || 'unknown'}`
+              return (
+                <div key={uniqueKey}>
+                  <div>{user.member?.name || user.memberName || 'Unknown'}</div>
+                  <div>{user.description || ''}</div>
+                </div>
+              )
+            })}
+        </div>
+      )
+    },
+  }
+})
+
+jest.mock('components/StatusBadge', () => ({
+  __esModule: true,
+  default: ({
+    status,
+    _size,
+    ...props
+  }: {
+    status: string
+    _size?: string
+    [key: string]: unknown
+  }) => (
+    <span
+      className={`px-3 py-1 text-sm ${status === 'inactive' ? 'bg-red-50 text-red-800' : 'bg-gray-300 text-gray-800'}`}
+      data-testid={`status-badge-${status}`}
+      {...props}
+    >
+      {status.charAt(0).toUpperCase() + status.slice(1)}
+    </span>
+  ),
+}))
+
+jest.mock('components/MarkdownWrapper', () => ({
+  __esModule: true,
+  default: ({ content, ...props }: { content: string; [key: string]: unknown }) => (
+    <div data-testid="markdown-wrapper" {...props}>
+      {content}
+    </div>
+  ),
+}))
+
+jest.mock('components/ModuleCard', () => ({
+  __esModule: true,
+  default: ({
+    modules,
+    accessLevel: _accessLevel,
+    admins: _admins,
+    programKey: _programKey,
+    ...props
+  }: {
+    modules: unknown[]
+    accessLevel: string
+    admins?: unknown[]
+    programKey?: string
+    [key: string]: unknown
+  }) => (
+    <div data-testid="module-card" {...props}>
+      ModuleCard ({modules?.length || 0} modules)
+    </div>
+  ),
+}))
+
+jest.mock('components/ShowMoreButton', () => {
+  function ShowMoreButtonMock({
+    onToggle,
+    ...props
+  }: Readonly<{
+    onToggle: () => void
+    [key: string]: unknown
+  }>) {
+    const [isExpanded, setIsExpanded] = React.useState(false)
+    return (
+      <button
+        onClick={() => {
+          setIsExpanded(!isExpanded)
+          onToggle()
+        }}
+        {...props}
+      >
+        {isExpanded ? 'Show less' : 'Show more'}
+      </button>
+    )
+  }
+  return {
+    __esModule: true,
+    default: ShowMoreButtonMock,
+  }
+})
+
+jest.mock('components/TruncatedText', () => ({
+  __esModule: true,
+  TruncatedText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
 describe('CardDetailsPage', () => {
@@ -412,13 +634,13 @@ describe('CardDetailsPage', () => {
 
   const mockStats = [
     {
-      icon: faCode,
+      icon: FaCode,
       pluralizedName: 'repositories',
       unit: '',
       value: 10,
     },
     {
-      icon: faTags,
+      icon: FaTags,
       pluralizedName: 'stars',
       unit: '',
       value: 100,
@@ -433,6 +655,7 @@ describe('CardDetailsPage', () => {
 
   const mockContributors = [
     {
+      id: 'contributor-1',
       avatarUrl: 'https://example.com/avatar1.jpg',
       login: 'john_doe',
       name: 'John Doe',
@@ -440,6 +663,7 @@ describe('CardDetailsPage', () => {
       contributionsCount: 50,
     },
     {
+      id: 'contributor-2',
       avatarUrl: 'https://example.com/avatar2.jpg',
       login: 'jane_smith',
       name: 'Jane Smith',
@@ -494,7 +718,7 @@ describe('CardDetailsPage', () => {
       organizationName: 'test-org',
       projectName: 'Test Project',
       projectUrl: 'https://github.com/test/project',
-      summary: 'Issue summary',
+      body: 'Issue summary',
       title: 'Test Issue',
       updatedAt: Date.now(),
       url: 'https://github.com/test/project/issues/123',
@@ -507,7 +731,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       body: 'Milestone description',
       closedIssuesCount: 5,
-      createdAt: new Date(Date.now() - 2592000000).toISOString(),
+      createdAt: '2023-01-01T00:00:00.000Z',
       openIssuesCount: 2,
       repositoryName: 'test-repo',
       state: 'open',
@@ -518,16 +742,20 @@ describe('CardDetailsPage', () => {
 
   const mockPullRequests = [
     {
+      id: 'mock-pull-request-1',
       author: mockUser,
       createdAt: new Date(Date.now() - 172800000).toISOString(),
       organizationName: 'test-org',
       title: 'Add new feature',
       url: 'https://github.com/test/project/pull/456',
+      state: 'merged',
+      mergedAt: new Date(Date.now() - 86400000).toISOString(),
     },
   ]
 
   const mockRecentReleases = [
     {
+      id: 'release-1',
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
@@ -614,7 +842,8 @@ describe('CardDetailsPage', () => {
       render(<CardDetailsPage {...defaultProps} isActive={false} />)
 
       expect(screen.getByText('Inactive')).toBeInTheDocument()
-      expect(screen.getByText('Inactive')).toHaveClass('bg-red-200', 'text-red-800')
+      // Updated classes for consistent badge styling.
+      expect(screen.getByText('Inactive')).toHaveClass('bg-red-50', 'text-red-800')
     })
 
     it('does not render inactive badge when isActive is true', () => {
@@ -696,7 +925,13 @@ describe('CardDetailsPage', () => {
       expect(detailsCard).toHaveClass('md:col-span-5')
     })
 
-    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes: CardType[] = [
+      'project',
+      'repository',
+      'committee',
+      'user',
+      'organization',
+    ]
 
     test.each(supportedTypes)('renders statistics section for %s type', (entityType) => {
       render(<CardDetailsPage {...defaultProps} type={entityType} />)
@@ -723,6 +958,19 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Repositories')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
     })
+
+    it('renders MentorshipPullRequest when type is module and PRs are provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+        />
+      )
+
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+      expect(screen.getAllByTestId('pull-request-item').length).toBeGreaterThan(0)
+    })
   })
 
   describe('Event Handling', () => {
@@ -740,15 +988,72 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
     })
 
+    it('renders Show More button when onLoadMorePullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show more/i })).toBeInTheDocument()
+    })
+
+    it('renders Show Less button when onResetPullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onResetPullRequests={jest.fn()}
+          onLoadMorePullRequests={undefined}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeInTheDocument()
+    })
+
+    it('shows Loading on Show more and disables both controls when isFetchingMore is true', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+          onResetPullRequests={jest.fn()}
+          isFetchingMore={true}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Loading/i })).toBeDisabled()
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeDisabled()
+    })
+
+    it('calls scrollToAnchor when MetricsScoreCircle is clicked', () => {
+      const { scrollToAnchor } = jest.requireMock('utils/scrollToAnchor')
+
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="project"
+          healthMetricsData={mockHealthMetricsData}
+        />
+      )
+
+      const healthButton = screen.getByRole('button')
+      fireEvent.click(healthButton)
+
+      expect(scrollToAnchor).toHaveBeenCalledWith('issues-trend')
+    })
+
     it('renders social links with correct hrefs and target attributes', () => {
       const socialLinks = ['https://github.com/test', 'https://twitter.com/test']
       render(<CardDetailsPage {...defaultProps} type="chapter" socialLinks={socialLinks} />)
 
       const links = screen.getAllByRole('link')
-      links.forEach((link) => {
+      for (const link of links) {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      })
+      }
     })
   })
 
@@ -780,6 +1085,25 @@ describe('CardDetailsPage', () => {
 
       expect(screen.getByText('Leaders:')).toBeInTheDocument()
       expect(screen.getByTestId('leaders-list')).toBeInTheDocument()
+    })
+
+    it('renders Leaders component when entityLeaders are provided', () => {
+      const entityLeaders = [
+        {
+          description: 'Project Leader',
+          memberName: 'Alice',
+          member: {
+            id: '1',
+            login: 'alice',
+            name: 'Alice',
+            avatarUrl: 'https://avatars.githubusercontent.com/u/12345?v=4',
+          },
+        },
+      ]
+      render(<CardDetailsPage {...defaultProps} entityLeaders={entityLeaders} />)
+      expect(screen.getByText('Leaders')).toBeInTheDocument()
+      expect(screen.getByText('Alice')).toBeInTheDocument()
+      expect(screen.getByText('Project Leader')).toBeInTheDocument()
     })
 
     it('capitalizes entity type in details title', () => {
@@ -901,7 +1225,7 @@ describe('CardDetailsPage', () => {
     it('passes correct props to child components', () => {
       render(<CardDetailsPage {...defaultProps} topContributors={mockContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (2 items, max display: 12)'
       )
     })
@@ -933,7 +1257,14 @@ describe('CardDetailsPage', () => {
       expect(screen.getByTestId('recent-releases')).toBeInTheDocument()
     })
 
-    const entityTypes = ['project', 'repository', 'user', 'organization', 'committee', 'chapter']
+    const entityTypes: CardType[] = [
+      'project',
+      'repository',
+      'user',
+      'organization',
+      'committee',
+      'chapter',
+    ]
 
     test.each(entityTypes)('renders all expected sections for %s type', (entityType) => {
       render(
@@ -952,7 +1283,13 @@ describe('CardDetailsPage', () => {
       ).toBeInTheDocument()
     })
 
-    const supportedTypes = ['project', 'repository', 'committee', 'user', 'organization']
+    const supportedTypes: CardType[] = [
+      'project',
+      'repository',
+      'committee',
+      'user',
+      'organization',
+    ]
 
     test.each(supportedTypes)('renders statistics section for supported %s type', (entityType) => {
       render(<CardDetailsPage {...defaultProps} type={entityType} />)
@@ -978,9 +1315,7 @@ describe('CardDetailsPage', () => {
       )
 
       expect(screen.getByTestId('health-metrics')).toHaveTextContent('Health Metrics (1 items)')
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
-        'Top Contributors (2 items'
-      )
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent('Top Contributors (2 items')
       expect(screen.getByTestId('repositories-card')).toHaveTextContent('Repositories (2 items)')
     })
 
@@ -989,6 +1324,13 @@ describe('CardDetailsPage', () => {
 
       expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Languages: JavaScript')
       expect(screen.queryByText('Topics:')).not.toBeInTheDocument()
+    })
+
+    it('handles conditional rendering when languages empty but topics present', () => {
+      render(<CardDetailsPage {...defaultProps} languages={[]} topics={['web']} />)
+
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Topics: web')
+      expect(screen.queryByText('Languages:')).not.toBeInTheDocument()
     })
   })
 
@@ -1010,10 +1352,10 @@ describe('CardDetailsPage', () => {
       const links = screen.getAllByRole('link')
       const externalLinks = links.filter((link) => link.getAttribute('href')?.startsWith('http'))
 
-      externalLinks.forEach((link) => {
+      for (const link of externalLinks) {
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      })
+      }
     })
 
     it('renders with proper document structure', () => {
@@ -1089,7 +1431,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributorsList} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (50 items, max display: 12)'
       )
     })
@@ -1135,8 +1477,8 @@ describe('CardDetailsPage', () => {
     })
 
     it('handles unsupported entity types gracefully', () => {
-      render(<CardDetailsPage {...defaultProps} type="unsupported-type" />)
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render(<CardDetailsPage {...defaultProps} type={'unsupported-type' as any} />)
       expect(screen.getByText('Unsupported-type Details')).toBeInTheDocument()
     })
 
@@ -1149,7 +1491,7 @@ describe('CardDetailsPage', () => {
 
       render(<CardDetailsPage {...defaultProps} topContributors={largeContributors} />)
 
-      expect(screen.getByTestId('top-contributors-list')).toHaveTextContent(
+      expect(screen.getByTestId('contributors-list')).toHaveTextContent(
         'Top Contributors (1000 items, max display: 12)'
       )
     })
@@ -1177,7 +1519,7 @@ describe('CardDetailsPage', () => {
 
     it('validates required vs optional props correctly', () => {
       const minimalValidProps: DetailsCardProps = {
-        type: 'project',
+        type: 'project' as const,
         stats: [],
         healthMetricsData: [],
         languages: [],
@@ -1230,15 +1572,15 @@ describe('CardDetailsPage', () => {
 
   describe('Advanced Integration Tests', () => {
     it('handles multiple rapid prop changes', () => {
-      const { rerender } = render(<CardDetailsPage {...defaultProps} type="project" />)
+      const { rerender } = render(<CardDetailsPage {...defaultProps} type={'project' as const} />)
 
-      rerender(<CardDetailsPage {...defaultProps} type="chapter" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'chapter' as const} />)
       expect(screen.getByText('Chapter Details')).toBeInTheDocument()
 
-      rerender(<CardDetailsPage {...defaultProps} type="user" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'user' as const} />)
       expect(screen.getByText('User Details')).toBeInTheDocument()
 
-      rerender(<CardDetailsPage {...defaultProps} type="organization" />)
+      rerender(<CardDetailsPage {...defaultProps} type={'organization' as const} />)
       expect(screen.getByText('Organization Details')).toBeInTheDocument()
     })
 
@@ -1276,9 +1618,9 @@ describe('CardDetailsPage', () => {
     })
 
     it('renders correctly with all optional sections enabled', () => {
-      const fullPropsAllSections = {
+      const fullPropsAllSections: DetailsCardProps = {
         ...defaultProps,
-        type: 'project',
+        type: 'project' as const,
         summary: 'Project summary text',
         userSummary: <div>User summary content</div>,
         socialLinks: ['https://github.com/test', 'https://twitter.com/test'],
@@ -1299,16 +1641,16 @@ describe('CardDetailsPage', () => {
       expect(screen.getByText('Project summary text')).toBeInTheDocument()
       expect(screen.getByText('User summary content')).toBeInTheDocument()
       expect(screen.getByTestId('health-metrics')).toBeInTheDocument()
-      expect(screen.getByTestId('top-contributors-list')).toBeInTheDocument()
+      expect(screen.getByTestId('contributors-list')).toBeInTheDocument()
       expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
       expect(screen.getByTestId('sponsor-card')).toBeInTheDocument()
     })
 
     it('handles zero and negative values in stats', () => {
       const statsWithZeroValues = [
-        { icon: faCode, value: 0, unit: 'Star' },
-        { icon: faTags, value: invalidValues.negativeNumber, unit: 'Issue' },
-        { icon: faCode, value: invalidValues.nullValue, unit: 'Fork' },
+        { icon: FaCode, value: 0, unit: 'Star' },
+        { icon: FaTags, value: -10, unit: 'Issue' },
+        { icon: FaCode, value: null, unit: 'Fork' },
       ]
 
       expect(() =>
@@ -1316,6 +1658,25 @@ describe('CardDetailsPage', () => {
       ).not.toThrow()
 
       expect(screen.getByText('Statistics')).toBeInTheDocument()
+    })
+
+    it('handles undefined topics/languages in grid layout', () => {
+      render(<CardDetailsPage {...defaultProps} languages={['JavaScript']} topics={undefined} />)
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Languages: JavaScript')
+      cleanup()
+      render(<CardDetailsPage {...defaultProps} languages={undefined} topics={['web']} />)
+      expect(screen.getByTestId('toggleable-list')).toHaveTextContent('Topics: web')
+    })
+
+    it('renders Leaders with Unknown when value is null', () => {
+      const propsWithNullLeader = {
+        ...defaultProps,
+        type: 'chapter',
+        details: [{ label: 'Leaders', value: null }],
+      }
+      render(<CardDetailsPage {...propsWithNullLeader} />)
+      expect(screen.getByText('Leaders:')).toBeInTheDocument()
+      expect(screen.getByText('Unknown')).toBeInTheDocument()
     })
 
     it('handles mixed valid and invalid data in arrays', () => {
@@ -1374,6 +1735,1202 @@ describe('CardDetailsPage', () => {
       expect(
         screen.getByText('Description with symbols 🚀 and special characters')
       ).toBeInTheDocument()
+    })
+  })
+
+  describe('Archived Badge Functionality', () => {
+    it('displays archived badge for archived repository', () => {
+      const archivedProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        isArchived: true,
+      }
+
+      render(<CardDetailsPage {...archivedProps} />)
+
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+    })
+
+    it('does not display archived badge for non-archived repository', () => {
+      const activeProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        isArchived: false,
+      }
+
+      render(<CardDetailsPage {...activeProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('does not display archived badge when isArchived is undefined', () => {
+      const undefinedProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+      }
+
+      render(<CardDetailsPage {...undefinedProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('does not display archived badge for non-repository types', () => {
+      const projectProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        isArchived: true,
+      }
+
+      render(<CardDetailsPage {...projectProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+
+    it('displays archived badge alongside inactive badge', () => {
+      const bothBadgesProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        isArchived: true,
+        isActive: false,
+      }
+
+      render(<CardDetailsPage {...bothBadgesProps} />)
+
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+      expect(screen.getByText('Inactive')).toBeInTheDocument()
+    })
+
+    it('displays archived badge independently of active status', () => {
+      const archivedAndActiveProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        isArchived: true,
+        isActive: true,
+      }
+
+      render(<CardDetailsPage {...archivedAndActiveProps} />)
+
+      expect(screen.getByText('Archived')).toBeInTheDocument()
+      expect(screen.queryByText('Inactive')).not.toBeInTheDocument()
+    })
+
+    it('archived badge has correct positioning with flex container', () => {
+      const archivedProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        isArchived: true,
+      }
+
+      const { container } = render(<CardDetailsPage {...archivedProps} />)
+
+      // New structure: badges are in a flex container with items-center and gap-3
+      const badgeContainer = container.querySelector('.flex.items-center.gap-3')
+      expect(badgeContainer).toBeInTheDocument()
+    })
+
+    it('archived badge renders with medium size', () => {
+      const archivedProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        isArchived: true,
+      }
+
+      render(<CardDetailsPage {...archivedProps} />)
+
+      const badge = screen.getByText('Archived')
+      expect(badge).toHaveClass('px-3', 'py-1', 'text-sm')
+    })
+
+    it('handles null isArchived gracefully', () => {
+      const nullArchivedProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        isArchived: null,
+      }
+
+      render(<CardDetailsPage {...nullArchivedProps} />)
+
+      expect(screen.queryByText('Archived')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Contribution Stats and Heatmap', () => {
+    const contributionData = {
+      '2024-01-01': 5,
+      '2024-01-02': 10,
+      '2024-01-03': 3,
+    }
+
+    const contributionStats = {
+      commits: 100,
+      pullRequests: 50,
+      issues: 25,
+      total: 175,
+    }
+
+    it('renders contribution stats and heatmap when data is provided', () => {
+      const propsWithContributions: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData,
+        contributionStats,
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...propsWithContributions} />)
+
+      expect(screen.getByText('Project Contribution Activity')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+      expect(screen.getByText('50')).toBeInTheDocument()
+      expect(screen.getByText('25')).toBeInTheDocument()
+      expect(screen.getByText('175')).toBeInTheDocument()
+    })
+
+    it('uses correct title for chapter type', () => {
+      const chapterPropsWithContributions: DetailsCardProps = {
+        ...defaultProps,
+        type: 'chapter' as const,
+        contributionStats,
+      }
+
+      render(<CardDetailsPage {...chapterPropsWithContributions} />)
+
+      expect(screen.getByText('Chapter Contribution Activity')).toBeInTheDocument()
+    })
+
+    it('does not render contribution section when no data is provided', () => {
+      render(<CardDetailsPage {...defaultProps} type={'project' as const} />)
+
+      expect(screen.queryByText('Project Contribution Activity')).not.toBeInTheDocument()
+      expect(screen.queryByText('Chapter Contribution Activity')).not.toBeInTheDocument()
+    })
+
+    it('renders only stats when contributionData is missing', () => {
+      const statsOnlyProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionStats,
+      }
+
+      render(<CardDetailsPage {...statsOnlyProps} />)
+
+      expect(screen.getByText('Project Contribution Activity')).toBeInTheDocument()
+      expect(screen.getByText('100')).toBeInTheDocument()
+    })
+
+    it('renders heatmap when contributionData and dates are provided', () => {
+      const heatmapProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData,
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...heatmapProps} />)
+
+      // Heatmap should be rendered (mocked in jest setup)
+      expect(screen.getByTestId('mock-heatmap-chart')).toBeInTheDocument()
+    })
+
+    it('does not render heatmap when dates are missing', () => {
+      const noDateProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData,
+      }
+
+      render(<CardDetailsPage {...noDateProps} />)
+
+      expect(screen.queryByTestId('mock-heatmap-chart')).not.toBeInTheDocument()
+    })
+
+    it('does not render heatmap when contributionData is empty', () => {
+      const emptyDataProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionData: {},
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      }
+
+      render(<CardDetailsPage {...emptyDataProps} />)
+
+      expect(screen.queryByTestId('mock-heatmap-chart')).not.toBeInTheDocument()
+    })
+
+    it('renders contribution section before top contributors', () => {
+      const fullProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        contributionStats,
+        topContributors: [
+          {
+            id: 'contributor-user1',
+            login: 'user1',
+            name: 'User One',
+            avatarUrl: 'https://example.com/avatar1.png',
+          },
+        ],
+      }
+
+      render(<CardDetailsPage {...fullProps} />)
+
+      const contributionSection = screen.getByText('Project Contribution Activity')
+      const contributorsSection = screen.getByText(/Top Contributors/i)
+
+      // Check that contribution section appears before contributors
+      expect(contributionSection.compareDocumentPosition(contributorsSection)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      )
+    })
+  })
+
+  describe('Program Milestones Display', () => {
+    const createMilestones = (count: number) => {
+      const milestones = []
+      for (let i = 0; i < count; i++) {
+        milestones.push({
+          author: mockUser,
+          body: `Milestone description ${i + 1}`,
+          closedIssuesCount: 5,
+          createdAt: Math.floor((Date.now() - 10000000) / 1000),
+          openIssuesCount: 2,
+          repositoryName: `test-repo-${i}`,
+          organizationName: 'test-org',
+          state: 'open',
+          title: `Milestone ${i + 1}`,
+          url: `https://github.com/test/project/milestone/${i + 1}`,
+        })
+      }
+      return milestones
+    }
+
+    it('renders only first 4 milestones initially for program type', () => {
+      const manyMilestones = createMilestones(6)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: manyMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Recent Milestones')).toBeInTheDocument()
+
+      expect(screen.getByText('Milestone 1')).toBeInTheDocument()
+      expect(screen.getByText('Milestone 4')).toBeInTheDocument()
+
+      expect(screen.queryByText('Milestone 5')).not.toBeInTheDocument()
+      expect(screen.queryByText('Milestone 6')).not.toBeInTheDocument()
+
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('expands to show all milestones when "Show more" is clicked', () => {
+      const manyMilestones = createMilestones(6)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: manyMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      const showMoreBtn = screen.getByText(/Show more/i)
+      fireEvent.click(showMoreBtn)
+
+      expect(screen.getByText('Milestone 5')).toBeInTheDocument()
+      expect(screen.getByText('Milestone 6')).toBeInTheDocument()
+
+      expect(screen.getByText(/Show less/i)).toBeInTheDocument()
+    })
+
+    it('collapses back to 4 milestones when "Show less" is clicked', () => {
+      const manyMilestones = createMilestones(6)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: manyMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      fireEvent.click(screen.getByText(/Show more/i))
+      expect(screen.getByText('Milestone 5')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByText(/Show less/i))
+
+      expect(screen.queryByText('Milestone 5')).not.toBeInTheDocument()
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('does not show toggle button if milestones <= 4', () => {
+      const fewMilestones = createMilestones(4)
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: fewMilestones,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Milestone 1')).toBeInTheDocument()
+      expect(screen.getByText('Milestone 4')).toBeInTheDocument()
+      expect(screen.queryByText(/Show more/i)).not.toBeInTheDocument()
+    })
+
+    it('renders milestone author avatar when showAvatar is true and author data is complete', () => {
+      const milestonesWithAuthor = [
+        {
+          author: {
+            login: 'author-user',
+            name: 'Author User',
+            avatarUrl: 'https://example.com/author-avatar.jpg',
+          },
+          body: 'Milestone with author',
+          closedIssuesCount: 3,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 1,
+          repositoryName: 'test-repo',
+          organizationName: 'test-org',
+          state: 'open',
+          title: 'Milestone With Author',
+          url: 'https://github.com/test/project/milestone/1',
+        },
+      ]
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: milestonesWithAuthor,
+        showAvatar: true,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Milestone With Author')).toBeInTheDocument()
+      // The avatar image should be rendered
+      const avatarImg = screen.getByAltText("Author User's avatar")
+      expect(avatarImg).toBeInTheDocument()
+      expect(avatarImg).toHaveAttribute('src', 'https://example.com/author-avatar.jpg')
+    })
+
+    it('renders milestone without author avatar when author data is missing', () => {
+      const milestonesWithoutAuthor = [
+        {
+          author: null,
+          body: 'Milestone without author',
+          closedIssuesCount: 3,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 1,
+          repositoryName: 'test-repo',
+          organizationName: 'test-org',
+          state: 'open',
+          title: 'Milestone No Author',
+          url: 'https://github.com/test/project/milestone/1',
+        },
+      ]
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: milestonesWithoutAuthor,
+        showAvatar: true,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Milestone No Author')).toBeInTheDocument()
+    })
+
+    it('renders milestone author tooltip using login when name is missing', () => {
+      const milestonesWithAuthorNoName = [
+        {
+          author: {
+            login: 'author-login-only',
+            name: undefined,
+            avatarUrl: 'https://example.com/author-avatar.jpg',
+          },
+          body: 'Milestone with author no name',
+          closedIssuesCount: 3,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 1,
+          repositoryName: 'test-repo',
+          organizationName: 'test-org',
+          state: 'open',
+          title: 'Milestone Author No Name',
+          url: 'https://github.com/test/project/milestone/1',
+        },
+      ]
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: milestonesWithAuthorNoName,
+        showAvatar: true,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+      expect(screen.getByTestId('mock-tooltip')).toHaveAttribute('title', 'author-login-only')
+      expect(screen.getByAltText("author-login-only's avatar")).toBeInTheDocument()
+    })
+
+    it('renders milestone title without link when URL is missing', () => {
+      const milestonesWithoutUrl = [
+        {
+          author: mockUser,
+          body: 'Milestone without URL',
+          closedIssuesCount: 3,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 1,
+          repositoryName: 'test-repo',
+          organizationName: 'test-org',
+          state: 'open',
+          title: 'Milestone No URL',
+          url: null,
+        },
+      ]
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: milestonesWithoutUrl,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Milestone No URL')).toBeInTheDocument()
+      // The title should not be a link
+      const title = screen.getByText('Milestone No URL')
+      expect(title.closest('a')).toBeNull()
+    })
+
+    it('renders milestone without repository link when repositoryName or organizationName is missing', () => {
+      const milestonesWithoutRepo = [
+        {
+          author: mockUser,
+          body: 'Milestone without repo',
+          closedIssuesCount: 3,
+          createdAt: new Date(Date.now() - 10000000).toISOString(),
+          openIssuesCount: 1,
+          repositoryName: null,
+          organizationName: null,
+          state: 'open',
+          title: 'Milestone No Repo',
+          url: 'https://github.com/test/project/milestone/1',
+        },
+      ]
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        recentMilestones: milestonesWithoutRepo,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText('Milestone No Repo')).toBeInTheDocument()
+    })
+  })
+
+  describe('Module Pull Requests Display', () => {
+    const createPullRequests = (count: number) => {
+      const pullRequests = []
+      for (let i = 0; i < count; i++) {
+        pullRequests.push({
+          id: `pr-${i}`,
+          author: mockUser,
+          createdAt: new Date().toISOString(),
+          organizationName: 'test-org',
+          title: `Pull Request ${i + 1}`,
+          url: `https://github.com/test/project/pull/${i + 1}`,
+          state: 'OPEN',
+          number: i + 1,
+          mergedAt: null,
+          repositoryName: 'test-repo',
+        })
+      }
+      return pullRequests
+    }
+
+    it('renders only first 4 PRs initially for module type', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByText('Recent Pull Requests')).toBeInTheDocument()
+
+      expect(screen.getByText(/Pull Request 1/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 4/)).toBeInTheDocument()
+
+      expect(screen.queryByText(/Pull Request 5/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Pull Request 6/)).not.toBeInTheDocument()
+
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('expands to show all PRs when "Show more" is clicked', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      const showMoreBtn = screen.getByText(/Show more/i)
+      fireEvent.click(showMoreBtn)
+
+      expect(screen.getByText(/Pull Request 5/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 6/)).toBeInTheDocument()
+
+      expect(screen.getByText(/Show less/i)).toBeInTheDocument()
+    })
+
+    it('collapses back to 4 PRs when "Show less" is clicked', () => {
+      const manyPRs = createPullRequests(6)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: manyPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      fireEvent.click(screen.getByText(/Show more/i))
+      expect(screen.getByText(/Pull Request 5/)).toBeInTheDocument()
+
+      fireEvent.click(screen.getByText(/Show less/i))
+
+      expect(screen.queryByText(/Pull Request 5/)).not.toBeInTheDocument()
+      expect(screen.getByText(/Show more/i)).toBeInTheDocument()
+    })
+
+    it('does not show toggle button if PRs <= 4', () => {
+      const fewPRs = createPullRequests(4)
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        pullRequests: fewPRs as unknown as PullRequest[],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByText(/Pull Request 1/)).toBeInTheDocument()
+      expect(screen.getByText(/Pull Request 4/)).toBeInTheDocument()
+      expect(screen.queryByText(/Show more/i)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Module Admin EntityActions and Mentees', () => {
+    it('renders EntityActions for module type when user is an admin', () => {
+      const { useSession } = jest.requireMock('next-auth/react')
+      useSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'admin-user',
+            name: 'Admin User',
+            email: 'admin@example.com',
+          },
+        },
+      })
+
+      const adminUser = {
+        id: 'admin-id',
+        login: 'admin-user',
+        name: 'Admin User',
+        avatarUrl: 'https://example.com/admin-avatar.jpg',
+      }
+
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        accessLevel: 'admin',
+        admins: [adminUser],
+        programKey: 'test-program',
+        entityKey: 'test-module',
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
+      expect(screen.getByTestId('entity-actions')).toHaveTextContent('type=module')
+    })
+
+    it('renders EntityActions for module type when user is a mentor but not admin', () => {
+      const { useSession } = jest.requireMock('next-auth/react')
+      useSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'mentor-user',
+            name: 'Mentor User',
+            email: 'mentor@example.com',
+          },
+        },
+      })
+
+      const adminUser = {
+        id: 'admin-id',
+        login: 'admin-user',
+        name: 'Admin User',
+        avatarUrl: 'https://example.com/admin-avatar.jpg',
+      }
+
+      const mentorUser = {
+        id: 'mentor-id',
+        login: 'mentor-user',
+        name: 'Mentor User',
+        avatarUrl: 'https://example.com/mentor-avatar.jpg',
+      }
+
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        accessLevel: 'admin',
+        admins: [adminUser],
+        mentors: [mentorUser],
+        programKey: 'test-program',
+        entityKey: 'test-module',
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      const entityActions = screen.getByTestId('entity-actions')
+      expect(entityActions).toBeInTheDocument()
+      expect(entityActions).toHaveTextContent('type=module')
+      // isAdmin should be undefined (user is not in admins list)
+      expect(entityActions).not.toHaveAttribute('data-isadmin', 'true')
+    })
+
+    it('does not render EntityActions for module type when user is not an admin', () => {
+      const { useSession } = jest.requireMock('next-auth/react')
+      useSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'regular-user',
+            name: 'Regular User',
+            email: 'user@example.com',
+          },
+        },
+      })
+
+      const adminUser = {
+        id: 'admin-id',
+        login: 'admin-user',
+        name: 'Admin User',
+        avatarUrl: 'https://example.com/admin-avatar.jpg',
+      }
+
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        accessLevel: 'admin',
+        admins: [adminUser],
+        programKey: 'test-program',
+        entityKey: 'test-module',
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+
+    it('renders mentees section when mentees are provided', () => {
+      const mentees = [
+        {
+          id: 'mentee-1',
+          login: 'mentee_user1',
+          name: 'Mentee User 1',
+          avatarUrl: 'https://example.com/mentee1.jpg',
+        },
+        {
+          id: 'mentee-2',
+          login: 'mentee_user2',
+          name: 'Mentee User 2',
+          avatarUrl: 'https://example.com/mentee2.jpg',
+        },
+      ]
+
+      const propsWithMentees: DetailsCardProps = {
+        ...defaultProps,
+        mentees,
+        programKey: 'test-program',
+        entityKey: 'test-entity',
+      }
+
+      render(<CardDetailsPage {...propsWithMentees} />)
+
+      const allContributorsLists = screen.getAllByTestId('contributors-list')
+      const menteesSection = allContributorsLists.find((el) => el.textContent?.includes('Mentees'))
+      expect(menteesSection).toHaveTextContent('Mentees (2 items, max display: 6)')
+    })
+
+    it('does not render mentees section when no mentees are provided', () => {
+      const propsWithoutMentees: DetailsCardProps = {
+        ...defaultProps,
+        mentees: [],
+      }
+      render(<CardDetailsPage {...propsWithoutMentees} />)
+      // Make sure mentees section is not rendered
+      const allContributorsLists = screen.queryAllByTestId('contributors-list')
+      const menteesList = allContributorsLists.find((el) => el.textContent?.includes('Mentees'))
+      expect(menteesList).toBeUndefined()
+    })
+
+    it('renders mentees with custom URL formatter', () => {
+      const mentees = [
+        {
+          id: 'mentee-1',
+          login: 'test_mentee',
+          name: 'Test Mentee',
+          avatarUrl: 'https://example.com/mentee.jpg',
+        },
+      ]
+
+      const propsWithMentees: DetailsCardProps = {
+        ...defaultProps,
+        mentees,
+        programKey: 'program-key-123',
+        entityKey: 'entity-key-456',
+      }
+
+      render(<CardDetailsPage {...propsWithMentees} />)
+
+      const menteeLink = screen.getByText('Test Mentee')
+      expect(menteeLink).toBeInTheDocument()
+      expect(menteeLink).toHaveAttribute('href', '/programs/program-key-123/mentees/test_mentee')
+    })
+
+    it('renders mentee links with empty program key segment when programKey is undefined', () => {
+      const mentees = [
+        {
+          id: 'mentee-1',
+          login: 'test_mentee',
+          name: 'Test Mentee',
+          avatarUrl: 'https://example.com/mentee.jpg',
+        },
+      ]
+
+      const propsWithMentees: DetailsCardProps = {
+        ...defaultProps,
+        mentees,
+        programKey: undefined,
+        entityKey: undefined,
+      }
+
+      render(<CardDetailsPage {...propsWithMentees} />)
+
+      const menteeLink = screen.getByText('Test Mentee')
+      expect(menteeLink).toBeInTheDocument()
+      expect(menteeLink).toHaveAttribute('href', '/programs//mentees/test_mentee')
+    })
+
+    it('handles null/undefined mentees array gracefully', () => {
+      const propsWithNullMentees: DetailsCardProps = {
+        ...defaultProps,
+        mentees: null,
+      }
+
+      expect(() => render(<CardDetailsPage {...propsWithNullMentees} />)).not.toThrow()
+    })
+
+    it('renders program EntityActions when type is program with appropriate access', () => {
+      const { useSession } = jest.requireMock('next-auth/react')
+      useSession.mockReturnValue({
+        data: {
+          user: {
+            login: 'program-admin',
+            name: 'Program Admin',
+            email: 'admin@example.com',
+          },
+        },
+      })
+
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        accessLevel: 'admin',
+        canUpdateStatus: true,
+        status: 'active',
+        setStatus: jest.fn(),
+        programKey: 'test-program',
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByTestId('entity-actions')).toBeInTheDocument()
+      expect(screen.getByTestId('entity-actions')).toHaveTextContent('type=program')
+    })
+
+    it('does not render program EntityActions when canUpdateStatus is false', () => {
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        accessLevel: 'admin',
+        canUpdateStatus: false,
+        status: 'active',
+        setStatus: jest.fn(),
+        programKey: 'test-program',
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+
+    it('does not render program EntityActions when accessLevel is not admin', () => {
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        accessLevel: 'user',
+        canUpdateStatus: true,
+        status: 'active',
+        setStatus: jest.fn(),
+        programKey: 'test-program',
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.queryByTestId('entity-actions')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Program and Module Tags, Domains, and Labels', () => {
+    it('renders tags for program type', () => {
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        tags: ['tag1', 'tag2', 'tag3'],
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText(/Tags/)).toBeInTheDocument()
+      expect(screen.getByText(/tag1, tag2, tag3/)).toBeInTheDocument()
+    })
+
+    it('renders domains for program type', () => {
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        domains: ['domain1', 'domain2'],
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText(/Domains/)).toBeInTheDocument()
+      expect(screen.getByText(/domain1, domain2/)).toBeInTheDocument()
+    })
+
+    it('renders labels for program type', () => {
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        labels: ['label1', 'label2'],
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText(/Labels/)).toBeInTheDocument()
+      expect(screen.getByText(/label1, label2/)).toBeInTheDocument()
+    })
+
+    it('renders tags and domains in same row for module type', () => {
+      const moduleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'module' as const,
+        tags: ['moduleTag1'],
+        domains: ['moduleDomain1'],
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...moduleProps} />)
+
+      expect(screen.getByText(/Tags/)).toBeInTheDocument()
+      expect(screen.getByText(/Domains/)).toBeInTheDocument()
+    })
+
+    it('does not render tags section when tags array is empty', () => {
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        tags: [],
+        domains: ['domain1'],
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.queryByText(/Tags:/)).not.toBeInTheDocument()
+      expect(screen.getByText(/Domains/)).toBeInTheDocument()
+    })
+
+    it('does not render domains section when domains array is empty', () => {
+      const programProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        tags: ['tag1'],
+        domains: [],
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...programProps} />)
+
+      expect(screen.getByText(/Tags/)).toBeInTheDocument()
+      expect(screen.queryByText(/Domains:/)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Program Module Rendering', () => {
+    const mockModules = [
+      {
+        id: 'module-1-id',
+        key: 'module-1',
+        name: 'Module 1',
+        description: 'First module',
+        endedAt: new Date(Date.now() + 86400000).toISOString(),
+        startedAt: new Date(Date.now() - 86400000).toISOString(),
+        experienceLevel: 'BEGINNER',
+        mentors: [],
+      },
+      {
+        id: 'module-2-id',
+        key: 'module-2',
+        name: 'Module 2',
+        description: 'Second module',
+        endedAt: new Date(Date.now() + 86400000).toISOString(),
+        startedAt: new Date(Date.now() - 86400000).toISOString(),
+        experienceLevel: 'INTERMEDIATE',
+        mentors: [],
+      },
+    ] as DetailsCardProps['modules']
+
+    it('renders single module without SecondaryCard wrapper', () => {
+      const singleModuleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        modules: [mockModules![0]],
+      }
+
+      render(<CardDetailsPage {...singleModuleProps} />)
+
+      expect(screen.getByTestId('module-card')).toBeInTheDocument()
+      // Single module should not have "Modules" title
+      expect(screen.queryByText('Modules')).not.toBeInTheDocument()
+    })
+
+    it('renders multiple modules with SecondaryCard wrapper and title', () => {
+      const multiModuleProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        modules: mockModules,
+      }
+
+      render(<CardDetailsPage {...multiModuleProps} />)
+
+      expect(screen.getByTestId('module-card')).toBeInTheDocument()
+      expect(screen.getByText('Modules')).toBeInTheDocument()
+    })
+  })
+
+  describe('Mentors and Admins Lists', () => {
+    const mockMentors = [
+      {
+        id: 'mentor-1',
+        login: 'mentor_user1',
+        name: 'Mentor User 1',
+        avatarUrl: 'https://example.com/mentor1.jpg',
+      },
+      {
+        id: 'mentor-2',
+        login: 'mentor_user2',
+        name: 'Mentor User 2',
+        avatarUrl: 'https://example.com/mentor2.jpg',
+      },
+    ]
+
+    const mockAdmins = [
+      {
+        id: 'admin-1',
+        login: 'admin_user1',
+        name: 'Admin User 1',
+        avatarUrl: 'https://example.com/admin1.jpg',
+      },
+    ]
+
+    it('renders mentors section when mentors are provided', () => {
+      const propsWithMentors: DetailsCardProps = {
+        ...defaultProps,
+        mentors: mockMentors,
+      }
+
+      render(<CardDetailsPage {...propsWithMentors} />)
+
+      const allContributorsLists = screen.getAllByTestId('contributors-list')
+      const mentorsSection = allContributorsLists.find((el) => el.textContent?.includes('Mentors'))
+      expect(mentorsSection).toHaveTextContent('Mentors (2 items, max display: 6)')
+    })
+
+    it('does not render mentors section when mentors array is empty', () => {
+      const propsWithoutMentors: DetailsCardProps = {
+        ...defaultProps,
+        mentors: [],
+      }
+
+      render(<CardDetailsPage {...propsWithoutMentors} />)
+
+      // Mentors section should not be rendered
+      const allContributorsLists = screen.queryAllByTestId('contributors-list')
+      const mentorsSection = allContributorsLists.find((el) => el.textContent?.includes('Mentors'))
+      expect(mentorsSection).toBeUndefined()
+    })
+
+    it('renders admins section when type is program and admins are provided', () => {
+      const propsWithAdmins: DetailsCardProps = {
+        ...defaultProps,
+        type: 'program' as const,
+        admins: mockAdmins,
+        modules: [],
+      }
+
+      render(<CardDetailsPage {...propsWithAdmins} />)
+
+      const allContributorsLists = screen.getAllByTestId('contributors-list')
+      const adminsSection = allContributorsLists.find((el) => el.textContent?.includes('Admins'))
+      expect(adminsSection).toHaveTextContent('Admins (1 items, max display: 6)')
+    })
+
+    it('does not render admins section for non-program types', () => {
+      const propsWithAdmins: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        admins: mockAdmins,
+      }
+
+      render(<CardDetailsPage {...propsWithAdmins} />)
+
+      const allContributorsLists = screen.queryAllByTestId('contributors-list')
+      const adminsSection = allContributorsLists.find((el) => el.textContent?.includes('Admins'))
+      expect(adminsSection).toBeUndefined()
+    })
+  })
+
+  describe('Repository Rendering for Different Types', () => {
+    it('renders repositories for user type', () => {
+      const userProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'user' as const,
+        repositories: mockRepositories,
+      }
+
+      render(<CardDetailsPage {...userProps} />)
+
+      expect(screen.getByText('Repositories')).toBeInTheDocument()
+      expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
+    })
+
+    it('renders repositories for organization type', () => {
+      const orgProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'organization' as const,
+        repositories: mockRepositories,
+      }
+
+      render(<CardDetailsPage {...orgProps} />)
+
+      expect(screen.getByText('Repositories')).toBeInTheDocument()
+      expect(screen.getByTestId('repositories-card')).toBeInTheDocument()
+    })
+
+    it('does not render repositories for chapter type', () => {
+      const chapterProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'chapter' as const,
+        repositories: mockRepositories,
+      }
+
+      render(<CardDetailsPage {...chapterProps} />)
+
+      expect(screen.queryByText('Repositories')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Sponsor Card Rendering', () => {
+    it('renders sponsor card for chapter type', () => {
+      const chapterProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'chapter' as const,
+        entityKey: 'test-chapter',
+      }
+
+      render(<CardDetailsPage {...chapterProps} />)
+
+      expect(screen.getByTestId('sponsor-card')).toBeInTheDocument()
+      expect(screen.getByTestId('sponsor-card')).toHaveTextContent('Type: chapter')
+    })
+
+    it('renders sponsor card for repository type', () => {
+      const repoProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'repository' as const,
+        entityKey: 'test-repo',
+      }
+
+      render(<CardDetailsPage {...repoProps} />)
+
+      expect(screen.getByTestId('sponsor-card')).toBeInTheDocument()
+      expect(screen.getByTestId('sponsor-card')).toHaveTextContent('Type: project')
+    })
+
+    it('uses projectName as title when provided', () => {
+      const projectProps: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        entityKey: 'test-project',
+        projectName: 'Custom Project Name',
+      }
+
+      render(<CardDetailsPage {...projectProps} />)
+
+      expect(screen.getByTestId('sponsor-card')).toHaveTextContent('Title: Custom Project Name')
+    })
+
+    it('does not render sponsor card when entityKey is missing', () => {
+      const propsWithoutKey: DetailsCardProps = {
+        ...defaultProps,
+        type: 'project' as const,
+        entityKey: undefined,
+      }
+
+      render(<CardDetailsPage {...propsWithoutKey} />)
+
+      expect(screen.queryByTestId('sponsor-card')).not.toBeInTheDocument()
     })
   })
 })

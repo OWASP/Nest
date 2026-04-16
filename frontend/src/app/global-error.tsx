@@ -28,25 +28,24 @@ export const ERROR_CONFIGS: Record<string, ErrorDisplayProps> = {
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ statusCode, title, message }) => {
   const router = useRouter()
   return (
-    <main className="flex min-h-screen flex-col items-center bg-white pt-8 dark:bg-slate-900">
-      <div className="flex flex-1 flex-col items-center justify-center px-4">
-        <div className="w-full max-w-md text-center">
-          <h1 className="font-poppins text-8xl font-semibold text-black dark:text-white">
-            {statusCode}
-          </h1>
-          <h2 className="font-inter mt-4 text-2xl font-semibold text-black dark:text-white">
-            {title}
-          </h2>
-          <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
-          <Button
-            onPress={() => router.push('/')}
-            className="font-inter bg-owasp-blue mt-8 h-12 w-40 rounded-lg text-base font-medium text-white transition-colors hover:bg-blue-400"
-          >
-            Return To Home
-          </Button>
-        </div>
+    <div className="flex flex-1 flex-col items-center justify-center px-4 py-9">
+      <div className="w-full max-w-md text-center">
+        <h1 className="font-poppins text-8xl font-semibold text-black dark:text-white">
+          {statusCode}
+        </h1>
+        <h2 className="font-inter mt-4 text-2xl font-semibold text-black dark:text-white">
+          {title}
+        </h2>
+        <p className="font-inter mt-2 text-lg text-black dark:text-white">{message}</p>
+        <Button
+          onPress={() => router.push('/')}
+          className="font-inter bg-owasp-blue mt-8 h-12 w-40 rounded-lg text-base font-medium text-white transition-colors hover:bg-blue-500 dark:bg-slate-800 dark:hover:bg-slate-700"
+          aria-label="Return to Home"
+        >
+          Return To Home
+        </Button>
       </div>
-    </main>
+    </div>
   )
 }
 
@@ -64,10 +63,14 @@ export class AppError extends Error {
 }
 
 export const handleAppError = (error: unknown) => {
-  const appError =
-    error instanceof AppError
-      ? error
-      : new AppError(500, error instanceof Error ? error.message : ERROR_CONFIGS['500'].message)
+  let appError: AppError
+
+  if (error instanceof AppError) {
+    appError = error
+  } else {
+    const message = error instanceof Error ? error.message : ERROR_CONFIGS['500'].message
+    appError = new AppError(500, message)
+  }
 
   if (appError.statusCode >= 500) {
     Sentry.captureException(error instanceof Error ? error : appError)
@@ -88,19 +91,29 @@ export const handleAppError = (error: unknown) => {
 export const ErrorWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <Sentry.ErrorBoundary
-      fallback={({ error }) => {
-        Sentry.captureException(error)
-        const errorConfig = ERROR_CONFIGS['500']
-        return <ErrorDisplay {...errorConfig} />
-      }}
+      fallback={(props) => <SentryErrorFallback {...props} errorConfig={ERROR_CONFIGS['500']} />}
     >
       {children}
     </Sentry.ErrorBoundary>
   )
 }
 
-export default function GlobalError({ error }: { error: Error }) {
-  Sentry.captureException(error)
+export const SentryErrorFallback: React.FC<{
+  error: unknown
+  errorConfig?: ErrorDisplayProps
+}> = ({ error, errorConfig = ERROR_CONFIGS['500'] }) => {
+  React.useEffect(() => {
+    Sentry.captureException(error instanceof Error ? error : new Error(String(error)))
+  }, [error])
+
+  return <ErrorDisplay {...errorConfig} />
+}
+
+export default function GlobalError({ error }: Readonly<{ error: Error }>) {
+  React.useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
   const errorConfig = ERROR_CONFIGS['500']
   return <ErrorDisplay {...errorConfig} />
 }

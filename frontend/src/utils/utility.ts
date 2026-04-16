@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { FaGlobe } from 'react-icons/fa6'
 import { twMerge } from 'tailwind-merge'
 import { fetchCsrfToken } from 'server/fetchCsrfToken'
 
@@ -22,11 +23,10 @@ type ProjectType = Project | Issue | Committee | Chapter
 export const getFilteredIcons = (project: ProjectType, params: string[]): Icon => {
   const filteredIcons = params.reduce((acc: Icon, key) => {
     if (ICONS[key as IconKeys] && project[key as keyof typeof project] !== undefined) {
-      if (key === 'createdAt') {
-        acc[key] = dayjs.unix(project[key as keyof ProjectType] as unknown as number).fromNow()
-      } else {
-        acc[key] = project[key as keyof typeof project] as unknown as number
-      }
+      acc[key] =
+        key === 'createdAt' || key === 'updatedAt'
+          ? dayjs(project[key as keyof ProjectType]).fromNow()
+          : (project[key as keyof typeof project] as unknown as number)
     }
     return acc
   }, {})
@@ -40,7 +40,7 @@ export const handleSocialUrls = (relatedUrls: string[]) => {
 
     return match
       ? { title: match.title, icon: match.icon, url }
-      : { title: 'Social Links', icon: 'fa-solid fa-globe', url }
+      : { title: 'Social Links', icon: FaGlobe, url }
   })
 }
 

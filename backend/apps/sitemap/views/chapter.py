@@ -10,8 +10,13 @@ class ChapterSitemap(BaseSitemap):
     change_frequency = "weekly"
     prefix = "/chapters"
 
-    def items(self):
-        """Return list of chapters for sitemap generation."""
+    def items(self) -> list[Chapter]:
+        """Return chapters for sitemap generation.
+
+        Returns:
+            list: List of indexable Chapter objects ordered by update/creation date.
+
+        """
         return [
             c
             for c in Chapter.active_chapters.order_by(

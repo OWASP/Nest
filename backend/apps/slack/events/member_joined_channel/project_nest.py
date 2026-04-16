@@ -39,19 +39,3 @@ class ProjectNest(EventBase):
             f"{convert_to_snake_case(self.__class__.__name__)}/"
             "ephemeral_message.jinja"
         )
-
-    def get_context(self, event):
-        """Get the template context.
-
-        Args:
-            event: The Slack event
-
-        Returns:
-            dict: The template context.
-
-        """
-        return {
-            **super().get_context(event),
-            "PROJECT_NEST_CHANNEL_ID": OWASP_PROJECT_NEST_CHANNEL_ID,
-            "PROJECT_NEST_CHANNEL_NAME": "project-nest",
-        }

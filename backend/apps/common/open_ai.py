@@ -81,10 +81,6 @@ class OpenAi:
         Returns
             str: The response content.
 
-        Raises
-            openai.APIConnectionError: If a connection error occurs.
-            Exception: For other errors during the API request.
-
         """
         try:
             response = self.client.chat.completions.create(
@@ -98,8 +94,27 @@ class OpenAi:
             )
 
             return response.choices[0].message.content
+        except openai.AuthenticationError:
+            logger.exception(
+                "OpenAI authentication failed: invalid or missing API key. "
+                "Verify DJANGO_OPEN_AI_SECRET_KEY is set and valid."
+            )
+        except openai.RateLimitError as e:
+            logger.warning(
+                "OpenAI rate limit exceeded: %s. Request may be retried with backoff.",
+                e,
+            )
+        except openai.BadRequestError:
+            logger.exception(
+                "OpenAI invalid request. Check model name, message format, and input size."
+            )
         except openai.APIConnectionError:
-            logger.exception("A connection error occurred during OpenAI API request.")
-        except Exception:
-            logger.exception("An error occurred during OpenAI API request.")
+            logger.exception(
+                "OpenAI connection failed. Check network connectivity and firewall/proxy settings."
+            )
+        except Exception as e:
+            logger.exception(
+                "Unexpected OpenAI API error: %s",
+                type(e).__name__,
+            )
         return None

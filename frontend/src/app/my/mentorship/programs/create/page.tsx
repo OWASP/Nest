@@ -1,13 +1,14 @@
 'use client'
-
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import React, { useEffect, useState } from 'react'
 
-import { CREATE_PROGRAM } from 'server/mutations/programsMutations'
+import { CreateProgramDocument } from 'types/__generated__/programsMutations.generated'
+import { GetMyProgramsDocument } from 'types/__generated__/programsQueries.generated'
 import { ExtendedSession } from 'types/auth'
+import { extractGraphQLErrors } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -15,16 +16,16 @@ import ProgramForm from 'components/ProgramForm'
 const CreateProgramPage = () => {
   const router = useRouter()
   const { data: session, status } = useSession()
-  const isProjectLeader = (session as ExtendedSession)?.user.isLeader
+  const isProjectLeader = (session as ExtendedSession | undefined)?.user?.isLeader
 
   const [redirected, setRedirected] = useState(false)
 
-  const [createProgram, { loading }] = useMutation(CREATE_PROGRAM)
+  const [createProgram, { loading }] = useMutation(CreateProgramDocument)
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    menteesLimit: 5,
+    menteesLimit: 0,
     startedAt: '',
     endedAt: '',
     tags: '',
@@ -62,7 +63,11 @@ const CreateProgramPage = () => {
         domains: parseCommaSeparated(formData.domains),
       }
 
-      await createProgram({ variables: { input } })
+      await createProgram({
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: GetMyProgramsDocument }],
+        variables: { input },
+      })
 
       addToast({
         description: 'Program created successfully!',
@@ -75,14 +80,19 @@ const CreateProgramPage = () => {
 
       router.push('/my/mentorship')
     } catch (err) {
-      addToast({
-        description: err?.message || 'Unable to complete the requested operation.',
-        title: 'GraphQL Request Failed',
-        timeout: 3000,
-        shouldShowTimeoutProgress: true,
-        color: 'danger',
-        variant: 'solid',
-      })
+      const { hasValidationErrors } = extractGraphQLErrors(err)
+      if (!hasValidationErrors) {
+        addToast({
+          description:
+            err instanceof Error ? err.message : 'Unable to complete the requested operation.',
+          title: 'GraphQL Request Failed',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'danger',
+          variant: 'solid',
+        })
+      }
+      throw err
     }
   }
 

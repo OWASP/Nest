@@ -1,5 +1,5 @@
+import mockProjectData from '@mockData/mockProjectData'
 import { waitFor, screen, fireEvent } from '@testing-library/react'
-import mockProjectData from '@unit/data/mockProjectData'
 import { useRouter } from 'next/navigation'
 import { render } from 'wrappers/testUtil'
 import ProjectsPage from 'app/projects/page'
@@ -27,10 +27,6 @@ jest.mock('components/Pagination', () =>
     </div>
   ))
 )
-jest.mock('wrappers/FontAwesomeIconWrapper', () => ({
-  __esModule: true,
-  default: () => <span data-testid="mock-icon" />,
-}))
 
 jest.mock('@/components/MarkdownWrapper', () => {
   return ({ content, className }: { content: string; className?: string }) => (
@@ -79,7 +75,14 @@ describe('ProjectPage Component', () => {
       expect(screen.queryByText('Next Page')).not.toBeInTheDocument()
     })
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Search for projects...')).toBeInTheDocument()
+      const searchInputs = screen.getAllByPlaceholderText('Search for projects...')
+      const visibleInput = searchInputs.find((input) => {
+        const closest =
+          input.closest(String.raw`.md\:hidden`) || input.closest(String.raw`.md\:flex`)
+        return closest ? globalThis.getComputedStyle(closest).display !== 'none' : true
+      })
+      expect(visibleInput).toBeDefined()
+      expect(visibleInput).toBeVisible()
       expect(screen.getByText('Project 1')).toBeInTheDocument()
       expect(screen.getByText('Next Page')).toBeInTheDocument()
     })
@@ -149,12 +152,50 @@ describe('ProjectPage Component', () => {
       const detailLinks = screen.getAllByRole('button', { name: /View Details/i })
       expect(detailLinks.length).toBeGreaterThan(0)
 
-      detailLinks.forEach((link, index) => {
+      for (const [index, link] of detailLinks.entries()) {
         fireEvent.click(link)
         expect(mockRouter.push).toHaveBeenCalledWith(`/projects/project_${index + 1}`)
-      })
+      }
     })
 
     jest.restoreAllMocks()
+  })
+
+  test('handles project with null key gracefully', async () => {
+    const projectWithNullKey = {
+      ...mockProjectData.projects[0],
+      key: null,
+      name: 'Project Without Key',
+      isActive: true,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [projectWithNullKey],
+      totalPages: 1,
+    })
+
+    render(<ProjectsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Project Without Key')).toBeInTheDocument()
+    })
+  })
+
+  test('handles project with null summary gracefully', async () => {
+    const projectWithNullSummary = {
+      ...mockProjectData.projects[0],
+      summary: null,
+      name: 'Project Without Summary',
+      isActive: true,
+    }
+    ;(fetchAlgoliaData as jest.Mock).mockResolvedValue({
+      hits: [projectWithNullSummary],
+      totalPages: 1,
+    })
+
+    render(<ProjectsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Project Without Summary')).toBeInTheDocument()
+    })
   })
 })

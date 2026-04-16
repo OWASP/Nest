@@ -2,20 +2,36 @@
 
 from typing import Literal
 
-from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
-from ninja import Field, FilterSchema, Query, Router, Schema
+from ninja import Field, FilterSchema, Query, Schema
 from ninja.decorators import decorate_view
-from ninja.pagination import PageNumberPagination, paginate
+from ninja.pagination import RouterPaginated
 
-from apps.github.models.label import Label
+from apps.api.decorators.cache import cache_response
+from apps.github.models.label import Label as LabelModel
 
-router = Router()
+router = RouterPaginated(tags=["Labels"])
 
 
-class LabelFilterSchema(FilterSchema):
-    """Filter schema for Label."""
+class LabelBase(Schema):
+    """Base schema for Label (used in list endpoints)."""
+
+    color: str
+    name: str
+
+
+class Label(LabelBase):
+    """Schema for Label (minimal fields for list display)."""
+
+
+class LabelDetail(LabelBase):
+    """Detail schema for Label (used in single item endpoints)."""
+
+    description: str
+
+
+class LabelFilter(FilterSchema):
+    """Filter for Label."""
 
     color: str | None = Field(
         None,
@@ -24,35 +40,25 @@ class LabelFilterSchema(FilterSchema):
     )
 
 
-class LabelSchema(Schema):
-    """Schema for Label."""
-
-    color: str
-    description: str
-    name: str
-
-
 @router.get(
     "/",
     description="Retrieve a paginated list of GitHub labels.",
     operation_id="list_labels",
-    response={200: list[LabelSchema]},
+    response=list[Label],
     summary="List labels",
-    tags=["Labels"],
 )
-@decorate_view(cache_page(settings.API_CACHE_TIME_SECONDS))
-@paginate(PageNumberPagination, page_size=settings.API_PAGE_SIZE)
+@decorate_view(cache_response())
 def list_label(
     request: HttpRequest,
-    filters: LabelFilterSchema = Query(...),
+    filters: LabelFilter = Query(...),
     ordering: Literal["nest_created_at", "-nest_created_at", "nest_updated_at", "-nest_updated_at"]
     | None = Query(
         None,
         description="Ordering field",
     ),
-) -> list[LabelSchema]:
+) -> list[Label]:
     """Get all labels."""
-    labels = filters.filter(Label.objects.all())
+    labels = filters.filter(LabelModel.objects.all())
 
     if ordering:
         labels = labels.order_by(ordering)

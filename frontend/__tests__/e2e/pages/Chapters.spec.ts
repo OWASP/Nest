@@ -1,6 +1,6 @@
 import { expectBreadCrumbsToBeVisible } from '@e2e/helpers/expects'
+import { mockChapterData } from '@mockData/mockChapterData'
 import { test, expect } from '@playwright/test'
-import { mockChapterData } from '@unit/data/mockChapterData'
 
 test.describe('Chapters Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,19 +13,11 @@ test.describe('Chapters Page', () => {
         }),
       })
     })
-    await page.context().addCookies([
-      {
-        name: 'csrftoken',
-        value: 'abc123',
-        domain: 'localhost',
-        path: '/',
-      },
-    ])
-    await page.goto('/chapters')
+    await page.goto('/chapters', { timeout: 25000 })
   })
 
   test('renders chapter data correctly', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'Chapter 1' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Chapter 1' })).toBeVisible({ timeout: 10000 })
     await expect(page.getByText('This is a summary of Chapter')).toBeVisible()
     await expect(page.getByRole('link', { name: "Isanori Sakanashi's avatar" })).toBeVisible()
     await expect(page.getByRole('button', { name: 'View Details' })).toBeVisible()
@@ -43,14 +35,14 @@ test.describe('Chapters Page', () => {
   })
 
   test('handles page change correctly', async ({ page }) => {
-    const nextPageButton = await page.getByRole('button', { name: '2' })
-    await nextPageButton.waitFor({ state: 'visible' }) // Ensure button is visible
+    const nextPageButton = page.getByRole('button', { name: '2' })
+    await nextPageButton.waitFor({ state: 'visible' })
     await nextPageButton.click()
     await expect(page).toHaveURL(/page=2/)
   })
 
   test('opens window on View Details button click', async ({ page }) => {
-    const contributeButton = await page.getByRole('button', { name: 'View Details' })
+    const contributeButton = page.getByRole('button', { name: 'View Details' })
     await contributeButton.waitFor({ state: 'visible' })
     await contributeButton.click()
     await expect(page).toHaveURL('chapters/chapter_1')

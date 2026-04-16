@@ -4,24 +4,7 @@
  */
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { ReactNode } from 'react'
-import { footerSections, footerIcons } from 'utils/constants'
-import Footer from 'components/Footer'
-
-// Define proper types for mock props
-interface MockLinkProps {
-  children: ReactNode
-  href: string
-  target?: string
-  rel?: string
-  className?: string
-  'aria-label'?: string
-}
-
-interface MockFontAwesomeIconProps {
-  icon: unknown
-  className?: string
-}
+import React, { ReactNode } from 'react'
 
 interface MockButtonProps {
   children: ReactNode
@@ -31,24 +14,6 @@ interface MockButtonProps {
   'aria-expanded'?: boolean
   'aria-controls'?: string
 }
-
-jest.mock('next/link', () => {
-  return function MockedLink({ children, href, ...props }: MockLinkProps) {
-    return (
-      <a href={href} {...props}>
-        {children}
-      </a>
-    )
-  }
-})
-
-jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: ({ icon, className }: MockFontAwesomeIconProps) => (
-    <span data-testid="font-awesome-icon" className={className}>
-      {typeof icon === 'string' ? icon : JSON.stringify(icon)}
-    </span>
-  ),
-}))
 
 jest.mock('@heroui/button', () => ({
   Button: ({ children, onPress, className, disableAnimation, ...props }: MockButtonProps) => (
@@ -63,6 +28,17 @@ jest.mock('@heroui/button', () => ({
   ),
 }))
 
+jest.mock('react-icons/fa6', () => ({
+  FaGithub: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="github-icon" {...props} />,
+  FaSlack: (props: React.SVGProps<SVGSVGElement>) => <svg data-testid="slack-icon" {...props} />,
+  FaChevronDown: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-down" {...props} />
+  ),
+  FaChevronUp: (props: React.SVGProps<SVGSVGElement>) => (
+    <svg data-testid="chevron-up" {...props} />
+  ),
+}))
+
 jest.mock('utils/constants', () => ({
   footerSections: [
     {
@@ -70,6 +46,7 @@ jest.mock('utils/constants', () => ({
       links: [
         { text: 'About', href: '/about' },
         { text: 'Contribute', href: 'https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md' },
+        { text: 'Empty Href Link', href: '' }, // Empty href to test fallback
       ],
     },
     {
@@ -83,22 +60,37 @@ jest.mock('utils/constants', () => ({
   ],
   footerIcons: [
     {
-      icon: 'faGithub',
+      icon: 'FA_GITHUB_PLACEHOLDER',
       href: 'https://github.com/owasp/nest',
       label: 'GitHub',
     },
     {
-      icon: 'faSlack',
+      icon: 'FA_SLACK_PLACEHOLDER',
       href: 'https://owasp.slack.com/archives/project-nest',
       label: 'Slack',
     },
   ],
 }))
 
-jest.mock('utils/env.client', () => ({
+let mockEnv = {
   ENVIRONMENT: 'production',
   RELEASE_VERSION: '1.2.3',
+}
+
+jest.mock('utils/env.client', () => ({
+  get ENVIRONMENT() {
+    return mockEnv.ENVIRONMENT
+  },
+  get RELEASE_VERSION() {
+    return mockEnv.RELEASE_VERSION
+  },
 }))
+
+import { FaGithub, FaSlack } from 'react-icons/fa6'
+import { footerSections, footerIcons } from 'utils/constants'
+import Footer from 'components/Footer'
+;(footerIcons as unknown)[0].icon = FaGithub
+;(footerIcons as unknown)[1].icon = FaSlack
 
 describe('Footer', () => {
   // Use the imported mocked constants
@@ -111,6 +103,10 @@ describe('Footer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockEnv = {
+      ENVIRONMENT: 'production',
+      RELEASE_VERSION: '1.2.3',
+    }
   })
 
   afterEach(() => {
@@ -130,9 +126,9 @@ describe('Footer', () => {
     test('renders all footer sections with correct titles', () => {
       renderFooter()
 
-      mockFooterSections.forEach((section) => {
+      for (const section of mockFooterSections) {
         expect(screen.getByText(section.title)).toBeInTheDocument()
-      })
+      }
     })
 
     test('renders all section links correctly', () => {
@@ -150,31 +146,63 @@ describe('Footer', () => {
           }
         }
       }
-      regularLinks.forEach((link) => {
+
+      const externalLinks = regularLinks.filter((link) => (link.href || '/').startsWith('http'))
+      const internalLinks = regularLinks.filter((link) => !(link.href || '/').startsWith('http'))
+
+      for (const link of regularLinks) {
         const linkElement = screen.getByRole('link', { name: link.text })
         expect(linkElement).toBeInTheDocument()
-        expect(linkElement).toHaveAttribute('href', link.href)
-        expect(linkElement).toHaveAttribute('target', '_blank')
-      })
+        const expectedHref = link.href || '/'
+        expect(linkElement).toHaveAttribute('href', expectedHref)
+      }
 
-      spanElements.forEach((link) => {
+      for (const link of externalLinks) {
+        const linkElement = screen.getByRole('link', { name: link.text })
+        expect(linkElement).toHaveAttribute('target', '_blank')
+        expect(linkElement).toHaveAttribute('rel', 'noopener noreferrer')
+      }
+
+      for (const link of internalLinks) {
+        const linkElement = screen.getByRole('link', { name: link.text })
+        expect(linkElement).not.toHaveAttribute('target')
+      }
+
+      for (const link of spanElements) {
         expect(screen.getByText(link.text)).toBeInTheDocument()
-      })
+      }
     })
 
     test('renders social media icons with correct attributes', () => {
       renderFooter()
 
-      mockFooterIcons.forEach((icon) => {
+      // Test GitHub icon
+      const githubLink = screen.getByLabelText('OWASP Nest GitHub')
+      expect(githubLink).toBeInTheDocument()
+      expect(githubLink).toHaveAttribute('href', 'https://github.com/owasp/nest')
+      expect(githubLink).toHaveAttribute('target', '_blank')
+      expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(githubLink.querySelector('[data-testid="github-icon"]')).toBeInTheDocument()
+
+      // Test Slack icon
+      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      expect(slackLink).toBeInTheDocument()
+      expect(slackLink).toHaveAttribute('href', 'https://owasp.slack.com/archives/project-nest')
+      expect(slackLink).toHaveAttribute('target', '_blank')
+      expect(slackLink).toHaveAttribute('rel', 'noopener noreferrer')
+      expect(slackLink.querySelector('[data-testid="slack-icon"]')).toBeInTheDocument()
+
+      // Test that all icons have basic attributes
+      for (const icon of mockFooterIcons) {
         const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
         expect(link).toBeInTheDocument()
         expect(link).toHaveAttribute('href', icon.href)
         expect(link).toHaveAttribute('target', '_blank')
         expect(link).toHaveAttribute('rel', 'noopener noreferrer')
 
-        const iconElement = link.querySelector('[data-testid="font-awesome-icon"]')
+        const iconElement = link.querySelector('svg')
         expect(iconElement).toBeInTheDocument()
-      })
+      }
     })
 
     test('renders copyright information with current year', () => {
@@ -219,12 +247,22 @@ describe('Footer', () => {
       const firstSection = mockFooterSections[0]
       const button = screen.getByRole('button', { name: new RegExp(firstSection.title) })
 
-      let chevronIcons = button.querySelectorAll('[data-testid="font-awesome-icon"]')
-      expect(chevronIcons).toHaveLength(1)
+      // Initial state - should show chevron down (collapsed)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+      expect(button.querySelector('[data-testid="chevron-down"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-up"]')).not.toBeInTheDocument()
 
+      // Click to expand - should show chevron up
       fireEvent.click(button)
-      chevronIcons = button.querySelectorAll('[data-testid="font-awesome-icon"]')
-      expect(chevronIcons).toHaveLength(1)
+      expect(button).toHaveAttribute('aria-expanded', 'true')
+      expect(button.querySelector('[data-testid="chevron-up"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-down"]')).not.toBeInTheDocument()
+
+      // Click to collapse - should show chevron down again
+      fireEvent.click(button)
+      expect(button).toHaveAttribute('aria-expanded', 'false')
+      expect(button.querySelector('[data-testid="chevron-down"]')).toBeInTheDocument()
+      expect(button.querySelector('[data-testid="chevron-up"]')).not.toBeInTheDocument()
     })
 
     test('handles multiple section toggles independently', () => {
@@ -257,6 +295,23 @@ describe('Footer', () => {
       expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
 
+    test('renders version as commit link in non-production environment', () => {
+      mockEnv.ENVIRONMENT = 'staging'
+      mockEnv.RELEASE_VERSION = '24.2.10-12c25c5'
+
+      renderFooter()
+
+      const versionText = screen.getByText('v24.2.10-12c25c5')
+      const versionLink = versionText.closest('a')
+      expect(versionLink).toBeInTheDocument()
+      expect(versionLink).toHaveAttribute('href', 'https://github.com/OWASP/Nest/commit/12c25c5')
+      expect(versionLink).toHaveAttribute('target', '_blank')
+      expect(versionLink).toHaveAttribute('rel', 'noopener noreferrer')
+
+      mockEnv.ENVIRONMENT = 'production'
+      mockEnv.RELEASE_VERSION = '1.2.3'
+    })
+
     test('handles span elements correctly', () => {
       renderFooter()
 
@@ -271,20 +326,21 @@ describe('Footer', () => {
       renderFooter()
 
       const buttons = screen.getAllByRole('button')
-      buttons.forEach((button, index) => {
+
+      for (const [index, button] of buttons.entries()) {
         const sectionTitle = mockFooterSections[index].title
         expect(button).toHaveAttribute('aria-controls', `footer-section-${sectionTitle}`)
         expect(button).toHaveAttribute('aria-expanded')
-      })
+      }
     })
 
     test('has correct section IDs matching aria-controls', () => {
       renderFooter()
 
-      mockFooterSections.forEach((section) => {
+      for (const section of mockFooterSections) {
         const sectionElement = document.getElementById(`footer-section-${section.title}`)
         expect(sectionElement).toBeInTheDocument()
-      })
+      }
     })
 
     test('has proper semantic structure', () => {
@@ -292,19 +348,18 @@ describe('Footer', () => {
 
       expect(screen.getByRole('contentinfo')).toBeInTheDocument()
 
-      mockFooterSections.forEach((section) => {
+      for (const section of mockFooterSections) {
         const heading = screen.getByRole('heading', { name: section.title, level: 3 })
         expect(heading).toBeInTheDocument()
-      })
+      }
     })
 
     test('has proper aria-labels for social media links', () => {
       renderFooter()
-
-      mockFooterIcons.forEach((icon) => {
+      for (const icon of mockFooterIcons) {
         const link = screen.getByLabelText(`OWASP Nest ${icon.label}`)
         expect(link).toBeInTheDocument()
-      })
+      }
     })
   })
 
@@ -327,7 +382,7 @@ describe('Footer', () => {
       renderFooter()
 
       const footer = screen.getByRole('contentinfo')
-      const gridContainer = footer.querySelector('.grid.w-full.sm\\:grid-cols-2')
+      const gridContainer = footer.querySelector(String.raw`.grid.w-full.sm\:grid-cols-2`)
       expect(gridContainer).toBeInTheDocument()
     })
 
@@ -335,10 +390,10 @@ describe('Footer', () => {
       renderFooter()
 
       const buttons = screen.getAllByRole('button')
-      buttons.forEach((button) => {
+      for (const button of buttons) {
         expect(button).toHaveClass('flex', 'w-full', 'items-center', 'justify-between')
         expect(button).toHaveAttribute('data-disable-animation', 'true')
-      })
+      }
     })
 
     test('applies correct section content classes for collapsed/expanded states', () => {
@@ -360,12 +415,96 @@ describe('Footer', () => {
       expect(aboutLink).toHaveAttribute('href', '/about')
     })
 
+    test('handles empty href with fallback to root path', () => {
+      renderFooter()
+
+      const emptyHrefLink = screen.getByRole('link', { name: 'Empty Href Link' })
+      expect(emptyHrefLink).toHaveAttribute('href', '/')
+    })
+
     test('handles sections with span elements', () => {
       renderFooter()
 
       const spanElement = screen.getByText('Plain Text')
       expect(spanElement.tagName).toBe('SPAN')
       expect(spanElement.closest('a')).toBeNull()
+    })
+  })
+
+  describe('Logos Section', () => {
+    test('renders both Nest and OWASP logos', () => {
+      renderFooter()
+
+      const nestLogo = screen.getByAltText('Nest Logo')
+      const owaspLogo = screen.getByAltText('OWASP Logo')
+
+      expect(nestLogo).toBeInTheDocument()
+      expect(owaspLogo).toBeInTheDocument()
+    })
+
+    test('renders logos with correct image sources', () => {
+      renderFooter()
+
+      const nestLogo = screen.getByAltText('Nest Logo') as HTMLImageElement
+      const owaspLogo = screen.getByAltText('OWASP Logo') as HTMLImageElement
+
+      expect(nestLogo.src).toMatch(/\/img\/logo_(light|dark)\.png/)
+      expect(owaspLogo.src).toContain('/img/OWASP_logo.svg')
+    })
+
+    test('renders Nest text next to Nest logo', () => {
+      renderFooter()
+
+      expect(screen.getByText('Nest')).toBeInTheDocument()
+
+      const nestText = screen.getByText('Nest')
+      expect(nestText).toHaveClass('text-lg', 'font-semibold')
+    })
+
+    test('renders vertical separator between logos', () => {
+      renderFooter()
+
+      const footer = screen.getByRole('contentinfo')
+      const separator = footer.querySelector('.h-8.w-px')
+
+      expect(separator).toBeInTheDocument()
+    })
+
+    test('OWASP logo has dark mode invert class', () => {
+      renderFooter()
+
+      const owaspLogo = screen.getByAltText('OWASP Logo')
+      expect(owaspLogo).toHaveClass('dark:invert')
+    })
+
+    test('logos section has proper accessibility attributes', () => {
+      renderFooter()
+
+      const nestLogo = screen.getByAltText('Nest Logo')
+      const owaspLogo = screen.getByAltText('OWASP Logo')
+
+      expect(nestLogo).toHaveAttribute('alt', 'Nest Logo')
+      expect(owaspLogo).toHaveAttribute('alt', 'OWASP Logo')
+    })
+
+    test('Nest logo links to home', () => {
+      renderFooter()
+
+      const nestLink = screen.getByLabelText('Nest home')
+      expect(nestLink).toBeInTheDocument()
+      expect(nestLink).toHaveAttribute('href', '/')
+      expect(nestLink).not.toHaveAttribute('target')
+      expect(nestLink).not.toHaveAttribute('rel')
+    })
+
+    test('OWASP logo links to owasp.org', () => {
+      renderFooter()
+
+      const owaspLink = screen.getByLabelText('OWASP Foundation')
+      expect(owaspLink).toBeInTheDocument()
+      expect(owaspLink).toHaveAttribute('href', 'https://owasp.org/')
+      expect(owaspLink).toHaveAttribute('target', '_blank')
+      expect(owaspLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
   })
 
@@ -376,14 +515,19 @@ describe('Footer', () => {
       const links = screen.getAllByRole('link')
       expect(links.length).toBeGreaterThan(0)
 
-      const icons = screen.getAllByTestId('font-awesome-icon')
-      expect(icons.length).toBeGreaterThan(0)
+      const socialLinks = screen.getByLabelText('OWASP Nest GitHub')
+      const svgIcon = socialLinks.querySelector('svg')
+      expect(svgIcon).toBeInTheDocument()
+
+      const slackLink = screen.getByLabelText('OWASP Nest Slack')
+      const slackSvg = slackLink.querySelector('svg')
+      expect(slackSvg).toBeInTheDocument()
 
       const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBeGreaterThan(0)
-      buttons.forEach((button) => {
+      for (const button of buttons) {
         expect(button).toHaveAttribute('data-disable-animation', 'true')
-      })
+      }
     })
   })
 })

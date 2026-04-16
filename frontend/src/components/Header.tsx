@@ -1,18 +1,20 @@
 'use client'
-import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons'
-import { faStar as faRegularStar } from '@fortawesome/free-regular-svg-icons'
-import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
-import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons'
-import { faStar as faSolidStar } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '@heroui/button'
-import { useIsMobile } from 'hooks/useIsMobile'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import {
+  FaRegHeart,
+  FaRegStar,
+  FaHeart as FaSolidHeart,
+  FaStar as FaSolidStar,
+  FaBars,
+  FaTimes,
+} from 'react-icons/fa'
 import { desktopViewMinWidth, headerLinks } from 'utils/constants'
 import { cn } from 'utils/utility'
+import GlobalSearch from 'components/GlobalSearch'
 import ModeToggle from 'components/ModeToggle'
 import NavButton from 'components/NavButton'
 import NavDropdown from 'components/NavDropDown'
@@ -20,13 +22,12 @@ import UserMenu from 'components/UserMenu'
 
 export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthEnabled: boolean }) {
   const pathname = usePathname()
-  const isMobile = useIsMobile()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= desktopViewMinWidth) {
+      if (globalThis.innerWidth >= desktopViewMinWidth) {
         setMobileMenuOpen(false)
       }
     }
@@ -45,44 +46,42 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
       }
     }
 
-    window.addEventListener('resize', handleResize)
-    window.addEventListener('click', handleOutsideClick)
+    globalThis.addEventListener('resize', handleResize)
+    globalThis.addEventListener('click', handleOutsideClick)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
-      window.removeEventListener('click', handleOutsideClick)
+      globalThis.removeEventListener('resize', handleResize)
+      globalThis.removeEventListener('click', handleOutsideClick)
     }
   }, [mobileMenuOpen])
 
   return (
     <header className="bg-owasp-blue fixed inset-x-0 top-0 z-50 w-full shadow-md dark:bg-slate-800">
-      <div className="flex h-16 w-full items-center px-4 max-md:justify-between" id="navbar-sticky">
+      <div className="flex h-16 w-full items-center px-4 max-lg:justify-between" id="navbar-sticky">
         {/* Logo */}
-        <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+        <Link
+          href="/"
+          onClick={() => setMobileMenuOpen(false)}
+          className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
           <div className="flex h-full items-center">
-            <Image
-              width={64}
-              height={64}
-              priority={true}
-              src={'/img/owasp_icon_white_sm.png'}
-              className="hidden dark:block"
-              alt="OWASP Logo"
-            />
-            <Image
-              width={64}
-              height={64}
-              priority={true}
-              src={'/img/owasp_icon_black_sm.png'}
-              className="block dark:hidden"
-              alt="OWASP Logo"
-            />
-            <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+            <div className="flex h-16 w-16 items-center justify-center py-2">
+              <Image
+                width={64}
+                height={64}
+                priority={true}
+                src={'/img/logo_dark.png'}
+                className="h-full w-auto object-contain"
+                alt="OWASP Logo"
+              />
+            </div>
+            <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
               Nest
             </div>
           </div>
         </Link>
         {/* Desktop Header Links */}
-        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium md:block">
+        <div className="hidden flex-1 justify-between rounded-lg pl-6 font-medium lg:block">
           <div className="flex justify-start pl-6">
             {headerLinks
               .filter((link) => {
@@ -91,18 +90,18 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                 }
                 return true
               })
-              .map((link, i) => {
+              .map((link) => {
                 return link.submenu ? (
-                  <NavDropdown link={link} pathname={pathname} key={i} />
+                  <NavDropdown link={link} pathname={pathname} key={`${link.text}-${link.href}`} />
                 ) : (
                   <Link
                     key={link.text}
                     href={link.href || '/'}
                     className={cn(
-                      'navlink px-3 py-2 text-slate-700 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-200',
+                      'navlink px-3 py-2 text-slate-700 transition-colors duration-200 hover:text-white dark:text-slate-300 dark:hover:text-blue-400',
                       pathname === link.href && 'font-bold text-blue-800 dark:text-white'
                     )}
-                    aria-current="page"
+                    aria-current={pathname === link.href ? 'page' : undefined}
                   >
                     {link.text}
                   </Link>
@@ -110,39 +109,40 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               })}
           </div>
         </div>
-        <div className="flex items-center justify-normal gap-4">
-          <NavButton
-            href="https://github.com/OWASP/Nest"
-            defaultIcon={faRegularStar}
-            hoverIcon={faSolidStar}
-            defaultIconColor="#FDCE2D"
-            hoverIconColor="#FDCE2D"
-            text="Star"
-            className="hidden"
-          />
+        <div className="ml-auto flex items-center justify-normal gap-4 pl-4">
+          <GlobalSearch />
+          <div className="hidden md:flex">
+            <NavButton
+              href="https://github.com/OWASP/Nest"
+              defaultIcon={FaRegStar}
+              hoverIcon={FaSolidStar}
+              defaultIconColor="#FDCE2D"
+              hoverIconColor="#FDCE2D"
+              text="Star"
+            />
+          </div>
 
-          <NavButton
-            href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-            defaultIcon={faRegularHeart}
-            hoverIcon={faSolidHeart}
-            defaultIconColor="#b55f95"
-            hoverIconColor="#d9156c"
-            text="Sponsor"
-            className="hidden"
-          />
-          {!isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
+          <div className="hidden md:flex">
+            <NavButton
+              href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
+              defaultIcon={FaRegHeart}
+              hoverIcon={FaSolidHeart}
+              defaultIconColor="#b55f95"
+              hoverIconColor="#d9156c"
+              text="Sponsor"
+            />
+          </div>
+          <div className="hidden md:flex">
+            <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
+          </div>
           <ModeToggle />
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Button
               onPress={toggleMobileMenu}
-              className="flex h-11 w-11 items-center justify-center bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus:outline-hidden"
+              className="flex h-11 w-11 items-center justify-center rounded-lg bg-transparent text-slate-300 hover:bg-transparent hover:text-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <span className="sr-only">Open main menu</span>
-              {mobileMenuOpen ? (
-                <FontAwesomeIcon icon={faTimes} size="2x" />
-              ) : (
-                <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
-              )}
+              {mobileMenuOpen ? <FaTimes className="h-6 w-6" /> : <FaBars className="h-6 w-6" />}
             </Button>
           </div>
         </div>
@@ -156,25 +156,23 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
         <div className="flex h-full flex-col justify-between gap-1 px-2 pt-2 pb-3">
           {/* Logo */}
           <div className="flex flex-col justify-center gap-5">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
               <div className="flex h-full items-center">
-                <Image
-                  width={64}
-                  height={64}
-                  priority={true}
-                  src={'/img/owasp_icon_white_sm.png'}
-                  className="hidden h-16 dark:block"
-                  alt="OWASP Logo"
-                />
-                <Image
-                  width={64}
-                  height={64}
-                  priority={true}
-                  src={'/img/owasp_icon_black_sm.png'}
-                  className="block h-16 dark:hidden"
-                  alt="OWASP Logo"
-                />
-                <div className="text-2xl text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
+                <div className="flex h-16 w-16 items-center justify-center py-2">
+                  <Image
+                    width={64}
+                    height={64}
+                    priority={true}
+                    src={'/img/logo_dark.png'}
+                    className="h-full w-auto object-contain"
+                    alt="OWASP Logo"
+                  />
+                </div>
+                <div className="text-2xl font-semibold text-slate-800 dark:text-slate-300 dark:hover:text-slate-200">
                   Nest
                 </div>
               </div>
@@ -193,9 +191,9 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
                       {link.text}
                     </div>
                     <div className="ml-4">
-                      {link.submenu.map((sub, i) => (
+                      {link.submenu.map((sub) => (
                         <Link
-                          key={i}
+                          key={`${sub.text}-${sub.href}`}
                           href={sub.href || '/'}
                           className={cn(
                             'block w-full px-4 py-3 text-left text-sm text-slate-700 transition duration-150 ease-in-out first:rounded-t-md last:rounded-b-md hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white',
@@ -225,20 +223,20 @@ export default function Header({ isGitHubAuthEnabled }: { readonly isGitHubAuthE
               )}
           </div>
 
-          <div className="flex flex-col gap-y-2">
-            {isMobile && <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />}
+          <div className="flex flex-col gap-y-2 md:hidden">
+            <UserMenu isGitHubAuthEnabled={isGitHubAuthEnabled} />
             <NavButton
               href="https://github.com/OWASP/Nest"
-              defaultIcon={faRegularStar}
-              hoverIcon={faSolidStar}
+              defaultIcon={FaRegStar}
+              hoverIcon={FaSolidStar}
               defaultIconColor="#FDCE2D"
               hoverIconColor="#FDCE2D"
               text="Star On Github"
             />
             <NavButton
               href="https://owasp.org/donate/?reponame=www-project-nest&title=OWASP+Nest"
-              defaultIcon={faRegularHeart}
-              hoverIcon={faSolidHeart}
+              defaultIcon={FaRegHeart}
+              hoverIcon={FaSolidHeart}
               defaultIconColor="#b55f95"
               hoverIconColor="#d9156c"
               text="Sponsor Us"
