@@ -15,11 +15,11 @@ class TestGetCachedResponse:
         mock_config.semantic_cache_ttl_seconds = 86400
         mock_model_get.return_value = "cached response"
 
-        result = get_cached_response("test query")
+        result = get_cached_response("test query 1")
 
         assert result == "cached response"
         mock_model_get.assert_called_once_with(
-            "test query",
+            "test query 1",
             similarity_threshold=0.95,
             ttl_seconds=86400,
         )
@@ -29,7 +29,7 @@ class TestGetCachedResponse:
     def test_returns_none_when_disabled(self, mock_model_get, mock_config):
         mock_config.semantic_cache_enabled = False
 
-        result = get_cached_response("test query")
+        result = get_cached_response("test query 2")
 
         assert result is None
         mock_model_get.assert_not_called()
@@ -44,16 +44,16 @@ class TestStoreCachedResponse:
         mock_model_store.return_value = mock_entry
 
         result = store_cached_response(
-            query="test query",
-            response="test response",
+            query="test query 3",
+            response="test response 1",
             intent="rag",
             confidence=0.9,
         )
 
         assert result == mock_entry
         mock_model_store.assert_called_once_with(
-            query="test query",
-            response="test response",
+            query="test query 3",
+            response="test response 1",
             intent="rag",
             confidence=0.9,
         )

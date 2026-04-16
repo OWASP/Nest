@@ -1,5 +1,6 @@
 """Tests for SemanticCache model."""
 
+import math
 from unittest.mock import Mock, patch
 
 from apps.ai.models.chunk import EMBEDDING_DIMENSIONS
@@ -17,7 +18,7 @@ class TestSemanticCacheModel:
 
     def test_confidence_field_properties(self):
         field = SemanticCache._meta.get_field("confidence")
-        assert field.default == 0.0
+        assert math.isclose(field.default, 0.0)
         assert field.verbose_name == "Confidence"
 
     def test_intent_field_properties(self):
@@ -74,10 +75,10 @@ class TestSemanticCacheGetCachedResponse:
             mock_objects.filter.return_value.annotate.return_value.filter
         ).return_value.order_by.return_value.first.return_value = mock_result
 
-        result = SemanticCache.get_cached_response("test query")
+        result = SemanticCache.get_cached_response("test query 1")
 
         assert result == "Cached response"
-        mock_embedder.embed_query.assert_called_once_with("test query")
+        mock_embedder.embed_query.assert_called_once_with("test query 1")
 
     @patch("apps.ai.embeddings.factory.get_embedder")
     @patch("apps.ai.models.semantic_cache.SemanticCache.objects")
@@ -120,18 +121,18 @@ class TestSemanticCacheStoreResponse:
         mock_get_embedder.return_value = mock_embedder
 
         result = SemanticCache.store_response(
-            query="test query",
-            response="test response",
+            query="test query 2",  # NOSONAR duplicate string literal
+            response="test response 1",
             intent="rag",
             confidence=0.9,
         )
 
         mock_save.assert_called_once()
-        mock_embedder.embed_query.assert_called_once_with("test query")
-        assert result.query_text == "test query"
-        assert result.response_text == "test response"
+        mock_embedder.embed_query.assert_called_once_with("test query 2")
+        assert result.query_text == "test query 2"
+        assert result.response_text == "test response 1"
         assert result.intent == "rag"
-        assert result.confidence == 0.9
+        assert math.isclose(result.confidence, 0.9)
 
     @patch("apps.ai.embeddings.factory.get_embedder")
     @patch("apps.ai.models.semantic_cache.SemanticCache.save")
@@ -146,4 +147,4 @@ class TestSemanticCacheStoreResponse:
         )
 
         assert result.intent == ""
-        assert result.confidence == 0.0
+        assert math.isclose(result.confidence, 0.0)

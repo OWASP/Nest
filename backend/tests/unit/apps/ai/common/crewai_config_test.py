@@ -1,5 +1,7 @@
 """Tests for CrewAI configuration."""
 
+import math
+
 from apps.ai.common.crewai_config import CrewAIConfig
 
 
@@ -8,7 +10,7 @@ class TestCrewAIConfig:
         config = CrewAIConfig()
 
         assert config.semantic_cache_enabled is True
-        assert config.semantic_cache_similarity_threshold == 0.95
+        assert math.isclose(config.semantic_cache_similarity_threshold, 0.95)
         assert config.semantic_cache_ttl_seconds == 86400
 
     def test_custom_values(self):
@@ -19,5 +21,5 @@ class TestCrewAIConfig:
         )
 
         assert config.semantic_cache_enabled is False
-        assert config.semantic_cache_similarity_threshold == 0.8
+        assert math.isclose(config.semantic_cache_similarity_threshold, 0.8)
         assert config.semantic_cache_ttl_seconds == 3600
