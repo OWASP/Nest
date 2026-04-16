@@ -138,3 +138,130 @@ def test_low_confidence_rag_triggers_clarification_when_policy_removed(
     mock_create_clarify.assert_called_once()
     mock_execute_task.assert_called_once_with(clarification_agent, "Is this covered by OWASP?")
     assert res == "Clarify: please specify 'this'"
+
+
+class TestCache:
+    @patch("apps.ai.flows.assistant.get_cached_response")
+    def test_cache_hit_returns_early(self, mock_get_cached):
+        """Semantic cache hit should return cached response without routing."""
+        mock_get_cached.return_value = "cached answer"
+
+        result = process_query("What is OWASP?")
+
+        assert result == "cached answer"
+        mock_get_cached.assert_called_once_with("What is OWASP?")
+
+    @patch("apps.ai.flows.assistant.analyze_query")
+    @patch("apps.ai.flows.assistant.route")
+    @patch("apps.ai.flows.assistant.execute_task")
+    @patch("apps.ai.flows.assistant.get_cached_response")
+    def test_cache_miss_proceeds_to_routing(
+        self, mock_get_cached, mock_execute_task, mock_route, mock_analyze_query
+    ):
+        """Cache miss should proceed with normal routing."""
+        mock_get_cached.return_value = None
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
+        mock_route.return_value = {"intent": "rag", "confidence": 0.9}
+        mock_execute_task.return_value = "agent response"
+
+        result = process_query("What is OWASP?")
+
+        assert result == "agent response"
+        mock_get_cached.assert_called_once()
+        mock_route.assert_called_once()
+
+    @patch("apps.ai.flows.assistant.analyze_query")
+    @patch("apps.ai.flows.assistant.route")
+    @patch("apps.ai.flows.assistant.execute_task")
+    @patch("apps.ai.flows.assistant.get_cached_response")
+    def test_cache_lookup_exception_proceeds_normally(
+        self, mock_get_cached, mock_execute_task, mock_route, mock_analyze_query
+    ):
+        """Cache lookup failure should log and proceed without crashing."""
+        mock_get_cached.side_effect = Exception("Redis down")
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
+        mock_route.return_value = {"intent": "rag", "confidence": 0.9}
+        mock_execute_task.return_value = "agent response"
+
+        result = process_query("What is OWASP?")
+
+        assert result == "agent response"
+
+    @patch("apps.ai.flows.assistant.store_cached_response")
+    @patch("apps.ai.flows.assistant.analyze_query")
+    @patch("apps.ai.flows.assistant.route")
+    @patch("apps.ai.flows.assistant.execute_task")
+    @patch("apps.ai.flows.assistant.get_cached_response")
+    def test_response_stored_in_cache_after_execution(
+        self,
+        mock_get_cached,
+        mock_execute_task,
+        mock_route,
+        mock_analyze_query,
+        mock_store_cached,
+    ):
+        """Successful agent response should be stored in semantic cache."""
+        mock_get_cached.return_value = None
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
+        mock_route.return_value = {"intent": "rag", "confidence": 0.9}
+        mock_execute_task.return_value = "agent response"
+
+        process_query("What is OWASP?")
+
+        mock_store_cached.assert_called_once_with(
+            query="What is OWASP?",
+            response="agent response",
+            intent="rag",
+            confidence=0.9,
+        )
+
+    @patch("apps.ai.flows.assistant.store_cached_response")
+    @patch("apps.ai.flows.assistant.analyze_query")
+    @patch("apps.ai.flows.assistant.route")
+    @patch("apps.ai.flows.assistant.execute_task")
+    @patch("apps.ai.flows.assistant.get_cached_response")
+    def test_cache_store_failure_still_returns_response(
+        self,
+        mock_get_cached,
+        mock_execute_task,
+        mock_route,
+        mock_analyze_query,
+        mock_store_cached,
+    ):
+        """Cache store exception must not prevent response from being returned."""
+        mock_get_cached.return_value = None
+        mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
+        mock_route.return_value = {"intent": "rag", "confidence": 0.9}
+        mock_execute_task.return_value = "agent response"
+        mock_store_cached.side_effect = Exception("DB write failed")
+
+        result = process_query("What is OWASP?")
+
+        assert result == "agent response"
+
+    @patch("apps.ai.flows.assistant.store_cached_response")
+    @patch("apps.ai.flows.assistant.handle_collaborative_query")
+    @patch("apps.ai.flows.assistant.analyze_query")
+    @patch("apps.ai.flows.assistant.get_cached_response")
+    def test_collaborative_flow_stores_in_cache(
+        self,
+        mock_get_cached,
+        mock_analyze_query,
+        mock_collab,
+        mock_store_cached,
+    ):
+        """Collaborative flow response should be stored in cache."""
+        mock_get_cached.return_value = None
+        mock_analyze_query.return_value = {
+            "is_simple": False,
+            "sub_queries": ["sub1", "sub2"],
+        }
+        mock_collab.return_value = "collaborative response"
+
+        result = process_query("Complex multi-part question")
+
+        assert result == "collaborative response"
+        mock_store_cached.assert_called_once_with(
+            query="Complex multi-part question",
+            response="collaborative response",
+        )
