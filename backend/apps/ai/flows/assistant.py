@@ -280,8 +280,8 @@ def process_query(  # noqa: PLR0911
                         )
                     except Exception:
                         logger.exception(
-                            "Failed to store semantic cache entry"
-                        )  # NOSONAR: duplicate string literal
+                            "Failed to store semantic cache entry"  # NOSONAR
+                        )
                 return response
 
         # Step 2: Analyze query complexity before routing
@@ -310,9 +310,7 @@ def process_query(  # noqa: PLR0911
                             response=response,
                         )
                     except Exception:
-                        logger.exception(
-                            "Failed to store semantic cache entry"
-                        )  # NOSONAR: duplicate string literal
+                        logger.exception("Failed to store semantic cache entry")
                     return response
             except Exception:
                 logger.exception(
@@ -425,9 +423,7 @@ def process_query(  # noqa: PLR0911
                     confidence=confidence,
                 )
             except Exception:
-                logger.exception(
-                    "Failed to store semantic cache entry"
-                )  # NOSONAR: duplicate string literal
+                logger.exception("Failed to store semantic cache entry")
 
     except Exception:
         logger.exception("Failed to process query: %s", query)
