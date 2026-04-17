@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@apollo/client/react'
-import { Pagination } from '@heroui/react'
+import { PaginationRoot, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from '@heroui/react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FC, useState, useEffect, Key } from 'react'
 import { FaFilter, FaArrowDownWideShort, FaArrowUpWideShort } from 'react-icons/fa6'
@@ -277,12 +277,9 @@ const MetricsPage: FC = () => {
               }
               setFilters(newFilters)
               setActiveFilters(
-                Array.from(
-                  newParams
-                    .entries()
+                Array.from(newParams.entries())
                     .filter(([key]) => key != 'order')
                     .map(([, value]) => value)
-                )
               )
               router.replace(`/projects/dashboard/metrics?${newParams.toString()}`)
             }}
@@ -303,33 +300,81 @@ const MetricsPage: FC = () => {
             )}
           </div>
           <div className="mt-4 flex items-center justify-center">
-            <Pagination
-              initialPage={getCurrentPage()}
-              page={getCurrentPage()}
-              total={Math.ceil(metricsLength / PAGINATION_LIMIT)}
-              onChange={async (page) => {
-                const newOffset = (page - 1) * PAGINATION_LIMIT
-                const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
-                setPagination(newPagination)
-                await fetchMore({
-                  variables: {
-                    filters,
-                    pagination: newPagination,
-                    ordering: buildOrderingWithTieBreaker(ordering),
-                  },
-                  updateQuery: (prev, { fetchMoreResult }) => {
-                    if (!fetchMoreResult) return prev
-                    return {
-                      ...prev,
-                      projectHealthMetrics: fetchMoreResult.projectHealthMetrics,
-                    }
-                  },
-                })
-              }}
-              showControls
-              color="warning"
-              className="mt-4"
-            />
+            {Math.ceil(metricsLength / PAGINATION_LIMIT) > 1 && (
+              <PaginationRoot className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      isDisabled={getCurrentPage() <= 1}
+                      onPress={async () => {
+                        const page = getCurrentPage() - 1
+                        const newOffset = (page - 1) * PAGINATION_LIMIT
+                        const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
+                        setPagination(newPagination)
+                        await fetchMore({
+                          variables: {
+                            filters,
+                            pagination: newPagination,
+                            ordering: buildOrderingWithTieBreaker(ordering),
+                          },
+                          updateQuery: (prev, { fetchMoreResult }) => {
+                            if (!fetchMoreResult) return prev
+                            return { ...prev, projectHealthMetrics: fetchMoreResult.projectHealthMetrics }
+                          },
+                        })
+                      }}
+                    >{"←"}</PaginationPrevious>
+                  </PaginationItem>
+                  {Array.from({ length: Math.ceil(metricsLength / PAGINATION_LIMIT) }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        isActive={page === getCurrentPage()}
+                        onPress={async () => {
+                          const newOffset = (page - 1) * PAGINATION_LIMIT
+                          const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
+                          setPagination(newPagination)
+                          await fetchMore({
+                            variables: {
+                              filters,
+                              pagination: newPagination,
+                              ordering: buildOrderingWithTieBreaker(ordering),
+                            },
+                            updateQuery: (prev, { fetchMoreResult }) => {
+                              if (!fetchMoreResult) return prev
+                              return { ...prev, projectHealthMetrics: fetchMoreResult.projectHealthMetrics }
+                            },
+                          })
+                        }}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      isDisabled={getCurrentPage() >= Math.ceil(metricsLength / PAGINATION_LIMIT)}
+                      onPress={async () => {
+                        const page = getCurrentPage() + 1
+                        const newOffset = (page - 1) * PAGINATION_LIMIT
+                        const newPagination = { offset: newOffset, limit: PAGINATION_LIMIT }
+                        setPagination(newPagination)
+                        await fetchMore({
+                          variables: {
+                            filters,
+                            pagination: newPagination,
+                            ordering: buildOrderingWithTieBreaker(ordering),
+                          },
+                          updateQuery: (prev, { fetchMoreResult }) => {
+                            if (!fetchMoreResult) return prev
+                            return { ...prev, projectHealthMetrics: fetchMoreResult.projectHealthMetrics }
+                          },
+                        })
+                      }}
+                    >{"→"}</PaginationNext>
+                  </PaginationItem>
+                </PaginationContent>
+              </PaginationRoot>
+            )}
           </div>
         </>
       )}

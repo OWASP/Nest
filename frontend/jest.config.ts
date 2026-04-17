@@ -41,16 +41,17 @@ const config: Config = {
     '<rootDir>/__tests__/mockData/',
   ],
   transform: {
-    '^.+\\.tsx?$': '@swc/jest',
+    '^.+\\.[jt]sx?$': ['@swc/jest', { module: { type: 'commonjs' } }],
   },
   moduleNameMapper: {
+    '^@heroui/react$': '<rootDir>/__mocks__/@heroui/react.js',
     '^@mockData/(.*)$': '<rootDir>/__tests__/mockData/$1',
     '^@unit/(.*)$': '<rootDir>/__tests__/unit/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(scss|sass|css)$': 'identity-obj-proxy',
   },
   moduleDirectories: ['node_modules', 'src'],
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!@zag-js)'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!@zag-js|@heroui|tailwind-variants)'],
 }
 
 export default config

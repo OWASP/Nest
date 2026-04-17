@@ -102,7 +102,7 @@ describe('EditModulePage', () => {
     expect(await screen.findByDisplayValue('Existing Module')).toBeInTheDocument()
 
     // Modify values
-    fireEvent.change(screen.getByLabelText('Name'), {
+    fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: 'Updated Name' },
     })
     fireEvent.change(screen.getByLabelText(/Description/i), {
@@ -366,7 +366,7 @@ describe('EditModulePage', () => {
 
     expect(await screen.findByDisplayValue('Minimal Module')).toBeInTheDocument()
     // Verify form renders with empty/fallback values for missing optional fields
-    expect(screen.getByLabelText('Name')).toHaveValue('Minimal Module')
+    expect(screen.getByLabelText(/^Name/)).toHaveValue('Minimal Module')
   })
 
   it('renders form without program dates', async () => {
@@ -442,11 +442,11 @@ describe('EditModulePage', () => {
     render(<EditModulePage />)
 
     // Wait for form to load with fallback empty name
-    expect(await screen.findByLabelText('Name')).toHaveValue('')
+    expect(await screen.findByLabelText(/^Name/)).toHaveValue('')
 
     await act(async () => {
       // Fill required fields that aren't dates
-      fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Valid Name' } })
+      fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: 'Valid Name' } })
 
       // Project is already "valid" from mock data (projectId: '123')
       // Dates are null/empty, but we mocked validators to return undefined (valid).
