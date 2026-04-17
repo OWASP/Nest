@@ -141,8 +141,13 @@ def test_low_confidence_rag_triggers_clarification_when_policy_removed(
 
 
 class TestCache:
+    @patch("apps.ai.flows.assistant.execute_task")
+    @patch("apps.ai.flows.assistant.route")
+    @patch("apps.ai.flows.assistant.analyze_query")
     @patch("apps.ai.flows.assistant.get_cached_response")
-    def test_cache_hit_returns_early(self, mock_get_cached):
+    def test_cache_hit_returns_early(
+        self, mock_get_cached, mock_analyze_query, mock_route, mock_execute_task
+    ):
         """Semantic cache hit should return cached response without routing."""
         mock_get_cached.return_value = "cached answer"
 
@@ -150,6 +155,9 @@ class TestCache:
 
         assert result == "cached answer"
         mock_get_cached.assert_called_once_with("What is OWASP?")
+        mock_analyze_query.assert_not_called()
+        mock_route.assert_not_called()
+        mock_execute_task.assert_not_called()
 
     @patch("apps.ai.flows.assistant.analyze_query")
     @patch("apps.ai.flows.assistant.route")
@@ -232,12 +240,18 @@ class TestCache:
         mock_get_cached.return_value = None
         mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_route.return_value = {"intent": "rag", "confidence": 0.9}
-        mock_execute_task.return_value = "agent response"
+        mock_execute_task.return_value = "agent response"  # NOSONAR duplicate string literal
         mock_store_cached.side_effect = Exception("DB write failed")
 
         result = process_query("What is OWASP?")
 
         assert result == "agent response"
+        mock_store_cached.assert_called_once_with(
+            query="What is OWASP?",
+            response="agent response",
+            intent="rag",
+            confidence=0.9,
+        )
 
     @patch("apps.ai.flows.assistant.store_cached_response")
     @patch("apps.ai.flows.assistant.handle_collaborative_query")
@@ -265,3 +279,32 @@ class TestCache:
             query="Complex multi-part question",
             response="collaborative response",
         )
+
+    @patch("apps.ai.flows.assistant.get_cached_response")
+    @patch("apps.ai.flows.assistant.create_channel_agent")
+    @patch("apps.ai.flows.assistant.execute_task")
+    def test_cache_skipped_for_community_channel(
+        self, mock_execute_task, mock_create_channel, mock_get_cached
+    ):
+        """Cache lookup should be skipped for owasp-community channel queries."""
+        mock_create_channel.return_value = MagicMock()
+        mock_execute_task.return_value = "channel response 5"
+
+        result = process_query("How to contribute?", channel_id="C09HQJ5LAA0")
+
+        assert result == "channel response 5"
+        mock_get_cached.assert_not_called()
+
+    @patch("apps.ai.flows.assistant.store_cached_response")
+    @patch("apps.ai.flows.assistant.create_channel_agent")
+    @patch("apps.ai.flows.assistant.execute_task")
+    def test_community_channel_response_not_cached(
+        self, mock_execute_task, mock_create_channel, mock_store_cached
+    ):
+        """Community channel responses should not be stored in cache."""
+        mock_create_channel.return_value = MagicMock()
+        mock_execute_task.return_value = "channel response"
+
+        process_query("How to contribute?", channel_id="C09HQJ5LAA0")
+
+        mock_store_cached.assert_not_called()

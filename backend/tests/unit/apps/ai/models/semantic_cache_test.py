@@ -111,6 +111,11 @@ class TestSemanticCacheGetCachedResponse:
         mock_objects.filter.assert_called_once()
         mock_embedder.embed_query.assert_called_once_with("test")
 
+        second_filter = mock_objects.filter.return_value.annotate.return_value.filter
+        second_filter.assert_called_once()
+        filter_kwargs = second_filter.call_args[1]
+        assert math.isclose(filter_kwargs["distance__lte"], 0.2)
+
 
 class TestSemanticCacheStoreResponse:
     @patch("apps.ai.embeddings.factory.get_embedder")

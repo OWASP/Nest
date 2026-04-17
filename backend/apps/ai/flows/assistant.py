@@ -78,13 +78,6 @@ def process_query(  # noqa: PLR0911
             if image_context:
                 query = f"{query}{DELIMITER}Image context: {image_context}"
 
-        # Step 0: Check semantic cache
-        try:
-            if (cached := get_cached_response(query)) is not None:
-                return cached
-        except Exception:
-            logger.exception("Semantic cache lookup failed, proceeding without cache")
-
         # Step 1: Handle queries in owasp-community channel - suggest channels
         # If query is in owasp-community channel, ALWAYS route to community agent
         # for channel suggestions regardless of intent
@@ -266,23 +259,19 @@ def process_query(  # noqa: PLR0911
                     extra={"query": query[:200]},
                 )
                 channel_agent = create_channel_agent()
-                response = execute_task(
+                return execute_task(
                     channel_agent,
                     query,
                     channel_id=channel_id,
                     is_channel_suggestion=True,
                 )
-                if response:
-                    try:
-                        store_cached_response(
-                            query=query,
-                            response=response,
-                        )
-                    except Exception:
-                        logger.exception(
-                            "Failed to store semantic cache entry"  # NOSONAR
-                        )
-                return response
+
+        # Check semantic cache
+        try:
+            if (cached := get_cached_response(query)) is not None:
+                return cached
+        except Exception:
+            logger.exception("Semantic cache lookup failed, proceeding without cache")
 
         # Step 2: Analyze query complexity before routing
         try:
