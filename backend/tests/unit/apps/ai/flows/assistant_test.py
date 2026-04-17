@@ -2,7 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
-from apps.ai.flows.assistant import process_query
+from apps.ai.flows.assistant import normalize_channel_id, process_query
+from apps.slack.constants import OWASP_COMMUNITY_CHANNEL_ID
 
 
 class TestProcessQueryImageEnrichment:
@@ -280,31 +281,39 @@ class TestCache:
             response="collaborative response",
         )
 
+    @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.get_cached_response")
     @patch("apps.ai.flows.assistant.create_channel_agent")
     @patch("apps.ai.flows.assistant.execute_task")
     def test_cache_skipped_for_community_channel(
-        self, mock_execute_task, mock_create_channel, mock_get_cached
+        self, mock_execute_task, mock_create_channel, mock_get_cached, mock_logger
     ):
         """Cache lookup should be skipped for owasp-community channel queries."""
         mock_create_channel.return_value = MagicMock()
         mock_execute_task.return_value = "channel response 5"
 
-        result = process_query("How to contribute?", channel_id="C09HQJ5LAA0")
+        result = process_query(
+            "Where should I ask about ZAP?",
+            channel_id=normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID),
+        )
 
         assert result == "channel response 5"
         mock_get_cached.assert_not_called()
 
+    @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.store_cached_response")
     @patch("apps.ai.flows.assistant.create_channel_agent")
     @patch("apps.ai.flows.assistant.execute_task")
     def test_community_channel_response_not_cached(
-        self, mock_execute_task, mock_create_channel, mock_store_cached
+        self, mock_execute_task, mock_create_channel, mock_store_cached, mock_logger
     ):
         """Community channel responses should not be stored in cache."""
         mock_create_channel.return_value = MagicMock()
         mock_execute_task.return_value = "channel response"
 
-        process_query("How to contribute?", channel_id="C09HQJ5LAA0")
+        process_query(
+            "Where should I ask about ZAP?",
+            channel_id=normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID),
+        )
 
         mock_store_cached.assert_not_called()
