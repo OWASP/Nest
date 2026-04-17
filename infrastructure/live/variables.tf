@@ -127,6 +127,12 @@ variable "django_configuration" {
   type        = string
 }
 
+variable "django_release_version" {
+  description = "The Django release version."
+  type        = string
+  default     = "0.0.0"
+}
+
 variable "django_settings_module" {
   description = "The location of the Django settings module to use (e.g., settings.staging, settings.production)."
   type        = string
@@ -135,6 +141,12 @@ variable "django_settings_module" {
 variable "domain_name" {
   description = "The domain name for the site."
   type        = string
+}
+
+variable "enable_additional_parameters" {
+  description = "Whether to enable additional parameters (e.g. for production)."
+  type        = bool
+  default     = false
 }
 
 variable "enable_cron_tasks" {
@@ -310,6 +322,12 @@ variable "secret_recovery_window_in_days" {
   description = "The number of days that Secrets Manager waits before it can delete the secret. Set to 0 to delete immediately."
   type        = number
   default     = 7
+}
+
+variable "slack_bot_token_suffix" {
+  description = "The Suffix for the Slack bot token."
+  type        = string
+  default     = "T04T40NHX"
 }
 
 variable "tasks_use_fargate_spot" {

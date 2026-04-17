@@ -22,15 +22,15 @@ locals {
 module "alb" {
   source = "../modules/alb"
 
-  alb_sg_id                  = module.security.alb_sg_id
-  common_tags                = local.common_tags
-  domain_name                = var.domain_name
-  environment                = var.environment
-  frontend_health_check_path = "/"
-  frontend_port              = 3000
-  project_name               = var.project_name
-  public_subnet_ids          = module.networking.public_subnet_ids
-  vpc_id                     = module.networking.vpc_id
+  alb_sg_id             = module.security.alb_sg_id
+  common_tags           = local.common_tags
+  domain_name           = var.domain_name
+  environment           = var.environment
+  frontend_port         = 3000
+  project_name          = var.project_name
+  public_subnet_ids     = module.networking.public_subnet_ids
+  static_s3_bucket_name = module.storage.static_s3_bucket_name
+  vpc_id                = module.networking.vpc_id
 }
 
 module "backend" {
@@ -46,6 +46,7 @@ module "backend" {
   desired_count         = var.backend_desired_count
   enable_auto_scaling   = var.backend_enable_auto_scaling
   environment           = var.environment
+  health_check_path     = "/status/"
   image_tag             = var.backend_image_tag
   kms_key_arn           = module.kms.key_arn
   max_count             = var.backend_max_count
@@ -109,6 +110,7 @@ module "frontend" {
   desired_count       = var.frontend_desired_count
   enable_auto_scaling = var.frontend_enable_auto_scaling
   environment         = var.environment
+  health_check_path   = "/api/health"
   image_tag           = var.frontend_image_tag
   kms_key_arn         = module.kms.key_arn
   max_count           = var.frontend_max_count
@@ -166,13 +168,16 @@ module "parameters" {
   django_db_port                = var.db_port
   django_db_user                = var.db_user
   django_redis_host             = module.cache.redis_primary_endpoint
+  django_release_version        = var.django_release_version
   django_settings_module        = var.django_settings_module
+  enable_additional_parameters  = var.enable_additional_parameters
   environment                   = var.environment
   next_server_csrf_url          = "https://${var.domain_name}/csrf/"
   next_server_graphql_url       = "https://${var.domain_name}/graphql/"
   nextauth_url                  = "https://${var.domain_name}"
   project_name                  = var.project_name
   redis_password_arn            = module.cache.redis_password_arn
+  slack_bot_token_suffix        = var.slack_bot_token_suffix
 }
 
 module "security" {
