@@ -70,13 +70,20 @@ export default function CommunityPage() {
         <SecondaryCard title="Ways to Engage">
           <div className="grid gap-6 md:grid-cols-2">
             {engagementWays.map((way) => (
-              <div key={way.title} className="rounded-lg bg-gray-200 p-5 dark:bg-gray-700">
-                <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  {way.title}
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{way.description}</p>
-              </div>
-            ))}
+            <Link
+              key={way.title}
+              href={way.href}
+              target={way.href.startsWith('http') ? '_blank' : undefined}
+              rel={way.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+              className="group rounded-lg bg-gray-200 p-5 transition-all duration-300 hover:bg-blue-100 dark:bg-gray-700 dark:hover:bg-gray-600"
+            >
+              <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {way.title}
+                <FaChevronRight className="h-3 w-3 transform transition-transform group-hover:translate-x-1" />
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{way.description}</p>
+            </Link>
+          ))}
           </div>
         </SecondaryCard>
 

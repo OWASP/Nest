@@ -57,21 +57,25 @@ export const engagementWays = [
     title: 'Join Local Chapters',
     description:
       'Find and connect with OWASP chapters in your area to participate in local events and meetups.',
+    href: '/chapters',
   },
   {
     title: 'Connect with Members',
     description:
       'Network with security professionals, developers, and enthusiasts from around the world.',
+    href: '/members',
   },
   {
     title: 'Contribute to Projects',
     description:
       'Share your expertise by contributing to open-source security projects and initiatives.',
+    href: '/contribute',
   },
   {
     title: 'Participate in Discussions',
     description:
       'Join conversations, share knowledge, and learn from the global cybersecurity community.',
+    href: 'https://owasp.org/slack/invite',
   },
 ]
 
