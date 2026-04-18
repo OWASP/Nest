@@ -147,12 +147,15 @@ class IndexBase(AlgoliaIndex):
         return SearchClientSync(config=config)
 
     @staticmethod
-    def configure_replicas(index_name: str, replicas: dict) -> None:
+    def configure_replicas(
+        index_name: str, replicas: dict, base_settings: dict | None = None
+    ) -> None:
         """Configure replicas for an index.
 
         Args:
             index_name (str): The name of the base index.
             replicas (dict): A dictionary of replica names and their ranking configurations.
+            base_settings (dict, optional): Base settings to apply to all replicas (like faceting).
 
         """
         if not is_indexable(index_name):
@@ -172,7 +175,12 @@ class IndexBase(AlgoliaIndex):
             )
 
             for replica_name, replica_ranking in indexable_replicas.items():
-                client.set_settings(replica_name, {"ranking": replica_ranking})
+                replica_settings = {"ranking": replica_ranking}
+                if base_settings and "attributesForFaceting" in base_settings:
+                    replica_settings["attributesForFaceting"] = base_settings[
+                        "attributesForFaceting"
+                    ]
+                client.set_settings(replica_name, replica_settings)
 
     @staticmethod
     def _parse_synonyms_file(file_path) -> list | None:

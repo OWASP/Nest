@@ -205,6 +205,7 @@ def get_params_for_index(index_name: str) -> dict:
                 "idx_badge_count",
                 "idx_bio",
                 "idx_company",
+                "idx_contributions_count",
                 "idx_created_at",
                 "idx_email",
                 "idx_followers_count",

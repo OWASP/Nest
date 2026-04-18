@@ -32,6 +32,9 @@ class UserIndex(IndexBase):
         "idx_title",
         "idx_updated_at",
         "idx_url",
+        "idx_has_project_affinity",
+        "idx_has_chapter_affinity",
+        "idx_has_committee_affinity",
     )
 
     settings = {
@@ -39,6 +42,9 @@ class UserIndex(IndexBase):
             "idx_key",
             "idx_name",
             "idx_title",
+            "idx_has_project_affinity",
+            "idx_has_chapter_affinity",
+            "idx_has_committee_affinity",
         ],
         "attributeForDistinct": "idx_login",
         "minProximity": 4,
@@ -67,6 +73,31 @@ class UserIndex(IndexBase):
     should_index = "is_indexable"
 
     @staticmethod
+    def configure_replicas() -> None:  # type: ignore[override]
+        """Configure the settings for user replicas."""
+        replicas = {
+            "contributions_count_asc": ["asc(idx_contributions_count)"],
+            "contributions_count_desc": ["desc(idx_contributions_count)"],
+            "followers_count_asc": ["asc(idx_followers_count)"],
+            "followers_count_desc": ["desc(idx_followers_count)"],
+            "public_repositories_count_asc": ["asc(idx_public_repositories_count)"],
+            "public_repositories_count_desc": ["desc(idx_public_repositories_count)"],
+        }
+
+        base_settings = {
+            "attributesForFaceting": [
+                "idx_key",
+                "idx_name",
+                "idx_title",
+                "idx_has_project_affinity",
+                "idx_has_chapter_affinity",
+                "idx_has_committee_affinity",
+            ]
+        }
+
+        IndexBase.configure_replicas("users", replicas, base_settings)
+
+    @staticmethod
     def update_synonyms() -> None:
         """Update synonyms for the user index."""
         UserIndex.reindex_synonyms("github", "users")
@@ -78,6 +109,10 @@ class UserIndex(IndexBase):
             QuerySet: A queryset of User objects to be indexed.
 
         """
-        return User.objects.exclude(
-            Q(is_bot=True) | Q(login__in=User.get_non_indexable_logins()),
+        return (
+            User.objects.exclude(
+                Q(is_bot=True) | Q(login__in=User.get_non_indexable_logins()),
+            )
+            .select_related("owasp_profile")
+            .prefetch_related("chapters", "projects")
         )
