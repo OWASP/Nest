@@ -39,7 +39,7 @@ class SemanticCache(TimestampedModel):
         query: str,
         *,
         similarity_threshold: float = 0.95,
-        ttl_seconds: int = 86400,
+        ttl_seconds: int = 86400,  # 24 hours
     ) -> str | None:
         """Look up semantically similar cached response.
 
