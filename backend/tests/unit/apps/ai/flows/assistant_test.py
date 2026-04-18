@@ -147,15 +147,15 @@ class TestCache:
     @patch("apps.ai.flows.assistant.analyze_query")
     @patch("apps.ai.flows.assistant.get_cached_response")
     def test_cache_hit_returns_early(
-        self, mock_get_cached, mock_analyze_query, mock_route, mock_execute_task
+        self, mock_get_cached_response, mock_analyze_query, mock_route, mock_execute_task
     ):
         """Semantic cache hit should return cached response without routing."""
-        mock_get_cached.return_value = "cached answer"
+        mock_get_cached_response.return_value = "cached answer"
 
         result = process_query("What is OWASP?")
 
         assert result == "cached answer"
-        mock_get_cached.assert_called_once_with("What is OWASP?")
+        mock_get_cached_response.assert_called_once_with("What is OWASP?")
         mock_analyze_query.assert_not_called()
         mock_route.assert_not_called()
         mock_execute_task.assert_not_called()
@@ -165,10 +165,10 @@ class TestCache:
     @patch("apps.ai.flows.assistant.execute_task")
     @patch("apps.ai.flows.assistant.get_cached_response")
     def test_cache_miss_proceeds_to_routing(
-        self, mock_get_cached, mock_execute_task, mock_route, mock_analyze_query
+        self, mock_get_cached_response, mock_execute_task, mock_route, mock_analyze_query
     ):
         """Cache miss should proceed with normal routing."""
-        mock_get_cached.return_value = None
+        mock_get_cached_response.return_value = None
         mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_route.return_value = {"intent": "rag", "confidence": 0.9}
         mock_execute_task.return_value = "agent response 1"
@@ -176,7 +176,7 @@ class TestCache:
         result = process_query("What is OWASP?")
 
         assert result == "agent response 1"
-        mock_get_cached.assert_called_once()
+        mock_get_cached_response.assert_called_once()
         mock_route.assert_called_once()
 
     @patch("apps.ai.flows.assistant.analyze_query")
@@ -184,10 +184,10 @@ class TestCache:
     @patch("apps.ai.flows.assistant.execute_task")
     @patch("apps.ai.flows.assistant.get_cached_response")
     def test_cache_lookup_exception_proceeds_normally(
-        self, mock_get_cached, mock_execute_task, mock_route, mock_analyze_query
+        self, mock_get_cached_response, mock_execute_task, mock_route, mock_analyze_query
     ):
         """Cache lookup failure should log and proceed without crashing."""
-        mock_get_cached.side_effect = Exception("Redis down")
+        mock_get_cached_response.side_effect = Exception("Redis down")
         mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_route.return_value = {"intent": "rag", "confidence": 0.9}
         mock_execute_task.return_value = "agent response 2"
@@ -203,14 +203,14 @@ class TestCache:
     @patch("apps.ai.flows.assistant.get_cached_response")
     def test_response_stored_in_cache_after_execution(
         self,
-        mock_get_cached,
+        mock_get_cached_response,
         mock_execute_task,
         mock_route,
         mock_analyze_query,
         mock_store_cached,
     ):
         """Successful agent response should be stored in semantic cache."""
-        mock_get_cached.return_value = None
+        mock_get_cached_response.return_value = None
         mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_route.return_value = {"intent": "rag", "confidence": 0.9}
         mock_execute_task.return_value = "agent response 3"
@@ -231,14 +231,14 @@ class TestCache:
     @patch("apps.ai.flows.assistant.get_cached_response")
     def test_cache_store_failure_still_returns_response(
         self,
-        mock_get_cached,
+        mock_get_cached_response,
         mock_execute_task,
         mock_route,
         mock_analyze_query,
         mock_store_cached,
     ):
         """Cache store exception must not prevent response from being returned."""
-        mock_get_cached.return_value = None
+        mock_get_cached_response.return_value = None
         mock_analyze_query.return_value = {"is_simple": True, "sub_queries": []}
         mock_route.return_value = {"intent": "rag", "confidence": 0.9}
         mock_execute_task.return_value = "agent response"  # NOSONAR duplicate string literal
@@ -260,13 +260,13 @@ class TestCache:
     @patch("apps.ai.flows.assistant.get_cached_response")
     def test_collaborative_flow_stores_in_cache(
         self,
-        mock_get_cached,
+        mock_get_cached_response,
         mock_analyze_query,
         mock_collab,
         mock_store_cached,
     ):
         """Collaborative flow response should be stored in cache."""
-        mock_get_cached.return_value = None
+        mock_get_cached_response.return_value = None
         mock_analyze_query.return_value = {
             "is_simple": False,
             "sub_queries": ["sub1", "sub2"],
@@ -286,7 +286,7 @@ class TestCache:
     @patch("apps.ai.flows.assistant.create_channel_agent")
     @patch("apps.ai.flows.assistant.execute_task")
     def test_cache_skipped_for_community_channel(
-        self, mock_execute_task, mock_create_channel, mock_get_cached, mock_logger
+        self, mock_execute_task, mock_create_channel, mock_get_cached_response, mock_logger
     ):
         """Cache lookup should be skipped for owasp-community channel queries."""
         mock_create_channel.return_value = MagicMock()
@@ -298,14 +298,14 @@ class TestCache:
         )
 
         assert result == "channel response 5"
-        mock_get_cached.assert_not_called()
+        mock_get_cached_response.assert_not_called()
 
     @patch("apps.ai.flows.assistant.logger")
     @patch("apps.ai.flows.assistant.store_cached_response")
     @patch("apps.ai.flows.assistant.create_channel_agent")
     @patch("apps.ai.flows.assistant.execute_task")
     def test_community_channel_response_not_cached(
-        self, mock_execute_task, mock_create_channel, mock_store_cached, mock_logger
+        self, mock_execute_task, mock_create_channel, mock_store_cached_response, mock_logger
     ):
         """Community channel responses should not be stored in cache."""
         mock_create_channel.return_value = MagicMock()
@@ -316,4 +316,4 @@ class TestCache:
             channel_id=normalize_channel_id(OWASP_COMMUNITY_CHANNEL_ID),
         )
 
-        mock_store_cached.assert_not_called()
+        mock_store_cached_response.assert_not_called()

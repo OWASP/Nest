@@ -14,6 +14,7 @@ from apps.common.utils import truncate
 logger = logging.getLogger(__name__)
 
 
+# TODO(rudransh-shrivastava): Add Cache Invalidation cron job.
 class SemanticCache(TimestampedModel):
     """Semantic cache model for storing query-response pairs with embeddings."""
 

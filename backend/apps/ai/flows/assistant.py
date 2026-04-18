@@ -291,8 +291,7 @@ def process_query(  # noqa: PLR0911
         # Step 3: Use collaborative flow for complex query
         if not query_analysis["is_simple"] and len(query_analysis["sub_queries"]) > 1:
             try:
-                response = handle_collaborative_query(query, query_analysis["sub_queries"])
-                if response:
+                if response := handle_collaborative_query(query, query_analysis["sub_queries"]):
                     try:
                         store_cached_response(
                             query=query,
@@ -400,10 +399,7 @@ def process_query(  # noqa: PLR0911
         agent = agent_factory()
 
         # Step 8: Execute task with agent
-        response = execute_task(agent, query)
-
-        # Step 9: Store in semantic cache
-        if response:
+        if response := execute_task(agent, query):
             try:
                 store_cached_response(
                     query=query,
