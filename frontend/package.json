@@ -41,7 +41,7 @@
     "core-js": "^3.49.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
-    "dompurify": "^3.3.3",
+    "dompurify": "^3.4.0",
     "framer-motion": "^12.38.0",
     "graphql": "^16.13.2",
     "ics": "^3.11.0",
@@ -115,7 +115,7 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
-    "typescript": "~5.9.3",
+    "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
     "util": "^0.12.5"
   },
