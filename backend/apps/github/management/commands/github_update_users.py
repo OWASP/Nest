@@ -44,15 +44,16 @@ class Command(BaseCommand):
             .annotate(total_contributions=Sum("contributions_count"))
         }
         users = []
-        for idx, user in enumerate(active_users[offset:]):
+        for idx, user in enumerate( active_users[offset:] ):
             prefix = f"{idx + offset + 1} of {active_users_count - offset}"
-            self.stdout.write(f"{prefix:<10} {user.title}\n")
-
+            self.stdout.write( f"{prefix:<10} {user.title}\n" )
+            # update contributions
             user.contributions_count = user_contributions.get( user.id, 0 )
+            # RECALCULATE SCORE
             user.calculated_score = user.calculate_score()
-            users.append(user)
-
-        if len( users ) % BATCH_SIZE == 0:
-            User.bulk_save( users, fields=("contributions_count", "calculated_score") )
+            # add to list
+            users.append( user )
+            if not len( users ) % BATCH_SIZE:
+                User.bulk_save( users, fields=("contributions_count", "calculated_score") )
 
         User.bulk_save( users, fields=("contributions_count", "calculated_score") )
