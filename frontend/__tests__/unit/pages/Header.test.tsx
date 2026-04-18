@@ -1103,21 +1103,15 @@ describe('Header Component', () => {
 
       expect(isMobileMenuOpen()).toBe(true)
 
-      // Find and click a navigation link in the mobile menu
-      const aboutLinks = screen.getAllByRole('link', { name: 'About' })
-      const mobileAboutLink = aboutLinks.find((link) => {
-        // Find the one in the mobile menu (has the transition class)
-        return link.className.includes('transition')
-      })
+      const sidebar = document.querySelector('.fixed.inset-y-0')
+      expect(sidebar).not.toBeNull()
+      const mobileAboutLink = within(sidebar as HTMLElement).getByRole('link', { name: 'About' })
 
       expect(mobileAboutLink).toBeDefined()
-      if (mobileAboutLink) {
-        await act(async () => {
-          fireEvent.click(mobileAboutLink)
-        })
-      }
+      await act(async () => {
+        fireEvent.click(mobileAboutLink)
+      })
 
-      // Menu should close after clicking a link
       expect(isMobileMenuClosed()).toBe(true)
     })
 
@@ -1132,11 +1126,9 @@ describe('Header Component', () => {
 
       expect(isMobileMenuOpen()).toBe(true)
 
-      // Find submenu links in the mobile menu
       const submenuLinks = screen.getAllByRole('link', { name: 'Web Development' })
       expect(submenuLinks.length).toBeGreaterThan(0)
 
-      // Verify they have click handlers
       const mobileSubmenuLink = submenuLinks.find(
         (link) => link.closest('.fixed.inset-y-0') !== null
       )
@@ -1176,11 +1168,9 @@ describe('Header Component', () => {
       mockUsePathname.mockReturnValue('/services/web')
       renderWithSession(<Header isGitHubAuthEnabled />)
 
-      // Verify the dropdown is rendered with submenu items
       const dropdowns = screen.getAllByTestId('nav-dropdown')
       expect(dropdowns.length).toBeGreaterThan(0)
 
-      // Check for the active submenu link in the mock
       const webDevLinks = screen.getAllByRole('link', { name: 'Web Development' })
       const activeLinks = webDevLinks.filter((link) => link.className.includes('active'))
       expect(activeLinks.length).toBeGreaterThan(0)
