@@ -2,8 +2,8 @@
 import { screen, fireEvent } from '@testing-library/react'
 import { render } from 'wrappers/testUtil'
 import '@testing-library/jest-dom'
-import SponsorTierSection from 'components/sponsors/SponsorTierSection'
 import { SponsorData } from 'types/sponsor'
+import SponsorTierSection from 'components/sponsors/SponsorTierSection'
 
 const mockSponsors: SponsorData[] = [
   {
