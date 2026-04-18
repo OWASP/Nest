@@ -73,7 +73,7 @@ jobs:
           curl -sSLo "${TARBALL}" "${BASE_URL}/${TARBALL}" && \
             curl -sSL "${BASE_URL}/terraform-docs-${TERRAFORM_DOCS_VERSION}.sha256sum" | grep -F "${TARBALL}" | sha256sum -c - && \
             tar -xzf "${TARBALL}" terraform-docs && \
-            sudo install -m 755 terraform-docs /usr/local/bin/terraform-docs
+            sudo install -m 755 terraform-docs /usr/local/bin/terraform-docs && \
             rm -f "${TARBALL}" terraform-docs
 
       - name: Run pre-commit

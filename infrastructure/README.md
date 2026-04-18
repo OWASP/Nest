@@ -397,14 +397,10 @@ To ensure consistency, you must use the same version locally — the Makefile wi
 
 ### Install the required version
 
-```bash
-go install github.com/terraform-docs/terraform-docs@v0.22.0
-# or
-brew install terraform-docs@v0.22.0
-```
+Please refer to the [official terraform-docs installation guide](https://terraform-docs.io/user-guide/installation/) for instructions on how to install a specific release version for your operating system.
 
 ### Generate docs locally
 
 ```bash
-cd infrastructure && make docs-infrastructure
+make docs-infrastructure
 ```
