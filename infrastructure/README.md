@@ -392,7 +392,18 @@ aws ecs run-task \
 
 ## Documentation
 
-Module READMEs are generated automatically during CI using `terraform-docs`. You can format and generate them locally to avoid CI failures:
+Module READMEs are generated automatically during CI using `terraform-docs` `v0.22.0`.
+To ensure consistency, you must use the same version locally — the Makefile will exit with an error if the version does not match.
+
+### Install the required version
+
+```bash
+go install github.com/terraform-docs/terraform-docs@v0.22.0
+# or
+brew install terraform-docs@v0.22.0
+```
+
+### Generate docs locally
 
 ```bash
 cd infrastructure && make docs-infrastructure
