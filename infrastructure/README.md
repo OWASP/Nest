@@ -389,3 +389,11 @@ aws ecs run-task \
   ```bash
   terraform destroy
   ```
+
+## Documentation
+
+Module READMEs are generated automatically during CI using `terraform-docs`. You can format and generate them locally to avoid CI failures:
+
+```bash
+cd infrastructure && make docs-infrastructure
+```

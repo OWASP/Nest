@@ -22,7 +22,7 @@ docs-infrastructure: ## Generate terraform-docs
 	while read -r dir; do \
 		echo "Generating docs for $$dir..."; \
 		terraform-docs markdown "$$dir" \
-		--config ./.terraform-docs.yml \
+		--config $(CURDIR)/.terraform-docs.yml \
 		--output-file README.md \
 		--output-mode inject; \
 	done
