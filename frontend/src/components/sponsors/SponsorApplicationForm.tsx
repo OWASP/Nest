@@ -41,7 +41,7 @@ function isProbablyEmail(value: string): boolean {
   // Keep it linear-time to avoid regex backtracking warnings.
   const email = value.trim()
   if (!email || email.includes(' ') || email.length > 254) return false
- //check valid email address
+  //check valid email address
   const at = email.indexOf('@')
   if (at <= 0 || at !== email.lastIndexOf('@') || at === email.length - 1) return false
 

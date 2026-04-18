@@ -33,7 +33,8 @@ export default function SponsorTierSection({ tier, sponsors }: SponsorTierSectio
   const isSupporter = tier === 'supporter'
   const maxItems = 8
   const hasMore = isSupporter && sortedSponsors.length > maxItems
-  const visibleSponsors = hasMore && !isExpanded ? sortedSponsors.slice(0, maxItems) : sortedSponsors
+  const visibleSponsors =
+    hasMore && !isExpanded ? sortedSponsors.slice(0, maxItems) : sortedSponsors
 
   return (
     <section className="mb-10 md:mb-12" aria-labelledby={tierHeadingId(tier)}>
@@ -59,7 +60,7 @@ export default function SponsorTierSection({ tier, sponsors }: SponsorTierSectio
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-[#2A2E33] dark:text-gray-300 dark:hover:bg-[#32363C] dark:hover:text-white"
+            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:border-gray-700 dark:bg-[#2A2E33] dark:text-gray-300 dark:hover:bg-[#32363C] dark:hover:text-white"
           >
             {isExpanded ? 'Show Less' : 'Show More'}
             <svg
@@ -69,7 +70,12 @@ export default function SponsorTierSection({ tier, sponsors }: SponsorTierSectio
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
         </div>
