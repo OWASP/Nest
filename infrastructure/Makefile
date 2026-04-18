@@ -12,3 +12,17 @@ test-infrastructure: ## Run infrastructure tests
 		terraform -chdir="$$module_dir" init -backend=false -input=false && \
 		terraform -chdir="$$module_dir" test || exit 1; \
 	done
+
+docs-infrastructure: ## Generate terraform-docs
+	@find . \
+		-name "main.tf" \
+		-not -path "*/.terraform/*" \
+		-not -path "*/tests/*" \
+		-exec dirname {} \; | sort -u | \
+	while read -r dir; do \
+		echo "Generating docs for $$dir..."; \
+		terraform-docs markdown "$$dir" \
+		--config ./.terraform-docs.yml \
+		--output-file README.md \
+		--output-mode inject; \
+	done
