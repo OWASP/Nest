@@ -41,7 +41,7 @@ function isProbablyEmail(value: string): boolean {
   // Keep it linear-time to avoid regex backtracking warnings.
   const email = value.trim()
   if (!email || email.includes(' ') || email.length > 254) return false
-
+ //check valid email address
   const at = email.indexOf('@')
   if (at <= 0 || at !== email.lastIndexOf('@') || at === email.length - 1) return false
 
@@ -77,7 +77,7 @@ function validate(form: FormState) {
     errors.contactEmail = 'Enter a valid email address'
   }
 
-  if (form.website?.trim() && !isHttpUrl(form.website)) {
+  if (form.website && !isHttpUrl(form.website)) {
     errors.website = 'Enter a valid URL (e.g., https://example.com)'
   }
 
@@ -214,11 +214,7 @@ export default function SponsorApplicationForm() {
       </p>
 
       {serverError && (
-        <p
-          role="alert"
-          aria-live="assertive"
-          className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
-        >
+        <p className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
           {serverError}
         </p>
       )}
