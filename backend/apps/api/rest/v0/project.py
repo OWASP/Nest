@@ -12,9 +12,11 @@ from ninja.responses import Response
 
 from apps.api.decorators.cache import cache_response
 from apps.api.rest.v0.common import Leader, ValidationErrorSchema
+from apps.api.rest.v0.sponsor import Sponsor
 from apps.api.rest.v0.structured_search import FieldConfig, apply_structured_search
 from apps.owasp.models.enums.project import ProjectLevel, ProjectType
 from apps.owasp.models.project import Project as ProjectModel
+from apps.owasp.models.sponsor import Sponsor as SponsorModel
 
 PROJECT_SEARCH_FIELDS: dict[str, FieldConfig] = {
     "name": {
@@ -145,3 +147,18 @@ def get_project(
         return project
 
     return Response({"message": "Project not found"}, status=HTTPStatus.NOT_FOUND)
+
+
+@router.get(
+    "/nest/sponsors",
+    description="Retrieve sponsors associated with project nest.",
+    operation_id="list_nest_sponsors",
+    response=list[Sponsor],
+    summary="List nest sponsors",
+)
+@decorate_view(cache_response())
+def list_nest_sponsors(
+    request: HttpRequest,
+) -> list[Sponsor]:
+    """Get sponsors for a project."""
+    return SponsorModel.objects.filter(status=SponsorModel.StatusType.ACTIVE)

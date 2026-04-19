@@ -146,6 +146,13 @@ export type CreateProgramInput = {
   tags?: Array<Scalars['String']['input']>;
 };
 
+export type CreateSponsorInput = {
+  contactEmail: Scalars['String']['input'];
+  message: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
 export type EntityMemberNode = Node & {
   __typename?: 'EntityMemberNode';
   description: Scalars['String']['output'];
@@ -394,6 +401,7 @@ export type Mutation = {
   createApiKey: CreateApiKeyResult;
   createModule: ModuleNode;
   createProgram: ProgramNode;
+  createSponsor: SponsorNode;
   deleteModule: Scalars['String']['output'];
   githubAuth: GitHubAuthResult;
   logoutUser: LogoutResult;
@@ -435,6 +443,11 @@ export type MutationCreateModuleArgs = {
 
 export type MutationCreateProgramArgs = {
   inputData: CreateProgramInput;
+};
+
+
+export type MutationCreateSponsorArgs = {
+  inputData: CreateSponsorInput;
 };
 
 
@@ -715,6 +728,7 @@ export type PullRequestNode = Node & {
 export type Query = {
   __typename?: 'Query';
   activeApiKeyCount: Scalars['Int']['output'];
+  activeSponsors: Array<SponsorNode>;
   apiKeys: Array<ApiKeyNode>;
   boardOfDirectors?: Maybe<BoardOfDirectorsNode>;
   boardsOfDirectors: Array<BoardOfDirectorsNode>;
@@ -1061,6 +1075,7 @@ export type SnapshotNode = Node & {
 
 export type SponsorNode = Node & {
   __typename?: 'SponsorNode';
+  description: Scalars['String']['output'];
   /** The Globally Unique ID of this object */
   id: Scalars['ID']['output'];
   imageUrl: Scalars['String']['output'];
