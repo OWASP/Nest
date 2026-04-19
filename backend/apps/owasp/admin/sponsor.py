@@ -14,15 +14,19 @@ class SponsorAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
         "name",
         "sort_name",
         "sponsor_type",
+        "status",
         "is_member",
         "member_type",
+        "contact_email",
     )
     search_fields = (
         "name",
         "sort_name",
         "description",
+        "contact_email",
     )
     list_filter = (
+        "status",
         "sponsor_type",
         "is_member",
         "member_type",
@@ -49,13 +53,31 @@ class SponsorAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
             },
         ),
         (
+            "Contact",
+            {"fields": ("contact_email",)},
+        ),
+        (
             "Status",
             {
                 "fields": (
+                    "status",
                     "is_member",
                     "member_type",
                     "sponsor_type",
                 )
+            },
+        ),
+        (
+            "Entity Association",
+            {
+                "fields": (
+                    "chapter",
+                    "project",
+                ),
+                "description": (
+                    "Optionally associate this sponsor with a specific chapter or project. "
+                    "Leave blank for global/general sponsors."
+                ),
             },
         ),
     )
