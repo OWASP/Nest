@@ -70,7 +70,7 @@ services:
     networks:
       - nest-network
     volumes:
-      - db-data-nestbot:/var/lib/postgresql/data
+      - db-data-nestbot-test:/var/lib/postgresql/data
 
   docs:
     container_name: nest-docs
@@ -186,7 +186,7 @@ networks:
 volumes:
   backend-venv-nestbot:
   cache-data-nestbot:
-  db-data-nestbot:
+  db-data-nestbot-test:
   docs-venv:
   frontend-next:
   frontend-node-modules:
