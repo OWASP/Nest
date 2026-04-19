@@ -33,24 +33,19 @@ const SearchBar: React.FC<SearchProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialValue)
   const inputRef = useRef<HTMLInputElement>(null)
+  const onSearchRef = useRef(onSearch)
   const pathname = usePathname()
   const shouldAutoFocus = useShouldAutoFocusSearch()
 
   useEffect(() => {
-    setSearchQuery(initialValue)
-  }, [initialValue])
-
-  useEffect(() => {
-    if (isLoaded && shouldAutoFocus && inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [pathname, isLoaded, shouldAutoFocus])
+    onSearchRef.current = onSearch
+  }, [onSearch])
 
   const debouncedSearch = useMemo(
     () =>
       debounce((query: string) => {
-        onSearch(query)
-        if (query && query.trim() !== '') {
+        onSearchRef.current(query)
+        if (query.trim()) {
           sendGTMEvent({
             event: 'search',
             path: globalThis.location.pathname,
@@ -58,14 +53,29 @@ const SearchBar: React.FC<SearchProps> = ({
           })
         }
       }, 750),
-    [onSearch]
+    []
   )
 
   useEffect(() => {
-    return () => {
-      debouncedSearch.cancel()
-    }
+    return () => debouncedSearch.cancel()
   }, [debouncedSearch])
+
+  useEffect(() => {
+    debouncedSearch.cancel()
+    setSearchQuery(initialValue)
+  }, [initialValue, debouncedSearch])
+
+  useEffect(() => {
+    if (isLoaded && shouldAutoFocus) {
+      inputRef.current?.focus()
+    }
+  }, [isLoaded, shouldAutoFocus])
+
+  useEffect(() => {
+    if (shouldAutoFocus && document.activeElement !== inputRef.current) {
+      inputRef.current?.focus()
+    }
+  }, [pathname, shouldAutoFocus])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value
@@ -79,13 +89,6 @@ const SearchBar: React.FC<SearchProps> = ({
     onSearch('')
     if (shouldAutoFocus) {
       inputRef.current?.focus()
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      handleClearSearch()
     }
   }
 
@@ -113,7 +116,6 @@ const SearchBar: React.FC<SearchProps> = ({
                 type="button"
                 className="absolute top-1/2 right-2 h-8 w-8 -translate-y-1/2 rounded-md p-1 text-gray-400 hover:bg-gray-400 hover:text-gray-200 focus:ring-2 focus:ring-gray-300 focus:outline-hidden dark:hover:bg-gray-600"
                 onClick={handleClearSearch}
-                onKeyDown={handleKeyDown}
                 aria-label="Clear search"
               >
                 <FaTimes className="h-4 w-4" aria-hidden="true" />
