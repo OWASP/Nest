@@ -64,6 +64,18 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_version: v0.60.0
 
+      - name: Install terraform-docs
+        env:
+          TERRAFORM_DOCS_VERSION: v0.22.0
+        run: |
+          TARBALL="terraform-docs-${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz"
+          BASE_URL="https://github.com/terraform-docs/terraform-docs/releases/download/${TERRAFORM_DOCS_VERSION}"
+          curl -sSLo "${TARBALL}" "${BASE_URL}/${TARBALL}" && \
+            curl -sSL "${BASE_URL}/terraform-docs-${TERRAFORM_DOCS_VERSION}.sha256sum" | grep -F "${TARBALL}" | sha256sum -c - && \
+            tar -xzf "${TARBALL}" terraform-docs && \
+            sudo install -m 755 terraform-docs /usr/local/bin/terraform-docs && \
+            rm -f "${TARBALL}" terraform-docs
+
       - name: Run pre-commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

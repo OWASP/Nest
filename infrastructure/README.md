@@ -389,3 +389,18 @@ aws ecs run-task \
   ```bash
   terraform destroy
   ```
+
+## Documentation
+
+Module READMEs are generated automatically during CI using `terraform-docs` `v0.22.0`.
+To ensure consistency, you must use the same version locally — the Makefile will exit with an error if the version does not match.
+
+### Install the required version
+
+Please refer to the [official terraform-docs installation guide](https://terraform-docs.io/user-guide/installation/) for instructions on how to install a specific release version for your operating system.
+
+### Generate docs locally
+
+```bash
+make docs-infrastructure
+```
