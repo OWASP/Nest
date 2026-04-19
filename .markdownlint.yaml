@@ -20,6 +20,9 @@ MD033: false
 # MD041/first-line-heading
 MD041: false
 
+# MD034/no-bare-urls - terraform-docs generates angle-bracket URLs (e.g. <https://...>)
+MD034: false
+
 # MD046/code-block-style
 MD046:
   style: fenced

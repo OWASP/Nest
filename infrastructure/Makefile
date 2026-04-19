@@ -1,5 +1,21 @@
 ##@ Infrastructure
 
+docs-infrastructure: ## Generate Terraform documentation for all modules and projects
+	@command -v terraform-docs >/dev/null 2>&1 || { \
+		echo "terraform-docs is not installed. Install it with:"; \
+		echo "  brew install terraform-docs"; \
+		exit 1; \
+		}
+	@find infrastructure/modules infrastructure/bootstrap infrastructure/live infrastructure/state \
+		-name "*.tf" \
+		-not -path "*/.terraform/*" \
+		-exec dirname {} \; | \
+	sort -u | \
+	while read -r dir; do \
+		echo "Generating docs for $$dir..."; \
+		terraform-docs --config infrastructure/.terraform-docs.yml "$$dir" || exit 1; \
+	done
+
 test-infrastructure: ## Run infrastructure tests
 	@find infrastructure/modules \
 		-name "tests" \

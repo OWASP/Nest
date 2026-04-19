@@ -64,6 +64,15 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tflint_version: v0.60.0
 
+      - name: Install terraform-docs
+        run: |
+          curl -sSLo terraform-docs.tar.gz \
+            https://github.com/terraform-docs/terraform-docs/releases/download/v0.22.0/terraform-docs-v0.22.0-linux-amd64.tar.gz
+          echo "8ec66616777c66f3e622af4f2853e8ae399f38908ad4b262c9c526dd42501369  terraform-docs.tar.gz" | sha256sum --check
+          tar -xzf terraform-docs.tar.gz terraform-docs
+          sudo mv terraform-docs /usr/local/bin/
+          terraform-docs --version
+
       - name: Run pre-commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

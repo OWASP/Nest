@@ -39,6 +39,10 @@ repos:
         files: ^infrastructure/.*\.tf$
         args:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
+      - id: terraform_docs
+        files: ^infrastructure/.*\.tf$
+        args:
+          - --args=--config=infrastructure/.terraform-docs.yml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: aca6d4c8045a504e2812ea4bedff1d0a09e437bc  # v0.15.8
