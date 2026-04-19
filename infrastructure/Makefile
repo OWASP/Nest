@@ -1,11 +1,19 @@
 ##@ Infrastructure
 
+TERRAFORM_DOCS_VERSION := v0.22.0
+
 docs-infrastructure: ## Generate Terraform documentation for all modules and projects
 	@command -v terraform-docs >/dev/null 2>&1 || { \
 		echo "terraform-docs is not installed. Install it with:"; \
 		echo "  brew install terraform-docs"; \
 		exit 1; \
 		}
+	@current=$$(terraform-docs --version 2>&1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1); \
+	if [ "$$current" != "$(TERRAFORM_DOCS_VERSION)" ]; then \
+		echo "terraform-docs version mismatch: expected $(TERRAFORM_DOCS_VERSION), got $$current"; \
+		echo "  brew upgrade terraform-docs"; \
+		exit 1; \
+	fi
 	@find infrastructure/modules infrastructure/bootstrap infrastructure/live infrastructure/state \
 		-name "*.tf" \
 		-not -path "*/.terraform/*" \

@@ -8,7 +8,7 @@ Ensure you have the following setup/installed:
 
 - Setup Project: [CONTRIBUTING.md](https://github.com/OWASP/Nest/blob/main/CONTRIBUTING.md)
 - Terraform: [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
-- terraform-docs: [terraform-docs](https://terraform-docs.io/user-guide/installation/) (`brew install terraform-docs`)
+- terraform-docs v0.22.0: [terraform-docs](https://terraform-docs.io/user-guide/installation/) (`brew install terraform-docs`)
 - AWS CLI: [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - An AWS account.
 Note: Refer to the respective `README.md` files for more information.
