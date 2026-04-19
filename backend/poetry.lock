@@ -4343,7 +4343,9 @@ files = [
 ]
 
 [package.dependencies]
+asgiref = {version = ">=3.2", optional = true, markers = "extra == \"django\""}
 cross-web = ">=0.4.0"
+Django = {version = ">=3.2", optional = true, markers = "extra == \"django\""}
 graphql-core = ">=3.2.0,<3.4.0"
 packaging = ">=23"
 python-dateutil = ">=2.7"
@@ -5143,4 +5145,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "1b2886622fef7a79c57d132e15913e963a347adfd33e954f53751b1c82a0f090"
+content-hash = "341a827ffe6ae39ee2710f955bde4ffd1c1173a11dabffe3f5fec6ca7887d67b"
