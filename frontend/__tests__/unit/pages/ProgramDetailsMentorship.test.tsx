@@ -3,6 +3,7 @@ import { addToast } from '@heroui/toast'
 import mockProgramDetailsData from '@mockData/mockProgramData'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import { useSession } from 'next-auth/react'
+import React from 'react'
 import { render } from 'wrappers/testUtil'
 import { handleAppError } from 'app/global-error'
 import ProgramDetailsPage from 'app/my/mentorship/programs/[programKey]/page'
@@ -11,21 +12,16 @@ import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 let capturedSetStatus: ((status: string) => void) | null = null
 
-jest.mock('components/CardDetailsPage', () => {
-  return jest.fn((props) => {
-    capturedSetStatus = props.setStatus
+jest.mock('components/CardDetailsPage/CardDetailsHeader', () => {
+  return function MockHeader(props: {
+    title: string
+    canUpdateStatus?: boolean
+    setStatus?: (status: string) => void
+  }) {
+    capturedSetStatus = props.setStatus || null
     return (
       <div data-testid="details-card">
         <h1>{props.title}</h1>
-        <p>{props.summary}</p>
-        <div data-testid="details-content">
-          {props.details?.map((detail: { label: string; value: string }) => (
-            <div key={detail.label}>
-              <span>{detail.label}</span>
-              <span>{detail.value}</span>
-            </div>
-          ))}
-        </div>
         {props.canUpdateStatus && (
           <div>
             <button aria-label="Program actions menu">Program actions menu</button>
@@ -36,7 +32,46 @@ jest.mock('components/CardDetailsPage', () => {
         )}
       </div>
     )
-  })
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsSummary', () => {
+  return function MockSummary(props: { summary: string }) {
+    return <p>{props.summary}</p>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsMetadata', () => {
+  return function MockMetadata(props: { details?: Array<{ label: string; value: string }> }) {
+    return (
+      <div data-testid="details-content">
+        {props.details?.map((detail: { label: string; value: string }) => (
+          <div key={detail.label}>
+            <span>{detail.label}</span>
+            <span>{detail.value}</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsPageWrapper', () => {
+  return function MockWrapper({ children }: { children: React.ReactNode }) {
+    return <div>{children}</div>
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsRepositoriesModules', () => {
+  return function MockReposModules() {
+    return <div />
+  }
+})
+
+jest.mock('components/CardDetailsPage/CardDetailsTags', () => {
+  return function MockTags() {
+    return <div />
+  }
 })
 
 jest.mock('@heroui/toast', () => ({

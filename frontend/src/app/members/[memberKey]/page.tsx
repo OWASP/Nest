@@ -12,7 +12,14 @@ import { Badge } from 'types/badge'
 import { User } from 'types/user'
 import { formatDate } from 'utils/dateFormatter'
 import Badges from 'components/Badges'
-import DetailsCard from 'components/CardDetailsPage'
+import CardDetailsContributions from 'components/CardDetailsPage/CardDetailsContributions'
+import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
+import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
+import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
+import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
+import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
+import CardDetailsRepositoriesModules from 'components/CardDetailsPage/CardDetailsRepositoriesModules'
+import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
 import ContributionHeatmap from 'components/ContributionHeatmap'
 import MemberDetailsPageSkeleton from 'components/skeletons/MemberDetailsPageSkeleton'
 
@@ -194,27 +201,37 @@ const UserDetailsPage: React.FC = () => {
   ]
 
   return (
-    <DetailsCard
-      details={userDetails}
-      pullRequests={pullRequests}
-      recentIssues={issues}
-      recentMilestones={milestones}
-      recentReleases={releases}
-      repositories={topRepositories}
-      showAvatar={false}
-      stats={userStats}
-      title={user?.name || user?.login}
-      type="user"
-      userSummary={
-        <UserSummary
-          user={user}
-          contributionData={contributionData}
-          dateRange={dateRange}
-          hasContributionData={hasContributionData}
-          formattedBio={formattedBio}
-        />
-      }
-    />
+    <CardDetailsPageWrapper>
+      <CardDetailsHeader title={user?.name || user?.login} isActive={true} isArchived={false} />
+
+      <CardDetailsSummary
+        userSummary={
+          <UserSummary
+            user={user}
+            contributionData={contributionData}
+            dateRange={dateRange}
+            hasContributionData={hasContributionData}
+            formattedBio={formattedBio}
+          />
+        }
+      />
+
+      <CardDetailsMetadata details={userDetails} stats={userStats} detailsTitle="User Details" />
+
+      <CardDetailsContributions hasContributions={false} />
+
+      <CardDetailsContributors />
+
+      <CardDetailsIssuesMilestones
+        recentIssues={issues}
+        recentMilestones={milestones}
+        pullRequests={pullRequests}
+        recentReleases={releases}
+        showAvatar={false}
+      />
+
+      <CardDetailsRepositoriesModules repositories={topRepositories} />
+    </CardDetailsPageWrapper>
   )
 }
 

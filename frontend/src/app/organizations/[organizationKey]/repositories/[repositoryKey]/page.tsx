@@ -9,8 +9,15 @@ import { HiUserGroup } from 'react-icons/hi'
 import { handleAppError, ErrorDisplay } from 'app/global-error'
 import { GetRepositoryDataDocument } from 'types/__generated__/repositoryQueries.generated'
 import { formatDate } from 'utils/dateFormatter'
-import DetailsCard from 'components/CardDetailsPage'
+import CardDetailsContributors from 'components/CardDetailsPage/CardDetailsContributors'
+import CardDetailsHeader from 'components/CardDetailsPage/CardDetailsHeader'
+import CardDetailsIssuesMilestones from 'components/CardDetailsPage/CardDetailsIssuesMilestones'
+import CardDetailsMetadata from 'components/CardDetailsPage/CardDetailsMetadata'
+import CardDetailsPageWrapper from 'components/CardDetailsPage/CardDetailsPageWrapper'
+import CardDetailsSummary from 'components/CardDetailsPage/CardDetailsSummary'
+import CardDetailsTags from 'components/CardDetailsPage/CardDetailsTags'
 import LoadingSpinner from 'components/LoadingSpinner'
+import SponsorCard from 'components/SponsorCard'
 
 const RepositoryDetailsPage = () => {
   const { repositoryKey, organizationKey } = useParams<{
@@ -104,23 +111,42 @@ const RepositoryDetailsPage = () => {
     },
   ]
   return (
-    <DetailsCard
-      details={repositoryDetails}
-      entityKey={repository.project?.key}
-      isArchived={repository.isArchived}
-      languages={repository.languages}
-      projectName={repository.project?.name}
-      pullRequests={recentPullRequests ?? []}
-      recentIssues={recentIssues ?? []}
-      recentMilestones={repository.recentMilestones ?? []}
-      recentReleases={repository.releases ?? []}
-      stats={RepositoryStats}
-      summary={repository.description}
-      title={repository.name}
-      topContributors={topContributors}
-      topics={repository.topics}
-      type="repository"
-    />
+    <CardDetailsPageWrapper>
+      <CardDetailsHeader
+        title={repository.name}
+        isActive={!repository.isArchived}
+        isArchived={repository.isArchived}
+        showArchivedBadge={true}
+      />
+
+      <CardDetailsSummary summary={repository.description} />
+
+      <CardDetailsMetadata
+        details={repositoryDetails}
+        stats={RepositoryStats}
+        detailsTitle="Repository Details"
+      />
+
+      <CardDetailsTags languages={repository.languages} topics={repository.topics} />
+
+      <CardDetailsContributors topContributors={topContributors} />
+
+      <CardDetailsIssuesMilestones
+        recentIssues={recentIssues ?? []}
+        recentMilestones={repository.recentMilestones ?? []}
+        pullRequests={recentPullRequests ?? []}
+        recentReleases={repository.releases ?? []}
+        showAvatar={true}
+      />
+
+      {repository.project?.key && repository.project?.name && (
+        <SponsorCard
+          target={repository.project.key}
+          title={repository.project.name}
+          type="project"
+        />
+      )}
+    </CardDetailsPageWrapper>
   )
 }
 export default RepositoryDetailsPage

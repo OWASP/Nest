@@ -302,4 +302,172 @@ describe('ProjectDetailsPage', () => {
       expect(screen.getByText('Project Leader')).toBeInTheDocument()
     })
   })
+
+  test('renders contribution activity when contributionStats with total > 0 is provided', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        ...mockProjectDetailsData,
+        project: {
+          ...mockProjectDetailsData.project,
+          contributionStats: {
+            commits: 50,
+            pullRequests: 20,
+            issues: 10,
+            releases: 5,
+            total: 85,
+          },
+          contributionData: undefined,
+        },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+  })
+
+  test('renders contribution activity when only contributionData is provided', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        ...mockProjectDetailsData,
+        project: {
+          ...mockProjectDetailsData.project,
+          contributionStats: undefined,
+          contributionData: {
+            '2024-01': 10,
+            '2024-02': 20,
+          },
+        },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+  })
+
+  test('does not render contribution activity when contributionStats total is 0 and no contributionData', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        ...mockProjectDetailsData,
+        project: {
+          ...mockProjectDetailsData.project,
+          contributionStats: {
+            commits: 0,
+            pullRequests: 0,
+            issues: 0,
+            releases: 0,
+            total: 0,
+          },
+          contributionData: {},
+        },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+    })
+  })
+
+  test('does not render health metrics when healthMetricsList is empty', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        ...mockProjectDetailsData,
+        project: {
+          ...mockProjectDetailsData.project,
+          healthMetricsList: [],
+        },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+      expect(screen.queryByText(/Issues Trend/)).not.toBeInTheDocument()
+    })
+  })
+
+  test('does not render health metrics when healthMetricsList is null', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: {
+        ...mockProjectDetailsData,
+        project: {
+          ...mockProjectDetailsData.project,
+          healthMetricsList: null,
+        },
+      },
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Project')).toBeInTheDocument()
+      expect(screen.queryByText(/Issues Trend/)).not.toBeInTheDocument()
+    })
+  })
+
+  test('renders project URL as a link', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      const urlLink = screen.getByRole('link', { name: mockProjectDetailsData.project.url })
+      expect(urlLink).toBeInTheDocument()
+      expect(urlLink).toHaveAttribute('href', mockProjectDetailsData.project.url)
+    })
+  })
+
+  test('renders tags section with languages and topics', async () => {
+    ;(useQuery as unknown as jest.Mock).mockReturnValue({
+      data: mockProjectDetailsData,
+      error: null,
+      loading: false,
+    })
+
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Python')).toBeInTheDocument()
+      expect(screen.getByText('graphql')).toBeInTheDocument()
+    })
+  })
+
+  test('renders repositories section correctly', async () => {
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('Repo One')).toBeInTheDocument()
+      expect(screen.getByText('Repo Two')).toBeInTheDocument()
+    })
+  })
+
+  test('renders recent releases section correctly', async () => {
+    render(<ProjectDetailsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText('v1.2.0')).toBeInTheDocument()
+    })
+  })
 })

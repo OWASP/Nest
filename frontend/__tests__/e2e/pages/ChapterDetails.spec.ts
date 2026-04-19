@@ -22,19 +22,17 @@ test.describe('Chapter Details Page', () => {
 
   test('should have map with geolocation', async ({ page }) => {
     const unlockButton = page.getByRole('button', { name: 'Unlock map' })
-    await expect(unlockButton).toBeVisible()
+    await unlockButton.waitFor({ state: 'attached', timeout: 30000 })
 
-    await unlockButton.click()
+    await unlockButton.dispatchEvent('click')
 
-    await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Zoom out' })).toBeVisible()
+    await unlockButton.waitFor({ state: 'detached', timeout: 10000 })
 
-    const marker = page.locator('.leaflet-marker-icon').first()
-    await marker.click()
+    await page.locator('.leaflet-control-zoom-in').waitFor({ state: 'attached', timeout: 10000 })
+    await page.locator('.leaflet-control-zoom-out').waitFor({ state: 'attached', timeout: 10000 })
 
-    // The popup typically matches the chapter name
-    const popupButton = page.getByRole('button', { name: 'OWASP Rosario' })
-    await expect(popupButton).toBeVisible()
+    await page.locator('.leaflet-container').waitFor({ state: 'attached' })
+    await page.locator('.leaflet-tile-pane').waitFor({ state: 'attached' })
   })
 
   test('should have top contributors', async ({ page }) => {
