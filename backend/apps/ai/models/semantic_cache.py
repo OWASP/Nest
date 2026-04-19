@@ -44,9 +44,9 @@ class SemanticCache(TimestampedModel):
         """Look up semantically similar cached response.
 
         Args:
-            query: User query text.
-            similarity_threshold: Minimum cosine similarity (0.0-1.0).
-            ttl_seconds: Maximum age of cached entries in seconds.
+            query (str): User query text.
+            similarity_threshold (float): Minimum cosine similarity (0.0-1.0).
+            ttl_seconds (int): Maximum age of cached entries in seconds.
 
         Returns:
             Cached response string if found, None otherwise.
@@ -90,10 +90,10 @@ class SemanticCache(TimestampedModel):
         """Store query-response pair in semantic cache.
 
         Args:
-            query: Original query text.
-            response: Generated response text.
-            intent: Classified intent for the query.
-            confidence: Router confidence score.
+            query (str): Original query text.
+            response (str): Generated response text.
+            intent (str): Classified intent for the query.
+            confidence (float): Router confidence score.
 
         Returns:
             Created SemanticCache instance.

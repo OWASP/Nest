@@ -10,10 +10,10 @@ def get_cached_response(query: str) -> str | None:
     """Look up semantically similar cached response.
 
     Args:
-        query: User query text.
+        query (str): User query text.
 
     Returns:
-        Cached response string if found within similarity threshold and TTL,
+        str: Cached response string if found within similarity threshold and TTL,
         None otherwise.
 
     """
@@ -36,10 +36,10 @@ def store_cached_response(
     """Store query-response pair in semantic cache.
 
     Args:
-        query: Original query text.
-        response: Generated response text.
-        intent: Classified intent for the query.
-        confidence: Router confidence score.
+        query (str): Original query text.
+        response (str): Generated response text.
+        intent (str): Classified intent for the query.
+        confidence (float): Router confidence score.
 
     Returns:
         Created SemanticCache instance.
