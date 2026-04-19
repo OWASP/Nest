@@ -326,7 +326,7 @@ describe('UserMenu Component', () => {
       const dropdown = document.getElementById(dropdownId)
       expect(dropdown).toBeInTheDocument()
 
-      fireEvent.mouseDown(dropdown!)
+      fireEvent.mouseDown(dropdown)
 
       await waitFor(() => {
         expect(avatarButton).toHaveAttribute('aria-expanded', 'true')
