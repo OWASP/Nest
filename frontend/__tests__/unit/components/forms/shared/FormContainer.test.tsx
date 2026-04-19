@@ -32,7 +32,7 @@ describe('FormContainer', () => {
     const { container } = render(<FormContainer {...defaultProps} />)
     const form = container.querySelector('form')
 
-    fireEvent.submit(form!)
+    fireEvent.submit(form)
     expect(mockOnSubmit).toHaveBeenCalledTimes(1)
   })
 

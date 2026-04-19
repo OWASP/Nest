@@ -323,7 +323,7 @@ describe('UserMenu Component', () => {
       })
 
       const dropdownId = avatarButton.getAttribute('aria-controls')
-      const dropdown = document.getElementById(dropdownId!)
+      const dropdown = document.getElementById(dropdownId)
       expect(dropdown).toBeInTheDocument()
 
       fireEvent.mouseDown(dropdown!)
