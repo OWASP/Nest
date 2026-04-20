@@ -405,7 +405,7 @@ describe('Header Component', () => {
       // Assert that mobileLogoLink is not null before clicking
       expect(mobileLogoLink).toBeDefined()
       await act(async () => {
-        fireEvent.click(mobileLogoLink!)
+        fireEvent.click(mobileLogoLink)
       })
       expect(isMobileMenuClosed()).toBe(true)
     })
@@ -430,7 +430,7 @@ describe('Header Component', () => {
 
       expect(desktopLogoLink).toBeDefined()
       await act(async () => {
-        fireEvent.click(desktopLogoLink!)
+        fireEvent.click(desktopLogoLink)
       })
       expect(isMobileMenuClosed()).toBe(true)
     })
