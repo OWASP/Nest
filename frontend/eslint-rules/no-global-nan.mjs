@@ -20,8 +20,8 @@ const noGlobalNaNRule = {
           if (
             parent?.type === 'MemberExpression' &&
             parent.property === node &&
-            parent?.object?.type === 'Identifier' &&
-            parent?.object?.name === 'Number'
+            parent.object?.type === 'Identifier' &&
+            parent.object.name === 'Number'
           ) {
             return
           }
