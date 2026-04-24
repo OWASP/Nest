@@ -117,11 +117,8 @@ index-data: ## Index data for Algolia search
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
-	# @cd backend && poetry run python -m scripts.fetch_nest_dump
-	@echo "changing permission of /backend/data"
-	@chmod 757 backend/data
-	@echo "fetching data inside docker container `nest-backend`"
-	@docker compose --project-name nest-local exec backend poetry run python -m scripts.fetch_nest_dump
+	@echo "fetching data inside docker container 'nest-backend'"
+	@docker compose -f docker-compose/local/compose.yaml --project-name nest-local exec backend poetry run python -m scripts.fetch_nest_dump
 	@echo "Check if it worked"
 	@ls -l backend/data
 
