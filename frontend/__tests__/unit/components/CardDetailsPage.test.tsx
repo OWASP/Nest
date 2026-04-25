@@ -429,7 +429,7 @@ jest.mock('components/ContributorsList', () => ({
     <div data-testid="contributors-list" {...props}>
       {title} ({contributors.length} items, max display: {maxInitialDisplay})
       {contributors.map((c) => (
-        <a key={c.tag || c.login || 'unknown'} href={getUrl && getUrl(c.login || 'unknown')}>
+        <a key={c.tag || c.login || 'unknown'} href={getUrl?.(c.login || 'unknown')}>
           {c.name || c.login || 'Unknown'}
         </a>
       ))}

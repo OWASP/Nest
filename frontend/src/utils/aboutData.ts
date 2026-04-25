@@ -159,6 +159,12 @@ export const projectTimeline: ProjectTimeline[] = [
       'The first cohort of OWASP Nest Sponsorship Program contributors completed their program, marking a milestone for sustained project support.',
     year: 'March 2026',
   },
+  {
+    title: 'OWASP Nest Leaders at SnowFROC 2026',
+    description:
+      'OWASP Nest leaders presented at SnowFROC 2026, sharing lessons from building the project.',
+    year: 'April 2026',
+  },
 ]
 
 export const technologies = [

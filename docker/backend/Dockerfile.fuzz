@@ -28,7 +28,7 @@ SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 RUN addgroup -S owasp && \
     adduser -S -h /home/owasp -G owasp owasp && \
-    apk add --no-cache curl jq
+    apk --no-cache add curl jq
 
 ENV FORCE_COLOR=1 \
     PATH="/home/owasp/.venv/bin:$PATH" \
