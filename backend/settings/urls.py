@@ -22,7 +22,15 @@ from settings.graphql import schema
 urlpatterns = [
     path("csrf/", get_csrf_token),
     path("idx/", csrf_protect(algolia_search)),
-    path("graphql/", csrf_protect(GraphQLView.as_view(schema=schema, graphiql=settings.DEBUG))),
+    path(
+        "graphql/",
+        csrf_protect(
+            GraphQLView.as_view(
+                schema=schema,
+                graphql_ide="graphiql" if settings.DEBUG else None,
+            )
+        ),
+    ),
     path("api/v0/", api_v0.urls),
     path("a/", admin.site.urls),
     path("owasp/", include(owasp_urls)),

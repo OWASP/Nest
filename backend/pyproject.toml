@@ -23,8 +23,6 @@ dependencies.geopy = "^2.4.1"
 dependencies.gunicorn = "^25.0.0"
 dependencies.humanize = "^4.11.0"
 dependencies.jinja2 = "^3.1.6"
-dependencies.langchain = "^0.3.26"
-dependencies.langchain-community = "^0.3.26"
 dependencies.langgraph = "^1.0.1"
 dependencies.lxml = "^6.0.0"
 dependencies.markdown = "^3.7"
@@ -43,7 +41,7 @@ dependencies.requests = "^2.32.5"
 dependencies.sentry-sdk = { extras = [ "django" ], version = "^2.20.0" }
 dependencies.slack-bolt = "^1.22.0"
 dependencies.slack-sdk = "^3.37.0"
-dependencies.strawberry-graphql = { extras = [ "django" ], version = "^0.291.0" }
+dependencies.strawberry-graphql = { extras = [ "django" ], version = "^0.312.3" }
 dependencies.strawberry-graphql-django = "^0.75.0"
 dependencies.thefuzz = "^0.22.1"
 dependencies.pyparsing = "^3.2.3"

@@ -238,12 +238,14 @@ ECR Repositories are used to store images used by ECS (Frontend + Backend + Sche
 
 Migrate and load data into the new database.
 
-1. **Upload Fixture to S3**:
+1. **Shared bucket and `nest.dump`**
 
-- Upload the fixture present in `backend/data` to `nest-fixtures` bucket using the following command:
+- Terraform (`module.storage` → `shared_data_bucket` in `infrastructure/modules/storage`) provisions **`owasp-nest-shared-data`**. Public read of **`nest.dump`** at the bucket root (HTTPS) is for **local/CI** only. ECS **load-data** uses the **fixtures** bucket at **`databases/nest.dump`** per environment.
+- **Dump:** `make dump-data` → `backend/data/nest.dump`. **Upload / fetch:** `make upload-nest-dump` / `make fetch-nest-dump` (host AWS credentials; optional **`SHARED_DATA_BUCKET`**).
+- **CLI** (after `cd infrastructure/live`):
 
     ```bash
-    aws s3 cp backend/data/nest.dump s3://nest-fixtures-RANDOM_ID/
+    aws s3 cp ../../backend/data/nest.dump "s3://$(terraform output -raw shared_data_bucket_name)/nest.dump"
     ```
 
 1. **Run ECS Tasks**:

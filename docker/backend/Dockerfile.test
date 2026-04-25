@@ -34,12 +34,12 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
 COPY .env.example .env.example
 COPY manage.py wsgi.py ./
 COPY tests/__init__.py tests/__init__.py
-COPY tests/conftest.py tests/conftest.py
+COPY scripts scripts
 COPY settings settings
 COPY static static
 COPY templates templates
 COPY apps apps
-COPY tests/apps tests/apps
+COPY tests/unit tests/unit
 
 FROM python:3.13.11-alpine3.23
 

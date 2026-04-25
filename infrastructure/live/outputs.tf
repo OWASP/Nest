@@ -63,6 +63,11 @@ output "private_subnet_ids" {
   value       = module.networking.private_subnet_ids
 }
 
+output "shared_data_bucket_name" {
+  description = "S3 bucket for shared public data (e.g. nest.dump)."
+  value       = module.storage.shared_data_bucket_name
+}
+
 output "tasks_cluster_name" {
   description = "The name of the ECS tasks cluster."
   value       = module.tasks.ecs_cluster_name

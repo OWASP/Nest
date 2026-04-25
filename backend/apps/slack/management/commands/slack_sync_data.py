@@ -85,7 +85,6 @@ class Command(BaseCommand):
 
             self.stdout.write(f"Fetching members for {workspace}...")
             members = []
-            total_members = 0
             try:
                 cursor = None
                 while True:
@@ -101,7 +100,6 @@ class Command(BaseCommand):
                         for member_data in response["members"]
                         if (member := Member.update_data(member_data, workspace))
                     )
-                    total_members += len(response["members"])
 
                     cursor = response.get("response_metadata", {}).get("next_cursor")
                     if not cursor:
@@ -114,11 +112,12 @@ class Command(BaseCommand):
             if members:
                 Member.bulk_save(members)
 
-            # Update the workspace with the total members count.
-            workspace.total_members_count = total_members
+            # Update the workspace with the total non-bot members count.
+            total_members_count = Member.objects.filter(is_bot=False, workspace=workspace).count()
+            workspace.total_members_count = total_members_count
             workspace.save(update_fields=["total_members_count"])
 
-            self.stdout.write(self.style.SUCCESS(f"Populated {total_members} members"))
+            self.stdout.write(self.style.SUCCESS(f"Populated {total_members_count} members"))
 
         self.stdout.write(self.style.SUCCESS("\nFinished processing all workspaces"))
 

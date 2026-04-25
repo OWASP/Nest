@@ -5,7 +5,7 @@ backend:
               - backend/**
           - all-globs-to-all-files:
               - '!backend/apps/slack/**'
-              - '!backend/tests/slack/**'
+              - '!backend/tests/unit/apps/slack/**'
 
 backend-tests:
   - all:
@@ -13,7 +13,7 @@ backend-tests:
           - any-glob-to-any-file:
               - backend/tests/**
           - all-globs-to-all-files:
-              - '!backend/tests/slack/**'
+              - '!backend/tests/unit/apps/slack/**'
 
 ci:
   - changed-files:
@@ -46,6 +46,11 @@ frontend-tests:
       - any-glob-to-any-file:
           - frontend/__tests__/**
 
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file:
+          - infrastructure/**
+
 makefile:
   - changed-files:
       - any-glob-to-any-file:
@@ -59,7 +64,7 @@ nestbot:
 nestbot-tests:
   - changed-files:
       - any-glob-to-any-file:
-          - backend/tests/slack/**
+          - backend/tests/unit/apps/slack/**
 
 nginx:
   - changed-files:

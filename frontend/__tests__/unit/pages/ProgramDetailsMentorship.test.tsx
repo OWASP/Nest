@@ -29,7 +29,7 @@ jest.mock('components/CardDetailsPage', () => {
         {props.canUpdateStatus && (
           <div>
             <button aria-label="Program actions menu">Program actions menu</button>
-            <button role="menuitem" onClick={() => props.setStatus && props.setStatus('PUBLISHED')}>
+            <button role="menuitem" onClick={() => props.setStatus?.('PUBLISHED')}>
               Publish
             </button>
           </div>
@@ -319,7 +319,7 @@ describe('ProgramDetailsPage', () => {
     })
 
     if (capturedSetStatus) {
-      await capturedSetStatus(ProgramStatusEnum.Published)
+      capturedSetStatus(ProgramStatusEnum.Published)
     }
 
     await waitFor(() => {
@@ -358,7 +358,7 @@ describe('ProgramDetailsPage', () => {
     })
 
     if (capturedSetStatus) {
-      await capturedSetStatus(ProgramStatusEnum.Published)
+      capturedSetStatus(ProgramStatusEnum.Published)
     }
 
     await waitFor(() => {

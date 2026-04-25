@@ -429,7 +429,7 @@ jest.mock('components/ContributorsList', () => ({
     <div data-testid="contributors-list" {...props}>
       {title} ({contributors.length} items, max display: {maxInitialDisplay})
       {contributors.map((c) => (
-        <a key={c.tag || c.login || 'unknown'} href={getUrl && getUrl(c.login || 'unknown')}>
+        <a key={c.tag || c.login || 'unknown'} href={getUrl?.(c.login || 'unknown')}>
           {c.name || c.login || 'Unknown'}
         </a>
       ))}
@@ -986,6 +986,46 @@ describe('CardDetailsPage', () => {
       const healthButton = screen.getByRole('button')
       expect(healthButton).toBeInTheDocument()
       expect(screen.getByTestId('metrics-score-circle')).toBeInTheDocument()
+    })
+
+    it('renders Show More button when onLoadMorePullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show more/i })).toBeInTheDocument()
+    })
+
+    it('renders Show Less button when onResetPullRequests is provided', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onResetPullRequests={jest.fn()}
+          onLoadMorePullRequests={undefined}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeInTheDocument()
+    })
+
+    it('shows Loading on Show more and disables both controls when isFetchingMore is true', () => {
+      render(
+        <CardDetailsPage
+          {...defaultProps}
+          type="module"
+          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          onLoadMorePullRequests={jest.fn()}
+          onResetPullRequests={jest.fn()}
+          isFetchingMore={true}
+        />
+      )
+      expect(screen.getByRole('button', { name: /Loading/i })).toBeDisabled()
+      expect(screen.getByRole('button', { name: /Show less/i })).toBeDisabled()
     })
 
     it('calls scrollToAnchor when MetricsScoreCircle is clicked', () => {

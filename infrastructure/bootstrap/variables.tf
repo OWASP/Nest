@@ -21,3 +21,9 @@ variable "project_name" {
   type        = string
   default     = "nest"
 }
+
+variable "shared_data_bucket_name" {
+  description = "Global S3 bucket for shared public data (e.g. nest.dump)"
+  type        = string
+  default     = "owasp-nest-shared-data"
+}

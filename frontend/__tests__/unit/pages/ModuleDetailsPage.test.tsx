@@ -26,6 +26,9 @@ jest.mock('components/CardDetailsPage', () => (props) => (
   <div data-testid="details-card">
     <div>{props.title}</div>
     <div>{props.summary}</div>
+    {props.onLoadMorePullRequests && (
+      <button onClick={props.onLoadMorePullRequests}>Show more</button>
+    )}
   </div>
 ))
 

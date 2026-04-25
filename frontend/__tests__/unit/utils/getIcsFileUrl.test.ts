@@ -109,16 +109,15 @@ describe('getIcsFileUrl', () => {
     await getIcsFileUrl(mockEvent)
 
     expect(createEvent).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         start: [2025, 1, 1],
         end: [2025, 1, 3],
         title: mockEvent.title,
         description: mockEvent.description,
         location: mockEvent.location,
-        url: mockEvent.url,
         status: 'CONFIRMED',
         busyStatus: 'BUSY',
-      },
+      }),
       expect.any(Function)
     )
   })

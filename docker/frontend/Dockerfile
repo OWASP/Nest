@@ -63,6 +63,7 @@ WORKDIR /tmp
 # Fix CVE-2026-23745, CVE-2026-26960, CVE-2026-29786, CVE-2026-31802: Update npm's bundled tar to 7.5.11
 # Fix CVE-2026-25547: Update npm's bundled @isaacs/brace-expansion to 5.0.1
 # Fix CVE-2026-27903, CVE-2026-27904: Update npm's bundled minimatch to 10.2.3
+# Fix CVE-2026-33671: Update npm's bundled picomatch (under tinyglobby) to 4.0.4
 # Note: Must download tar with npm pack BEFORE removing the old tar (npm needs it)
 RUN npm pack tar@7.5.11 && \
     tar -xzf tar-7.5.11.tgz && \
@@ -89,6 +90,15 @@ RUN npm pack tar@7.5.11 && \
     chmod -R 755 "${MINIMATCH_DIR}" && \
     rm -rf package minimatch-10.2.3.tgz && \
     grep -q '"version": "10.2.3"' "${MINIMATCH_DIR}/package.json" && \
+    npm pack picomatch@4.0.4 && \
+    tar -xzf picomatch-4.0.4.tgz && \
+    PICOMATCH_DIR="/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch" && \
+    rm -rf "${PICOMATCH_DIR}" && \
+    mkdir -p "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules" && \
+    cp -r package "${PICOMATCH_DIR}" && \
+    chmod -R 755 "${PICOMATCH_DIR}" && \
+    rm -rf package picomatch-4.0.4.tgz && \
+    grep -q '"version": "4.0.4"' "${PICOMATCH_DIR}/package.json" && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 -G nodejs nextjs
 

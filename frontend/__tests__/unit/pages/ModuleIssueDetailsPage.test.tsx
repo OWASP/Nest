@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client/react'
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react'
 import { useIssueMutations } from 'hooks/useIssueMutations'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
@@ -178,6 +178,26 @@ describe('ModuleIssueDetailsPage', () => {
     setupQueryMockLoading()
     render(<ModuleIssueDetailsPage />)
     expect(screen.getAllByAltText('Loading indicator')[0]).toBeInTheDocument()
+  })
+
+  it('does not show full-page spinner when loading with cached issue (e.g. fetchMore)', () => {
+    mockUseQuery.mockImplementation((query) => {
+      if (query === GetProgramAdminsAndModulesDocument) {
+        return { data: mockAccessData, loading: false, error: undefined }
+      }
+      if (query === GetModuleIssueViewDocument) {
+        return {
+          data: mockIssueData,
+          loading: true,
+          error: undefined,
+          fetchMore: jest.fn(),
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
+    })
+    render(<ModuleIssueDetailsPage />)
+    expect(screen.queryByAltText('Loading indicator')).not.toBeInTheDocument()
+    expect(screen.getByText('Test Issue Title')).toBeInTheDocument()
   })
 
   it('renders an error display on query error', () => {
@@ -492,6 +512,70 @@ describe('ModuleIssueDetailsPage', () => {
     const unassignButton = screen.getByRole('button', { name: /Unassign @user1/i })
     expect(unassignButton).toBeDisabled()
   })
+  it('calls fetchMore when clicking Show More button', async () => {
+    const fetchMoreMock = jest.fn().mockResolvedValue({
+      data: {
+        getModule: {
+          issueByNumber: {
+            pullRequests: [
+              {
+                id: 'pr-new',
+                title: 'New PR',
+                url: 'http://example.com',
+                state: 'open',
+                mergedAt: null,
+                createdAt: new Date().toISOString(),
+                author: { login: 'user-new', avatarUrl: '' },
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    mockUseQuery.mockImplementation((query) => {
+      if (query === GetProgramAdminsAndModulesDocument) {
+        return { data: mockAccessData, loading: false, error: undefined }
+      }
+      if (query === GetModuleIssueViewDocument) {
+        return {
+          data: {
+            getModule: {
+              issueByNumber: {
+                ...mockIssueData.getModule.issueByNumber,
+                pullRequests: Array.from({ length: 4 }, (_, i) => ({
+                  ...mockIssueData.getModule.issueByNumber.pullRequests[0],
+                  id: `pr-${i}`,
+                })),
+              },
+            },
+          },
+          loading: false,
+          error: undefined,
+          fetchMore: fetchMoreMock,
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
+    })
+
+    render(<ModuleIssueDetailsPage />)
+
+    const showMoreButton = screen.getByRole('button', { name: /Show more/i })
+    expect(showMoreButton).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(showMoreButton)
+    })
+
+    expect(fetchMoreMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variables: expect.objectContaining({
+          offset: 4,
+          limit: 4,
+        }),
+      })
+    )
+  })
 
   it('renders "(today)" for deadline that is exactly today', () => {
     const today = new Date()
@@ -545,7 +629,20 @@ describe('ModuleIssueDetailsPage', () => {
         },
       },
     }
-    setupQueryMock(manyPRsData)
+    mockUseQuery.mockImplementation((query) => {
+      if (query === GetProgramAdminsAndModulesDocument) {
+        return { data: mockAccessData, loading: false, error: undefined }
+      }
+      if (query === GetModuleIssueViewDocument) {
+        return {
+          data: manyPRsData,
+          loading: false,
+          error: undefined,
+          fetchMore: jest.fn().mockResolvedValue({ data: manyPRsData }),
+        }
+      }
+      return { data: undefined, loading: false, error: undefined }
+    })
     render(<ModuleIssueDetailsPage />)
 
     // Initially only 4 PRs should be visible

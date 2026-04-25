@@ -45,6 +45,8 @@ backend/*nest-staging*.tar.gz
 backend/*nest-staging*.zip
 backend/coverage.xml
 backend/data/backup*
+backend/data/nest.dump
+backend/data/nest.dump.*
 backend/fuzzing_results/
 backend/generated_videos/
 backend/staticfiles

@@ -1,10 +1,8 @@
 import { Tooltip } from '@heroui/tooltip'
 import Link from 'next/link'
-import { FaCalendar } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 import type { CardProps } from 'types/card'
 import { ICONS } from 'utils/data'
-import { formatDateRange } from 'utils/dateFormatter'
 import { getSocialIcon } from 'utils/urlIconMappings'
 import ActionButton from 'components/ActionButton'
 import ContributorAvatar from 'components/ContributorAvatar'
@@ -22,7 +20,6 @@ const Card = ({
   projectName,
   social,
   summary,
-  timeline,
   title,
   tooltipLabel,
   topContributors,
@@ -76,14 +73,6 @@ const Card = ({
                 />
               ) : null
             )}
-          </div>
-        )}
-
-        {/* Timeline Section (Optional) */}
-        {timeline?.start && timeline?.end && (
-          <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            <FaCalendar className="mr-2 h-4 w-4" />
-            <span>{formatDateRange(timeline.start, timeline.end)}</span>
           </div>
         )}
       </div>

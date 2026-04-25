@@ -1,31 +1,27 @@
 {
   "compilerOptions": {
-    "target": "ES2023",
-    "useDefineForClassFields": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "skipLibCheck": true,
-    "noEmit": true,
+    "baseUrl": ".",
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
+    "ignoreDeprecations": "6.0",
+    "incremental": true,
+    "inlineSources": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
-    "sourceMap": true,
-    "inlineSources": true,
-    "baseUrl": ".",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
+      "*": ["./src/*"],
       "@e2e/*": ["__tests__/e2e/*"],
       "@mockData/*": ["__tests__/mockData/*"],
       "@unit/*": ["__tests__/unit/*"],
-      "*": ["./src/*"],
       "app/*": ["src/app/*"],
       "components/*": ["src/components/*"],
       "hooks/*": ["src/hooks/*"],
@@ -34,15 +30,20 @@
       "utils/*": ["src/utils/*"],
       "wrappers/*": ["src/wrappers/*"]
     },
-    "strict": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2023",
+    "useDefineForClassFields": true
   },
+  "exclude": ["__tests__/**/*", "jest.setup.ts", "node_modules", "playwright.config.ts"],
   "include": [
-    ".next/dev/types/**/*.ts",
-    ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
+    ".next/dev/types/**/*.ts",
+    ".next/types/**/*.ts",
     "next-env.d.ts",
     "src"
-  ],
-  "exclude": ["__tests__/**/*", "jest.setup.ts", "node_modules"]
+  ]
 }

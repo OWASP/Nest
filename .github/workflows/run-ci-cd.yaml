@@ -7,15 +7,11 @@ on:
       - dev
       - feature/**
       - main
-    paths-ignore:
-      - backend/data/nest.dump
   push:
     branches:
       - dev
       - feature/**
       - main
-    paths-ignore:
-      - backend/data/nest.dump
   release:
     types:
       - published
@@ -560,7 +556,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
@@ -780,8 +776,8 @@ jobs:
         run: terraform apply -auto-approve tfplan
     timeout-minutes: 10
 
-  plan-staging-nest:
-    name: Plan Nest Staging
+  deploy-staging-nest:
+    name: Plan and Deploy Nest Staging
     env:
       TF_IN_AUTOMATION: true
       TF_INPUT: false
@@ -807,7 +803,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-StagingPlan
+          role-session-name: GitHubActions-StagingDeploy
           role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
 
@@ -876,8 +872,7 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infrastructure/live
-        run: |
-          terraform plan -out=tfplan
+        run: terraform plan -out=tfplan
 
       - name: Show plan in summary
         working-directory: infrastructure/live
@@ -886,72 +881,6 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload plan artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
-        with:
-          name: tfplan
-          path: infrastructure/live/tfplan
-          retention-days: 3
-    timeout-minutes: 15
-
-  deploy-staging-nest:
-    name: Deploy Nest Staging
-    env:
-      TF_INPUT: false
-      TF_IN_AUTOMATION: true
-    environment: staging
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    needs:
-      - plan-staging-nest
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-StagingDeploy
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-staging-terraform
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
-        with:
-          terraform_version: 1.14
-
-      - name: Prepare terraform backend
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-          TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
-          TF_STATE_KEY: staging/terraform.tfstate
-        run: |
-          umask 377
-          cat > infrastructure/live/terraform.tfbackend <<-EOF
-          bucket="$TF_STATE_BUCKET_NAME"
-          key="${TF_STATE_KEY}"
-          region="$AWS_REGION"
-          EOF
-
-      - name: Terraform Init
-        working-directory: infrastructure/live
-        run: terraform init -backend-config=terraform.tfbackend
-
-      - name: Download plan artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
-        with:
-          name: tfplan
-          path: infrastructure/live
 
       - name: Terraform Apply
         working-directory: infrastructure/live
@@ -1045,56 +974,23 @@ jobs:
 
           echo "Index-data task started successfully (runs async, ~30 min)"
 
-      - name: Force new backend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
-      - name: Force new frontend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
-      - name: Install boto3 for ECS waiter
-        run: pip install -q boto3
-
       - name: Wait for backend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
 
       - name: Wait for frontend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
     timeout-minutes: 60
 
   run-staging-lighthouse-ci:
@@ -1200,7 +1096,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
+        uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78
 
       - name: Build backend image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
@@ -1421,8 +1317,8 @@ jobs:
         run: terraform apply -auto-approve tfplan
     timeout-minutes: 10
 
-  plan-production-nest:
-    name: Plan Nest Production
+  deploy-production-nest:
+    name: Plan and Deploy Nest Production
     env:
       TF_IN_AUTOMATION: true
       TF_INPUT: false
@@ -1449,7 +1345,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 3600
           role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-ProductionPlan
+          role-session-name: GitHubActions-ProductionDeploy
           role-skip-session-tagging: true
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
 
@@ -1520,8 +1416,7 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infrastructure/live
-        run: |
-          terraform plan -out=tfplan
+        run: terraform plan -out=tfplan
 
       - name: Show plan in summary
         working-directory: infrastructure/live
@@ -1530,73 +1425,6 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           terraform show -no-color tfplan >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload plan artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
-        with:
-          name: tfplan
-          path: infrastructure/live/tfplan
-          retention-days: 3
-    timeout-minutes: 15
-
-  deploy-production-nest:
-    name: Deploy Nest Production
-    env:
-      TF_IN_AUTOMATION: true
-      TF_INPUT: false
-    environment: production
-    if: |
-      github.repository == 'OWASP/Nest' &&
-      github.event_name == 'release' &&
-      github.event.action == 'published'
-    needs:
-      - plan-production-nest
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ vars.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-duration-seconds: 3600
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
-          role-session-name: GitHubActions-ProductionDeploy
-          role-skip-session-tagging: true
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/nest-production-terraform
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
-        with:
-          terraform_version: 1.14
-
-      - name: Prepare terraform backend
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-          TF_STATE_BUCKET_NAME: ${{ secrets.TF_STATE_BUCKET_NAME }}
-          TF_STATE_KEY: production/terraform.tfstate
-        run: |
-          umask 377
-          cat > infrastructure/live/terraform.tfbackend <<-EOF
-          bucket="$TF_STATE_BUCKET_NAME"
-          key="${TF_STATE_KEY}"
-          region="$AWS_REGION"
-          EOF
-
-      - name: Terraform Init
-        working-directory: infrastructure/live
-        run: terraform init -backend-config=terraform.tfbackend
-
-      - name: Download plan artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
-        with:
-          name: tfplan
-          path: infrastructure/live
 
       - name: Terraform Apply
         working-directory: infrastructure/live
@@ -1690,57 +1518,23 @@ jobs:
 
           echo "Index-data task started successfully (runs async, ~30 min)"
 
-      - name: Force new backend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
-      - name: Force new frontend deployment
-        env:
-          CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
-          SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
-        run: |
-          aws ecs update-service \
-            --cluster "$CLUSTER_NAME" \
-            --service "$SERVICE_NAME" \
-            --force-new-deployment
-
-      - name: Install boto3 for ECS waiter
-        run: pip install -q boto3
-
       - name: Wait for backend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.backend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.backend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
 
       - name: Wait for frontend service stability
         env:
           CLUSTER_NAME: ${{ steps.tf-outputs.outputs.frontend_cluster_name }}
           SERVICE_NAME: ${{ steps.tf-outputs.outputs.frontend_service_name }}
         run: |
-          python3 -c "
-          import boto3, os
-          boto3.client('ecs').get_waiter('services_stable').wait(
-              cluster=os.environ['CLUSTER_NAME'],
-              services=[os.environ['SERVICE_NAME']],
-              WaiterConfig={'Delay': 30, 'MaxAttempts': 120}
-          )
-          "
-    timeout-minutes: 60
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER_NAME" \
+            --services "$SERVICE_NAME"
 
   run-production-lighthouse-ci:
     name: Run production Lighthouse CI
