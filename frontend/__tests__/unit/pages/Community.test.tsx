@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import React from 'react'
 import CommunityPage from 'app/community/page'
 
@@ -62,6 +62,7 @@ jest.mock('utils/communityData', () => ({
     {
       title: 'Test Engagement',
       description: 'Test Engagement Description',
+      href: '/test-engagement',
     },
   ],
   journeySteps: [
@@ -103,7 +104,7 @@ describe('CommunityPage', () => {
     expect(screen.getByText('Test Description')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Test Chapter/i })
     expect(link).toHaveAttribute('href', '/test-chapter')
-    expect(screen.getByTestId('icon-chevron-right')).toBeInTheDocument()
+    expect(within(link).getByTestId('icon-chevron-right')).toBeInTheDocument()
   })
 
   test('renders Ways to Engage section correctly', () => {
