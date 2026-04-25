@@ -19,7 +19,7 @@ RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && \
+    apk --no-cache update && \
     apk --no-cache upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
@@ -52,7 +52,7 @@ FROM python:3.13.12-alpine3.23
 ARG OWASP_GID
 ARG OWASP_UID
 
-RUN apk update && \
+RUN apk --no-cache update && \
     apk --no-cache upgrade && \
     apk --no-cache add make postgresql16-client=16.13-r0 && \
     addgroup -S -g ${OWASP_GID} owasp && \

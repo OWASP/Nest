@@ -21,8 +21,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && \
-    apk add --no-cache libc6-compat
+    apk --no-cache update && \
+    apk --no-cache add libc6-compat
 
 WORKDIR /app
 
@@ -56,7 +56,7 @@ FROM base AS runner
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-RUN apk update && apk upgrade --no-cache
+RUN apk --no-cache update && apk --no-cache upgrade
 
 WORKDIR /tmp
 

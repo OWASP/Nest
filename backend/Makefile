@@ -7,11 +7,7 @@ include backend/apps/slack/Makefile
 
 ##@ Backend
 
-ifeq ($(EXEC_MODE),direct)
 SHELL := /bin/sh
-else
-SHELL := /bin/bash
-endif
 
 .PHONY: sbom-backend-image fetch-nest-dump upload-nest-dump
 
