@@ -97,7 +97,10 @@ dump-data: ## Write masked database dump to backend/data/nest.dump (no S3 upload
 	@CMD="python manage.py dump_data" $(MAKE) exec-backend-command-it
 
 upload-nest-dump: ## Upload backend/data/nest.dump to shared S3 (host AWS creds; poetry run)
-	@cd backend && poetry run python -m scripts.upload_nest_dump
+	@echo "updating data inside docker container 'nest-backend'"
+	@docker compose -f docker-compose/local/compose.yaml --project-name nest-local exec backend poetry run python -m scripts.upload_nest_dump
+	@echo "Check if it worked"
+	@ls -l backend/data
 
 enrich-data: ## Enrich data from external sources
 enrich-data: \
