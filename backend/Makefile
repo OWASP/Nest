@@ -116,13 +116,11 @@ index-data: ## Index data for Algolia search
 
 fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
 	@DOCKER_BUILDKIT=1 docker compose \
-		--project-name nest-e2e \
 		-f docker-compose/e2e/compose.yaml \
 		run \
-		--build \
 		--no-deps \
-		--rm backend \
-		python -m scripts.fetch_nest_dump
+		--rm \
+		backend python -m scripts.fetch_nest_dump
 
 load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
