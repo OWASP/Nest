@@ -39,6 +39,7 @@ RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_G
 
 # Less likely to cause cache invalidation items go first.
 COPY entrypoint.sh manage.py wsgi.py Makefile ./
+COPY scripts scripts
 COPY settings settings
 COPY templates templates
 COPY static static

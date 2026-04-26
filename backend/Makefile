@@ -115,7 +115,14 @@ index-data: ## Index data for Algolia search
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
-	@cd backend && poetry run python -m scripts.fetch_nest_dump
+	@DOCKER_BUILDKIT=1 docker compose \
+		--project-name nest-e2e \
+		-f docker-compose/e2e/compose.yaml \
+		run \
+		--build \
+		--no-deps \
+		--rm backend \
+		python -m scripts.fetch_nest_dump
 
 load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"
