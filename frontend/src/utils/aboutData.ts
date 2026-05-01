@@ -165,6 +165,11 @@ export const projectTimeline: ProjectTimeline[] = [
       'OWASP Nest leaders presented at SnowFROC 2026, sharing lessons from building the project.',
     year: 'April 2026',
   },
+  {
+    title: 'GSoC 2026 Participation',
+    description: 'OWASP Nest accepted for Google Summer of Code 2026 as part of OWASP.',
+    year: 'May 2026',
+  },
 ]
 
 export const technologies = [
