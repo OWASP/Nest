@@ -20,7 +20,7 @@ runs:
       shell: bash
 
     - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
       with:
         cache: poetry
         cache-dependency-path: backend/poetry.lock
@@ -54,7 +54,7 @@ runs:
       shell: bash
 
     - name: Build backend image
-      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294  # v7.0.0
       with:
         cache-from: |
           type=gha
