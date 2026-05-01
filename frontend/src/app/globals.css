@@ -471,4 +471,5 @@ select:disabled,
 
 .leaflet-container {
   background: transparent !important;
+  cursor: default;
 }
