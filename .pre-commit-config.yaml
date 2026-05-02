@@ -30,6 +30,15 @@ repos:
           - --strict
         exclude: pnpm-lock.yaml
 
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: be1a79478b65f008aeb42f497ba9a862bcd8dbc9
+    hooks:
+      - id: terraform-docs-go
+        files: ^infrastructure/.*\.tf$
+        args:
+          - --config=infrastructure/.terraform-docs.yaml
+          - infrastructure/
+
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: d0e12caebb2ab0ee8bf98181c8bfe9702bca103d  # v1.105.0
     hooks:
@@ -39,11 +48,6 @@ repos:
         files: ^infrastructure/.*\.tf$
         args:
           - --args=--config=__GIT_WORKING_DIR__/infrastructure/.tflint.hcl
-      - id: terraform_docs
-        files: ^infrastructure/.*\.tf$
-        args:
-          - --args=--output-file=README.md
-          - --args=--output-mode=inject
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: aca6d4c8045a504e2812ea4bedff1d0a09e437bc  # v0.15.8
