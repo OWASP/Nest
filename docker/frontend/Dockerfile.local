@@ -16,8 +16,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && \
-    apk add --no-cache git && \
+    apk --no-cache update && \
+    apk --no-cache add git && \
     mkdir -p /home/owasp && \
     chown -R node:node /home/owasp
 
@@ -42,8 +42,8 @@ RUN mkdir -p ${APK_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && \
-    apk add --no-cache git && \
+    apk --no-cache update && \
+    apk --no-cache add git && \
     mkdir -p /home/owasp/.next && \
     chown -R node:node /home/owasp
 

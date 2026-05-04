@@ -1,24 +1,20 @@
 services:
   backend:
-    container_name: e2e-nest-backend
+    build:
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile
     command: >
       sh -c '
         python manage.py migrate &&
         gunicorn wsgi:application --bind 0.0.0.0:9000
       '
-    build:
-      context: ../../backend
-      dockerfile: ../docker/backend/Dockerfile
+    container_name: e2e-nest-backend
     depends_on:
       db:
         condition: service_healthy
       cache:
         condition: service_healthy
     env_file: ../../backend/.env.e2e.example
-    networks:
-      - e2e-nest-network
-    ports:
-      - 9000:9000
     healthcheck:
       interval: 10s
       retries: 10
@@ -28,6 +24,12 @@ services:
         '
       timeout: 10s
       start_period: 5s
+    networks:
+      - e2e-nest-network
+    ports:
+      - 9000:9000
+    volumes:
+      - ../../backend/data:/home/owasp/data
 
   data-loader:
     container_name: e2e-nest-data-loader

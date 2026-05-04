@@ -1,5 +1,3 @@
-SHELL := /bin/bash
-
 .PHONY: sbom-frontend-image
 
 ##@ Frontend
