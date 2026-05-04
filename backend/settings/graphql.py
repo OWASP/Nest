@@ -2,6 +2,8 @@
 
 import strawberry
 from django.conf import settings
+from django.http import HttpRequest, HttpResponse
+from strawberry.django.views import AsyncGraphQLView
 from strawberry.extensions import DisableIntrospection, QueryDepthLimiter
 from strawberry_django.optimizer import DjangoOptimizerExtension
 
@@ -19,6 +21,7 @@ from apps.mentorship.api.internal.queries import (
 )
 from apps.nest.api.internal.mutations import NestMutations
 from apps.owasp.api.internal.queries import OwaspQuery
+from settings.graphql_context import NestGraphQLContext
 
 
 @strawberry.type
@@ -41,6 +44,16 @@ class Query(
     ProgramQuery,
 ):
     """Schema queries."""
+
+
+class NestGraphQLView(AsyncGraphQLView[NestGraphQLContext, None]):
+    """Nest GraphQL view."""
+
+    async def get_context(
+        self, request: HttpRequest, response: HttpResponse
+    ) -> NestGraphQLContext:
+        """Return a NestGraphQLContext instance."""
+        return NestGraphQLContext(request=request, response=response)
 
 
 extensions = [

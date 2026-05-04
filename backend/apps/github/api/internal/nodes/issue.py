@@ -12,7 +12,6 @@ from apps.github.api.internal.nodes.pull_request import PullRequestNode
 from apps.github.api.internal.nodes.user import UserNode
 from apps.github.models.issue import Issue
 from apps.github.models.pull_request import PullRequest
-from apps.mentorship.models.issue_user_interest import IssueUserInterest
 from apps.mentorship.models.task import Task
 
 MERGED_PULL_REQUESTS_PREFETCH = Prefetch(
@@ -79,20 +78,10 @@ class IssueNode(strawberry.relay.Node):
         """Return True if this issue has at least one merged pull request."""
         return bool(getattr(root, "merged_pull_requests", None))
 
-    @strawberry_django.field(
-        prefetch_related=[
-            Prefetch(
-                "participant_interests",
-                queryset=IssueUserInterest.objects.select_related("user__owasp_profile").order_by(
-                    "user__login"
-                ),
-                to_attr="interests_users",
-            )
-        ]
-    )
-    def interested_users(self, root: Issue) -> list[UserNode]:
+    @strawberry_django.field
+    async def interested_users(self, root: Issue, info: Info) -> list[UserNode]:
         """Return all users who have expressed interest in this issue."""
-        return [interest.user for interest in getattr(root, "interests_users", [])]
+        return await info.context.github_dataloaders["interested_users_loader"].load(root.pk)
 
     @strawberry.field
     def task_deadline(self, root: Issue, info: Info) -> datetime | None:
