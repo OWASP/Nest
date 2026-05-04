@@ -1,7 +1,8 @@
 """Test cases for IssueNode."""
 
+import asyncio
 from datetime import UTC, datetime
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from apps.github.api.internal.nodes.issue import IssueNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
@@ -151,23 +152,26 @@ class TestIssueNode(GraphQLNodeBaseTest):
         assert not result
 
     def test_interested_users(self):
-        """Test interested_users field returns list of users from prefetched interests_users."""
+        """Test interested_users field returns users from the interested users dataloader."""
         mock_issue = Mock()
+        mock_issue.pk = 123
         mock_user1 = Mock()
         mock_user1.login = "user1"
         mock_user2 = Mock()
         mock_user2.login = "user2"
 
-        mock_interest1 = Mock()
-        mock_interest1.user = mock_user1
-        mock_interest2 = Mock()
-        mock_interest2.user = mock_user2
+        mock_loader = Mock()
+        mock_loader.load = AsyncMock(return_value=[mock_user1, mock_user2])
 
-        mock_issue.interests_users = [mock_interest1, mock_interest2]
+        mock_info = Mock()
+        mock_info.context = Mock()
+        mock_info.context.github_dataloaders = {"interested_users_loader": mock_loader}
 
         field = self._get_field_by_name("interested_users", IssueNode)
-        result = field.base_resolver.wrapped_func(None, mock_issue)
+        result = asyncio.run(field.base_resolver.wrapped_func(None, mock_issue, mock_info))
+
         assert result == [mock_user1, mock_user2]
+        mock_loader.load.assert_awaited_once_with(mock_issue.pk)
 
     def test_task_deadline_with_bulk_load_mapping(self):
         """Test task_deadline field when mapping exists with issue deadline."""
