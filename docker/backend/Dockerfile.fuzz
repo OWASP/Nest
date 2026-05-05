@@ -1,33 +1,48 @@
-FROM python:3.13.11-alpine3.23 AS builder
+ARG OWASP_GID=1000
+ARG OWASP_UID=1000
+
+FROM python:3.13.12-alpine3.23 AS builder
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-fuzz" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
+    OWASP_GID=${OWASP_GID} \
+    OWASP_UID=${OWASP_UID} \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -s ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
+RUN addgroup -S -g ${OWASP_GID} owasp && \
+    adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
+    chown -R owasp:owasp /home/owasp
+
 COPY --chmod=444 --chown=root:root requirements.build.txt /tmp/
 RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
     python -m pip install --requirement /tmp/requirements.build.txt
 
+USER owasp
 WORKDIR /home/owasp
 
-COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
-RUN --mount=type=cache,target=${POETRY_CACHE_DIR} \
+COPY --chmod=444 --chown=root:root poetry.lock poetry.toml pyproject.toml ./
+RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --only fuzz --no-root
 
-FROM python:3.13.11-alpine3.23
+FROM python:3.13.12-alpine3.23
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN addgroup -S owasp && \
-    adduser -S -h /home/owasp -G owasp owasp && \
+RUN addgroup -S -g ${OWASP_GID} owasp && \
+    adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     apk --no-cache add curl jq
 
 ENV FORCE_COLOR=1 \

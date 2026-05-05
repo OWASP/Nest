@@ -35,7 +35,7 @@
     "@next/third-parties": "^16.2.3",
     "@react-leaflet/core": "^3.0.0",
     "@sentry/nextjs": "^10.48.0",
-    "apexcharts": "^5.10.5",
+    "apexcharts": "^5.10.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "core-js": "^3.49.0",
@@ -55,7 +55,7 @@
     "next": "^16.2.4",
     "next-auth": "^4.24.13",
     "next-themes": "^0.4.6",
-    "posthog-js": "^1.364.7",
+    "posthog-js": "^1.367.0",
     "react": "^19.2.4",
     "react-apexcharts": "^2.1.0",
     "react-dom": "^19.2.4",
@@ -122,7 +122,7 @@
   "engines": {
     "node": "^24.0.0"
   },
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@10.33.3",
   "pnpm": {
     "overrides": {
       "glob": "^11.1.0",
