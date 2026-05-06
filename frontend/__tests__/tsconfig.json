@@ -8,11 +8,11 @@
 		"noEmit": true,
 		"isolatedModules": true
 	},
-	"include": [
-		"**/*"
-	],
 	"exclude": [
 		"node_modules",
 		"../playwright.config.ts"
+	],
+	"include": [
+		"**/*"
 	]
 }
