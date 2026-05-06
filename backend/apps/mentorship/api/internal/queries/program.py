@@ -3,6 +3,7 @@
 import logging
 
 import strawberry
+import strawberry_django
 from django.db.models import Q
 
 from apps.common.utils import normalize_limit
@@ -20,13 +21,13 @@ logger = logging.getLogger(__name__)
 class ProgramQuery:
     """Program queries."""
 
-    @strawberry.field
-    def get_program(self, info: strawberry.Info, program_key: str) -> ProgramNode | None:
+    @strawberry_django.field
+    async def get_program(self, info: strawberry.Info, program_key: str) -> ProgramNode | None:
         """Get a program by Key."""
         try:
-            program = Program.objects.prefetch_related(
+            program = await Program.objects.prefetch_related(
                 "admins__github_user", "admins__nest_user"
-            ).get(key=program_key)
+            ).aget(key=program_key)
         except Program.DoesNotExist:
             msg = f"Program with key '{program_key}' not found."
             logger.warning(msg, exc_info=True)

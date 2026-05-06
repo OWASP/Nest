@@ -3,6 +3,7 @@
 import logging
 
 import strawberry
+import strawberry_django
 
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module, Program
@@ -14,11 +15,13 @@ logger = logging.getLogger(__name__)
 class ModuleQuery:
     """Module queries."""
 
-    @strawberry.field
-    def get_program_modules(self, info: strawberry.Info, program_key: str) -> list[ModuleNode]:
+    @strawberry_django.field
+    async def get_program_modules(
+        self, info: strawberry.Info, program_key: str
+    ) -> list[ModuleNode]:
         """Get all modules by program Key. Returns an empty list if program is not found."""
         try:
-            program = Program.objects.get(key=program_key)
+            program = await Program.objects.aget(key=program_key)
         except Program.DoesNotExist:
             return []
 

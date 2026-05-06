@@ -1,12 +1,14 @@
 """OWASP stats GraphQL queries."""
 
 import strawberry
+import strawberry_django
 
 from apps.common.utils import round_down
 from apps.github.models.user import User
 from apps.owasp.api.internal.nodes.stats import StatsNode
 from apps.owasp.models.chapter import Chapter
 from apps.owasp.models.project import Project
+from apps.slack.constants import OWASP_WORKSPACE_ID
 from apps.slack.models.workspace import Workspace
 
 
@@ -14,25 +16,22 @@ from apps.slack.models.workspace import Workspace
 class StatsQuery:
     """Stats queries."""
 
-    @strawberry.field
-    def stats_overview(self) -> StatsNode:
+    @strawberry_django.field
+    async def stats_overview(self) -> StatsNode:
         """Resolve stats overview."""
-        active_projects_stats = Project.active_projects_count()
-        active_chapters_stats = Chapter.active_chapters_count()
-        contributors_stats = User.objects.count()
-        countries_stats = (
+        active_projects_stats = await Project.active_projects.acount()
+        active_chapters_stats = await Chapter.active_chapters.acount()
+        contributors_stats = await User.objects.acount()
+        countries_stats = await (
             Chapter.objects.filter(country__isnull=False)
             .exclude(country="")
             .values("country")
             .distinct()
-            .count()
+            .acount()
         )
 
-        slack_workspace_stats = (
-            workspace.total_members_count
-            if (workspace := Workspace.get_default_workspace())
-            else 0
-        )
+        workspace = await Workspace.objects.filter(slack_workspace_id=OWASP_WORKSPACE_ID).afirst()
+        slack_workspace_stats = workspace.total_members_count if workspace else 0
 
         return StatsNode(
             active_chapters_stats=round_down(active_chapters_stats, 10),
