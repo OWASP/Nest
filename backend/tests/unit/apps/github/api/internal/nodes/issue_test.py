@@ -4,6 +4,7 @@ import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock, patch
 
+from apps.github.api.internal.dataloaders import INTERESTED_USERS_LOADER
 from apps.github.api.internal.nodes.issue import IssueNode
 from tests.unit.apps.common.graphql_node_base_test import GraphQLNodeBaseTest
 
@@ -165,7 +166,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
 
         mock_info = Mock()
         mock_info.context = Mock()
-        mock_info.context.github_dataloaders = {"interested_users_loader": mock_loader}
+        mock_info.context.github_dataloaders = {INTERESTED_USERS_LOADER: mock_loader}
 
         field = self._get_field_by_name("interested_users", IssueNode)
         result = asyncio.run(field.base_resolver.wrapped_func(None, mock_issue, mock_info))
