@@ -1,4 +1,3 @@
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -49,7 +48,8 @@ class TestModuleQuery:
     @patch(
         "apps.mentorship.api.internal.queries.module.Program.objects.aget", new_callable=AsyncMock
     )
-    def test_get_program_modules_success(
+    @pytest.mark.asyncio
+    async def test_get_program_modules_success(
         self,
         mock_program_aget: AsyncMock,
         mock_module_filter: MagicMock,
@@ -66,8 +66,8 @@ class TestModuleQuery:
         mock_module_filter_related.prefetch_related.return_value.order_by.return_value = [
             mock_module
         ]
-        result = asyncio.run(
-            api_module_queries.get_program_modules(info=mock_info, program_key="program1")
+        result = await api_module_queries.get_program_modules(
+            info=mock_info, program_key="program1"
         )
 
         assert result == [mock_module]
@@ -77,7 +77,8 @@ class TestModuleQuery:
     @patch(
         "apps.mentorship.api.internal.queries.module.Program.objects.aget", new_callable=AsyncMock
     )
-    def test_get_program_modules_empty(
+    @pytest.mark.asyncio
+    async def test_get_program_modules_empty(
         self,
         mock_program_aget: AsyncMock,
         mock_info: MagicMock,
@@ -86,10 +87,8 @@ class TestModuleQuery:
         """Test retrieval of modules returns empty list if program not found."""
         mock_program_aget.side_effect = Program.DoesNotExist
 
-        result = asyncio.run(
-            api_module_queries.get_program_modules(
-                info=mock_info, program_key="nonexistent_program"
-            )
+        result = await api_module_queries.get_program_modules(
+            info=mock_info, program_key="nonexistent_program"
         )
 
         assert result == []
@@ -98,7 +97,8 @@ class TestModuleQuery:
     @patch(
         "apps.mentorship.api.internal.queries.module.Program.objects.aget", new_callable=AsyncMock
     )
-    def test_get_program_modules_hidden_for_draft_program(
+    @pytest.mark.asyncio
+    async def test_get_program_modules_hidden_for_draft_program(
         self,
         mock_program_aget: AsyncMock,
         mock_anonymous_info: MagicMock,
@@ -110,10 +110,8 @@ class TestModuleQuery:
         mock_program_aget.return_value = mock_program
         mock_program.user_has_access.return_value = False
 
-        result = asyncio.run(
-            api_module_queries.get_program_modules(
-                info=mock_anonymous_info, program_key="draft-program"
-            )
+        result = await api_module_queries.get_program_modules(
+            info=mock_anonymous_info, program_key="draft-program"
         )
 
         assert result == []

@@ -1,7 +1,8 @@
 """Tests for StatsQuery."""
 
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from apps.owasp.api.internal.queries.stats import StatsQuery
 
@@ -9,7 +10,8 @@ from apps.owasp.api.internal.queries.stats import StatsQuery
 class TestStatsQuery:
     """Test cases for StatsQuery."""
 
-    def test_stats_overview_returns_node(self):
+    @pytest.mark.asyncio
+    async def test_stats_overview_returns_node(self):
         """Test stats_overview returns StatsNode with calculated values."""
         mock_workspace = MagicMock()
         mock_workspace.total_members_count = 5500
@@ -33,8 +35,7 @@ class TestStatsQuery:
                 return_value=mock_workspace
             )
 
-            query = StatsQuery()
-            result = asyncio.run(query.stats_overview())
+            result = await StatsQuery().stats_overview()
 
             assert result.active_projects_stats == 270
             assert result.active_chapters_stats == 340
@@ -42,7 +43,8 @@ class TestStatsQuery:
             assert result.countries_stats == 90
             assert result.slack_workspace_stats == 5000
 
-    def test_stats_overview_no_workspace(self):
+    @pytest.mark.asyncio
+    async def test_stats_overview_no_workspace(self):
         """Test stats_overview when no default workspace exists."""
         with (
             patch("apps.owasp.api.internal.queries.stats.Project") as mock_project,
@@ -61,8 +63,7 @@ class TestStatsQuery:
 
             mock_workspace_cls.objects.filter.return_value.afirst = AsyncMock(return_value=None)
 
-            query = StatsQuery()
-            result = asyncio.run(query.stats_overview())
+            result = await StatsQuery().stats_overview()
             assert result.slack_workspace_stats == 0
 
     def test_stats_overview_has_strawberry_definition(self):

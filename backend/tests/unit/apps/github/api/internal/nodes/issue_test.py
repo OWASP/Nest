@@ -1,8 +1,9 @@
 """Test cases for IssueNode."""
 
-import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from apps.github.api.internal.dataloaders import INTERESTED_USERS_LOADER
 from apps.github.api.internal.nodes.issue import IssueNode
@@ -152,7 +153,8 @@ class TestIssueNode(GraphQLNodeBaseTest):
         result = field.base_resolver.wrapped_func(None, mock_issue)
         assert not result
 
-    def test_interested_users(self):
+    @pytest.mark.asyncio
+    async def test_interested_users(self):
         """Test interested_users field returns users from the interested users dataloader."""
         mock_issue = Mock()
         mock_issue.pk = 123
@@ -169,7 +171,7 @@ class TestIssueNode(GraphQLNodeBaseTest):
         mock_info.context.github_dataloaders = {INTERESTED_USERS_LOADER: mock_loader}
 
         field = self._get_field_by_name("interested_users", IssueNode)
-        result = asyncio.run(field.base_resolver.wrapped_func(None, mock_issue, mock_info))
+        result = await field.base_resolver.wrapped_func(None, mock_issue, mock_info)
 
         assert result == [mock_user1, mock_user2]
         mock_loader.load.assert_awaited_once_with(mock_issue.pk)
