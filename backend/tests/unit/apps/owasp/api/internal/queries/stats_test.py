@@ -1,6 +1,7 @@
 """Tests for StatsQuery."""
 
-from unittest.mock import MagicMock, patch
+import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from apps.owasp.api.internal.queries.stats import StatsQuery
 
@@ -19,15 +20,21 @@ class TestStatsQuery:
             patch("apps.owasp.api.internal.queries.stats.User") as mock_user,
             patch("apps.owasp.api.internal.queries.stats.Workspace") as mock_workspace_cls,
         ):
-            mock_project.active_projects_count.return_value = 275
-            mock_chapter.active_chapters_count.return_value = 342
-            mock_user.objects.count.return_value = 15234
-            mock_filter = mock_chapter.objects.filter.return_value.exclude.return_value
-            mock_filter.values.return_value.distinct.return_value.count.return_value = 98
-            mock_workspace_cls.get_default_workspace.return_value = mock_workspace
+            mock_project.active_projects.acount = AsyncMock(return_value=275)
+            mock_chapter.active_chapters.acount = AsyncMock(return_value=342)
+            mock_user.objects.acount = AsyncMock(return_value=15234)
+
+            mock_filter_chain = MagicMock()
+            mock_filter_chain.acount = AsyncMock(return_value=98)
+            mock_exclude = mock_chapter.objects.filter.return_value.exclude
+            mock_exclude.return_value.values.return_value.distinct.return_value = mock_filter_chain
+
+            mock_workspace_cls.objects.filter.return_value.afirst = AsyncMock(
+                return_value=mock_workspace
+            )
 
             query = StatsQuery()
-            result = query.stats_overview()
+            result = asyncio.run(query.stats_overview())
 
             assert result.active_projects_stats == 270
             assert result.active_chapters_stats == 340
@@ -43,15 +50,19 @@ class TestStatsQuery:
             patch("apps.owasp.api.internal.queries.stats.User") as mock_user,
             patch("apps.owasp.api.internal.queries.stats.Workspace") as mock_workspace_cls,
         ):
-            mock_project.active_projects_count.return_value = 10
-            mock_chapter.active_chapters_count.return_value = 10
-            mock_user.objects.count.return_value = 1000
-            mock_filter = mock_chapter.objects.filter.return_value.exclude.return_value
-            mock_filter.values.return_value.distinct.return_value.count.return_value = 10
-            mock_workspace_cls.get_default_workspace.return_value = None
+            mock_project.active_projects.acount = AsyncMock(return_value=10)
+            mock_chapter.active_chapters.acount = AsyncMock(return_value=10)
+            mock_user.objects.acount = AsyncMock(return_value=1000)
+
+            mock_filter_chain = MagicMock()
+            mock_filter_chain.acount = AsyncMock(return_value=10)
+            mock_exclude = mock_chapter.objects.filter.return_value.exclude
+            mock_exclude.return_value.values.return_value.distinct.return_value = mock_filter_chain
+
+            mock_workspace_cls.objects.filter.return_value.afirst = AsyncMock(return_value=None)
 
             query = StatsQuery()
-            result = query.stats_overview()
+            result = asyncio.run(query.stats_overview())
             assert result.slack_workspace_stats == 0
 
     def test_stats_overview_has_strawberry_definition(self):

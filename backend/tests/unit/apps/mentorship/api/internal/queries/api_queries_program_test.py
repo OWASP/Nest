@@ -1,4 +1,5 @@
-from unittest.mock import MagicMock, patch
+import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import strawberry
@@ -52,30 +53,36 @@ class TestGetProgram:
         """Test successful retrieval of a published program by key."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.PUBLISHED
-        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
 
-        result = api_program_queries.get_program(info=mock_info, program_key="program1")
+        result = asyncio.run(
+            api_program_queries.get_program(info=mock_info, program_key="program1")
+        )
 
         assert result == mock_program
         mock_program_prefetch_related.assert_called_once_with(
             "admins__github_user", "admins__nest_user"
         )
-        mock_program_prefetch_related.return_value.get.assert_called_once_with(key="program1")
+        mock_program_prefetch_related.return_value.aget.assert_called_once_with(key="program1")
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     def test_get_program_does_not_exist(
         self, mock_program_prefetch_related: MagicMock, mock_info: MagicMock, api_program_queries
     ) -> None:
         """Test when the program does not exist."""
-        mock_program_prefetch_related.return_value.get.side_effect = Program.DoesNotExist
+        mock_program_prefetch_related.return_value.aget = AsyncMock(
+            side_effect=Program.DoesNotExist
+        )
 
-        result = api_program_queries.get_program(info=mock_info, program_key="nonexistent")
+        result = asyncio.run(
+            api_program_queries.get_program(info=mock_info, program_key="nonexistent")
+        )
 
         assert result is None
         mock_program_prefetch_related.assert_called_once_with(
             "admins__github_user", "admins__nest_user"
         )
-        mock_program_prefetch_related.return_value.get.assert_called_once_with(key="nonexistent")
+        mock_program_prefetch_related.return_value.aget.assert_called_once_with(key="nonexistent")
 
     @patch("apps.mentorship.api.internal.queries.program.Program.objects.prefetch_related")
     def test_get_draft_program_hidden_for_anonymous_user(
@@ -87,11 +94,11 @@ class TestGetProgram:
         """Test that a draft program is not visible to anonymous users."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
-        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
         mock_program.user_has_access.return_value = False
 
-        result = api_program_queries.get_program(
-            info=mock_anonymous_info, program_key="draft-program"
+        result = asyncio.run(
+            api_program_queries.get_program(info=mock_anonymous_info, program_key="draft-program")
         )
 
         assert result is None
@@ -106,10 +113,12 @@ class TestGetProgram:
         """Test that a draft program is visible to an admin."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
-        mock_program_prefetch_related.return_value.get.return_value = mock_program
+        mock_program_prefetch_related.return_value.aget = AsyncMock(return_value=mock_program)
         mock_program.user_has_access.return_value = True
 
-        result = api_program_queries.get_program(info=mock_info, program_key="draft-program")
+        result = asyncio.run(
+            api_program_queries.get_program(info=mock_info, program_key="draft-program")
+        )
 
         assert result == mock_program
 

@@ -1,4 +1,5 @@
-from unittest.mock import MagicMock, patch
+import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import strawberry
@@ -45,10 +46,12 @@ class TestModuleQuery:
     """Tests for ModuleQuery."""
 
     @patch("apps.mentorship.api.internal.queries.module.Module.objects.filter")
-    @patch("apps.mentorship.api.internal.queries.module.Program.objects.get")
+    @patch(
+        "apps.mentorship.api.internal.queries.module.Program.objects.aget", new_callable=AsyncMock
+    )
     def test_get_program_modules_success(
         self,
-        mock_program_get: MagicMock,
+        mock_program_aget: AsyncMock,
         mock_module_filter: MagicMock,
         mock_info: MagicMock,
         api_module_queries,
@@ -56,51 +59,61 @@ class TestModuleQuery:
         """Test successful retrieval of modules by program key."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.PUBLISHED
-        mock_program_get.return_value = mock_program
+        mock_program_aget.return_value = mock_program
 
         mock_module = MagicMock(spec=Module)
         mock_module_filter_related = mock_module_filter.return_value.select_related.return_value
         mock_module_filter_related.prefetch_related.return_value.order_by.return_value = [
             mock_module
         ]
-        result = api_module_queries.get_program_modules(info=mock_info, program_key="program1")
+        result = asyncio.run(
+            api_module_queries.get_program_modules(info=mock_info, program_key="program1")
+        )
 
         assert result == [mock_module]
-        mock_program_get.assert_called_once_with(key="program1")
+        mock_program_aget.assert_called_once_with(key="program1")
         mock_module_filter.assert_called_once_with(program=mock_program)
 
-    @patch("apps.mentorship.api.internal.queries.module.Program.objects.get")
+    @patch(
+        "apps.mentorship.api.internal.queries.module.Program.objects.aget", new_callable=AsyncMock
+    )
     def test_get_program_modules_empty(
         self,
-        mock_program_get: MagicMock,
+        mock_program_aget: AsyncMock,
         mock_info: MagicMock,
         api_module_queries,
     ) -> None:
         """Test retrieval of modules returns empty list if program not found."""
-        mock_program_get.side_effect = Program.DoesNotExist
+        mock_program_aget.side_effect = Program.DoesNotExist
 
-        result = api_module_queries.get_program_modules(
-            info=mock_info, program_key="nonexistent_program"
+        result = asyncio.run(
+            api_module_queries.get_program_modules(
+                info=mock_info, program_key="nonexistent_program"
+            )
         )
 
         assert result == []
-        mock_program_get.assert_called_once_with(key="nonexistent_program")
+        mock_program_aget.assert_called_once_with(key="nonexistent_program")
 
-    @patch("apps.mentorship.api.internal.queries.module.Program.objects.get")
+    @patch(
+        "apps.mentorship.api.internal.queries.module.Program.objects.aget", new_callable=AsyncMock
+    )
     def test_get_program_modules_hidden_for_draft_program(
         self,
-        mock_program_get: MagicMock,
+        mock_program_aget: AsyncMock,
         mock_anonymous_info: MagicMock,
         api_module_queries,
     ) -> None:
         """Test that modules of a draft program are hidden from anonymous users."""
         mock_program = MagicMock(spec=Program)
         mock_program.status = Program.ProgramStatus.DRAFT
-        mock_program_get.return_value = mock_program
+        mock_program_aget.return_value = mock_program
         mock_program.user_has_access.return_value = False
 
-        result = api_module_queries.get_program_modules(
-            info=mock_anonymous_info, program_key="draft-program"
+        result = asyncio.run(
+            api_module_queries.get_program_modules(
+                info=mock_anonymous_info, program_key="draft-program"
+            )
         )
 
         assert result == []
