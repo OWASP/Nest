@@ -4,6 +4,7 @@ import logging
 
 import strawberry
 import strawberry_django
+from asgiref.sync import sync_to_async
 
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module, Program
@@ -25,9 +26,9 @@ class ModuleQuery:
         except Program.DoesNotExist:
             return []
 
-        if program.status != Program.ProgramStatus.PUBLISHED and not program.user_has_access(
-            info.context.request.user
-        ):
+        if program.status != Program.ProgramStatus.PUBLISHED and not await sync_to_async(
+            program.user_has_access
+        )(info.context.request.user):
             return []
 
         return (
