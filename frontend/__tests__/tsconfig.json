@@ -1,0 +1,19 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"types": [
+			"jest",
+			"@testing-library/jest-dom",
+			"node"
+		],
+		"noEmit": true,
+		"isolatedModules": true
+	},
+	"include": [
+		"**/*"
+	],
+	"exclude": [
+		"node_modules",
+		"../playwright.config.ts"
+	]
+}
