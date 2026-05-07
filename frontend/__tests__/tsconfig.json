@@ -9,8 +9,7 @@
 		"isolatedModules": true
 	},
 	"exclude": [
-		"node_modules",
-		"../playwright.config.ts"
+		"node_modules"
 	],
 	"include": [
 		"**/*"
