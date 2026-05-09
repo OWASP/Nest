@@ -27,6 +27,8 @@ env:
 jobs:
   run-checks:
     name: Run checks
+    permissions:
+      contents: read
     uses: ./.github/workflows/run-checks.yaml
 
   run-backend-tests:
