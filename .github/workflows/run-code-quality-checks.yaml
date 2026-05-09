@@ -1,0 +1,147 @@
+name: Run code quality checks
+
+on:
+  workflow_call:
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-pre-commit-checks:
+    name: Run pre-commit checks
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          cache-dependency-path: backend/poetry.lock
+          cache: poetry
+          python-version: '3.13'
+
+      - name: Set up pre-commit cache
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+        with:
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/pre-commit
+          restore-keys: |
+            pre-commit-${{ runner.os }}-
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85  # v4.0.0
+        with:
+          terraform_version: 1.14
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93  # v6.2.2
+        with:
+          cache: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tflint_version: v0.60.0
+
+      - name: Run pre-commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || (echo 'Unstaged changes detected. \
+          Run `make check` and use `git add` to address it.' && exit 1)
+
+  run-frontend-checks:
+    name: Run frontend checks
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320  # v5.0.0
+        with:
+          run_install: true
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          cache: pnpm
+          node-version: 24
+
+      - name: Run pnpm format
+        run: pnpm run format
+        working-directory: frontend
+
+      - name: Run pnpm lint check
+        run: pnpm run lint:check
+        working-directory: frontend
+
+      - name: Check for uncommitted changes
+        run: |
+          git diff --exit-code || (echo 'Unstaged changes detected. \
+          Run `make check` and use `git add` to address it.' && exit 1)
+
+  run-security-checks:
+    name: Run security checks
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run Semgrep security scan
+        run: make security-scan-code-semgrep
+
+      - name: Cache Trivy DB
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+        with:
+          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
+          path: .trivy-cache
+          restore-keys: trivy-${{ runner.os }}-
+
+      - name: Run Trivy security scan
+        run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
+    timeout-minutes: 15
+
+  run-spelling-checks:
+    name: Run spelling checks
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320  # v5.0.0
+        with:
+          run_install: false
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          cache-dependency-path: cspell/pnpm-lock.yaml
+          cache: pnpm
+          node-version: 24
+
+      - name: Install cspell dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: cspell
+
+      - name: Run cspell
+        run: pnpm exec cspell --config cspell.json --no-progress -r ..
+        working-directory: cspell

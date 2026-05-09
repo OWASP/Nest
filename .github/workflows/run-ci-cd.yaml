@@ -25,146 +25,16 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  pre-commit:
-    name: Run pre-commit checks
+  run-code-quality-checks:
+    name: Run code quality checks
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Install Poetry
-        run: pipx install poetry
-
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
-        with:
-          cache: poetry
-          cache-dependency-path: backend/poetry.lock
-          python-version: '3.13'
-
-      - name: Set up pre-commit cache
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
-          restore-keys: |
-            pre-commit-${{ runner.os }}-
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85  # v4.0.0
-        with:
-          terraform_version: 1.14
-
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93  # v6.2.2
-        with:
-          cache: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tflint_version: v0.60.0
-
-      - name: Run pre-commit
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
-
-      - name: Check for uncommitted changes
-        run: |
-          git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check` and use `git add` to address it.' && exit 1)
-
-  check-frontend:
-    name: Run frontend checks
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320  # v5.0.0
-        with:
-          version: 10
-          run_install: true
-
-      - name: Set up Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
-
-      - name: Run pnpm format
-        working-directory: frontend
-        run: pnpm run format
-
-      - name: Run pnpm lint check
-        working-directory: frontend
-        run: pnpm run lint:check
-
-      - name: Check for uncommitted changes
-        run: |
-          git diff --exit-code || (echo 'Unstaged changes detected. \
-          Run `make check` and use `git add` to address it.' && exit 1)
-
-  spellcheck:
-    name: Run spell check
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
-
-      - name: Build cspell image
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294  # v7.0.0
-        with:
-          cache-from: type=gha,scope=cspell
-          cache-to: type=gha,scope=cspell,mode=max
-          context: cspell
-          file: docker/cspell/Dockerfile
-          load: true
-          tags: cspell:ci
-
-      - name: Run cspell
-        run: |
-          make check-spelling
-
-  run-security-scan-code:
-    name: Run code security scan
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Run Semgrep security scan
-        run: make security-scan-code-semgrep
-
-      - name: Cache Trivy DB
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
-        with:
-          path: .trivy-cache
-          key: trivy-${{ runner.os }}-${{ hashFiles('docker/trivy/Dockerfile') }}
-          restore-keys: trivy-${{ runner.os }}-
-
-      - name: Run Trivy security scan
-        run: make security-scan-code-trivy SCANNERS=misconfig,secret,vuln
-    timeout-minutes: 15
+    uses: ./.github/workflows/run-code-quality-checks.yaml
 
   run-backend-tests:
     name: Run backend tests
     needs:
-      - check-frontend
-      - pre-commit
-      - run-security-scan-code
-      - spellcheck
+      - run-code-quality-checks
     permissions:
       contents: read
       id-token: write
@@ -214,10 +84,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - check-frontend
-      - pre-commit
-      - run-security-scan-code
-      - spellcheck
+      - run-code-quality-checks
     permissions:
       contents: read
       id-token: write
@@ -266,10 +133,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - check-frontend
-      - pre-commit
-      - run-security-scan-code
-      - spellcheck
+      - run-code-quality-checks
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -404,10 +268,7 @@ jobs:
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
-      - check-frontend
-      - pre-commit
-      - run-security-scan-code
-      - spellcheck
+      - run-code-quality-checks
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -441,10 +302,7 @@ jobs:
     name: Run GraphQL fuzz tests
     if: false
     needs:
-      - check-frontend
-      - pre-commit
-      - run-security-scan-code
-      - spellcheck
+      - run-code-quality-checks
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
@@ -452,10 +310,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
-      - check-frontend
-      - pre-commit
-      - run-security-scan-code
-      - spellcheck
+      - run-code-quality-checks
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: rest_test.py
@@ -464,10 +319,7 @@ jobs:
   run-infrastructure-tests:
     name: Run Infrastructure tests
     needs:
-      - check-frontend
-      - pre-commit
-      - run-security-scan-code
-      - spellcheck
+      - run-code-quality-checks
     permissions:
       contents: read
     runs-on: ubuntu-latest
