@@ -125,6 +125,7 @@
   "packageManager": "pnpm@10.33.3",
   "pnpm": {
     "overrides": {
+      "fast-uri": "3.1.2",
       "glob": "^11.1.0",
       "serialize-javascript": "^7.0.3",
       "test-exclude": "^7.0.1"
