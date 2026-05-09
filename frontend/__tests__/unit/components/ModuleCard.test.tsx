@@ -6,6 +6,7 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
+import type { Contributor } from 'types/contributor'
 import type { Module } from 'types/mentorship'
 import ModuleCard, { getSimpleDuration } from 'components/ModuleCard'
 
@@ -542,8 +543,8 @@ describe('ModuleCard', () => {
           id: 'id-mentor3',
           login: 'mentor3',
           name: 'Mentor 3',
-          avatarUrl: undefined as unknown as string,
-        }, // Undefined avatar
+          avatarUrl: undefined,
+        } as Contributor, // Undefined avatar URL
       ]
       const modules = [createMockModule({ mentors }), createMockModule({ key: 'mod2' })]
 
@@ -683,7 +684,7 @@ describe('ModuleCard', () => {
       const moduleWithUndefined = createMockModule({
         mentors: undefined,
         mentees: undefined,
-      } as unknown as Partial<Module>)
+      })
 
       const modules = [moduleWithUndefined, createMockModule({ key: 'mod2' })]
 

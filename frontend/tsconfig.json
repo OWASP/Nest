@@ -37,7 +37,7 @@
     "target": "ES2023",
     "useDefineForClassFields": true
   },
-  "exclude": ["__tests__/**/*", "jest.setup.ts", "node_modules", "playwright.config.ts"],
+  "exclude": ["__tests__/**/*", "node_modules", "playwright.config.ts"],
   "include": [
     "**/*.ts",
     "**/*.tsx",

@@ -630,7 +630,7 @@ describe('ItemCardList Component', () => {
 
     it('renders custom renderDetails content', () => {
       const customRenderDetails = (item: {
-        createdAt: number
+        createdAt: string
         commentsCount: number
         organizationName: string
         publishedAt: number
@@ -896,7 +896,7 @@ describe('ItemCardList Component', () => {
       const issueNoLogin = {
         ...mockIssue,
         author: authorNoLogin,
-      } as unknown as Issue
+      } as Issue
 
       render(
         <ItemCardList
