@@ -964,7 +964,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
         />
       )
 
@@ -993,7 +993,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
           onLoadMorePullRequests={jest.fn()}
         />
       )
@@ -1005,7 +1005,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
           onResetPullRequests={jest.fn()}
           onLoadMorePullRequests={undefined}
         />
@@ -1018,7 +1018,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
           onLoadMorePullRequests={jest.fn()}
           onResetPullRequests={jest.fn()}
           isFetchingMore={true}
@@ -2269,7 +2269,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: manyPRs as unknown as PullRequest[],
+        pullRequests: manyPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)
@@ -2290,7 +2290,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: manyPRs as unknown as PullRequest[],
+        pullRequests: manyPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)
@@ -2309,7 +2309,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: manyPRs as unknown as PullRequest[],
+        pullRequests: manyPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)
@@ -2328,7 +2328,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: fewPRs as unknown as PullRequest[],
+        pullRequests: fewPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)

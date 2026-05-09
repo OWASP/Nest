@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { axe } from 'jest-axe'
 import { useTheme } from 'next-themes'
-import { Organization } from 'types/organization'
 import { RepositoryCardProps } from 'types/project'
 import RepositoryCard from 'components/RepositoryCard'
 
@@ -24,7 +23,7 @@ const createMockRepository = (index: number): RepositoryCardProps => ({
     publicRepositoriesCount: 20,
     createdAt: new Date(Date.now()).toISOString(),
     updatedAt: new Date(Date.now()).toISOString(),
-  } as unknown as Organization,
+  },
   starsCount: 100 + index,
   subscribersCount: 20 + index,
   url: `https://github.com/org-${index}/repo-${index}`,

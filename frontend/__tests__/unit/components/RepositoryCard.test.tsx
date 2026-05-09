@@ -2,7 +2,6 @@ import { fireEvent, screen } from '@testing-library/react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { render } from 'wrappers/testUtil'
-import type { Organization } from 'types/organization'
 import type { RepositoryCardProps } from 'types/project'
 import RepositoryCard from 'components/RepositoryCard'
 
@@ -67,7 +66,7 @@ describe('RepositoryCard', () => {
       publicRepositoriesCount: 20,
       createdAt: new Date(Date.now()).toISOString(),
       updatedAt: new Date(Date.now()).toISOString(),
-    } as unknown as Organization,
+    },
     starsCount: 100 + index,
     subscribersCount: 20 + index,
     url: `https://github.com/org-${index}/repo-${index}`,
@@ -79,9 +78,7 @@ describe('RepositoryCard', () => {
   })
 
   it('returns null when repositories prop is missing', () => {
-    const { container } = render(
-      <RepositoryCard repositories={null as unknown as RepositoryCardProps[]} />
-    )
+    const { container } = render(<RepositoryCard />)
     expect(container.querySelector('.grid')).toBeNull()
   })
 

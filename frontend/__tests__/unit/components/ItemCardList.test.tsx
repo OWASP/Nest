@@ -896,7 +896,7 @@ describe('ItemCardList Component', () => {
       const issueNoLogin = {
         ...mockIssue,
         author: authorNoLogin,
-      } as unknown as Issue
+      } as Issue
 
       render(
         <ItemCardList
