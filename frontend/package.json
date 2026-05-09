@@ -113,7 +113,6 @@
     "require-in-the-middle": "^8.0.1",
     "tailwindcss": "^4.2.2",
     "tailwindcss-animate": "^1.0.7",
-    "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
