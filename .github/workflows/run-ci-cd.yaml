@@ -25,16 +25,16 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  run-checks:
-    name: Run checks
+  run-code-quality-checks:
+    name: Run code quality checks
     permissions:
       contents: read
-    uses: ./.github/workflows/run-checks.yaml
+    uses: ./.github/workflows/run-code-quality-checks.yaml
 
   run-backend-tests:
     name: Run backend tests
     needs:
-      - run-checks
+      - run-code-quality-checks
     permissions:
       contents: read
       id-token: write
@@ -84,7 +84,7 @@ jobs:
   run-frontend-unit-tests:
     name: Run frontend unit tests
     needs:
-      - run-checks
+      - run-code-quality-checks
     permissions:
       contents: read
       id-token: write
@@ -133,7 +133,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     needs:
-      - run-checks
+      - run-code-quality-checks
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -268,7 +268,7 @@ jobs:
   run-frontend-a11y-tests:
     name: Run frontend accessibility tests
     needs:
-      - run-checks
+      - run-code-quality-checks
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -302,7 +302,7 @@ jobs:
     name: Run GraphQL fuzz tests
     if: false
     needs:
-      - run-checks
+      - run-code-quality-checks
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: graphql_test.py
@@ -310,7 +310,7 @@ jobs:
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
     needs:
-      - run-checks
+      - run-code-quality-checks
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: rest_test.py
@@ -319,7 +319,7 @@ jobs:
   run-infrastructure-tests:
     name: Run Infrastructure tests
     needs:
-      - run-checks
+      - run-code-quality-checks
     permissions:
       contents: read
     runs-on: ubuntu-latest
