@@ -630,7 +630,7 @@ describe('ItemCardList Component', () => {
 
     it('renders custom renderDetails content', () => {
       const customRenderDetails = (item: {
-        createdAt: number
+        createdAt: string
         commentsCount: number
         organizationName: string
         publishedAt: number

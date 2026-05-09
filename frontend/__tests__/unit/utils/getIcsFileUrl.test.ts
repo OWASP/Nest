@@ -40,6 +40,7 @@ describe('getIcsFileUrl', () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
     const eventWithTimestamps = {
+      title: 'Multi-day',
       startDate: '2025-01-01T00:00:00Z',
       endDate: '2025-01-03T00:00:00Z',
     }
@@ -59,6 +60,7 @@ describe('getIcsFileUrl', () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
     const eventWithTimestamps = {
+      title: 'Multi-day UTC',
       startDate: '2025-01-01T00:00:00Z',
       endDate: '2025-01-03T00:00:00Z',
     }
@@ -78,6 +80,7 @@ describe('getIcsFileUrl', () => {
     ;(createEvent as jest.Mock).mockImplementation((attr, cb) => cb(null, 'val'))
 
     const singleDayEvent = {
+      title: 'Single day',
       startDate: '2025-01-01T00:00:00Z',
       endDate: '2025-01-01T00:00:00Z',
     }

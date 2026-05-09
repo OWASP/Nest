@@ -1,17 +1,14 @@
 {
-	"extends": "../tsconfig.json",
-	"compilerOptions": {
-		"types": [
-			"jest",
-			"node"
-		],
-		"noEmit": true,
-		"isolatedModules": true
-	},
-	"exclude": [
-		"node_modules"
-	],
-	"include": [
-		"**/*"
-	]
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Do not emit a .tsbuildinfo.
+    "incremental": false,
+    "isolatedModules": true,
+    "noEmit": true,
+    // Tightening would require typed mocks across many a11y files.
+    "strict": false,
+    "types": ["jest", "node"]
+  },
+  "exclude": ["e2e", "node_modules"],
+  "include": ["**/*.ts", "**/*.tsx", "../jest.config.ts"]
 }
