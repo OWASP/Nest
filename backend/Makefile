@@ -5,15 +5,9 @@ include backend/apps/nest/Makefile
 include backend/apps/owasp/Makefile
 include backend/apps/slack/Makefile
 
+.PHONY: fetch-nest-dump sbom-backend-image upload-nest-dump
+
 ##@ Backend
-
-ifeq ($(EXEC_MODE),direct)
-SHELL := /bin/sh
-else
-SHELL := /bin/bash
-endif
-
-.PHONY: sbom-backend-image fetch-nest-dump upload-nest-dump
 
 build-backend-local-image:
 	@DOCKER_BUILDKIT=1 docker build \
@@ -121,7 +115,12 @@ index-data: ## Index data for Algolia search
 	@CMD="python manage.py algolia_update_synonyms" $(MAKE) exec-backend-command
 
 fetch-nest-dump: ## Download backend/data/nest.dump from S3 if the remote copy changed
-	@cd backend && poetry run python -m scripts.fetch_nest_dump
+	@DOCKER_BUILDKIT=1 docker compose \
+		-f docker-compose/e2e/compose.yaml \
+		run \
+		--no-deps \
+		--rm \
+		backend python -m scripts.fetch_nest_dump
 
 load-data: fetch-nest-dump ## Load initial data from fixtures
 	@echo "Loading Nest data"

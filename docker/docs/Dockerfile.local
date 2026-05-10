@@ -1,21 +1,26 @@
-FROM python:3.13.11-alpine3.23 AS builder
+ARG OWASP_GID=1000
+ARG OWASP_UID=1000
+
+FROM python:3.13.12-alpine3.23 AS builder
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
 ENV APK_CACHE_DIR="/home/owasp/.cache/apk-docs" \
     APK_SYMLINK_DIR="/etc/apk/cache" \
-    OWASP_GID=1000 \
-    OWASP_UID=1000 \
+    OWASP_GID=${OWASP_GID} \
+    OWASP_UID=${OWASP_UID} \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
     ln -fns ${APK_CACHE_DIR} ${APK_SYMLINK_DIR}
 
 RUN --mount=type=cache,target=${APK_CACHE_DIR} \
-    apk update && \
+    apk --no-cache update && \
     apk --no-cache upgrade && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
@@ -28,17 +33,20 @@ RUN --mount=type=cache,target=${PIP_CACHE_DIR} \
 WORKDIR /home/owasp
 USER owasp
 
-COPY --chmod=444 --chown=root:root docs/poetry.lock docs/pyproject.toml .mkdocs.yaml ./
+COPY --chmod=444 --chown=root:root docs/poetry.lock docs/poetry.toml docs/pyproject.toml .mkdocs.yaml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --no-root --verbose && \
-    rm -rf docs/poetry.lock docs/pyproject.toml
+    rm -rf poetry.lock poetry.toml pyproject.toml
 
-FROM python:3.13.11-alpine3.23
+FROM python:3.13.12-alpine3.23
+
+ARG OWASP_GID
+ARG OWASP_UID
 
 SHELL ["/bin/sh", "-o", "pipefail", "-c"]
 
-RUN addgroup -S owasp && \
-    adduser -S -h /home/owasp -G owasp owasp && \
+RUN addgroup -S -g ${OWASP_GID} owasp && \
+    adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp && \
     mkdir -p /home/owasp && \
     chown owasp:owasp /home/owasp
 

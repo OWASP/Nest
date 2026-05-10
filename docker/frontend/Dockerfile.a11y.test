@@ -19,7 +19,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 
 COPY __tests__/a11y __tests__/a11y
 COPY __tests__/mockData __tests__/mockData
-COPY .pnpmrc jest.config.ts jest.setup.ts tsconfig.json ./
+COPY __tests__/jest.setup.ts __tests__/jest.setup.ts
+COPY .pnpmrc jest.config.ts tsconfig.json ./
 COPY public public
 COPY src src
 
