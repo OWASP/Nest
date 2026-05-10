@@ -69,8 +69,8 @@ jobs:
           cache-to: |
             type=gha,compression=zstd
             type=registry,ref=owasp/nest:test-frontend-e2e-cache
-          context: frontend
-          file: docker/frontend/Dockerfile.e2e.test
+          context: .
+          file: docker/e2e/Dockerfile
           platforms: linux/amd64
           push: true
           tags: owasp/nest:test-frontend-e2e-latest

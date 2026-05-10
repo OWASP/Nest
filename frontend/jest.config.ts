@@ -37,7 +37,6 @@ const config: Config = {
   testEnvironment: 'jest-environment-jsdom',
   testPathIgnorePatterns: [
     '<rootDir>/__tests__/unit/data/',
-    '<rootDir>/__tests__/e2e/',
     '<rootDir>/__tests__/mockData/',
     '<rootDir>/__tests__/jest.setup.ts',
   ],
