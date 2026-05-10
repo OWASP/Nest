@@ -3368,14 +3368,14 @@ test = ["pillow", "pytest", "ruff"]
 
 [[package]]
 name = "pygithub"
-version = "2.9.0"
+version = "2.9.1"
 description = "Use the full Github API v3"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pygithub-2.9.0-py3-none-any.whl", hash = "sha256:5e2b260ce327bffce9b00f447b65953ef7078ffe93e5a5425624a3075483927c"},
-    {file = "pygithub-2.9.0.tar.gz", hash = "sha256:a26abda1222febba31238682634cad11d8b966137ed6cc3c5e445b29a11cb0a4"},
+    {file = "pygithub-2.9.1-py3-none-any.whl", hash = "sha256:2ec78fca30092d51a42d76f4ddb02131b6f0c666a35dfdf364cf302cdda115b9"},
+    {file = "pygithub-2.9.1.tar.gz", hash = "sha256:59771d7ff63d54d427be2e7d0dad2208dfffc2b0a045fec959263787739b611c"},
 ]
 
 [package.dependencies]
