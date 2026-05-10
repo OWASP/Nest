@@ -5,20 +5,20 @@ ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     NPM_CONFIG_CACHE="/app/.npm" \
     PNPM_HOME="/pnpm"
 
-ENV NPM_CONFIG_RETRY=5 \
+ENV NODE_PATH=/app/e2e/node_modules \
+    NPM_CONFIG_RETRY=5 \
     NPM_CONFIG_TIMEOUT=30000 \
     PATH="$PNPM_HOME:$PATH"
 
-WORKDIR /app
+WORKDIR /app/e2e
 
-COPY --chmod=444 __tests__/e2e/package.json __tests__/e2e/pnpm-lock.yaml ./
+COPY e2e/package.json e2e/pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts
 
-COPY .pnpmrc next.config.ts postcss.config.js playwright.config.ts tailwind.config.mjs tsconfig.json ./
-COPY src/utils src/utils
-COPY __tests__/e2e __tests__/e2e
-COPY __tests__/mockData __tests__/mockData
+COPY e2e/ ./
+COPY frontend/__tests__/mockData /app/frontend/__tests__/mockData
+COPY frontend/src/utils /app/frontend/src/utils
 
 EXPOSE 3800

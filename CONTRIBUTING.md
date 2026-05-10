@@ -399,10 +399,10 @@ make security-scan-images
 
 ### Running e2e Tests
 
-Run the frontend e2e tests with the following command:
+Playwright specs and their package live in the repository `e2e/` directory at the project root. Make targets for the stack are defined in `e2e/Makefile` (included from the repository root). Run the e2e suite with:
 
 ```bash
-make test-frontend-e2e
+make test-e2e
 ```
 
 This command automatically:
@@ -412,10 +412,10 @@ This command automatically:
 - Executes the e2e tests
 - Cleans up containers when done
 
-To run e2e tests without initializing the database, use the following command:
+To run e2e tests without initializing the database, use:
 
 ```bash
-make test-frontend-e2e-no-init
+make test-e2e-no-db-init
 ```
 
 For debugging, you can run the e2e backend separately:
@@ -430,16 +430,16 @@ Then load data manually in another terminal:
 make load-data-e2e
 ```
 
-For debugging the frontend e2e tests UI mode, run:
+For Playwright UI mode:
 
 ```bash
-make test-frontend-e2e-ui
+make test-e2e-ui
 ```
 
-To run the frontend e2e tests UI mode without the database initialized, use the following command:
+To run UI mode without the database initialized:
 
 ```bash
-make test-frontend-e2e-ui-no-db-init
+make test-e2e-ui-no-db-init
 ```
 
 You can access the UI at [http://localhost:3800](http://localhost:3800).
