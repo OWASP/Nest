@@ -27,7 +27,9 @@ export const ReleasesSection = ({ releases, showAll, onToggle }: ReleasesSection
           )
         })}
       </div>
-      {releases.length > MAX_RELEASES_TO_SHOW && <ShowMoreButton onToggle={onToggle} />}
+      {releases.length > MAX_RELEASES_TO_SHOW && (
+        <ShowMoreButton expanded={showAll} onToggle={onToggle} />
+      )}
     </>
   )
 }

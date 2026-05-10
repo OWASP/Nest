@@ -31,6 +31,24 @@ describe('ReleasesSection', () => {
     expect(screen.getByRole('button', { name: 'Show more' })).toBeInTheDocument()
   })
 
+  it('syncs the button expanded state with showAll', () => {
+    const { rerender } = render(
+      <ReleasesSection releases={mockReleases} showAll={false} onToggle={jest.fn()} />
+    )
+
+    expect(screen.getByRole('button', { name: 'Show more' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    )
+
+    rerender(<ReleasesSection releases={mockReleases} showAll={true} onToggle={jest.fn()} />)
+
+    expect(screen.getByRole('button', { name: 'Show less' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+  })
+
   it('calls onToggle when the show more button is clicked', () => {
     const onToggle = jest.fn()
 
