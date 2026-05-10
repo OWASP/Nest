@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom'
-import { render, screen } from '@testing-library/react'
-import { ReleasesSection } from 'components/SnapshotReleaseSection'
+import { fireEvent, render, screen } from '@testing-library/react'
+
 import { MAX_RELEASES_TO_SHOW } from 'utils/constants'
+import { ReleasesSection } from 'components/SnapshotReleaseSection'
 
 describe('ReleasesSection', () => {
   const mockReleases = Array.from({ length: MAX_RELEASES_TO_SHOW + 1 }, (_, i) => ({
@@ -25,13 +26,17 @@ describe('ReleasesSection', () => {
     expect(items.length).toBe(MAX_RELEASES_TO_SHOW + 1)
   })
 
-  it('button has label `show all` for releases > MAX_RELEASES_TO_SHOW', () => {
+  it('renders the show more button for releases > MAX_RELEASES_TO_SHOW', () => {
     render(<ReleasesSection releases={mockReleases} showAll={false} onToggle={jest.fn()} />)
-    expect(screen.getByRole('button', { name: 'show all' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Show more' })).toBeInTheDocument()
   })
 
-  it('button has label `show less` for releases > MAX_RELEASES_TO_SHOW', () => {
-    render(<ReleasesSection releases={mockReleases} showAll={true} onToggle={jest.fn()} />)
-    expect(screen.getByRole('button', { name: 'show less' })).toBeInTheDocument()
+  it('calls onToggle when the show more button is clicked', () => {
+    const onToggle = jest.fn()
+
+    render(<ReleasesSection releases={mockReleases} showAll={false} onToggle={onToggle} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show more' }))
+    expect(onToggle).toHaveBeenCalledTimes(1)
   })
 })
