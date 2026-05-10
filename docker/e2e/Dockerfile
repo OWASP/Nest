@@ -12,7 +12,7 @@ ENV NODE_PATH=/app/e2e/node_modules \
 
 WORKDIR /app/e2e
 
-COPY e2e/package.json e2e/pnpm-lock.yaml e2e/.pnpmrc ./
+COPY e2e/package.json e2e/pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     corepack install && corepack enable pnpm && \
     pnpm install --frozen-lockfile --ignore-scripts
