@@ -1,4 +1,4 @@
-.PHONY: check-spelling cspell-install cspell-check cspell-run update-cspell-dependencies
+.PHONY: check-spelling cspell-check cspell-install cspell-run update-cspell-dependencies
 
 ##@ Spelling
 
