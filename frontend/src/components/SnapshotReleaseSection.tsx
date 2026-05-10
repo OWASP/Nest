@@ -20,7 +20,7 @@ export const ReleasesSection = ({ releases, showAll, onToggle }: ReleasesSection
               key={
                 release.id || `${release.tagName}-${release.repositoryName ?? 'unknown'}-${index}`
               }
-              release={release as unknown as ReleaseType}
+              release={release}
               showAvatar={true}
               index={index}
             />
