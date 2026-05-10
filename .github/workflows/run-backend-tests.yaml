@@ -1,0 +1,47 @@
+name: Run backend tests
+
+on:
+  workflow_call:
+
+jobs:
+  run-unit-tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd    # v6.0.2
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405    # v6.2.0
+        with:
+          cache-dependency-path: backend/poetry.lock
+          cache: poetry
+          python-version: '3.13'
+
+      - name: Install backend dependencies
+        run: poetry install --no-interaction
+        working-directory: backend
+
+      - name: Run backend tests
+        run: |
+          set -a
+          source .env.example
+          set +a
+          export DJANGO_SETTINGS_MODULE=settings.test
+          poetry run pytest tests/unit
+        working-directory: backend
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2    # v6.0.0
+        with:
+          fail_ci_if_error: false
+          files: backend/coverage.xml
+          flags: backend
+          use_oidc: true
+    timeout-minutes: 5
