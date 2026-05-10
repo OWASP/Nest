@@ -33,6 +33,9 @@ jobs:
 
   run-backend-tests:
     name: Run backend tests
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - run-code-quality-checks
     uses: ./.github/workflows/run-backend-tests.yaml
