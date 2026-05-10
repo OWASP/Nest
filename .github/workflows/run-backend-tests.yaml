@@ -3,6 +3,9 @@ name: Run backend tests
 on:
   workflow_call:
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   run-unit-tests:
     name: Run unit tests
