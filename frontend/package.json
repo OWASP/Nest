@@ -32,7 +32,7 @@
     "@heroui/theme": "^2.4.26",
     "@heroui/toast": "^2.0.22",
     "@heroui/tooltip": "^2.2.29",
-    "@next/third-parties": "^16.2.3",
+    "@next/third-parties": "^16.2.4",
     "@react-leaflet/core": "^3.0.0",
     "@sentry/nextjs": "^10.48.0",
     "apexcharts": "^5.10.6",
