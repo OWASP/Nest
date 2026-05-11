@@ -45,14 +45,14 @@ class ModuleQuery:
         """List modules for management UI; requires admin or mentor on the program."""
         user = info.context.request.user
         if not user.is_authenticated:
-            raise AuthenticationRequiredError
+            raise AuthenticationRequiredError()  # noqa: RSE102
         try:
             program = Program.objects.get(key=program_key)
         except Program.DoesNotExist:
             return []
 
         if not program.user_has_access(user):
-            raise ManagementProgramAccessDeniedError
+            raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         return (
             Module.objects.filter(program=program)
@@ -102,7 +102,7 @@ class ModuleQuery:
         """Single module for management UI; requires admin or mentor on the program."""
         user = info.context.request.user
         if not user.is_authenticated:
-            raise AuthenticationRequiredError
+            raise AuthenticationRequiredError()  # noqa: RSE102
         try:
             module = (
                 Module.objects.select_related("program", "project")
@@ -115,6 +115,6 @@ class ModuleQuery:
             return None
 
         if not module.program.user_has_access(user):
-            raise ManagementProgramAccessDeniedError
+            raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         return module

@@ -50,7 +50,7 @@ class ProgramQuery:
         """Return program details for admins or mentors."""
         user = info.context.request.user
         if not user.is_authenticated:
-            raise AuthenticationRequiredError
+            raise AuthenticationRequiredError()  # noqa: RSE102
         try:
             program = Program.objects.prefetch_related(
                 "admins__github_user", "admins__nest_user"
@@ -61,7 +61,7 @@ class ProgramQuery:
             return None
 
         if not program.user_has_access(user):
-            raise ManagementProgramAccessDeniedError
+            raise ManagementProgramAccessDeniedError()  # noqa: RSE102
 
         return program
 

@@ -209,7 +209,12 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   it('renders a 404 error if the issue is not found', () => {
-    setupQueryMock({ managementModule: { issueByNumber: null } } as typeof mockIssueData)
+    setupQueryMock({
+      managementModule: {
+        ...mockIssueData.managementModule,
+        issueByNumber: null,
+      },
+    })
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('Issue Not Found')).toBeInTheDocument()
   })

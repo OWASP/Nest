@@ -266,6 +266,25 @@ class TestModuleQuery:
 
         assert exc_info.value.extensions["code"] == "FORBIDDEN"
 
+    @patch("apps.mentorship.api.internal.queries.module.Module.objects.select_related")
+    def test_management_module_not_found(
+        self, mock_module_select_related: MagicMock, mock_info: MagicMock, api_module_queries
+    ) -> None:
+        """Missing module returns None for get_management_module."""
+        mock_module_select_related.return_value.prefetch_related.return_value.get.side_effect = (
+            Module.DoesNotExist
+        )
+
+        result = api_module_queries.get_management_module(
+            info=mock_info, module_key="nonexistent", program_key="program1"
+        )
+
+        assert result is None
+        mock_module_select_related.assert_called_once_with("program", "project")
+        mock_module_select_related.return_value.prefetch_related.return_value.get.assert_called_once_with(
+            key="nonexistent", program__key="program1"
+        )
+
     def test_management_module_unauthenticated(
         self, mock_anonymous_info: MagicMock, api_module_queries
     ) -> None:
