@@ -4,7 +4,7 @@ import { useMutation, useQuery } from '@apollo/client/react'
 import { addToast } from '@heroui/toast'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import type { UpdateModuleInput } from 'types/__generated__/graphql'
@@ -43,6 +43,24 @@ const EditModulePage = () => {
     fetchPolicy: 'network-only',
   })
 
+  const currentUserLogin = sessionData?.user?.login
+
+  const isAdmin = useMemo(
+    () =>
+      data?.managementProgram?.admins?.some(
+        (admin: { login: string }) => admin.login === currentUserLogin
+      ),
+    [data?.managementProgram?.admins, currentUserLogin]
+  )
+
+  const isMentor = useMemo(
+    () =>
+      data?.managementModule?.mentors?.some(
+        (mentor: { login: string }) => mentor.login === currentUserLogin
+      ),
+    [data?.managementModule?.mentors, currentUserLogin]
+  )
+
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
       return
@@ -58,15 +76,6 @@ const EditModulePage = () => {
       return
     }
 
-    const currentUserLogin = sessionData?.user?.login
-    const isAdmin = data.managementProgram.admins?.some(
-      (admin: { login: string }) => admin.login === currentUserLogin
-    )
-
-    const isMentor = data.managementModule.mentors?.some(
-      (mentor: { login: string }) => mentor.login === currentUserLogin
-    )
-
     if (isAdmin || isMentor) {
       setAccessStatus('allowed')
     } else {
@@ -80,7 +89,7 @@ const EditModulePage = () => {
       })
       setTimeout(() => router.replace(`/my/mentorship/programs/${programKey}`), 1500)
     }
-  }, [sessionStatus, sessionData, queryLoading, data, programKey, queryError, router])
+  }, [sessionStatus, queryLoading, queryError, data, programKey, router, isAdmin, isMentor])
 
   useEffect(() => {
     if (accessStatus === 'allowed' && data?.managementModule) {
@@ -107,11 +116,6 @@ const EditModulePage = () => {
     setValidationErrors({})
 
     try {
-      const currentUserLogin = sessionData?.user?.login
-      const isAdmin = data?.managementProgram?.admins?.some(
-        (admin: { login: string }) => admin.login === currentUserLogin
-      )
-
       const input: UpdateModuleInput = {
         description: formData!.description,
         domains: parseCommaSeparated(formData!.domains),

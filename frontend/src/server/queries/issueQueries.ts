@@ -1,5 +1,57 @@
 import { gql } from '@apollo/client'
 
+const MODULE_ISSUE_VIEW_FIELDS = gql`
+  fragment ModuleIssueViewFields on ModuleNode {
+    id
+    taskDeadline(issueNumber: $number)
+    taskAssignedAt(issueNumber: $number)
+    issueByNumber(number: $number) {
+      id
+      number
+      title
+      body
+      url
+      state
+      isMerged
+      organizationName
+      repositoryName
+      assignees {
+        id
+        login
+        name
+        avatarUrl
+      }
+      labels
+      pullRequests(limit: $limit, offset: $offset) {
+        id
+        title
+        url
+        state
+        createdAt
+        mergedAt
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
+    }
+    interestedUsers(issueNumber: $number) {
+      id
+      login
+      name
+      avatarUrl
+    }
+    issueMentees(issueNumber: $number) {
+      id
+      login
+      name
+      avatarUrl
+    }
+  }
+`
+
 export const GET_MANAGEMENT_MODULE_ISSUE_VIEW = gql`
   query GetManagementModuleIssueView(
     $programKey: String!
@@ -9,55 +61,10 @@ export const GET_MANAGEMENT_MODULE_ISSUE_VIEW = gql`
     $offset: Int = 0
   ) {
     managementModule(moduleKey: $moduleKey, programKey: $programKey) {
-      id
-      taskDeadline(issueNumber: $number)
-      taskAssignedAt(issueNumber: $number)
-      issueByNumber(number: $number) {
-        id
-        number
-        title
-        body
-        url
-        state
-        isMerged
-        organizationName
-        repositoryName
-        assignees {
-          id
-          login
-          name
-          avatarUrl
-        }
-        labels
-        pullRequests(limit: $limit, offset: $offset) {
-          id
-          title
-          url
-          state
-          createdAt
-          mergedAt
-          author {
-            id
-            login
-            name
-            avatarUrl
-          }
-        }
-      }
-      interestedUsers(issueNumber: $number) {
-        id
-        login
-        name
-        avatarUrl
-      }
-      issueMentees(issueNumber: $number) {
-        id
-        login
-        name
-        avatarUrl
-      }
+      ...ModuleIssueViewFields
     }
   }
+  ${MODULE_ISSUE_VIEW_FIELDS}
 `
 
 export const GET_MODULE_ISSUE_VIEW = gql`
@@ -69,55 +76,10 @@ export const GET_MODULE_ISSUE_VIEW = gql`
     $offset: Int = 0
   ) {
     getModule(programKey: $programKey, moduleKey: $moduleKey) {
-      id
-      taskDeadline(issueNumber: $number)
-      taskAssignedAt(issueNumber: $number)
-      issueByNumber(number: $number) {
-        id
-        number
-        title
-        body
-        url
-        state
-        isMerged
-        organizationName
-        repositoryName
-        assignees {
-          id
-          login
-          name
-          avatarUrl
-        }
-        labels
-        pullRequests(limit: $limit, offset: $offset) {
-          id
-          title
-          url
-          state
-          createdAt
-          mergedAt
-          author {
-            id
-            login
-            name
-            avatarUrl
-          }
-        }
-      }
-      interestedUsers(issueNumber: $number) {
-        id
-        login
-        name
-        avatarUrl
-      }
-      issueMentees(issueNumber: $number) {
-        id
-        login
-        name
-        avatarUrl
-      }
+      ...ModuleIssueViewFields
     }
   }
+  ${MODULE_ISSUE_VIEW_FIELDS}
 `
 
 export const ASSIGN_ISSUE_TO_USER = gql`

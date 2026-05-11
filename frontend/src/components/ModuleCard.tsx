@@ -32,10 +32,7 @@ import {
   FaHourglassHalf,
 } from 'react-icons/fa6'
 import { REORDER_MODULES } from 'server/mutations/moduleMutations'
-import {
-  GetManagementProgramAndModulesDocument,
-  GetProgramAndModulesDocument,
-} from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -103,10 +100,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
           },
           refetchQueries: [
             {
-              query:
-                accessLevel === 'admin'
-                  ? GetManagementProgramAndModulesDocument
-                  : GetProgramAndModulesDocument,
+              query: GetManagementProgramAndModulesDocument,
               variables: { programKey },
             },
           ],
@@ -124,7 +118,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
           .finally(() => setIsSaving(false))
       }
     },
-    [accessLevel, programKey, reorderModules, isSaving, orderedModules]
+    [programKey, reorderModules, isSaving, orderedModules]
   )
 
   if (modules.length === 1) {

@@ -38,18 +38,23 @@ export const useAccessControl = (
     const program = accessData?.managementProgram ?? accessData?.getProgram
     const moduleNode = accessData?.managementModule ?? accessData?.getModule
 
-    if (!program?.admins || !moduleNode?.mentors) {
+    const hasProgram = Boolean(program)
+    const hasModule = Boolean(moduleNode)
+
+    if (!hasProgram && !hasModule) {
       setHasAccess(false)
       return
     }
 
-    const isAdmin = (program.admins || []).some(
-      (admin: { login: string }) => admin.login === currentUserLogin
-    )
+    const isAdmin =
+      hasProgram &&
+      (program?.admins || []).some((admin: { login: string }) => admin.login === currentUserLogin)
 
-    const isMentor = (moduleNode.mentors || []).some(
-      (mentor: { login: string }) => mentor.login === currentUserLogin
-    )
+    const isMentor =
+      hasModule &&
+      (moduleNode?.mentors || []).some(
+        (mentor: { login: string }) => mentor.login === currentUserLogin
+      )
 
     setHasAccess(isAdmin || isMentor)
   }, [sessionStatus, currentUserLogin, isLoading, accessData])
