@@ -1,5 +1,65 @@
 import { gql } from '@apollo/client'
 
+export const GET_MANAGEMENT_MODULE_ISSUE_VIEW = gql`
+  query GetManagementModuleIssueView(
+    $programKey: String!
+    $moduleKey: String!
+    $number: Int!
+    $limit: Int = 4
+    $offset: Int = 0
+  ) {
+    managementModule(moduleKey: $moduleKey, programKey: $programKey) {
+      id
+      taskDeadline(issueNumber: $number)
+      taskAssignedAt(issueNumber: $number)
+      issueByNumber(number: $number) {
+        id
+        number
+        title
+        body
+        url
+        state
+        isMerged
+        organizationName
+        repositoryName
+        assignees {
+          id
+          login
+          name
+          avatarUrl
+        }
+        labels
+        pullRequests(limit: $limit, offset: $offset) {
+          id
+          title
+          url
+          state
+          createdAt
+          mergedAt
+          author {
+            id
+            login
+            name
+            avatarUrl
+          }
+        }
+      }
+      interestedUsers(issueNumber: $number) {
+        id
+        login
+        name
+        avatarUrl
+      }
+      issueMentees(issueNumber: $number) {
+        id
+        login
+        name
+        avatarUrl
+      }
+    }
+  }
+`
+
 export const GET_MODULE_ISSUE_VIEW = gql`
   query GetModuleIssueView(
     $programKey: String!

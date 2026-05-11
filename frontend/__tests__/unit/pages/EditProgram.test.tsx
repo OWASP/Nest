@@ -67,7 +67,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin1' }],
         },
       },
@@ -88,7 +88,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: 'Test',
           description: 'Test description',
           menteesLimit: 10,
@@ -116,7 +116,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin1' }],
         },
       },
@@ -154,7 +154,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: 'Test',
           description: 'Test description',
           menteesLimit: 10,
@@ -200,7 +200,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: 'Test',
           description: 'Test description',
           menteesLimit: 10,
@@ -242,7 +242,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: 'Test',
           description: 'Test description',
           menteesLimit: 10,
@@ -281,7 +281,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: 'Test',
           admins: [{ login: 'admin1' }],
           status: ProgramStatusEnum.Draft,
@@ -305,7 +305,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: 'Test',
           description: null,
           menteesLimit: null,
@@ -335,7 +335,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin1' }],
         },
       },
@@ -364,7 +364,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: null as unknown as string,
           description: 'Test description',
           menteesLimit: 10,
@@ -394,7 +394,7 @@ describe('EditProgramPage', () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
       data: {
-        getProgram: {
+        managementProgram: {
           name: 'Test',
           description: 'Test description',
           menteesLimit: 10,
@@ -435,7 +435,7 @@ describe('EditProgramPage', () => {
 
   test('handles null admins when access is initially allowed', async () => {
     const validData = {
-      getProgram: {
+      managementProgram: {
         name: 'Test',
         description: 'Test description',
         menteesLimit: 10,
@@ -449,8 +449,8 @@ describe('EditProgramPage', () => {
     }
 
     const nullAdminsData = {
-      getProgram: {
-        ...validData.getProgram,
+      managementProgram: {
+        ...validData.managementProgram,
         admins: null,
       },
     }

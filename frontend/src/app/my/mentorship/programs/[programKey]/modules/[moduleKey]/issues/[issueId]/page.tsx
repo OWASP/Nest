@@ -20,9 +20,10 @@ import {
 } from 'react-icons/fa6'
 import { HiUserGroup } from 'react-icons/hi'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
+import { isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
@@ -49,7 +50,7 @@ const ModuleIssueDetailsPage = () => {
     data: accessData,
     loading: accessLoading,
     error: accessError,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
@@ -104,7 +105,7 @@ const ModuleIssueDetailsPage = () => {
       color,
     }
   }
-  const { data, loading, error, fetchMore } = useQuery(GetModuleIssueViewDocument, {
+  const { data, loading, error, fetchMore } = useQuery(GetManagementModuleIssueViewDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -118,7 +119,7 @@ const ModuleIssueDetailsPage = () => {
   })
 
   useEffect(() => {
-    const prCount = data?.getModule?.issueByNumber?.pullRequests?.length
+    const prCount = data?.managementModule?.issueByNumber?.pullRequests?.length
     if (prCount == null) return
     if (prCount <= limit) {
       setHasMorePRs(prCount >= limit)
@@ -140,8 +141,8 @@ const ModuleIssueDetailsPage = () => {
     setDeadlineInput,
   } = useIssueMutations({ programKey, moduleKey, issueId })
 
-  const issue = data?.getModule?.issueByNumber
-  const taskDeadline = (data?.getModule?.taskDeadline as string | undefined) ?? null
+  const issue = data?.managementModule?.issueByNumber
+  const taskDeadline = (data?.managementModule?.taskDeadline as string | undefined) ?? null
 
   const getButtonClassName = (disabled: boolean) =>
     `inline-flex items-center justify-center rounded-md border p-1.5 text-sm ${
@@ -152,6 +153,16 @@ const ModuleIssueDetailsPage = () => {
 
   if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
     return <LoadingSpinner />
+  }
+
+  if (accessError && isForbiddenGraphQlError(accessError)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to view this issue in the mentorship workspace."
+      />
+    )
   }
 
   if (accessError) {
@@ -248,8 +259,8 @@ const ModuleIssueDetailsPage = () => {
               <div>
                 <span className="font-medium">Assigned:</span>{' '}
                 <span>
-                  {data?.getModule?.taskAssignedAt
-                    ? new Date(data.getModule.taskAssignedAt).toLocaleDateString()
+                  {data?.managementModule?.taskAssignedAt
+                    ? new Date(data.managementModule.taskAssignedAt).toLocaleDateString()
                     : 'Not assigned'}
                 </span>
               </div>
@@ -423,17 +434,18 @@ const ModuleIssueDetailsPage = () => {
                             updateQuery: (prevResult, { fetchMoreResult }) => {
                               if (!fetchMoreResult) return prevResult
                               const newPRs =
-                                fetchMoreResult.getModule?.issueByNumber?.pullRequests || []
+                                fetchMoreResult.managementModule?.issueByNumber?.pullRequests || []
                               if (newPRs.length < limit) setHasMorePRs(false)
                               if (newPRs.length === 0) return prevResult
                               return {
                                 ...prevResult,
-                                getModule: {
-                                  ...prevResult.getModule!,
+                                managementModule: {
+                                  ...prevResult.managementModule!,
                                   issueByNumber: {
-                                    ...prevResult.getModule!.issueByNumber!,
+                                    ...prevResult.managementModule!.issueByNumber!,
                                     pullRequests: [
-                                      ...(prevResult.getModule?.issueByNumber?.pullRequests || []),
+                                      ...(prevResult.managementModule?.issueByNumber
+                                        ?.pullRequests || []),
                                       ...newPRs,
                                     ],
                                   },
@@ -483,7 +495,7 @@ const ModuleIssueDetailsPage = () => {
               </div>
             </h2>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {(data?.getModule?.interestedUsers || []).map((u) => (
+              {(data?.managementModule?.interestedUsers || []).map((u) => (
                 <div
                   key={u.id}
                   className="flex items-center justify-between gap-2 rounded-lg bg-gray-200 p-3 dark:bg-gray-700"
@@ -524,7 +536,7 @@ const ModuleIssueDetailsPage = () => {
                   </button>
                 </div>
               ))}
-              {(data?.getModule?.interestedUsers || []).length === 0 && (
+              {(data?.managementModule?.interestedUsers || []).length === 0 && (
                 <span className="text-sm text-gray-400">No interested users yet.</span>
               )}
             </div>

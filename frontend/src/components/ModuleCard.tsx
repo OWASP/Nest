@@ -32,7 +32,10 @@ import {
   FaHourglassHalf,
 } from 'react-icons/fa6'
 import { REORDER_MODULES } from 'server/mutations/moduleMutations'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import {
+  GetManagementProgramAndModulesDocument,
+  GetProgramAndModulesDocument,
+} from 'types/__generated__/programsQueries.generated'
 import type { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { TextInfoItem } from 'components/InfoItem'
@@ -98,7 +101,15 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
               moduleKeys: newOrder.map((m) => m.key),
             },
           },
-          refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+          refetchQueries: [
+            {
+              query:
+                accessLevel === 'admin'
+                  ? GetManagementProgramAndModulesDocument
+                  : GetProgramAndModulesDocument,
+              variables: { programKey },
+            },
+          ],
         })
           .catch(() => {
             addToast({
@@ -113,7 +124,7 @@ const ModuleCard = ({ modules, accessLevel, admins, programKey }: ModuleCardProp
           .finally(() => setIsSaving(false))
       }
     },
-    [programKey, reorderModules, isSaving, orderedModules]
+    [accessLevel, programKey, reorderModules, isSaving, orderedModules]
   )
 
   if (modules.length === 1) {

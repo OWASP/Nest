@@ -67,12 +67,30 @@ describe('ModuleDetailsPage', () => {
     })
   })
 
+  it('shows access denied when GraphQL error has FORBIDDEN extension', async () => {
+    const forbiddenError = {
+      graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+    }
+    mockUseQuery.mockReturnValue({
+      loading: false,
+      error: forbiddenError,
+      data: undefined,
+    })
+
+    render(<ModuleDetailsPage />)
+
+    await waitFor(() => {
+      expect(handleAppError).toHaveBeenCalledWith(forbiddenError)
+    })
+    expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+  })
+
   it('renders module details when data is present', async () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
-        getModule: mockModuleData,
-        getProgram: {
+        managementModule: mockModuleData,
+        managementProgram: {
           admins,
         },
       },
@@ -88,8 +106,8 @@ describe('ModuleDetailsPage', () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
-        getModule: mockModuleData,
-        getProgram: {
+        managementModule: mockModuleData,
+        managementProgram: {
           admins: null,
         },
       },
@@ -104,8 +122,8 @@ describe('ModuleDetailsPage', () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
-        getModule: { ...mockModuleData, domains: null },
-        getProgram: {
+        managementModule: { ...mockModuleData, domains: null },
+        managementProgram: {
           admins,
         },
       },
@@ -120,8 +138,8 @@ describe('ModuleDetailsPage', () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
-        getModule: { ...mockModuleData, tags: null },
-        getProgram: {
+        managementModule: { ...mockModuleData, tags: null },
+        managementProgram: {
           admins,
         },
       },

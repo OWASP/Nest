@@ -4,8 +4,8 @@ import { useIssueMutations } from 'hooks/useIssueMutations'
 import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import ModuleIssueDetailsPage from 'app/my/mentorship/programs/[programKey]/modules/[moduleKey]/issues/[issueId]/page'
-import { GetModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 
 // Mock dependencies
 jest.mock('@apollo/client/react', () => ({
@@ -53,16 +53,16 @@ const mockSetTaskDeadline = jest.fn()
 const mockClearTaskDeadline = jest.fn()
 
 const mockAccessData = {
-  getProgram: {
+  managementProgram: {
     admins: [{ login: 'test-user' }],
   },
-  getModule: {
+  managementModule: {
     mentors: [{ login: 'test-user' }],
   },
 }
 
 const mockIssueData = {
-  getModule: {
+  managementModule: {
     issueByNumber: {
       id: '1',
       title: 'Test Issue Title',
@@ -114,10 +114,10 @@ function setupQueryMock(
   accessData: typeof mockAccessData = mockAccessData
 ) {
   mockUseQuery.mockImplementation((query) => {
-    if (query === GetProgramAdminsAndModulesDocument) {
+    if (query === GetManagementProgramAdminsAndModulesDocument) {
       return { data: accessData, loading: false, error: undefined }
     }
-    if (query === GetModuleIssueViewDocument) {
+    if (query === GetManagementModuleIssueViewDocument) {
       return { data: issueData, loading: false, error: undefined }
     }
     return { data: undefined, loading: false, error: undefined }
@@ -126,10 +126,10 @@ function setupQueryMock(
 
 function setupQueryMockLoading() {
   mockUseQuery.mockImplementation((query) => {
-    if (query === GetProgramAdminsAndModulesDocument) {
+    if (query === GetManagementProgramAdminsAndModulesDocument) {
       return { data: mockAccessData, loading: false, error: undefined }
     }
-    if (query === GetModuleIssueViewDocument) {
+    if (query === GetManagementModuleIssueViewDocument) {
       return { data: undefined, loading: true, error: undefined }
     }
     return { data: undefined, loading: true, error: undefined }
@@ -138,10 +138,10 @@ function setupQueryMockLoading() {
 
 function setupQueryMockError(error: Error) {
   mockUseQuery.mockImplementation((query) => {
-    if (query === GetProgramAdminsAndModulesDocument) {
+    if (query === GetManagementProgramAdminsAndModulesDocument) {
       return { data: mockAccessData, loading: false, error: undefined }
     }
-    if (query === GetModuleIssueViewDocument) {
+    if (query === GetManagementModuleIssueViewDocument) {
       return { data: undefined, loading: false, error }
     }
     return { data: undefined, loading: false, error: undefined }
@@ -182,10 +182,10 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('does not show full-page spinner when loading with cached issue (e.g. fetchMore)', () => {
     mockUseQuery.mockImplementation((query) => {
-      if (query === GetProgramAdminsAndModulesDocument) {
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
-      if (query === GetModuleIssueViewDocument) {
+      if (query === GetManagementModuleIssueViewDocument) {
         return {
           data: mockIssueData,
           loading: true,
@@ -209,7 +209,7 @@ describe('ModuleIssueDetailsPage', () => {
   })
 
   it('renders a 404 error if the issue is not found', () => {
-    setupQueryMock({ getModule: { issueByNumber: null } } as typeof mockIssueData)
+    setupQueryMock({ managementModule: { issueByNumber: null } } as typeof mockIssueData)
     render(<ModuleIssueDetailsPage />)
     expect(screen.getByText('Issue Not Found')).toBeInTheDocument()
   })
@@ -268,10 +268,10 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('shows "No linked pull requests" when there are none', () => {
     const noPrData = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           pullRequests: [],
         },
       },
@@ -283,8 +283,8 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('shows "No interested users yet" when there are none', () => {
     const noInterestedData = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         interestedUsers: [],
       },
     }
@@ -320,7 +320,7 @@ describe('ModuleIssueDetailsPage', () => {
 
         const dataWithDeadline = {
           ...mockIssueData,
-          getModule: { ...mockIssueData.getModule, taskDeadline: deadline },
+          managementModule: { ...mockIssueData.managementModule, taskDeadline: deadline },
         }
         setupQueryMock(dataWithDeadline)
         render(<ModuleIssueDetailsPage />)
@@ -333,10 +333,10 @@ describe('ModuleIssueDetailsPage', () => {
     it('disables the deadline button when there are no assignees', () => {
       const noAssigneesData = {
         ...mockIssueData,
-        getModule: {
-          ...mockIssueData.getModule,
+        managementModule: {
+          ...mockIssueData.managementModule,
           issueByNumber: {
-            ...mockIssueData.getModule.issueByNumber,
+            ...mockIssueData.managementModule.issueByNumber,
             assignees: [],
           },
         },
@@ -396,7 +396,7 @@ describe('ModuleIssueDetailsPage', () => {
       const pastDate = new Date('2020-01-01').toISOString()
       const dataWithDeadline = {
         ...mockIssueData,
-        getModule: { ...mockIssueData.getModule, taskDeadline: pastDate },
+        managementModule: { ...mockIssueData.managementModule, taskDeadline: pastDate },
       }
 
       setupQueryMock(dataWithDeadline)
@@ -420,10 +420,10 @@ describe('ModuleIssueDetailsPage', () => {
     ])('renders issue state as "$expectedText"', ({ state, isMerged, expectedText }) => {
       const issueWithState = {
         ...mockIssueData,
-        getModule: {
-          ...mockIssueData.getModule,
+        managementModule: {
+          ...mockIssueData.managementModule,
           issueByNumber: {
-            ...mockIssueData.getModule.issueByNumber,
+            ...mockIssueData.managementModule.issueByNumber,
             state,
             isMerged,
           },
@@ -437,11 +437,11 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('renders correctly with missing optional data', () => {
     const dataWithMissingFields = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         taskAssignedAt: null,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           body: null,
           assignees: [{ id: 'a1', login: 'user1', name: null, avatarUrl: null }],
           pullRequests: [
@@ -515,7 +515,7 @@ describe('ModuleIssueDetailsPage', () => {
   it('calls fetchMore when clicking Show More button', async () => {
     const fetchMoreMock = jest.fn().mockResolvedValue({
       data: {
-        getModule: {
+        managementModule: {
           issueByNumber: {
             pullRequests: [
               {
@@ -534,17 +534,17 @@ describe('ModuleIssueDetailsPage', () => {
     })
 
     mockUseQuery.mockImplementation((query) => {
-      if (query === GetProgramAdminsAndModulesDocument) {
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
-      if (query === GetModuleIssueViewDocument) {
+      if (query === GetManagementModuleIssueViewDocument) {
         return {
           data: {
-            getModule: {
+            managementModule: {
               issueByNumber: {
-                ...mockIssueData.getModule.issueByNumber,
+                ...mockIssueData.managementModule.issueByNumber,
                 pullRequests: Array.from({ length: 4 }, (_, i) => ({
-                  ...mockIssueData.getModule.issueByNumber.pullRequests[0],
+                  ...mockIssueData.managementModule.issueByNumber.pullRequests[0],
                   id: `pr-${i}`,
                 })),
               },
@@ -585,7 +585,7 @@ describe('ModuleIssueDetailsPage', () => {
 
     const dataWithTodayDeadline = {
       ...mockIssueData,
-      getModule: { ...mockIssueData.getModule, taskDeadline: todayDeadline },
+      managementModule: { ...mockIssueData.managementModule, taskDeadline: todayDeadline },
     }
     setupQueryMock(dataWithTodayDeadline)
     render(<ModuleIssueDetailsPage />)
@@ -610,10 +610,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('shows ShowMoreButton when there are more than 4 pull requests', async () => {
     const manyPRsData = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           pullRequests: Array.from({ length: 6 }, (_, i) => ({
             id: `pr${i + 1}`,
             title: `Pull Request ${i + 1}`,
@@ -630,10 +630,10 @@ describe('ModuleIssueDetailsPage', () => {
       },
     }
     mockUseQuery.mockImplementation((query) => {
-      if (query === GetProgramAdminsAndModulesDocument) {
+      if (query === GetManagementProgramAdminsAndModulesDocument) {
         return { data: mockAccessData, loading: false, error: undefined }
       }
-      if (query === GetModuleIssueViewDocument) {
+      if (query === GetManagementModuleIssueViewDocument) {
         return {
           data: manyPRsData,
           loading: false,
@@ -662,10 +662,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('renders assignee name when login is not available', () => {
     const dataWithNameOnlyAssignee = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: [
             {
               id: 'assignee1',
@@ -685,10 +685,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('renders placeholder avatar for assignee without avatarUrl', () => {
     const dataWithNoAvatarAssignee = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: [
             {
               id: 'assignee1',
@@ -709,10 +709,10 @@ describe('ModuleIssueDetailsPage', () => {
   it('handles null pullRequests array', () => {
     const dataWithNullPRs = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           pullRequests: null,
         },
       },
@@ -725,8 +725,8 @@ describe('ModuleIssueDetailsPage', () => {
   it('renders placeholder avatar for interested user without avatarUrl', () => {
     const dataWithNoAvatarInterestedUser = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         interestedUsers: [
           {
             id: 'user2',
@@ -746,11 +746,11 @@ describe('ModuleIssueDetailsPage', () => {
 
   it('handles null assignees, labels, and interestedUsers', () => {
     const dataWithNulls = {
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         interestedUsers: null,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: null,
           labels: null,
         },
@@ -835,10 +835,10 @@ describe('ModuleIssueDetailsPage', () => {
 
     const noAssigneesData = {
       ...mockIssueData,
-      getModule: {
-        ...mockIssueData.getModule,
+      managementModule: {
+        ...mockIssueData.managementModule,
         issueByNumber: {
-          ...mockIssueData.getModule.issueByNumber,
+          ...mockIssueData.managementModule.issueByNumber,
           assignees: [],
         },
       },
@@ -859,10 +859,10 @@ describe('ModuleIssueDetailsPage', () => {
       })
 
       const deniedAccessData = {
-        getProgram: {
+        managementProgram: {
           admins: [],
         },
-        getModule: {
+        managementModule: {
           mentors: [],
         },
       }
@@ -890,10 +890,10 @@ describe('ModuleIssueDetailsPage', () => {
       })
 
       const deniedAccessData = {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'other-admin' }],
         },
-        getModule: {
+        managementModule: {
           mentors: [{ login: 'other-mentor' }],
         },
       }
@@ -921,10 +921,10 @@ describe('ModuleIssueDetailsPage', () => {
       })
 
       const adminAccessData = {
-        getProgram: {
+        managementProgram: {
           admins: [{ login: 'admin-user' }],
         },
-        getModule: {
+        managementModule: {
           mentors: [],
         },
       }
@@ -947,10 +947,10 @@ describe('ModuleIssueDetailsPage', () => {
       })
 
       const mentorAccessData = {
-        getProgram: {
+        managementProgram: {
           admins: [],
         },
-        getModule: {
+        managementModule: {
           mentors: [{ login: 'mentor-user' }],
         },
       }
@@ -973,10 +973,10 @@ describe('ModuleIssueDetailsPage', () => {
       })
 
       const revokedAccessData = {
-        getProgram: {
+        managementProgram: {
           admins: [],
         },
-        getModule: {
+        managementModule: {
           mentors: [],
         },
       }

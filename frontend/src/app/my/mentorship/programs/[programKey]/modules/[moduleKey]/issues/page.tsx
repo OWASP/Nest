@@ -9,11 +9,12 @@ import { useSession } from 'next-auth/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import {
-  GetModuleIssuesDocument,
-  GetProgramAdminsAndModulesDocument,
+  GetManagementModuleIssuesDocument,
+  GetManagementProgramAdminsAndModulesDocument,
 } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
+import { isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import IssuesTable from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -45,7 +46,7 @@ const IssuesPage = () => {
     data: accessData,
     loading: accessLoading,
     error: accessError,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
@@ -57,7 +58,7 @@ const IssuesPage = () => {
     if (accessError) handleAppError(accessError)
   }, [accessError])
 
-  const { data, loading, error } = useQuery(GetModuleIssuesDocument, {
+  const { data, loading, error } = useQuery(GetManagementModuleIssuesDocument, {
     variables: {
       programKey,
       moduleKey,
@@ -73,7 +74,7 @@ const IssuesPage = () => {
     if (error) handleAppError(error)
   }, [error])
 
-  const moduleData = data?.getModule
+  const moduleData = data?.managementModule
 
   const { moduleIssues, filteredCount } = useMemo(() => {
     const allIssues = (moduleData?.issues || []).map((i) => ({
@@ -157,6 +158,16 @@ const IssuesPage = () => {
 
   if (sessionStatus === 'loading' || accessLoading || hasAccess === undefined) {
     return <LoadingSpinner />
+  }
+
+  if (accessError && isForbiddenGraphQlError(accessError)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to manage issues for this module."
+      />
+    )
   }
 
   if (accessError) {

@@ -55,3 +55,12 @@ export function extractGraphQLErrors(error: unknown): {
   const hasValidationErrors = Object.keys(validationErrors).length > 0
   return { validationErrors, hasValidationErrors, unmappedErrors }
 }
+
+/** True when GraphQL errors include extensions.code FORBIDDEN (e.g. mentorship management ACL). */
+export function isForbiddenGraphQlError(error: unknown): boolean {
+  const gqlErrors = getGraphQLErrors(error)
+  return (
+    gqlErrors?.some((e) => (e.extensions as { code?: string } | undefined)?.code === 'FORBIDDEN') ??
+    false
+  )
+}

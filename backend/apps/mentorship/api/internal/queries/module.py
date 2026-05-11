@@ -4,6 +4,10 @@ import logging
 
 import strawberry
 
+from apps.mentorship.api.internal.graphql_errors import (
+    AuthenticationRequiredError,
+    ManagementProgramAccessDeniedError,
+)
 from apps.mentorship.api.internal.nodes.module import ModuleNode
 from apps.mentorship.models import Module, Program
 
@@ -26,6 +30,29 @@ class ModuleQuery:
             info.context.request.user
         ):
             return []
+
+        return (
+            Module.objects.filter(program=program)
+            .select_related("program", "project")
+            .prefetch_related("mentors__github_user")
+            .order_by("order", "started_at")
+        )
+
+    @strawberry.field(name="managementProgramModules")
+    def get_management_program_modules(
+        self, info: strawberry.Info, program_key: str
+    ) -> list[ModuleNode]:
+        """List modules for management UI; requires admin or mentor on the program."""
+        user = info.context.request.user
+        if not user.is_authenticated:
+            raise AuthenticationRequiredError
+        try:
+            program = Program.objects.get(key=program_key)
+        except Program.DoesNotExist:
+            return []
+
+        if not program.user_has_access(user):
+            raise ManagementProgramAccessDeniedError
 
         return (
             Module.objects.filter(program=program)
@@ -65,5 +92,29 @@ class ModuleQuery:
             and not module.program.user_has_access(info.context.request.user)
         ):
             return None
+
+        return module
+
+    @strawberry.field(name="managementModule")
+    def get_management_module(
+        self, info: strawberry.Info, module_key: str, program_key: str
+    ) -> ModuleNode | None:
+        """Single module for management UI; requires admin or mentor on the program."""
+        user = info.context.request.user
+        if not user.is_authenticated:
+            raise AuthenticationRequiredError
+        try:
+            module = (
+                Module.objects.select_related("program", "project")
+                .prefetch_related("mentors__github_user")
+                .get(key=module_key, program__key=program_key)
+            )
+        except Module.DoesNotExist:
+            msg = f"Module with key '{module_key}' under program '{program_key}' not found."
+            logger.warning(msg, exc_info=True)
+            return None
+
+        if not module.program.user_has_access(user):
+            raise ManagementProgramAccessDeniedError
 
         return module

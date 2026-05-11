@@ -9,8 +9,8 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ExperienceLevelEnum } from 'types/__generated__/graphql'
 import type { UpdateModuleInput } from 'types/__generated__/graphql'
 import { UpdateModuleDocument } from 'types/__generated__/moduleMutations.generated'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import type { ModuleFormData } from 'types/mentorship'
 import { formatDateForInput } from 'utils/dateFormatter'
@@ -37,7 +37,7 @@ const EditModulePage = () => {
     data,
     loading: queryLoading,
     error: queryError,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     variables: { programKey, moduleKey },
     skip: !programKey || !moduleKey,
     fetchPolicy: 'network-only',
@@ -50,8 +50,8 @@ const EditModulePage = () => {
 
     if (
       queryError ||
-      !data?.getProgram ||
-      !data?.getModule ||
+      !data?.managementProgram ||
+      !data?.managementModule ||
       sessionStatus === 'unauthenticated'
     ) {
       setAccessStatus('denied')
@@ -59,11 +59,11 @@ const EditModulePage = () => {
     }
 
     const currentUserLogin = sessionData?.user?.login
-    const isAdmin = data.getProgram.admins?.some(
+    const isAdmin = data.managementProgram.admins?.some(
       (admin: { login: string }) => admin.login === currentUserLogin
     )
 
-    const isMentor = data.getModule.mentors?.some(
+    const isMentor = data.managementModule.mentors?.some(
       (mentor: { login: string }) => mentor.login === currentUserLogin
     )
 
@@ -83,8 +83,8 @@ const EditModulePage = () => {
   }, [sessionStatus, sessionData, queryLoading, data, programKey, queryError, router])
 
   useEffect(() => {
-    if (accessStatus === 'allowed' && data?.getModule) {
-      const m = data.getModule
+    if (accessStatus === 'allowed' && data?.managementModule) {
+      const m = data.managementModule
       setFormData({
         description: m.description || '',
         domains: (m.domains || []).join(', '),
@@ -108,7 +108,7 @@ const EditModulePage = () => {
 
     try {
       const currentUserLogin = sessionData?.user?.login
-      const isAdmin = data?.getProgram?.admins?.some(
+      const isAdmin = data?.managementProgram?.admins?.some(
         (admin: { login: string }) => admin.login === currentUserLogin
       )
 
@@ -133,7 +133,9 @@ const EditModulePage = () => {
 
       const result = await updateModule({
         awaitRefetchQueries: true,
-        refetchQueries: [{ query: GetProgramAndModulesDocument, variables: { programKey } }],
+        refetchQueries: [
+          { query: GetManagementProgramAndModulesDocument, variables: { programKey } },
+        ],
         variables: { input },
       })
       const updatedModuleKey = result.data?.updateModule?.key || moduleKey
@@ -187,9 +189,15 @@ const EditModulePage = () => {
       isEdit
       validationErrors={validationErrors}
       minDate={
-        data?.getProgram?.startedAt ? formatDateForInput(data.getProgram.startedAt) : undefined
+        data?.managementProgram?.startedAt
+          ? formatDateForInput(data.managementProgram.startedAt)
+          : undefined
       }
-      maxDate={data?.getProgram?.endedAt ? formatDateForInput(data.getProgram.endedAt) : undefined}
+      maxDate={
+        data?.managementProgram?.endedAt
+          ? formatDateForInput(data.managementProgram.endedAt)
+          : undefined
+      }
     />
   )
 }

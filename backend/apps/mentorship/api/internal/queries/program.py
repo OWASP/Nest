@@ -6,6 +6,10 @@ import strawberry
 from django.db.models import Q
 
 from apps.common.utils import normalize_limit
+from apps.mentorship.api.internal.graphql_errors import (
+    AuthenticationRequiredError,
+    ManagementProgramAccessDeniedError,
+)
 from apps.mentorship.api.internal.nodes.program import PaginatedPrograms, ProgramNode
 from apps.mentorship.models import Program
 from apps.mentorship.models.program_admin import ProgramAdmin
@@ -39,6 +43,28 @@ class ProgramQuery:
 
         return program
 
+    @strawberry.field(name="managementProgram")
+    def get_management_program(
+        self, info: strawberry.Info, program_key: str
+    ) -> ProgramNode | None:
+        """Return program details for admins or mentors."""
+        user = info.context.request.user
+        if not user.is_authenticated:
+            raise AuthenticationRequiredError
+        try:
+            program = Program.objects.prefetch_related(
+                "admins__github_user", "admins__nest_user"
+            ).get(key=program_key)
+        except Program.DoesNotExist:
+            msg = f"Program with key '{program_key}' not found."
+            logger.warning(msg, exc_info=True)
+            return None
+
+        if not program.user_has_access(user):
+            raise ManagementProgramAccessDeniedError
+
+        return program
+
     @strawberry.field(permission_classes=[IsAuthenticated])
     def my_programs(
         self,
@@ -55,8 +81,11 @@ class ProgramQuery:
         )
 
         query = Q(id__in=admin_program_ids)
-        if user.github_user:
-            query |= Q(modules__mentors__github_user=user.github_user)
+        mentor_q = Q(modules__mentors__nest_user=user)
+        github_user_id = getattr(user, "github_user_id", None)
+        if isinstance(github_user_id, int):
+            mentor_q |= Q(modules__mentors__github_user_id=github_user_id)
+        query |= mentor_q
 
         if (normalized_limit := normalize_limit(limit, MAX_LIMIT)) is None:
             normalized_limit = PAGE_SIZE
@@ -66,6 +95,7 @@ class ProgramQuery:
                 "admins__github_user",
                 "admins__nest_user",
                 "modules__mentors__github_user",
+                "modules__mentors__nest_user",
             )
             .filter(query)
             .distinct()

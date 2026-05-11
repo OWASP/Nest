@@ -56,6 +56,69 @@ export const GET_MODULE_BY_ID = gql`
   }
 `
 
+export const GET_MANAGEMENT_PROGRAM_ADMINS_AND_MODULES = gql`
+  query GetManagementProgramAdminsAndModules(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 4
+    $offset: Int = 0
+  ) {
+    managementProgram(programKey: $programKey) {
+      id
+      startedAt
+      endedAt
+      admins {
+        id
+        login
+        name
+        avatarUrl
+      }
+    }
+    managementModule(moduleKey: $moduleKey, programKey: $programKey) {
+      id
+      key
+      name
+      description
+      tags
+      labels
+      projectId
+      projectName
+      domains
+      experienceLevel
+      startedAt
+      endedAt
+      mentors {
+        id
+        login
+        name
+        avatarUrl
+      }
+      mentees {
+        id
+        login
+        name
+        avatarUrl
+      }
+      recentPullRequests(limit: $limit, offset: $offset) {
+        id
+        title
+        url
+        state
+        createdAt
+        mergedAt
+        organizationName
+        repositoryName
+        author {
+          id
+          login
+          name
+          avatarUrl
+        }
+      }
+    }
+  }
+`
+
 export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
   query GetProgramAdminsAndModules(
     $programKey: String!
@@ -113,6 +176,36 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
           login
           name
           avatarUrl
+        }
+      }
+    }
+  }
+`
+
+export const GET_MANAGEMENT_MODULE_ISSUES = gql`
+  query GetManagementModuleIssues(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 20
+    $offset: Int = 0
+    $label: String
+  ) {
+    managementModule(moduleKey: $moduleKey, programKey: $programKey) {
+      name
+      issuesCount(label: $label)
+      availableLabels
+      issues(limit: $limit, offset: $offset, label: $label) {
+        id
+        number
+        title
+        state
+        isMerged
+        labels
+        taskDeadline
+        assignees {
+          avatarUrl
+          login
+          name
         }
       }
     }
