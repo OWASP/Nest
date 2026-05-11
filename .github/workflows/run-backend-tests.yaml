@@ -6,6 +6,8 @@ on:
 env:
   FORCE_COLOR: 1
 
+permissions: {}
+
 jobs:
   run-unit-tests:
     name: Run unit tests
@@ -27,8 +29,19 @@ jobs:
           cache: poetry
           python-version: '3.13'
 
+      - name: Cache virtual environment
+        id: cache-venv
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+        with:
+          path: .venv
+          key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+
       - name: Install backend dependencies
-        run: poetry install --no-interaction
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install --no-interaction
+          touch .venv/dependencies_installed
         working-directory: backend
 
       - name: Run backend tests
