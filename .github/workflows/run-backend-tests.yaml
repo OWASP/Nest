@@ -12,8 +12,8 @@ jobs:
   run-unit-tests:
     name: Run unit tests
     permissions:
+      actions: write
       contents: read
-      id-token: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -29,28 +29,41 @@ jobs:
           cache: poetry
           python-version: '3.13'
 
-      - name: Cache virtual environment
-        id: cache-venv
+      - name: Set up backend dependencies cache
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
         with:
-          path: backend/.venv
           key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          path: backend/.venv
 
       - name: Install backend dependencies
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-        run: |
-          poetry config virtualenvs.in-project true
-          poetry install --no-interaction
+        run: poetry install --no-interaction
         working-directory: backend
 
       - name: Run backend tests
-        run: |
-          set -a
-          source .env.example
-          set +a
-          export DJANGO_SETTINGS_MODULE=settings.test
-          poetry run pytest tests/unit
+        run: set -a && source .env.example && set +a && poetry run pytest tests/unit
         working-directory: backend
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          if-no-files-found: error
+          name: coverage-xml
+          path: backend/coverage.xml
+    timeout-minutes: 5
+
+  upload-coverage-to-codecov:
+    name: Upload coverage to Codecov
+    needs: run-unit-tests
+    permissions:
+      actions: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download coverage artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
+        with:
+          name: coverage-xml
+          path: backend
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6.0.0
