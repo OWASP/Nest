@@ -1,0 +1,75 @@
+name: Run backend tests
+
+on:
+  workflow_call:
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+  run-unit-tests:
+    name: Run unit tests
+    permissions:
+      actions: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          cache-dependency-path: backend/poetry.lock
+          cache: poetry
+          python-version: '3.13'
+
+      - name: Set up backend dependencies cache
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          path: backend/.venv
+
+      - name: Install backend dependencies
+        run: poetry install --no-interaction
+        working-directory: backend
+
+      - name: Run backend tests
+        run: set -a && source .env.example && set +a && poetry run pytest tests/unit
+        working-directory: backend
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          if-no-files-found: error
+          name: coverage-xml
+          path: backend/coverage.xml
+    timeout-minutes: 5
+
+  upload-coverage-to-codecov:
+    name: Upload coverage to Codecov
+    needs: run-unit-tests
+    permissions:
+      actions: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download coverage artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
+        with:
+          name: coverage-xml
+          path: backend
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6.0.0
+        with:
+          fail_ci_if_error: false
+          files: backend/coverage.xml
+          flags: backend
+          use_oidc: true
+    timeout-minutes: 5
