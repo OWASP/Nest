@@ -57,7 +57,6 @@ jobs:
           export DJANGO_DB_HOST=localhost
           export DJANGO_REDIS_AUTH_ENABLED=False
           export DJANGO_REDIS_HOST=localhost
-          export DJANGO_REDIS_PASSWORD=
           cd backend && poetry run python manage.py migrate
           poetry run gunicorn wsgi:application --bind 0.0.0.0:9500 &
 
