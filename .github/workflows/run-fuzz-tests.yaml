@@ -87,10 +87,8 @@ jobs:
           TEST_FILE: ${{ inputs.test-file }}
           REST_URL: ${{ inputs.rest-url }}
         run: |
-          set -euo pipefail
-          cd backend && poetry install --no-root --no-interaction
           export BASE_URL=http://localhost:9500
           export CI=true
           export REST_URL="$REST_URL"
           export TEST_FILE="fuzz/$TEST_FILE"
-          sh ./entrypoint.fuzz.sh
+          cd backend && sh ./entrypoint.fuzz.sh
