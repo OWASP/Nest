@@ -698,7 +698,7 @@ describe('CardDetailsPage', () => {
   const mockUser = {
     avatarUrl: 'https://example.com/avatar.jpg',
     contributionsCount: 100,
-    createdAt: Date.now() - 31536000000,
+    createdAt: new Date(Date.now() - 31536000000).toISOString(),
     followersCount: 50,
     followingCount: 25,
     key: 'test-user',
@@ -711,7 +711,7 @@ describe('CardDetailsPage', () => {
   const mockRecentIssues = [
     {
       author: mockUser,
-      createdAt: Date.now() - 86400000,
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
       hint: 'Bug fix needed',
       labels: ['bug', 'high-priority'],
       number: '123',
@@ -720,7 +720,7 @@ describe('CardDetailsPage', () => {
       projectUrl: 'https://github.com/test/project',
       body: 'Issue summary',
       title: 'Test Issue',
-      updatedAt: Date.now(),
+      updatedAt: new Date(Date.now()).toISOString(),
       url: 'https://github.com/test/project/issues/123',
       objectID: 'issue-123',
     },
@@ -759,7 +759,7 @@ describe('CardDetailsPage', () => {
       author: mockUser,
       isPreRelease: false,
       name: 'v1.0.0',
-      publishedAt: Date.now() - 604800000,
+      publishedAt: new Date(Date.now() - 604800000).toISOString(),
       repositoryName: 'test-repo',
       tagName: 'v1.0.0',
       url: 'https://github.com/test/repo/releases/tag/v1.0.0',
@@ -768,7 +768,7 @@ describe('CardDetailsPage', () => {
 
   const mockChapterGeoData = [
     {
-      createdAt: Date.now() - 31536000000,
+      createdAt: new Date(Date.now() - 31536000000).toISOString(),
       isActive: true,
       key: 'test-chapter',
       leaders: ['John Doe', 'Jane Smith'],
@@ -779,7 +779,7 @@ describe('CardDetailsPage', () => {
       suggestedLocation: 'New York, NY',
       summary: 'Test chapter summary',
       topContributors: mockContributors,
-      updatedAt: Date.now(),
+      updatedAt: new Date(Date.now()).toISOString(),
       url: 'https://owasp.org/test-chapter',
       _geoloc: { lat: 40.7128, lng: -74.006 },
     },
@@ -964,7 +964,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
         />
       )
 
@@ -993,7 +993,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
           onLoadMorePullRequests={jest.fn()}
         />
       )
@@ -1005,7 +1005,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
           onResetPullRequests={jest.fn()}
           onLoadMorePullRequests={undefined}
         />
@@ -1018,7 +1018,7 @@ describe('CardDetailsPage', () => {
         <CardDetailsPage
           {...defaultProps}
           type="module"
-          pullRequests={mockPullRequests as unknown as PullRequest[]}
+          pullRequests={mockPullRequests as PullRequest[]}
           onLoadMorePullRequests={jest.fn()}
           onResetPullRequests={jest.fn()}
           isFetchingMore={true}
@@ -1671,7 +1671,7 @@ describe('CardDetailsPage', () => {
     it('renders Leaders with Unknown when value is null', () => {
       const propsWithNullLeader = {
         ...defaultProps,
-        type: 'chapter',
+        type: 'chapter' as const,
         details: [{ label: 'Leaders', value: null }],
       }
       render(<CardDetailsPage {...propsWithNullLeader} />)
@@ -2269,7 +2269,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: manyPRs as unknown as PullRequest[],
+        pullRequests: manyPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)
@@ -2290,7 +2290,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: manyPRs as unknown as PullRequest[],
+        pullRequests: manyPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)
@@ -2309,7 +2309,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: manyPRs as unknown as PullRequest[],
+        pullRequests: manyPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)
@@ -2328,7 +2328,7 @@ describe('CardDetailsPage', () => {
       const moduleProps: DetailsCardProps = {
         ...defaultProps,
         type: 'module' as const,
-        pullRequests: fewPRs as unknown as PullRequest[],
+        pullRequests: fewPRs as PullRequest[],
       }
 
       render(<CardDetailsPage {...moduleProps} />)
