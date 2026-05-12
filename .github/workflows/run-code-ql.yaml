@@ -38,8 +38,8 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53  # v6.0.1
         with:
-          version: 10
           run_install: false
+          version: 10.33.3
 
       - name: Set up Node
         if: matrix.language == 'javascript-typescript'

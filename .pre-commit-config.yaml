@@ -105,6 +105,7 @@ repos:
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml
+        exclude: pnpm-lock\.yaml$
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: frontend/src/types/__generated__
