@@ -56,6 +56,9 @@ frontend/.next
 frontend/.vercel
 frontend/**/.pnpm-debug.log*
 frontend/**/*.tsbuildinfo
+e2e/playwright-report/
+e2e/playwright/.cache/
+e2e/test-results/
 frontend/**/next-env.d.ts
 frontend/**/npm-debug.log*
 frontend/blob-report/
@@ -63,8 +66,6 @@ frontend/build
 frontend/coverage
 frontend/dist
 frontend/out
-frontend/playwright-report/
-frontend/playwright/.cache/
 frontend/test-results/
 logs
 node_modules/
