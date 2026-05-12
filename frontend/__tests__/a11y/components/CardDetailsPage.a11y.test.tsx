@@ -188,8 +188,8 @@ describe.each([
             name: 'Intro to Web',
             description: 'A beginner friendly module.',
             experienceLevel: ExperienceLevelEnum.Beginner,
-            startedAt: 1735689600, // 2025-01-01
-            endedAt: 1740787200, // 2025-03-01
+            startedAt: '2025-01-01T00:00:00.000Z',
+            endedAt: '2025-03-01T00:00:00.000Z',
             mentors: [
               {
                 id: 'mentor-mentor1',
