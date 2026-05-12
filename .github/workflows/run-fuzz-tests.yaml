@@ -86,6 +86,7 @@ jobs:
           TEST_FILE: ${{ inputs.test-file }}
           REST_URL: ${{ inputs.rest-url }}
         run: |
+          set -a && source backend/.env.fuzz.example && set +a
           export BASE_URL=http://localhost:9500
           export CI=true
           export REST_URL="$REST_URL"
