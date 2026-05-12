@@ -45,9 +45,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
-
       - name: Setup Backend environment
         uses: ./.github/workflows/setup-backend-environment
         with:
@@ -56,18 +53,13 @@ jobs:
 
       - name: Run backend with fuzz environment variables
         run: |
-          docker run -d --rm --name fuzz-nest-backend \
-            --env-file backend/.env.fuzz.example \
-            --network host \
-            -e DJANGO_DB_HOST=localhost \
-            -e DJANGO_REDIS_AUTH_ENABLED=False \
-            -e DJANGO_REDIS_HOST=localhost \
-            -p 9500:9500 \
-            owasp/nest:test-backend-latest \
-            sh -c '
-              python manage.py migrate &&
-              gunicorn wsgi:application --bind 0.0.0.0:9500
-            '
+          set -euo pipefail && set -a && source backend/.env.fuzz.example && set +a
+          export DJANGO_DB_HOST=localhost
+          export DJANGO_REDIS_AUTH_ENABLED=False
+          export DJANGO_REDIS_HOST=localhost
+          export DJANGO_REDIS_PASSWORD=
+          cd backend && poetry run python manage.py migrate
+          poetry run gunicorn wsgi:application --bind 0.0.0.0:9500 &
 
       - name: Waiting for the backend to be ready
         run: |
@@ -90,29 +82,15 @@ jobs:
           fi
           echo "Data loading completed."
 
-      - name: Build Fuzz-testing image
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
-        with:
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:test-fuzz-backend-cache
-          cache-to: |
-            type=gha,compression=zstd
-          context: backend
-          file: docker/backend/Dockerfile.fuzz
-          load: true
-          platforms: linux/amd64
-          tags: owasp/nest:test-fuzz-backend-latest
-
       - name: Run fuzz tests
         env:
           TEST_FILE: ${{ inputs.test-file }}
           REST_URL: ${{ inputs.rest-url }}
         run: |
-          docker run \
-            --network host \
-            -e BASE_URL=http://localhost:9500 \
-            -e CI=true \
-            -e REST_URL="$REST_URL" \
-            -e TEST_FILE="$TEST_FILE" \
-            owasp/nest:test-fuzz-backend-latest
+          set -euo pipefail
+          cd backend && poetry install --no-root --no-interaction
+          export BASE_URL=http://localhost:9500
+          export CI=true
+          export REST_URL="$REST_URL"
+          export TEST_FILE="fuzz/$TEST_FILE"
+          sh ./entrypoint.fuzz.sh

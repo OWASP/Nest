@@ -175,18 +175,12 @@ jobs:
 
       - name: Start Backend in the background
         run: |
-          docker run -d --rm --name e2e-nest-backend \
-            --env-file backend/.env.e2e.example \
-            --network host \
-            -e DJANGO_DB_HOST=localhost \
-            -e DJANGO_REDIS_AUTH_ENABLED=False \
-            -e DJANGO_REDIS_HOST=localhost \
-            -p 9000:9000 \
-            owasp/nest:test-backend-latest \
-            sh -c '
-              python manage.py migrate &&
-              gunicorn wsgi:application --bind 0.0.0.0:9000
-          '
+          set -euo pipefail && set -a && source backend/.env.e2e.example && set +a
+          export DJANGO_DB_HOST=localhost
+          export DJANGO_REDIS_AUTH_ENABLED=False
+          export DJANGO_REDIS_HOST=localhost
+          export DJANGO_REDIS_PASSWORD=
+          cd backend && poetry run python manage.py migrate && poetry run gunicorn wsgi:application --bind 0.0.0.0:9000 &
 
       - name: Waiting for the backend to be ready
         run: |
