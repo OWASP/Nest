@@ -76,7 +76,6 @@ runs:
     - name: Migrate Database
       env:
         ENV_FILE: ${{ inputs.env_file }}
-        BACKEND_PORT: ${{ inputs.backend_port }}
       run: |
         set -euo pipefail && set -a && source $ENV_FILE && set +a
         export DJANGO_DB_HOST=localhost
