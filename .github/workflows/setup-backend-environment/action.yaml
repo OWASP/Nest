@@ -84,6 +84,20 @@ runs:
         cd backend && poetry run python manage.py migrate
       shell: bash
 
+    - name: Load Postgres data
+      env:
+        PGPASSWORD: ${{ inputs.db_password }}
+        DB_USERNAME: ${{ inputs.db_username }}
+        DB_NAME: ${{ inputs.db_name }}
+      run: |
+        set -euo pipefail
+        if ! pg_restore -h localhost -U $DB_USERNAME -d $DB_NAME < backend/data/nest.dump; then
+          echo "Data loading failed"
+          exit 1
+        fi
+        echo "Data loading completed."
+      shell: bash
+
     - name: Start Backend in the background
       env:
         ENV_FILE: ${{ inputs.env_file }}
@@ -107,18 +121,4 @@ runs:
           done
         '
         echo "Backend is up!"
-      shell: bash
-
-    - name: Load Postgres data
-      env:
-        PGPASSWORD: ${{ inputs.db_password }}
-        DB_USERNAME: ${{ inputs.db_username }}
-        DB_NAME: ${{ inputs.db_name }}
-      run: |
-        set -euo pipefail
-        if ! pg_restore -h localhost -U $DB_USERNAME -d $DB_NAME < backend/data/nest.dump; then
-          echo "Data loading failed"
-          exit 1
-        fi
-        echo "Data loading completed."
       shell: bash
