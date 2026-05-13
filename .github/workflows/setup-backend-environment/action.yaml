@@ -30,6 +30,7 @@ runs:
       shell: bash
 
     - name: Set up Python
+      id: setup-python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
       with:
         cache: poetry
@@ -41,7 +42,7 @@ runs:
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
         path: backend/.venv
-        key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+        key: poetry-venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-$${{ hashFiles('backend/poetry.lock') }}
 
     - name: Install backend dependencies
       if: steps.cache-poetry-venv.outputs.cache-hit != 'true'

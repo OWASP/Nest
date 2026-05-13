@@ -23,6 +23,7 @@ jobs:
         run: pipx install poetry
 
       - name: Set up Python
+        id: setup-python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           cache-dependency-path: backend/poetry.lock
@@ -32,11 +33,11 @@ jobs:
       - name: Set up backend dependencies cache
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          key: poetry-venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-$${{ hashFiles('backend/poetry.lock') }}
           path: backend/.venv
 
       - name: Install backend dependencies
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --no-root
         working-directory: backend
 
       - name: Run backend tests
