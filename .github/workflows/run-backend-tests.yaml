@@ -56,20 +56,11 @@ jobs:
     needs: run-unit-tests
     permissions:
       actions: read
+      contents: read
       id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download coverage artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
-        with:
-          name: coverage-xml
-          path: backend
-
-      - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6.0.0
-        with:
-          fail_ci_if_error: false
-          files: backend/coverage.xml
-          flags: backend
-          use_oidc: true
-    timeout-minutes: 5
+    uses: ./.github/workflows/upload-coverage-to-codecov.yaml
+    with:
+      artifact_name: coverage-xml
+      artifact_path: backend
+      coverage_path: backend/coverage.xml
+      coverage_flags: backend
