@@ -11,15 +11,16 @@ on:
         description: Coverage artifact download path
         required: true
         type: string
-      coverage_path:
-        description: Coverage file path
-        required: true
-        type: string
       coverage_flags:
         description: Codecov flags
         required: false
         type: string
         default: ''
+      coverage_path:
+        description: Coverage report file path
+        required: true
+        type: string
+
 
 permissions: {}
 
@@ -31,10 +32,7 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
-      - name: Download coverage artifact
+      - name: Download coverage report
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
         with:
           name: ${{ inputs.artifact_name }}
@@ -43,7 +41,7 @@ jobs:
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6.0.0
         with:
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           files: ${{ inputs.coverage_path }}
           flags: ${{ inputs.coverage_flags }}
           use_oidc: true
