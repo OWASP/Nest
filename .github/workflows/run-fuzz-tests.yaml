@@ -50,36 +50,9 @@ jobs:
         with:
           db_username: nest_user_fuzz
           db_name: nest_db_fuzz
-
-      - name: Run backend with fuzz environment variables
-        run: |
-          set -euo pipefail && set -a && source backend/.env.fuzz.example && set +a
-          export DJANGO_DB_HOST=localhost
-          export DJANGO_REDIS_AUTH_ENABLED=False
-          export DJANGO_REDIS_HOST=localhost
-          cd backend && poetry run python manage.py migrate
-          poetry run gunicorn wsgi:application --bind 0.0.0.0:9500 &
-
-      - name: Waiting for the backend to be ready
-        run: |
-          timeout 5m bash -c '
-            until wget --spider http://localhost:9500/a; do
-              echo "Waiting for backend..."
-              sleep 5
-            done
-          '
-          echo "Backend is up!"
-
-      - name: Load Postgres data
-        env:
-          PGPASSWORD: nest_user_fuzz_password
-        run: |
-          set -euo pipefail
-          if ! pg_restore -h localhost -U nest_user_fuzz -d nest_db_fuzz < backend/data/nest.dump; then
-            echo "Data loading failed"
-            exit 1
-          fi
-          echo "Data loading completed."
+          db_password: nest_user_fuzz_password
+          env_file: backend/.env.fuzz.example
+          backend_port: 9500
 
       - name: Run fuzz tests
         env:

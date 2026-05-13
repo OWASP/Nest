@@ -1,8 +1,9 @@
-name: Set up Backend environment
+name: Setup Backend environment
 
 description: >-
   Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
-  Postgres, installs the PostgreSQL client, and builds the backend test image.
+  Postgres, installs the PostgreSQL client, starts the backend, waits for it to be ready,
+  and restores the database dump.
 
 inputs:
   db_username:
@@ -10,6 +11,15 @@ inputs:
     required: true
   db_name:
     description: Database name
+    required: true
+  db_password:
+    description: Database password
+    required: true
+  env_file:
+    description: Backend environment file
+    required: true
+  backend_port:
+    description: Backend port to bind
     required: true
 
 runs:
@@ -60,4 +70,55 @@ runs:
 
     - name: Install PostgreSQL client
       run: sudo apt-get install -y postgresql-client
+      shell: bash
+
+    - name: Migrate Database
+      env:
+        ENV_FILE: ${{ inputs.env_file }}
+        BACKEND_PORT: ${{ inputs.backend_port }}
+      run: |
+        set -euo pipefail && set -a && source $ENV_FILE && set +a
+        export DJANGO_DB_HOST=localhost
+        export DJANGO_REDIS_AUTH_ENABLED=False
+        export DJANGO_REDIS_HOST=localhost
+        cd backend && poetry run python manage.py migrate
+      shell: bash
+
+    - name: Start Backend in the background
+      env:
+        ENV_FILE: ${{ inputs.env_file }}
+        BACKEND_PORT: ${{ inputs.backend_port }}
+      run: |
+        set -euo pipefail && set -a && source $ENV_FILE && set +a
+        export DJANGO_DB_HOST=localhost
+        export DJANGO_REDIS_AUTH_ENABLED=False
+        export DJANGO_REDIS_HOST=localhost
+        cd backend && poetry run gunicorn wsgi:application --bind 0.0.0.0:$BACKEND_PORT &
+      shell: bash
+
+    - name: Waiting for the backend to be ready
+      env:
+        BACKEND_PORT: ${{ inputs.backend_port }}
+      run: |
+        timeout 5m bash -c '
+          until wget --spider http://localhost:$BACKEND_PORT/a; do
+            echo "Waiting for backend..."
+            sleep 5
+          done
+        '
+        echo "Backend is up!"
+      shell: bash
+
+    - name: Load Postgres data
+      env:
+        PGPASSWORD: ${{ inputs.db_password }}
+        DB_USERNAME: ${{ inputs.db_username }}
+        DB_NAME: ${{ inputs.db_name }}
+      run: |
+        set -euo pipefail
+        if ! pg_restore -h localhost -U $DB_USERNAME -d $DB_NAME < backend/data/nest.dump; then
+          echo "Data loading failed"
+          exit 1
+        fi
+        echo "Data loading completed."
       shell: bash
