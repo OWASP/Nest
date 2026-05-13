@@ -62,6 +62,7 @@ jobs:
           set -a && source backend/.env.fuzz.example && set +a
           export BASE_URL=http://localhost:9500
           export CI=true
+          export PYTEST_ADDOPTS="--no-cov"
           export REST_URL="$REST_URL"
           export TEST_FILE="fuzz/$TEST_FILE"
           source backend/.venv/bin/activate
