@@ -64,4 +64,5 @@ jobs:
           export CI=true
           export REST_URL="$REST_URL"
           export TEST_FILE="fuzz/$TEST_FILE"
-          cd backend && eval $(poetry env activate) && sh ./entrypoint.fuzz.sh
+          source backend/.venv/bin/activate
+          cd backend && sh ./entrypoint.fuzz.sh
