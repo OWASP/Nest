@@ -1,5 +1,7 @@
 ##@ Infrastructure
 
+SHELL := /bin/bash
+
 test-infrastructure: ## Run infrastructure tests
 	@find infrastructure/modules \
 		-name "tests" \
