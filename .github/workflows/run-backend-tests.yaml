@@ -36,7 +36,7 @@ jobs:
           path: backend/.venv
 
       - name: Install backend dependencies
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --no-root
         working-directory: backend
 
       - name: Run backend tests
