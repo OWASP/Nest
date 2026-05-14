@@ -46,6 +46,7 @@ jobs:
     needs:
       - run-code-quality-checks
     permissions:
+      actions: read
       contents: read
       id-token: write
     uses: ./.github/workflows/run-frontend-tests.yaml
@@ -53,9 +54,7 @@ jobs:
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
     permissions:
-      actions: read
       contents: read
-      id-token: write
     runs-on: ubuntu-latest
     services:
       db:
