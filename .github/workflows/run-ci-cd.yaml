@@ -43,6 +43,8 @@ jobs:
 
   run-frontend-tests:
     name: Run frontend tests
+    needs:
+      - run-code-quality-checks
     permissions:
       actions: read
       contents: read
