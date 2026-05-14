@@ -30,8 +30,8 @@ jobs:
       - name: Cache Terraform plugins
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          path: ~/.terraform.d/plugin-cache
           key: ${{ runner.os }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
+          path: ~/.terraform.d/plugin-cache
 
       - name: Run tests
         run: make test-infrastructure
