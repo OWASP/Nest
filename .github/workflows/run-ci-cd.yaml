@@ -278,8 +278,6 @@ jobs:
 
   run-infrastructure-tests:
     name: Run Infrastructure tests
-    needs:
-      - run-code-quality-checks
     permissions:
       contents: read
     uses: ./.github/workflows/run-infrastructure-tests.yaml
