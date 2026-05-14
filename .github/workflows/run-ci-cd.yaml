@@ -52,8 +52,6 @@ jobs:
 
   run-frontend-e2e-tests:
     name: Run frontend e2e tests
-    needs:
-      - run-code-quality-checks
     permissions:
       actions: read
       contents: read
