@@ -65,6 +65,5 @@ jobs:
           export PYTEST_ADDOPTS="--no-cov"
           export REST_URL="$REST_URL"
           export TEST_FILE="fuzz/$TEST_FILE"
-          source ./.venv/bin/activate
-          sh ./entrypoint.fuzz.sh
+          poetry run sh ./entrypoint.fuzz.sh
         working-directory: backend
