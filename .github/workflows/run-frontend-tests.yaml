@@ -32,19 +32,19 @@ jobs:
           cache: pnpm
           node-version: 24
 
-      - name: Get pnpm store path
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Set pnpm store directory
+        run: pnpm config set store-dir ~/.pnpm-store
 
       - name: Cache pnpm store
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          path: ${{ env.STORE_PATH }}
+          path: ~/.pnpm-store
           restore-keys: pnpm-store-${{ runner.os }}-
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run unit tests
         working-directory: frontend
@@ -94,17 +94,18 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
           node-version: 24
 
-      - name: Get pnpm store path
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Set pnpm store directory
+        run: pnpm config set store-dir ~/.pnpm-store
 
       - name: Cache pnpm store
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          path: ${{ env.STORE_PATH }}
+          path: ~/.pnpm-store
+          restore-keys: pnpm-store-${{ runner.os }}-
 
       - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
         working-directory: frontend
 
       - name: Run frontend a11y tests
