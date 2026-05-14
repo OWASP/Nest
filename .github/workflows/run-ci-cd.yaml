@@ -241,8 +241,6 @@ jobs:
 
   run-rest-fuzz-tests:
     name: Run REST fuzz tests
-    needs:
-      - run-code-quality-checks
     uses: ./.github/workflows/run-fuzz-tests.yaml
     with:
       test-file: rest_test.py
