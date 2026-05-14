@@ -47,8 +47,8 @@ updates:
       default-days: 21
     directories:
       - cspell
+      - e2e
       - frontend
-      - frontend/__tests__/e2e
     groups:
       version-updates:
         applies-to: version-updates

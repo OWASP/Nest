@@ -1,0 +1,6 @@
+cache-dir = ".cache/pypoetry"
+
+[virtualenvs]
+create = true
+in-project = true
+use-poetry-python = true

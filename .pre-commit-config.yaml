@@ -110,9 +110,13 @@ repos:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
       - id: check-json
+        # tsconfig.json uses JSONC (comments).
+        # Matches frontend/tsconfig.json and frontend/**/tsconfig.json
+        exclude: ^frontend/(?:[^/]+/)*tsconfig\.json$
       - id: check-merge-conflict
       - id: check-toml
       - id: check-yaml
+        exclude: pnpm-lock\.yaml$
       - id: detect-private-key
       - id: end-of-file-fixer
         exclude: frontend/src/types/__generated__

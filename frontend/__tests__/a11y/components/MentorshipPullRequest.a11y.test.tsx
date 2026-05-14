@@ -15,7 +15,7 @@ const mockPR: PullRequest = {
     avatarUrl: 'https://example.com/avatar.png',
     key: 'testuser',
     contributionsCount: 10,
-    createdAt: 0,
+    createdAt: '1970-01-01T00:00:00.000Z',
     followersCount: 5,
     followingCount: 3,
     publicRepositoriesCount: 8,

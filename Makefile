@@ -1,15 +1,16 @@
 include backend/Makefile
 include cspell/Makefile
 include docs/Makefile
+include e2e/Makefile
 include frontend/Makefile
 include infrastructure/Makefile
 
 .DEFAULT_GOAL := help
 
-.PHONY: build clean check help pre-commit prune run scan-images security-scan security-scan-code \
-	security-scan-code-semgrep security-scan-code-trivy security-scan-images \
-	security-scan-backend-image security-scan-frontend-image security-scan-zap \
-	test test-nest-app test-infrastructure update clean-trivy-cache
+.PHONY: build check clean clean-trivy-cache help pre-commit prune run scan-images security-scan \
+	security-scan-backend-image security-scan-code security-scan-code-semgrep security-scan-code-trivy \
+	security-scan-frontend-image security-scan-images security-scan-zap test test-infrastructure \
+	test-nest-app update
 
 MAKEFLAGS += --no-print-directory
 
@@ -65,6 +66,7 @@ test: \
 test-nest-app:
 	$(MAKE) test-backend
 	$(MAKE) test-frontend
+	$(MAKE) test-e2e
 	$(MAKE) test-infrastructure
 
 ##@ Security

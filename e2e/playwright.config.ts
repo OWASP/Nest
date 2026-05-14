@@ -22,7 +22,7 @@ export default defineConfig({
   ],
   reporter: [['list', { printSteps: true }]],
   retries: 2,
-  testDir: './__tests__/e2e',
+  testDir: '.',
   timeout: 120_000,
   use: {
     baseURL: process.env.FRONTEND_URL || 'http://localhost:3000',
