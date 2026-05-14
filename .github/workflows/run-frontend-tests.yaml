@@ -22,7 +22,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53  # v6.0.1
         with:
-          run_install: false
+          run_install: true
           version: 10.33.3
 
       - name: Set up Node
@@ -31,10 +31,6 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
           cache: pnpm
           node-version: 24
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
         working-directory: frontend
@@ -74,7 +70,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@078e9d416474b29c0c387560859308974f7e9c53  # v6.0.1
         with:
-          run_install: false
+          run_install: true
           version: 10.33.3
 
       - name: Set up Node
@@ -83,10 +79,6 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
           cache: pnpm
           node-version: 24
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: pnpm install --frozen-lockfile
 
       - name: Run frontend a11y tests
         working-directory: frontend
