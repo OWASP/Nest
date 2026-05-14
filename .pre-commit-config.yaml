@@ -34,7 +34,7 @@ repos:
     rev: 9d4455198941806aa02ec14369de030cda2c2b59  # v0.24.0
     hooks:
       - id: terraform-docs-go
-        files: ^infrastructure/.*\.tf$
+        files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
         args:
           - --config=infrastructure/.terraform-docs.yaml
           - infrastructure/
