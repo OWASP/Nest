@@ -87,7 +87,7 @@ runs:
       env:
         DB_NAME: ${{ inputs.db_name }}
         DB_USERNAME: ${{ inputs.db_username }}
-        PGPASSWORD: ${{ inputs.db_password }}
+        PGPASSWORD: ${{ inputs.db_password }}  # The env name required by PostgreSQL clients.
       run: |
         set -euo pipefail
         if ! pg_restore -h localhost -U $DB_USERNAME -d $DB_NAME < backend/data/nest.dump; then
