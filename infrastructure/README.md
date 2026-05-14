@@ -393,8 +393,3 @@ aws ecs run-task \
 ## Documentation
 
 Module READMEs are generated automatically by `terraform-docs` via the pre-commit hook.
-To regenerate manually:
-
-```bash
-make docs-infrastructure
-```

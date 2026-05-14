@@ -26,6 +26,3 @@ MD041: false
 # MD046/code-block-style
 MD046:
   style: fenced
-
-# MD060 conflicts with terraform-docs generated table format
-MD060: false

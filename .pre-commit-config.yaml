@@ -31,7 +31,7 @@ repos:
         exclude: pnpm-lock.yaml
 
   - repo: https://github.com/terraform-docs/terraform-docs
-    rev: be1a79478b65f008aeb42f497ba9a862bcd8dbc9
+    rev: 9d4455198941806aa02ec14369de030cda2c2b59  # v0.24.0
     hooks:
       - id: terraform-docs-go
         files: ^infrastructure/.*\.tf$

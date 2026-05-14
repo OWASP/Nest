@@ -12,9 +12,3 @@ test-infrastructure: ## Run infrastructure tests
 		terraform -chdir="$$module_dir" init -backend=false -input=false && \
 		terraform -chdir="$$module_dir" test || exit 1; \
 	done
-
-docs-infrastructure: ## Generate terraform-docs
-	@echo "Generating terraform docs..."
-	@terraform-docs \
-		--config infrastructure/.terraform-docs.yaml \
-		infrastructure/
