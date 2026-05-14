@@ -6,8 +6,8 @@ description: >-
   and restores the database dump.
 
 inputs:
-  db_username:
-    description: Database username
+  backend_port:
+    description: Backend port to bind
     required: true
   db_name:
     description: Database name
@@ -15,11 +15,11 @@ inputs:
   db_password:
     description: Database password
     required: true
+  db_username:
+    description: Database username
+    required: true
   env_file:
     description: Backend environment file
-    required: true
-  backend_port:
-    description: Backend port to bind
     required: true
 
 runs:
@@ -30,7 +30,6 @@ runs:
       shell: bash
 
     - name: Set up Python
-      id: setup-python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
       with:
         cache: poetry
@@ -42,24 +41,23 @@ runs:
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
         path: backend/.venv
-        key: poetry-venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('backend/poetry.lock') }}
+        key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
 
     - name: Install backend dependencies
-      if: steps.cache-poetry-venv.outputs.cache-hit != 'true'
       run: |
-        cd backend
-        poetry config virtualenvs.in-project true
         poetry install --no-root --no-interaction
       shell: bash
+      working-directory: backend
 
     - name: Fetch nest.dump from S3
-      run: cd backend && poetry run python -m scripts.fetch_nest_dump
+      run: poetry run python -m scripts.fetch_nest_dump
       shell: bash
+      working-directory: backend
 
     - name: Wait for database to be ready
       env:
-        DB_USERNAME: ${{ inputs.db_username }}
         DB_NAME: ${{ inputs.db_name }}
+        DB_USERNAME: ${{ inputs.db_username }}
       run: |
         timeout 5m bash -c '
           until docker exec ${{ job.services.db.id }} pg_isready -U $DB_USERNAME -d $DB_NAME; do
@@ -81,14 +79,15 @@ runs:
         export DJANGO_DB_HOST=localhost
         export DJANGO_REDIS_AUTH_ENABLED=False
         export DJANGO_REDIS_HOST=localhost
-        cd backend && poetry run python manage.py migrate
+        poetry run python manage.py migrate
       shell: bash
+      working-directory: backend
 
     - name: Load Postgres data
       env:
-        PGPASSWORD: ${{ inputs.db_password }}
-        DB_USERNAME: ${{ inputs.db_username }}
         DB_NAME: ${{ inputs.db_name }}
+        DB_USERNAME: ${{ inputs.db_username }}
+        PGPASSWORD: ${{ inputs.db_password }}
       run: |
         set -euo pipefail
         if ! pg_restore -h localhost -U $DB_USERNAME -d $DB_NAME < backend/data/nest.dump; then
@@ -100,15 +99,16 @@ runs:
 
     - name: Start Backend in the background
       env:
-        ENV_FILE: ${{ inputs.env_file }}
         BACKEND_PORT: ${{ inputs.backend_port }}
+        ENV_FILE: ${{ inputs.env_file }}
       run: |
         set -euo pipefail && set -a && source $ENV_FILE && set +a
         export DJANGO_DB_HOST=localhost
         export DJANGO_REDIS_AUTH_ENABLED=False
         export DJANGO_REDIS_HOST=localhost
-        cd backend && poetry run gunicorn wsgi:application --bind 0.0.0.0:$BACKEND_PORT &
+        poetry run gunicorn wsgi:application --bind 0.0.0.0:$BACKEND_PORT &
       shell: bash
+      working-directory: backend
 
     - name: Waiting for the backend to be ready
       env:

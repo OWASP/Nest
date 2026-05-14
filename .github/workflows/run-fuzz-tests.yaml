@@ -48,11 +48,11 @@ jobs:
       - name: Setup Backend environment
         uses: ./.github/workflows/setup-backend-environment
         with:
-          db_username: nest_user_fuzz
+          backend_port: 9500
           db_name: nest_db_fuzz
           db_password: nest_user_fuzz_password
+          db_username: nest_user_fuzz
           env_file: backend/.env.fuzz.example
-          backend_port: 9500
 
       - name: Run fuzz tests
         env:
@@ -66,4 +66,5 @@ jobs:
           export REST_URL="$REST_URL"
           export TEST_FILE="fuzz/$TEST_FILE"
           source backend/.venv/bin/activate
-          cd backend && sh ./entrypoint.fuzz.sh
+          sh ./entrypoint.fuzz.sh
+        working-directory: backend
