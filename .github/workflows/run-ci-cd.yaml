@@ -233,9 +233,8 @@ jobs:
       )
     needs:
       - run-backend-tests
-      - run-frontend-a11y-tests
+      - run-frontend-tests
       - run-frontend-e2e-tests
-      - run-frontend-unit-tests
       - run-infrastructure-tests
       - run-rest-fuzz-tests
     outputs:
