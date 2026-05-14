@@ -52,7 +52,7 @@ jobs:
           db_name: nest_db_fuzz
           db_password: nest_user_fuzz_password
           db_username: nest_user_fuzz
-          env_file: backend/.env.fuzz.example
+          env_file: .env.fuzz.example
 
       - name: Run fuzz tests
         env:

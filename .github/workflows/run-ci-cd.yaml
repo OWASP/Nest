@@ -134,7 +134,7 @@ jobs:
           db_name: nest_db_e2e
           db_password: nest_user_e2e_password
           db_username: nest_user_e2e
-          env_file: backend/.env.e2e.example
+          env_file: .env.e2e.example
 
       - name: Build frontend image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
