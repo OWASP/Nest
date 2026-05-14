@@ -5,7 +5,7 @@ on:
 
 env:
   FORCE_COLOR: 1
-  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+  TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
 
 permissions: {}
 
@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           key: ${{ runner.os }}-terraform-${{ hashFiles('infrastructure/**/.terraform.lock.hcl') }}
-          path: ~/.terraform.d/plugin-cache
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Run tests
         run: make test-infrastructure
