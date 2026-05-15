@@ -5,9 +5,6 @@ description: Check out repository, install pnpm, set up Node, and install fronte
 runs:
   using: composite
   steps:
-    - name: Check out repository
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-
     - name: Install pnpm
       uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e  # v6.0.3
       with:
