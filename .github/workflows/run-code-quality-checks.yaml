@@ -72,7 +72,6 @@ jobs:
         with:
           run_install: |
             - cwd: frontend
-              args: [--frozen-lockfile]
           version: 10.33.3
           cache: true
 
