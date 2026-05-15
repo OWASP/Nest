@@ -142,7 +142,7 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+      expect(await screen.findByText('Program Not Found')).toBeInTheDocument()
     })
   })
 
@@ -293,7 +293,8 @@ describe('EditProgramPage', () => {
     render(<EditProgramPage />)
 
     await waitFor(async () => {
-      expect(await screen.findByLabelText('Name')).toBeInTheDocument()
+      expect(await screen.findByText('Error Loading Program')).toBeInTheDocument()
+      expect(screen.getByText('GraphQL error')).toBeInTheDocument()
     })
   })
 

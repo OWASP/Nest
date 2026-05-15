@@ -1,4 +1,8 @@
-import { extractGraphQLErrors, isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
+import {
+  extractGraphQLErrors,
+  isForbiddenGraphQLError,
+  isAccessDeniedGraphQLError,
+} from 'utils/helpers/handleGraphQLError'
 
 describe('extractGraphQLErrors', () => {
   describe('ApolloError-like errors with graphQLErrors', () => {
@@ -285,5 +289,40 @@ describe('isForbiddenGraphQLError', () => {
     expect(isForbiddenGraphQLError(new Error('network'))).toBe(false)
     expect(isForbiddenGraphQLError(null)).toBe(false)
     expect(isForbiddenGraphQLError({})).toBe(false)
+  })
+})
+
+describe('isAccessDeniedGraphQLError', () => {
+  it('returns true for FORBIDDEN via GraphQL errors', () => {
+    expect(
+      isAccessDeniedGraphQLError({
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      })
+    ).toBe(true)
+  })
+
+  it('returns true for UNAUTHENTICATED', () => {
+    expect(
+      isAccessDeniedGraphQLError({
+        graphQLErrors: [{ message: 'Sign in', extensions: { code: 'UNAUTHENTICATED' } }],
+      })
+    ).toBe(true)
+  })
+
+  it('returns true when networkError status is 401 or 403', () => {
+    expect(
+      isAccessDeniedGraphQLError({ networkError: { statusCode: 401, message: 'Unauthorized' } })
+    ).toBe(true)
+    expect(
+      isAccessDeniedGraphQLError({ networkError: { statusCode: 403, message: 'Forbidden' } })
+    ).toBe(true)
+  })
+
+  it('returns false for unrelated GraphQL errors', () => {
+    expect(
+      isAccessDeniedGraphQLError({
+        graphQLErrors: [{ message: 'Bad', extensions: { code: 'INTERNAL_SERVER_ERROR' } }],
+      })
+    ).toBe(false)
   })
 })

@@ -207,6 +207,16 @@ const IssuesPage = () => {
     )
   }
 
+  if (error) {
+    return (
+      <ErrorDisplay
+        statusCode={500}
+        title="Server Error"
+        message="Failed to load issues for this module. Please try again later."
+      />
+    )
+  }
+
   if (!moduleData)
     return <ErrorDisplay statusCode={404} title="Module Not Found" message="Module not found" />
 

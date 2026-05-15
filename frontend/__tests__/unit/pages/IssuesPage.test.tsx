@@ -123,6 +123,7 @@ describe('IssuesPage', () => {
     })
     render(<IssuesPage />)
     expect(mockHandleAppError).toHaveBeenCalledWith(error)
+    expect(screen.getByText('Server Error')).toBeInTheDocument()
   })
 
   it('renders a 404 error if the module is not found', () => {
@@ -867,6 +868,24 @@ describe('IssuesPage', () => {
       render(<IssuesPage />)
 
       expect(mockHandleAppError).toHaveBeenCalledWith(error)
+      expect(screen.getByText('Server Error')).toBeInTheDocument()
+    })
+
+    it('renders 403 when issues query returns FORBIDDEN GraphQL error', () => {
+      const error = {
+        graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
+      }
+      mockUseQuery.mockImplementation((document) => {
+        if (document === GetManagementProgramAdminsAndModulesDocument) {
+          return { data: mockAccessData, loading: false, error: undefined }
+        }
+        return { data: undefined, loading: false, error }
+      })
+
+      render(<IssuesPage />)
+
+      expect(screen.getByText('Access Denied')).toBeInTheDocument()
+      expect(mockHandleAppError).not.toHaveBeenCalled()
     })
 
     it('does not call handleAppError when there is no error', () => {

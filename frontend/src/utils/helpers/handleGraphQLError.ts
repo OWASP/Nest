@@ -64,3 +64,28 @@ export function isForbiddenGraphQLError(error: unknown): boolean {
     false
   )
 }
+
+const ACCESS_DENIED_GQL_CODES = new Set(['UNAUTHENTICATED', 'AUTHENTICATION_REQUIRED'])
+
+/** True for auth/forbidden signals (GraphQL ACL, auth codes, or HTTP 401/403 on networkError). */
+export function isAccessDeniedGraphQLError(error: unknown): boolean {
+  if (isForbiddenGraphQLError(error)) return true
+
+  const gqlErrors = getGraphQLErrors(error)
+  if (
+    gqlErrors?.some((e) =>
+      ACCESS_DENIED_GQL_CODES.has(
+        String((e.extensions as { code?: string } | undefined)?.code ?? '')
+      )
+    )
+  ) {
+    return true
+  }
+
+  if (typeof error === 'object' && error !== null && 'networkError' in error) {
+    const status = (error as { networkError?: { statusCode?: number } }).networkError?.statusCode
+    if (status === 401 || status === 403) return true
+  }
+
+  return false
+}

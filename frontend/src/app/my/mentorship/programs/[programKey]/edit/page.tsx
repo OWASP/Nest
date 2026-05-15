@@ -14,7 +14,7 @@ import {
   GetMyProgramsDocument,
 } from 'types/__generated__/programsQueries.generated'
 import { formatDateForInput } from 'utils/dateFormatter'
-import { extractGraphQLErrors, isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
+import { extractGraphQLErrors, isAccessDeniedGraphQLError } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -54,18 +54,29 @@ const EditProgramPage = () => {
     status: ProgramStatusEnum.Draft,
     tags: '',
   })
-  const [accessStatus, setAccessStatus] = useState<'checking' | 'allowed' | 'denied'>('checking')
+  const [accessStatus, setAccessStatus] = useState<
+    'checking' | 'allowed' | 'denied' | 'error' | 'notFound'
+  >('checking')
   useEffect(() => {
     if (sessionStatus === 'loading' || queryLoading) {
       return
     }
-    if (queryError && isForbiddenGraphQLError(queryError)) {
+    if (queryError && isAccessDeniedGraphQLError(queryError)) {
+      setAccessStatus('denied')
+      return
+    }
+    if (queryError) {
+      setAccessStatus('error')
+      return
+    }
+
+    if (sessionStatus === 'unauthenticated') {
       setAccessStatus('denied')
       return
     }
 
-    if (!data?.managementProgram || sessionStatus === 'unauthenticated') {
-      setAccessStatus('denied')
+    if (!data?.managementProgram) {
+      setAccessStatus('notFound')
       return
     }
 
@@ -108,10 +119,8 @@ const EditProgramPage = () => {
           .join(', '),
         status: program.status || ProgramStatusEnum.Draft,
       })
-    } else if (queryError && !isForbiddenGraphQLError(queryError)) {
-      handleAppError(queryError)
     }
-  }, [accessStatus, data, queryError])
+  }, [accessStatus, data])
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -161,6 +170,22 @@ const EditProgramPage = () => {
   }
   if (accessStatus === 'checking') {
     return <LoadingSpinner />
+  }
+  if (accessStatus === 'error') {
+    const message =
+      queryError instanceof Error
+        ? queryError.message
+        : 'Failed to load program. Please try again later.'
+    return <ErrorDisplay statusCode={500} title="Error Loading Program" message={message} />
+  }
+  if (accessStatus === 'notFound') {
+    return (
+      <ErrorDisplay
+        statusCode={404}
+        title="Program Not Found"
+        message="Sorry, the program you're looking for doesn't exist."
+      />
+    )
   }
   if (accessStatus === 'denied') {
     return (
