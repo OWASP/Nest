@@ -14,7 +14,7 @@ import {
   GetMyProgramsDocument,
 } from 'types/__generated__/programsQueries.generated'
 import { formatDateForInput } from 'utils/dateFormatter'
-import { extractGraphQLErrors, isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
+import { extractGraphQLErrors, isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import { parseCommaSeparated } from 'utils/parser'
 import LoadingSpinner from 'components/LoadingSpinner'
 import ProgramForm from 'components/ProgramForm'
@@ -59,7 +59,7 @@ const EditProgramPage = () => {
     if (sessionStatus === 'loading' || queryLoading) {
       return
     }
-    if (queryError && isForbiddenGraphQlError(queryError)) {
+    if (queryError && isForbiddenGraphQLError(queryError)) {
       setAccessStatus('denied')
       return
     }
@@ -108,7 +108,7 @@ const EditProgramPage = () => {
           .join(', '),
         status: program.status || ProgramStatusEnum.Draft,
       })
-    } else if (queryError && !isForbiddenGraphQlError(queryError)) {
+    } else if (queryError && !isForbiddenGraphQLError(queryError)) {
       handleAppError(queryError)
     }
   }, [accessStatus, data, queryError])
@@ -167,7 +167,7 @@ const EditProgramPage = () => {
       <ErrorDisplay
         statusCode={403}
         title="Access Denied"
-        message="You do not have permission to view this page. You will be redirected."
+        message="You do not have permission to edit this program."
       />
     )
   }

@@ -8,7 +8,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
-import { isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
@@ -29,7 +29,7 @@ const ModuleDetailsPage = () => {
   })
 
   useEffect(() => {
-    if (error) {
+    if (error && !isForbiddenGraphQLError(error)) {
       handleAppError(error)
     }
   }, [error])
@@ -37,7 +37,7 @@ const ModuleDetailsPage = () => {
   const mentorshipModule: Module | null | undefined = data?.managementModule
   const admins = data?.managementProgram?.admins
 
-  if (error && isForbiddenGraphQlError(error)) {
+  if (error && isForbiddenGraphQLError(error)) {
     return (
       <ErrorDisplay
         statusCode={403}

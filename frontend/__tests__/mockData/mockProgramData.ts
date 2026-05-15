@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 
 export const mockPrograms = [
@@ -29,7 +30,7 @@ const mockProgramNode = {
 export const mockProgramDetailsData = {
   getProgram: mockProgramNode,
   getProgramModules: [],
-  managementProgram: mockProgramNode,
+  managementProgram: cloneDeep(mockProgramNode),
   managementProgramModules: [],
 }
 

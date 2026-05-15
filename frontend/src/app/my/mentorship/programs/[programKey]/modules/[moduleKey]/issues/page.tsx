@@ -14,7 +14,7 @@ import {
 } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { DEADLINE_ALL, DEADLINE_OPTIONS, getDeadlineCategory } from 'utils/deadlineUtils'
-import { isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import IssuesTable from 'components/IssuesTable'
 import LoadingSpinner from 'components/LoadingSpinner'
@@ -55,7 +55,9 @@ const IssuesPage = () => {
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 
   useEffect(() => {
-    if (accessError) handleAppError(accessError)
+    if (accessError && !isForbiddenGraphQLError(accessError)) {
+      handleAppError(accessError)
+    }
   }, [accessError])
 
   const { data, loading, error } = useQuery(GetManagementModuleIssuesDocument, {
@@ -71,7 +73,9 @@ const IssuesPage = () => {
   })
 
   useEffect(() => {
-    if (error) handleAppError(error)
+    if (error && !isForbiddenGraphQLError(error)) {
+      handleAppError(error)
+    }
   }, [error])
 
   const moduleData = data?.managementModule
@@ -160,7 +164,7 @@ const IssuesPage = () => {
     return <LoadingSpinner />
   }
 
-  if (accessError && isForbiddenGraphQlError(accessError)) {
+  if (accessError && isForbiddenGraphQLError(accessError)) {
     return (
       <ErrorDisplay
         statusCode={403}
@@ -191,6 +195,16 @@ const IssuesPage = () => {
 
   if (loading) {
     return <LoadingSpinner />
+  }
+
+  if (error && isForbiddenGraphQLError(error)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to view issues for this module."
+      />
+    )
   }
 
   if (!moduleData)

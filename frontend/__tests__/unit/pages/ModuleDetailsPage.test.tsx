@@ -79,10 +79,8 @@ describe('ModuleDetailsPage', () => {
 
     render(<ModuleDetailsPage />)
 
-    await waitFor(() => {
-      expect(handleAppError).toHaveBeenCalledWith(forbiddenError)
-    })
     expect(await screen.findByText('Access Denied')).toBeInTheDocument()
+    expect(handleAppError).not.toHaveBeenCalled()
   })
 
   it('renders module details when data is present', async () => {

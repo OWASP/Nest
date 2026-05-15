@@ -13,7 +13,7 @@ import { GetManagementProgramAndModulesDocument } from 'types/__generated__/prog
 import type { ExtendedSession } from 'types/auth'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
-import { isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
 
@@ -104,7 +104,7 @@ const ProgramDetailsPage = () => {
     }
   }
 
-  if (queryError && isForbiddenGraphQlError(queryError)) {
+  if (queryError && isForbiddenGraphQLError(queryError)) {
     return (
       <ErrorDisplay
         statusCode={403}

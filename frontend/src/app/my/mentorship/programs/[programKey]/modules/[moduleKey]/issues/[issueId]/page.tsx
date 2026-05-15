@@ -23,7 +23,7 @@ import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetManagementModuleIssueViewDocument } from 'types/__generated__/issueQueries.generated'
 import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import type { ExtendedSession } from 'types/auth'
-import { isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import AccessDeniedDisplay from 'components/AccessDeniedDisplay'
 import ActionButton from 'components/ActionButton'
 import AnchorTitle from 'components/AnchorTitle'
@@ -59,7 +59,9 @@ const ModuleIssueDetailsPage = () => {
   const hasAccess = useAccessControl(accessData, sessionStatus, currentUserLogin, accessLoading)
 
   useEffect(() => {
-    if (accessError) handleAppError(accessError)
+    if (accessError && !isForbiddenGraphQLError(accessError)) {
+      handleAppError(accessError)
+    }
   }, [accessError])
 
   const formatDeadline = (deadline: string | null) => {
@@ -155,7 +157,7 @@ const ModuleIssueDetailsPage = () => {
     return <LoadingSpinner />
   }
 
-  if (accessError && isForbiddenGraphQlError(accessError)) {
+  if (accessError && isForbiddenGraphQLError(accessError)) {
     return (
       <ErrorDisplay
         statusCode={403}

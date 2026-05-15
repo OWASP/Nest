@@ -57,7 +57,7 @@ export function extractGraphQLErrors(error: unknown): {
 }
 
 /** True when GraphQL errors include extensions.code FORBIDDEN (e.g. mentorship management ACL). */
-export function isForbiddenGraphQlError(error: unknown): boolean {
+export function isForbiddenGraphQLError(error: unknown): boolean {
   const gqlErrors = getGraphQLErrors(error)
   return (
     gqlErrors?.some((e) => (e.extensions as { code?: string } | undefined)?.code === 'FORBIDDEN') ??

@@ -1,4 +1,4 @@
-import { extractGraphQLErrors, isForbiddenGraphQlError } from 'utils/helpers/handleGraphQLError'
+import { extractGraphQLErrors, isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 
 describe('extractGraphQLErrors', () => {
   describe('ApolloError-like errors with graphQLErrors', () => {
@@ -249,19 +249,19 @@ describe('extractGraphQLErrors', () => {
   })
 })
 
-describe('isForbiddenGraphQlError', () => {
+describe('isForbiddenGraphQLError', () => {
   it('returns true when graphQLErrors includes FORBIDDEN', () => {
     const error = {
       graphQLErrors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
     }
-    expect(isForbiddenGraphQlError(error)).toBe(true)
+    expect(isForbiddenGraphQLError(error)).toBe(true)
   })
 
   it('returns true when errors array includes FORBIDDEN (Apollo combined shape)', () => {
     const error = {
       errors: [{ message: 'Forbidden', extensions: { code: 'FORBIDDEN' } }],
     }
-    expect(isForbiddenGraphQlError(error)).toBe(true)
+    expect(isForbiddenGraphQLError(error)).toBe(true)
   })
 
   it('returns true if any nested error is FORBIDDEN', () => {
@@ -271,19 +271,19 @@ describe('isForbiddenGraphQlError', () => {
         { message: 'No access', extensions: { code: 'FORBIDDEN' } },
       ],
     }
-    expect(isForbiddenGraphQlError(error)).toBe(true)
+    expect(isForbiddenGraphQLError(error)).toBe(true)
   })
 
   it('returns false when GraphQL errors exist but none are FORBIDDEN', () => {
     const error = {
       graphQLErrors: [{ message: 'Not found', extensions: { code: 'NOT_FOUND' } }],
     }
-    expect(isForbiddenGraphQlError(error)).toBe(false)
+    expect(isForbiddenGraphQLError(error)).toBe(false)
   })
 
   it('returns false when there are no GraphQL error arrays', () => {
-    expect(isForbiddenGraphQlError(new Error('network'))).toBe(false)
-    expect(isForbiddenGraphQlError(null)).toBe(false)
-    expect(isForbiddenGraphQlError({})).toBe(false)
+    expect(isForbiddenGraphQLError(new Error('network'))).toBe(false)
+    expect(isForbiddenGraphQLError(null)).toBe(false)
+    expect(isForbiddenGraphQLError({})).toBe(false)
   })
 })
