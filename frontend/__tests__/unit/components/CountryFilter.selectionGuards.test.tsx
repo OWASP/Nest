@@ -1,6 +1,6 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 import CountryFilter from 'components/CountryFilter'
 
 jest.mock('@heroui/autocomplete', () => ({
@@ -10,7 +10,11 @@ jest.mock('@heroui/autocomplete', () => ({
     onSelectionChange?: (key: React.Key | null) => void
   }) => (
     <div>
-      <button type="button" aria-label="Simulate null selection" onClick={() => onSelectionChange?.(null)}>
+      <button
+        type="button"
+        aria-label="Simulate null selection"
+        onClick={() => onSelectionChange?.(null)}
+      >
         null
       </button>
       <button
@@ -30,11 +34,7 @@ describe('CountryFilter selection guards', () => {
     const user = userEvent.setup()
     const onCountryChange = jest.fn()
     render(
-      <CountryFilter
-        countries={['France']}
-        selectedCountry=""
-        onCountryChange={onCountryChange}
-      />
+      <CountryFilter countries={['France']} selectedCountry="" onCountryChange={onCountryChange} />
     )
 
     await user.click(screen.getByRole('button', { name: 'Simulate null selection' }))
