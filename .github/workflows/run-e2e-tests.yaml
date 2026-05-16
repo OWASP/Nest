@@ -93,6 +93,11 @@ jobs:
           '
           echo "Frontend is up!"
 
+      - name: Install e2e dependencies
+        run: |
+          pnpm install --frozen-lockfile
+        working-directory: e2e
+
       - name: Read Playwright version
         id: playwright-version
         run: echo "version=$(node -p \"require('./package.json').dependencies['@playwright/test']\")" >> "$GITHUB_OUTPUT"
@@ -106,11 +111,6 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
-        working-directory: e2e
-
-      - name: Install e2e dependencies
-        run: |
-          pnpm install --frozen-lockfile
         working-directory: e2e
 
       - name: Run frontend end-to-end tests
