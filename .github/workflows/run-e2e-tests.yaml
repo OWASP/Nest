@@ -36,11 +36,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Set up Docker buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
-
       - name: Setup Backend environment
-        uses: ./.github/workflows/setup-backend-environment
+        uses: ./.github/actions/setup-backend-environment
         with:
           backend_port: 9000
           db_name: nest_db_e2e
