@@ -48,34 +48,42 @@ jobs:
           db_username: nest_user_e2e
           env_file: .env.e2e.example
 
-      - name: Build frontend image
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f  # v7.1.0
+      - name: Install pnpm
+        uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e  # v6.0.3
         with:
-          build-args: |
-            ENV_FILE=.env.e2e.example
-            NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000
-          cache-from: |
-            type=gha
-            type=registry,ref=owasp/nest:frontend-e2e-cache
-          cache-to: |
-            type=gha,compression=zstd
-          context: frontend
-          file: docker/frontend/Dockerfile
-          load: true
-          platforms: linux/amd64
-          tags: owasp/nest:frontend-e2e-latest
+          version: 10.33.3
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+          node-version: 24
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
+      - name: Prepare frontend environment
+        run: cp .env.e2e.example .env
+        working-directory: frontend
+
+      - name: Build frontend
+        run: |
+          NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
+          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
+          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
+          pnpm run build
+        working-directory: frontend
 
       - name: Run frontend in the background
         run: |
-          docker run \
-            --env-file frontend/.env.e2e.example \
-            --name e2e-nest-frontend \
-            --network host \
-            -d \
-            -e NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
-            -e NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-            -p 3000:3000 \
-            owasp/nest:frontend-e2e-latest
+          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
+          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
+          HOSTNAME=0.0.0.0 \
+          PORT=3000 \
+          node .next/standalone/server.js &
+        working-directory: frontend
 
       - name: Wait for frontend to be ready
         run: |
