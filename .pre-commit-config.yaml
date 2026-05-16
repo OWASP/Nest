@@ -36,7 +36,6 @@ repos:
       - id: terraform-docs-go
         files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
         args:
-          - --config=infrastructure/.terraform-docs.yaml
           - infrastructure/
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
@@ -72,8 +71,6 @@ repos:
       - id: markdownlint
         args:
           - --fix
-          - --config
-          - .markdownlint.yaml
         files: \.md$
 
   - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt

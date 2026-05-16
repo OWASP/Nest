@@ -1,18 +1,5 @@
 formatter: markdown table
 
-recursive:
-  enabled: true
-  path: .
-  include-main: false
-  exclude:
-    - .terraform
-    - .terragrunt-cache
-    - tests
-
-sections:
-  hide: []
-  show: []
-
 output:
   file: README.md
   mode: inject
@@ -20,13 +7,23 @@ output:
     <!-- BEGIN_TF_DOCS -->
     {{ .Content }}
     <!-- END_TF_DOCS -->
+
 output-values:
   enabled: false
   from: ''
 
-sort:
+recursive:
   enabled: true
-  by: name
+  exclude:
+    - .terraform
+    - .terragrunt-cache
+    - tests
+  include-main: false
+  path: .
+
+sections:
+  hide: []
+  show: []
 
 settings:
   anchor: true
@@ -42,3 +39,7 @@ settings:
   required: true
   sensitive: true
   type: true
+
+sort:
+  enabled: true
+  by: name
