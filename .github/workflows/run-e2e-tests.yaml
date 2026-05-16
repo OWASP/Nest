@@ -92,4 +92,5 @@ jobs:
         run: |
           FRONTEND_URL=http://localhost:3000 \
           pnpm run test:e2e
+        working-directory: frontend
     timeout-minutes: 20
