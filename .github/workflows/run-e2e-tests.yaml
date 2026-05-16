@@ -52,6 +52,12 @@ jobs:
         run: cp .env.e2e.example .env
         working-directory: frontend
 
+      - name: Cache Next.js build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          path: frontend/.next/cache
+          key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml', 'frontend/package.json', 'frontend/next.config.ts', 'frontend/src/**', 'frontend/public/**') }}
+
       - name: Build frontend
         run: |
           NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
@@ -62,9 +68,11 @@ jobs:
 
       - name: Run frontend in the background
         run: |
+          HOSTNAME=0.0.0.0 \
           NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
           NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-          HOSTNAME=0.0.0.0 \
+          NEXT_TELEMETRY_DISABLED=1 \
+          NODE_ENV=production \
           PORT=3000 \
           node .next/standalone/server.js &
         working-directory: frontend
