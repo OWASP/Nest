@@ -3,6 +3,11 @@ name: Run e2e tests
 on:
   workflow_call:
 
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
 jobs:
   run-e2e-tests:
     name: Run e2e tests
@@ -87,6 +92,21 @@ jobs:
             done
           '
           echo "Frontend is up!"
+
+      - name: Read Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p \"require('./package.json').dependencies['@playwright/test']\")" >> "$GITHUB_OUTPUT"
+        working-directory: e2e
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: e2e
 
       - name: Install e2e dependencies
         run: |
