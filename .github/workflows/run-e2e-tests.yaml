@@ -88,9 +88,14 @@ jobs:
           '
           echo "Frontend is up!"
 
+      - name: Install e2e dependencies
+        run: |
+          pnpm install --frozen-lockfile
+        working-directory: e2e
+
       - name: Run frontend end-to-end tests
         run: |
           FRONTEND_URL=http://localhost:3000 \
           pnpm run test:e2e
-        working-directory: frontend
+        working-directory: e2e
     timeout-minutes: 20
