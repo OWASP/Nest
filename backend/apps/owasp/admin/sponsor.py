@@ -14,18 +14,25 @@ class SponsorAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
         "name",
         "sort_name",
         "sponsor_type",
+        "status",
         "is_member",
         "member_type",
+        "chapter",
+        "project",
     )
     search_fields = (
         "name",
         "sort_name",
         "description",
+        "contact_email",
     )
     list_filter = (
         "sponsor_type",
+        "status",
         "is_member",
         "member_type",
+        "chapter",
+        "project",
     )
     fieldsets = (
         (
@@ -35,6 +42,7 @@ class SponsorAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
                     "name",
                     "sort_name",
                     "description",
+                    "contact_email",
                 )
             },
         ),
@@ -55,10 +63,25 @@ class SponsorAdmin(admin.ModelAdmin, StandardOwaspAdminMixin):
                     "is_member",
                     "member_type",
                     "sponsor_type",
+                    "status",
                 )
             },
         ),
+        (
+            "Entity Associations",
+            {
+                "fields": (
+                    "chapter",
+                    "project",
+                ),
+                "description": (
+                    "Optional: Link this sponsor to a specific chapter or project. "
+                    "Leave blank for global sponsors."
+                ),
+            },
+        ),
     )
+    readonly_fields = ("nest_created_at", "nest_updated_at")
 
 
 admin.site.register(Sponsor, SponsorAdmin)

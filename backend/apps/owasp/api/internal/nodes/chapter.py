@@ -5,7 +5,9 @@ import strawberry_django
 
 from apps.core.utils.index import deep_camelize
 from apps.owasp.api.internal.nodes.common import GenericEntityNode
+from apps.owasp.api.internal.nodes.sponsor import SponsorNode
 from apps.owasp.models.chapter import Chapter
+from apps.owasp.models.sponsor import Sponsor
 
 
 @strawberry.type
@@ -61,3 +63,8 @@ class ChapterNode(GenericEntityNode):
     def suggested_location(self, root: Chapter) -> str | None:
         """Resolve suggested location."""
         return root.idx_suggested_location
+
+    @strawberry_django.field(prefetch_related=["sponsors"])
+    def sponsors(self, root: Chapter) -> list[SponsorNode]:
+        """Resolve active sponsors for this chapter."""
+        return root.sponsors.filter(status=Sponsor.Status.ACTIVE).order_by("name")

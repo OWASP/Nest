@@ -15,7 +15,9 @@ from apps.owasp.api.internal.nodes.common import GenericEntityNode
 from apps.owasp.api.internal.nodes.project_health_metrics import (
     ProjectHealthMetricsNode,
 )
+from apps.owasp.api.internal.nodes.sponsor import SponsorNode
 from apps.owasp.models.project import Project
+from apps.owasp.models.sponsor import Sponsor
 
 RECENT_ISSUES_LIMIT = 5
 RECENT_RELEASES_LIMIT = 5
@@ -130,6 +132,11 @@ class ProjectNode(GenericEntityNode):
     def repositories_count(self, root: Project) -> int:
         """Resolve repositories count."""
         return root.idx_repositories_count
+
+    @strawberry_django.field(prefetch_related=["sponsors"])
+    def sponsors(self, root: Project) -> list[SponsorNode]:
+        """Resolve active sponsors for this project."""
+        return root.sponsors.filter(status=Sponsor.Status.ACTIVE).order_by("name")
 
     @strawberry_django.field
     def topics(self, root: Project) -> list[str]:

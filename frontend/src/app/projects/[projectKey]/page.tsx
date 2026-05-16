@@ -19,6 +19,7 @@ import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import type { SponsorInfo } from 'components/SponsorBadge'
 
 const ProjectDetailsPage = () => {
   const { projectKey } = useParams<{ projectKey: string }>()
@@ -32,6 +33,25 @@ const ProjectDetailsPage = () => {
 
   const project = data?.project
   const topContributors = data?.topContributors || []
+
+  const sponsors: SponsorInfo[] = (project?.sponsors || []).map(
+    (sponsor: {
+      key: string
+      name: string
+      sponsorType: string
+      imageUrl: string
+      url: string
+      description?: string
+      status?: string
+    }) => ({
+      key: sponsor.key,
+      name: sponsor.name,
+      sponsorType: sponsor.sponsorType,
+      imageUrl: sponsor.imageUrl,
+      url: sponsor.url,
+      description: sponsor.description || '',
+    })
+  )
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -123,6 +143,7 @@ const ProjectDetailsPage = () => {
       recentMilestones={project.recentMilestones as unknown as Milestone[]}
       recentReleases={project.recentReleases as unknown as Release[]}
       repositories={project.repositories as unknown as RepositoryCardProps[]}
+      sponsors={sponsors}
       startDate={startDate}
       stats={projectStats}
       summary={project.summary}

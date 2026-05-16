@@ -86,6 +86,15 @@ export const GET_PROJECT_DATA = gql`
         url
       }
       repositoriesCount
+      sponsors {
+        description
+        imageUrl
+        key
+        name
+        sponsorType
+        status
+        url
+      }
       starsCount
       summary
       topics

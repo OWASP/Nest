@@ -10,6 +10,7 @@ import { getContributionStats } from 'utils/contributionDataUtils'
 import { formatDate, getDateRange } from 'utils/dateFormatter'
 import DetailsCard from 'components/CardDetailsPage'
 import LoadingSpinner from 'components/LoadingSpinner'
+import type { SponsorInfo } from 'components/SponsorBadge'
 
 export default function ChapterDetailsPage() {
   const { chapterKey } = useParams<{ chapterKey: string }>()
@@ -24,6 +25,25 @@ export default function ChapterDetailsPage() {
 
   const chapter = data?.chapter
   const topContributors = data?.topContributors
+
+  const sponsors: SponsorInfo[] = (chapter?.sponsors || []).map(
+    (sponsor: {
+      key: string
+      name: string
+      sponsorType: string
+      imageUrl: string
+      url: string
+      description?: string
+      status?: string
+    }) => ({
+      key: sponsor.key,
+      name: sponsor.name,
+      sponsorType: sponsor.sponsorType,
+      imageUrl: sponsor.imageUrl,
+      url: sponsor.url,
+      description: sponsor.description || '',
+    })
+  )
 
   useEffect(() => {
     if (graphQLRequestError) {
@@ -87,6 +107,7 @@ export default function ChapterDetailsPage() {
       geolocationData={[chapter as unknown as Chapter]}
       isActive={chapter.isActive}
       socialLinks={chapter.relatedUrls}
+      sponsors={sponsors}
       startDate={startDate}
       summary={chapter.summary}
       title={chapter.name}
