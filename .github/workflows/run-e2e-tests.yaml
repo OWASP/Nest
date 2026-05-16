@@ -60,9 +60,9 @@ jobs:
       - name: Cache Next.js build
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          path: frontend/.next/cache
           key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml', 'frontend/package.json', 'frontend/next.config.ts', 'frontend/src/**',
             'frontend/public/**') }}
+          path: frontend/.next/cache
 
       - name: Build frontend
         run: |
@@ -98,16 +98,11 @@ jobs:
           pnpm install --frozen-lockfile
         working-directory: e2e
 
-      - name: Read Playwright version
-        id: playwright-version
-        run: echo "version=$(node -p \"require('./package.json').dependencies['@playwright/test']\")" >> "$GITHUB_OUTPUT"
-        working-directory: e2e
-
       - name: Cache Playwright browsers
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json', 'e2e/pnpm-lock.yaml') }}
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
