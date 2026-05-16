@@ -1,6 +1,6 @@
 'use client'
 
-import { Breadcrumbs, BreadcrumbItem as HeroUIBreadcrumbItem } from '@heroui/react'
+import { Breadcrumbs, BreadcrumbsItem as HeroUIBreadcrumbItem } from '@heroui/react'
 import { useBreadcrumbClassName } from 'contexts/BreadcrumbContext'
 import { useBreadcrumbs } from 'hooks/useBreadcrumbs'
 import Link from 'next/link'
@@ -22,17 +22,16 @@ export default function BreadCrumbsWrapper() {
           aria-label="breadcrumb"
           separator={<FaChevronRight className="mx-1 text-xs text-gray-400 dark:text-gray-500" />}
           className="text-gray-800 dark:text-gray-200"
-          itemClasses={{
-            base: 'transition-colors duration-200 min-w-0',
-            item: 'text-sm font-medium',
-            separator: 'flex items-center',
-          }}
         >
           {items.map((item, index) => {
             const isLast = index === items.length - 1
 
             return (
-              <HeroUIBreadcrumbItem key={item.path} isDisabled={isLast}>
+              <HeroUIBreadcrumbItem
+                key={item.path}
+                isDisabled={isLast}
+                className="transition-colors duration-200 min-w-0 text-sm font-medium"
+              >
                 {isLast ? (
                   <span className="cursor-default font-semibold text-gray-800 dark:text-gray-100">
                     <TruncatedText

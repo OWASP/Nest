@@ -1,6 +1,5 @@
 'use client'
 
-import { Navbar, NavbarItem, NavbarContent } from '@heroui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React from 'react'
@@ -8,38 +7,21 @@ import { FaChartLine, FaChartBar } from 'react-icons/fa6'
 import { IconWrapper } from 'wrappers/IconWrapper'
 
 const NAVIGATION_ITEMS = [
-  {
-    label: 'Overview',
-    icon: FaChartLine,
-    href: '/projects/dashboard',
-  },
-  {
-    label: 'Metrics',
-    icon: FaChartBar,
-    href: '/projects/dashboard/metrics',
-  },
+  { label: 'Overview', icon: FaChartLine, href: '/projects/dashboard' },
+  { label: 'Metrics', icon: FaChartBar, href: '/projects/dashboard/metrics' },
 ] as const
 
 const ProjectsDashboardNavBar: React.FC = () => {
   const pathname = usePathname()
   const isActive = (path: string) => pathname === path
   return (
-    <Navbar
-      classNames={{
-        base: 'flex lg:w-64 lg:flex-col flex-row items-start justify-start py-4',
-        item: [
-          'data-[active=true]:bg-gray-200',
-          'dark:data-[active=true]:bg-gray-800',
-          'data-[active=true]:text-align-left',
-          'w-full',
-          'data-[active=true]:rounded',
-        ],
-      }}
-      position="static"
-    >
-      <NavbarContent className="flex h-full justify-center lg:flex-col lg:items-start">
+    <nav className="flex lg:w-64 lg:flex-col flex-row items-start justify-start py-4">
+      <div className="flex h-full justify-center lg:flex-col lg:items-start">
         {NAVIGATION_ITEMS.map(({ href, label, icon }) => (
-          <NavbarItem key={href} isActive={isActive(href)}>
+          <div
+            key={href}
+            className={`w-full rounded ${isActive(href) ? 'bg-gray-200 dark:bg-gray-800' : ''}`}
+          >
             <Link
               href={href}
               aria-current={isActive(href) ? 'page' : undefined}
@@ -50,10 +32,10 @@ const ProjectsDashboardNavBar: React.FC = () => {
                 <span className="text-sm font-semibold">{label}</span>
               </div>
             </Link>
-          </NavbarItem>
+          </div>
         ))}
-      </NavbarContent>
-    </Navbar>
+      </div>
+    </nav>
   )
 }
 export default ProjectsDashboardNavBar

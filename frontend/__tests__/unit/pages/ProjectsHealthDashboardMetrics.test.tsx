@@ -40,10 +40,17 @@ jest.mock('hooks/useDjangoSession', () => ({
 
 jest.mock('@heroui/react', () => ({
   ...jest.requireActual('@heroui/react'),
-  Pagination: ({ page, onChange }) => (
-    <div>
-      <button onClick={() => onChange(page + 1)}>Next Page</button>
-    </div>
+  PaginationRoot: ({ children }) => <div>{children}</div>,
+  PaginationContent: ({ children }) => <div>{children}</div>,
+  PaginationItem: ({ children }) => <div>{children}</div>,
+  PaginationPrevious: ({ onPress, isDisabled }) => (
+    <button onClick={onPress} disabled={isDisabled}>Prev Page</button>
+  ),
+  PaginationNext: ({ onPress, isDisabled }) => (
+    <button onClick={onPress} disabled={isDisabled}>Next Page</button>
+  ),
+  PaginationLink: ({ children, onPress, isActive }) => (
+    <button onClick={onPress} aria-current={isActive ? 'page' : undefined}>{children}</button>
   ),
 }))
 
@@ -194,9 +201,22 @@ describe('MetricsPage', () => {
       const mockFetchMoreResult = { projectHealthMetrics: [] }
       return updateQuery(mockHealthMetricsData, { fetchMoreResult: mockFetchMoreResult })
     })
+    const paginatedData = {
+      projectHealthMetrics: Array.from({ length: 11 }, (_, i) => ({
+        id: String(i + 1),
+        projectKey: `project-${i + 1}`,
+        projectName: `Project ${i + 1}`,
+        starsCount: 100,
+        forksCount: 10,
+        contributorsCount: 5,
+        createdAt: '2023-01-01T00:00:00Z',
+        score: 80,
+      })),
+      projectHealthMetricsDistinctLength: 11,
+    }
 
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
+      data: paginatedData,
       loading: false,
       error: null,
       fetchMore: mockFetchMore,
@@ -621,9 +641,22 @@ describe('MetricsPage', () => {
       const updateQuery = options.updateQuery
       return updateQuery(mockHealthMetricsData, { fetchMoreResult: null })
     })
+    const paginatedData = {
+      projectHealthMetrics: Array.from({ length: 11 }, (_, i) => ({
+        id: String(i + 1),
+        projectKey: `project-${i + 1}`,
+        projectName: `Project ${i + 1}`,
+        starsCount: 100,
+        forksCount: 10,
+        contributorsCount: 5,
+        createdAt: '2023-01-01T00:00:00Z',
+        score: 80,
+      })),
+      projectHealthMetricsDistinctLength: 11,
+    }
 
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
-      data: mockHealthMetricsData,
+      data: paginatedData,
       loading: false,
       error: null,
       fetchMore: mockFetchMore,

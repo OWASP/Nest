@@ -41,7 +41,7 @@ const ProjectsDashboardDropDown: FC<{
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button variant="solid">
+        <Button variant="primary">
           <IconWrapper
             icon={
               isOrdering
@@ -62,7 +62,7 @@ const ProjectsDashboardDropDown: FC<{
       </DropdownTrigger>
       <DropdownMenu onAction={onAction} selectedKeys={selectedKeys} selectionMode={selectionMode}>
         {sections.map((section) => (
-          <DropdownSection key={section.title} title={section.title}>
+          <DropdownSection key={section.title} data-title={section.title}>
             {section.items.map((item) => (
               <DropdownItem key={item.key}>{item.label}</DropdownItem>
             ))}

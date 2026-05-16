@@ -716,7 +716,7 @@ describe('ProgramForm Component', () => {
       expect(startDateLabel).toBeInTheDocument()
 
       // Find the date input element using getByLabelText
-      const startDateInput = screen.getByLabelText('Start Date') as HTMLInputElement
+      const startDateInput = screen.getByLabelText(/Start Date/) as HTMLInputElement
       await user.type(startDateInput, '2024-01-15')
 
       expect(mockSetFormData).toHaveBeenCalled()
@@ -739,7 +739,7 @@ describe('ProgramForm Component', () => {
       expect(endDateLabel).toBeInTheDocument()
 
       // Find the date input element using getByLabelText
-      const endDateInput = screen.getByLabelText('End Date') as HTMLInputElement
+      const endDateInput = screen.getByLabelText(/End Date/) as HTMLInputElement
       await user.type(endDateInput, '2024-12-31')
 
       expect(mockSetFormData).toHaveBeenCalled()
