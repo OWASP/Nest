@@ -218,7 +218,7 @@ const DetailsCard = ({
                 </div>
               ) : (
                 <div key={detail.label} className="pb-1">
-                  <strong>{detail.label}:</strong> {detail?.value || 'Unknown'}
+                  <strong>{detail.label}:</strong> {renderDetailValue(detail)}
                 </div>
               )
             )}
