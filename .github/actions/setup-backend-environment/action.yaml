@@ -1,4 +1,4 @@
-name: Setup Backend environment
+name: Set up Backend environment
 
 description: >-
   Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
@@ -34,12 +34,11 @@ runs:
       id: cache-poetry-venv
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
-        path: backend/.venv
         key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+        path: backend/.venv
 
     - name: Install backend dependencies
-      run: |
-        poetry install --no-root --no-interaction
+      run: poetry install --no-root --no-interaction
       shell: bash
       working-directory: backend
 
