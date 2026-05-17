@@ -24,7 +24,7 @@ jobs:
         with:
           terraform_version: 1.14
 
-      - name: Create plugin cache dir
+      - name: Create plugin cache directory
         run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
 
       - name: Cache Terraform plugins
