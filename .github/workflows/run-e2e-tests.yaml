@@ -15,19 +15,6 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     services:
-      db:
-        image: pgvector/pgvector:pg16@sha256:b7777bdf891c085d63413b4d000eacf43ccef926b2f014163aa49dbcb4acd4c6
-        env:
-          POSTGRES_DB: nest_db_e2e
-          POSTGRES_PASSWORD: nest_user_e2e_password
-          POSTGRES_USER: nest_user_e2e
-        options: >-
-          --health-cmd="pg_isready -U nest_user_e2e -d nest_db_e2e -h localhost -p 5432"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=5
-        ports:
-          - 5432:5432
       cache:
         image: redis:8.6-alpine3.23@sha256:d146f83b1e0f02fc27c26a50cee39338c736674c5959db84363e6ae3cd9e02d2
         options: >-
@@ -37,6 +24,19 @@ jobs:
           --health-timeout=5s
         ports:
           - 6379:6379
+      db:
+        env:
+          POSTGRES_DB: nest_db_e2e
+          POSTGRES_PASSWORD: nest_user_e2e_password
+          POSTGRES_USER: nest_user_e2e
+        image: pgvector/pgvector:pg16@sha256:b7777bdf891c085d63413b4d000eacf43ccef926b2f014163aa49dbcb4acd4c6
+        options: >-
+          --health-cmd="pg_isready -U nest_user_e2e -d nest_db_e2e -h localhost -p 5432"
+          --health-interval=5s
+          --health-retries=5
+          --health-timeout=5s
+        ports:
+          - 5432:5432
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -60,7 +60,7 @@ jobs:
       - name: Cache Next.js build
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml', 'frontend/package.json', 'frontend/next.config.ts') }}
+          key: next-cache-${{ runner.os }}-${{ hashFiles('frontend/next.config.ts', 'frontend/package.json', 'frontend/pnpm-lock.yaml') }}
           path: frontend/.next/cache
 
       - name: Build frontend
@@ -100,15 +100,14 @@ jobs:
           echo "Frontend is up!"
 
       - name: Install e2e dependencies
-        run: |
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
         working-directory: e2e
 
       - name: Cache Playwright browsers
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
         with:
-          path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('e2e/pnpm-lock.yaml') }}
+          path: ~/.cache/ms-playwright
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -116,8 +115,8 @@ jobs:
 
       - name: Run frontend end-to-end tests
         run: |
-          FRONTEND_URL=http://localhost:3000 \
           CI=true \
+          FRONTEND_URL=http://localhost:3000 \
           pnpm run test:e2e
         working-directory: e2e
 
