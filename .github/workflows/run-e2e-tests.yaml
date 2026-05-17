@@ -72,6 +72,12 @@ jobs:
           pnpm run build
         working-directory: frontend
 
+      - name: Copy public and static folders
+        run: |
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+        working-directory: frontend
+
       - name: Run frontend in the background
         run: |
           HOSTNAME=0.0.0.0 \
