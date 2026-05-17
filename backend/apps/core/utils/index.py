@@ -58,7 +58,7 @@ def deep_camelize(obj) -> dict | list:
         obj: The object to camelize.
 
     Returns:
-        The camelize object.
+        The camelized object.
 
     """
     if isinstance(obj, dict):
@@ -134,6 +134,7 @@ def get_params_for_index(index_name: str) -> dict:
                 "idx_key",
                 "idx_leaders",
                 "idx_name",
+                "idx_country",
                 "idx_region",
                 "idx_related_urls",
                 "idx_suggested_location",

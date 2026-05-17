@@ -40,6 +40,7 @@ class TestParamsMapping:
                 "idx_key",
                 "idx_leaders",
                 "idx_name",
+                "idx_country",
                 "idx_region",
                 "idx_related_urls",
                 "idx_suggested_location",
