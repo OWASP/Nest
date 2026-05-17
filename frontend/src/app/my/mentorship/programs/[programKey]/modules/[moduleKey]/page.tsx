@@ -9,7 +9,12 @@ import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated_
 import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
-import DetailsCard from 'components/CardDetailsPage'
+import Contributors from 'components/cards/Contributors'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
@@ -74,21 +79,39 @@ const ModuleDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <DetailsCard
-        accessLevel="admin"
-        admins={admins ?? undefined}
-        details={moduleDetails}
-        domains={mentorshipModule.domains ?? undefined}
-        entityKey={moduleKey}
-        labels={mentorshipModule.labels ?? undefined}
-        mentees={mentorshipModule.mentees}
-        mentors={mentorshipModule.mentors}
-        programKey={programKey}
-        summary={mentorshipModule.description}
-        tags={mentorshipModule.tags ?? undefined}
-        title={mentorshipModule.name}
-        type="module"
-      />
+      <PageWrapper>
+        <Header
+          title={mentorshipModule.name}
+          programKey={programKey}
+          moduleKey={moduleKey}
+          entityKey={moduleKey}
+          accessLevel="admin"
+          admins={admins ?? undefined}
+          mentors={mentorshipModule.mentors ?? undefined}
+          isActive={true}
+          isArchived={false}
+          showModuleActions={true}
+        />
+
+        <Summary summary={mentorshipModule.description} />
+
+        <Metadata details={moduleDetails} detailsTitle="Module Details" />
+
+        <Tags
+          entityKey={moduleKey}
+          tags={mentorshipModule.tags ?? undefined}
+          domains={mentorshipModule.domains ?? undefined}
+          labels={mentorshipModule.labels ?? undefined}
+        />
+
+        <Contributors
+          entityKey={moduleKey}
+          programKey={programKey}
+          admins={admins ?? undefined}
+          mentors={mentorshipModule.mentors ?? undefined}
+          mentees={mentorshipModule.mentees ?? undefined}
+        />
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }

@@ -14,7 +14,12 @@ import type { ExtendedSession } from 'types/auth'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
 import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
-import DetailsCard from 'components/CardDetailsPage'
+import Header from 'components/cards/Header'
+import Metadata from 'components/cards/Metadata'
+import PageWrapper from 'components/cards/PageWrapper'
+import RepositoriesModules from 'components/cards/RepositoriesModules'
+import Summary from 'components/cards/Summary'
+import Tags from 'components/cards/Tags'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
@@ -139,21 +144,32 @@ const ProgramDetailsPage = () => {
 
   return (
     <BreadcrumbStyleProvider className="bg-white dark:bg-[#212529]">
-      <DetailsCard
-        accessLevel={isAdmin ? 'admin' : 'user'}
-        admins={program?.admins ?? undefined}
-        canUpdateStatus={canUpdateStatus}
-        details={programDetails}
-        domains={program?.domains ?? undefined}
-        modules={modules}
-        programKey={program?.key ?? ''}
-        setStatus={updateStatus}
-        status={program?.status ?? ''}
-        summary={program?.description ?? ''}
-        tags={program?.tags ?? undefined}
-        title={program?.name ?? ''}
-        type="program"
-      />
+      <PageWrapper>
+        <Header
+          title={program?.name ?? ''}
+          status={program?.status ?? ''}
+          setStatus={updateStatus}
+          canUpdateStatus={canUpdateStatus}
+          programKey={program?.key ?? ''}
+          entityKey={program?.key ?? ''}
+          admins={program?.admins ?? undefined}
+          isActive={true}
+          isArchived={false}
+          showProgramActions={true}
+        />
+
+        <Summary summary={program?.description ?? ''} />
+
+        <Metadata details={programDetails} detailsTitle="Program Details" />
+
+        <Tags tags={program?.tags ?? undefined} domains={program?.domains ?? undefined} />
+
+        <RepositoriesModules
+          programKey={program?.key ?? ''}
+          accessLevel={isAdmin ? 'admin' : 'user'}
+          modules={modules}
+        />
+      </PageWrapper>
     </BreadcrumbStyleProvider>
   )
 }
