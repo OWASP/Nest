@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 20
     services:
       db:
-        image: pgvector/pgvector:pg16
+        image: pgvector/pgvector:pg16@sha256:b7777bdf891c085d63413b4d000eacf43ccef926b2f014163aa49dbcb4acd4c6
         env:
           POSTGRES_DB: nest_db_fuzz
           POSTGRES_PASSWORD: nest_user_fuzz_password
@@ -33,7 +33,7 @@ jobs:
         ports:
           - 5432:5432
       cache:
-        image: redis:8.0.5-alpine3.21
+        image: redis:8.6-alpine3.23@sha256:d146f83b1e0f02fc27c26a50cee39338c736674c5959db84363e6ae3cd9e02d2
         options: >-
           --health-cmd="redis-cli ping"
           --health-interval=5s
