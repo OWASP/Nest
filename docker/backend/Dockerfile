@@ -1,7 +1,7 @@
 ARG OWASP_GID=1000
 ARG OWASP_UID=1000
 
-FROM python:3.13.12-alpine3.23 AS builder
+FROM python:3.13.13-alpine3.23 AS builder
 
 ARG OWASP_GID
 ARG OWASP_UID
@@ -12,7 +12,6 @@ ENV APK_CACHE_DIR="/home/owasp/.cache/apk" \
     OWASP_UID=${OWASP_UID} \
     PIP_CACHE_DIR="/home/owasp/.cache/pip" \
     POETRY_CACHE_DIR="/home/owasp/.cache/pypoetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
     PYTHONUNBUFFERED=1
 
 RUN mkdir -p ${APK_CACHE_DIR} ${POETRY_CACHE_DIR} && \
@@ -33,7 +32,7 @@ WORKDIR /home/owasp
 
 USER owasp
 
-COPY --chmod=444 --chown=root:root poetry.lock pyproject.toml ./
+COPY --chmod=444 --chown=root:root poetry.lock poetry.toml pyproject.toml ./
 RUN --mount=type=cache,target=${POETRY_CACHE_DIR},uid=${OWASP_UID},gid=${OWASP_GID} \
     poetry install --no-root --verbose --without fuzz --without test --without video
 
@@ -48,14 +47,14 @@ COPY apps apps
 # Required to run make targets.
 RUN ln -s . backend
 
-FROM python:3.13.12-alpine3.23
+FROM python:3.13.13-alpine3.23
 
 ARG OWASP_GID
 ARG OWASP_UID
 
 RUN apk --no-cache update && \
     apk --no-cache upgrade && \
-    apk --no-cache add make postgresql16-client=16.13-r0 && \
+    apk --no-cache add make postgresql16-client=16.14-r0 && \
     addgroup -S -g ${OWASP_GID} owasp && \
     adduser -S -h /home/owasp -u ${OWASP_UID} -G owasp owasp
 

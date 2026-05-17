@@ -1,4 +1,4 @@
-FROM node:24.14-alpine3.23
+FROM node:24.15-alpine3.23
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     FORCE_COLOR=1 \
@@ -19,7 +19,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 
 COPY __tests__/unit __tests__/unit
 COPY __tests__/mockData __tests__/mockData
-COPY .pnpmrc jest.config.ts jest.setup.ts tsconfig.json ./
+COPY __tests__/jest.setup.ts __tests__/jest.setup.ts
+COPY __tests__/tsconfig.json __tests__/tsconfig.json
+COPY .pnpmrc jest.config.ts tsconfig.json ./
 COPY public public
 COPY src src
 
