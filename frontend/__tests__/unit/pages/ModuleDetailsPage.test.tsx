@@ -191,8 +191,8 @@ describe('ModuleDetailsPage', () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
-        getModule: { ...mockModuleData, mentors: null },
-        getProgram: { admins },
+        managementModule: { ...mockModuleData, mentors: null },
+        managementProgram: { admins },
       },
     })
 
@@ -205,8 +205,8 @@ describe('ModuleDetailsPage', () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
-        getModule: { ...mockModuleData, mentees: null },
-        getProgram: { admins },
+        managementModule: { ...mockModuleData, mentees: null },
+        managementProgram: { admins },
       },
     })
 
@@ -219,8 +219,8 @@ describe('ModuleDetailsPage', () => {
     mockUseQuery.mockReturnValue({
       loading: false,
       data: {
-        getModule: { ...mockModuleData, labels: null },
-        getProgram: { admins },
+        managementModule: { ...mockModuleData, labels: null },
+        managementProgram: { admins },
       },
     })
 
@@ -229,10 +229,10 @@ describe('ModuleDetailsPage', () => {
     expect(await screen.findByTestId('header')).toHaveTextContent('Intro to Web')
   })
 
-  it('shows "Module Not Found" when getModule returns null', async () => {
+  it('shows "Module Not Found" when managementModule returns null', async () => {
     mockUseQuery.mockReturnValue({
       loading: false,
-      data: { getModule: null, getProgram: { admins } },
+      data: { managementModule: null, managementProgram: { admins } },
     })
 
     render(<ModuleDetailsPage />)
@@ -266,8 +266,8 @@ describe('ModuleDetailsPage', () => {
     mockUseQuery.mockReturnValue({
       loading: true,
       data: {
-        getModule: mockModuleData,
-        getProgram: { admins },
+        managementModule: mockModuleData,
+        managementProgram: { admins },
       },
     })
 

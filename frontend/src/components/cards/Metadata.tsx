@@ -32,12 +32,15 @@ const Metadata = ({
   showSocialLinks = false,
   detailsTitle = 'Details',
 }: MetadataProps) => {
+  const statistics = stats ?? []
+  const hasStatistics = showStatistics && statistics.length > 0
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-7">
       <SecondaryCard
         icon={FaRectangleList}
         title={<AnchorTitle title={detailsTitle} />}
-        className="gap-2 md:col-span-5"
+        className={`gap-2 ${hasStatistics ? 'md:col-span-5' : 'md:col-span-7'}`}
       >
         {details?.map((detail) =>
           detail?.label === 'Leaders' ? (
@@ -56,13 +59,13 @@ const Metadata = ({
         )}
         {showSocialLinks && socialLinks && <SocialLinks urls={socialLinks} />}
       </SecondaryCard>
-      {showStatistics && stats && (
+      {hasStatistics && (
         <SecondaryCard
           icon={FaChartPie}
           title={<AnchorTitle title="Statistics" />}
           className="md:col-span-2"
         >
-          {stats.map((stat) => (
+          {statistics.map((stat) => (
             <div key={`${stat.unit}-${stat.value}`}>
               <InfoBlock
                 className="pb-1"

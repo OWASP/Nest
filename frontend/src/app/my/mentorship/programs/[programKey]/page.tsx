@@ -13,13 +13,13 @@ import { GetManagementProgramAndModulesDocument } from 'types/__generated__/prog
 import type { ExtendedSession } from 'types/auth'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import Header from 'components/cards/Header'
 import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
 import RepositoriesModules from 'components/cards/RepositoriesModules'
 import Summary from 'components/cards/Summary'
 import Tags from 'components/cards/Tags'
-import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {

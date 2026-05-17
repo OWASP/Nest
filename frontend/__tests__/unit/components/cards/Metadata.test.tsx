@@ -121,6 +121,7 @@ describe('Metadata', () => {
     render(<Metadata details={details} />)
     const secondaryCard = screen.getByTestId('secondary-card')
     expect(secondaryCard).toBeInTheDocument()
+    expect(secondaryCard).toHaveClass('md:col-span-7')
     expect(secondaryCard).toHaveTextContent('Name')
     expect(secondaryCard).toHaveTextContent('Test Name')
   })
@@ -146,9 +147,16 @@ describe('Metadata', () => {
 
   it('renders Statistics card when showStatistics is true and stats provided', () => {
     render(<Metadata stats={mockStats} showStatistics={true} />)
-    expect(screen.getAllByTestId('secondary-card').length).toBeGreaterThanOrEqual(1)
+    const cards = screen.getAllByTestId('secondary-card')
+    expect(cards[0]).toHaveClass('md:col-span-5')
     expect(screen.getByText('Statistics')).toBeInTheDocument()
     expect(screen.getAllByTestId('info-block').length).toBe(2)
+  })
+
+  it('uses full-width details column when statistics are not shown', () => {
+    render(<Metadata details={[{ label: 'Name', value: 'Test' }]} showStatistics={false} />)
+    expect(screen.getByTestId('secondary-card')).toHaveClass('md:col-span-7')
+    expect(screen.queryByText('Statistics')).not.toBeInTheDocument()
   })
 
   it('renders geolocation map when showGeolocation is true and geolocationData provided', () => {

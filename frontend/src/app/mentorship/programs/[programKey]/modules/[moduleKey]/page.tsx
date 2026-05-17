@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
-import type { PullRequest } from 'types/pullRequest'
 import { formatDate } from 'utils/dateFormatter'
 import Contributors from 'components/cards/Contributors'
 import Header from 'components/cards/Header'
@@ -116,9 +115,7 @@ const ModuleDetailsPage = () => {
         />
 
         <IssuesMilestones
-          pullRequests={(
-            (programModule.recentPullRequests as unknown as PullRequest[]) || []
-          ).slice(0, visibleCount)}
+          pullRequests={(programModule.recentPullRequests ?? []).slice(0, visibleCount)}
           showAvatar={true}
           isPullRequestOnly={true}
           onLoadMorePullRequests={

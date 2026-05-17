@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import type { Session } from 'next-auth'
 import '@testing-library/jest-dom'
 import Header from 'components/cards/Header'
 import type { HeaderProps } from 'components/cards/Header'
@@ -133,7 +132,7 @@ describe('Header', () => {
       mockUseSession.mockReturnValue({
         data: null,
         status: 'unauthenticated',
-      } as { data: Session | null; status: string })
+      })
     })
 
     it('renders entity actions when showModuleActions is true and user is admin', () => {
@@ -144,7 +143,7 @@ describe('Header', () => {
           },
         },
         status: 'authenticated',
-      } as { data: Record<string, unknown>; status: string })
+      })
 
       const admins = [{ login: 'admin_user' }]
 
@@ -171,7 +170,7 @@ describe('Header', () => {
           },
         },
         status: 'authenticated',
-      } as { data: Record<string, unknown>; status: string })
+      })
 
       const mentors = [{ login: 'mentor_user' }]
 
@@ -196,7 +195,7 @@ describe('Header', () => {
           },
         },
         status: 'authenticated',
-      } as { data: Record<string, unknown>; status: string })
+      })
 
       const admins = [{ login: 'admin_user' }]
       const mentors = [{ login: 'mentor_user' }]
@@ -224,7 +223,7 @@ describe('Header', () => {
           },
         },
         status: 'authenticated',
-      } as { data: Record<string, unknown>; status: string })
+      })
 
       const admins = [{ login: 'admin_user' }]
 
@@ -249,7 +248,7 @@ describe('Header', () => {
           },
         },
         status: 'authenticated',
-      } as { data: Record<string, unknown>; status: string })
+      })
 
       const admins = [{ login: 'admin_user' }]
 
@@ -275,7 +274,7 @@ describe('Header', () => {
           },
         },
         status: 'authenticated',
-      } as { data: Record<string, unknown>; status: string })
+      })
 
       const admins = [{ login: 'admin_mentor_user' }]
       const mentors = [{ login: 'admin_mentor_user' }]
