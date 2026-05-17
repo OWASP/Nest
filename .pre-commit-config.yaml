@@ -126,6 +126,14 @@ repos:
       - id: trailing-whitespace
         exclude: pnpm-lock.yaml
 
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: 9d4455198941806aa02ec14369de030cda2c2b59  # v0.24.0
+    hooks:
+      - id: terraform-docs-go
+        args:
+          - infrastructure/
+        files: ^infrastructure/.*\.tf$|^infrastructure/\.terraform-docs\.ya?ml$
+
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: 6e10264313f53d6247a8b1b984f5b5ccf50ba539  # v2.21.0
     hooks:

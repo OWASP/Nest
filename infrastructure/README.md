@@ -389,3 +389,7 @@ aws ecs run-task \
   ```bash
   terraform destroy
   ```
+
+## Documentation
+
+Documentation is generated using [terraform-docs](https://github.com/terraform-docs/terraform-docs).
