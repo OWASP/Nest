@@ -11,6 +11,13 @@ permissions: {}
 jobs:
   run-e2e-tests:
     name: Run e2e tests
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      options: --init --ipc=host
+    env:
+      NEXT_PUBLIC_E2E_BACKEND_BASE_URL: http://localhost:9000
+      NEXT_SERVER_CSRF_URL: http://localhost:9000/csrf/
+      NEXT_SERVER_GRAPHQL_URL: http://localhost:9000/graphql/
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -45,6 +52,8 @@ jobs:
         uses: ./.github/actions/setup-backend-environment
         with:
           backend_port: 9000
+          cache_host: cache
+          db_host: db
           db_name: nest_db_e2e
           db_password: nest_user_e2e_password
           db_username: nest_user_e2e
@@ -64,11 +73,7 @@ jobs:
           path: frontend/.next/cache
 
       - name: Build frontend
-        run: |
-          NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
-          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
-          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-          pnpm run build
+        run: pnpm run build
         working-directory: frontend
 
       - name: Copy public and static folders
@@ -78,15 +83,12 @@ jobs:
         working-directory: frontend
 
       - name: Run frontend in the background
-        run: |
-          HOSTNAME=0.0.0.0 \
-          NEXT_PUBLIC_E2E_BACKEND_BASE_URL=http://localhost:9000 \
-          NEXT_SERVER_CSRF_URL=http://localhost:9000/csrf/ \
-          NEXT_SERVER_GRAPHQL_URL=http://localhost:9000/graphql/ \
-          NEXT_TELEMETRY_DISABLED=1 \
-          NODE_ENV=production \
-          PORT=3000 \
-          node .next/standalone/server.js &
+        env:
+          HOSTNAME: 0.0.0.0
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_ENV: production
+          PORT: '3000'
+        run: node .next/standalone/server.js &
         working-directory: frontend
 
       - name: Wait for frontend to be ready
@@ -99,37 +101,16 @@ jobs:
           '
           echo "Frontend is up!"
 
-      - name: Cache apt archives for Playwright dependencies
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          key: apt-playwright-${{ runner.os }}-${{ hashFiles('e2e/package.json') }}
-          path: /var/cache/apt/archives
-          restore-keys: |
-            apt-playwright-${{ runner.os }}-
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
-        with:
-          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package.json', 'e2e/pnpm-lock.yaml') }}
-          path: ~/.cache/ms-playwright
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
       - name: Install e2e dependencies
         run: pnpm install --frozen-lockfile
         working-directory: e2e
 
-      - name: Install Playwright browsers and dependencies
-        run: |
-          npx playwright install-deps
-          npx playwright install
-        working-directory: e2e
-
       - name: Run frontend end-to-end tests
-        run: |
-          CI=true \
-          FRONTEND_URL=http://localhost:3000 \
-          pnpm run test:e2e
+        env:
+          CI: true
+          FRONTEND_URL: http://localhost:3000
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+        run: pnpm run test:e2e
         working-directory: e2e
 
       - name: Upload Playwright test results
