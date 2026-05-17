@@ -9,7 +9,7 @@ import { useMemo } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
 import { ProgramStatusEnum } from 'types/__generated__/graphql'
 import { UpdateProgramStatusDocument } from 'types/__generated__/programsMutations.generated'
-import { GetProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
+import { GetManagementProgramAndModulesDocument } from 'types/__generated__/programsQueries.generated'
 import type { ExtendedSession } from 'types/auth'
 import { titleCaseWord } from 'utils/capitalize'
 import { formatDate } from 'utils/dateFormatter'
@@ -19,6 +19,7 @@ import PageWrapper from 'components/cards/PageWrapper'
 import RepositoriesModules from 'components/cards/RepositoriesModules'
 import Summary from 'components/cards/Summary'
 import Tags from 'components/cards/Tags'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import LoadingSpinner from 'components/LoadingSpinner'
 
 const ProgramDetailsPage = () => {
@@ -31,7 +32,11 @@ const ProgramDetailsPage = () => {
     onError: handleAppError,
   })
 
-  const { data, loading: isQueryLoading } = useQuery(GetProgramAndModulesDocument, {
+  const {
+    data,
+    loading: isQueryLoading,
+    error: queryError,
+  } = useQuery(GetManagementProgramAndModulesDocument, {
     variables: { programKey },
     skip: !programKey,
     fetchPolicy: 'cache-and-network',
@@ -39,8 +44,8 @@ const ProgramDetailsPage = () => {
   })
 
   const isLoading = isQueryLoading
-  const program = data?.getProgram ?? null
-  const modules = data?.getProgramModules ?? []
+  const program = data?.managementProgram ?? null
+  const modules = data?.managementProgramModules ?? []
 
   const isAdmin = useMemo(
     () => !!program?.admins?.some((admin) => admin.login === username),
@@ -84,6 +89,12 @@ const ProgramDetailsPage = () => {
             status: newStatus as ProgramStatusEnum,
           },
         },
+        refetchQueries: [
+          {
+            query: GetManagementProgramAndModulesDocument,
+            variables: { programKey },
+          },
+        ],
       })
 
       addToast({
@@ -96,6 +107,16 @@ const ProgramDetailsPage = () => {
     } catch (err) {
       handleAppError(err)
     }
+  }
+
+  if (queryError && isForbiddenGraphQLError(queryError)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to manage this program."
+      />
+    )
   }
 
   if (isLoading && !data) return <LoadingSpinner />

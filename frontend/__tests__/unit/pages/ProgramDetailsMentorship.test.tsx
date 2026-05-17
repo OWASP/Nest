@@ -138,7 +138,7 @@ describe('ProgramDetailsPage', () => {
   test('renders 404 if no program found', async () => {
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
-      data: { program: null },
+      data: { managementProgram: null },
     })
 
     render(<ProgramDetailsPage />)
@@ -178,7 +178,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders N/A if experienceLevels is null', async () => {
     const mockDataWithoutLevels = {
-      getProgram: { ...mockProgramDetailsData.getProgram, experienceLevels: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, experienceLevels: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -215,15 +215,17 @@ describe('ProgramDetailsPage', () => {
       fireEvent.click(publishButton)
 
       await waitFor(() => {
-        expect(mockUpdateProgram).toHaveBeenCalledWith({
-          variables: {
-            inputData: {
-              key: 'test-program',
-              name: 'Test Program',
-              status: ProgramStatusEnum.Published,
+        expect(mockUpdateProgram).toHaveBeenCalledWith(
+          expect.objectContaining({
+            variables: {
+              inputData: {
+                key: 'test-program',
+                name: 'Test Program',
+                status: ProgramStatusEnum.Published,
+              },
             },
-          },
-        })
+          })
+        )
       })
     })
 
@@ -270,7 +272,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with null admins (uses undefined fallback)', async () => {
     const mockDataWithoutAdmins = {
-      getProgram: { ...mockProgramDetailsData.getProgram, admins: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, admins: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -284,7 +286,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with null domains (uses undefined fallback)', async () => {
     const mockDataWithoutDomains = {
-      getProgram: { ...mockProgramDetailsData.getProgram, domains: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, domains: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -298,7 +300,7 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with null tags (uses undefined fallback)', async () => {
     const mockDataWithoutTags = {
-      getProgram: { ...mockProgramDetailsData.getProgram, tags: null },
+      managementProgram: { ...mockProgramDetailsData.managementProgram, tags: null },
     }
     ;(useQuery as unknown as jest.Mock).mockReturnValue({
       loading: false,
@@ -358,15 +360,17 @@ describe('ProgramDetailsPage', () => {
     }
 
     await waitFor(() => {
-      expect(mockUpdateProgram).toHaveBeenCalledWith({
-        variables: {
-          inputData: {
-            key: 'test-program',
-            name: 'Test Program',
-            status: ProgramStatusEnum.Published,
+      expect(mockUpdateProgram).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variables: {
+            inputData: {
+              key: 'test-program',
+              name: 'Test Program',
+              status: ProgramStatusEnum.Published,
+            },
           },
-        },
-      })
+        })
+      )
       expect(addToast).toHaveBeenCalledWith({
         title: 'Program status updated to Published',
         description: 'The status has been successfully updated.',
@@ -404,8 +408,8 @@ describe('ProgramDetailsPage', () => {
 
   test('renders program with minimal details ensuring default values are used', async () => {
     const mockDataWithNullFields = {
-      getProgram: {
-        ...mockProgramDetailsData.getProgram,
+      managementProgram: {
+        ...mockProgramDetailsData.managementProgram,
         status: null,
         startedAt: null,
         endedAt: null,
@@ -414,7 +418,7 @@ describe('ProgramDetailsPage', () => {
         description: null,
         name: null,
       },
-      getProgramModules: [],
+      managementProgramModules: [],
     }
 
     ;(useQuery as unknown as jest.Mock).mockReturnValue({

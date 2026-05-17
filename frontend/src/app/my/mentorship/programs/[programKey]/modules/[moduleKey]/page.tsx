@@ -5,7 +5,7 @@ import { capitalize } from 'lodash'
 import { useParams } from 'next/navigation'
 import { useEffect } from 'react'
 import { ErrorDisplay, handleAppError } from 'app/global-error'
-import { GetProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
+import { GetManagementProgramAdminsAndModulesDocument } from 'types/__generated__/moduleQueries.generated'
 import { Module } from 'types/mentorship'
 import { formatDate } from 'utils/dateFormatter'
 import Contributors from 'components/cards/Contributors'
@@ -14,6 +14,7 @@ import Metadata from 'components/cards/Metadata'
 import PageWrapper from 'components/cards/PageWrapper'
 import Summary from 'components/cards/Summary'
 import Tags from 'components/cards/Tags'
+import { isForbiddenGraphQLError } from 'utils/helpers/handleGraphQLError'
 import LoadingSpinner from 'components/LoadingSpinner'
 import { getSimpleDuration } from 'components/ModuleCard'
 
@@ -24,7 +25,7 @@ const ModuleDetailsPage = () => {
     data,
     error,
     loading: isLoading,
-  } = useQuery(GetProgramAdminsAndModulesDocument, {
+  } = useQuery(GetManagementProgramAdminsAndModulesDocument, {
     fetchPolicy: 'cache-and-network',
     variables: {
       programKey,
@@ -33,13 +34,23 @@ const ModuleDetailsPage = () => {
   })
 
   useEffect(() => {
-    if (error) {
+    if (error && !isForbiddenGraphQLError(error)) {
       handleAppError(error)
     }
   }, [error])
 
-  const mentorshipModule: Module | null | undefined = data?.getModule
-  const admins = data?.getProgram?.admins
+  const mentorshipModule: Module | null | undefined = data?.managementModule
+  const admins = data?.managementProgram?.admins
+
+  if (error && isForbiddenGraphQLError(error)) {
+    return (
+      <ErrorDisplay
+        statusCode={403}
+        title="Access Denied"
+        message="You do not have permission to manage this module."
+      />
+    )
+  }
 
   if (isLoading && !mentorshipModule) return <LoadingSpinner />
 

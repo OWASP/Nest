@@ -56,6 +56,83 @@ export const GET_MODULE_BY_ID = gql`
   }
 `
 
+const PROGRAM_ADMINS_AND_SCHEDULE = gql`
+  fragment ProgramAdminsAndSchedule on ProgramNode {
+    id
+    startedAt
+    endedAt
+    admins {
+      id
+      login
+      name
+      avatarUrl
+    }
+  }
+`
+
+const MODULE_DETAIL_WITH_RECENT_PRS = gql`
+  fragment ModuleDetailWithRecentPrs on ModuleNode {
+    id
+    key
+    name
+    description
+    tags
+    labels
+    projectId
+    projectName
+    domains
+    experienceLevel
+    startedAt
+    endedAt
+    mentors {
+      id
+      login
+      name
+      avatarUrl
+    }
+    mentees {
+      id
+      login
+      name
+      avatarUrl
+    }
+    recentPullRequests(limit: $limit, offset: $offset) {
+      id
+      title
+      url
+      state
+      createdAt
+      mergedAt
+      organizationName
+      repositoryName
+      author {
+        id
+        login
+        name
+        avatarUrl
+      }
+    }
+  }
+`
+
+export const GET_MANAGEMENT_PROGRAM_ADMINS_AND_MODULES = gql`
+  query GetManagementProgramAdminsAndModules(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 4
+    $offset: Int = 0
+  ) {
+    managementProgram(programKey: $programKey) {
+      ...ProgramAdminsAndSchedule
+    }
+    managementModule(moduleKey: $moduleKey, programKey: $programKey) {
+      ...ModuleDetailWithRecentPrs
+    }
+  }
+  ${PROGRAM_ADMINS_AND_SCHEDULE}
+  ${MODULE_DETAIL_WITH_RECENT_PRS}
+`
+
 export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
   query GetProgramAdminsAndModules(
     $programKey: String!
@@ -64,59 +141,51 @@ export const GET_PROGRAM_ADMINS_AND_MODULES = gql`
     $offset: Int = 0
   ) {
     getProgram(programKey: $programKey) {
-      id
-      startedAt
-      endedAt
-      admins {
-        id
-        login
-        name
-        avatarUrl
-      }
+      ...ProgramAdminsAndSchedule
     }
     getModule(moduleKey: $moduleKey, programKey: $programKey) {
+      ...ModuleDetailWithRecentPrs
+    }
+  }
+  ${PROGRAM_ADMINS_AND_SCHEDULE}
+  ${MODULE_DETAIL_WITH_RECENT_PRS}
+`
+
+const MODULE_ISSUES_LIST = gql`
+  fragment ModuleIssuesList on ModuleNode {
+    name
+    issuesCount(label: $label)
+    availableLabels
+    issues(limit: $limit, offset: $offset, label: $label) {
       id
-      key
-      name
-      description
-      tags
+      number
+      title
+      state
+      isMerged
       labels
-      projectId
-      projectName
-      domains
-      experienceLevel
-      startedAt
-      endedAt
-      mentors {
-        id
+      taskDeadline
+      assignees {
+        avatarUrl
         login
         name
-        avatarUrl
-      }
-      mentees {
-        id
-        login
-        name
-        avatarUrl
-      }
-      recentPullRequests(limit: $limit, offset: $offset) {
-        id
-        title
-        url
-        state
-        createdAt
-        mergedAt
-        organizationName
-        repositoryName
-        author {
-          id
-          login
-          name
-          avatarUrl
-        }
       }
     }
   }
+`
+
+export const GET_MANAGEMENT_MODULE_ISSUES = gql`
+  query GetManagementModuleIssues(
+    $programKey: String!
+    $moduleKey: String!
+    $limit: Int = 20
+    $offset: Int = 0
+    $label: String
+  ) {
+    managementModule(moduleKey: $moduleKey, programKey: $programKey) {
+      ...ModuleIssuesList
+    }
+  }
+  ${MODULE_ISSUES_LIST}
 `
 
 export const GET_MODULE_ISSUES = gql`
@@ -128,23 +197,8 @@ export const GET_MODULE_ISSUES = gql`
     $label: String
   ) {
     getModule(moduleKey: $moduleKey, programKey: $programKey) {
-      name
-      issuesCount(label: $label)
-      availableLabels
-      issues(limit: $limit, offset: $offset, label: $label) {
-        id
-        number
-        title
-        state
-        isMerged
-        labels
-        taskDeadline
-        assignees {
-          avatarUrl
-          login
-          name
-        }
-      }
+      ...ModuleIssuesList
     }
   }
+  ${MODULE_ISSUES_LIST}
 `
