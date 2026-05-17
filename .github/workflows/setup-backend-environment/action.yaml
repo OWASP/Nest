@@ -1,15 +1,25 @@
-name: Set up Backend environment
+name: Setup Backend environment
 
 description: >-
   Fetches nest.dump from S3 using the same Poetry environment as local Make targets, waits for
-  Postgres, installs the PostgreSQL client, and builds the backend test image.
+  Postgres, installs the PostgreSQL client, starts the backend, waits for it to be ready,
+  and restores the database dump.
 
 inputs:
-  db_username:
-    description: Database username
+  backend_port:
+    description: Backend port to bind
     required: true
   db_name:
     description: Database name
+    required: true
+  db_password:
+    description: Database password
+    required: true
+  db_username:
+    description: Database username
+    required: true
+  env_file:
+    description: Backend environment file
     required: true
 
 runs:
@@ -26,20 +36,28 @@ runs:
         cache-dependency-path: backend/poetry.lock
         python-version: '3.13'
 
-    - name: Install backend dependencies (fetch script)
+    - name: Cache Poetry virtual environment
+      id: cache-poetry-venv
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+      with:
+        path: backend/.venv
+        key: poetry-venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+
+    - name: Install backend dependencies
       run: |
-        cd backend
-        poetry install --no-root --without fuzz --without test --without video
+        poetry install --no-root --no-interaction
       shell: bash
+      working-directory: backend
 
     - name: Fetch nest.dump from S3
-      run: cd backend && poetry run python -m scripts.fetch_nest_dump
+      run: poetry run python -m scripts.fetch_nest_dump
       shell: bash
+      working-directory: backend
 
     - name: Wait for database to be ready
       env:
-        DB_USERNAME: ${{ inputs.db_username }}
         DB_NAME: ${{ inputs.db_name }}
+        DB_USERNAME: ${{ inputs.db_username }}
       run: |
         timeout 5m bash -c '
           until docker exec ${{ job.services.db.id }} pg_isready -U $DB_USERNAME -d $DB_NAME; do
@@ -53,15 +71,54 @@ runs:
       run: sudo apt-get install -y postgresql-client
       shell: bash
 
-    - name: Build backend image
-      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294  # v7.0.0
-      with:
-        cache-from: |
-          type=gha
-        cache-to: |
-          type=gha,compression=zstd
-        context: backend
-        file: docker/backend/Dockerfile
-        load: true
-        platforms: linux/amd64
-        tags: owasp/nest:test-backend-latest
+    - name: Migrate Database
+      env:
+        ENV_FILE: ${{ inputs.env_file }}
+      run: |
+        set -euo pipefail && set -a && source $ENV_FILE && set +a
+        export DJANGO_DB_HOST=localhost
+        export DJANGO_REDIS_AUTH_ENABLED=False
+        export DJANGO_REDIS_HOST=localhost
+        poetry run python manage.py migrate
+      shell: bash
+      working-directory: backend
+
+    - name: Load Postgres data
+      env:
+        DB_NAME: ${{ inputs.db_name }}
+        DB_USERNAME: ${{ inputs.db_username }}
+        PGPASSWORD: ${{ inputs.db_password }}  # The env name required by PostgreSQL clients.
+      run: |
+        set -euo pipefail
+        if ! pg_restore -h localhost -U $DB_USERNAME -d $DB_NAME < backend/data/nest.dump; then
+          echo "Data loading failed"
+          exit 1
+        fi
+        echo "Data loading completed."
+      shell: bash
+
+    - name: Start Backend in the background
+      env:
+        BACKEND_PORT: ${{ inputs.backend_port }}
+        ENV_FILE: ${{ inputs.env_file }}
+      run: |
+        set -euo pipefail && set -a && source $ENV_FILE && set +a
+        export DJANGO_DB_HOST=localhost
+        export DJANGO_REDIS_AUTH_ENABLED=False
+        export DJANGO_REDIS_HOST=localhost
+        poetry run gunicorn wsgi:application --bind 0.0.0.0:$BACKEND_PORT &
+      shell: bash
+      working-directory: backend
+
+    - name: Waiting for the backend to be ready
+      env:
+        BACKEND_PORT: ${{ inputs.backend_port }}
+      run: |
+        timeout 5m bash -c '
+          until wget --spider http://localhost:$BACKEND_PORT/a; do
+            echo "Waiting for backend..."
+            sleep 5
+          done
+        '
+        echo "Backend is up!"
+      shell: bash
