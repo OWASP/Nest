@@ -292,20 +292,7 @@ jobs:
       - run-code-quality-checks
     permissions:
       contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
-        with:
-          terraform_version: 1.14
-
-      - name: Run Infrastructure tests
-        run: make test-infrastructure
+    uses: ./.github/workflows/run-infrastructure-tests.yaml
 
   set-release-version:
     name: Set release version
